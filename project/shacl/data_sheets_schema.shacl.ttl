@@ -1,0 +1,72 @@
+@prefix PATO: <http://purl.obolibrary.org/obo/PATO_> .
+@prefix data_sheets_schema: <https://w3id.org/bridge2ai/data-sheets-schema/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schema1: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+schema1:Thing a sh:NodeShape ;
+    sh:closed true ;
+    sh:description "A generic grouping for any identifiable entity" ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:description "A human-readable description for a thing" ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
+            sh:path schema1:description ],
+        [ sh:description "A unique identifier for a thing" ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path schema1:identifier ],
+        [ sh:description "A human-readable name for a thing" ;
+            sh:maxCount 1 ;
+            sh:order 1 ;
+            sh:path schema1:name ] ;
+    sh:targetClass schema1:Thing .
+
+data_sheets_schema:DatasheetCollection a sh:NodeShape ;
+    sh:closed true ;
+    sh:description "A holder for Datasheet objects" ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:class data_sheets_schema:Datasheet ;
+            sh:nodeKind sh:IRI ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:entries ] ;
+    sh:targetClass data_sheets_schema:DatasheetCollection .
+
+data_sheets_schema:Datasheet a sh:NodeShape ;
+    sh:closed true ;
+    sh:description "Represents a Datasheet" ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:description "living or dead status" ;
+            sh:in ( PATO:0001421 PATO:0001422 "UNKNOWN" ) ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path data_sheets_schema:vital_status ],
+        [ sh:description "The main email address of a person" ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path schema1:email ;
+            sh:pattern "^\\S+@[\\S+\\.]+\\S+" ],
+        [ sh:description "A human-readable description for a thing" ;
+            sh:maxCount 1 ;
+            sh:order 6 ;
+            sh:path schema1:description ],
+        [ sh:description "Date on which a person is born" ;
+            sh:maxCount 1 ;
+            sh:order 1 ;
+            sh:path schema1:birthDate ],
+        [ sh:description "Number of years since birth" ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:age_in_years ],
+        [ sh:description "A human-readable name for a thing" ;
+            sh:maxCount 1 ;
+            sh:order 5 ;
+            sh:path schema1:name ],
+        [ sh:description "A unique identifier for a thing" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 4 ;
+            sh:path schema1:identifier ] ;
+    sh:targetClass data_sheets_schema:Datasheet .
+

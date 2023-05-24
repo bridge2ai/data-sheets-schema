@@ -1,0 +1,7 @@
+---
+name: data_sheets_schema
+author: My Name <MJoachimiak@lbl.gov>
+description: A LinkML schema for Datasheets for Datasets.
+source_schema_path: src/data_sheets_schema/schema/data_sheets_schema.yaml
+google_sheet_id: 1wVoaiFg47aT9YWNeRfTZ8tYHN8s8PAuDx5i2HUcDpvQ
+google_sheet_tabs: personinfo enums

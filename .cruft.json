@@ -1,0 +1,27 @@
+{
+  "template": "https://github.com/linkml/linkml-project-cookiecutter",
+  "commit": "cb594e5f56976bc26bcdb572d4b2b6a0de8f15ae",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "project_name": "data-sheets-schema",
+      "__project_slug": "data_sheets_schema",
+      "github_org": "bridge2ai",
+      "__source_path": "src/data_sheets_schema/schema/data_sheets_schema.yaml",
+      "project_description": "A LinkML schema for Datasheets for Datasets.",
+      "full_name": "My Name",
+      "email": "MJoachimiak@lbl.gov",
+      "__author": "My Name <MJoachimiak@lbl.gov>",
+      "license": "MIT",
+      "main_schema_class": "Datasheet",
+      "create_python_classes": "Yes",
+      "use_schemasheets": "No",
+      "google_sheet_id": "1wVoaiFg47aT9YWNeRfTZ8tYHN8s8PAuDx5i2HUcDpvQ",
+      "google_sheet_tabs": "personinfo enums",
+      "__google_sheet_module": "personinfo_enums",
+      "github_token_for_pypi_deployment": "PYPI_PASSWORD",
+      "_template": "https://github.com/linkml/linkml-project-cookiecutter"
+    }
+  },
+  "directory": null
+}
