@@ -1,10 +1,6 @@
 # data-sheets-schema
 
-A LinkML schema for Datasheets for Datasets.
-
-## Website
-
-[https://bridge2ai.github.io/data-sheets-schema](https://bridge2ai.github.io/data-sheets-schema)
+A LinkML schema for Datasheets for Datasets model as published in [Datasheets for Datasets](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext)
 
 ## Repository Structure
 
