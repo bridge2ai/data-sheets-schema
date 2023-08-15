@@ -51,7 +51,6 @@ classes:
   DatasheetQuestion:
     description: >-
       Represents a Datasheet
-      A generic grouping for any identifiable entity
     slots:
       - id
       - name
