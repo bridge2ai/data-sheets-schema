@@ -117,7 +117,7 @@ classes:
 
     Instances:
       description: >-
-        What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions be- tween them; nodes and edges)?
+        What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?
       is_a: DatasheetQuestion
       attributes:
         representation:
@@ -226,7 +226,7 @@ classes:
 
     Relationships:
       description: >-
-        Are relationships between individual instances made explicit (e.g., users’ movie ratings, social network links)? If so, please de- scribe how these relationships are made explicit.
+        Are relationships between individual instances made explicit (e.g., users’ movie ratings, social network links)? If so, please describe how these relationships are made explicit.
       is_a: DatasheetQuestion
       attributes:
         description:
@@ -296,7 +296,7 @@ classes:
 
     Confidential:
       description: >-
-        Does the dataset contain data that might be considered confiden- tial (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals’ non-public communications)?
+        Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals’ non-public communications)?
       is_a: DatasheetQuestion
       attributes:
         description:
@@ -309,7 +309,7 @@ classes:
 
     ContentWarning:
       description: >-
-        Does the dataset contain data that, if viewed directly, might be of- fensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why.
+        Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why.
       is_a: DatasheetQuestion
       attributes:
         warnings:
@@ -323,7 +323,7 @@ classes:
 
     Subpopulations:
       description: >-
-        Does the dataset identify any subpopulations (e.g., by age, gen- der)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset.
+        Does the dataset identify any subpopulations (e.g., by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset.
       is_a: DatasheetQuestion
       attributes:
         identification:
@@ -342,7 +342,7 @@ classes:
 
     Deidentification:
       description: >-
-        Is it possible to identify individuals (i.e., one or more natural per- sons), either directly or indirectly (i.e., in combination with other data) from the dataset? 
+        Is it possible to identify individuals (i.e., one or more natural persons), either directly or indirectly (i.e., in combination with other data) from the dataset? 
       is_a: DatasheetQuestion
       attributes:
         description:
@@ -356,7 +356,7 @@ classes:
 
     SensitiveData:
       description: >-
-        Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union member- ships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)?
+        Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)?
       is_a: DatasheetQuestion
       attributes:
         description:
@@ -418,7 +418,7 @@ classes:
 
     CollectionTimeframe:
       description: >-
-         Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (e.g., recent crawl of old news articles)? If not, please describe the time- frame in which the data associated with the instances was created.
+         Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (e.g., recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created.
       is_a: DatasheetQuestion
       attributes:
         description:
@@ -491,7 +491,7 @@ classes:
 
     DataProtectionImpact:
       description: >-
-        Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been con- ducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.
+        Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.
       is_a: DatasheetQuestion
       attributes:
         description:
@@ -504,7 +504,7 @@ classes:
 
     PreprocessingCleaningLabeling:
       description: >-
-        Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of miss- ing values)?
+        Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)?
       is_a: DatasheetQuestion
       attributes:
         description:
@@ -808,7 +808,7 @@ classes:
 
     ExtensionMechanism:
       description: >-
-        If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for commu- nicating/distributing these contributions to dataset consumers? If so, please provide a description.
+        If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description.
       is_a: DatasheetQuestion
       attributes:
         description:
