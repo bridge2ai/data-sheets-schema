@@ -88,7 +88,7 @@ classes:
       entries:
         range: Dataset
         multivalued: true
-        inlined: true
+        # inlined: true
 
   Dataset:
     description: >-
@@ -99,7 +99,7 @@ classes:
       entries:
         range: DatasetProperty
         multivalued: true
-        inlined: true
+        # inlined: true
 
   Purpose:
     description: >-
@@ -138,15 +138,15 @@ classes:
       grantor:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       grant_name:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       grant_number:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Motivation
 
@@ -161,7 +161,7 @@ classes:
       representation:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -173,7 +173,7 @@ classes:
       count_values:
         range: integer
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -191,27 +191,27 @@ classes:
       ia_sample:
         range: boolean
         multivalued: true
-        inlined: true
+        # inlined: true
       israndom:
         range: boolean
         multivalued: true
-        inlined: true
+        # inlined: true
       source_data:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       is_representative:
         range: boolean
         multivalued: true
-        inlined: true
+        # inlined: true
       representative_verification:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       why_not_representative:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       # subsample
     in_subset:
       - Composition
@@ -225,7 +225,7 @@ classes:
       type:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -237,7 +237,7 @@ classes:
       label:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -252,11 +252,11 @@ classes:
       missing:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       why_missing:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -270,7 +270,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -284,7 +284,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -297,7 +297,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -318,19 +318,19 @@ classes:
       external_resources:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       future_guarantees:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       archival:
-        range: string
+        range: boolean
         multivalued: true
-        inlined: true
+        # inlined: true
       restrictions:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -345,7 +345,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -359,7 +359,7 @@ classes:
       warnings:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -373,11 +373,11 @@ classes:
       identification:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       distribution:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -391,7 +391,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -407,7 +407,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Composition
 
@@ -424,7 +424,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -438,7 +438,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -452,7 +452,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -466,7 +466,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -481,7 +481,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -496,7 +496,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -509,7 +509,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -524,7 +524,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -540,7 +540,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -555,7 +555,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -571,7 +571,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Collection
 
@@ -585,7 +585,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Preprocessing-Cleaning-Labeling
 
@@ -599,7 +599,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Preprocessing-Cleaning-Labeling
 
@@ -612,7 +612,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Preprocessing-Cleaning-Labeling
 
@@ -624,7 +624,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Uses
       - Maintenance
@@ -638,7 +638,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Uses
 
@@ -650,7 +650,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Uses
 
@@ -669,7 +669,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Uses
 
@@ -681,7 +681,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Uses
 
@@ -695,7 +695,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Distribution
 
@@ -708,11 +708,11 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       doi:
         range: string
         multivalued: false
-        inlined: true
+        # inlined: true
     in_subset:
       - Distribution
 
@@ -724,7 +724,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Distribution
 
@@ -740,7 +740,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Distribution
 
@@ -756,7 +756,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Distribution
 
@@ -771,7 +771,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Distribution
 
@@ -783,7 +783,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Maintenance
 
@@ -796,11 +796,11 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
       email:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Maintenance
 
@@ -812,7 +812,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Maintenance
 
@@ -827,7 +827,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Maintenance
 
@@ -843,7 +843,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Maintenance
 
@@ -857,7 +857,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Maintenance
 
@@ -874,7 +874,7 @@ classes:
       description:
         range: string
         multivalued: true
-        inlined: true
+        # inlined: true
     in_subset:
       - Maintenance
 
