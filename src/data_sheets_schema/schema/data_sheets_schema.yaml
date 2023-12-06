@@ -59,7 +59,6 @@ subsets:
       consumers.
 
 classes:
-
   DatasetProperty:
     description: >-
       Represents a single property of a dataset, or a set of related properties.
@@ -69,8 +68,18 @@ classes:
       - description
       - response
 
-  Dataset:
+  DatasetCollection:
     tree_root: true
+    description: >-
+      A collection of related datasets, likely containing multiple files
+      of multiple potential purposes and properties.
+    attributes:
+      entries:
+        range: Dataset
+        multivalued: true
+        inlined: true
+
+  Dataset:
     description: >-
       A single component of related observations and/or information that can be
       read, manipulated, transformed, and otherwise interpreted.
@@ -82,7 +91,8 @@ classes:
 
   Purpose:
     description: >-
-      For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled?
+      For what purpose was the dataset created? Was there a specific task in
+      mind? Was there a specific gap that needed to be filled?
     is_a: DatasetProperty
     slot_usage:
       response:
@@ -279,7 +289,7 @@ classes:
         restrictions:
           range: String
           multivalued: true
-          inlined: true 
+          inlined: true
       in_subset:
         - Composition
 
@@ -325,7 +335,7 @@ classes:
 
     Deidentification:
       description: >-
-        Is it possible to identify individuals (i.e., one or more natural persons), either directly or indirectly (i.e., in combination with other data) from the dataset? 
+        Is it possible to identify individuals (i.e., one or more natural persons), either directly or indirectly (i.e., in combination with other data) from the dataset?
       is_a: DatasetProperty
       attributes:
         description:
@@ -334,7 +344,7 @@ classes:
           inlined: true
       in_subset:
         - Composition
-      
+
     SensitiveData:
       description: >-
         Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)?
@@ -349,7 +359,7 @@ classes:
 
     InstanceAcquisition:
       description: >-
-        How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified? 
+        How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified?
       is_a: DatasetProperty
       attributes:
         description:
@@ -397,7 +407,7 @@ classes:
 
     CollectionTimeframe:
       description: >-
-         Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (e.g., recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created.
+        Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (e.g., recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created.
       is_a: DatasetProperty
       attributes:
         description:
@@ -505,7 +515,7 @@ classes:
 
     PreprocessingCleaningLabelingSoftware:
       description: >-
-        Is the software that was used to preprocess/clean/label the data available? 
+        Is the software that was used to preprocess/clean/label the data available?
       is_a: DatasetProperty
       attributes:
         description:
@@ -554,7 +564,7 @@ classes:
 
     FutureUseImpacts:
       description: >-
-         Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?
+        Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?
       is_a: DatasetProperty
       attributes:
         description:
@@ -566,7 +576,7 @@ classes:
 
     DiscouragedUses:
       description: >-
-        Are there tasks for which the dataset should not be used? 
+        Are there tasks for which the dataset should not be used?
       is_a: DatasetProperty
       attributes:
         description:
@@ -578,7 +588,7 @@ classes:
 
     ThirdPartySharing:
       description: >-
-        Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created? 
+        Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?
       is_a: DatasetProperty
       attributes:
         description:
@@ -590,7 +600,7 @@ classes:
 
     DistributionFormat:
       description: >-
-        How will the dataset will be distributed (e.g., tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)? 
+        How will the dataset will be distributed (e.g., tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?
       is_a: DatasetProperty
       attributes:
         description:
@@ -606,7 +616,7 @@ classes:
 
     DistributionDate:
       description: >-
-        When will the dataset be distributed? 
+        When will the dataset be distributed?
       is_a: DatasetProperty
       attributes:
         description:
@@ -618,7 +628,7 @@ classes:
 
     LicenseAndUseTerms:
       description: >-
-        Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions. 
+        Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions.
       is_a: DatasetProperty
       attributes:
         description:
@@ -630,7 +640,7 @@ classes:
 
     IPRestrictions:
       description: >-
-        Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions. 
+        Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions.
       is_a: DatasetProperty
       attributes:
         description:
