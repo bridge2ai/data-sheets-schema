@@ -138,8 +138,8 @@ classes:
         range: String
         multivalued: true
         inlined: true
-      in_subset:
-        - Motivation
+    in_subset:
+      - Motivation
 
     Instances:
       description: >-
