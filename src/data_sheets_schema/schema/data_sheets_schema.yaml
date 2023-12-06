@@ -109,7 +109,7 @@ classes:
         range: Instance
         multivalued: true
       anomalies:
-        range: DataAnamoly
+        range: DataAnomaly
         multivalued: true
       external_resources:
         range: ExternalResource
