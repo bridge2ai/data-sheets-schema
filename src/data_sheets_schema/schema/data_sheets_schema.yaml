@@ -878,5 +878,14 @@ classes:
 ## TYPES ##
 
 ## SLOTS ##
+slots:
+  id:
+    identifier: true
+    slot_uri: schema:identifier
+  name:
+    slot_uri: schema:name
+  description:
+    slot_uri: schema:description
+
 
 ## ENUMS ##
