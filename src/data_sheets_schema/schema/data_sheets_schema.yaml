@@ -99,7 +99,7 @@ classes:
       For what purpose was the dataset created? Was there a specific task in
       mind? Was there a specific gap that needed to be filled?
     is_a: DatasetProperty
-    slot_usage:
+    attributes:
       response:
         range: String
       task:
@@ -113,8 +113,8 @@ classes:
     description: >-
       Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)?
     is_a: DatasetProperty
-    slot_usage:
-      PI:
+    attributes:
+      principal_investigator:
         range: String
       institution:
         range: String
