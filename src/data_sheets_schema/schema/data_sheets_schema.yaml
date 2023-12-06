@@ -336,7 +336,10 @@ classes:
 
   Confidential:
     description: >-
-      Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals’ non-public communications)?
+      Does the dataset contain data that might be considered confidential (e.g.,
+      data that is protected by legal privilege or by doctor patient
+      confidentiality, data that includes the content of individuals’
+      non-public communications)?
     is_a: DatasetProperty
     attributes:
       description:
