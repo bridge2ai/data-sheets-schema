@@ -62,14 +62,21 @@ subsets:
 
 ## CLASSES ##
 classes:
-  DatasetProperty:
+
+  NamedThing:
     description: >-
-      Represents a single property of a dataset, or a set of related properties.
+      A generic grouping for any identifiable entity
     slots:
       - id
       - name
       - description
-      - response
+    close_mappings:
+      - schema:Thing
+
+  DatasetProperty:
+    description: >-
+      Represents a single property of a dataset, or a set of related properties.
+    is_a: NamedThing
 
   DatasetCollection:
     tree_root: true
@@ -100,8 +107,8 @@ classes:
       mind? Was there a specific gap that needed to be filled?
     is_a: DatasetProperty
     attributes:
-      response:
-        range: String
+      # response:
+      #   range: String
       task:
         range: String
       addressing_gap:
