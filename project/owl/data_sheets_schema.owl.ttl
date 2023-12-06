@@ -23,82 +23,30 @@ data_sheets_schema:CollectionConsent a owl:Class,
     skos:definition "Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
-data_sheets_schema:CollectionMechanism a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "CollectionMechanism" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "What mechanisms or procedures were used to collect the data (e.g., hardware apparatuses or sensors, manual human curation, software programs, software APIs)? How were these mechanisms or procedures validated?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
 data_sheets_schema:CollectionNotification a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "CollectionNotification" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:description ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:description ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Were the individuals in question notified about the data collection? If so, please describe (or show with screenshots or other information) how notice was provided, and provide a link or other access point to, or otherwise reproduce, the exact language of the notification itself." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:CollectionTimeframe a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "CollectionTimeframe" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (e.g., recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:Confidential a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Confidential" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals’ non-public communications)?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:ConsentRevocation a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "ConsentRevocation" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:description ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:description ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or 8 for certain uses? If so, please provide a description, as well as a link or other access point to the mechanism (if appropriate)." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:ContentWarning a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "ContentWarning" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:warnings ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:warnings ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:Counts a owl:Class,
@@ -114,31 +62,6 @@ data_sheets_schema:Counts a owl:Class,
     skos:definition "How many instances are there in total (of each type, if appropriate)?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
-data_sheets_schema:Creator a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Creator" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:institution ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:institution ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:principal_investigator ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:principal_investigator ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:institution ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:principal_investigator ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
 data_sheets_schema:Data a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Data" ;
@@ -150,32 +73,6 @@ data_sheets_schema:Data a owl:Class,
             owl:onProperty data_sheets_schema:type ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "What data does each instance consist of? “Raw” data (e.g., unprocessed text or images) or features? In either case, please provide a description." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:DataAnomalies a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "DataAnomalies" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:DataProtectionImpact a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "DataProtectionImpact" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:DatasetCollection a owl:Class,
@@ -195,10 +92,10 @@ data_sheets_schema:Deidentification a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Deidentification" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:description ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:description ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Is it possible to identify individuals (i.e., one or more natural persons), either directly or indirectly (i.e., in combination with other data) from the dataset?" ;
@@ -208,287 +105,40 @@ data_sheets_schema:DirectCollection a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "DirectCollection" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:description ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:description ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (e.g., websites)?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:DiscouragedUses a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "DiscouragedUses" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Are there tasks for which the dataset should not be used?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:DistributionDate a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "DistributionDate" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "When will the dataset be distributed?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:DistributionFormat a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "DistributionFormat" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:doi ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:doi ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:doi ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "How will the dataset will be distributed (e.g., tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:Erratum a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Erratum" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Is there an erratum? If so, please provide a link or other access point." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:EthicalReview a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "EthicalReview" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Were any ethical review processes conducted (e.g., by an institutional review board)? If so, please provide a description of these review processes, including the outcomes, as well as a link or other access point to any supporting documentation." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:ExistingUses a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "ExistingUses" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Has the dataset been used for any tasks already?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:ExportControlRegulatoryRestrictionss a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "ExportControlRegulatoryRestrictionss" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:ExtensionMechanism a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "ExtensionMechanism" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:ExternalResources a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "ExternalResources" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:archival ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:future_guarantees ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:external_resources ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty data_sheets_schema:archival ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:external_resources ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:future_guarantees ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:restrictions ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:restrictions ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Is the dataset self-contained, or does it link to or otherwise rely on external resources (e.g., websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (i.e., including the external resources as they existed at the time the dataset was created); c) are there any restrictions (e.g., licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:Funder a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Funder" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:grant_name ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:grant_number ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:grant_number ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:grantor ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:grantor ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:grant_name ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:FutureUseImpacts a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "FutureUseImpacts" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:IPRestrictions a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "IPRestrictions" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:InstanceAcquisition a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "InstanceAcquisition" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:Instances a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Instances" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:representation ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:representation ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:Labels a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Labels" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:label ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:label ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Is there a label or target associated with each instance?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:LicenseAndUseTerms a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "LicenseAndUseTerms" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:Maintainer a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Maintainer" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Who will be supporting/hosting/maintaining the dataset?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:MaintainerContact a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "MaintainerContact" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:email ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:email ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:email ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:email ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:description ],
@@ -503,42 +153,16 @@ data_sheets_schema:Missing a owl:Class,
             owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:why_missing ],
         [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:missing ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:missing ],
+        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:why_missing ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:missing ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:missing ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (e.g., because it was unavailable). This does not include intentionally removed information, but might include, e.g., redacted text." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:OtherTasks a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "OtherTasks" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "What (other) tasks could the dataset be used for?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:PreprocessingCleaningLabeling a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "PreprocessingCleaningLabeling" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:PreprocessingCleaningLabelingSoftware a owl:Class,
@@ -554,137 +178,60 @@ data_sheets_schema:PreprocessingCleaningLabelingSoftware a owl:Class,
     skos:definition "Is the software that was used to preprocess/clean/label the data available?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
-data_sheets_schema:Purpose a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Purpose" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:addressing_gap ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:task ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:addressing_gap ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:task ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:task ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:addressing_gap ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:RawData a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "RawData" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Was the “raw” data saved in addition to the preprocessed/cleaned/labeled data (e.g., to support unanticipated future uses)? If so, please provide a link or other access point to the “raw” data." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
 data_sheets_schema:Relationships a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Relationships" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:description ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:description ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Are relationships between individual instances made explicit (e.g., users’ movie ratings, social network links)? If so, please describe how these relationships are made explicit." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:RetentionLimits a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "RetentionLimits" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (e.g., were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? If so, please describe these limits and explain how they will be enforced." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:Sampling a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Sampling" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:representative_verification ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:representative_verification ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty data_sheets_schema:is_representative ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:why_not_representative ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
             owl:onProperty data_sheets_schema:ia_sample ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:is_representative ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:israndom ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:source_data ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:ia_sample ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:source_data ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:why_not_representative ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
             owl:onProperty data_sheets_schema:israndom ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:ia_sample ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:source_data ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:source_data ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:is_representative ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:why_not_representative ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:israndom ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:representative_verification ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:representative_verification ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty data_sheets_schema:is_representative ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (e.g., geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (e.g., to cover a more diverse range of instances, because instances were withheld or unavailable)." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:SamplingStrategy a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "SamplingStrategy" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:SensitiveData a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "SensitiveData" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:Splits a owl:Class,
@@ -700,25 +247,6 @@ data_sheets_schema:Splits a owl:Class,
     skos:definition "Are there recommended data splits (e.g., training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
-data_sheets_schema:Subpopulations a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Subpopulations" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:identification ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:identification ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:distribution ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:distribution ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Does the dataset identify any subpopulations (e.g., by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
 data_sheets_schema:ThirdPartySharing a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "ThirdPartySharing" ;
@@ -732,106 +260,54 @@ data_sheets_schema:ThirdPartySharing a owl:Class,
     skos:definition "Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
-data_sheets_schema:Updates a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "Updates" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (e.g., mailing list, GitHub)?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:UseRepository a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "UseRepository" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Is there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:VersionAccess a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "VersionAccess" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
-data_sheets_schema:WhoCollected a owl:Class,
-        linkml:ClassDefinition ;
-    rdfs:label "WhoCollected" ;
-    rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        data_sheets_schema:DatasetProperty ;
-    skos:definition "Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?" ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
-
 linkml:reportFormatDialect a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "FormatDialect" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportdelimiter ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty linkml:reportdelimiter ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
             owl:onProperty linkml:reportheader ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportcomment_prefix ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty linkml:reportdouble_quote ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportcomment_prefix ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportcomment_prefix ],
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportdelimiter ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty linkml:reportquote_char ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
             owl:onProperty linkml:reportheader ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportheader ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty linkml:reportquote_char ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportdouble_quote ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportcomment_prefix ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportcomment_prefix ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportdouble_quote ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty linkml:reportdelimiter ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportdouble_quote ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportheader ],
+            owl:onProperty linkml:reportquote_char ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportdelimiter ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty linkml:reportdouble_quote ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportquote_char ] ;
+            owl:onProperty linkml:reportcomment_prefix ] ;
     skos:definition "Additional format information for a file" ;
     skos:inScheme linkml:datasets .
 
@@ -869,51 +345,800 @@ linkml:reportthemes a owl:ObjectProperty,
     rdfs:range linkml:Uriorcurie ;
     skos:inScheme linkml:datasets .
 
+data_sheets_schema:CollectionMechanism a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "CollectionMechanism" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "What mechanisms or procedures were used to collect the data (e.g., hardware apparatuses or sensors, manual human curation, software programs, software APIs)? How were these mechanisms or procedures validated?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:CollectionTimeframe a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "CollectionTimeframe" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (e.g., recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:Confidentiality a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "Confidentiality" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals’ non-public communications)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:ContentWarning a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "ContentWarning" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:warnings ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:warnings ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:Creator a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "Creator" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:institution ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:principal_investigator ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:principal_investigator ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:institution ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:principal_investigator ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:institution ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:DataAnomaly a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "DataAnomaly" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:DataCollector a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "DataCollector" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:DataProtectionImpact a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "DataProtectionImpact" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:Dataset a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Dataset" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom data_sheets_schema:DatasetProperty ;
-            owl:onProperty data_sheets_schema:entries ],
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:updates ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Subpopulation ;
+            owl:onProperty data_sheets_schema:subpopulations ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:entries ],
+            owl:onProperty data_sheets_schema:regulatory_restrictions ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:raw_sources ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:updates ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:data_protection_impacts ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:funders ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:subpopulations ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:retention_limit ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:retention_limit ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:SensitiveElement ;
+            owl:onProperty data_sheets_schema:sensitive_elements ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:version_access ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:anomalies ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:CollectionMechanism ;
+            owl:onProperty data_sheets_schema:collection_mechanisms ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Instance ;
+            owl:onProperty data_sheets_schema:instances ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:RawData ;
+            owl:onProperty data_sheets_schema:raw_sources ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:VersionAccess ;
+            owl:onProperty data_sheets_schema:version_access ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:extension_mechanism ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:instances ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:DataAnomaly ;
+            owl:onProperty data_sheets_schema:anomalies ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:license_and_use_terms ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Erratum ;
+            owl:onProperty data_sheets_schema:errata ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:discouraged_uses ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:ip_restrictions ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:DiscouragedUse ;
+            owl:onProperty data_sheets_schema:discouraged_uses ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Creator ;
+            owl:onProperty data_sheets_schema:creators ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:acquisition_methods ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:DistributionDate ;
+            owl:onProperty data_sheets_schema:distribution_dates ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:data_collectors ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:distribution_dates ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:creators ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Confidentiality ;
+            owl:onProperty data_sheets_schema:confidential_elements ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:ExtensionMechanism ;
+            owl:onProperty data_sheets_schema:extension_mechanism ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:ExternalResource ;
+            owl:onProperty data_sheets_schema:external_resources ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:regulatory_restrictions ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:IPRestrictions ;
+            owl:onProperty data_sheets_schema:ip_restrictions ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:extension_mechanism ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:PreprocessingCleaningLabeling ;
+            owl:onProperty data_sheets_schema:preprocessing_cleaning_labeling_methods ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:DistributionFormat ;
+            owl:onProperty data_sheets_schema:distribution_formats ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:confidential_elements ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:FutureUseImpact ;
+            owl:onProperty data_sheets_schema:future_use_impacts ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:preprocessing_cleaning_labeling_methods ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:UseRepository ;
+            owl:onProperty data_sheets_schema:use_repository ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:ip_restrictions ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:collection_timeframes ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:license_and_use_terms ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:external_resources ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:errata ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:collection_mechanisms ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:version_access ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:ExistingUse ;
+            owl:onProperty data_sheets_schema:existing_uses ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:use_repository ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:sampling_strategies ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:OtherTask ;
+            owl:onProperty data_sheets_schema:other_tasks ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Purpose ;
+            owl:onProperty data_sheets_schema:purposes ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Funder ;
+            owl:onProperty data_sheets_schema:funders ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:sensitive_elements ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:purposes ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:ethical_reviews ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:DataProtectionImpact ;
+            owl:onProperty data_sheets_schema:data_protection_impacts ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:other_tasks ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:SamplingStrategy ;
+            owl:onProperty data_sheets_schema:sampling_strategies ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:UpdatePlan ;
+            owl:onProperty data_sheets_schema:updates ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:DataCollector ;
+            owl:onProperty data_sheets_schema:data_collectors ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:existing_uses ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:LicenseAndUseTerms ;
+            owl:onProperty data_sheets_schema:license_and_use_terms ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:InstanceAcquisition ;
+            owl:onProperty data_sheets_schema:acquisition_methods ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:future_use_impacts ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:ExportControlRegulatoryRestrictions ;
+            owl:onProperty data_sheets_schema:regulatory_restrictions ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:CollectionTimeframe ;
+            owl:onProperty data_sheets_schema:collection_timeframes ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:RetentionLimits ;
+            owl:onProperty data_sheets_schema:retention_limit ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:ContentWarning ;
+            owl:onProperty data_sheets_schema:content_warnings ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:distribution_formats ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:EthicalReview ;
+            owl:onProperty data_sheets_schema:ethical_reviews ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:content_warnings ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:maintainers ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Maintainer ;
+            owl:onProperty data_sheets_schema:maintainers ],
         linkml:reportDataResource ;
     skos:definition "A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:DiscouragedUse a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "DiscouragedUse" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Are there tasks for which the dataset should not be used?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:DistributionDate a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "DistributionDate" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "When will the dataset be distributed?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:DistributionFormat a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "DistributionFormat" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:doi ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:doi ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:doi ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "How will the dataset will be distributed (e.g., tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:Erratum a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "Erratum" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Is there an erratum? If so, please provide a link or other access point." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:EthicalReview a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "EthicalReview" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Were any ethical review processes conducted (e.g., by an institutional review board)? If so, please provide a description of these review processes, including the outcomes, as well as a link or other access point to any supporting documentation." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:ExistingUse a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "ExistingUse" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Has the dataset been used for any tasks already?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:ExportControlRegulatoryRestrictions a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "ExportControlRegulatoryRestrictions" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:ExtensionMechanism a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "ExtensionMechanism" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:ExternalResource a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "ExternalResource" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty data_sheets_schema:archival ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:restrictions ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:future_guarantees ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:archival ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:future_guarantees ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:external_resources ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:external_resources ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:restrictions ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Is the dataset self-contained, or does it link to or otherwise rely on external resources (e.g., websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (i.e., including the external resources as they existed at the time the dataset was created); c) are there any restrictions (e.g., licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:Funder a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "Funder" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:grantor ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:grantor ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:grant_number ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:grant_name ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:grant_number ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:grant_name ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:FutureUseImpact a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "FutureUseImpact" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:IPRestrictions a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "IPRestrictions" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:Instance a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "Instance" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:representation ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:representation ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:InstanceAcquisition a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "InstanceAcquisition" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:LicenseAndUseTerms a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "LicenseAndUseTerms" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:Maintainer a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "Maintainer" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Who will be supporting/hosting/maintaining the dataset?" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:NamedThing a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "NamedThing" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportid ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:name ],
-        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty linkml:reportdescription ],
         [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:name ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportdescription ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportid ],
+        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:name ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportid ],
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportdescription ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty linkml:reportid ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:name ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportdescription ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportdescription ] ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportid ] ;
     skos:closeMatch schema1:Thing ;
     skos:definition "A generic grouping for any identifiable entity" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:OtherTask a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "OtherTask" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "What (other) tasks could the dataset be used for?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:PreprocessingCleaningLabeling a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "PreprocessingCleaningLabeling" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:Purpose a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "Purpose" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:addressing_gap ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:task ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:addressing_gap ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:task ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:addressing_gap ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:task ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:RawData a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "RawData" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Was the “raw” data saved in addition to the preprocessed/cleaned/labeled data (e.g., to support unanticipated future uses)? If so, please provide a link or other access point to the “raw” data." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:RetentionLimits a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "RetentionLimits" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (e.g., were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? If so, please describe these limits and explain how they will be enforced." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:SamplingStrategy a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "SamplingStrategy" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:SensitiveElement a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "SensitiveElement" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:Subpopulation a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "Subpopulation" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:identification ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:distribution ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:distribution ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:identification ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Does the dataset identify any subpopulations (e.g., by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:UpdatePlan a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "UpdatePlan" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (e.g., mailing list, GitHub)?" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:UseRepository a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "UseRepository" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Is there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:VersionAccess a owl:Class,
+        linkml:ClassDefinition ;
+    rdfs:label "VersionAccess" ;
+    rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
+        data_sheets_schema:DatasetProperty ;
+    skos:definition "Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 linkml:reportDataPackage a owl:Class,
@@ -921,10 +1146,10 @@ linkml:reportDataPackage a owl:Class,
     rdfs:label "DataPackage" ;
     rdfs:seeAlso <https://specs.frictionlessdata.io/data-package> ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:reportDataResource ;
             owl:onProperty linkml:reportresources ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:reportDataResource ;
+            owl:minCardinality 0 ;
             owl:onProperty linkml:reportresources ],
         linkml:reportInformation ;
     skos:altLabel "data resource collection",
@@ -1071,9 +1296,39 @@ linkml:reportDataPackage a owl:Class,
     rdfs:label "Example" ;
     rdfs:subClassOf data_sheets_schema:TestRole .
 
+data_sheets_schema:acquisition_methods a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "acquisition_methods" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:anomalies a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "anomalies" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:archival a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "archival" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:collection_mechanisms a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "collection_mechanisms" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:collection_timeframes a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "collection_timeframes" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:confidential_elements a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "confidential_elements" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:content_warnings a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "content_warnings" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:count_values a owl:ObjectProperty,
@@ -1081,9 +1336,39 @@ data_sheets_schema:count_values a owl:ObjectProperty,
     rdfs:label "count_values" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
+data_sheets_schema:creators a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "creators" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:data_collectors a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "data_collectors" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:data_protection_impacts a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "data_protection_impacts" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:discouraged_uses a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "discouraged_uses" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:distribution a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "distribution" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:distribution_dates a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "distribution_dates" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:distribution_formats a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "distribution_formats" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:email a owl:ObjectProperty,
@@ -1091,14 +1376,39 @@ data_sheets_schema:email a owl:ObjectProperty,
     rdfs:label "email" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
-data_sheets_schema:external_resources a owl:ObjectProperty,
+data_sheets_schema:entries a owl:ObjectProperty,
         linkml:SlotDefinition ;
-    rdfs:label "external_resources" ;
+    rdfs:label "entries" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:errata a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "errata" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:ethical_reviews a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "ethical_reviews" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:existing_uses a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "existing_uses" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:funders a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "funders" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:future_guarantees a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "future_guarantees" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:future_use_impacts a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "future_use_impacts" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:grant_name a owl:ObjectProperty,
@@ -1126,6 +1436,11 @@ data_sheets_schema:identification a owl:ObjectProperty,
     rdfs:label "identification" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
+data_sheets_schema:instances a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "instances" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:is_representative a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "is_representative" ;
@@ -1141,9 +1456,34 @@ data_sheets_schema:label a owl:ObjectProperty,
     rdfs:label "label" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
+data_sheets_schema:maintainers a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "maintainers" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:missing a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "missing" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:other_tasks a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "other_tasks" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:preprocessing_cleaning_labeling_methods a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "preprocessing_cleaning_labeling_methods" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:purposes a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "purposes" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:raw_sources a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "raw_sources" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:representation a owl:ObjectProperty,
@@ -1161,14 +1501,34 @@ data_sheets_schema:restrictions a owl:ObjectProperty,
     rdfs:label "restrictions" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
+data_sheets_schema:sampling_strategies a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "sampling_strategies" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:sensitive_elements a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "sensitive_elements" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:source_data a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "source_data" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
+data_sheets_schema:subpopulations a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "subpopulations" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:type a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "type" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:use_repository a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "use_repository" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:warnings a owl:ObjectProperty,
@@ -1190,170 +1550,170 @@ linkml:reportInformation a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Information" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportversion ],
-        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportwas_derived_from ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportconforms_to_schema ],
+            owl:onProperty linkml:reportlicense ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty linkml:reportlanguage ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportwas_derived_from ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Datetime ;
             owl:onProperty linkml:reportcreated_on ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportconforms_to_schema ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty linkml:reporttitle ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom data_sheets_schema:TestRole ;
-            owl:onProperty linkml:reporttest_roles ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty linkml:reportcreated_by ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty linkml:reportconforms_to ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportconforms_to ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportconforms_to ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportpublisher ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportid ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportkeywords ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportdescription ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportpage ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty linkml:reportpublisher ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportversion ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reporttest_roles ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportconforms_to_class ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
             owl:onProperty linkml:reportlanguage ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportcompression ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportwas_derived_from ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportdownload_url ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportcompression ],
+            owl:onProperty linkml:reportdescription ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty linkml:reportversion ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportdescription ],
+            owl:onProperty linkml:reportpublisher ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty linkml:reportconforms_to_class ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportpage ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportlicense ],
-        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportlanguage ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportissued ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportcreated_by ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Datetime ;
-            owl:onProperty linkml:reportissued ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportcreated_on ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reporttitle ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
             owl:onProperty linkml:reportconforms_to_schema ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportkeywords ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty linkml:reportcompression ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty linkml:reportpublisher ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportcreated_on ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportlicense ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportid ],
+            owl:allValuesFrom linkml:Uriorcurie ;
+            owl:onProperty linkml:reportconforms_to ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty linkml:reportpage ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportcreated_by ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportlicense ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportdescription ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uri ;
-            owl:onProperty linkml:reportdownload_url ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportissued ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportdownload_url ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportconforms_to_class ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty linkml:reportid ],
         [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reporttitle ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportcreated_by ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Uriorcurie ;
+            owl:onProperty linkml:reportcreated_by ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportdescription ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportcreated_on ],
+        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reporttitle ] ;
+            owl:onProperty linkml:reportkeywords ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportlanguage ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportpage ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportissued ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportissued ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportwas_derived_from ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportconforms_to ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportconforms_to_schema ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportkeywords ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportcompression ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportid ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportid ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Datetime ;
+            owl:onProperty linkml:reportcreated_on ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportconforms_to ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportcompression ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reporttest_roles ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportwas_derived_from ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportwas_derived_from ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportconforms_to_schema ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportdownload_url ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Uriorcurie ;
+            owl:onProperty linkml:reportpublisher ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportconforms_to_class ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportlanguage ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reporttitle ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportcreated_by ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reporttitle ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Uri ;
+            owl:onProperty linkml:reportdownload_url ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportlicense ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportlicense ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:TestRole ;
+            owl:onProperty linkml:reporttest_roles ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Datetime ;
+            owl:onProperty linkml:reportissued ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportversion ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportdownload_url ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportpage ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportdescription ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportconforms_to_class ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportversion ] ;
     skos:closeMatch schema1:CreativeWork ;
     skos:definition "Grouping for datasets and data files" ;
     skos:inScheme linkml:datasets .
@@ -1398,9 +1758,24 @@ data_sheets_schema:doi a owl:ObjectProperty,
     rdfs:label "doi" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
+data_sheets_schema:extension_mechanism a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "extension_mechanism" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:institution a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "institution" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:ip_restrictions a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "ip_restrictions" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:license_and_use_terms a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "license_and_use_terms" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:name a owl:ObjectProperty,
@@ -1413,9 +1788,29 @@ data_sheets_schema:principal_investigator a owl:ObjectProperty,
     rdfs:label "principal_investigator" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
+data_sheets_schema:regulatory_restrictions a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "regulatory_restrictions" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:retention_limit a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "retention_limit" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:task a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "task" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:updates a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "updates" ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
+data_sheets_schema:version_access a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "version_access" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 linkml:reportDataResource a owl:Class,
@@ -1423,80 +1818,29 @@ linkml:reportDataResource a owl:Class,
     rdfs:label "DataResource" ;
     rdfs:seeAlso <https://specs.frictionlessdata.io/data-resource> ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportmedia_type ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty linkml:reportmedia_type ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty linkml:reportdescription ],
+            owl:onProperty linkml:reportmedia_type ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportsha256 ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportdescription ],
+            owl:onProperty linkml:reporttitle ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty linkml:reportbytes ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty linkml:reportmd5 ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty linkml:reportbytes ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportdialect ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reporthash ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportsha256 ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty linkml:reportencoding ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reporttitle ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportdescription ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportsha256 ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Integer ;
-            owl:onProperty linkml:reportbytes ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reporthash ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportmedia_type ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportencoding ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportdialect ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportmd5 ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportpath ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reporttitle ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reporttitle ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportformat ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportsha256 ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty linkml:reportformat ],
         [ a owl:Restriction ;
             owl:allValuesFrom data_sheets_schema:FormatEnum ;
             owl:onProperty linkml:reportformat ],
@@ -1504,23 +1848,74 @@ linkml:reportDataResource a owl:Class,
             owl:maxCardinality 1 ;
             owl:onProperty linkml:reportpath ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportmd5 ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Integer ;
             owl:onProperty linkml:reportbytes ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty linkml:reporthash ],
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportformat ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty linkml:reportdialect ],
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reporttitle ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportencoding ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportmedia_type ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty linkml:reportpath ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty linkml:reportencoding ],
+            owl:onProperty linkml:reportformat ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportdialect ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportdialect ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportdescription ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportsha256 ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reporthash ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
             owl:onProperty linkml:reportmd5 ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reporthash ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reporttitle ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reporthash ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportdescription ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportdialect ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportdescription ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty linkml:reportpath ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty linkml:reportsha256 ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty linkml:reportencoding ],
         linkml:reportInformation ;
     skos:definition "An individual file or table" ;
     skos:exactMatch schema1:DataDownload,
@@ -1691,7 +2086,7 @@ data_sheets_schema:MediaTypeEnum a owl:Class,
     linkml:permissible_values <https://www.iana.org/assignments/media-types/application/rdf+xml>,
         <https://www.iana.org/assignments/media-types/text/csv> .
 
-data_sheets_schema:entries a owl:ObjectProperty,
+data_sheets_schema:external_resources a owl:ObjectProperty,
         linkml:SlotDefinition .
 
 linkml:reportconforms_to a owl:ObjectProperty,

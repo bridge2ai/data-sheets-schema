@@ -96,7 +96,7 @@
             "title": "CollectionTimeframe",
             "type": "object"
         },
-        "Confidential": {
+        "Confidentiality": {
             "additionalProperties": false,
             "description": "Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals\u2019 non-public communications)?",
             "properties": {
@@ -117,7 +117,7 @@
             "required": [
                 "id"
             ],
-            "title": "Confidential",
+            "title": "Confidentiality",
             "type": "object"
         },
         "ConsentRevocation": {
@@ -256,7 +256,7 @@
             "title": "Data",
             "type": "object"
         },
-        "DataAnomalies": {
+        "DataAnomaly": {
             "additionalProperties": false,
             "description": "Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description.",
             "properties": {
@@ -277,7 +277,31 @@
             "required": [
                 "id"
             ],
-            "title": "DataAnomalies",
+            "title": "DataAnomaly",
+            "type": "object"
+        },
+        "DataCollector": {
+            "additionalProperties": false,
+            "description": "Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?",
+            "properties": {
+                "description": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "DataCollector",
             "type": "object"
         },
         "DataPackage": {
@@ -513,11 +537,41 @@
             "additionalProperties": false,
             "description": "A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted.",
             "properties": {
+                "acquisition_methods": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "anomalies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "bytes": {
                     "type": "integer"
                 },
+                "collection_mechanisms": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "collection_timeframes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "compression": {
                     "type": "string"
+                },
+                "confidential_elements": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "conforms_to": {
                     "type": "string"
@@ -529,6 +583,12 @@
                 "conforms_to_schema": {
                     "type": "string"
                 },
+                "content_warnings": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "created_by": {
                     "description": "agent that created the element",
                     "type": "string"
@@ -538,6 +598,24 @@
                     "format": "date-time",
                     "type": "string"
                 },
+                "creators": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "data_collectors": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "data_protection_impacts": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "description": {
                     "description": "human readable description of the information",
                     "type": "string"
@@ -545,13 +623,52 @@
                 "dialect": {
                     "type": "string"
                 },
+                "discouraged_uses": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "distribution_dates": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "distribution_formats": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "download_url": {
                     "type": "string"
                 },
                 "encoding": {
                     "type": "string"
                 },
-                "entries": {
+                "errata": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "ethical_reviews": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "existing_uses": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "extension_mechanism": {
+                    "type": "string"
+                },
+                "external_resources": {
                     "items": {
                         "type": "string"
                     },
@@ -560,11 +677,32 @@
                 "format": {
                     "$ref": "#/$defs/FormatEnum"
                 },
+                "funders": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "future_use_impacts": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "hash": {
                     "type": "string"
                 },
                 "id": {
                     "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "instances": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "ip_restrictions": {
                     "type": "string"
                 },
                 "issued": {
@@ -585,11 +723,26 @@
                     "description": "license for the data",
                     "type": "string"
                 },
+                "license_and_use_terms": {
+                    "type": "string"
+                },
+                "maintainers": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "md5": {
                     "type": "string"
                 },
                 "media_type": {
                     "type": "string"
+                },
+                "other_tasks": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "page": {
                     "type": "string"
@@ -597,11 +750,53 @@
                 "path": {
                     "type": "string"
                 },
+                "preprocessing_cleaning_labeling_methods": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "publisher": {
                     "type": "string"
                 },
+                "purposes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "raw_sources": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "regulatory_restrictions": {
+                    "type": "string"
+                },
+                "retention_limit": {
+                    "type": "string"
+                },
+                "sampling_strategies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "sensitive_elements": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "sha256": {
                     "type": "string"
+                },
+                "subpopulations": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "test_roles": {
                     "items": {
@@ -613,8 +808,20 @@
                     "description": "the official title of the element",
                     "type": "string"
                 },
+                "updates": {
+                    "type": "string"
+                },
+                "use_repository": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "version": {
                     "description": "particular version of schema",
+                    "type": "string"
+                },
+                "version_access": {
                     "type": "string"
                 },
                 "was_derived_from": {
@@ -796,7 +1003,7 @@
             "title": "DirectCollection",
             "type": "object"
         },
-        "DiscouragedUses": {
+        "DiscouragedUse": {
             "additionalProperties": false,
             "description": "Are there tasks for which the dataset should not be used?",
             "properties": {
@@ -817,7 +1024,7 @@
             "required": [
                 "id"
             ],
-            "title": "DiscouragedUses",
+            "title": "DiscouragedUse",
             "type": "object"
         },
         "DistributionDate": {
@@ -919,7 +1126,7 @@
             "title": "EthicalReview",
             "type": "object"
         },
-        "ExistingUses": {
+        "ExistingUse": {
             "additionalProperties": false,
             "description": "Has the dataset been used for any tasks already?",
             "properties": {
@@ -940,10 +1147,10 @@
             "required": [
                 "id"
             ],
-            "title": "ExistingUses",
+            "title": "ExistingUse",
             "type": "object"
         },
-        "ExportControlRegulatoryRestrictionss": {
+        "ExportControlRegulatoryRestrictions": {
             "additionalProperties": false,
             "description": "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.",
             "properties": {
@@ -964,7 +1171,7 @@
             "required": [
                 "id"
             ],
-            "title": "ExportControlRegulatoryRestrictionss",
+            "title": "ExportControlRegulatoryRestrictions",
             "type": "object"
         },
         "ExtensionMechanism": {
@@ -991,7 +1198,7 @@
             "title": "ExtensionMechanism",
             "type": "object"
         },
-        "ExternalResources": {
+        "ExternalResource": {
             "additionalProperties": false,
             "description": "Is the dataset self-contained, or does it link to or otherwise rely on external resources (e.g., websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (i.e., including the external resources as they existed at the time the dataset was created); c) are there any restrictions (e.g., licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate.",
             "properties": {
@@ -1034,7 +1241,7 @@
             "required": [
                 "id"
             ],
-            "title": "ExternalResources",
+            "title": "ExternalResource",
             "type": "object"
         },
         "FormatDialect": {
@@ -1132,7 +1339,7 @@
             "title": "Funder",
             "type": "object"
         },
-        "FutureUseImpacts": {
+        "FutureUseImpact": {
             "additionalProperties": false,
             "description": "Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?",
             "properties": {
@@ -1153,7 +1360,7 @@
             "required": [
                 "id"
             ],
-            "title": "FutureUseImpacts",
+            "title": "FutureUseImpact",
             "type": "object"
         },
         "IPRestrictions": {
@@ -1180,31 +1387,7 @@
             "title": "IPRestrictions",
             "type": "object"
         },
-        "InstanceAcquisition": {
-            "additionalProperties": false,
-            "description": "How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified?",
-            "properties": {
-                "description": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "InstanceAcquisition",
-            "type": "object"
-        },
-        "Instances": {
+        "Instance": {
             "additionalProperties": false,
             "description": "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?",
             "properties": {
@@ -1229,7 +1412,31 @@
             "required": [
                 "id"
             ],
-            "title": "Instances",
+            "title": "Instance",
+            "type": "object"
+        },
+        "InstanceAcquisition": {
+            "additionalProperties": false,
+            "description": "How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified?",
+            "properties": {
+                "description": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "InstanceAcquisition",
             "type": "object"
         },
         "Labels": {
@@ -1403,7 +1610,7 @@
             "title": "NamedThing",
             "type": "object"
         },
-        "OtherTasks": {
+        "OtherTask": {
             "additionalProperties": false,
             "description": "What (other) tasks could the dataset be used for?",
             "properties": {
@@ -1424,7 +1631,7 @@
             "required": [
                 "id"
             ],
-            "title": "OtherTasks",
+            "title": "OtherTask",
             "type": "object"
         },
         "PreprocessingCleaningLabeling": {
@@ -1657,7 +1864,7 @@
             "title": "SamplingStrategy",
             "type": "object"
         },
-        "SensitiveData": {
+        "SensitiveElement": {
             "additionalProperties": false,
             "description": "Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)?",
             "properties": {
@@ -1678,7 +1885,7 @@
             "required": [
                 "id"
             ],
-            "title": "SensitiveData",
+            "title": "SensitiveElement",
             "type": "object"
         },
         "Splits": {
@@ -1705,7 +1912,7 @@
             "title": "Splits",
             "type": "object"
         },
-        "Subpopulations": {
+        "Subpopulation": {
             "additionalProperties": false,
             "description": "Does the dataset identify any subpopulations (e.g., by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset.",
             "properties": {
@@ -1736,7 +1943,7 @@
             "required": [
                 "id"
             ],
-            "title": "Subpopulations",
+            "title": "Subpopulation",
             "type": "object"
         },
         "TestRole": {
@@ -1772,7 +1979,7 @@
             "title": "ThirdPartySharing",
             "type": "object"
         },
-        "Updates": {
+        "UpdatePlan": {
             "additionalProperties": false,
             "description": "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (e.g., mailing list, GitHub)?",
             "properties": {
@@ -1793,7 +2000,7 @@
             "required": [
                 "id"
             ],
-            "title": "Updates",
+            "title": "UpdatePlan",
             "type": "object"
         },
         "UseRepository": {
@@ -1842,30 +2049,6 @@
                 "id"
             ],
             "title": "VersionAccess",
-            "type": "object"
-        },
-        "WhoCollected": {
-            "additionalProperties": false,
-            "description": "Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?",
-            "properties": {
-                "description": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "WhoCollected",
             "type": "object"
         }
     },

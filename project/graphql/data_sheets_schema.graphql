@@ -26,7 +26,7 @@ type CollectionTimeframe
     description: [String]
   }
 
-type Confidential
+type Confidentiality
   {
     id: String!
     name: String
@@ -73,7 +73,14 @@ type Data
     type: [String]
   }
 
-type DataAnomalies
+type DataAnomaly
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type DataCollector
   {
     id: String!
     name: String
@@ -173,7 +180,41 @@ type Dataset
     md5: String
     sha256: String
     dialect: String
-    entries: [DatasetProperty]
+    purposes: [Purpose]
+    creators: [Creator]
+    funders: [Funder]
+    instances: [Instance]
+    anomalies: [DataAnomaly]
+    externalResources: [ExternalResource]
+    confidentialElements: [Confidentiality]
+    contentWarnings: [ContentWarning]
+    subpopulations: [Subpopulation]
+    sensitiveElements: [SensitiveElement]
+    acquisitionMethods: [InstanceAcquisition]
+    collectionMechanisms: [CollectionMechanism]
+    samplingStrategies: [SamplingStrategy]
+    dataCollectors: [DataCollector]
+    collectionTimeframes: [CollectionTimeframe]
+    ethicalReviews: [EthicalReview]
+    dataProtectionImpacts: [DataProtectionImpact]
+    preprocessingCleaningLabelingMethods: [PreprocessingCleaningLabeling]
+    rawSources: [RawData]
+    existingUses: [ExistingUse]
+    useRepository: [UseRepository]
+    otherTasks: [OtherTask]
+    futureUseImpacts: [FutureUseImpact]
+    discouragedUses: [DiscouragedUse]
+    distributionFormats: [DistributionFormat]
+    distributionDates: [DistributionDate]
+    licenseAndUseTerms: LicenseAndUseTerms
+    ipRestrictions: IPRestrictions
+    regulatoryRestrictions: ExportControlRegulatoryRestrictions
+    maintainers: [Maintainer]
+    errata: [Erratum]
+    updates: UpdatePlan
+    retentionLimit: RetentionLimits
+    versionAccess: VersionAccess
+    extensionMechanism: ExtensionMechanism
   }
 
 type DatasetCollection
@@ -222,7 +263,7 @@ type DirectCollection
     description: [String]
   }
 
-type DiscouragedUses
+type DiscouragedUse
   {
     id: String!
     name: String
@@ -258,14 +299,14 @@ type EthicalReview
     description: [String]
   }
 
-type ExistingUses
+type ExistingUse
   {
     id: String!
     name: String
     description: [String]
   }
 
-type ExportControlRegulatoryRestrictionss
+type ExportControlRegulatoryRestrictions
   {
     id: String!
     name: String
@@ -279,7 +320,7 @@ type ExtensionMechanism
     description: [String]
   }
 
-type ExternalResources
+type ExternalResource
   {
     id: String!
     name: String
@@ -309,7 +350,7 @@ type Funder
     grantNumber: [String]
   }
 
-type FutureUseImpacts
+type FutureUseImpact
   {
     id: String!
     name: String
@@ -339,19 +380,19 @@ interface Information
     testRoles: [TestRole]
   }
 
-type InstanceAcquisition
-  {
-    id: String!
-    name: String
-    description: [String]
-  }
-
-type Instances
+type Instance
   {
     id: String!
     name: String
     description: String
     representation: [String]
+  }
+
+type InstanceAcquisition
+  {
+    id: String!
+    name: String
+    description: [String]
   }
 
 type IPRestrictions
@@ -407,7 +448,7 @@ type NamedThing
     description: String
   }
 
-type OtherTasks
+type OtherTask
   {
     id: String!
     name: String
@@ -478,7 +519,7 @@ type SamplingStrategy
     description: [String]
   }
 
-type SensitiveData
+type SensitiveElement
   {
     id: String!
     name: String
@@ -492,7 +533,7 @@ type Splits
     description: [String]
   }
 
-type Subpopulations
+type Subpopulation
   {
     id: String!
     name: String
@@ -508,7 +549,7 @@ type ThirdPartySharing
     description: [String]
   }
 
-type Updates
+type UpdatePlan
   {
     id: String!
     name: String
@@ -523,13 +564,6 @@ type UseRepository
   }
 
 type VersionAccess
-  {
-    id: String!
-    name: String
-    description: [String]
-  }
-
-type WhoCollected
   {
     id: String!
     name: String

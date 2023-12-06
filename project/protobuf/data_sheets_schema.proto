@@ -27,7 +27,7 @@ message CollectionTimeframe
  repeated  string description = 0
  }
 // Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals’ non-public communications)?
-message Confidential
+message Confidentiality
  {
   string id = 0
   string name = 0
@@ -74,7 +74,14 @@ message Data
  repeated  string type = 0
  }
 // Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description.
-message DataAnomalies
+message DataAnomaly
+ {
+  string id = 0
+  string name = 0
+ repeated  string description = 0
+ }
+// Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?
+message DataCollector
  {
   string id = 0
   string name = 0
@@ -174,7 +181,41 @@ message Dataset
   string md5 = 0
   string sha256 = 0
   string dialect = 0
- repeated  datasetProperty entries = 0
+ repeated  purpose purposes = 0
+ repeated  creator creators = 0
+ repeated  funder funders = 0
+ repeated  instance instances = 0
+ repeated  dataAnomaly anomalies = 0
+ repeated  externalResource externalResources = 0
+ repeated  confidentiality confidentialElements = 0
+ repeated  contentWarning contentWarnings = 0
+ repeated  subpopulation subpopulations = 0
+ repeated  sensitiveElement sensitiveElements = 0
+ repeated  instanceAcquisition acquisitionMethods = 0
+ repeated  collectionMechanism collectionMechanisms = 0
+ repeated  samplingStrategy samplingStrategies = 0
+ repeated  dataCollector dataCollectors = 0
+ repeated  collectionTimeframe collectionTimeframes = 0
+ repeated  ethicalReview ethicalReviews = 0
+ repeated  dataProtectionImpact dataProtectionImpacts = 0
+ repeated  preprocessingCleaningLabeling preprocessingCleaningLabelingMethods = 0
+ repeated  rawData rawSources = 0
+ repeated  existingUse existingUses = 0
+ repeated  useRepository useRepository = 0
+ repeated  otherTask otherTasks = 0
+ repeated  futureUseImpact futureUseImpacts = 0
+ repeated  discouragedUse discouragedUses = 0
+ repeated  distributionFormat distributionFormats = 0
+ repeated  distributionDate distributionDates = 0
+  licenseAndUseTerms licenseAndUseTerms = 0
+  iPRestrictions ipRestrictions = 0
+  exportControlRegulatoryRestrictions regulatoryRestrictions = 0
+ repeated  maintainer maintainers = 0
+ repeated  erratum errata = 0
+  updatePlan updates = 0
+  retentionLimits retentionLimit = 0
+  versionAccess versionAccess = 0
+  extensionMechanism extensionMechanism = 0
  }
 // A collection of related datasets, likely containing multiple files of multiple potential purposes and properties.
 message DatasetCollection
@@ -223,7 +264,7 @@ message DirectCollection
  repeated  string description = 0
  }
 // Are there tasks for which the dataset should not be used?
-message DiscouragedUses
+message DiscouragedUse
  {
   string id = 0
   string name = 0
@@ -259,14 +300,14 @@ message EthicalReview
  repeated  string description = 0
  }
 // Has the dataset been used for any tasks already?
-message ExistingUses
+message ExistingUse
  {
   string id = 0
   string name = 0
  repeated  string description = 0
  }
 // Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.
-message ExportControlRegulatoryRestrictionss
+message ExportControlRegulatoryRestrictions
  {
   string id = 0
   string name = 0
@@ -280,7 +321,7 @@ message ExtensionMechanism
  repeated  string description = 0
  }
 // Is the dataset self-contained, or does it link to or otherwise rely on external resources (e.g., websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (i.e., including the external resources as they existed at the time the dataset was created); c) are there any restrictions (e.g., licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate.
-message ExternalResources
+message ExternalResource
  {
   string id = 0
   string name = 0
@@ -310,11 +351,19 @@ message Funder
  repeated  string grantNumber = 0
  }
 // Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?
-message FutureUseImpacts
+message FutureUseImpact
  {
   string id = 0
   string name = 0
  repeated  string description = 0
+ }
+// What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?
+message Instance
+ {
+  string id = 0
+  string name = 0
+  string description = 0
+ repeated  string representation = 0
  }
 // How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified?
 message InstanceAcquisition
@@ -322,14 +371,6 @@ message InstanceAcquisition
   string id = 0
   string name = 0
  repeated  string description = 0
- }
-// What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?
-message Instances
- {
-  string id = 0
-  string name = 0
-  string description = 0
- repeated  string representation = 0
  }
 // Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions.
 message IPRestrictions
@@ -385,7 +426,7 @@ message NamedThing
   string description = 0
  }
 // What (other) tasks could the dataset be used for?
-message OtherTasks
+message OtherTask
  {
   string id = 0
   string name = 0
@@ -456,7 +497,7 @@ message SamplingStrategy
  repeated  string description = 0
  }
 // Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)?
-message SensitiveData
+message SensitiveElement
  {
   string id = 0
   string name = 0
@@ -470,7 +511,7 @@ message Splits
  repeated  string description = 0
  }
 // Does the dataset identify any subpopulations (e.g., by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset.
-message Subpopulations
+message Subpopulation
  {
   string id = 0
   string name = 0
@@ -486,7 +527,7 @@ message ThirdPartySharing
  repeated  string description = 0
  }
 // Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (e.g., mailing list, GitHub)?
-message Updates
+message UpdatePlan
  {
   string id = 0
   string name = 0
@@ -501,13 +542,6 @@ message UseRepository
  }
 // Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers.
 message VersionAccess
- {
-  string id = 0
-  string name = 0
- repeated  string description = 0
- }
-// Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?
-message WhoCollected
  {
   string id = 0
   string name = 0

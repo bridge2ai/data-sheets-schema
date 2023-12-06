@@ -86,12 +86,12 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<Confidential> CLOSED {
-    (  $<Confidential_tes> (  &<DatasetProperty_tes> ;
+<Confidentiality> CLOSED {
+    (  $<Confidentiality_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <Confidential> ]
+       rdf:type [ <Confidentiality> ]
     )
 }
 
@@ -141,12 +141,21 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<DataAnomalies> CLOSED {
-    (  $<DataAnomalies_tes> (  &<DatasetProperty_tes> ;
+<DataAnomaly> CLOSED {
+    (  $<DataAnomaly_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <DataAnomalies> ]
+       rdf:type [ <DataAnomaly> ]
+    )
+}
+
+<DataCollector> CLOSED {
+    (  $<DataCollector_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <DataCollector> ]
     )
 }
 
@@ -192,7 +201,41 @@ datasets:DataResource  (
 <Dataset> CLOSED {
     (  $<Dataset_tes> (  &datasets:DataResource_tes ;
           rdf:type [ dcat:Distribution ] ? ;
-          <entries> @<DatasetProperty> *
+          <purposes> @<Purpose> * ;
+          <creators> @<Creator> * ;
+          <funders> @<Funder> * ;
+          <instances> @<Instance> * ;
+          <anomalies> @<DataAnomaly> * ;
+          <external_resources> @<ExternalResource> * ;
+          <confidential_elements> @<Confidentiality> * ;
+          <content_warnings> @<ContentWarning> * ;
+          <subpopulations> @<Subpopulation> * ;
+          <sensitive_elements> @<SensitiveElement> * ;
+          <acquisition_methods> @<InstanceAcquisition> * ;
+          <collection_mechanisms> @<CollectionMechanism> * ;
+          <sampling_strategies> @<SamplingStrategy> * ;
+          <data_collectors> @<DataCollector> * ;
+          <collection_timeframes> @<CollectionTimeframe> * ;
+          <ethical_reviews> @<EthicalReview> * ;
+          <data_protection_impacts> @<DataProtectionImpact> * ;
+          <preprocessing_cleaning_labeling_methods> @<PreprocessingCleaningLabeling> * ;
+          <raw_sources> @<RawData> * ;
+          <existing_uses> @<ExistingUse> * ;
+          <use_repository> @<UseRepository> * ;
+          <other_tasks> @<OtherTask> * ;
+          <future_use_impacts> @<FutureUseImpact> * ;
+          <discouraged_uses> @<DiscouragedUse> * ;
+          <distribution_formats> @<DistributionFormat> * ;
+          <distribution_dates> @<DistributionDate> * ;
+          <license_and_use_terms> @<LicenseAndUseTerms> ? ;
+          <ip_restrictions> @<IPRestrictions> ? ;
+          <regulatory_restrictions> @<ExportControlRegulatoryRestrictions> ? ;
+          <maintainers> @<Maintainer> * ;
+          <errata> @<Erratum> * ;
+          <updates> @<UpdatePlan> ? ;
+          <retention_limit> @<RetentionLimits> ? ;
+          <version_access> @<VersionAccess> ? ;
+          <extension_mechanism> @<ExtensionMechanism> ?
        ) ;
        rdf:type [ <Dataset> ]
     )
@@ -214,15 +257,16 @@ datasets:DataResource  (
           ) ;
           rdf:type [ <DatasetProperty> ]
        )
-    } OR @<CollectionConsent> OR @<CollectionMechanism> OR @<CollectionNotification> OR @<CollectionTimeframe> OR @<Confidential>
-    OR @<ConsentRevocation> OR @<ContentWarning> OR @<Counts> OR @<Creator> OR @<Data> OR @<DataAnomalies> OR
-    @<DataProtectionImpact> OR @<Deidentification> OR @<DirectCollection> OR @<DiscouragedUses> OR @<DistributionDate> OR
-    @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUses> OR @<ExportControlRegulatoryRestrictionss> OR
-    @<ExtensionMechanism> OR @<ExternalResources> OR @<Funder> OR @<FutureUseImpacts> OR @<IPRestrictions> OR
-    @<InstanceAcquisition> OR @<Instances> OR @<Labels> OR @<LicenseAndUseTerms> OR @<Maintainer> OR @<MaintainerContact> OR
-    @<Missing> OR @<OtherTasks> OR @<PreprocessingCleaningLabeling> OR @<PreprocessingCleaningLabelingSoftware> OR @<Purpose> OR
-    @<RawData> OR @<Relationships> OR @<RetentionLimits> OR @<Sampling> OR @<SamplingStrategy> OR @<SensitiveData> OR @<Splits> OR
-    @<Subpopulations> OR @<ThirdPartySharing> OR @<Updates> OR @<UseRepository> OR @<VersionAccess> OR @<WhoCollected>
+    } OR @<CollectionConsent> OR @<CollectionMechanism> OR @<CollectionNotification> OR @<CollectionTimeframe> OR
+    @<Confidentiality> OR @<ConsentRevocation> OR @<ContentWarning> OR @<Counts> OR @<Creator> OR @<Data> OR @<DataAnomaly> OR
+    @<DataCollector> OR @<DataProtectionImpact> OR @<Deidentification> OR @<DirectCollection> OR @<DiscouragedUse> OR
+    @<DistributionDate> OR @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUse> OR
+    @<ExportControlRegulatoryRestrictions> OR @<ExtensionMechanism> OR @<ExternalResource> OR @<Funder> OR @<FutureUseImpact> OR
+    @<IPRestrictions> OR @<Instance> OR @<InstanceAcquisition> OR @<Labels> OR @<LicenseAndUseTerms> OR @<Maintainer> OR
+    @<MaintainerContact> OR @<Missing> OR @<OtherTask> OR @<PreprocessingCleaningLabeling> OR
+    @<PreprocessingCleaningLabelingSoftware> OR @<Purpose> OR @<RawData> OR @<Relationships> OR @<RetentionLimits> OR @<Sampling>
+    OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR @<Subpopulation> OR @<ThirdPartySharing> OR @<UpdatePlan> OR
+    @<UseRepository> OR @<VersionAccess>
 )
 
 <Deidentification> CLOSED {
@@ -243,12 +287,12 @@ datasets:DataResource  (
     )
 }
 
-<DiscouragedUses> CLOSED {
-    (  $<DiscouragedUses_tes> (  &<DatasetProperty_tes> ;
+<DiscouragedUse> CLOSED {
+    (  $<DiscouragedUse_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <DiscouragedUses> ]
+       rdf:type [ <DiscouragedUse> ]
     )
 }
 
@@ -289,21 +333,21 @@ datasets:DataResource  (
     )
 }
 
-<ExistingUses> CLOSED {
-    (  $<ExistingUses_tes> (  &<DatasetProperty_tes> ;
+<ExistingUse> CLOSED {
+    (  $<ExistingUse_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <ExistingUses> ]
+       rdf:type [ <ExistingUse> ]
     )
 }
 
-<ExportControlRegulatoryRestrictionss> CLOSED {
-    (  $<ExportControlRegulatoryRestrictionss_tes> (  &<DatasetProperty_tes> ;
+<ExportControlRegulatoryRestrictions> CLOSED {
+    (  $<ExportControlRegulatoryRestrictions_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <ExportControlRegulatoryRestrictionss> ]
+       rdf:type [ <ExportControlRegulatoryRestrictions> ]
     )
 }
 
@@ -316,15 +360,15 @@ datasets:DataResource  (
     )
 }
 
-<ExternalResources> CLOSED {
-    (  $<ExternalResources_tes> (  &<DatasetProperty_tes> ;
+<ExternalResource> CLOSED {
+    (  $<ExternalResource_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <external_resources> @linkml:String * ;
           <future_guarantees> @linkml:String * ;
           <archival> @linkml:Boolean * ;
           <restrictions> @linkml:String *
        ) ;
-       rdf:type [ <ExternalResources> ]
+       rdf:type [ <ExternalResource> ]
     )
 }
 
@@ -350,12 +394,12 @@ datasets:FormatDialect CLOSED {
     )
 }
 
-<FutureUseImpacts> CLOSED {
-    (  $<FutureUseImpacts_tes> (  &<DatasetProperty_tes> ;
+<FutureUseImpact> CLOSED {
+    (  $<FutureUseImpact_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <FutureUseImpacts> ]
+       rdf:type [ <FutureUseImpact> ]
     )
 }
 
@@ -387,21 +431,21 @@ datasets:Information_struct {
     )
 }
 
+<Instance> CLOSED {
+    (  $<Instance_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <representation> @linkml:String *
+       ) ;
+       rdf:type [ <Instance> ]
+    )
+}
+
 <InstanceAcquisition> CLOSED {
     (  $<InstanceAcquisition_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
        rdf:type [ <InstanceAcquisition> ]
-    )
-}
-
-<Instances> CLOSED {
-    (  $<Instances_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <representation> @linkml:String *
-       ) ;
-       rdf:type [ <Instances> ]
     )
 }
 
@@ -471,12 +515,12 @@ datasets:Information_struct {
     } OR @<DatasetProperty>
 )
 
-<OtherTasks> CLOSED {
-    (  $<OtherTasks_tes> (  &<DatasetProperty_tes> ;
+<OtherTask> CLOSED {
+    (  $<OtherTask_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <OtherTasks> ]
+       rdf:type [ <OtherTask> ]
     )
 }
 
@@ -558,12 +602,12 @@ datasets:Information_struct {
     )
 }
 
-<SensitiveData> CLOSED {
-    (  $<SensitiveData_tes> (  &<DatasetProperty_tes> ;
+<SensitiveElement> CLOSED {
+    (  $<SensitiveElement_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <SensitiveData> ]
+       rdf:type [ <SensitiveElement> ]
     )
 }
 
@@ -576,13 +620,13 @@ datasets:Information_struct {
     )
 }
 
-<Subpopulations> CLOSED {
-    (  $<Subpopulations_tes> (  &<DatasetProperty_tes> ;
+<Subpopulation> CLOSED {
+    (  $<Subpopulation_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <identification> @linkml:String * ;
           <distribution> @linkml:String *
        ) ;
-       rdf:type [ <Subpopulations> ]
+       rdf:type [ <Subpopulation> ]
     )
 }
 
@@ -595,12 +639,12 @@ datasets:Information_struct {
     )
 }
 
-<Updates> CLOSED {
-    (  $<Updates_tes> (  &<DatasetProperty_tes> ;
+<UpdatePlan> CLOSED {
+    (  $<UpdatePlan_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
-       rdf:type [ <Updates> ]
+       rdf:type [ <UpdatePlan> ]
     )
 }
 
@@ -619,15 +663,6 @@ datasets:Information_struct {
           <description> @linkml:String *
        ) ;
        rdf:type [ <VersionAccess> ]
-    )
-}
-
-<WhoCollected> CLOSED {
-    (  $<WhoCollected_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String *
-       ) ;
-       rdf:type [ <WhoCollected> ]
     )
 }
 
