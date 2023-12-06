@@ -21,6 +21,7 @@ imports:
   - linkml:types
   - linkml:datasets
 
+## SUBSETS ##
 subsets:
   Motivation:
     description: >-
@@ -59,6 +60,7 @@ subsets:
       to plan for dataset maintenance and communicate this plan to dataset
       consumers.
 
+## CLASSES ##
 classes:
   DatasetProperty:
     description: >-
@@ -752,3 +754,9 @@ classes:
           inlined: true
       in_subset:
         - Maintenance
+
+## TYPES ##
+
+## SLOTS ##
+
+## ENUMS ##
