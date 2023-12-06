@@ -19,6 +19,7 @@ default_range: string
 
 imports:
   - linkml:types
+  - linkml:datasets
 
 subsets:
   Motivation:
@@ -73,6 +74,7 @@ classes:
     description: >-
       A collection of related datasets, likely containing multiple files
       of multiple potential purposes and properties.
+    is_a: DataPackage
     attributes:
       entries:
         range: Dataset
@@ -83,6 +85,7 @@ classes:
     description: >-
       A single component of related observations and/or information that can be
       read, manipulated, transformed, and otherwise interpreted.
+    is_a: DataResource
     attributes:
       entries:
         range: DatasetProperty
