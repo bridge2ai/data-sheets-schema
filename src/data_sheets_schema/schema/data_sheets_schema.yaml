@@ -879,13 +879,10 @@ classes:
 
 ## SLOTS ##
 slots:
-  id:
-    identifier: true
-    slot_uri: schema:identifier
+  # id slot imported from linkml:datasets
+  # description slot imported from linkml:datasets
   name:
     slot_uri: schema:name
-  description:
-    slot_uri: schema:description
 
 
 ## ENUMS ##
