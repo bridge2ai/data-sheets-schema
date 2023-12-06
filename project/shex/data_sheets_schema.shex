@@ -1,8 +1,15 @@
 BASE <https://w3id.org/bridge2ai/data-sheets-schema/>
+PREFIX csvw: <http://www.w3.org/ns/csvw#>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX linkml: <https://w3id.org/linkml/>
 PREFIX schema1: <http://schema.org/>
+PREFIX datasets: <https://w3id.org/linkml/report>
+PREFIX pav: <http://purl.org/pav/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
 
 
 linkml:String xsd:string
@@ -37,32 +44,591 @@ linkml:Objectidentifier IRI
 
 linkml:Nodeidentifier NONLITERAL
 
-<Datasheet> CLOSED {
-    (  $<Datasheet_tes> (  &<NamedThing_tes> ;
-          rdf:type [ schema1:Thing ] ? ;
-          schema1:email @linkml:String ? ;
-          schema1:birthDate @linkml:Date ? ;
-          <age_in_years> @linkml:Integer ? ;
-          <vital_status> @<PersonStatus> ?
+linkml:Jsonpointer xsd:string
+
+linkml:Jsonpath xsd:string
+
+linkml:Sparqlpath xsd:string
+
+<CollectionConsent> CLOSED {
+    (  $<CollectionConsent_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
        ) ;
-       rdf:type [ <Datasheet> ]
+       rdf:type [ <CollectionConsent> ]
     )
 }
 
-<DatasheetCollection> CLOSED {
-    (  $<DatasheetCollection_tes> <entries> @<Datasheet> * ;
-       rdf:type [ <DatasheetCollection> ] ?
+<CollectionMechanism> CLOSED {
+    (  $<CollectionMechanism_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <CollectionMechanism> ]
+    )
+}
+
+<CollectionNotification> CLOSED {
+    (  $<CollectionNotification_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <CollectionNotification> ]
+    )
+}
+
+<CollectionTimeframe> CLOSED {
+    (  $<CollectionTimeframe_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <CollectionTimeframe> ]
+    )
+}
+
+<Confidential> CLOSED {
+    (  $<Confidential_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <Confidential> ]
+    )
+}
+
+<ConsentRevocation> CLOSED {
+    (  $<ConsentRevocation_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <ConsentRevocation> ]
+    )
+}
+
+<ContentWarning> CLOSED {
+    (  $<ContentWarning_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <warnings> @linkml:String *
+       ) ;
+       rdf:type [ <ContentWarning> ]
+    )
+}
+
+<Counts> CLOSED {
+    (  $<Counts_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <count_values> @linkml:Integer *
+       ) ;
+       rdf:type [ <Counts> ]
+    )
+}
+
+<Creator> CLOSED {
+    (  $<Creator_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <principal_investigator> @linkml:String ? ;
+          <institution> @linkml:String ?
+       ) ;
+       rdf:type [ <Creator> ]
+    )
+}
+
+<Data> CLOSED {
+    (  $<Data_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <type> @linkml:String *
+       ) ;
+       rdf:type [ <Data> ]
+    )
+}
+
+<DataAnomalies> CLOSED {
+    (  $<DataAnomalies_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <DataAnomalies> ]
+    )
+}
+
+datasets:DataPackage  (
+    CLOSED {
+       (  $datasets:DataPackage_tes (  &datasets:Information_tes ;
+             rdf:type [ datasets:Information ] ? ;
+             dcat:distribution @datasets:DataResource *
+          ) ;
+          rdf:type [ void:Dataset ]
+       )
+    } OR @<DatasetCollection>
+)
+
+<DataProtectionImpact> CLOSED {
+    (  $<DataProtectionImpact_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <DataProtectionImpact> ]
+    )
+}
+
+datasets:DataResource  (
+    CLOSED {
+       (  $datasets:DataResource_tes (  &datasets:Information_tes ;
+             rdf:type [ datasets:Information ] ? ;
+             datasets:path @linkml:String ? ;
+             dcterms:format @datasets:FormatEnum ? ;
+             dcat:mediaType @linkml:String ? ;
+             datasets:encoding @linkml:String ? ;
+             dcat:byteSize @linkml:Integer ? ;
+             datasets:hash @linkml:String ? ;
+             datasets:md5 @linkml:String ? ;
+             datasets:sha256 @linkml:String ? ;
+             csvw:dialect @linkml:String ?
+          ) ;
+          rdf:type [ dcat:Distribution ]
+       )
+    } OR @<Dataset>
+)
+
+<Dataset> CLOSED {
+    (  $<Dataset_tes> (  &datasets:DataResource_tes ;
+          rdf:type [ dcat:Distribution ] ? ;
+          <entries> @<DatasetProperty> *
+       ) ;
+       rdf:type [ <Dataset> ]
+    )
+}
+
+<DatasetCollection> CLOSED {
+    (  $<DatasetCollection_tes> (  &datasets:DataPackage_tes ;
+          rdf:type [ void:Dataset ] ? ;
+          <entries> @<Dataset> *
+       ) ;
+       rdf:type [ <DatasetCollection> ]
+    )
+}
+
+<DatasetProperty>  (
+    CLOSED {
+       (  $<DatasetProperty_tes> (  &<NamedThing_tes> ;
+             rdf:type [ <NamedThing> ] ?
+          ) ;
+          rdf:type [ <DatasetProperty> ]
+       )
+    } OR @<CollectionConsent> OR @<CollectionMechanism> OR @<CollectionNotification> OR @<CollectionTimeframe> OR @<Confidential>
+    OR @<ConsentRevocation> OR @<ContentWarning> OR @<Counts> OR @<Creator> OR @<Data> OR @<DataAnomalies> OR
+    @<DataProtectionImpact> OR @<Deidentification> OR @<DirectCollection> OR @<DiscouragedUses> OR @<DistributionDate> OR
+    @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUses> OR @<ExportControlRegulatoryRestrictionss> OR
+    @<ExtensionMechanism> OR @<ExternalResources> OR @<Funder> OR @<FutureUseImpacts> OR @<IPRestrictions> OR
+    @<InstanceAcquisition> OR @<Instances> OR @<Labels> OR @<LicenseAndUseTerms> OR @<Maintainer> OR @<MaintainerContact> OR
+    @<Missing> OR @<OtherTasks> OR @<PreprocessingCleaningLabeling> OR @<PreprocessingCleaningLabelingSoftware> OR @<Purpose> OR
+    @<RawData> OR @<Relationships> OR @<RetentionLimits> OR @<Sampling> OR @<SamplingStrategy> OR @<SensitiveData> OR @<Splits> OR
+    @<Subpopulations> OR @<ThirdPartySharing> OR @<Updates> OR @<UseRepository> OR @<VersionAccess> OR @<WhoCollected>
+)
+
+<Deidentification> CLOSED {
+    (  $<Deidentification_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <Deidentification> ]
+    )
+}
+
+<DirectCollection> CLOSED {
+    (  $<DirectCollection_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <DirectCollection> ]
+    )
+}
+
+<DiscouragedUses> CLOSED {
+    (  $<DiscouragedUses_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <DiscouragedUses> ]
+    )
+}
+
+<DistributionDate> CLOSED {
+    (  $<DistributionDate_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <DistributionDate> ]
+    )
+}
+
+<DistributionFormat> CLOSED {
+    (  $<DistributionFormat_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String * ;
+          <doi> @linkml:String ?
+       ) ;
+       rdf:type [ <DistributionFormat> ]
+    )
+}
+
+<Erratum> CLOSED {
+    (  $<Erratum_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <Erratum> ]
+    )
+}
+
+<EthicalReview> CLOSED {
+    (  $<EthicalReview_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <EthicalReview> ]
+    )
+}
+
+<ExistingUses> CLOSED {
+    (  $<ExistingUses_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <ExistingUses> ]
+    )
+}
+
+<ExportControlRegulatoryRestrictionss> CLOSED {
+    (  $<ExportControlRegulatoryRestrictionss_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <ExportControlRegulatoryRestrictionss> ]
+    )
+}
+
+<ExtensionMechanism> CLOSED {
+    (  $<ExtensionMechanism_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <ExtensionMechanism> ]
+    )
+}
+
+<ExternalResources> CLOSED {
+    (  $<ExternalResources_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <external_resources> @linkml:String * ;
+          <future_guarantees> @linkml:String * ;
+          <archival> @linkml:Boolean * ;
+          <restrictions> @linkml:String *
+       ) ;
+       rdf:type [ <ExternalResources> ]
+    )
+}
+
+datasets:FormatDialect CLOSED {
+    (  $datasets:FormatDialect_tes (  datasets:comment_prefix @linkml:String ? ;
+          datasets:delimiter @linkml:String ? ;
+          datasets:double_quote @linkml:String ? ;
+          datasets:header @linkml:String ? ;
+          datasets:quote_char @linkml:String ?
+       ) ;
+       rdf:type [ datasets:FormatDialect ] ?
+    )
+}
+
+<Funder> CLOSED {
+    (  $<Funder_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <grantor> @linkml:String * ;
+          <grant_name> @linkml:String * ;
+          <grant_number> @linkml:String *
+       ) ;
+       rdf:type [ <Funder> ]
+    )
+}
+
+<FutureUseImpacts> CLOSED {
+    (  $<FutureUseImpacts_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <FutureUseImpacts> ]
+    )
+}
+
+datasets:Information  (
+    @datasets:DataPackage OR @datasets:DataResource
+)
+
+datasets:Information_struct {
+    (  $datasets:Information_tes (  dcat:downloadURL @linkml:Uri ? ;
+          dcterms:license @linkml:String ? ;
+          dcterms:title @linkml:String ? ;
+          dcterms:description @linkml:String ? ;
+          dcterms:conformsTo @linkml:Uriorcurie ? ;
+          datasets:conforms_to_schema @linkml:Uriorcurie ? ;
+          datasets:conforms_to_class @linkml:Uriorcurie ? ;
+          pav:version @linkml:String ? ;
+          datasets:language @linkml:String ? ;
+          dcterms:publisher @linkml:Uriorcurie ? ;
+          dcat:keyword @linkml:String * ;
+          dcterms:issued @linkml:Datetime ? ;
+          pav:createdBy @linkml:Uriorcurie ? ;
+          pav:createdOn @linkml:Datetime ? ;
+          datasets:compression @linkml:String ? ;
+          prov:wasDerivedFrom @linkml:String ? ;
+          dcat:landingPage @linkml:String ? ;
+          datasets:test_roles @datasets:TestRole *
+       ) ;
+       rdf:type [ datasets:Information ]
+    )
+}
+
+<InstanceAcquisition> CLOSED {
+    (  $<InstanceAcquisition_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <InstanceAcquisition> ]
+    )
+}
+
+<Instances> CLOSED {
+    (  $<Instances_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <representation> @linkml:String *
+       ) ;
+       rdf:type [ <Instances> ]
+    )
+}
+
+<IPRestrictions> CLOSED {
+    (  $<IPRestrictions_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <IPRestrictions> ]
+    )
+}
+
+<Labels> CLOSED {
+    (  $<Labels_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <label> @linkml:String *
+       ) ;
+       rdf:type [ <Labels> ]
+    )
+}
+
+<LicenseAndUseTerms> CLOSED {
+    (  $<LicenseAndUseTerms_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <LicenseAndUseTerms> ]
+    )
+}
+
+<Maintainer> CLOSED {
+    (  $<Maintainer_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <Maintainer> ]
+    )
+}
+
+<MaintainerContact> CLOSED {
+    (  $<MaintainerContact_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String * ;
+          <email> @linkml:String *
+       ) ;
+       rdf:type [ <MaintainerContact> ]
+    )
+}
+
+<Missing> CLOSED {
+    (  $<Missing_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <missing> @linkml:String * ;
+          <why_missing> @linkml:String *
+       ) ;
+       rdf:type [ <Missing> ]
     )
 }
 
 <NamedThing>  (
     CLOSED {
        (  $<NamedThing_tes> (  schema1:name @linkml:String ? ;
-             schema1:description @linkml:String ?
+             dcterms:description @linkml:String ?
           ) ;
-          rdf:type [ schema1:Thing ]
+          rdf:type [ <NamedThing> ]
        )
-    } OR @<Datasheet>
+    } OR @<DatasetProperty>
 )
+
+<OtherTasks> CLOSED {
+    (  $<OtherTasks_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <OtherTasks> ]
+    )
+}
+
+<PreprocessingCleaningLabeling> CLOSED {
+    (  $<PreprocessingCleaningLabeling_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <PreprocessingCleaningLabeling> ]
+    )
+}
+
+<PreprocessingCleaningLabelingSoftware> CLOSED {
+    (  $<PreprocessingCleaningLabelingSoftware_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <PreprocessingCleaningLabelingSoftware> ]
+    )
+}
+
+<Purpose> CLOSED {
+    (  $<Purpose_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <task> @linkml:String ? ;
+          <addressing_gap> @linkml:String ?
+       ) ;
+       rdf:type [ <Purpose> ]
+    )
+}
+
+<RawData> CLOSED {
+    (  $<RawData_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <RawData> ]
+    )
+}
+
+<Relationships> CLOSED {
+    (  $<Relationships_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <Relationships> ]
+    )
+}
+
+<RetentionLimits> CLOSED {
+    (  $<RetentionLimits_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <RetentionLimits> ]
+    )
+}
+
+<Sampling> CLOSED {
+    (  $<Sampling_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <ia_sample> @linkml:Boolean * ;
+          <israndom> @linkml:Boolean * ;
+          <source_data> @linkml:String * ;
+          <is_representative> @linkml:Boolean * ;
+          <representative_verification> @linkml:String * ;
+          <why_not_representative> @linkml:String *
+       ) ;
+       rdf:type [ <Sampling> ]
+    )
+}
+
+<SamplingStrategy> CLOSED {
+    (  $<SamplingStrategy_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <SamplingStrategy> ]
+    )
+}
+
+<SensitiveData> CLOSED {
+    (  $<SensitiveData_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <SensitiveData> ]
+    )
+}
+
+<Splits> CLOSED {
+    (  $<Splits_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <Splits> ]
+    )
+}
+
+<Subpopulations> CLOSED {
+    (  $<Subpopulations_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <identification> @linkml:String * ;
+          <distribution> @linkml:String *
+       ) ;
+       rdf:type [ <Subpopulations> ]
+    )
+}
+
+<ThirdPartySharing> CLOSED {
+    (  $<ThirdPartySharing_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <ThirdPartySharing> ]
+    )
+}
+
+<Updates> CLOSED {
+    (  $<Updates_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <Updates> ]
+    )
+}
+
+<UseRepository> CLOSED {
+    (  $<UseRepository_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <UseRepository> ]
+    )
+}
+
+<VersionAccess> CLOSED {
+    (  $<VersionAccess_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <VersionAccess> ]
+    )
+}
+
+<WhoCollected> CLOSED {
+    (  $<WhoCollected_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <WhoCollected> ]
+    )
+}
 
 

@@ -1,11 +1,33 @@
 {
-   "PATO": "http://purl.obolibrary.org/obo/PATO_",
+   "bibo": "http://example.org/UNKNOWN/bibo/",
    "biolink": "https://w3id.org/biolink/",
+   "csvw": "http://www.w3.org/ns/csvw#",
    "data_sheets_schema": "https://w3id.org/bridge2ai/data-sheets-schema/",
+   "datasets": "https://w3id.org/linkml/report",
+   "dcat": "http://www.w3.org/ns/dcat#",
+   "dcterms": "http://purl.org/dc/terms/",
    "example": "https://example.org/",
+   "frictionless": "https://specs.frictionlessdata.io/",
    "linkml": "https://w3id.org/linkml/",
+   "oslc": "http://example.org/UNKNOWN/oslc/",
+   "owl": "http://www.w3.org/2002/07/owl#",
+   "pav": "http://purl.org/pav/",
+   "prov": "http://www.w3.org/ns/prov#",
+   "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+   "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
    "schema": "http://schema.org/",
-   "NamedThing": {
-      "@id": "schema:Thing"
+   "void": "http://rdfs.org/ns/void#",
+   "xsd": "http://www.w3.org/2001/XMLSchema#",
+   "DataPackage": {
+      "@id": "void:Dataset"
+   },
+   "DataResource": {
+      "@id": "dcat:Distribution"
+   },
+   "FormatDialect": {
+      "@id": "datasets:FormatDialect"
+   },
+   "Information": {
+      "@id": "datasets:Information"
    }
 }
