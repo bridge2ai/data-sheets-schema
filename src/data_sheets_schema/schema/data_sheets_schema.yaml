@@ -108,11 +108,11 @@ classes:
     is_a: DatasetProperty
     attributes:
       # response:
-      #   range: String
+      #   range: string
       task:
-        range: String
+        range: string
       addressing_gap:
-        range: String
+        range: string
     in_subset:
       - Motivation
 
@@ -123,9 +123,9 @@ classes:
     is_a: DatasetProperty
     attributes:
       principal_investigator:
-        range: String
+        range: string
       institution:
-        range: String
+        range: string
     in_subset:
       - Motivation
 
@@ -136,15 +136,15 @@ classes:
     is_a: DatasetProperty
     attributes:
       grantor:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       grant_name:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       grant_number:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -159,7 +159,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       representation:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -171,7 +171,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       count_values:
-        range: Integer
+        range: integer
         multivalued: true
         inlined: true
     in_subset:
@@ -189,27 +189,27 @@ classes:
     is_a: DatasetProperty
     attributes:
       ia_sample:
-        range: Boolean
+        range: boolean
         multivalued: true
         inlined: true
       israndom:
-        range: Boolean
+        range: boolean
         multivalued: true
         inlined: true
       source_data:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       is_representative:
-        range: Boolean
+        range: boolean
         multivalued: true
         inlined: true
       representative_verification:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       why_not_representative:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       # subsample
@@ -223,7 +223,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       type:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -235,7 +235,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       label:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -250,11 +250,11 @@ classes:
     is_a: DatasetProperty
     attributes:
       missing:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       why_missing:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -268,7 +268,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -282,7 +282,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -295,7 +295,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -316,19 +316,19 @@ classes:
     is_a: DatasetProperty
     attributes:
       external_resources:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       future_guarantees:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       archival:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       restrictions:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -340,7 +340,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -354,7 +354,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       warnings:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -368,11 +368,11 @@ classes:
     is_a: DatasetProperty
     attributes:
       identification:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       distribution:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -386,7 +386,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -402,7 +402,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -419,7 +419,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -433,7 +433,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -447,7 +447,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -461,7 +461,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -476,7 +476,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -491,7 +491,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -504,7 +504,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -519,7 +519,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -535,7 +535,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -550,7 +550,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -566,7 +566,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -580,7 +580,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -594,7 +594,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -607,7 +607,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -619,7 +619,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -633,7 +633,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -645,7 +645,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -664,7 +664,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -676,7 +676,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -690,7 +690,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -703,11 +703,11 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       doi:
-        range: String
+        range: string
         multivalued: false
         inlined: true
     in_subset:
@@ -719,7 +719,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -735,7 +735,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -751,7 +751,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -766,7 +766,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -778,7 +778,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -791,11 +791,11 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
       email:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -807,7 +807,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -822,7 +822,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -838,7 +838,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -852,7 +852,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
@@ -869,7 +869,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: String
+        range: string
         multivalued: true
         inlined: true
     in_subset:
