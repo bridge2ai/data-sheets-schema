@@ -96,10 +96,104 @@ classes:
       read, manipulated, transformed, and otherwise interpreted.
     is_a: DataResource
     attributes:
-      entries:
-        range: DatasetProperty
+      purposes:
+        range: Purpose
         multivalued: true
-        # inlined: true
+      creators:
+        range: Creator
+        multivalued: true
+      funders:
+        range: Funder
+        multivalued: true
+      instances:
+        range: Instance
+        multivalued: true
+      anomalies:
+        range: DataAnamoly
+        multivalued: true
+      external_resources:
+        range: ExternalResource
+        multivalued: true
+      confidential_elements:
+        range: Confidentiality
+        multivalued: true
+      content_warnings:
+        range: ContentWarning
+        multivalued: true
+      subpopulations:
+        range: Subpopulation
+        multivalued: true
+      sensitive_elements:
+        range: SensitiveElement
+        multivalued: true
+      acquisition_methods:
+        range: InstanceAcquisition
+        multivalued: true
+      collection_mechanisms:
+        range: CollectionMechanism
+        multivalued: true
+      sampling_strategies:
+        range: SamplingStrategy
+        multivalued: true
+      data_collectors:
+        range: DataCollector
+        multivalued: true
+      collection_timeframes:
+        range: CollectionTimeframe
+        multivalued: true
+      ethical_reviews:
+        range: EthicalReview
+        multivalued: true
+      data_protection_impacts:
+        range: DataProtectionImpact
+        multivalued: true
+      preprocessing_cleaning_labeling_methods:
+        range: PreprocessingCleaningLabeling
+        multivalued: true
+      raw_sources:
+        range: RawData
+        multivalued: true
+      existing_uses:
+        range: ExistingUse
+        multivalued: true
+      use_repository:
+        range: UseRepository
+        multivalued: true
+      other_tasks:
+        range: OtherTask
+        multivalued: true
+      future_use_impacts:
+        range: FutureUseImpact
+        multivalued: true
+      discouraged_uses:
+        range: DiscouragedUse
+        multivalued: true
+      distribution_formats:
+        range: DistributionFormat
+        multivalued: true
+      distribution_dates:
+        range: DistributionDate
+        multivalued: true
+      license_and_use_terms:
+        range: LicenseAndUseTerms
+      ip_restrictions:
+        range: IPRestrictions
+      regulatory_restrictions:
+        range: ExportControlRegulatoryRestrictions
+      maintainers:
+        range: Maintainer
+        multivalued: true
+      errata:
+        range: Erratum
+        multivalued: true
+      updates:
+        range: UpdatePlan
+      retention_limit:
+        range: RetentionLimits
+      version_access:
+        range: VersionAccess
+      extension_mechanism:
+        range: ExtensionMechanism
 
   Purpose:
     description: >-
@@ -150,7 +244,7 @@ classes:
     in_subset:
       - Motivation
 
-  Instances:
+  Instance:
     description: >-
       What do the instances that comprise the dataset represent (e.g.,
       documents, photos, people, countries)? Are there multiple types of
@@ -165,6 +259,7 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: add this as an attribute of the Instance class
   Counts:
     description: >-
       How many instances are there in total (of each type, if appropriate)?
@@ -177,6 +272,7 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: consider this as an attribute of the Instance class
   Sampling:
     description: >-
       Does the dataset contain all possible instances or is it a sample (not
@@ -216,6 +312,7 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: consider this as an attribute of the Instance class
   Data:
     description: >-
       What data does each instance consist of? “Raw” data (e.g., unprocessed
@@ -229,6 +326,7 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: consider this as an attribute of the Instance class
   Labels:
     description: >-
       Is there a label or target associated with each instance?
@@ -241,6 +339,7 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: consider this as an attribute of the Instance class
   Missing:
     description: >-
       Is any information missing from individual instances? If so, please
@@ -260,6 +359,7 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: Refactor this into more of a triple
   Relationships:
     description: >-
       Are relationships between individual instances made explicit (e.g., users’
@@ -274,6 +374,7 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: Refactor this into more of a triple
   Splits:
     description: >-
       Are there recommended data splits (e.g., training, development/validation,
@@ -288,7 +389,7 @@ classes:
     in_subset:
       - Composition
 
-  DataAnomalies:
+  DataAnomaly:
     description: >-
       Are there any errors, sources of noise, or redundancies in the dataset?
       If so, please provide a description.
@@ -301,7 +402,7 @@ classes:
     in_subset:
       - Composition
 
-  ExternalResources:
+  ExternalResource:
     description: >-
       Is the dataset self-contained, or does it link to or otherwise rely on
       external resources (e.g., websites, tweets, other datasets)? If it links
@@ -334,7 +435,7 @@ classes:
     in_subset:
       - Composition
 
-  Confidential:
+  Confidentiality:
     description: >-
       Does the dataset contain data that might be considered confidential (e.g.,
       data that is protected by legal privilege or by doctor patient
@@ -363,7 +464,7 @@ classes:
     in_subset:
       - Composition
 
-  Subpopulations:
+  Subpopulation:
     description: >-
       Does the dataset identify any subpopulations (e.g., by age, gender)? If
       so, please describe how these subpopulations are identified and provide a
@@ -381,6 +482,8 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: consider other ways to model this - is it just a boolean?
+  # or are we concerned about specific PHI subtypes?
   Deidentification:
     description: >-
       Is it possible to identify individuals (i.e., one or more natural
@@ -395,7 +498,7 @@ classes:
     in_subset:
       - Composition
 
-  SensitiveData:
+  SensitiveElement:
     description: >-
       Does the dataset contain data that might be considered sensitive in any
       way (e.g., data that reveals race or ethnic origins, sexual orientations,
@@ -411,6 +514,7 @@ classes:
     in_subset:
       - Composition
 
+  # TODO: consider other modeling options here
   InstanceAcquisition:
     description: >-
       How was the data associated with each instance acquired? Was the data
@@ -442,6 +546,7 @@ classes:
     in_subset:
       - Collection
 
+  # TODO: probably an interdependency relationship here
   SamplingStrategy:
     description: >-
       If the dataset is a sample from a larger set, what was the sampling
@@ -456,7 +561,7 @@ classes:
     in_subset:
       - Collection
 
-  WhoCollected:
+  DataCollector:
     description: >-
       Who was involved in the data collection process (e.g., students,
       crowdworkers, contractors) and how were they compensated (e.g., how much
@@ -500,6 +605,8 @@ classes:
     in_subset:
       - Collection
 
+  # TODO: this is just a boolean, model as such
+  # or is it?
   DirectCollection:
     description: >-
       Did you collect the data from the individuals in question directly, or
@@ -513,6 +620,8 @@ classes:
     in_subset:
       - Collection
 
+  # TODO: this is just a boolean, model as such
+  # or is it?
   CollectionNotification:
     description: >-
       Were the individuals in question notified about the data collection? If
@@ -528,6 +637,8 @@ classes:
     in_subset:
       - Collection
 
+  # TODO: this is just a boolean, model as such
+  # or is it?
   CollectionConsent:
     description: >-
       Did the individuals in question consent to the collection and use of
@@ -544,6 +655,8 @@ classes:
     in_subset:
       - Collection
 
+  # TODO: this is just a boolean, model as such
+  # or is it?
   ConsentRevocation:
     description: >-
       If consent was obtained, were the consenting individuals provided with a
@@ -575,6 +688,7 @@ classes:
     in_subset:
       - Collection
 
+  # TODO: consider this as different tasks
   PreprocessingCleaningLabeling:
     description: >-
       Was any preprocessing/cleaning/labeling of the data done (e.g.,
@@ -603,6 +717,7 @@ classes:
     in_subset:
       - Preprocessing-Cleaning-Labeling
 
+  # TODO: this is probably an attribute of a task defined above
   PreprocessingCleaningLabelingSoftware:
     description: >-
       Is the software that was used to preprocess/clean/label the data
@@ -616,7 +731,7 @@ classes:
     in_subset:
       - Preprocessing-Cleaning-Labeling
 
-  ExistingUses:
+  ExistingUse:
     description: >-
       Has the dataset been used for any tasks already?
     is_a: DatasetProperty
@@ -642,7 +757,7 @@ classes:
     in_subset:
       - Uses
 
-  OtherTasks:
+  OtherTask:
     description: >-
       What (other) tasks could the dataset be used for?
     is_a: DatasetProperty
@@ -654,7 +769,7 @@ classes:
     in_subset:
       - Uses
 
-  FutureUseImpacts:
+  FutureUseImpact:
     description: >-
       Is there anything about the composition of the dataset or the way it was
       collected and preprocessed/cleaned/labeled that might impact future uses?
@@ -673,7 +788,7 @@ classes:
     in_subset:
       - Uses
 
-  DiscouragedUses:
+  DiscouragedUse:
     description: >-
       Are there tasks for which the dataset should not be used?
     is_a: DatasetProperty
@@ -685,6 +800,7 @@ classes:
     in_subset:
       - Uses
 
+  # TODO: a boolean, likely
   ThirdPartySharing:
     description: >-
       Will the dataset be distributed to third parties outside of the entity
@@ -760,7 +876,7 @@ classes:
     in_subset:
       - Distribution
 
-  ExportControlRegulatoryRestrictionss:
+  ExportControlRegulatoryRestrictions:
     description: >-
       Do any export controls or other regulatory restrictions apply to the
       dataset or to individual instances? If so, please describe these
@@ -775,6 +891,8 @@ classes:
     in_subset:
       - Distribution
 
+  # TODO: this isn't just a property but a person, so it there can be a
+  # parent class for Person
   Maintainer:
     description: >-
       Who will be supporting/hosting/maintaining the dataset?
@@ -787,6 +905,7 @@ classes:
     in_subset:
       - Maintenance
 
+  # TODO: this is a property of a Maintainer, or even a parent Person class
   MaintainerContact:
     description: >-
       How can the owner/curator/manager of the dataset be contacted (e.g.,
@@ -816,7 +935,7 @@ classes:
     in_subset:
       - Maintenance
 
-  Updates:
+  UpdatePlan:
     description: >-
       Will the dataset be updated (e.g., to correct labeling errors, add new
       instances, delete instances)? If so, please describe how often, by whom,
