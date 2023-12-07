@@ -74,6 +74,7 @@ classes:
       - schema:Thing
 
   DatasetProperty:
+    # Individual properties have their own attributes
     description: >-
       Represents a single property of a dataset, or a set of related properties.
     is_a: NamedThing
@@ -88,7 +89,6 @@ classes:
       entries:
         range: Dataset
         multivalued: true
-        # inlined: true
 
   Dataset:
     description: >-
@@ -98,6 +98,12 @@ classes:
     attributes:
       purposes:
         range: Purpose
+        multivalued: true
+      tasks:
+        range: Task
+        multivalued: true
+      addressing_gaps:
+        range: AddressingGap
         multivalued: true
       creators:
         range: Creator
@@ -197,15 +203,31 @@ classes:
 
   Purpose:
     description: >-
-      For what purpose was the dataset created? Was there a specific task in
-      mind? Was there a specific gap that needed to be filled?
+      For what purpose was the dataset created?
     is_a: DatasetProperty
     attributes:
-      # response:
-      #   range: string
-      task:
+      response:
         range: string
-      addressing_gap:
+    in_subset:
+      - Motivation
+
+  Task:
+    description: >-
+      Was there a specific task in mind for the dataset's application?
+    is_a: DatasetProperty
+    attributes:
+      response:
+        range: string
+    in_subset:
+      - Motivation
+
+  AddressingGap:
+    description: >-
+      Was there a specific gap that needed to be filled by creation of the
+      dataset?
+    is_a: DatasetProperty
+    attributes:
+      response:
         range: string
     in_subset:
       - Motivation
