@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2023-12-06T16:13:36
+# Generation date: 2023-12-20T15:13:21
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -45,6 +45,21 @@ DEFAULT_ = DATA_SHEETS_SCHEMA
 
 
 # Types
+class RorIdentifier(Uriorcurie):
+    """ Identifier from Research Organization Registry. """
+    type_class_uri = XSD["anyURI"]
+    type_class_curie = "xsd:anyURI"
+    type_name = "ror_identifier"
+    type_model_uri = DATA_SHEETS_SCHEMA.RorIdentifier
+
+
+class WikidataIdentifier(Uriorcurie):
+    """ Identifier from Wikidata open knowledge base. """
+    type_class_uri = XSD["anyURI"]
+    type_class_curie = "xsd:anyURI"
+    type_name = "wikidata_identifier"
+    type_model_uri = DATA_SHEETS_SCHEMA.WikidataIdentifier
+
 
 # Class references
 class NamedThingId(extended_str):
@@ -59,11 +74,27 @@ class PurposeId(DatasetPropertyId):
     pass
 
 
+class TaskId(DatasetPropertyId):
+    pass
+
+
+class AddressingGapId(DatasetPropertyId):
+    pass
+
+
 class CreatorId(DatasetPropertyId):
     pass
 
 
 class FunderId(DatasetPropertyId):
+    pass
+
+
+class GrantorId(NamedThingId):
+    pass
+
+
+class GrantId(NamedThingId):
     pass
 
 
@@ -320,8 +351,7 @@ class DatasetProperty(NamedThing):
 @dataclass
 class Purpose(DatasetProperty):
     """
-    For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed
-    to be filled?
+    For what purpose was the dataset created?
     """
     _inherited_slots: ClassVar[List[str]] = []
 
@@ -331,8 +361,7 @@ class Purpose(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Purpose
 
     id: Union[str, PurposeId] = None
-    task: Optional[str] = None
-    addressing_gap: Optional[str] = None
+    response: Optional[str] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
@@ -340,11 +369,62 @@ class Purpose(DatasetProperty):
         if not isinstance(self.id, PurposeId):
             self.id = PurposeId(self.id)
 
-        if self.task is not None and not isinstance(self.task, str):
-            self.task = str(self.task)
+        if self.response is not None and not isinstance(self.response, str):
+            self.response = str(self.response)
 
-        if self.addressing_gap is not None and not isinstance(self.addressing_gap, str):
-            self.addressing_gap = str(self.addressing_gap)
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class Task(DatasetProperty):
+    """
+    Was there a specific task in mind for the dataset's application?
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Task"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:Task"
+    class_name: ClassVar[str] = "Task"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Task
+
+    id: Union[str, TaskId] = None
+    response: Optional[str] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, TaskId):
+            self.id = TaskId(self.id)
+
+        if self.response is not None and not isinstance(self.response, str):
+            self.response = str(self.response)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class AddressingGap(DatasetProperty):
+    """
+    Was there a specific gap that needed to be filled by creation of the dataset?
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["AddressingGap"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:AddressingGap"
+    class_name: ClassVar[str] = "AddressingGap"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.AddressingGap
+
+    id: Union[str, AddressingGapId] = None
+    response: Optional[str] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, AddressingGapId):
+            self.id = AddressingGapId(self.id)
+
+        if self.response is not None and not isinstance(self.response, str):
+            self.response = str(self.response)
 
         super().__post_init__(**kwargs)
 
@@ -395,9 +475,8 @@ class Funder(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Funder
 
     id: Union[str, FunderId] = None
-    grantor: Optional[Union[str, List[str]]] = empty_list()
-    grant_name: Optional[Union[str, List[str]]] = empty_list()
-    grant_number: Optional[Union[str, List[str]]] = empty_list()
+    grantor: Optional[Union[str, GrantorId]] = None
+    grant: Optional[Union[str, GrantId]] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
@@ -405,17 +484,71 @@ class Funder(DatasetProperty):
         if not isinstance(self.id, FunderId):
             self.id = FunderId(self.id)
 
-        if not isinstance(self.grantor, list):
-            self.grantor = [self.grantor] if self.grantor is not None else []
-        self.grantor = [v if isinstance(v, str) else str(v) for v in self.grantor]
+        if self.grantor is not None and not isinstance(self.grantor, GrantorId):
+            self.grantor = GrantorId(self.grantor)
 
-        if not isinstance(self.grant_name, list):
-            self.grant_name = [self.grant_name] if self.grant_name is not None else []
-        self.grant_name = [v if isinstance(v, str) else str(v) for v in self.grant_name]
+        if self.grant is not None and not isinstance(self.grant, GrantId):
+            self.grant = GrantId(self.grant)
 
-        if not isinstance(self.grant_number, list):
-            self.grant_number = [self.grant_number] if self.grant_number is not None else []
-        self.grant_number = [v if isinstance(v, str) else str(v) for v in self.grant_number]
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class Grantor(NamedThing):
+    """
+    What is the name and/or identifier of the organization providing monetary support or other resources supporting
+    creation of the dataset?
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Grantor"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:Grantor"
+    class_name: ClassVar[str] = "Grantor"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Grantor
+
+    id: Union[str, GrantorId] = None
+    ror_id: Optional[Union[str, RorIdentifier]] = None
+    wikidata_id: Optional[Union[str, WikidataIdentifier]] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, GrantorId):
+            self.id = GrantorId(self.id)
+
+        if self.ror_id is not None and not isinstance(self.ror_id, RorIdentifier):
+            self.ror_id = RorIdentifier(self.ror_id)
+
+        if self.wikidata_id is not None and not isinstance(self.wikidata_id, WikidataIdentifier):
+            self.wikidata_id = WikidataIdentifier(self.wikidata_id)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class Grant(NamedThing):
+    """
+    What is the name and/or identifier of the specific mechanism providing monetary support or other resources
+    supporting creation of the dataset?
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Grant"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:Grant"
+    class_name: ClassVar[str] = "Grant"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Grant
+
+    id: Union[str, GrantId] = None
+    grant_number: Optional[str] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, GrantId):
+            self.id = GrantId(self.id)
+
+        if self.grant_number is not None and not isinstance(self.grant_number, str):
+            self.grant_number = str(self.grant_number)
 
         super().__post_init__(**kwargs)
 
@@ -1906,6 +2039,8 @@ class Dataset(DataResource):
 
     id: Union[str, DatasetId] = None
     purposes: Optional[Union[Union[str, PurposeId], List[Union[str, PurposeId]]]] = empty_list()
+    tasks: Optional[Union[Union[str, TaskId], List[Union[str, TaskId]]]] = empty_list()
+    addressing_gaps: Optional[Union[Union[str, AddressingGapId], List[Union[str, AddressingGapId]]]] = empty_list()
     creators: Optional[Union[Union[str, CreatorId], List[Union[str, CreatorId]]]] = empty_list()
     funders: Optional[Union[Union[str, FunderId], List[Union[str, FunderId]]]] = empty_list()
     instances: Optional[Union[Union[str, InstanceId], List[Union[str, InstanceId]]]] = empty_list()
@@ -1950,6 +2085,14 @@ class Dataset(DataResource):
         if not isinstance(self.purposes, list):
             self.purposes = [self.purposes] if self.purposes is not None else []
         self.purposes = [v if isinstance(v, PurposeId) else PurposeId(v) for v in self.purposes]
+
+        if not isinstance(self.tasks, list):
+            self.tasks = [self.tasks] if self.tasks is not None else []
+        self.tasks = [v if isinstance(v, TaskId) else TaskId(v) for v in self.tasks]
+
+        if not isinstance(self.addressing_gaps, list):
+            self.addressing_gaps = [self.addressing_gaps] if self.addressing_gaps is not None else []
+        self.addressing_gaps = [v if isinstance(v, AddressingGapId) else AddressingGapId(v) for v in self.addressing_gaps]
 
         if not isinstance(self.creators, list):
             self.creators = [self.creators] if self.creators is not None else []
@@ -2099,6 +2242,12 @@ slots.datasetCollection__entries = Slot(uri=DATA_SHEETS_SCHEMA.entries, name="da
 slots.dataset__purposes = Slot(uri=DATA_SHEETS_SCHEMA.purposes, name="dataset__purposes", curie=DATA_SHEETS_SCHEMA.curie('purposes'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__purposes, domain=None, range=Optional[Union[Union[str, PurposeId], List[Union[str, PurposeId]]]])
 
+slots.dataset__tasks = Slot(uri=DATA_SHEETS_SCHEMA.tasks, name="dataset__tasks", curie=DATA_SHEETS_SCHEMA.curie('tasks'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__tasks, domain=None, range=Optional[Union[Union[str, TaskId], List[Union[str, TaskId]]]])
+
+slots.dataset__addressing_gaps = Slot(uri=DATA_SHEETS_SCHEMA.addressing_gaps, name="dataset__addressing_gaps", curie=DATA_SHEETS_SCHEMA.curie('addressing_gaps'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__addressing_gaps, domain=None, range=Optional[Union[Union[str, AddressingGapId], List[Union[str, AddressingGapId]]]])
+
 slots.dataset__creators = Slot(uri=DATA_SHEETS_SCHEMA.creators, name="dataset__creators", curie=DATA_SHEETS_SCHEMA.curie('creators'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__creators, domain=None, range=Optional[Union[Union[str, CreatorId], List[Union[str, CreatorId]]]])
 
@@ -2201,11 +2350,14 @@ slots.dataset__version_access = Slot(uri=DATA_SHEETS_SCHEMA.version_access, name
 slots.dataset__extension_mechanism = Slot(uri=DATA_SHEETS_SCHEMA.extension_mechanism, name="dataset__extension_mechanism", curie=DATA_SHEETS_SCHEMA.curie('extension_mechanism'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__extension_mechanism, domain=None, range=Optional[Union[str, ExtensionMechanismId]])
 
-slots.purpose__task = Slot(uri=DATA_SHEETS_SCHEMA.task, name="purpose__task", curie=DATA_SHEETS_SCHEMA.curie('task'),
-                   model_uri=DATA_SHEETS_SCHEMA.purpose__task, domain=None, range=Optional[str])
+slots.purpose__response = Slot(uri=DATA_SHEETS_SCHEMA.response, name="purpose__response", curie=DATA_SHEETS_SCHEMA.curie('response'),
+                   model_uri=DATA_SHEETS_SCHEMA.purpose__response, domain=None, range=Optional[str])
 
-slots.purpose__addressing_gap = Slot(uri=DATA_SHEETS_SCHEMA.addressing_gap, name="purpose__addressing_gap", curie=DATA_SHEETS_SCHEMA.curie('addressing_gap'),
-                   model_uri=DATA_SHEETS_SCHEMA.purpose__addressing_gap, domain=None, range=Optional[str])
+slots.task__response = Slot(uri=DATA_SHEETS_SCHEMA.response, name="task__response", curie=DATA_SHEETS_SCHEMA.curie('response'),
+                   model_uri=DATA_SHEETS_SCHEMA.task__response, domain=None, range=Optional[str])
+
+slots.addressingGap__response = Slot(uri=DATA_SHEETS_SCHEMA.response, name="addressingGap__response", curie=DATA_SHEETS_SCHEMA.curie('response'),
+                   model_uri=DATA_SHEETS_SCHEMA.addressingGap__response, domain=None, range=Optional[str])
 
 slots.creator__principal_investigator = Slot(uri=DATA_SHEETS_SCHEMA.principal_investigator, name="creator__principal_investigator", curie=DATA_SHEETS_SCHEMA.curie('principal_investigator'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[str])
@@ -2214,13 +2366,19 @@ slots.creator__institution = Slot(uri=DATA_SHEETS_SCHEMA.institution, name="crea
                    model_uri=DATA_SHEETS_SCHEMA.creator__institution, domain=None, range=Optional[str])
 
 slots.funder__grantor = Slot(uri=DATA_SHEETS_SCHEMA.grantor, name="funder__grantor", curie=DATA_SHEETS_SCHEMA.curie('grantor'),
-                   model_uri=DATA_SHEETS_SCHEMA.funder__grantor, domain=None, range=Optional[Union[str, List[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.funder__grantor, domain=None, range=Optional[Union[str, GrantorId]])
 
-slots.funder__grant_name = Slot(uri=DATA_SHEETS_SCHEMA.grant_name, name="funder__grant_name", curie=DATA_SHEETS_SCHEMA.curie('grant_name'),
-                   model_uri=DATA_SHEETS_SCHEMA.funder__grant_name, domain=None, range=Optional[Union[str, List[str]]])
+slots.funder__grant = Slot(uri=DATA_SHEETS_SCHEMA.grant, name="funder__grant", curie=DATA_SHEETS_SCHEMA.curie('grant'),
+                   model_uri=DATA_SHEETS_SCHEMA.funder__grant, domain=None, range=Optional[Union[str, GrantId]])
 
-slots.funder__grant_number = Slot(uri=DATA_SHEETS_SCHEMA.grant_number, name="funder__grant_number", curie=DATA_SHEETS_SCHEMA.curie('grant_number'),
-                   model_uri=DATA_SHEETS_SCHEMA.funder__grant_number, domain=None, range=Optional[Union[str, List[str]]])
+slots.grantor__ror_id = Slot(uri=DATA_SHEETS_SCHEMA.ror_id, name="grantor__ror_id", curie=DATA_SHEETS_SCHEMA.curie('ror_id'),
+                   model_uri=DATA_SHEETS_SCHEMA.grantor__ror_id, domain=None, range=Optional[Union[str, RorIdentifier]])
+
+slots.grantor__wikidata_id = Slot(uri=DATA_SHEETS_SCHEMA.wikidata_id, name="grantor__wikidata_id", curie=DATA_SHEETS_SCHEMA.curie('wikidata_id'),
+                   model_uri=DATA_SHEETS_SCHEMA.grantor__wikidata_id, domain=None, range=Optional[Union[str, WikidataIdentifier]])
+
+slots.grant__grant_number = Slot(uri=DATA_SHEETS_SCHEMA.grant_number, name="grant__grant_number", curie=DATA_SHEETS_SCHEMA.curie('grant_number'),
+                   model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])
 
 slots.instance__representation = Slot(uri=DATA_SHEETS_SCHEMA.representation, name="instance__representation", curie=DATA_SHEETS_SCHEMA.curie('representation'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__representation, domain=None, range=Optional[Union[str, List[str]]])
