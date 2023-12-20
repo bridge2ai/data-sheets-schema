@@ -1,23 +1,605 @@
-type Datasheet
+type AddressingGap
   {
-    id: Uriorcurie!
+    id: String!
     name: String
     description: String
-    primaryEmail: String
-    birthDate: Date
-    ageInYears: Integer
-    vitalStatus: PersonStatus
+    response: String
   }
 
-type DatasheetCollection
+type CollectionConsent
   {
-    entries: [Datasheet]
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type CollectionMechanism
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type CollectionNotification
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type CollectionTimeframe
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Confidentiality
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type ConsentRevocation
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type ContentWarning
+  {
+    id: String!
+    name: String
+    description: String
+    warnings: [String]
+  }
+
+type Counts
+  {
+    id: String!
+    name: String
+    description: String
+    countValues: [Integer]
+  }
+
+type Creator
+  {
+    id: String!
+    name: String
+    description: String
+    principalInvestigator: String
+    institution: String
+  }
+
+type Data
+  {
+    id: String!
+    name: String
+    description: String
+    type: [String]
+  }
+
+type DataAnomaly
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type DataCollector
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type DataPackage
+  {
+    id: String!
+    downloadUrl: Uri
+    license: String
+    title: String
+    description: String
+    conformsTo: Uriorcurie
+    conformsToSchema: Uriorcurie
+    conformsToClass: Uriorcurie
+    version: String
+    language: String
+    publisher: Uriorcurie
+    keywords: [String]
+    issued: Datetime
+    createdBy: Uriorcurie
+    createdOn: Datetime
+    compression: String
+    wasDerivedFrom: String
+    page: String
+    testRoles: [TestRole]
+    resources: [DataResource]
+  }
+
+type DataProtectionImpact
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type DataResource
+  {
+    id: String!
+    downloadUrl: Uri
+    license: String
+    conformsTo: Uriorcurie
+    conformsToSchema: Uriorcurie
+    conformsToClass: Uriorcurie
+    version: String
+    language: String
+    publisher: Uriorcurie
+    keywords: [String]
+    issued: Datetime
+    createdBy: Uriorcurie
+    createdOn: Datetime
+    compression: String
+    wasDerivedFrom: String
+    page: String
+    testRoles: [TestRole]
+    path: String
+    title: String
+    description: String
+    format: FormatEnum
+    mediaType: String
+    encoding: String
+    bytes: Integer
+    hash: String
+    md5: String
+    sha256: String
+    dialect: String
+  }
+
+type Dataset
+  {
+    id: String!
+    downloadUrl: Uri
+    license: String
+    conformsTo: Uriorcurie
+    conformsToSchema: Uriorcurie
+    conformsToClass: Uriorcurie
+    version: String
+    language: String
+    publisher: Uriorcurie
+    keywords: [String]
+    issued: Datetime
+    createdBy: Uriorcurie
+    createdOn: Datetime
+    compression: String
+    wasDerivedFrom: String
+    page: String
+    testRoles: [TestRole]
+    path: String
+    title: String
+    description: String
+    format: FormatEnum
+    mediaType: String
+    encoding: String
+    bytes: Integer
+    hash: String
+    md5: String
+    sha256: String
+    dialect: String
+    purposes: [Purpose]
+    tasks: [Task]
+    addressingGaps: [AddressingGap]
+    creators: [Creator]
+    funders: [Funder]
+    instances: [Instance]
+    anomalies: [DataAnomaly]
+    externalResources: [ExternalResource]
+    confidentialElements: [Confidentiality]
+    contentWarnings: [ContentWarning]
+    subpopulations: [Subpopulation]
+    sensitiveElements: [SensitiveElement]
+    acquisitionMethods: [InstanceAcquisition]
+    collectionMechanisms: [CollectionMechanism]
+    samplingStrategies: [SamplingStrategy]
+    dataCollectors: [DataCollector]
+    collectionTimeframes: [CollectionTimeframe]
+    ethicalReviews: [EthicalReview]
+    dataProtectionImpacts: [DataProtectionImpact]
+    preprocessingCleaningLabelingMethods: [PreprocessingCleaningLabeling]
+    rawSources: [RawData]
+    existingUses: [ExistingUse]
+    useRepository: [UseRepository]
+    otherTasks: [OtherTask]
+    futureUseImpacts: [FutureUseImpact]
+    discouragedUses: [DiscouragedUse]
+    distributionFormats: [DistributionFormat]
+    distributionDates: [DistributionDate]
+    licenseAndUseTerms: LicenseAndUseTerms
+    ipRestrictions: IPRestrictions
+    regulatoryRestrictions: ExportControlRegulatoryRestrictions
+    maintainers: [Maintainer]
+    errata: [Erratum]
+    updates: UpdatePlan
+    retentionLimit: RetentionLimits
+    versionAccess: VersionAccess
+    extensionMechanism: ExtensionMechanism
+  }
+
+type DatasetCollection
+  {
+    id: String!
+    downloadUrl: Uri
+    license: String
+    title: String
+    description: String
+    conformsTo: Uriorcurie
+    conformsToSchema: Uriorcurie
+    conformsToClass: Uriorcurie
+    version: String
+    language: String
+    publisher: Uriorcurie
+    keywords: [String]
+    issued: Datetime
+    createdBy: Uriorcurie
+    createdOn: Datetime
+    compression: String
+    wasDerivedFrom: String
+    page: String
+    testRoles: [TestRole]
+    resources: [DataResource]
+    entries: [Dataset]
+  }
+
+type DatasetProperty
+  {
+    id: String!
+    name: String
+    description: String
+  }
+
+type Deidentification
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type DirectCollection
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type DiscouragedUse
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type DistributionDate
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type DistributionFormat
+  {
+    id: String!
+    name: String
+    description: [String]
+    doi: String
+  }
+
+type Erratum
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type EthicalReview
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type ExistingUse
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type ExportControlRegulatoryRestrictions
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type ExtensionMechanism
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type ExternalResource
+  {
+    id: String!
+    name: String
+    description: String
+    externalResources: [String]
+    futureGuarantees: [String]
+    archival: [Boolean]
+    restrictions: [String]
+  }
+
+type FormatDialect
+  {
+    commentPrefix: String
+    delimiter: String
+    doubleQuote: String
+    header: String
+    quoteChar: String
+  }
+
+type Funder
+  {
+    id: String!
+    name: String
+    description: String
+    grantor: Grantor
+    grant: Grant
+  }
+
+type FutureUseImpact
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Grant
+  {
+    id: String!
+    name: String
+    description: String
+    grantNumber: String
+  }
+
+type Grantor
+  {
+    id: String!
+    name: String
+    description: String
+    rorId: RorIdentifier
+    wikidataId: WikidataIdentifier
+  }
+
+interface Information
+  {
+    id: String!
+    downloadUrl: Uri
+    license: String
+    title: String
+    description: String
+    conformsTo: Uriorcurie
+    conformsToSchema: Uriorcurie
+    conformsToClass: Uriorcurie
+    version: String
+    language: String
+    publisher: Uriorcurie
+    keywords: [String]
+    issued: Datetime
+    createdBy: Uriorcurie
+    createdOn: Datetime
+    compression: String
+    wasDerivedFrom: String
+    page: String
+    testRoles: [TestRole]
+  }
+
+type Instance
+  {
+    id: String!
+    name: String
+    description: String
+    representation: [String]
+  }
+
+type InstanceAcquisition
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type IPRestrictions
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Labels
+  {
+    id: String!
+    name: String
+    description: String
+    label: [String]
+  }
+
+type LicenseAndUseTerms
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Maintainer
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type MaintainerContact
+  {
+    id: String!
+    name: String
+    description: [String]
+    email: [String]
+  }
+
+type Missing
+  {
+    id: String!
+    name: String
+    description: String
+    missing: [String]
+    whyMissing: [String]
   }
 
 type NamedThing
   {
-    id: Uriorcurie!
+    id: String!
     name: String
     description: String
+  }
+
+type OtherTask
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type PreprocessingCleaningLabeling
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type PreprocessingCleaningLabelingSoftware
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Purpose
+  {
+    id: String!
+    name: String
+    description: String
+    response: String
+  }
+
+type RawData
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Relationships
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type RetentionLimits
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Sampling
+  {
+    id: String!
+    name: String
+    description: String
+    iaSample: [Boolean]
+    israndom: [Boolean]
+    sourceData: [String]
+    isRepresentative: [Boolean]
+    representativeVerification: [String]
+    whyNotRepresentative: [String]
+  }
+
+type SamplingStrategy
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type SensitiveElement
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Splits
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type Subpopulation
+  {
+    id: String!
+    name: String
+    description: String
+    identification: [String]
+    distribution: [String]
+  }
+
+type Task
+  {
+    id: String!
+    name: String
+    description: String
+    response: String
+  }
+
+type ThirdPartySharing
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type UpdatePlan
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type UseRepository
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type VersionAccess
+  {
+    id: String!
+    name: String
+    description: [String]
   }
 

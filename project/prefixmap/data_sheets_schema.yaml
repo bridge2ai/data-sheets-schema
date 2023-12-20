@@ -1,11 +1,27 @@
 {
-   "PATO": "http://purl.obolibrary.org/obo/PATO_",
+   "bibo": "http://example.org/UNKNOWN/bibo/",
    "biolink": "https://w3id.org/biolink/",
+   "csvw": "http://www.w3.org/ns/csvw#",
    "data_sheets_schema": "https://w3id.org/bridge2ai/data-sheets-schema/",
+   "datasets": "https://w3id.org/linkml/report",
+   "dcat": "http://www.w3.org/ns/dcat#",
+   "dcterms": "http://example.org/UNKNOWN/dcterms/",
    "example": "https://example.org/",
+   "formats": "http://www.w3.org/ns/formats/",
+   "frictionless": "https://specs.frictionlessdata.io/",
    "linkml": "https://w3id.org/linkml/",
+   "mediatypes": "https://www.iana.org/assignments/media-types/",
+   "oslc": "http://example.org/UNKNOWN/oslc/",
+   "pav": "http://purl.org/pav/",
+   "prov": "http://example.org/UNKNOWN/prov/",
    "schema": "http://schema.org/",
-   "NamedThing": {
-      "@id": "schema:Thing"
+   "sh": "https://w3id.org/shacl/",
+   "skos": "http://www.w3.org/2004/02/skos/core#",
+   "void": "http://rdfs.org/ns/void#",
+   "DataPackage": {
+      "@id": "void:Dataset"
+   },
+   "DataResource": {
+      "@id": "dcat:Distribution"
    }
 }
