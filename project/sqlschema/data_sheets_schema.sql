@@ -146,6 +146,23 @@ CREATE TABLE "FormatDialect" (
 	PRIMARY KEY (comment_prefix, delimiter, double_quote, header, quote_char)
 );
 
+CREATE TABLE "Grant" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	grant_number TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Grantor" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	ror_id TEXT, 
+	wikidata_id TEXT, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "IPRestrictions" (
 	id TEXT NOT NULL, 
 	name TEXT, 
@@ -525,6 +542,16 @@ CREATE TABLE "VersionAccess_description" (
 	FOREIGN KEY(backref_id) REFERENCES "VersionAccess" (id)
 );
 
+CREATE TABLE "AddressingGap" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	response TEXT, 
+	"Dataset_id" TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
+);
+
 CREATE TABLE "CollectionMechanism" (
 	id TEXT NOT NULL, 
 	name TEXT, 
@@ -655,8 +682,12 @@ CREATE TABLE "Funder" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	grantor TEXT, 
+	grant TEXT, 
 	"Dataset_id" TEXT, 
 	PRIMARY KEY (id), 
+	FOREIGN KEY(grantor) REFERENCES "Grantor" (id), 
+	FOREIGN KEY(grant) REFERENCES "Grant" (id), 
 	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
 );
 
@@ -713,8 +744,7 @@ CREATE TABLE "Purpose" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
-	task TEXT, 
-	addressing_gap TEXT, 
+	response TEXT, 
 	"Dataset_id" TEXT, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
@@ -748,6 +778,16 @@ CREATE TABLE "Subpopulation" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	"Dataset_id" TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
+);
+
+CREATE TABLE "Task" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	response TEXT, 
 	"Dataset_id" TEXT, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
@@ -892,27 +932,6 @@ CREATE TABLE "ExternalResource_restrictions" (
 	restrictions TEXT, 
 	PRIMARY KEY (backref_id, restrictions), 
 	FOREIGN KEY(backref_id) REFERENCES "ExternalResource" (id)
-);
-
-CREATE TABLE "Funder_grantor" (
-	backref_id TEXT, 
-	grantor TEXT, 
-	PRIMARY KEY (backref_id, grantor), 
-	FOREIGN KEY(backref_id) REFERENCES "Funder" (id)
-);
-
-CREATE TABLE "Funder_grant_name" (
-	backref_id TEXT, 
-	grant_name TEXT, 
-	PRIMARY KEY (backref_id, grant_name), 
-	FOREIGN KEY(backref_id) REFERENCES "Funder" (id)
-);
-
-CREATE TABLE "Funder_grant_number" (
-	backref_id TEXT, 
-	grant_number TEXT, 
-	PRIMARY KEY (backref_id, grant_number), 
-	FOREIGN KEY(backref_id) REFERENCES "Funder" (id)
 );
 
 CREATE TABLE "FutureUseImpact_description" (

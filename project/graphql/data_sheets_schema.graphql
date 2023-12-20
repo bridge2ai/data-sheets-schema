@@ -1,3 +1,11 @@
+type AddressingGap
+  {
+    id: String!
+    name: String
+    description: String
+    response: String
+  }
+
 type CollectionConsent
   {
     id: String!
@@ -181,6 +189,8 @@ type Dataset
     sha256: String
     dialect: String
     purposes: [Purpose]
+    tasks: [Task]
+    addressingGaps: [AddressingGap]
     creators: [Creator]
     funders: [Funder]
     instances: [Instance]
@@ -345,9 +355,8 @@ type Funder
     id: String!
     name: String
     description: String
-    grantor: [String]
-    grantName: [String]
-    grantNumber: [String]
+    grantor: Grantor
+    grant: Grant
   }
 
 type FutureUseImpact
@@ -355,6 +364,23 @@ type FutureUseImpact
     id: String!
     name: String
     description: [String]
+  }
+
+type Grant
+  {
+    id: String!
+    name: String
+    description: String
+    grantNumber: String
+  }
+
+type Grantor
+  {
+    id: String!
+    name: String
+    description: String
+    rorId: RorIdentifier
+    wikidataId: WikidataIdentifier
   }
 
 interface Information
@@ -474,8 +500,7 @@ type Purpose
     id: String!
     name: String
     description: String
-    task: String
-    addressingGap: String
+    response: String
   }
 
 type RawData
@@ -540,6 +565,14 @@ type Subpopulation
     description: String
     identification: [String]
     distribution: [String]
+  }
+
+type Task
+  {
+    id: String!
+    name: String
+    description: String
+    response: String
   }
 
 type ThirdPartySharing

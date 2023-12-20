@@ -7,38 +7,70 @@
   ],
   "id": "https://w3id.org/bridge2ai/data-sheets-schema",
   "imports": [
-    "linkml:types",
-    "linkml:datasets"
+    "linkml:types"
   ],
   "license": "MIT",
   "prefixes": [
     {
+      "prefix_prefix": "biolink",
+      "prefix_reference": "https://w3id.org/biolink/"
+    },
+    {
+      "prefix_prefix": "csvw",
+      "prefix_reference": "http://www.w3.org/ns/csvw#"
+    },
+    {
       "prefix_prefix": "data_sheets_schema",
       "prefix_reference": "https://w3id.org/bridge2ai/data-sheets-schema/"
+    },
+    {
+      "prefix_prefix": "datasets",
+      "prefix_reference": "https://w3id.org/linkml/report"
+    },
+    {
+      "prefix_prefix": "dcat",
+      "prefix_reference": "http://www.w3.org/ns/dcat#"
+    },
+    {
+      "prefix_prefix": "example",
+      "prefix_reference": "https://example.org/"
+    },
+    {
+      "prefix_prefix": "formats",
+      "prefix_reference": "http://www.w3.org/ns/formats/"
+    },
+    {
+      "prefix_prefix": "frictionless",
+      "prefix_reference": "https://specs.frictionlessdata.io/"
     },
     {
       "prefix_prefix": "linkml",
       "prefix_reference": "https://w3id.org/linkml/"
     },
     {
-      "prefix_prefix": "biolink",
-      "prefix_reference": "https://w3id.org/biolink/"
+      "prefix_prefix": "mediatypes",
+      "prefix_reference": "https://www.iana.org/assignments/media-types/"
+    },
+    {
+      "prefix_prefix": "pav",
+      "prefix_reference": "http://purl.org/pav/"
     },
     {
       "prefix_prefix": "schema",
       "prefix_reference": "http://schema.org/"
     },
     {
-      "prefix_prefix": "example",
-      "prefix_reference": "https://example.org/"
+      "prefix_prefix": "sh",
+      "prefix_reference": "https://w3id.org/shacl/"
+    },
+    {
+      "prefix_prefix": "skos",
+      "prefix_reference": "http://www.w3.org/2004/02/skos/core#"
+    },
+    {
+      "prefix_prefix": "void",
+      "prefix_reference": "http://rdfs.org/ns/void#"
     }
-  ],
-  "emit_prefixes": [
-    "linkml",
-    "rdf",
-    "rdfs",
-    "xsd",
-    "owl"
   ],
   "default_prefix": "data_sheets_schema",
   "default_range": "string",
@@ -94,6 +126,34 @@
     }
   ],
   "types": [
+    {
+      "name": "ror_identifier",
+      "id_prefixes": [
+        "ror"
+      ],
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/RorIdentifier",
+      "description": "Identifier from Research Organization Registry.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "typeof": "uriorcurie",
+      "base": "URIorCURIE",
+      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "wikidata_identifier",
+      "id_prefixes": [
+        "wikidata"
+      ],
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/WikidataIdentifier",
+      "description": "Identifier from Wikidata open knowledge base.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "typeof": "uriorcurie",
+      "base": "URIorCURIE",
+      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
     {
       "name": "string",
       "definition_uri": "https://w3id.org/linkml/String",
@@ -406,9 +466,8 @@
   "enums": [
     {
       "name": "TestRole",
-      "definition_uri": "https://w3id.org/linkml/reportTestRole",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/TestRole",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "permissible_values": [
         {
           "text": "Example"
@@ -420,9 +479,8 @@
     },
     {
       "name": "MediaTypeEnum",
-      "definition_uri": "https://w3id.org/linkml/reportMediaTypeEnum",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/MediaTypeEnum",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "exact_mappings": [
         "dcterms:MediaType"
       ],
@@ -439,9 +497,8 @@
     },
     {
       "name": "FormatEnum",
-      "definition_uri": "https://w3id.org/linkml/reportFormatEnum",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatEnum",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "permissible_values": [
         {
           "text": "JSON-LD",
@@ -546,6 +603,28 @@
   ],
   "slots": [
     {
+      "name": "id",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/id",
+      "description": "the unique name of th dataset",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://example.org/UNKNOWN/dcterms/identifier"
+      ],
+      "exact_mappings": [
+        "http://schema.org/name"
+      ],
+      "slot_uri": "http://example.org/UNKNOWN/dcterms/identifier",
+      "identifier": true,
+      "owner": "Information",
+      "domain_of": [
+        "NamedThing",
+        "Information"
+      ],
+      "range": "string",
+      "required": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "name",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/name",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
@@ -561,38 +640,14 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "id",
-      "definition_uri": "https://w3id.org/linkml/reportid",
-      "description": "the unique name of th dataset",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "mappings": [
-        "http://purl.org/dc/terms/identifier"
-      ],
-      "exact_mappings": [
-        "http://schema.org/name"
-      ],
-      "slot_uri": "http://purl.org/dc/terms/identifier",
-      "identifier": true,
-      "owner": "Information",
-      "domain_of": [
-        "NamedThing",
-        "Information"
-      ],
-      "range": "string",
-      "required": true,
-      "@type": "SlotDefinition"
-    },
-    {
       "name": "title",
-      "definition_uri": "https://w3id.org/linkml/reporttitle",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/title",
       "description": "the official title of the element",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
-        "http://purl.org/dc/terms/title"
+        "http://example.org/UNKNOWN/dcterms/title"
       ],
-      "slot_uri": "http://purl.org/dc/terms/title",
+      "slot_uri": "http://example.org/UNKNOWN/dcterms/title",
       "owner": "DataResource",
       "domain_of": [
         "Information",
@@ -603,14 +658,13 @@
     },
     {
       "name": "description",
-      "definition_uri": "https://w3id.org/linkml/reportdescription",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/description",
       "description": "human readable description of the information",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
-        "http://purl.org/dc/terms/description"
+        "http://example.org/UNKNOWN/dcterms/description"
       ],
-      "slot_uri": "http://purl.org/dc/terms/description",
+      "slot_uri": "http://example.org/UNKNOWN/dcterms/description",
       "owner": "DataResource",
       "domain_of": [
         "NamedThing",
@@ -622,11 +676,10 @@
     },
     {
       "name": "language",
-      "definition_uri": "https://w3id.org/linkml/reportlanguage",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/language",
       "description": "language in which the information is expressed",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reportlanguage",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/language",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -636,13 +689,12 @@
     },
     {
       "name": "publisher",
-      "definition_uri": "https://w3id.org/linkml/reportpublisher",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/publisher",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
-        "http://purl.org/dc/terms/publisher"
+        "http://example.org/UNKNOWN/dcterms/publisher"
       ],
-      "slot_uri": "http://purl.org/dc/terms/publisher",
+      "slot_uri": "http://example.org/UNKNOWN/dcterms/publisher",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -652,13 +704,12 @@
     },
     {
       "name": "issued",
-      "definition_uri": "https://w3id.org/linkml/reportissued",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/issued",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
-        "http://purl.org/dc/terms/issued"
+        "http://example.org/UNKNOWN/dcterms/issued"
       ],
-      "slot_uri": "http://purl.org/dc/terms/issued",
+      "slot_uri": "http://example.org/UNKNOWN/dcterms/issued",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -668,9 +719,8 @@
     },
     {
       "name": "page",
-      "definition_uri": "https://w3id.org/linkml/reportpage",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/page",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/dcat#landingPage"
       ],
@@ -684,9 +734,8 @@
     },
     {
       "name": "dialect",
-      "definition_uri": "https://w3id.org/linkml/reportdialect",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/dialect",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/csvw#dialect"
       ],
@@ -700,9 +749,8 @@
     },
     {
       "name": "bytes",
-      "definition_uri": "https://w3id.org/linkml/reportbytes",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/bytes",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/dcat#byteSize"
       ],
@@ -716,13 +764,12 @@
     },
     {
       "name": "path",
-      "definition_uri": "https://w3id.org/linkml/reportpath",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/path",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "close_mappings": [
         "https://specs.frictionlessdata.io/path"
       ],
-      "slot_uri": "https://w3id.org/linkml/reportpath",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/path",
       "owner": "DataResource",
       "domain_of": [
         "DataResource"
@@ -732,9 +779,8 @@
     },
     {
       "name": "download_url",
-      "definition_uri": "https://w3id.org/linkml/reportdownload_url",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/download_url",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/dcat#downloadURL"
       ],
@@ -754,13 +800,12 @@
     },
     {
       "name": "format",
-      "definition_uri": "https://w3id.org/linkml/reportformat",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/format",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
-        "http://purl.org/dc/terms/format"
+        "http://example.org/UNKNOWN/dcterms/format"
       ],
-      "slot_uri": "http://purl.org/dc/terms/format",
+      "slot_uri": "http://example.org/UNKNOWN/dcterms/format",
       "owner": "DataResource",
       "domain_of": [
         "DataResource"
@@ -770,10 +815,9 @@
     },
     {
       "name": "compression",
-      "definition_uri": "https://w3id.org/linkml/reportcompression",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reportcompression",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -783,10 +827,9 @@
     },
     {
       "name": "encoding",
-      "definition_uri": "https://w3id.org/linkml/reportencoding",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reportencoding",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/encoding",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/encoding",
       "owner": "DataResource",
       "domain_of": [
         "DataResource"
@@ -796,13 +839,12 @@
     },
     {
       "name": "hash",
-      "definition_uri": "https://w3id.org/linkml/reporthash",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/hash",
       "notes": [
         "we recommend using a more specific slot such as sha256 or md5"
       ],
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reporthash",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/hash",
       "owner": "DataResource",
       "domain_of": [
         "DataResource"
@@ -812,11 +854,10 @@
     },
     {
       "name": "sha256",
-      "definition_uri": "https://w3id.org/linkml/reportsha256",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sha256",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "is_a": "hash",
-      "slot_uri": "https://w3id.org/linkml/reportsha256",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sha256",
       "owner": "DataResource",
       "domain_of": [
         "DataResource"
@@ -826,11 +867,10 @@
     },
     {
       "name": "md5",
-      "definition_uri": "https://w3id.org/linkml/reportmd5",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/md5",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "is_a": "hash",
-      "slot_uri": "https://w3id.org/linkml/reportmd5",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/md5",
       "owner": "DataResource",
       "domain_of": [
         "DataResource"
@@ -840,7 +880,7 @@
     },
     {
       "name": "media_type",
-      "definition_uri": "https://w3id.org/linkml/reportmedia_type",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/media_type",
       "examples": [
         {
           "value": "text/csv",
@@ -851,8 +891,7 @@
           "@type": "Example"
         }
       ],
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/dcat#mediaType"
       ],
@@ -870,13 +909,12 @@
     },
     {
       "name": "conforms_to",
-      "definition_uri": "https://w3id.org/linkml/reportconforms_to",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
-        "http://purl.org/dc/terms/conformsTo"
+        "http://example.org/UNKNOWN/dcterms/conformsTo"
       ],
-      "slot_uri": "http://purl.org/dc/terms/conformsTo",
+      "slot_uri": "http://example.org/UNKNOWN/dcterms/conformsTo",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -886,14 +924,13 @@
     },
     {
       "name": "conforms_to_schema",
-      "definition_uri": "https://w3id.org/linkml/reportconforms_to_schema",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "exact_mappings": [
         "https://specs.frictionlessdata.io/schema"
       ],
       "is_a": "conforms_to",
-      "slot_uri": "https://w3id.org/linkml/reportconforms_to_schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_schema",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -903,12 +940,11 @@
     },
     {
       "name": "conforms_to_class",
-      "definition_uri": "https://w3id.org/linkml/reportconforms_to_class",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_class",
       "description": "class in schema which the data object instantiates",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "is_a": "conforms_to",
-      "slot_uri": "https://w3id.org/linkml/reportconforms_to_class",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_class",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -918,21 +954,19 @@
     },
     {
       "name": "profile",
-      "definition_uri": "https://w3id.org/linkml/reportprofile",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/profile",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "exact_mappings": [
         "https://specs.frictionlessdata.io/profiles"
       ],
-      "slot_uri": "https://w3id.org/linkml/reportprofile",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/profile",
       "range": "uriorcurie",
       "@type": "SlotDefinition"
     },
     {
       "name": "keywords",
-      "definition_uri": "https://w3id.org/linkml/reportkeywords",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/keywords",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/dcat#keyword"
       ],
@@ -951,9 +985,8 @@
     },
     {
       "name": "themes",
-      "definition_uri": "https://w3id.org/linkml/reportthemes",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/themes",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/dcat#theme"
       ],
@@ -965,9 +998,8 @@
     },
     {
       "name": "resources",
-      "definition_uri": "https://w3id.org/linkml/reportresources",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://www.w3.org/ns/dcat#distribution"
       ],
@@ -985,10 +1017,9 @@
     },
     {
       "name": "test_roles",
-      "definition_uri": "https://w3id.org/linkml/reporttest_roles",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reporttest_roles",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/test_roles",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/test_roles",
       "multivalued": true,
       "owner": "Information",
       "domain_of": [
@@ -999,10 +1030,9 @@
     },
     {
       "name": "created_by",
-      "definition_uri": "https://w3id.org/linkml/reportcreated_by",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/created_by",
       "description": "agent that created the element",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://purl.org/pav/createdBy"
       ],
@@ -1016,10 +1046,9 @@
     },
     {
       "name": "created_on",
-      "definition_uri": "https://w3id.org/linkml/reportcreated_on",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/created_on",
       "description": "time at which the element was created",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://purl.org/pav/createdOn"
       ],
@@ -1033,10 +1062,9 @@
     },
     {
       "name": "last_updated_on",
-      "definition_uri": "https://w3id.org/linkml/reportlast_updated_on",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/last_updated_on",
       "description": "time at which the element was last updated",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://purl.org/pav/lastUpdatedOn"
       ],
@@ -1046,10 +1074,9 @@
     },
     {
       "name": "modified_by",
-      "definition_uri": "https://w3id.org/linkml/reportmodified_by",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/modified_by",
       "description": "agent that modified the element",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://example.org/UNKNOWN/oslc/modifiedBy"
       ],
@@ -1059,7 +1086,7 @@
     },
     {
       "name": "status",
-      "definition_uri": "https://w3id.org/linkml/reportstatus",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/status",
       "description": "status of the element",
       "examples": [
         {
@@ -1067,8 +1094,7 @@
           "@type": "Example"
         }
       ],
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://example.org/UNKNOWN/bibo/status"
       ],
@@ -1078,17 +1104,16 @@
     },
     {
       "name": "license",
-      "definition_uri": "https://w3id.org/linkml/reportlicense",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/license",
       "description": "license for the data",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
-        "http://purl.org/dc/terms/license"
+        "http://example.org/UNKNOWN/dcterms/license"
       ],
       "exact_mappings": [
         "https://specs.frictionlessdata.io/licenses"
       ],
-      "slot_uri": "http://purl.org/dc/terms/license",
+      "slot_uri": "http://example.org/UNKNOWN/dcterms/license",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1098,16 +1123,15 @@
     },
     {
       "name": "version",
-      "definition_uri": "https://w3id.org/linkml/reportversion",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/version",
       "description": "particular version of schema",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
         "http://purl.org/pav/version"
       ],
       "exact_mappings": [
         "http://schema.org/version",
-        "http://purl.org/dc/terms/hasVersion"
+        "http://example.org/UNKNOWN/dcterms/hasVersion"
       ],
       "slot_uri": "http://purl.org/pav/version",
       "owner": "Information",
@@ -1119,17 +1143,76 @@
     },
     {
       "name": "was_derived_from",
-      "definition_uri": "https://w3id.org/linkml/reportwas_derived_from",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/was_derived_from",
       "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
-        "http://www.w3.org/ns/prov#wasDerivedFrom"
+        "http://example.org/UNKNOWN/prov/wasDerivedFrom"
       ],
-      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
+      "slot_uri": "http://example.org/UNKNOWN/prov/wasDerivedFrom",
       "owner": "Information",
       "domain_of": [
         "Information"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__comment_prefix",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/comment_prefix",
+      "alias": "comment_prefix",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__delimiter",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/delimiter",
+      "alias": "delimiter",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__double_quote",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/double_quote",
+      "alias": "double_quote",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__header",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/header",
+      "alias": "header",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__quote_char",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/quote_char",
+      "alias": "quote_char",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -1158,6 +1241,32 @@
         "Dataset"
       ],
       "range": "Purpose",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__tasks",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/tasks",
+      "multivalued": true,
+      "alias": "tasks",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "Task",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__addressing_gaps",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/addressing_gaps",
+      "multivalued": true,
+      "alias": "addressing_gaps",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "AddressingGap",
       "@type": "SlotDefinition"
     },
     {
@@ -1596,10 +1705,10 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "purpose__task",
+      "name": "purpose__response",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/task",
-      "alias": "task",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/response",
+      "alias": "response",
       "owner": "Purpose",
       "domain_of": [
         "Purpose"
@@ -1608,13 +1717,25 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "purpose__addressing_gap",
+      "name": "task__response",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/addressing_gap",
-      "alias": "addressing_gap",
-      "owner": "Purpose",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/response",
+      "alias": "response",
+      "owner": "Task",
       "domain_of": [
-        "Purpose"
+        "Task"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "addressingGap__response",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/response",
+      "alias": "response",
+      "owner": "AddressingGap",
+      "domain_of": [
+        "AddressingGap"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -1647,37 +1768,79 @@
       "name": "funder__grantor",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/grantor",
-      "multivalued": true,
       "alias": "grantor",
       "owner": "Funder",
       "domain_of": [
         "Funder"
       ],
-      "range": "string",
+      "range": "Grantor",
       "@type": "SlotDefinition"
     },
     {
-      "name": "funder__grant_name",
+      "name": "funder__grant",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/grant_name",
-      "multivalued": true,
-      "alias": "grant_name",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/grant",
+      "alias": "grant",
       "owner": "Funder",
       "domain_of": [
         "Funder"
       ],
-      "range": "string",
+      "range": "Grant",
       "@type": "SlotDefinition"
     },
     {
-      "name": "funder__grant_number",
+      "name": "grantor__ror_id",
+      "description": "Unique ROR identifier.",
+      "examples": [
+        {
+          "value": "ROR:02mp31p96",
+          "@type": "Example"
+        }
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "values_from": [
+        "ROR"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ror_id",
+      "alias": "ror_id",
+      "owner": "Grantor",
+      "domain_of": [
+        "Grantor"
+      ],
+      "range": "ror_identifier",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "grantor__wikidata_id",
+      "description": "Unique Wikidata identifier.",
+      "examples": [
+        {
+          "value": "WIKIDATA:Q282186",
+          "@type": "Example"
+        }
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "values_from": [
+        "WIKIDATA"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/wikidata_id",
+      "alias": "wikidata_id",
+      "owner": "Grantor",
+      "domain_of": [
+        "Grantor"
+      ],
+      "range": "wikidata_identifier",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "grant__grant_number",
+      "description": "The alphanumeric identifier for the grant.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/grant_number",
-      "multivalued": true,
       "alias": "grant_number",
-      "owner": "Funder",
+      "owner": "Grant",
       "domain_of": [
-        "Funder"
+        "Grant"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -2447,71 +2610,6 @@
       ],
       "range": "string",
       "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__comment_prefix",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reportcomment_prefix",
-      "alias": "comment_prefix",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__delimiter",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reportdelimiter",
-      "alias": "delimiter",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__double_quote",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reportdouble_quote",
-      "alias": "double_quote",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__header",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reportheader",
-      "alias": "header",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__quote_char",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slot_uri": "https://w3id.org/linkml/reportquote_char",
-      "alias": "quote_char",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
     }
   ],
   "classes": [
@@ -2530,6 +2628,176 @@
       ],
       "slot_usage": {},
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/NamedThing",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Information",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Information",
+      "description": "Grouping for datasets and data files",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "close_mappings": [
+        "schema:CreativeWork"
+      ],
+      "abstract": true,
+      "slots": [
+        "id",
+        "download_url",
+        "license",
+        "title",
+        "description",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "version",
+        "language",
+        "publisher",
+        "keywords",
+        "issued",
+        "created_by",
+        "created_on",
+        "compression",
+        "was_derived_from",
+        "page",
+        "test_roles"
+      ],
+      "slot_usage": {},
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Information",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "DataPackage",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataPackage",
+      "description": "A collection of data resources",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "see_also": [
+        "https://specs.frictionlessdata.io/data-package"
+      ],
+      "aliases": [
+        "dataset",
+        "file collection",
+        "data resource collection"
+      ],
+      "mappings": [
+        "void:Dataset"
+      ],
+      "exact_mappings": [
+        "dcat:Dataset"
+      ],
+      "close_mappings": [
+        "dcat:Catalog"
+      ],
+      "is_a": "Information",
+      "slots": [
+        "id",
+        "download_url",
+        "license",
+        "title",
+        "description",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "version",
+        "language",
+        "publisher",
+        "keywords",
+        "issued",
+        "created_by",
+        "created_on",
+        "compression",
+        "was_derived_from",
+        "page",
+        "test_roles",
+        "resources"
+      ],
+      "slot_usage": {},
+      "class_uri": "http://rdfs.org/ns/void#Dataset",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "DataResource",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataResource",
+      "description": "An individual file or table",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "see_also": [
+        "https://specs.frictionlessdata.io/data-resource"
+      ],
+      "mappings": [
+        "dcat:Distribution"
+      ],
+      "exact_mappings": [
+        "schema:DataDownload"
+      ],
+      "is_a": "Information",
+      "slots": [
+        "id",
+        "download_url",
+        "license",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "version",
+        "language",
+        "publisher",
+        "keywords",
+        "issued",
+        "created_by",
+        "created_on",
+        "compression",
+        "was_derived_from",
+        "page",
+        "test_roles",
+        "path",
+        "title",
+        "description",
+        "format",
+        "media_type",
+        "encoding",
+        "bytes",
+        "hash",
+        "md5",
+        "sha256",
+        "dialect"
+      ],
+      "slot_usage": {},
+      "class_uri": "http://www.w3.org/ns/dcat#Distribution",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "FormatDialect",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect",
+      "description": "Additional format information for a file",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slots": [
+        "formatDialect__comment_prefix",
+        "formatDialect__delimiter",
+        "formatDialect__double_quote",
+        "formatDialect__header",
+        "formatDialect__quote_char"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "comment_prefix",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "delimiter",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "double_quote",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "header",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "quote_char",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect",
       "@type": "ClassDefinition"
     },
     {
@@ -2625,6 +2893,8 @@
         "sha256",
         "dialect",
         "dataset__purposes",
+        "dataset__tasks",
+        "dataset__addressing_gaps",
         "dataset__creators",
         "dataset__funders",
         "dataset__instances",
@@ -2666,6 +2936,18 @@
           "name": "purposes",
           "multivalued": true,
           "range": "Purpose",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "tasks",
+          "multivalued": true,
+          "range": "Task",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "addressing_gaps",
+          "multivalued": true,
+          "range": "AddressingGap",
           "@type": "SlotDefinition"
         },
         {
@@ -2872,7 +3154,7 @@
     {
       "name": "Purpose",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Purpose",
-      "description": "For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled?",
+      "description": "For what purpose was the dataset created?",
       "in_subset": [
         "Motivation"
       ],
@@ -2882,23 +3164,69 @@
         "id",
         "name",
         "description",
-        "purpose__task",
-        "purpose__addressing_gap"
+        "purpose__response"
       ],
       "slot_usage": {},
       "attributes": [
         {
-          "name": "task",
-          "range": "string",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "addressing_gap",
+          "name": "response",
           "range": "string",
           "@type": "SlotDefinition"
         }
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Purpose",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Task",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Task",
+      "description": "Was there a specific task in mind for the dataset's application?",
+      "in_subset": [
+        "Motivation"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "id",
+        "name",
+        "description",
+        "task__response"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "response",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Task",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "AddressingGap",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/AddressingGap",
+      "description": "Was there a specific gap that needed to be filled by creation of the dataset?",
+      "in_subset": [
+        "Motivation"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "id",
+        "name",
+        "description",
+        "addressingGap__response"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "response",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/AddressingGap",
       "@type": "ClassDefinition"
     },
     {
@@ -2947,31 +3275,95 @@
         "name",
         "description",
         "funder__grantor",
-        "funder__grant_name",
-        "funder__grant_number"
+        "funder__grant"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "grantor",
-          "multivalued": true,
-          "range": "string",
+          "range": "Grantor",
           "@type": "SlotDefinition"
         },
         {
-          "name": "grant_name",
-          "multivalued": true,
-          "range": "string",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "grant_number",
-          "multivalued": true,
-          "range": "string",
+          "name": "grant",
+          "range": "Grant",
           "@type": "SlotDefinition"
         }
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Funder",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Grantor",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Grantor",
+      "description": "What is the name and/or identifier of the organization providing monetary support or other resources supporting creation of the dataset?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "NamedThing",
+      "slots": [
+        "id",
+        "name",
+        "description",
+        "grantor__ror_id",
+        "grantor__wikidata_id"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "ror_id",
+          "description": "Unique ROR identifier.",
+          "examples": [
+            {
+              "value": "ROR:02mp31p96",
+              "@type": "Example"
+            }
+          ],
+          "values_from": [
+            "ROR"
+          ],
+          "range": "ror_identifier",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "wikidata_id",
+          "description": "Unique Wikidata identifier.",
+          "examples": [
+            {
+              "value": "WIKIDATA:Q282186",
+              "@type": "Example"
+            }
+          ],
+          "values_from": [
+            "WIKIDATA"
+          ],
+          "range": "wikidata_identifier",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Grantor",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Grant",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Grant",
+      "description": "What is the name and/or identifier of the specific mechanism providing monetary support or other resources supporting creation of the dataset?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "NamedThing",
+      "slots": [
+        "id",
+        "name",
+        "description",
+        "grant__grant_number"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "grant_number",
+          "description": "The alphanumeric identifier for the grant.",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Grant",
       "@type": "ClassDefinition"
     },
     {
@@ -4288,192 +4680,17 @@
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ExtensionMechanism",
       "@type": "ClassDefinition"
-    },
-    {
-      "name": "Information",
-      "definition_uri": "https://w3id.org/linkml/reportInformation",
-      "description": "Grouping for datasets and data files",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "close_mappings": [
-        "schema:CreativeWork"
-      ],
-      "abstract": true,
-      "slots": [
-        "id",
-        "download_url",
-        "license",
-        "title",
-        "description",
-        "conforms_to",
-        "conforms_to_schema",
-        "conforms_to_class",
-        "version",
-        "language",
-        "publisher",
-        "keywords",
-        "issued",
-        "created_by",
-        "created_on",
-        "compression",
-        "was_derived_from",
-        "page",
-        "test_roles"
-      ],
-      "slot_usage": {},
-      "class_uri": "https://w3id.org/linkml/reportInformation",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "DataPackage",
-      "definition_uri": "https://w3id.org/linkml/reportDataPackage",
-      "description": "A collection of data resources",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "see_also": [
-        "https://specs.frictionlessdata.io/data-package"
-      ],
-      "aliases": [
-        "dataset",
-        "file collection",
-        "data resource collection"
-      ],
-      "mappings": [
-        "void:Dataset"
-      ],
-      "exact_mappings": [
-        "dcat:Dataset"
-      ],
-      "close_mappings": [
-        "dcat:Catalog"
-      ],
-      "is_a": "Information",
-      "slots": [
-        "id",
-        "download_url",
-        "license",
-        "title",
-        "description",
-        "conforms_to",
-        "conforms_to_schema",
-        "conforms_to_class",
-        "version",
-        "language",
-        "publisher",
-        "keywords",
-        "issued",
-        "created_by",
-        "created_on",
-        "compression",
-        "was_derived_from",
-        "page",
-        "test_roles",
-        "resources"
-      ],
-      "slot_usage": {},
-      "class_uri": "http://rdfs.org/ns/void#Dataset",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "DataResource",
-      "definition_uri": "https://w3id.org/linkml/reportDataResource",
-      "description": "An individual file or table",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "see_also": [
-        "https://specs.frictionlessdata.io/data-resource"
-      ],
-      "mappings": [
-        "dcat:Distribution"
-      ],
-      "exact_mappings": [
-        "schema:DataDownload"
-      ],
-      "is_a": "Information",
-      "slots": [
-        "id",
-        "download_url",
-        "license",
-        "conforms_to",
-        "conforms_to_schema",
-        "conforms_to_class",
-        "version",
-        "language",
-        "publisher",
-        "keywords",
-        "issued",
-        "created_by",
-        "created_on",
-        "compression",
-        "was_derived_from",
-        "page",
-        "test_roles",
-        "path",
-        "title",
-        "description",
-        "format",
-        "media_type",
-        "encoding",
-        "bytes",
-        "hash",
-        "md5",
-        "sha256",
-        "dialect"
-      ],
-      "slot_usage": {},
-      "class_uri": "http://www.w3.org/ns/dcat#Distribution",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "FormatDialect",
-      "definition_uri": "https://w3id.org/linkml/reportFormatDialect",
-      "description": "Additional format information for a file",
-      "from_schema": "https://w3id.org/linkml/datasets",
-      "imported_from": "linkml:datasets",
-      "slots": [
-        "formatDialect__comment_prefix",
-        "formatDialect__delimiter",
-        "formatDialect__double_quote",
-        "formatDialect__header",
-        "formatDialect__quote_char"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "comment_prefix",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "delimiter",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "double_quote",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "header",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "quote_char",
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/linkml/reportFormatDialect",
-      "@type": "ClassDefinition"
     }
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2023-12-06T16:13:23",
-  "source_file_size": 30555,
-  "generation_date": "2023-12-06T16:13:28",
+  "source_file_date": "2023-12-20T15:35:53",
+  "source_file_size": 40324,
+  "generation_date": "2023-12-20T15:36:22",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
     "https://w3id.org/linkml/types.context.jsonld",
-    "https://w3id.org/linkml/datasets.context.jsonld",
     {
       "@base": "https://w3id.org/bridge2ai/data-sheets-schema/"
     }

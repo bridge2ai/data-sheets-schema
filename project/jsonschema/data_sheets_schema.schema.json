@@ -1,5 +1,30 @@
 {
     "$defs": {
+        "AddressingGap": {
+            "additionalProperties": false,
+            "description": "Was there a specific gap that needed to be filled by creation of the dataset?",
+            "properties": {
+                "description": {
+                    "description": "human readable description of the information",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "response": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "AddressingGap",
+            "type": "object"
+        },
         "CollectionConsent": {
             "additionalProperties": false,
             "description": "Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented.",
@@ -543,6 +568,12 @@
                     },
                     "type": "array"
                 },
+                "addressing_gaps": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "anomalies": {
                     "items": {
                         "type": "string"
@@ -793,6 +824,12 @@
                     "type": "string"
                 },
                 "subpopulations": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "tasks": {
                     "items": {
                         "type": "string"
                     },
@@ -1307,23 +1344,11 @@
                     "description": "human readable description of the information",
                     "type": "string"
                 },
-                "grant_name": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "grant_number": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
+                "grant": {
+                    "type": "string"
                 },
                 "grantor": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
+                    "type": "string"
                 },
                 "id": {
                     "description": "the unique name of th dataset",
@@ -1361,6 +1386,62 @@
                 "id"
             ],
             "title": "FutureUseImpact",
+            "type": "object"
+        },
+        "Grant": {
+            "additionalProperties": false,
+            "description": "What is the name and/or identifier of the specific mechanism providing monetary support or other resources supporting creation of the dataset?",
+            "properties": {
+                "description": {
+                    "description": "human readable description of the information",
+                    "type": "string"
+                },
+                "grant_number": {
+                    "description": "The alphanumeric identifier for the grant.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Grant",
+            "type": "object"
+        },
+        "Grantor": {
+            "additionalProperties": false,
+            "description": "What is the name and/or identifier of the organization providing monetary support or other resources supporting creation of the dataset?",
+            "properties": {
+                "description": {
+                    "description": "human readable description of the information",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ror_id": {
+                    "description": "Unique ROR identifier.",
+                    "type": "string"
+                },
+                "wikidata_id": {
+                    "description": "Unique Wikidata identifier.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Grantor",
             "type": "object"
         },
         "IPRestrictions": {
@@ -1684,11 +1765,8 @@
         },
         "Purpose": {
             "additionalProperties": false,
-            "description": "For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled?",
+            "description": "For what purpose was the dataset created?",
             "properties": {
-                "addressing_gap": {
-                    "type": "string"
-                },
                 "description": {
                     "description": "human readable description of the information",
                     "type": "string"
@@ -1700,7 +1778,7 @@
                 "name": {
                     "type": "string"
                 },
-                "task": {
+                "response": {
                     "type": "string"
                 }
             },
@@ -1944,6 +2022,31 @@
                 "id"
             ],
             "title": "Subpopulation",
+            "type": "object"
+        },
+        "Task": {
+            "additionalProperties": false,
+            "description": "Was there a specific task in mind for the dataset's application?",
+            "properties": {
+                "description": {
+                    "description": "human readable description of the information",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "response": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Task",
             "type": "object"
         },
         "TestRole": {

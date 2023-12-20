@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2023-12-20T15:13:21
+# Generation date: 2023-12-20T15:36:31
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -21,7 +21,6 @@ from linkml_runtime.utils.formatutils import camelcase, underscore, sfx
 from linkml_runtime.utils.enumerations import EnumDefinitionImpl
 from rdflib import Namespace, URIRef
 from linkml_runtime.utils.curienamespace import CurieNamespace
-from linkml_runtime.linkml_model.datasets import DataPackage, DataPackageId, DataResource, DataResourceId, FormatEnum, TestRole
 from linkml_runtime.linkml_model.types import Boolean, Datetime, Integer, String, Uri, Uriorcurie
 from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDateTime
 
@@ -32,14 +31,25 @@ version = None
 dataclasses._init_fn = dataclasses_init_fn_with_kwargs
 
 # Namespaces
+BIBO = CurieNamespace('bibo', 'http://example.org/UNKNOWN/bibo/')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/')
+CSVW = CurieNamespace('csvw', 'http://www.w3.org/ns/csvw#')
 DATA_SHEETS_SCHEMA = CurieNamespace('data_sheets_schema', 'https://w3id.org/bridge2ai/data-sheets-schema/')
+DATASETS = CurieNamespace('datasets', 'https://w3id.org/linkml/report')
+DCAT = CurieNamespace('dcat', 'http://www.w3.org/ns/dcat#')
+DCTERMS = CurieNamespace('dcterms', 'http://example.org/UNKNOWN/dcterms/')
 EXAMPLE = CurieNamespace('example', 'https://example.org/')
+FORMATS = CurieNamespace('formats', 'http://www.w3.org/ns/formats/')
+FRICTIONLESS = CurieNamespace('frictionless', 'https://specs.frictionlessdata.io/')
 LINKML = CurieNamespace('linkml', 'https://w3id.org/linkml/')
-OWL = CurieNamespace('owl', 'http://www.w3.org/2002/07/owl#')
-RDF = CurieNamespace('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
-RDFS = CurieNamespace('rdfs', 'http://www.w3.org/2000/01/rdf-schema#')
+MEDIATYPES = CurieNamespace('mediatypes', 'https://www.iana.org/assignments/media-types/')
+OSLC = CurieNamespace('oslc', 'http://example.org/UNKNOWN/oslc/')
+PAV = CurieNamespace('pav', 'http://purl.org/pav/')
+PROV = CurieNamespace('prov', 'http://example.org/UNKNOWN/prov/')
 SCHEMA = CurieNamespace('schema', 'http://schema.org/')
+SH = CurieNamespace('sh', 'https://w3id.org/shacl/')
+SKOS = CurieNamespace('skos', 'http://www.w3.org/2004/02/skos/core#')
+VOID = CurieNamespace('void', 'http://rdfs.org/ns/void#')
 XSD = CurieNamespace('xsd', 'http://www.w3.org/2001/XMLSchema#')
 DEFAULT_ = DATA_SHEETS_SCHEMA
 
@@ -66,7 +76,27 @@ class NamedThingId(extended_str):
     pass
 
 
+class InformationId(extended_str):
+    pass
+
+
+class DataPackageId(InformationId):
+    pass
+
+
+class DataResourceId(InformationId):
+    pass
+
+
 class DatasetPropertyId(NamedThingId):
+    pass
+
+
+class DatasetCollectionId(DataPackageId):
+    pass
+
+
+class DatasetId(DataResourceId):
     pass
 
 
@@ -286,14 +316,6 @@ class ExtensionMechanismId(DatasetPropertyId):
     pass
 
 
-class DatasetCollectionId(DataPackageId):
-    pass
-
-
-class DatasetId(DataResourceId):
-    pass
-
-
 @dataclass
 class NamedThing(YAMLRoot):
     """
@@ -326,6 +348,235 @@ class NamedThing(YAMLRoot):
 
 
 @dataclass
+class Information(YAMLRoot):
+    """
+    Grouping for datasets and data files
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Information"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:Information"
+    class_name: ClassVar[str] = "Information"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Information
+
+    id: Union[str, InformationId] = None
+    download_url: Optional[Union[str, URI]] = None
+    license: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    conforms_to: Optional[Union[str, URIorCURIE]] = None
+    conforms_to_schema: Optional[Union[str, URIorCURIE]] = None
+    conforms_to_class: Optional[Union[str, URIorCURIE]] = None
+    version: Optional[str] = None
+    language: Optional[str] = None
+    publisher: Optional[Union[str, URIorCURIE]] = None
+    keywords: Optional[Union[str, List[str]]] = empty_list()
+    issued: Optional[Union[str, XSDDateTime]] = None
+    created_by: Optional[Union[str, URIorCURIE]] = None
+    created_on: Optional[Union[str, XSDDateTime]] = None
+    compression: Optional[str] = None
+    was_derived_from: Optional[str] = None
+    page: Optional[str] = None
+    test_roles: Optional[Union[Union[str, "TestRole"], List[Union[str, "TestRole"]]]] = empty_list()
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, InformationId):
+            self.id = InformationId(self.id)
+
+        if self.download_url is not None and not isinstance(self.download_url, URI):
+            self.download_url = URI(self.download_url)
+
+        if self.license is not None and not isinstance(self.license, str):
+            self.license = str(self.license)
+
+        if self.title is not None and not isinstance(self.title, str):
+            self.title = str(self.title)
+
+        if self.description is not None and not isinstance(self.description, str):
+            self.description = str(self.description)
+
+        if self.conforms_to is not None and not isinstance(self.conforms_to, URIorCURIE):
+            self.conforms_to = URIorCURIE(self.conforms_to)
+
+        if self.conforms_to_schema is not None and not isinstance(self.conforms_to_schema, URIorCURIE):
+            self.conforms_to_schema = URIorCURIE(self.conforms_to_schema)
+
+        if self.conforms_to_class is not None and not isinstance(self.conforms_to_class, URIorCURIE):
+            self.conforms_to_class = URIorCURIE(self.conforms_to_class)
+
+        if self.version is not None and not isinstance(self.version, str):
+            self.version = str(self.version)
+
+        if self.language is not None and not isinstance(self.language, str):
+            self.language = str(self.language)
+
+        if self.publisher is not None and not isinstance(self.publisher, URIorCURIE):
+            self.publisher = URIorCURIE(self.publisher)
+
+        if not isinstance(self.keywords, list):
+            self.keywords = [self.keywords] if self.keywords is not None else []
+        self.keywords = [v if isinstance(v, str) else str(v) for v in self.keywords]
+
+        if self.issued is not None and not isinstance(self.issued, XSDDateTime):
+            self.issued = XSDDateTime(self.issued)
+
+        if self.created_by is not None and not isinstance(self.created_by, URIorCURIE):
+            self.created_by = URIorCURIE(self.created_by)
+
+        if self.created_on is not None and not isinstance(self.created_on, XSDDateTime):
+            self.created_on = XSDDateTime(self.created_on)
+
+        if self.compression is not None and not isinstance(self.compression, str):
+            self.compression = str(self.compression)
+
+        if self.was_derived_from is not None and not isinstance(self.was_derived_from, str):
+            self.was_derived_from = str(self.was_derived_from)
+
+        if self.page is not None and not isinstance(self.page, str):
+            self.page = str(self.page)
+
+        if not isinstance(self.test_roles, list):
+            self.test_roles = [self.test_roles] if self.test_roles is not None else []
+        self.test_roles = [v if isinstance(v, TestRole) else TestRole(v) for v in self.test_roles]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class DataPackage(Information):
+    """
+    A collection of data resources
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = VOID["Dataset"]
+    class_class_curie: ClassVar[str] = "void:Dataset"
+    class_name: ClassVar[str] = "DataPackage"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataPackage
+
+    id: Union[str, DataPackageId] = None
+    resources: Optional[Union[Union[str, DataResourceId], List[Union[str, DataResourceId]]]] = empty_list()
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, DataPackageId):
+            self.id = DataPackageId(self.id)
+
+        if not isinstance(self.resources, list):
+            self.resources = [self.resources] if self.resources is not None else []
+        self.resources = [v if isinstance(v, DataResourceId) else DataResourceId(v) for v in self.resources]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class DataResource(Information):
+    """
+    An individual file or table
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DCAT["Distribution"]
+    class_class_curie: ClassVar[str] = "dcat:Distribution"
+    class_name: ClassVar[str] = "DataResource"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataResource
+
+    id: Union[str, DataResourceId] = None
+    path: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    format: Optional[Union[str, "FormatEnum"]] = None
+    media_type: Optional[str] = None
+    encoding: Optional[str] = None
+    bytes: Optional[int] = None
+    hash: Optional[str] = None
+    md5: Optional[str] = None
+    sha256: Optional[str] = None
+    dialect: Optional[str] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, DataResourceId):
+            self.id = DataResourceId(self.id)
+
+        if self.path is not None and not isinstance(self.path, str):
+            self.path = str(self.path)
+
+        if self.title is not None and not isinstance(self.title, str):
+            self.title = str(self.title)
+
+        if self.description is not None and not isinstance(self.description, str):
+            self.description = str(self.description)
+
+        if self.format is not None and not isinstance(self.format, FormatEnum):
+            self.format = FormatEnum(self.format)
+
+        if self.media_type is not None and not isinstance(self.media_type, str):
+            self.media_type = str(self.media_type)
+
+        if self.encoding is not None and not isinstance(self.encoding, str):
+            self.encoding = str(self.encoding)
+
+        if self.bytes is not None and not isinstance(self.bytes, int):
+            self.bytes = int(self.bytes)
+
+        if self.hash is not None and not isinstance(self.hash, str):
+            self.hash = str(self.hash)
+
+        if self.md5 is not None and not isinstance(self.md5, str):
+            self.md5 = str(self.md5)
+
+        if self.sha256 is not None and not isinstance(self.sha256, str):
+            self.sha256 = str(self.sha256)
+
+        if self.dialect is not None and not isinstance(self.dialect, str):
+            self.dialect = str(self.dialect)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class FormatDialect(YAMLRoot):
+    """
+    Additional format information for a file
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["FormatDialect"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:FormatDialect"
+    class_name: ClassVar[str] = "FormatDialect"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FormatDialect
+
+    comment_prefix: Optional[str] = None
+    delimiter: Optional[str] = None
+    double_quote: Optional[str] = None
+    header: Optional[str] = None
+    quote_char: Optional[str] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self.comment_prefix is not None and not isinstance(self.comment_prefix, str):
+            self.comment_prefix = str(self.comment_prefix)
+
+        if self.delimiter is not None and not isinstance(self.delimiter, str):
+            self.delimiter = str(self.delimiter)
+
+        if self.double_quote is not None and not isinstance(self.double_quote, str):
+            self.double_quote = str(self.double_quote)
+
+        if self.header is not None and not isinstance(self.header, str):
+            self.header = str(self.header)
+
+        if self.quote_char is not None and not isinstance(self.quote_char, str):
+            self.quote_char = str(self.quote_char)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
 class DatasetProperty(NamedThing):
     """
     Represents a single property of a dataset, or a set of related properties.
@@ -344,6 +595,236 @@ class DatasetProperty(NamedThing):
             self.MissingRequiredField("id")
         if not isinstance(self.id, DatasetPropertyId):
             self.id = DatasetPropertyId(self.id)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class DatasetCollection(DataPackage):
+    """
+    A collection of related datasets, likely containing multiple files of multiple potential purposes and properties.
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DatasetCollection"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:DatasetCollection"
+    class_name: ClassVar[str] = "DatasetCollection"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetCollection
+
+    id: Union[str, DatasetCollectionId] = None
+    entries: Optional[Union[Union[str, DatasetId], List[Union[str, DatasetId]]]] = empty_list()
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, DatasetCollectionId):
+            self.id = DatasetCollectionId(self.id)
+
+        if not isinstance(self.entries, list):
+            self.entries = [self.entries] if self.entries is not None else []
+        self.entries = [v if isinstance(v, DatasetId) else DatasetId(v) for v in self.entries]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class Dataset(DataResource):
+    """
+    A single component of related observations and/or information that can be read, manipulated, transformed, and
+    otherwise interpreted.
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Dataset"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:Dataset"
+    class_name: ClassVar[str] = "Dataset"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Dataset
+
+    id: Union[str, DatasetId] = None
+    purposes: Optional[Union[Union[str, PurposeId], List[Union[str, PurposeId]]]] = empty_list()
+    tasks: Optional[Union[Union[str, TaskId], List[Union[str, TaskId]]]] = empty_list()
+    addressing_gaps: Optional[Union[Union[str, AddressingGapId], List[Union[str, AddressingGapId]]]] = empty_list()
+    creators: Optional[Union[Union[str, CreatorId], List[Union[str, CreatorId]]]] = empty_list()
+    funders: Optional[Union[Union[str, FunderId], List[Union[str, FunderId]]]] = empty_list()
+    instances: Optional[Union[Union[str, InstanceId], List[Union[str, InstanceId]]]] = empty_list()
+    anomalies: Optional[Union[Union[str, DataAnomalyId], List[Union[str, DataAnomalyId]]]] = empty_list()
+    external_resources: Optional[Union[Union[str, ExternalResourceId], List[Union[str, ExternalResourceId]]]] = empty_list()
+    confidential_elements: Optional[Union[Union[str, ConfidentialityId], List[Union[str, ConfidentialityId]]]] = empty_list()
+    content_warnings: Optional[Union[Union[str, ContentWarningId], List[Union[str, ContentWarningId]]]] = empty_list()
+    subpopulations: Optional[Union[Union[str, SubpopulationId], List[Union[str, SubpopulationId]]]] = empty_list()
+    sensitive_elements: Optional[Union[Union[str, SensitiveElementId], List[Union[str, SensitiveElementId]]]] = empty_list()
+    acquisition_methods: Optional[Union[Union[str, InstanceAcquisitionId], List[Union[str, InstanceAcquisitionId]]]] = empty_list()
+    collection_mechanisms: Optional[Union[Union[str, CollectionMechanismId], List[Union[str, CollectionMechanismId]]]] = empty_list()
+    sampling_strategies: Optional[Union[Union[str, SamplingStrategyId], List[Union[str, SamplingStrategyId]]]] = empty_list()
+    data_collectors: Optional[Union[Union[str, DataCollectorId], List[Union[str, DataCollectorId]]]] = empty_list()
+    collection_timeframes: Optional[Union[Union[str, CollectionTimeframeId], List[Union[str, CollectionTimeframeId]]]] = empty_list()
+    ethical_reviews: Optional[Union[Union[str, EthicalReviewId], List[Union[str, EthicalReviewId]]]] = empty_list()
+    data_protection_impacts: Optional[Union[Union[str, DataProtectionImpactId], List[Union[str, DataProtectionImpactId]]]] = empty_list()
+    preprocessing_cleaning_labeling_methods: Optional[Union[Union[str, PreprocessingCleaningLabelingId], List[Union[str, PreprocessingCleaningLabelingId]]]] = empty_list()
+    raw_sources: Optional[Union[Union[str, RawDataId], List[Union[str, RawDataId]]]] = empty_list()
+    existing_uses: Optional[Union[Union[str, ExistingUseId], List[Union[str, ExistingUseId]]]] = empty_list()
+    use_repository: Optional[Union[Union[str, UseRepositoryId], List[Union[str, UseRepositoryId]]]] = empty_list()
+    other_tasks: Optional[Union[Union[str, OtherTaskId], List[Union[str, OtherTaskId]]]] = empty_list()
+    future_use_impacts: Optional[Union[Union[str, FutureUseImpactId], List[Union[str, FutureUseImpactId]]]] = empty_list()
+    discouraged_uses: Optional[Union[Union[str, DiscouragedUseId], List[Union[str, DiscouragedUseId]]]] = empty_list()
+    distribution_formats: Optional[Union[Union[str, DistributionFormatId], List[Union[str, DistributionFormatId]]]] = empty_list()
+    distribution_dates: Optional[Union[Union[str, DistributionDateId], List[Union[str, DistributionDateId]]]] = empty_list()
+    license_and_use_terms: Optional[Union[str, LicenseAndUseTermsId]] = None
+    ip_restrictions: Optional[Union[str, IPRestrictionsId]] = None
+    regulatory_restrictions: Optional[Union[str, ExportControlRegulatoryRestrictionsId]] = None
+    maintainers: Optional[Union[Union[str, MaintainerId], List[Union[str, MaintainerId]]]] = empty_list()
+    errata: Optional[Union[Union[str, ErratumId], List[Union[str, ErratumId]]]] = empty_list()
+    updates: Optional[Union[str, UpdatePlanId]] = None
+    retention_limit: Optional[Union[str, RetentionLimitsId]] = None
+    version_access: Optional[Union[str, VersionAccessId]] = None
+    extension_mechanism: Optional[Union[str, ExtensionMechanismId]] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, DatasetId):
+            self.id = DatasetId(self.id)
+
+        if not isinstance(self.purposes, list):
+            self.purposes = [self.purposes] if self.purposes is not None else []
+        self.purposes = [v if isinstance(v, PurposeId) else PurposeId(v) for v in self.purposes]
+
+        if not isinstance(self.tasks, list):
+            self.tasks = [self.tasks] if self.tasks is not None else []
+        self.tasks = [v if isinstance(v, TaskId) else TaskId(v) for v in self.tasks]
+
+        if not isinstance(self.addressing_gaps, list):
+            self.addressing_gaps = [self.addressing_gaps] if self.addressing_gaps is not None else []
+        self.addressing_gaps = [v if isinstance(v, AddressingGapId) else AddressingGapId(v) for v in self.addressing_gaps]
+
+        if not isinstance(self.creators, list):
+            self.creators = [self.creators] if self.creators is not None else []
+        self.creators = [v if isinstance(v, CreatorId) else CreatorId(v) for v in self.creators]
+
+        if not isinstance(self.funders, list):
+            self.funders = [self.funders] if self.funders is not None else []
+        self.funders = [v if isinstance(v, FunderId) else FunderId(v) for v in self.funders]
+
+        if not isinstance(self.instances, list):
+            self.instances = [self.instances] if self.instances is not None else []
+        self.instances = [v if isinstance(v, InstanceId) else InstanceId(v) for v in self.instances]
+
+        if not isinstance(self.anomalies, list):
+            self.anomalies = [self.anomalies] if self.anomalies is not None else []
+        self.anomalies = [v if isinstance(v, DataAnomalyId) else DataAnomalyId(v) for v in self.anomalies]
+
+        if not isinstance(self.external_resources, list):
+            self.external_resources = [self.external_resources] if self.external_resources is not None else []
+        self.external_resources = [v if isinstance(v, ExternalResourceId) else ExternalResourceId(v) for v in self.external_resources]
+
+        if not isinstance(self.confidential_elements, list):
+            self.confidential_elements = [self.confidential_elements] if self.confidential_elements is not None else []
+        self.confidential_elements = [v if isinstance(v, ConfidentialityId) else ConfidentialityId(v) for v in self.confidential_elements]
+
+        if not isinstance(self.content_warnings, list):
+            self.content_warnings = [self.content_warnings] if self.content_warnings is not None else []
+        self.content_warnings = [v if isinstance(v, ContentWarningId) else ContentWarningId(v) for v in self.content_warnings]
+
+        if not isinstance(self.subpopulations, list):
+            self.subpopulations = [self.subpopulations] if self.subpopulations is not None else []
+        self.subpopulations = [v if isinstance(v, SubpopulationId) else SubpopulationId(v) for v in self.subpopulations]
+
+        if not isinstance(self.sensitive_elements, list):
+            self.sensitive_elements = [self.sensitive_elements] if self.sensitive_elements is not None else []
+        self.sensitive_elements = [v if isinstance(v, SensitiveElementId) else SensitiveElementId(v) for v in self.sensitive_elements]
+
+        if not isinstance(self.acquisition_methods, list):
+            self.acquisition_methods = [self.acquisition_methods] if self.acquisition_methods is not None else []
+        self.acquisition_methods = [v if isinstance(v, InstanceAcquisitionId) else InstanceAcquisitionId(v) for v in self.acquisition_methods]
+
+        if not isinstance(self.collection_mechanisms, list):
+            self.collection_mechanisms = [self.collection_mechanisms] if self.collection_mechanisms is not None else []
+        self.collection_mechanisms = [v if isinstance(v, CollectionMechanismId) else CollectionMechanismId(v) for v in self.collection_mechanisms]
+
+        if not isinstance(self.sampling_strategies, list):
+            self.sampling_strategies = [self.sampling_strategies] if self.sampling_strategies is not None else []
+        self.sampling_strategies = [v if isinstance(v, SamplingStrategyId) else SamplingStrategyId(v) for v in self.sampling_strategies]
+
+        if not isinstance(self.data_collectors, list):
+            self.data_collectors = [self.data_collectors] if self.data_collectors is not None else []
+        self.data_collectors = [v if isinstance(v, DataCollectorId) else DataCollectorId(v) for v in self.data_collectors]
+
+        if not isinstance(self.collection_timeframes, list):
+            self.collection_timeframes = [self.collection_timeframes] if self.collection_timeframes is not None else []
+        self.collection_timeframes = [v if isinstance(v, CollectionTimeframeId) else CollectionTimeframeId(v) for v in self.collection_timeframes]
+
+        if not isinstance(self.ethical_reviews, list):
+            self.ethical_reviews = [self.ethical_reviews] if self.ethical_reviews is not None else []
+        self.ethical_reviews = [v if isinstance(v, EthicalReviewId) else EthicalReviewId(v) for v in self.ethical_reviews]
+
+        if not isinstance(self.data_protection_impacts, list):
+            self.data_protection_impacts = [self.data_protection_impacts] if self.data_protection_impacts is not None else []
+        self.data_protection_impacts = [v if isinstance(v, DataProtectionImpactId) else DataProtectionImpactId(v) for v in self.data_protection_impacts]
+
+        if not isinstance(self.preprocessing_cleaning_labeling_methods, list):
+            self.preprocessing_cleaning_labeling_methods = [self.preprocessing_cleaning_labeling_methods] if self.preprocessing_cleaning_labeling_methods is not None else []
+        self.preprocessing_cleaning_labeling_methods = [v if isinstance(v, PreprocessingCleaningLabelingId) else PreprocessingCleaningLabelingId(v) for v in self.preprocessing_cleaning_labeling_methods]
+
+        if not isinstance(self.raw_sources, list):
+            self.raw_sources = [self.raw_sources] if self.raw_sources is not None else []
+        self.raw_sources = [v if isinstance(v, RawDataId) else RawDataId(v) for v in self.raw_sources]
+
+        if not isinstance(self.existing_uses, list):
+            self.existing_uses = [self.existing_uses] if self.existing_uses is not None else []
+        self.existing_uses = [v if isinstance(v, ExistingUseId) else ExistingUseId(v) for v in self.existing_uses]
+
+        if not isinstance(self.use_repository, list):
+            self.use_repository = [self.use_repository] if self.use_repository is not None else []
+        self.use_repository = [v if isinstance(v, UseRepositoryId) else UseRepositoryId(v) for v in self.use_repository]
+
+        if not isinstance(self.other_tasks, list):
+            self.other_tasks = [self.other_tasks] if self.other_tasks is not None else []
+        self.other_tasks = [v if isinstance(v, OtherTaskId) else OtherTaskId(v) for v in self.other_tasks]
+
+        if not isinstance(self.future_use_impacts, list):
+            self.future_use_impacts = [self.future_use_impacts] if self.future_use_impacts is not None else []
+        self.future_use_impacts = [v if isinstance(v, FutureUseImpactId) else FutureUseImpactId(v) for v in self.future_use_impacts]
+
+        if not isinstance(self.discouraged_uses, list):
+            self.discouraged_uses = [self.discouraged_uses] if self.discouraged_uses is not None else []
+        self.discouraged_uses = [v if isinstance(v, DiscouragedUseId) else DiscouragedUseId(v) for v in self.discouraged_uses]
+
+        if not isinstance(self.distribution_formats, list):
+            self.distribution_formats = [self.distribution_formats] if self.distribution_formats is not None else []
+        self.distribution_formats = [v if isinstance(v, DistributionFormatId) else DistributionFormatId(v) for v in self.distribution_formats]
+
+        if not isinstance(self.distribution_dates, list):
+            self.distribution_dates = [self.distribution_dates] if self.distribution_dates is not None else []
+        self.distribution_dates = [v if isinstance(v, DistributionDateId) else DistributionDateId(v) for v in self.distribution_dates]
+
+        if self.license_and_use_terms is not None and not isinstance(self.license_and_use_terms, LicenseAndUseTermsId):
+            self.license_and_use_terms = LicenseAndUseTermsId(self.license_and_use_terms)
+
+        if self.ip_restrictions is not None and not isinstance(self.ip_restrictions, IPRestrictionsId):
+            self.ip_restrictions = IPRestrictionsId(self.ip_restrictions)
+
+        if self.regulatory_restrictions is not None and not isinstance(self.regulatory_restrictions, ExportControlRegulatoryRestrictionsId):
+            self.regulatory_restrictions = ExportControlRegulatoryRestrictionsId(self.regulatory_restrictions)
+
+        if not isinstance(self.maintainers, list):
+            self.maintainers = [self.maintainers] if self.maintainers is not None else []
+        self.maintainers = [v if isinstance(v, MaintainerId) else MaintainerId(v) for v in self.maintainers]
+
+        if not isinstance(self.errata, list):
+            self.errata = [self.errata] if self.errata is not None else []
+        self.errata = [v if isinstance(v, ErratumId) else ErratumId(v) for v in self.errata]
+
+        if self.updates is not None and not isinstance(self.updates, UpdatePlanId):
+            self.updates = UpdatePlanId(self.updates)
+
+        if self.retention_limit is not None and not isinstance(self.retention_limit, RetentionLimitsId):
+            self.retention_limit = RetentionLimitsId(self.retention_limit)
+
+        if self.version_access is not None and not isinstance(self.version_access, VersionAccessId):
+            self.version_access = VersionAccessId(self.version_access)
+
+        if self.extension_mechanism is not None and not isinstance(self.extension_mechanism, ExtensionMechanismId):
+            self.extension_mechanism = ExtensionMechanismId(self.extension_mechanism)
 
         super().__post_init__(**kwargs)
 
@@ -1996,245 +2477,254 @@ class ExtensionMechanism(DatasetProperty):
         super().__post_init__(**kwargs)
 
 
-@dataclass
-class DatasetCollection(DataPackage):
-    """
-    A collection of related datasets, likely containing multiple files of multiple potential purposes and properties.
-    """
-    _inherited_slots: ClassVar[List[str]] = []
-
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DatasetCollection"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DatasetCollection"
-    class_name: ClassVar[str] = "DatasetCollection"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetCollection
-
-    id: Union[str, DatasetCollectionId] = None
-    entries: Optional[Union[Union[str, DatasetId], List[Union[str, DatasetId]]]] = empty_list()
-
-    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DatasetCollectionId):
-            self.id = DatasetCollectionId(self.id)
-
-        if not isinstance(self.entries, list):
-            self.entries = [self.entries] if self.entries is not None else []
-        self.entries = [v if isinstance(v, DatasetId) else DatasetId(v) for v in self.entries]
-
-        super().__post_init__(**kwargs)
-
-
-@dataclass
-class Dataset(DataResource):
-    """
-    A single component of related observations and/or information that can be read, manipulated, transformed, and
-    otherwise interpreted.
-    """
-    _inherited_slots: ClassVar[List[str]] = []
-
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Dataset"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Dataset"
-    class_name: ClassVar[str] = "Dataset"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Dataset
-
-    id: Union[str, DatasetId] = None
-    purposes: Optional[Union[Union[str, PurposeId], List[Union[str, PurposeId]]]] = empty_list()
-    tasks: Optional[Union[Union[str, TaskId], List[Union[str, TaskId]]]] = empty_list()
-    addressing_gaps: Optional[Union[Union[str, AddressingGapId], List[Union[str, AddressingGapId]]]] = empty_list()
-    creators: Optional[Union[Union[str, CreatorId], List[Union[str, CreatorId]]]] = empty_list()
-    funders: Optional[Union[Union[str, FunderId], List[Union[str, FunderId]]]] = empty_list()
-    instances: Optional[Union[Union[str, InstanceId], List[Union[str, InstanceId]]]] = empty_list()
-    anomalies: Optional[Union[Union[str, DataAnomalyId], List[Union[str, DataAnomalyId]]]] = empty_list()
-    external_resources: Optional[Union[Union[str, ExternalResourceId], List[Union[str, ExternalResourceId]]]] = empty_list()
-    confidential_elements: Optional[Union[Union[str, ConfidentialityId], List[Union[str, ConfidentialityId]]]] = empty_list()
-    content_warnings: Optional[Union[Union[str, ContentWarningId], List[Union[str, ContentWarningId]]]] = empty_list()
-    subpopulations: Optional[Union[Union[str, SubpopulationId], List[Union[str, SubpopulationId]]]] = empty_list()
-    sensitive_elements: Optional[Union[Union[str, SensitiveElementId], List[Union[str, SensitiveElementId]]]] = empty_list()
-    acquisition_methods: Optional[Union[Union[str, InstanceAcquisitionId], List[Union[str, InstanceAcquisitionId]]]] = empty_list()
-    collection_mechanisms: Optional[Union[Union[str, CollectionMechanismId], List[Union[str, CollectionMechanismId]]]] = empty_list()
-    sampling_strategies: Optional[Union[Union[str, SamplingStrategyId], List[Union[str, SamplingStrategyId]]]] = empty_list()
-    data_collectors: Optional[Union[Union[str, DataCollectorId], List[Union[str, DataCollectorId]]]] = empty_list()
-    collection_timeframes: Optional[Union[Union[str, CollectionTimeframeId], List[Union[str, CollectionTimeframeId]]]] = empty_list()
-    ethical_reviews: Optional[Union[Union[str, EthicalReviewId], List[Union[str, EthicalReviewId]]]] = empty_list()
-    data_protection_impacts: Optional[Union[Union[str, DataProtectionImpactId], List[Union[str, DataProtectionImpactId]]]] = empty_list()
-    preprocessing_cleaning_labeling_methods: Optional[Union[Union[str, PreprocessingCleaningLabelingId], List[Union[str, PreprocessingCleaningLabelingId]]]] = empty_list()
-    raw_sources: Optional[Union[Union[str, RawDataId], List[Union[str, RawDataId]]]] = empty_list()
-    existing_uses: Optional[Union[Union[str, ExistingUseId], List[Union[str, ExistingUseId]]]] = empty_list()
-    use_repository: Optional[Union[Union[str, UseRepositoryId], List[Union[str, UseRepositoryId]]]] = empty_list()
-    other_tasks: Optional[Union[Union[str, OtherTaskId], List[Union[str, OtherTaskId]]]] = empty_list()
-    future_use_impacts: Optional[Union[Union[str, FutureUseImpactId], List[Union[str, FutureUseImpactId]]]] = empty_list()
-    discouraged_uses: Optional[Union[Union[str, DiscouragedUseId], List[Union[str, DiscouragedUseId]]]] = empty_list()
-    distribution_formats: Optional[Union[Union[str, DistributionFormatId], List[Union[str, DistributionFormatId]]]] = empty_list()
-    distribution_dates: Optional[Union[Union[str, DistributionDateId], List[Union[str, DistributionDateId]]]] = empty_list()
-    license_and_use_terms: Optional[Union[str, LicenseAndUseTermsId]] = None
-    ip_restrictions: Optional[Union[str, IPRestrictionsId]] = None
-    regulatory_restrictions: Optional[Union[str, ExportControlRegulatoryRestrictionsId]] = None
-    maintainers: Optional[Union[Union[str, MaintainerId], List[Union[str, MaintainerId]]]] = empty_list()
-    errata: Optional[Union[Union[str, ErratumId], List[Union[str, ErratumId]]]] = empty_list()
-    updates: Optional[Union[str, UpdatePlanId]] = None
-    retention_limit: Optional[Union[str, RetentionLimitsId]] = None
-    version_access: Optional[Union[str, VersionAccessId]] = None
-    extension_mechanism: Optional[Union[str, ExtensionMechanismId]] = None
-
-    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DatasetId):
-            self.id = DatasetId(self.id)
-
-        if not isinstance(self.purposes, list):
-            self.purposes = [self.purposes] if self.purposes is not None else []
-        self.purposes = [v if isinstance(v, PurposeId) else PurposeId(v) for v in self.purposes]
-
-        if not isinstance(self.tasks, list):
-            self.tasks = [self.tasks] if self.tasks is not None else []
-        self.tasks = [v if isinstance(v, TaskId) else TaskId(v) for v in self.tasks]
-
-        if not isinstance(self.addressing_gaps, list):
-            self.addressing_gaps = [self.addressing_gaps] if self.addressing_gaps is not None else []
-        self.addressing_gaps = [v if isinstance(v, AddressingGapId) else AddressingGapId(v) for v in self.addressing_gaps]
-
-        if not isinstance(self.creators, list):
-            self.creators = [self.creators] if self.creators is not None else []
-        self.creators = [v if isinstance(v, CreatorId) else CreatorId(v) for v in self.creators]
-
-        if not isinstance(self.funders, list):
-            self.funders = [self.funders] if self.funders is not None else []
-        self.funders = [v if isinstance(v, FunderId) else FunderId(v) for v in self.funders]
-
-        if not isinstance(self.instances, list):
-            self.instances = [self.instances] if self.instances is not None else []
-        self.instances = [v if isinstance(v, InstanceId) else InstanceId(v) for v in self.instances]
-
-        if not isinstance(self.anomalies, list):
-            self.anomalies = [self.anomalies] if self.anomalies is not None else []
-        self.anomalies = [v if isinstance(v, DataAnomalyId) else DataAnomalyId(v) for v in self.anomalies]
-
-        if not isinstance(self.external_resources, list):
-            self.external_resources = [self.external_resources] if self.external_resources is not None else []
-        self.external_resources = [v if isinstance(v, ExternalResourceId) else ExternalResourceId(v) for v in self.external_resources]
-
-        if not isinstance(self.confidential_elements, list):
-            self.confidential_elements = [self.confidential_elements] if self.confidential_elements is not None else []
-        self.confidential_elements = [v if isinstance(v, ConfidentialityId) else ConfidentialityId(v) for v in self.confidential_elements]
-
-        if not isinstance(self.content_warnings, list):
-            self.content_warnings = [self.content_warnings] if self.content_warnings is not None else []
-        self.content_warnings = [v if isinstance(v, ContentWarningId) else ContentWarningId(v) for v in self.content_warnings]
-
-        if not isinstance(self.subpopulations, list):
-            self.subpopulations = [self.subpopulations] if self.subpopulations is not None else []
-        self.subpopulations = [v if isinstance(v, SubpopulationId) else SubpopulationId(v) for v in self.subpopulations]
-
-        if not isinstance(self.sensitive_elements, list):
-            self.sensitive_elements = [self.sensitive_elements] if self.sensitive_elements is not None else []
-        self.sensitive_elements = [v if isinstance(v, SensitiveElementId) else SensitiveElementId(v) for v in self.sensitive_elements]
-
-        if not isinstance(self.acquisition_methods, list):
-            self.acquisition_methods = [self.acquisition_methods] if self.acquisition_methods is not None else []
-        self.acquisition_methods = [v if isinstance(v, InstanceAcquisitionId) else InstanceAcquisitionId(v) for v in self.acquisition_methods]
-
-        if not isinstance(self.collection_mechanisms, list):
-            self.collection_mechanisms = [self.collection_mechanisms] if self.collection_mechanisms is not None else []
-        self.collection_mechanisms = [v if isinstance(v, CollectionMechanismId) else CollectionMechanismId(v) for v in self.collection_mechanisms]
-
-        if not isinstance(self.sampling_strategies, list):
-            self.sampling_strategies = [self.sampling_strategies] if self.sampling_strategies is not None else []
-        self.sampling_strategies = [v if isinstance(v, SamplingStrategyId) else SamplingStrategyId(v) for v in self.sampling_strategies]
-
-        if not isinstance(self.data_collectors, list):
-            self.data_collectors = [self.data_collectors] if self.data_collectors is not None else []
-        self.data_collectors = [v if isinstance(v, DataCollectorId) else DataCollectorId(v) for v in self.data_collectors]
-
-        if not isinstance(self.collection_timeframes, list):
-            self.collection_timeframes = [self.collection_timeframes] if self.collection_timeframes is not None else []
-        self.collection_timeframes = [v if isinstance(v, CollectionTimeframeId) else CollectionTimeframeId(v) for v in self.collection_timeframes]
-
-        if not isinstance(self.ethical_reviews, list):
-            self.ethical_reviews = [self.ethical_reviews] if self.ethical_reviews is not None else []
-        self.ethical_reviews = [v if isinstance(v, EthicalReviewId) else EthicalReviewId(v) for v in self.ethical_reviews]
-
-        if not isinstance(self.data_protection_impacts, list):
-            self.data_protection_impacts = [self.data_protection_impacts] if self.data_protection_impacts is not None else []
-        self.data_protection_impacts = [v if isinstance(v, DataProtectionImpactId) else DataProtectionImpactId(v) for v in self.data_protection_impacts]
-
-        if not isinstance(self.preprocessing_cleaning_labeling_methods, list):
-            self.preprocessing_cleaning_labeling_methods = [self.preprocessing_cleaning_labeling_methods] if self.preprocessing_cleaning_labeling_methods is not None else []
-        self.preprocessing_cleaning_labeling_methods = [v if isinstance(v, PreprocessingCleaningLabelingId) else PreprocessingCleaningLabelingId(v) for v in self.preprocessing_cleaning_labeling_methods]
-
-        if not isinstance(self.raw_sources, list):
-            self.raw_sources = [self.raw_sources] if self.raw_sources is not None else []
-        self.raw_sources = [v if isinstance(v, RawDataId) else RawDataId(v) for v in self.raw_sources]
-
-        if not isinstance(self.existing_uses, list):
-            self.existing_uses = [self.existing_uses] if self.existing_uses is not None else []
-        self.existing_uses = [v if isinstance(v, ExistingUseId) else ExistingUseId(v) for v in self.existing_uses]
-
-        if not isinstance(self.use_repository, list):
-            self.use_repository = [self.use_repository] if self.use_repository is not None else []
-        self.use_repository = [v if isinstance(v, UseRepositoryId) else UseRepositoryId(v) for v in self.use_repository]
-
-        if not isinstance(self.other_tasks, list):
-            self.other_tasks = [self.other_tasks] if self.other_tasks is not None else []
-        self.other_tasks = [v if isinstance(v, OtherTaskId) else OtherTaskId(v) for v in self.other_tasks]
-
-        if not isinstance(self.future_use_impacts, list):
-            self.future_use_impacts = [self.future_use_impacts] if self.future_use_impacts is not None else []
-        self.future_use_impacts = [v if isinstance(v, FutureUseImpactId) else FutureUseImpactId(v) for v in self.future_use_impacts]
-
-        if not isinstance(self.discouraged_uses, list):
-            self.discouraged_uses = [self.discouraged_uses] if self.discouraged_uses is not None else []
-        self.discouraged_uses = [v if isinstance(v, DiscouragedUseId) else DiscouragedUseId(v) for v in self.discouraged_uses]
-
-        if not isinstance(self.distribution_formats, list):
-            self.distribution_formats = [self.distribution_formats] if self.distribution_formats is not None else []
-        self.distribution_formats = [v if isinstance(v, DistributionFormatId) else DistributionFormatId(v) for v in self.distribution_formats]
-
-        if not isinstance(self.distribution_dates, list):
-            self.distribution_dates = [self.distribution_dates] if self.distribution_dates is not None else []
-        self.distribution_dates = [v if isinstance(v, DistributionDateId) else DistributionDateId(v) for v in self.distribution_dates]
-
-        if self.license_and_use_terms is not None and not isinstance(self.license_and_use_terms, LicenseAndUseTermsId):
-            self.license_and_use_terms = LicenseAndUseTermsId(self.license_and_use_terms)
-
-        if self.ip_restrictions is not None and not isinstance(self.ip_restrictions, IPRestrictionsId):
-            self.ip_restrictions = IPRestrictionsId(self.ip_restrictions)
-
-        if self.regulatory_restrictions is not None and not isinstance(self.regulatory_restrictions, ExportControlRegulatoryRestrictionsId):
-            self.regulatory_restrictions = ExportControlRegulatoryRestrictionsId(self.regulatory_restrictions)
-
-        if not isinstance(self.maintainers, list):
-            self.maintainers = [self.maintainers] if self.maintainers is not None else []
-        self.maintainers = [v if isinstance(v, MaintainerId) else MaintainerId(v) for v in self.maintainers]
-
-        if not isinstance(self.errata, list):
-            self.errata = [self.errata] if self.errata is not None else []
-        self.errata = [v if isinstance(v, ErratumId) else ErratumId(v) for v in self.errata]
-
-        if self.updates is not None and not isinstance(self.updates, UpdatePlanId):
-            self.updates = UpdatePlanId(self.updates)
-
-        if self.retention_limit is not None and not isinstance(self.retention_limit, RetentionLimitsId):
-            self.retention_limit = RetentionLimitsId(self.retention_limit)
-
-        if self.version_access is not None and not isinstance(self.version_access, VersionAccessId):
-            self.version_access = VersionAccessId(self.version_access)
-
-        if self.extension_mechanism is not None and not isinstance(self.extension_mechanism, ExtensionMechanismId):
-            self.extension_mechanism = ExtensionMechanismId(self.extension_mechanism)
-
-        super().__post_init__(**kwargs)
-
-
 # Enumerations
+class TestRole(EnumDefinitionImpl):
 
+    Example = PermissibleValue(text="Example")
+    CounterExample = PermissibleValue(text="CounterExample")
+
+    _defn = EnumDefinition(
+        name="TestRole",
+    )
+
+class MediaTypeEnum(EnumDefinitionImpl):
+
+    csv = PermissibleValue(
+        text="csv",
+        meaning=MEDIATYPES["text/csv"])
+
+    _defn = EnumDefinition(
+        name="MediaTypeEnum",
+    )
+
+    @classmethod
+    def _addvals(cls):
+        setattr(cls, "rdf-xml",
+            PermissibleValue(
+                text="rdf-xml",
+                meaning=MEDIATYPES["application/rdf+xml"]))
+
+class FormatEnum(EnumDefinitionImpl):
+
+    N3 = PermissibleValue(
+        text="N3",
+        meaning=FORMATS["N3"])
+    Microdata = PermissibleValue(
+        text="Microdata",
+        meaning=FORMATS["microdata"])
+    POWDER = PermissibleValue(
+        text="POWDER",
+        meaning=FORMATS["POWDER"])
+    RDFa = PermissibleValue(
+        text="RDFa",
+        meaning=FORMATS["RDFa"])
+    Turtle = PermissibleValue(
+        text="Turtle",
+        meaning=FORMATS["Turtle"])
+    TriG = PermissibleValue(
+        text="TriG",
+        meaning=FORMATS["TriG"])
+    YAML = PermissibleValue(text="YAML")
+    JSON = PermissibleValue(text="JSON")
+
+    _defn = EnumDefinition(
+        name="FormatEnum",
+    )
+
+    @classmethod
+    def _addvals(cls):
+        setattr(cls, "JSON-LD",
+            PermissibleValue(
+                text="JSON-LD",
+                meaning=FORMATS["JSON-LD"]))
+        setattr(cls, "N-Triples",
+            PermissibleValue(
+                text="N-Triples",
+                meaning=FORMATS["N-Triples"]))
+        setattr(cls, "N-Quads",
+            PermissibleValue(
+                text="N-Quads",
+                meaning=FORMATS["N-Quads"]))
+        setattr(cls, "LD Patch",
+            PermissibleValue(
+                text="LD Patch",
+                meaning=FORMATS["LD_Patch"]))
+        setattr(cls, "OWL XML Serialization",
+            PermissibleValue(
+                text="OWL XML Serialization",
+                meaning=FORMATS["OWL_XML"]))
+        setattr(cls, "OWL Functional Syntax",
+            PermissibleValue(
+                text="OWL Functional Syntax",
+                meaning=FORMATS["OWL_Functional"]))
+        setattr(cls, "OWL Manchester Syntax",
+            PermissibleValue(
+                text="OWL Manchester Syntax",
+                meaning=FORMATS["OWL_Manchester"]))
+        setattr(cls, "POWDER-S",
+            PermissibleValue(
+                text="POWDER-S",
+                meaning=FORMATS["POWDER-S"]))
+        setattr(cls, "PROV-N",
+            PermissibleValue(
+                text="PROV-N",
+                meaning=FORMATS["PROV-N"]))
+        setattr(cls, "PROV-XML",
+            PermissibleValue(
+                text="PROV-XML",
+                meaning=FORMATS["PROV-XML"]))
+        setattr(cls, "RDF/JSON",
+            PermissibleValue(
+                text="RDF/JSON",
+                meaning=FORMATS["RDF_JSON"]))
+        setattr(cls, "RDF/XML",
+            PermissibleValue(
+                text="RDF/XML",
+                meaning=FORMATS["RDF_XML"]))
+        setattr(cls, "RIF XML Syntax",
+            PermissibleValue(
+                text="RIF XML Syntax",
+                meaning=FORMATS["RIF_XML"]))
+        setattr(cls, "SPARQL Results in XML",
+            PermissibleValue(
+                text="SPARQL Results in XML",
+                meaning=FORMATS["SPARQL_Results_XML"]))
+        setattr(cls, "SPARQL Results in JSON",
+            PermissibleValue(
+                text="SPARQL Results in JSON",
+                meaning=FORMATS["SPARQL_Results_JSON"]))
+        setattr(cls, "SPARQL Results in CSV",
+            PermissibleValue(
+                text="SPARQL Results in CSV",
+                meaning=FORMATS["SPARQL_Results_CSV"]))
+        setattr(cls, "SPARQL Results in TSV",
+            PermissibleValue(
+                text="SPARQL Results in TSV",
+                meaning=FORMATS["SPARQL_Results_TSV"]))
 
 # Slots
 class slots:
     pass
 
+slots.id = Slot(uri=DCTERMS.identifier, name="id", curie=DCTERMS.curie('identifier'),
+                   model_uri=DATA_SHEETS_SCHEMA.id, domain=None, range=URIRef)
+
 slots.name = Slot(uri=SCHEMA.name, name="name", curie=SCHEMA.curie('name'),
                    model_uri=DATA_SHEETS_SCHEMA.name, domain=None, range=Optional[str])
+
+slots.title = Slot(uri=DCTERMS.title, name="title", curie=DCTERMS.curie('title'),
+                   model_uri=DATA_SHEETS_SCHEMA.title, domain=None, range=Optional[str])
+
+slots.description = Slot(uri=DCTERMS.description, name="description", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.description, domain=None, range=Optional[str])
+
+slots.language = Slot(uri=DATA_SHEETS_SCHEMA.language, name="language", curie=DATA_SHEETS_SCHEMA.curie('language'),
+                   model_uri=DATA_SHEETS_SCHEMA.language, domain=None, range=Optional[str])
+
+slots.publisher = Slot(uri=DCTERMS.publisher, name="publisher", curie=DCTERMS.curie('publisher'),
+                   model_uri=DATA_SHEETS_SCHEMA.publisher, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.issued = Slot(uri=DCTERMS.issued, name="issued", curie=DCTERMS.curie('issued'),
+                   model_uri=DATA_SHEETS_SCHEMA.issued, domain=None, range=Optional[Union[str, XSDDateTime]])
+
+slots.page = Slot(uri=DCAT.landingPage, name="page", curie=DCAT.curie('landingPage'),
+                   model_uri=DATA_SHEETS_SCHEMA.page, domain=None, range=Optional[str])
+
+slots.dialect = Slot(uri=CSVW.dialect, name="dialect", curie=CSVW.curie('dialect'),
+                   model_uri=DATA_SHEETS_SCHEMA.dialect, domain=None, range=Optional[str])
+
+slots.bytes = Slot(uri=DCAT.byteSize, name="bytes", curie=DCAT.curie('byteSize'),
+                   model_uri=DATA_SHEETS_SCHEMA.bytes, domain=None, range=Optional[int])
+
+slots.path = Slot(uri=DATA_SHEETS_SCHEMA.path, name="path", curie=DATA_SHEETS_SCHEMA.curie('path'),
+                   model_uri=DATA_SHEETS_SCHEMA.path, domain=None, range=Optional[str])
+
+slots.download_url = Slot(uri=DCAT.downloadURL, name="download_url", curie=DCAT.curie('downloadURL'),
+                   model_uri=DATA_SHEETS_SCHEMA.download_url, domain=None, range=Optional[Union[str, URI]])
+
+slots.format = Slot(uri=DCTERMS.format, name="format", curie=DCTERMS.curie('format'),
+                   model_uri=DATA_SHEETS_SCHEMA.format, domain=None, range=Optional[Union[str, "FormatEnum"]])
+
+slots.compression = Slot(uri=DATA_SHEETS_SCHEMA.compression, name="compression", curie=DATA_SHEETS_SCHEMA.curie('compression'),
+                   model_uri=DATA_SHEETS_SCHEMA.compression, domain=None, range=Optional[str])
+
+slots.encoding = Slot(uri=DATA_SHEETS_SCHEMA.encoding, name="encoding", curie=DATA_SHEETS_SCHEMA.curie('encoding'),
+                   model_uri=DATA_SHEETS_SCHEMA.encoding, domain=None, range=Optional[str])
+
+slots.hash = Slot(uri=DATA_SHEETS_SCHEMA.hash, name="hash", curie=DATA_SHEETS_SCHEMA.curie('hash'),
+                   model_uri=DATA_SHEETS_SCHEMA.hash, domain=None, range=Optional[str])
+
+slots.sha256 = Slot(uri=DATA_SHEETS_SCHEMA.sha256, name="sha256", curie=DATA_SHEETS_SCHEMA.curie('sha256'),
+                   model_uri=DATA_SHEETS_SCHEMA.sha256, domain=None, range=Optional[str])
+
+slots.md5 = Slot(uri=DATA_SHEETS_SCHEMA.md5, name="md5", curie=DATA_SHEETS_SCHEMA.curie('md5'),
+                   model_uri=DATA_SHEETS_SCHEMA.md5, domain=None, range=Optional[str])
+
+slots.media_type = Slot(uri=DCAT.mediaType, name="media_type", curie=DCAT.curie('mediaType'),
+                   model_uri=DATA_SHEETS_SCHEMA.media_type, domain=None, range=Optional[str])
+
+slots.conforms_to = Slot(uri=DCTERMS.conformsTo, name="conforms_to", curie=DCTERMS.curie('conformsTo'),
+                   model_uri=DATA_SHEETS_SCHEMA.conforms_to, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.conforms_to_schema = Slot(uri=DATA_SHEETS_SCHEMA.conforms_to_schema, name="conforms_to_schema", curie=DATA_SHEETS_SCHEMA.curie('conforms_to_schema'),
+                   model_uri=DATA_SHEETS_SCHEMA.conforms_to_schema, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.conforms_to_class = Slot(uri=DATA_SHEETS_SCHEMA.conforms_to_class, name="conforms_to_class", curie=DATA_SHEETS_SCHEMA.curie('conforms_to_class'),
+                   model_uri=DATA_SHEETS_SCHEMA.conforms_to_class, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.profile = Slot(uri=DATA_SHEETS_SCHEMA.profile, name="profile", curie=DATA_SHEETS_SCHEMA.curie('profile'),
+                   model_uri=DATA_SHEETS_SCHEMA.profile, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.keywords = Slot(uri=DCAT.keyword, name="keywords", curie=DCAT.curie('keyword'),
+                   model_uri=DATA_SHEETS_SCHEMA.keywords, domain=None, range=Optional[Union[str, List[str]]])
+
+slots.themes = Slot(uri=DCAT.theme, name="themes", curie=DCAT.curie('theme'),
+                   model_uri=DATA_SHEETS_SCHEMA.themes, domain=None, range=Optional[Union[Union[str, URIorCURIE], List[Union[str, URIorCURIE]]]])
+
+slots.resources = Slot(uri=DCAT.distribution, name="resources", curie=DCAT.curie('distribution'),
+                   model_uri=DATA_SHEETS_SCHEMA.resources, domain=None, range=Optional[Union[Union[str, DataResourceId], List[Union[str, DataResourceId]]]])
+
+slots.test_roles = Slot(uri=DATA_SHEETS_SCHEMA.test_roles, name="test_roles", curie=DATA_SHEETS_SCHEMA.curie('test_roles'),
+                   model_uri=DATA_SHEETS_SCHEMA.test_roles, domain=None, range=Optional[Union[Union[str, "TestRole"], List[Union[str, "TestRole"]]]])
+
+slots.created_by = Slot(uri=PAV.createdBy, name="created_by", curie=PAV.curie('createdBy'),
+                   model_uri=DATA_SHEETS_SCHEMA.created_by, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.created_on = Slot(uri=PAV.createdOn, name="created_on", curie=PAV.curie('createdOn'),
+                   model_uri=DATA_SHEETS_SCHEMA.created_on, domain=None, range=Optional[Union[str, XSDDateTime]])
+
+slots.last_updated_on = Slot(uri=PAV.lastUpdatedOn, name="last_updated_on", curie=PAV.curie('lastUpdatedOn'),
+                   model_uri=DATA_SHEETS_SCHEMA.last_updated_on, domain=None, range=Optional[Union[str, XSDDateTime]])
+
+slots.modified_by = Slot(uri=OSLC.modifiedBy, name="modified_by", curie=OSLC.curie('modifiedBy'),
+                   model_uri=DATA_SHEETS_SCHEMA.modified_by, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.status = Slot(uri=BIBO.status, name="status", curie=BIBO.curie('status'),
+                   model_uri=DATA_SHEETS_SCHEMA.status, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.license = Slot(uri=DCTERMS.license, name="license", curie=DCTERMS.curie('license'),
+                   model_uri=DATA_SHEETS_SCHEMA.license, domain=None, range=Optional[str])
+
+slots.version = Slot(uri=PAV.version, name="version", curie=PAV.curie('version'),
+                   model_uri=DATA_SHEETS_SCHEMA.version, domain=None, range=Optional[str])
+
+slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", curie=PROV.curie('wasDerivedFrom'),
+                   model_uri=DATA_SHEETS_SCHEMA.was_derived_from, domain=None, range=Optional[str])
+
+slots.formatDialect__comment_prefix = Slot(uri=DATA_SHEETS_SCHEMA.comment_prefix, name="formatDialect__comment_prefix", curie=DATA_SHEETS_SCHEMA.curie('comment_prefix'),
+                   model_uri=DATA_SHEETS_SCHEMA.formatDialect__comment_prefix, domain=None, range=Optional[str])
+
+slots.formatDialect__delimiter = Slot(uri=DATA_SHEETS_SCHEMA.delimiter, name="formatDialect__delimiter", curie=DATA_SHEETS_SCHEMA.curie('delimiter'),
+                   model_uri=DATA_SHEETS_SCHEMA.formatDialect__delimiter, domain=None, range=Optional[str])
+
+slots.formatDialect__double_quote = Slot(uri=DATA_SHEETS_SCHEMA.double_quote, name="formatDialect__double_quote", curie=DATA_SHEETS_SCHEMA.curie('double_quote'),
+                   model_uri=DATA_SHEETS_SCHEMA.formatDialect__double_quote, domain=None, range=Optional[str])
+
+slots.formatDialect__header = Slot(uri=DATA_SHEETS_SCHEMA.header, name="formatDialect__header", curie=DATA_SHEETS_SCHEMA.curie('header'),
+                   model_uri=DATA_SHEETS_SCHEMA.formatDialect__header, domain=None, range=Optional[str])
+
+slots.formatDialect__quote_char = Slot(uri=DATA_SHEETS_SCHEMA.quote_char, name="formatDialect__quote_char", curie=DATA_SHEETS_SCHEMA.curie('quote_char'),
+                   model_uri=DATA_SHEETS_SCHEMA.formatDialect__quote_char, domain=None, range=Optional[str])
 
 slots.datasetCollection__entries = Slot(uri=DATA_SHEETS_SCHEMA.entries, name="datasetCollection__entries", curie=DATA_SHEETS_SCHEMA.curie('entries'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetCollection__entries, domain=None, range=Optional[Union[Union[str, DatasetId], List[Union[str, DatasetId]]]])

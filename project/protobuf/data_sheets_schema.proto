@@ -1,3 +1,11 @@
+// Was there a specific gap that needed to be filled by creation of the dataset?
+message AddressingGap
+ {
+  string id = 0
+  string name = 0
+  string description = 0
+  string response = 0
+ }
 // Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented.
 message CollectionConsent
  {
@@ -182,6 +190,8 @@ message Dataset
   string sha256 = 0
   string dialect = 0
  repeated  purpose purposes = 0
+ repeated  task tasks = 0
+ repeated  addressingGap addressingGaps = 0
  repeated  creator creators = 0
  repeated  funder funders = 0
  repeated  instance instances = 0
@@ -346,9 +356,8 @@ message Funder
   string id = 0
   string name = 0
   string description = 0
- repeated  string grantor = 0
- repeated  string grantName = 0
- repeated  string grantNumber = 0
+  grantor grantor = 0
+  grant grant = 0
  }
 // Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?
 message FutureUseImpact
@@ -356,6 +365,23 @@ message FutureUseImpact
   string id = 0
   string name = 0
  repeated  string description = 0
+ }
+// What is the name and/or identifier of the specific mechanism providing monetary support or other resources supporting creation of the dataset?
+message Grant
+ {
+  string id = 0
+  string name = 0
+  string description = 0
+  string grantNumber = 0
+ }
+// What is the name and/or identifier of the organization providing monetary support or other resources supporting creation of the dataset?
+message Grantor
+ {
+  string id = 0
+  string name = 0
+  string description = 0
+  rorIdentifier rorId = 0
+  wikidataIdentifier wikidataId = 0
  }
 // What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?
 message Instance
@@ -446,14 +472,13 @@ message PreprocessingCleaningLabelingSoftware
   string name = 0
  repeated  string description = 0
  }
-// For what purpose was the dataset created? Was there a specific task in mind? Was there a specific gap that needed to be filled?
+// For what purpose was the dataset created?
 message Purpose
  {
   string id = 0
   string name = 0
   string description = 0
-  string task = 0
-  string addressingGap = 0
+  string response = 0
  }
 // Was the “raw” data saved in addition to the preprocessed/cleaned/labeled data (e.g., to support unanticipated future uses)? If so, please provide a link or other access point to the “raw” data.
 message RawData
@@ -518,6 +543,14 @@ message Subpopulation
   string description = 0
  repeated  string identification = 0
  repeated  string distribution = 0
+ }
+// Was there a specific task in mind for the dataset's application?
+message Task
+ {
+  string id = 0
+  string name = 0
+  string description = 0
+  string response = 0
  }
 // Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?
 message ThirdPartySharing

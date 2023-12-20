@@ -1,16 +1,19 @@
 BASE <https://w3id.org/bridge2ai/data-sheets-schema/>
 PREFIX csvw: <http://www.w3.org/ns/csvw#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX linkml: <https://w3id.org/linkml/>
-PREFIX schema1: <http://schema.org/>
-PREFIX datasets: <https://w3id.org/linkml/report>
 PREFIX pav: <http://purl.org/pav/>
-PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX schema1: <http://schema.org/>
+PREFIX dcterms1: <http://example.org/UNKNOWN/dcterms/>
+PREFIX prov1: <http://example.org/UNKNOWN/prov/>
 
+
+<RorIdentifier> IRI
+
+<WikidataIdentifier> IRI
 
 linkml:String xsd:string
 
@@ -49,6 +52,15 @@ linkml:Jsonpointer xsd:string
 linkml:Jsonpath xsd:string
 
 linkml:Sparqlpath xsd:string
+
+<AddressingGap> CLOSED {
+    (  $<AddressingGap_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <response> @linkml:String ?
+       ) ;
+       rdf:type [ <AddressingGap> ]
+    )
+}
 
 <CollectionConsent> CLOSED {
     (  $<CollectionConsent_tes> (  &<DatasetProperty_tes> ;
@@ -159,11 +171,11 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-datasets:DataPackage  (
+<DataPackage>  (
     CLOSED {
-       (  $datasets:DataPackage_tes (  &datasets:Information_tes ;
-             rdf:type [ datasets:Information ] ? ;
-             dcat:distribution @datasets:DataResource *
+       (  $<DataPackage_tes> (  &<Information_tes> ;
+             rdf:type [ <Information> ] ? ;
+             dcat:distribution @<DataResource> *
           ) ;
           rdf:type [ void:Dataset ]
        )
@@ -179,18 +191,18 @@ datasets:DataPackage  (
     )
 }
 
-datasets:DataResource  (
+<DataResource>  (
     CLOSED {
-       (  $datasets:DataResource_tes (  &datasets:Information_tes ;
-             rdf:type [ datasets:Information ] ? ;
-             datasets:path @linkml:String ? ;
-             dcterms:format @datasets:FormatEnum ? ;
+       (  $<DataResource_tes> (  &<Information_tes> ;
+             rdf:type [ <Information> ] ? ;
+             <path> @linkml:String ? ;
+             dcterms1:format @<FormatEnum> ? ;
              dcat:mediaType @linkml:String ? ;
-             datasets:encoding @linkml:String ? ;
+             <encoding> @linkml:String ? ;
              dcat:byteSize @linkml:Integer ? ;
-             datasets:hash @linkml:String ? ;
-             datasets:md5 @linkml:String ? ;
-             datasets:sha256 @linkml:String ? ;
+             <hash> @linkml:String ? ;
+             <md5> @linkml:String ? ;
+             <sha256> @linkml:String ? ;
              csvw:dialect @linkml:String ?
           ) ;
           rdf:type [ dcat:Distribution ]
@@ -199,9 +211,11 @@ datasets:DataResource  (
 )
 
 <Dataset> CLOSED {
-    (  $<Dataset_tes> (  &datasets:DataResource_tes ;
+    (  $<Dataset_tes> (  &<DataResource_tes> ;
           rdf:type [ dcat:Distribution ] ? ;
           <purposes> @<Purpose> * ;
+          <tasks> @<Task> * ;
+          <addressing_gaps> @<AddressingGap> * ;
           <creators> @<Creator> * ;
           <funders> @<Funder> * ;
           <instances> @<Instance> * ;
@@ -242,7 +256,7 @@ datasets:DataResource  (
 }
 
 <DatasetCollection> CLOSED {
-    (  $<DatasetCollection_tes> (  &datasets:DataPackage_tes ;
+    (  $<DatasetCollection_tes> (  &<DataPackage_tes> ;
           rdf:type [ void:Dataset ] ? ;
           <entries> @<Dataset> *
        ) ;
@@ -257,16 +271,16 @@ datasets:DataResource  (
           ) ;
           rdf:type [ <DatasetProperty> ]
        )
-    } OR @<CollectionConsent> OR @<CollectionMechanism> OR @<CollectionNotification> OR @<CollectionTimeframe> OR
-    @<Confidentiality> OR @<ConsentRevocation> OR @<ContentWarning> OR @<Counts> OR @<Creator> OR @<Data> OR @<DataAnomaly> OR
+    } OR @<AddressingGap> OR @<CollectionConsent> OR @<CollectionMechanism> OR @<CollectionNotification> OR @<CollectionTimeframe>
+    OR @<Confidentiality> OR @<ConsentRevocation> OR @<ContentWarning> OR @<Counts> OR @<Creator> OR @<Data> OR @<DataAnomaly> OR
     @<DataCollector> OR @<DataProtectionImpact> OR @<Deidentification> OR @<DirectCollection> OR @<DiscouragedUse> OR
     @<DistributionDate> OR @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUse> OR
     @<ExportControlRegulatoryRestrictions> OR @<ExtensionMechanism> OR @<ExternalResource> OR @<Funder> OR @<FutureUseImpact> OR
     @<IPRestrictions> OR @<Instance> OR @<InstanceAcquisition> OR @<Labels> OR @<LicenseAndUseTerms> OR @<Maintainer> OR
     @<MaintainerContact> OR @<Missing> OR @<OtherTask> OR @<PreprocessingCleaningLabeling> OR
     @<PreprocessingCleaningLabelingSoftware> OR @<Purpose> OR @<RawData> OR @<Relationships> OR @<RetentionLimits> OR @<Sampling>
-    OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR @<Subpopulation> OR @<ThirdPartySharing> OR @<UpdatePlan> OR
-    @<UseRepository> OR @<VersionAccess>
+    OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR @<Subpopulation> OR @<Task> OR @<ThirdPartySharing> OR
+    @<UpdatePlan> OR @<UseRepository> OR @<VersionAccess>
 )
 
 <Deidentification> CLOSED {
@@ -372,23 +386,22 @@ datasets:DataResource  (
     )
 }
 
-datasets:FormatDialect CLOSED {
-    (  $datasets:FormatDialect_tes (  datasets:comment_prefix @linkml:String ? ;
-          datasets:delimiter @linkml:String ? ;
-          datasets:double_quote @linkml:String ? ;
-          datasets:header @linkml:String ? ;
-          datasets:quote_char @linkml:String ?
+<FormatDialect> CLOSED {
+    (  $<FormatDialect_tes> (  <comment_prefix> @linkml:String ? ;
+          <delimiter> @linkml:String ? ;
+          <double_quote> @linkml:String ? ;
+          <header> @linkml:String ? ;
+          <quote_char> @linkml:String ?
        ) ;
-       rdf:type [ datasets:FormatDialect ] ?
+       rdf:type [ <FormatDialect> ] ?
     )
 }
 
 <Funder> CLOSED {
     (  $<Funder_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <grantor> @linkml:String * ;
-          <grant_name> @linkml:String * ;
-          <grant_number> @linkml:String *
+          <grantor> @<Grantor> ? ;
+          <grant> @<Grant> ?
        ) ;
        rdf:type [ <Funder> ]
     )
@@ -403,31 +416,50 @@ datasets:FormatDialect CLOSED {
     )
 }
 
-datasets:Information  (
-    @datasets:DataPackage OR @datasets:DataResource
+<Grant> CLOSED {
+    (  $<Grant_tes> (  &<NamedThing_tes> ;
+          rdf:type [ <NamedThing> ] ? ;
+          <grant_number> @linkml:String ?
+       ) ;
+       rdf:type [ <Grant> ]
+    )
+}
+
+<Grantor> CLOSED {
+    (  $<Grantor_tes> (  &<NamedThing_tes> ;
+          rdf:type [ <NamedThing> ] ? ;
+          <ror_id> @<RorIdentifier> ? ;
+          <wikidata_id> @<WikidataIdentifier> ?
+       ) ;
+       rdf:type [ <Grantor> ]
+    )
+}
+
+<Information>  (
+    @<DataPackage> OR @<DataResource>
 )
 
-datasets:Information_struct {
-    (  $datasets:Information_tes (  dcat:downloadURL @linkml:Uri ? ;
-          dcterms:license @linkml:String ? ;
-          dcterms:title @linkml:String ? ;
-          dcterms:description @linkml:String ? ;
-          dcterms:conformsTo @linkml:Uriorcurie ? ;
-          datasets:conforms_to_schema @linkml:Uriorcurie ? ;
-          datasets:conforms_to_class @linkml:Uriorcurie ? ;
+<Information_struct> {
+    (  $<Information_tes> (  dcat:downloadURL @linkml:Uri ? ;
+          dcterms1:license @linkml:String ? ;
+          dcterms1:title @linkml:String ? ;
+          dcterms1:description @linkml:String ? ;
+          dcterms1:conformsTo @linkml:Uriorcurie ? ;
+          <conforms_to_schema> @linkml:Uriorcurie ? ;
+          <conforms_to_class> @linkml:Uriorcurie ? ;
           pav:version @linkml:String ? ;
-          datasets:language @linkml:String ? ;
-          dcterms:publisher @linkml:Uriorcurie ? ;
+          <language> @linkml:String ? ;
+          dcterms1:publisher @linkml:Uriorcurie ? ;
           dcat:keyword @linkml:String * ;
-          dcterms:issued @linkml:Datetime ? ;
+          dcterms1:issued @linkml:Datetime ? ;
           pav:createdBy @linkml:Uriorcurie ? ;
           pav:createdOn @linkml:Datetime ? ;
-          datasets:compression @linkml:String ? ;
-          prov:wasDerivedFrom @linkml:String ? ;
+          <compression> @linkml:String ? ;
+          prov1:wasDerivedFrom @linkml:String ? ;
           dcat:landingPage @linkml:String ? ;
-          datasets:test_roles @datasets:TestRole *
+          <test_roles> @<TestRole> *
        ) ;
-       rdf:type [ datasets:Information ]
+       rdf:type [ <Information> ]
     )
 }
 
@@ -508,11 +540,11 @@ datasets:Information_struct {
 <NamedThing>  (
     CLOSED {
        (  $<NamedThing_tes> (  schema1:name @linkml:String ? ;
-             dcterms:description @linkml:String ?
+             dcterms1:description @linkml:String ?
           ) ;
           rdf:type [ <NamedThing> ]
        )
-    } OR @<DatasetProperty>
+    } OR @<DatasetProperty> OR @<Grant> OR @<Grantor>
 )
 
 <OtherTask> CLOSED {
@@ -545,8 +577,7 @@ datasets:Information_struct {
 <Purpose> CLOSED {
     (  $<Purpose_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <task> @linkml:String ? ;
-          <addressing_gap> @linkml:String ?
+          <response> @linkml:String ?
        ) ;
        rdf:type [ <Purpose> ]
     )
@@ -627,6 +658,15 @@ datasets:Information_struct {
           <distribution> @linkml:String *
        ) ;
        rdf:type [ <Subpopulation> ]
+    )
+}
+
+<Task> CLOSED {
+    (  $<Task_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <response> @linkml:String ?
+       ) ;
+       rdf:type [ <Task> ]
     )
 }
 
