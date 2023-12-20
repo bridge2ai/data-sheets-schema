@@ -104,6 +104,10 @@ classes:
         range: Dataset
         multivalued: true
 
+  # TODO: add simple property about whether there is a tabular component
+  #       This may be a property of a subset or an instance type.
+  # TODO: consider adding DataSubset class that is a child of Dataset
+  #       ANd perhaps data splits and subselections are 'DataSubset's
   Dataset:
     description: >-
       A single component of related observations and/or information that can be
@@ -246,7 +250,7 @@ classes:
     in_subset:
       - Motivation
 
-  Creator:
+  Creator:  # TODO: Institution may need to be more granular
     description: >-
       Who created the dataset (e.g., which team, research group) and on behalf
       of which entity (e.g., company, institution, organization)?
