@@ -21,6 +21,20 @@ imports:
   - linkml:types
   - linkml:datasets
 
+## TYPES ##
+
+types:
+  ror_identifier:
+    description: Identifier from Research Organization Registry.
+    typeof: uriorcurie
+    id_prefixes:
+      - ror
+  wikidata_identifier:
+    description: Identifier from Wikidata open knowledge base.
+    typeof: uriorcurie
+    id_prefixes:
+      - wikidata
+
 ## SUBSETS ##
 subsets:
   Motivation:
@@ -238,13 +252,15 @@ classes:
       of which entity (e.g., company, institution, organization)?
     is_a: DatasetProperty
     attributes:
-      principal_investigator:
+      principal_investigator:  # TODO: connect this to a Person class
         range: string
-      institution:
+      institution:  # TODO: connect this to an Organization class
         range: string
     in_subset:
       - Motivation
 
+  # TODO: make this a child of an Organization class
+  #       and move the Grantor attributes into Organization
   Funder:
     description: >-
       Who funded the creation of the dataset? If there is an associated grant,
@@ -252,19 +268,44 @@ classes:
     is_a: DatasetProperty
     attributes:
       grantor:
-        range: string
-        multivalued: true
-        # inlined: true
-      grant_name:
-        range: string
-        multivalued: true
-        # inlined: true
-      grant_number:
-        range: string
-        multivalued: true
-        # inlined: true
+        range: Grantor
+      grant:
+        range: Grant
     in_subset:
       - Motivation
+
+  Grantor:
+    # Note this will have a name slot due to being a NamedThing
+    description: >-
+      What is the name and/or identifier of the organization providing
+      monetary support or other resources supporting creation of the dataset?
+    is_a: NamedThing
+    attributes:
+      ror_id:
+        description: Unique ROR identifier.
+        examples:
+          - value: ROR:02mp31p96
+        range: ror_identifier
+        values_from:
+          - ROR
+      wikidata_id:
+        description: Unique Wikidata identifier.
+        examples:
+          - value: WIKIDATA:Q282186
+        range: wikidata_identifier
+        values_from:
+          - WIKIDATA
+
+  Grant:
+    # Note this will have a name slot due to being a NamedThing
+    description: >-
+      What is the name and/or identifier of the specific mechanism providing
+      monetary support or other resources supporting creation of the dataset?
+    is_a: NamedThing
+    attributes:
+      grant_number:  # TODO: formalize this more - probably not a URI though
+        description: The alphanumeric identifier for the grant.
+        range: string
 
   Instance:
     description: >-
