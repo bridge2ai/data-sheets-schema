@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2023-12-20T15:36:31
+# Generation date: 2023-12-22T16:33:04
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -88,6 +88,14 @@ class DataResourceId(InformationId):
     pass
 
 
+class PersonId(NamedThingId):
+    pass
+
+
+class OrganizationId(NamedThingId):
+    pass
+
+
 class DatasetPropertyId(NamedThingId):
     pass
 
@@ -116,11 +124,11 @@ class CreatorId(DatasetPropertyId):
     pass
 
 
-class FunderId(DatasetPropertyId):
+class FundingMechanismId(DatasetPropertyId):
     pass
 
 
-class GrantorId(NamedThingId):
+class GrantorId(OrganizationId):
     pass
 
 
@@ -132,19 +140,7 @@ class InstanceId(DatasetPropertyId):
     pass
 
 
-class CountsId(DatasetPropertyId):
-    pass
-
-
 class SamplingId(DatasetPropertyId):
-    pass
-
-
-class DataId(DatasetPropertyId):
-    pass
-
-
-class LabelsId(DatasetPropertyId):
     pass
 
 
@@ -577,6 +573,64 @@ class FormatDialect(YAMLRoot):
 
 
 @dataclass
+class Person(NamedThing):
+    """
+    An individual human being.
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Person"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:Person"
+    class_name: ClassVar[str] = "Person"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Person
+
+    id: Union[str, PersonId] = None
+    affiliation: Optional[Union[str, OrganizationId]] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, PersonId):
+            self.id = PersonId(self.id)
+
+        if self.affiliation is not None and not isinstance(self.affiliation, OrganizationId):
+            self.affiliation = OrganizationId(self.affiliation)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class Organization(NamedThing):
+    """
+    A collection of people acting in common interests.
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Organization"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:Organization"
+    class_name: ClassVar[str] = "Organization"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Organization
+
+    id: Union[str, OrganizationId] = None
+    ror_id: Optional[Union[str, RorIdentifier]] = None
+    wikidata_id: Optional[Union[str, WikidataIdentifier]] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, OrganizationId):
+            self.id = OrganizationId(self.id)
+
+        if self.ror_id is not None and not isinstance(self.ror_id, RorIdentifier):
+            self.ror_id = RorIdentifier(self.ror_id)
+
+        if self.wikidata_id is not None and not isinstance(self.wikidata_id, WikidataIdentifier):
+            self.wikidata_id = WikidataIdentifier(self.wikidata_id)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
 class DatasetProperty(NamedThing):
     """
     Represents a single property of a dataset, or a set of related properties.
@@ -645,7 +699,7 @@ class Dataset(DataResource):
     tasks: Optional[Union[Union[str, TaskId], List[Union[str, TaskId]]]] = empty_list()
     addressing_gaps: Optional[Union[Union[str, AddressingGapId], List[Union[str, AddressingGapId]]]] = empty_list()
     creators: Optional[Union[Union[str, CreatorId], List[Union[str, CreatorId]]]] = empty_list()
-    funders: Optional[Union[Union[str, FunderId], List[Union[str, FunderId]]]] = empty_list()
+    funders: Optional[Union[Union[str, FundingMechanismId], List[Union[str, FundingMechanismId]]]] = empty_list()
     instances: Optional[Union[Union[str, InstanceId], List[Union[str, InstanceId]]]] = empty_list()
     anomalies: Optional[Union[Union[str, DataAnomalyId], List[Union[str, DataAnomalyId]]]] = empty_list()
     external_resources: Optional[Union[Union[str, ExternalResourceId], List[Union[str, ExternalResourceId]]]] = empty_list()
@@ -703,7 +757,7 @@ class Dataset(DataResource):
 
         if not isinstance(self.funders, list):
             self.funders = [self.funders] if self.funders is not None else []
-        self.funders = [v if isinstance(v, FunderId) else FunderId(v) for v in self.funders]
+        self.funders = [v if isinstance(v, FundingMechanismId) else FundingMechanismId(v) for v in self.funders]
 
         if not isinstance(self.instances, list):
             self.instances = [self.instances] if self.instances is not None else []
@@ -914,7 +968,7 @@ class AddressingGap(DatasetProperty):
 class Creator(DatasetProperty):
     """
     Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company,
-    institution, organization)?
+    institution, organization)? This may also be considered a team.
     """
     _inherited_slots: ClassVar[List[str]] = []
 
@@ -924,8 +978,8 @@ class Creator(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Creator
 
     id: Union[str, CreatorId] = None
-    principal_investigator: Optional[str] = None
-    institution: Optional[str] = None
+    principal_investigator: Optional[Union[str, PersonId]] = None
+    affiliation: Optional[Union[str, OrganizationId]] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
@@ -933,37 +987,37 @@ class Creator(DatasetProperty):
         if not isinstance(self.id, CreatorId):
             self.id = CreatorId(self.id)
 
-        if self.principal_investigator is not None and not isinstance(self.principal_investigator, str):
-            self.principal_investigator = str(self.principal_investigator)
+        if self.principal_investigator is not None and not isinstance(self.principal_investigator, PersonId):
+            self.principal_investigator = PersonId(self.principal_investigator)
 
-        if self.institution is not None and not isinstance(self.institution, str):
-            self.institution = str(self.institution)
+        if self.affiliation is not None and not isinstance(self.affiliation, OrganizationId):
+            self.affiliation = OrganizationId(self.affiliation)
 
         super().__post_init__(**kwargs)
 
 
 @dataclass
-class Funder(DatasetProperty):
+class FundingMechanism(DatasetProperty):
     """
     Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor
     and the grant name and number.
     """
     _inherited_slots: ClassVar[List[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Funder"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Funder"
-    class_name: ClassVar[str] = "Funder"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Funder
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["FundingMechanism"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:FundingMechanism"
+    class_name: ClassVar[str] = "FundingMechanism"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FundingMechanism
 
-    id: Union[str, FunderId] = None
+    id: Union[str, FundingMechanismId] = None
     grantor: Optional[Union[str, GrantorId]] = None
     grant: Optional[Union[str, GrantId]] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
             self.MissingRequiredField("id")
-        if not isinstance(self.id, FunderId):
-            self.id = FunderId(self.id)
+        if not isinstance(self.id, FundingMechanismId):
+            self.id = FundingMechanismId(self.id)
 
         if self.grantor is not None and not isinstance(self.grantor, GrantorId):
             self.grantor = GrantorId(self.grantor)
@@ -975,7 +1029,7 @@ class Funder(DatasetProperty):
 
 
 @dataclass
-class Grantor(NamedThing):
+class Grantor(Organization):
     """
     What is the name and/or identifier of the organization providing monetary support or other resources supporting
     creation of the dataset?
@@ -988,20 +1042,12 @@ class Grantor(NamedThing):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Grantor
 
     id: Union[str, GrantorId] = None
-    ror_id: Optional[Union[str, RorIdentifier]] = None
-    wikidata_id: Optional[Union[str, WikidataIdentifier]] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
             self.MissingRequiredField("id")
         if not isinstance(self.id, GrantorId):
             self.id = GrantorId(self.id)
-
-        if self.ror_id is not None and not isinstance(self.ror_id, RorIdentifier):
-            self.ror_id = RorIdentifier(self.ror_id)
-
-        if self.wikidata_id is not None and not isinstance(self.wikidata_id, WikidataIdentifier):
-            self.wikidata_id = WikidataIdentifier(self.wikidata_id)
 
         super().__post_init__(**kwargs)
 
@@ -1037,9 +1083,7 @@ class Grant(NamedThing):
 @dataclass
 class Instance(DatasetProperty):
     """
-    What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there
-    multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and
-    edges)?
+    What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?
     """
     _inherited_slots: ClassVar[List[str]] = []
 
@@ -1049,7 +1093,11 @@ class Instance(DatasetProperty):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Instance
 
     id: Union[str, InstanceId] = None
-    representation: Optional[Union[str, List[str]]] = empty_list()
+    representation: Optional[str] = None
+    instance_type: Optional[str] = None
+    data_type: Optional[str] = None
+    counts: Optional[int] = None
+    label: Optional[str] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
@@ -1057,37 +1105,20 @@ class Instance(DatasetProperty):
         if not isinstance(self.id, InstanceId):
             self.id = InstanceId(self.id)
 
-        if not isinstance(self.representation, list):
-            self.representation = [self.representation] if self.representation is not None else []
-        self.representation = [v if isinstance(v, str) else str(v) for v in self.representation]
+        if self.representation is not None and not isinstance(self.representation, str):
+            self.representation = str(self.representation)
 
-        super().__post_init__(**kwargs)
+        if self.instance_type is not None and not isinstance(self.instance_type, str):
+            self.instance_type = str(self.instance_type)
 
+        if self.data_type is not None and not isinstance(self.data_type, str):
+            self.data_type = str(self.data_type)
 
-@dataclass
-class Counts(DatasetProperty):
-    """
-    How many instances are there in total (of each type, if appropriate)?
-    """
-    _inherited_slots: ClassVar[List[str]] = []
+        if self.counts is not None and not isinstance(self.counts, int):
+            self.counts = int(self.counts)
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Counts"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Counts"
-    class_name: ClassVar[str] = "Counts"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Counts
-
-    id: Union[str, CountsId] = None
-    count_values: Optional[Union[int, List[int]]] = empty_list()
-
-    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, CountsId):
-            self.id = CountsId(self.id)
-
-        if not isinstance(self.count_values, list):
-            self.count_values = [self.count_values] if self.count_values is not None else []
-        self.count_values = [v if isinstance(v, int) else int(v) for v in self.count_values]
+        if self.label is not None and not isinstance(self.label, str):
+            self.label = str(self.label)
 
         super().__post_init__(**kwargs)
 
@@ -1145,63 +1176,6 @@ class Sampling(DatasetProperty):
         if not isinstance(self.why_not_representative, list):
             self.why_not_representative = [self.why_not_representative] if self.why_not_representative is not None else []
         self.why_not_representative = [v if isinstance(v, str) else str(v) for v in self.why_not_representative]
-
-        super().__post_init__(**kwargs)
-
-
-@dataclass
-class Data(DatasetProperty):
-    """
-    What data does each instance consist of? “Raw” data (e.g., unprocessed text or images) or features? In either
-    case, please provide a description.
-    """
-    _inherited_slots: ClassVar[List[str]] = []
-
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Data"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Data"
-    class_name: ClassVar[str] = "Data"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Data
-
-    id: Union[str, DataId] = None
-    type: Optional[Union[str, List[str]]] = empty_list()
-
-    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DataId):
-            self.id = DataId(self.id)
-
-        if not isinstance(self.type, list):
-            self.type = [self.type] if self.type is not None else []
-        self.type = [v if isinstance(v, str) else str(v) for v in self.type]
-
-        super().__post_init__(**kwargs)
-
-
-@dataclass
-class Labels(DatasetProperty):
-    """
-    Is there a label or target associated with each instance?
-    """
-    _inherited_slots: ClassVar[List[str]] = []
-
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Labels"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Labels"
-    class_name: ClassVar[str] = "Labels"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Labels
-
-    id: Union[str, LabelsId] = None
-    label: Optional[Union[str, List[str]]] = empty_list()
-
-    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, LabelsId):
-            self.id = LabelsId(self.id)
-
-        if not isinstance(self.label, list):
-            self.label = [self.label] if self.label is not None else []
-        self.label = [v if isinstance(v, str) else str(v) for v in self.label]
 
         super().__post_init__(**kwargs)
 
@@ -2726,6 +2700,15 @@ slots.formatDialect__header = Slot(uri=DATA_SHEETS_SCHEMA.header, name="formatDi
 slots.formatDialect__quote_char = Slot(uri=DATA_SHEETS_SCHEMA.quote_char, name="formatDialect__quote_char", curie=DATA_SHEETS_SCHEMA.curie('quote_char'),
                    model_uri=DATA_SHEETS_SCHEMA.formatDialect__quote_char, domain=None, range=Optional[str])
 
+slots.person__affiliation = Slot(uri=DATA_SHEETS_SCHEMA.affiliation, name="person__affiliation", curie=DATA_SHEETS_SCHEMA.curie('affiliation'),
+                   model_uri=DATA_SHEETS_SCHEMA.person__affiliation, domain=None, range=Optional[Union[str, OrganizationId]])
+
+slots.organization__ror_id = Slot(uri=DATA_SHEETS_SCHEMA.ror_id, name="organization__ror_id", curie=DATA_SHEETS_SCHEMA.curie('ror_id'),
+                   model_uri=DATA_SHEETS_SCHEMA.organization__ror_id, domain=None, range=Optional[Union[str, RorIdentifier]])
+
+slots.organization__wikidata_id = Slot(uri=DATA_SHEETS_SCHEMA.wikidata_id, name="organization__wikidata_id", curie=DATA_SHEETS_SCHEMA.curie('wikidata_id'),
+                   model_uri=DATA_SHEETS_SCHEMA.organization__wikidata_id, domain=None, range=Optional[Union[str, WikidataIdentifier]])
+
 slots.datasetCollection__entries = Slot(uri=DATA_SHEETS_SCHEMA.entries, name="datasetCollection__entries", curie=DATA_SHEETS_SCHEMA.curie('entries'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetCollection__entries, domain=None, range=Optional[Union[Union[str, DatasetId], List[Union[str, DatasetId]]]])
 
@@ -2742,7 +2725,7 @@ slots.dataset__creators = Slot(uri=DATA_SHEETS_SCHEMA.creators, name="dataset__c
                    model_uri=DATA_SHEETS_SCHEMA.dataset__creators, domain=None, range=Optional[Union[Union[str, CreatorId], List[Union[str, CreatorId]]]])
 
 slots.dataset__funders = Slot(uri=DATA_SHEETS_SCHEMA.funders, name="dataset__funders", curie=DATA_SHEETS_SCHEMA.curie('funders'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__funders, domain=None, range=Optional[Union[Union[str, FunderId], List[Union[str, FunderId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__funders, domain=None, range=Optional[Union[Union[str, FundingMechanismId], List[Union[str, FundingMechanismId]]]])
 
 slots.dataset__instances = Slot(uri=DATA_SHEETS_SCHEMA.instances, name="dataset__instances", curie=DATA_SHEETS_SCHEMA.curie('instances'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__instances, domain=None, range=Optional[Union[Union[str, InstanceId], List[Union[str, InstanceId]]]])
@@ -2850,31 +2833,34 @@ slots.addressingGap__response = Slot(uri=DATA_SHEETS_SCHEMA.response, name="addr
                    model_uri=DATA_SHEETS_SCHEMA.addressingGap__response, domain=None, range=Optional[str])
 
 slots.creator__principal_investigator = Slot(uri=DATA_SHEETS_SCHEMA.principal_investigator, name="creator__principal_investigator", curie=DATA_SHEETS_SCHEMA.curie('principal_investigator'),
-                   model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[str])
+                   model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.creator__institution = Slot(uri=DATA_SHEETS_SCHEMA.institution, name="creator__institution", curie=DATA_SHEETS_SCHEMA.curie('institution'),
-                   model_uri=DATA_SHEETS_SCHEMA.creator__institution, domain=None, range=Optional[str])
+slots.creator__affiliation = Slot(uri=DATA_SHEETS_SCHEMA.affiliation, name="creator__affiliation", curie=DATA_SHEETS_SCHEMA.curie('affiliation'),
+                   model_uri=DATA_SHEETS_SCHEMA.creator__affiliation, domain=None, range=Optional[Union[str, OrganizationId]])
 
-slots.funder__grantor = Slot(uri=DATA_SHEETS_SCHEMA.grantor, name="funder__grantor", curie=DATA_SHEETS_SCHEMA.curie('grantor'),
-                   model_uri=DATA_SHEETS_SCHEMA.funder__grantor, domain=None, range=Optional[Union[str, GrantorId]])
+slots.fundingMechanism__grantor = Slot(uri=DATA_SHEETS_SCHEMA.grantor, name="fundingMechanism__grantor", curie=DATA_SHEETS_SCHEMA.curie('grantor'),
+                   model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grantor, domain=None, range=Optional[Union[str, GrantorId]])
 
-slots.funder__grant = Slot(uri=DATA_SHEETS_SCHEMA.grant, name="funder__grant", curie=DATA_SHEETS_SCHEMA.curie('grant'),
-                   model_uri=DATA_SHEETS_SCHEMA.funder__grant, domain=None, range=Optional[Union[str, GrantId]])
-
-slots.grantor__ror_id = Slot(uri=DATA_SHEETS_SCHEMA.ror_id, name="grantor__ror_id", curie=DATA_SHEETS_SCHEMA.curie('ror_id'),
-                   model_uri=DATA_SHEETS_SCHEMA.grantor__ror_id, domain=None, range=Optional[Union[str, RorIdentifier]])
-
-slots.grantor__wikidata_id = Slot(uri=DATA_SHEETS_SCHEMA.wikidata_id, name="grantor__wikidata_id", curie=DATA_SHEETS_SCHEMA.curie('wikidata_id'),
-                   model_uri=DATA_SHEETS_SCHEMA.grantor__wikidata_id, domain=None, range=Optional[Union[str, WikidataIdentifier]])
+slots.fundingMechanism__grant = Slot(uri=DATA_SHEETS_SCHEMA.grant, name="fundingMechanism__grant", curie=DATA_SHEETS_SCHEMA.curie('grant'),
+                   model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grant, domain=None, range=Optional[Union[str, GrantId]])
 
 slots.grant__grant_number = Slot(uri=DATA_SHEETS_SCHEMA.grant_number, name="grant__grant_number", curie=DATA_SHEETS_SCHEMA.curie('grant_number'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])
 
 slots.instance__representation = Slot(uri=DATA_SHEETS_SCHEMA.representation, name="instance__representation", curie=DATA_SHEETS_SCHEMA.curie('representation'),
-                   model_uri=DATA_SHEETS_SCHEMA.instance__representation, domain=None, range=Optional[Union[str, List[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.instance__representation, domain=None, range=Optional[str])
 
-slots.counts__count_values = Slot(uri=DATA_SHEETS_SCHEMA.count_values, name="counts__count_values", curie=DATA_SHEETS_SCHEMA.curie('count_values'),
-                   model_uri=DATA_SHEETS_SCHEMA.counts__count_values, domain=None, range=Optional[Union[int, List[int]]])
+slots.instance__instance_type = Slot(uri=DATA_SHEETS_SCHEMA.instance_type, name="instance__instance_type", curie=DATA_SHEETS_SCHEMA.curie('instance_type'),
+                   model_uri=DATA_SHEETS_SCHEMA.instance__instance_type, domain=None, range=Optional[str])
+
+slots.instance__data_type = Slot(uri=DATA_SHEETS_SCHEMA.data_type, name="instance__data_type", curie=DATA_SHEETS_SCHEMA.curie('data_type'),
+                   model_uri=DATA_SHEETS_SCHEMA.instance__data_type, domain=None, range=Optional[str])
+
+slots.instance__counts = Slot(uri=DATA_SHEETS_SCHEMA.counts, name="instance__counts", curie=DATA_SHEETS_SCHEMA.curie('counts'),
+                   model_uri=DATA_SHEETS_SCHEMA.instance__counts, domain=None, range=Optional[int])
+
+slots.instance__label = Slot(uri=DATA_SHEETS_SCHEMA.label, name="instance__label", curie=DATA_SHEETS_SCHEMA.curie('label'),
+                   model_uri=DATA_SHEETS_SCHEMA.instance__label, domain=None, range=Optional[str])
 
 slots.sampling__ia_sample = Slot(uri=DATA_SHEETS_SCHEMA.ia_sample, name="sampling__ia_sample", curie=DATA_SHEETS_SCHEMA.curie('ia_sample'),
                    model_uri=DATA_SHEETS_SCHEMA.sampling__ia_sample, domain=None, range=Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]])
@@ -2893,12 +2879,6 @@ slots.sampling__representative_verification = Slot(uri=DATA_SHEETS_SCHEMA.repres
 
 slots.sampling__why_not_representative = Slot(uri=DATA_SHEETS_SCHEMA.why_not_representative, name="sampling__why_not_representative", curie=DATA_SHEETS_SCHEMA.curie('why_not_representative'),
                    model_uri=DATA_SHEETS_SCHEMA.sampling__why_not_representative, domain=None, range=Optional[Union[str, List[str]]])
-
-slots.data__type = Slot(uri=DATA_SHEETS_SCHEMA.type, name="data__type", curie=DATA_SHEETS_SCHEMA.curie('type'),
-                   model_uri=DATA_SHEETS_SCHEMA.data__type, domain=None, range=Optional[Union[str, List[str]]])
-
-slots.labels__label = Slot(uri=DATA_SHEETS_SCHEMA.label, name="labels__label", curie=DATA_SHEETS_SCHEMA.curie('label'),
-                   model_uri=DATA_SHEETS_SCHEMA.labels__label, domain=None, range=Optional[Union[str, List[str]]])
 
 slots.missing__missing = Slot(uri=DATA_SHEETS_SCHEMA.missing, name="missing__missing", curie=DATA_SHEETS_SCHEMA.curie('missing'),
                    model_uri=DATA_SHEETS_SCHEMA.missing__missing, domain=None, range=Optional[Union[str, List[str]]])

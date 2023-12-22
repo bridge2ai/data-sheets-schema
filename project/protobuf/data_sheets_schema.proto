@@ -56,30 +56,14 @@ message ContentWarning
   string description = 0
  repeated  string warnings = 0
  }
-// How many instances are there in total (of each type, if appropriate)?
-message Counts
- {
-  string id = 0
-  string name = 0
-  string description = 0
- repeated  integer countValues = 0
- }
-// Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)?
+// Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team.
 message Creator
  {
   string id = 0
   string name = 0
   string description = 0
-  string principalInvestigator = 0
-  string institution = 0
- }
-// What data does each instance consist of? “Raw” data (e.g., unprocessed text or images) or features? In either case, please provide a description.
-message Data
- {
-  string id = 0
-  string name = 0
-  string description = 0
- repeated  string type = 0
+  person principalInvestigator = 0
+  organization affiliation = 0
  }
 // Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description.
 message DataAnomaly
@@ -193,7 +177,7 @@ message Dataset
  repeated  task tasks = 0
  repeated  addressingGap addressingGaps = 0
  repeated  creator creators = 0
- repeated  funder funders = 0
+ repeated  fundingMechanism funders = 0
  repeated  instance instances = 0
  repeated  dataAnomaly anomalies = 0
  repeated  externalResource externalResources = 0
@@ -351,7 +335,7 @@ message FormatDialect
   string quoteChar = 0
  }
 // Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.
-message Funder
+message FundingMechanism
  {
   string id = 0
   string name = 0
@@ -383,13 +367,17 @@ message Grantor
   rorIdentifier rorId = 0
   wikidataIdentifier wikidataId = 0
  }
-// What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?
+// What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?
 message Instance
  {
   string id = 0
   string name = 0
   string description = 0
- repeated  string representation = 0
+  string representation = 0
+  string instanceType = 0
+  string dataType = 0
+  integer counts = 0
+  string label = 0
  }
 // How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified?
 message InstanceAcquisition
@@ -404,14 +392,6 @@ message IPRestrictions
   string id = 0
   string name = 0
  repeated  string description = 0
- }
-// Is there a label or target associated with each instance?
-message Labels
- {
-  string id = 0
-  string name = 0
-  string description = 0
- repeated  string label = 0
  }
 // Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions.
 message LicenseAndUseTerms
@@ -451,12 +431,29 @@ message NamedThing
   string name = 0
   string description = 0
  }
+// A collection of people acting in common interests.
+message Organization
+ {
+  string id = 0
+  string name = 0
+  string description = 0
+  rorIdentifier rorId = 0
+  wikidataIdentifier wikidataId = 0
+ }
 // What (other) tasks could the dataset be used for?
 message OtherTask
  {
   string id = 0
   string name = 0
  repeated  string description = 0
+ }
+// An individual human being.
+message Person
+ {
+  string id = 0
+  string name = 0
+  string description = 0
+  organization affiliation = 0
  }
 // Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)?
 message PreprocessingCleaningLabeling

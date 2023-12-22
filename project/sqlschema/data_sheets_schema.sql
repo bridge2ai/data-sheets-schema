@@ -18,20 +18,6 @@ CREATE TABLE "ConsentRevocation" (
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "Counts" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	PRIMARY KEY (id)
-);
-
-CREATE TABLE "Data" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	PRIMARY KEY (id)
-);
-
 CREATE TABLE "DataPackage" (
 	id TEXT NOT NULL, 
 	download_url TEXT, 
@@ -169,13 +155,6 @@ CREATE TABLE "IPRestrictions" (
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "Labels" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	PRIMARY KEY (id)
-);
-
 CREATE TABLE "LicenseAndUseTerms" (
 	id TEXT NOT NULL, 
 	name TEXT, 
@@ -199,6 +178,15 @@ CREATE TABLE "NamedThing" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Organization" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	ror_id TEXT, 
+	wikidata_id TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -297,6 +285,15 @@ CREATE TABLE "Dataset" (
 	FOREIGN KEY("DatasetCollection_id") REFERENCES "DatasetCollection" (id)
 );
 
+CREATE TABLE "Person" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	affiliation TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(affiliation) REFERENCES "Organization" (id)
+);
+
 CREATE TABLE "CollectionConsent_description" (
 	backref_id TEXT, 
 	description TEXT, 
@@ -316,20 +313,6 @@ CREATE TABLE "ConsentRevocation_description" (
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "ConsentRevocation" (id)
-);
-
-CREATE TABLE "Counts_count_values" (
-	backref_id TEXT, 
-	count_values INTEGER, 
-	PRIMARY KEY (backref_id, count_values), 
-	FOREIGN KEY(backref_id) REFERENCES "Counts" (id)
-);
-
-CREATE TABLE "Data_type" (
-	backref_id TEXT, 
-	type TEXT, 
-	PRIMARY KEY (backref_id, type), 
-	FOREIGN KEY(backref_id) REFERENCES "Data" (id)
 );
 
 CREATE TABLE "DataPackage_keywords" (
@@ -407,13 +390,6 @@ CREATE TABLE "IPRestrictions_description" (
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "IPRestrictions" (id)
-);
-
-CREATE TABLE "Labels_label" (
-	backref_id TEXT, 
-	label TEXT, 
-	PRIMARY KEY (backref_id, label), 
-	FOREIGN KEY(backref_id) REFERENCES "Labels" (id)
 );
 
 CREATE TABLE "LicenseAndUseTerms_description" (
@@ -590,9 +566,11 @@ CREATE TABLE "Creator" (
 	name TEXT, 
 	description TEXT, 
 	principal_investigator TEXT, 
-	institution TEXT, 
+	affiliation TEXT, 
 	"Dataset_id" TEXT, 
 	PRIMARY KEY (id), 
+	FOREIGN KEY(principal_investigator) REFERENCES "Person" (id), 
+	FOREIGN KEY(affiliation) REFERENCES "Organization" (id), 
 	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
 );
 
@@ -678,7 +656,7 @@ CREATE TABLE "ExternalResource" (
 	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
 );
 
-CREATE TABLE "Funder" (
+CREATE TABLE "FundingMechanism" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
@@ -703,6 +681,11 @@ CREATE TABLE "Instance" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	representation TEXT, 
+	instance_type TEXT, 
+	data_type TEXT, 
+	counts INTEGER, 
+	label TEXT, 
 	"Dataset_id" TEXT, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
@@ -939,13 +922,6 @@ CREATE TABLE "FutureUseImpact_description" (
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "FutureUseImpact" (id)
-);
-
-CREATE TABLE "Instance_representation" (
-	backref_id TEXT, 
-	representation TEXT, 
-	PRIMARY KEY (backref_id, representation), 
-	FOREIGN KEY(backref_id) REFERENCES "Instance" (id)
 );
 
 CREATE TABLE "InstanceAcquisition_description" (

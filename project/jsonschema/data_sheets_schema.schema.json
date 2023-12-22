@@ -197,47 +197,19 @@
             "title": "ContentWarning",
             "type": "object"
         },
-        "Counts": {
-            "additionalProperties": false,
-            "description": "How many instances are there in total (of each type, if appropriate)?",
-            "properties": {
-                "count_values": {
-                    "items": {
-                        "type": "integer"
-                    },
-                    "type": "array"
-                },
-                "description": {
-                    "description": "human readable description of the information",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "Counts",
-            "type": "object"
-        },
         "Creator": {
             "additionalProperties": false,
-            "description": "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)?",
+            "description": "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team.",
             "properties": {
+                "affiliation": {
+                    "type": "string"
+                },
                 "description": {
                     "description": "human readable description of the information",
                     "type": "string"
                 },
                 "id": {
                     "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "institution": {
                     "type": "string"
                 },
                 "name": {
@@ -251,34 +223,6 @@
                 "id"
             ],
             "title": "Creator",
-            "type": "object"
-        },
-        "Data": {
-            "additionalProperties": false,
-            "description": "What data does each instance consist of? \u201cRaw\u201d data (e.g., unprocessed text or images) or features? In either case, please provide a description.",
-            "properties": {
-                "description": {
-                    "description": "human readable description of the information",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "type": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "Data",
             "type": "object"
         },
         "DataAnomaly": {
@@ -1336,7 +1280,7 @@
             "title": "FormatEnum",
             "type": "string"
         },
-        "Funder": {
+        "FundingMechanism": {
             "additionalProperties": false,
             "description": "Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.",
             "properties": {
@@ -1361,7 +1305,7 @@
             "required": [
                 "id"
             ],
-            "title": "Funder",
+            "title": "FundingMechanism",
             "type": "object"
         },
         "FutureUseImpact": {
@@ -1470,8 +1414,16 @@
         },
         "Instance": {
             "additionalProperties": false,
-            "description": "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?",
+            "description": "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?",
             "properties": {
+                "counts": {
+                    "description": "How many instances are there in total (of each type, if appropriate)?",
+                    "type": "integer"
+                },
+                "data_type": {
+                    "description": "What data does each instance consist of? \u201cRaw\u201d data (e.g., unprocessed text or images) or features? In either case, please provide a description.",
+                    "type": "string"
+                },
                 "description": {
                     "description": "human readable description of the information",
                     "type": "string"
@@ -1480,14 +1432,19 @@
                     "description": "the unique name of th dataset",
                     "type": "string"
                 },
+                "instance_type": {
+                    "description": "Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?",
+                    "type": "string"
+                },
+                "label": {
+                    "description": "Is there a label or target associated with each instance?",
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "representation": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
+                    "type": "string"
                 }
             },
             "required": [
@@ -1518,34 +1475,6 @@
                 "id"
             ],
             "title": "InstanceAcquisition",
-            "type": "object"
-        },
-        "Labels": {
-            "additionalProperties": false,
-            "description": "Is there a label or target associated with each instance?",
-            "properties": {
-                "description": {
-                    "description": "human readable description of the information",
-                    "type": "string"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "label": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "Labels",
             "type": "object"
         },
         "LicenseAndUseTerms": {
@@ -1691,6 +1620,36 @@
             "title": "NamedThing",
             "type": "object"
         },
+        "Organization": {
+            "additionalProperties": false,
+            "description": "A collection of people acting in common interests.",
+            "properties": {
+                "description": {
+                    "description": "human readable description of the information",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "ror_id": {
+                    "description": "Unique ROR identifier.",
+                    "type": "string"
+                },
+                "wikidata_id": {
+                    "description": "Unique Wikidata identifier.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Organization",
+            "type": "object"
+        },
         "OtherTask": {
             "additionalProperties": false,
             "description": "What (other) tasks could the dataset be used for?",
@@ -1713,6 +1672,31 @@
                 "id"
             ],
             "title": "OtherTask",
+            "type": "object"
+        },
+        "Person": {
+            "additionalProperties": false,
+            "description": "An individual human being.",
+            "properties": {
+                "affiliation": {
+                    "type": "string"
+                },
+                "description": {
+                    "description": "human readable description of the information",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Person",
             "type": "object"
         },
         "PreprocessingCleaningLabeling": {

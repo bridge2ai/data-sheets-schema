@@ -125,31 +125,13 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<Counts> CLOSED {
-    (  $<Counts_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <count_values> @linkml:Integer *
-       ) ;
-       rdf:type [ <Counts> ]
-    )
-}
-
 <Creator> CLOSED {
     (  $<Creator_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <principal_investigator> @linkml:String ? ;
-          <institution> @linkml:String ?
+          <principal_investigator> @<Person> ? ;
+          <affiliation> @<Organization> ?
        ) ;
        rdf:type [ <Creator> ]
-    )
-}
-
-<Data> CLOSED {
-    (  $<Data_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <type> @linkml:String *
-       ) ;
-       rdf:type [ <Data> ]
     )
 }
 
@@ -217,7 +199,7 @@ linkml:Sparqlpath xsd:string
           <tasks> @<Task> * ;
           <addressing_gaps> @<AddressingGap> * ;
           <creators> @<Creator> * ;
-          <funders> @<Funder> * ;
+          <funders> @<FundingMechanism> * ;
           <instances> @<Instance> * ;
           <anomalies> @<DataAnomaly> * ;
           <external_resources> @<ExternalResource> * ;
@@ -272,15 +254,14 @@ linkml:Sparqlpath xsd:string
           rdf:type [ <DatasetProperty> ]
        )
     } OR @<AddressingGap> OR @<CollectionConsent> OR @<CollectionMechanism> OR @<CollectionNotification> OR @<CollectionTimeframe>
-    OR @<Confidentiality> OR @<ConsentRevocation> OR @<ContentWarning> OR @<Counts> OR @<Creator> OR @<Data> OR @<DataAnomaly> OR
-    @<DataCollector> OR @<DataProtectionImpact> OR @<Deidentification> OR @<DirectCollection> OR @<DiscouragedUse> OR
-    @<DistributionDate> OR @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUse> OR
-    @<ExportControlRegulatoryRestrictions> OR @<ExtensionMechanism> OR @<ExternalResource> OR @<Funder> OR @<FutureUseImpact> OR
-    @<IPRestrictions> OR @<Instance> OR @<InstanceAcquisition> OR @<Labels> OR @<LicenseAndUseTerms> OR @<Maintainer> OR
-    @<MaintainerContact> OR @<Missing> OR @<OtherTask> OR @<PreprocessingCleaningLabeling> OR
-    @<PreprocessingCleaningLabelingSoftware> OR @<Purpose> OR @<RawData> OR @<Relationships> OR @<RetentionLimits> OR @<Sampling>
-    OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR @<Subpopulation> OR @<Task> OR @<ThirdPartySharing> OR
-    @<UpdatePlan> OR @<UseRepository> OR @<VersionAccess>
+    OR @<Confidentiality> OR @<ConsentRevocation> OR @<ContentWarning> OR @<Creator> OR @<DataAnomaly> OR @<DataCollector> OR
+    @<DataProtectionImpact> OR @<Deidentification> OR @<DirectCollection> OR @<DiscouragedUse> OR @<DistributionDate> OR
+    @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUse> OR @<ExportControlRegulatoryRestrictions> OR
+    @<ExtensionMechanism> OR @<ExternalResource> OR @<FundingMechanism> OR @<FutureUseImpact> OR @<IPRestrictions> OR @<Instance>
+    OR @<InstanceAcquisition> OR @<LicenseAndUseTerms> OR @<Maintainer> OR @<MaintainerContact> OR @<Missing> OR @<OtherTask> OR
+    @<PreprocessingCleaningLabeling> OR @<PreprocessingCleaningLabelingSoftware> OR @<Purpose> OR @<RawData> OR @<Relationships> OR
+    @<RetentionLimits> OR @<Sampling> OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR @<Subpopulation> OR @<Task> OR
+    @<ThirdPartySharing> OR @<UpdatePlan> OR @<UseRepository> OR @<VersionAccess>
 )
 
 <Deidentification> CLOSED {
@@ -397,13 +378,13 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<Funder> CLOSED {
-    (  $<Funder_tes> (  &<DatasetProperty_tes> ;
+<FundingMechanism> CLOSED {
+    (  $<FundingMechanism_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <grantor> @<Grantor> ? ;
           <grant> @<Grant> ?
        ) ;
-       rdf:type [ <Funder> ]
+       rdf:type [ <FundingMechanism> ]
     )
 }
 
@@ -426,10 +407,8 @@ linkml:Sparqlpath xsd:string
 }
 
 <Grantor> CLOSED {
-    (  $<Grantor_tes> (  &<NamedThing_tes> ;
-          rdf:type [ <NamedThing> ] ? ;
-          <ror_id> @<RorIdentifier> ? ;
-          <wikidata_id> @<WikidataIdentifier> ?
+    (  $<Grantor_tes> (  &<Organization_tes> ;
+          rdf:type [ <Organization> ] ?
        ) ;
        rdf:type [ <Grantor> ]
     )
@@ -466,7 +445,11 @@ linkml:Sparqlpath xsd:string
 <Instance> CLOSED {
     (  $<Instance_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <representation> @linkml:String *
+          <representation> @linkml:String ? ;
+          <instance_type> @linkml:String ? ;
+          <data_type> @linkml:String ? ;
+          <counts> @linkml:Integer ? ;
+          <label> @linkml:String ?
        ) ;
        rdf:type [ <Instance> ]
     )
@@ -487,15 +470,6 @@ linkml:Sparqlpath xsd:string
           <description> @linkml:String *
        ) ;
        rdf:type [ <IPRestrictions> ]
-    )
-}
-
-<Labels> CLOSED {
-    (  $<Labels_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <label> @linkml:String *
-       ) ;
-       rdf:type [ <Labels> ]
     )
 }
 
@@ -544,7 +518,19 @@ linkml:Sparqlpath xsd:string
           ) ;
           rdf:type [ <NamedThing> ]
        )
-    } OR @<DatasetProperty> OR @<Grant> OR @<Grantor>
+    } OR @<DatasetProperty> OR @<Grant> OR @<Organization> OR @<Person>
+)
+
+<Organization>  (
+    CLOSED {
+       (  $<Organization_tes> (  &<NamedThing_tes> ;
+             rdf:type [ <NamedThing> ] ? ;
+             <ror_id> @<RorIdentifier> ? ;
+             <wikidata_id> @<WikidataIdentifier> ?
+          ) ;
+          rdf:type [ <Organization> ]
+       )
+    } OR @<Grantor>
 )
 
 <OtherTask> CLOSED {
@@ -553,6 +539,15 @@ linkml:Sparqlpath xsd:string
           <description> @linkml:String *
        ) ;
        rdf:type [ <OtherTask> ]
+    )
+}
+
+<Person> CLOSED {
+    (  $<Person_tes> (  &<NamedThing_tes> ;
+          rdf:type [ <NamedThing> ] ? ;
+          <affiliation> @<Organization> ?
+       ) ;
+       rdf:type [ <Person> ]
     )
 }
 

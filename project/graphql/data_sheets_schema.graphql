@@ -56,29 +56,13 @@ type ContentWarning
     warnings: [String]
   }
 
-type Counts
-  {
-    id: String!
-    name: String
-    description: String
-    countValues: [Integer]
-  }
-
 type Creator
   {
     id: String!
     name: String
     description: String
-    principalInvestigator: String
-    institution: String
-  }
-
-type Data
-  {
-    id: String!
-    name: String
-    description: String
-    type: [String]
+    principalInvestigator: Person
+    affiliation: Organization
   }
 
 type DataAnomaly
@@ -192,7 +176,7 @@ type Dataset
     tasks: [Task]
     addressingGaps: [AddressingGap]
     creators: [Creator]
-    funders: [Funder]
+    funders: [FundingMechanism]
     instances: [Instance]
     anomalies: [DataAnomaly]
     externalResources: [ExternalResource]
@@ -350,7 +334,7 @@ type FormatDialect
     quoteChar: String
   }
 
-type Funder
+type FundingMechanism
   {
     id: String!
     name: String
@@ -411,7 +395,11 @@ type Instance
     id: String!
     name: String
     description: String
-    representation: [String]
+    representation: String
+    instanceType: String
+    dataType: String
+    counts: Integer
+    label: String
   }
 
 type InstanceAcquisition
@@ -426,14 +414,6 @@ type IPRestrictions
     id: String!
     name: String
     description: [String]
-  }
-
-type Labels
-  {
-    id: String!
-    name: String
-    description: String
-    label: [String]
   }
 
 type LicenseAndUseTerms
@@ -474,11 +454,28 @@ type NamedThing
     description: String
   }
 
+type Organization
+  {
+    id: String!
+    name: String
+    description: String
+    rorId: RorIdentifier
+    wikidataId: WikidataIdentifier
+  }
+
 type OtherTask
   {
     id: String!
     name: String
     description: [String]
+  }
+
+type Person
+  {
+    id: String!
+    name: String
+    description: String
+    affiliation: Organization
   }
 
 type PreprocessingCleaningLabeling
