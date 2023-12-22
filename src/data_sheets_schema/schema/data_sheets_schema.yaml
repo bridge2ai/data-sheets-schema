@@ -437,6 +437,10 @@ classes:
         description: >-
           How many instances are there in total (of each type, if appropriate)?
         range: integer
+      label:  # TODO: clarify what this means - it's fuzzy, and maybe redundant
+        description: >-
+          Is there a label or target associated with each instance?
+        range: string
     in_subset:
       - Composition
 
@@ -473,19 +477,6 @@ classes:
         multivalued: true
         # inlined: true
       why_not_representative:
-        range: string
-        multivalued: true
-        # inlined: true
-    in_subset:
-      - Composition
-
-  # TODO: consider this as an attribute of the Instance class
-  Labels:
-    description: >-
-      Is there a label or target associated with each instance?
-    is_a: DatasetProperty
-    attributes:
-      label:
         range: string
         multivalued: true
         # inlined: true
