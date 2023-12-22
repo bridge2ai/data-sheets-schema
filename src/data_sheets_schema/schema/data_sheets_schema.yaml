@@ -420,12 +420,18 @@ classes:
       documents, photos, people, countries)?
     is_a: DatasetProperty
     attributes:
-      representation:
+      representation:  # TODO: align with Bridge2AI Standards Schema topics
         range: string
-      type:
+      instance_type:
         description: >-
           Are there multiple types of instances (e.g., movies, users, and
           ratings; people and interactions between them; nodes and edges)?
+        range: string
+      data_type:  # TODO: align with Bridge2AI Standards Schema types
+        description: >-
+          What data does each instance consist of? “Raw” data (e.g., unprocessed
+          text or images) or features? In either case, please provide a
+          description.
         range: string
       counts:
         description: >-
@@ -467,21 +473,6 @@ classes:
         multivalued: true
         # inlined: true
       why_not_representative:
-        range: string
-        multivalued: true
-        # inlined: true
-      # subsample
-    in_subset:
-      - Composition
-
-  # TODO: consider this as an attribute of the Instance class
-  Data:
-    description: >-
-      What data does each instance consist of? “Raw” data (e.g., unprocessed
-      text or images) or features? In either case, please provide a description.
-    is_a: DatasetProperty
-    attributes:
-      type:
         range: string
         multivalued: true
         # inlined: true
