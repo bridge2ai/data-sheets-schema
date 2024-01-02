@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2023-12-22T16:33:04
+# Generation date: 2024-01-02T15:08:09
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -108,6 +108,10 @@ class DatasetId(DataResourceId):
     pass
 
 
+class DataSubsetId(DatasetId):
+    pass
+
+
 class PurposeId(DatasetPropertyId):
     pass
 
@@ -140,11 +144,11 @@ class InstanceId(DatasetPropertyId):
     pass
 
 
-class SamplingId(DatasetPropertyId):
+class SamplingStrategyId(DatasetPropertyId):
     pass
 
 
-class MissingId(DatasetPropertyId):
+class MissingInfoId(DatasetPropertyId):
     pass
 
 
@@ -192,10 +196,6 @@ class CollectionMechanismId(DatasetPropertyId):
     pass
 
 
-class SamplingStrategyId(DatasetPropertyId):
-    pass
-
-
 class DataCollectorId(DatasetPropertyId):
     pass
 
@@ -228,7 +228,15 @@ class DataProtectionImpactId(DatasetPropertyId):
     pass
 
 
-class PreprocessingCleaningLabelingId(DatasetPropertyId):
+class PreprocessingStrategyId(DatasetPropertyId):
+    pass
+
+
+class CleaningStrategyId(DatasetPropertyId):
+    pass
+
+
+class LabelingStrategyId(DatasetPropertyId):
     pass
 
 
@@ -714,7 +722,9 @@ class Dataset(DataResource):
     collection_timeframes: Optional[Union[Union[str, CollectionTimeframeId], List[Union[str, CollectionTimeframeId]]]] = empty_list()
     ethical_reviews: Optional[Union[Union[str, EthicalReviewId], List[Union[str, EthicalReviewId]]]] = empty_list()
     data_protection_impacts: Optional[Union[Union[str, DataProtectionImpactId], List[Union[str, DataProtectionImpactId]]]] = empty_list()
-    preprocessing_cleaning_labeling_methods: Optional[Union[Union[str, PreprocessingCleaningLabelingId], List[Union[str, PreprocessingCleaningLabelingId]]]] = empty_list()
+    preprocessing_strategies: Optional[Union[Union[str, PreprocessingStrategyId], List[Union[str, PreprocessingStrategyId]]]] = empty_list()
+    cleaning_strategies: Optional[Union[Union[str, CleaningStrategyId], List[Union[str, CleaningStrategyId]]]] = empty_list()
+    labeling_strategies: Optional[Union[Union[str, LabelingStrategyId], List[Union[str, LabelingStrategyId]]]] = empty_list()
     raw_sources: Optional[Union[Union[str, RawDataId], List[Union[str, RawDataId]]]] = empty_list()
     existing_uses: Optional[Union[Union[str, ExistingUseId], List[Union[str, ExistingUseId]]]] = empty_list()
     use_repository: Optional[Union[Union[str, UseRepositoryId], List[Union[str, UseRepositoryId]]]] = empty_list()
@@ -732,6 +742,7 @@ class Dataset(DataResource):
     retention_limit: Optional[Union[str, RetentionLimitsId]] = None
     version_access: Optional[Union[str, VersionAccessId]] = None
     extension_mechanism: Optional[Union[str, ExtensionMechanismId]] = None
+    is_deidentified: Optional[Union[str, DeidentificationId]] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
@@ -815,9 +826,17 @@ class Dataset(DataResource):
             self.data_protection_impacts = [self.data_protection_impacts] if self.data_protection_impacts is not None else []
         self.data_protection_impacts = [v if isinstance(v, DataProtectionImpactId) else DataProtectionImpactId(v) for v in self.data_protection_impacts]
 
-        if not isinstance(self.preprocessing_cleaning_labeling_methods, list):
-            self.preprocessing_cleaning_labeling_methods = [self.preprocessing_cleaning_labeling_methods] if self.preprocessing_cleaning_labeling_methods is not None else []
-        self.preprocessing_cleaning_labeling_methods = [v if isinstance(v, PreprocessingCleaningLabelingId) else PreprocessingCleaningLabelingId(v) for v in self.preprocessing_cleaning_labeling_methods]
+        if not isinstance(self.preprocessing_strategies, list):
+            self.preprocessing_strategies = [self.preprocessing_strategies] if self.preprocessing_strategies is not None else []
+        self.preprocessing_strategies = [v if isinstance(v, PreprocessingStrategyId) else PreprocessingStrategyId(v) for v in self.preprocessing_strategies]
+
+        if not isinstance(self.cleaning_strategies, list):
+            self.cleaning_strategies = [self.cleaning_strategies] if self.cleaning_strategies is not None else []
+        self.cleaning_strategies = [v if isinstance(v, CleaningStrategyId) else CleaningStrategyId(v) for v in self.cleaning_strategies]
+
+        if not isinstance(self.labeling_strategies, list):
+            self.labeling_strategies = [self.labeling_strategies] if self.labeling_strategies is not None else []
+        self.labeling_strategies = [v if isinstance(v, LabelingStrategyId) else LabelingStrategyId(v) for v in self.labeling_strategies]
 
         if not isinstance(self.raw_sources, list):
             self.raw_sources = [self.raw_sources] if self.raw_sources is not None else []
@@ -879,6 +898,32 @@ class Dataset(DataResource):
 
         if self.extension_mechanism is not None and not isinstance(self.extension_mechanism, ExtensionMechanismId):
             self.extension_mechanism = ExtensionMechanismId(self.extension_mechanism)
+
+        if self.is_deidentified is not None and not isinstance(self.is_deidentified, DeidentificationId):
+            self.is_deidentified = DeidentificationId(self.is_deidentified)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class DataSubset(Dataset):
+    """
+    A subset of a dataset, likely containing multiple files of multiple potential purposes and properties.
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DataSubset"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:DataSubset"
+    class_name: ClassVar[str] = "DataSubset"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataSubset
+
+    id: Union[str, DataSubsetId] = None
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, DataSubsetId):
+            self.id = DataSubsetId(self.id)
 
         super().__post_init__(**kwargs)
 
@@ -1098,6 +1143,8 @@ class Instance(DatasetProperty):
     data_type: Optional[str] = None
     counts: Optional[int] = None
     label: Optional[str] = None
+    sampling_strategies: Optional[Union[Union[str, SamplingStrategyId], List[Union[str, SamplingStrategyId]]]] = empty_list()
+    missing_information: Optional[Union[Union[str, MissingInfoId], List[Union[str, MissingInfoId]]]] = empty_list()
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
@@ -1120,11 +1167,19 @@ class Instance(DatasetProperty):
         if self.label is not None and not isinstance(self.label, str):
             self.label = str(self.label)
 
+        if not isinstance(self.sampling_strategies, list):
+            self.sampling_strategies = [self.sampling_strategies] if self.sampling_strategies is not None else []
+        self.sampling_strategies = [v if isinstance(v, SamplingStrategyId) else SamplingStrategyId(v) for v in self.sampling_strategies]
+
+        if not isinstance(self.missing_information, list):
+            self.missing_information = [self.missing_information] if self.missing_information is not None else []
+        self.missing_information = [v if isinstance(v, MissingInfoId) else MissingInfoId(v) for v in self.missing_information]
+
         super().__post_init__(**kwargs)
 
 
 @dataclass
-class Sampling(DatasetProperty):
+class SamplingStrategy(DatasetProperty):
     """
     Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a
     larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger
@@ -1134,24 +1189,25 @@ class Sampling(DatasetProperty):
     """
     _inherited_slots: ClassVar[List[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Sampling"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Sampling"
-    class_name: ClassVar[str] = "Sampling"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Sampling
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["SamplingStrategy"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:SamplingStrategy"
+    class_name: ClassVar[str] = "SamplingStrategy"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SamplingStrategy
 
-    id: Union[str, SamplingId] = None
+    id: Union[str, SamplingStrategyId] = None
     ia_sample: Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]] = empty_list()
     israndom: Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]] = empty_list()
     source_data: Optional[Union[str, List[str]]] = empty_list()
     is_representative: Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]] = empty_list()
     representative_verification: Optional[Union[str, List[str]]] = empty_list()
     why_not_representative: Optional[Union[str, List[str]]] = empty_list()
+    strategies: Optional[Union[str, List[str]]] = empty_list()
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
             self.MissingRequiredField("id")
-        if not isinstance(self.id, SamplingId):
-            self.id = SamplingId(self.id)
+        if not isinstance(self.id, SamplingStrategyId):
+            self.id = SamplingStrategyId(self.id)
 
         if not isinstance(self.ia_sample, list):
             self.ia_sample = [self.ia_sample] if self.ia_sample is not None else []
@@ -1177,11 +1233,15 @@ class Sampling(DatasetProperty):
             self.why_not_representative = [self.why_not_representative] if self.why_not_representative is not None else []
         self.why_not_representative = [v if isinstance(v, str) else str(v) for v in self.why_not_representative]
 
+        if not isinstance(self.strategies, list):
+            self.strategies = [self.strategies] if self.strategies is not None else []
+        self.strategies = [v if isinstance(v, str) else str(v) for v in self.strategies]
+
         super().__post_init__(**kwargs)
 
 
 @dataclass
-class Missing(DatasetProperty):
+class MissingInfo(DatasetProperty):
     """
     Is any information missing from individual instances? If so, please provide a description, explaining why this
     information is missing (e.g., because it was unavailable). This does not include intentionally removed
@@ -1189,20 +1249,20 @@ class Missing(DatasetProperty):
     """
     _inherited_slots: ClassVar[List[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Missing"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Missing"
-    class_name: ClassVar[str] = "Missing"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Missing
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["MissingInfo"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:MissingInfo"
+    class_name: ClassVar[str] = "MissingInfo"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.MissingInfo
 
-    id: Union[str, MissingId] = None
+    id: Union[str, MissingInfoId] = None
     missing: Optional[Union[str, List[str]]] = empty_list()
     why_missing: Optional[Union[str, List[str]]] = empty_list()
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
             self.MissingRequiredField("id")
-        if not isinstance(self.id, MissingId):
-            self.id = MissingId(self.id)
+        if not isinstance(self.id, MissingInfoId):
+            self.id = MissingInfoId(self.id)
 
         if not isinstance(self.missing, list):
             self.missing = [self.missing] if self.missing is not None else []
@@ -1520,6 +1580,10 @@ class InstanceAcquisition(DatasetProperty):
 
     id: Union[str, InstanceAcquisitionId] = None
     description: Optional[Union[str, List[str]]] = empty_list()
+    was_directly_observed: Optional[Union[bool, Bool]] = None
+    was_reported_by_subjects: Optional[Union[bool, Bool]] = None
+    was_inferred_derived: Optional[Union[bool, Bool]] = None
+    was_validated_verified: Optional[Union[bool, Bool]] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
@@ -1530,6 +1594,18 @@ class InstanceAcquisition(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+
+        if self.was_directly_observed is not None and not isinstance(self.was_directly_observed, Bool):
+            self.was_directly_observed = Bool(self.was_directly_observed)
+
+        if self.was_reported_by_subjects is not None and not isinstance(self.was_reported_by_subjects, Bool):
+            self.was_reported_by_subjects = Bool(self.was_reported_by_subjects)
+
+        if self.was_inferred_derived is not None and not isinstance(self.was_inferred_derived, Bool):
+            self.was_inferred_derived = Bool(self.was_inferred_derived)
+
+        if self.was_validated_verified is not None and not isinstance(self.was_validated_verified, Bool):
+            self.was_validated_verified = Bool(self.was_validated_verified)
 
         super().__post_init__(**kwargs)
 
@@ -1555,35 +1631,6 @@ class CollectionMechanism(DatasetProperty):
             self.MissingRequiredField("id")
         if not isinstance(self.id, CollectionMechanismId):
             self.id = CollectionMechanismId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        super().__post_init__(**kwargs)
-
-
-@dataclass
-class SamplingStrategy(DatasetProperty):
-    """
-    If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic
-    with specific sampling probabilities)?
-    """
-    _inherited_slots: ClassVar[List[str]] = []
-
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["SamplingStrategy"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:SamplingStrategy"
-    class_name: ClassVar[str] = "SamplingStrategy"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SamplingStrategy
-
-    id: Union[str, SamplingStrategyId] = None
-    description: Optional[Union[str, List[str]]] = empty_list()
-
-    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, SamplingStrategyId):
-            self.id = SamplingStrategyId(self.id)
 
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
@@ -1831,26 +1878,81 @@ class DataProtectionImpact(DatasetProperty):
 
 
 @dataclass
-class PreprocessingCleaningLabeling(DatasetProperty):
+class PreprocessingStrategy(DatasetProperty):
     """
-    Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization,
-    part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)?
+    Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?
     """
     _inherited_slots: ClassVar[List[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["PreprocessingCleaningLabeling"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:PreprocessingCleaningLabeling"
-    class_name: ClassVar[str] = "PreprocessingCleaningLabeling"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.PreprocessingCleaningLabeling
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["PreprocessingStrategy"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:PreprocessingStrategy"
+    class_name: ClassVar[str] = "PreprocessingStrategy"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.PreprocessingStrategy
 
-    id: Union[str, PreprocessingCleaningLabelingId] = None
+    id: Union[str, PreprocessingStrategyId] = None
     description: Optional[Union[str, List[str]]] = empty_list()
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
         if self._is_empty(self.id):
             self.MissingRequiredField("id")
-        if not isinstance(self.id, PreprocessingCleaningLabelingId):
-            self.id = PreprocessingCleaningLabelingId(self.id)
+        if not isinstance(self.id, PreprocessingStrategyId):
+            self.id = PreprocessingStrategyId(self.id)
+
+        if not isinstance(self.description, list):
+            self.description = [self.description] if self.description is not None else []
+        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class CleaningStrategy(DatasetProperty):
+    """
+    Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["CleaningStrategy"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:CleaningStrategy"
+    class_name: ClassVar[str] = "CleaningStrategy"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CleaningStrategy
+
+    id: Union[str, CleaningStrategyId] = None
+    description: Optional[Union[str, List[str]]] = empty_list()
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, CleaningStrategyId):
+            self.id = CleaningStrategyId(self.id)
+
+        if not isinstance(self.description, list):
+            self.description = [self.description] if self.description is not None else []
+        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass
+class LabelingStrategy(DatasetProperty):
+    """
+    Was any preprocessing/cleaning/labeling of the data done (e.g., part-of-speech tagging)?
+    """
+    _inherited_slots: ClassVar[List[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["LabelingStrategy"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:LabelingStrategy"
+    class_name: ClassVar[str] = "LabelingStrategy"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LabelingStrategy
+
+    id: Union[str, LabelingStrategyId] = None
+    description: Optional[Union[str, List[str]]] = empty_list()
+
+    def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, LabelingStrategyId):
+            self.id = LabelingStrategyId(self.id)
 
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
@@ -2769,8 +2871,14 @@ slots.dataset__ethical_reviews = Slot(uri=DATA_SHEETS_SCHEMA.ethical_reviews, na
 slots.dataset__data_protection_impacts = Slot(uri=DATA_SHEETS_SCHEMA.data_protection_impacts, name="dataset__data_protection_impacts", curie=DATA_SHEETS_SCHEMA.curie('data_protection_impacts'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__data_protection_impacts, domain=None, range=Optional[Union[Union[str, DataProtectionImpactId], List[Union[str, DataProtectionImpactId]]]])
 
-slots.dataset__preprocessing_cleaning_labeling_methods = Slot(uri=DATA_SHEETS_SCHEMA.preprocessing_cleaning_labeling_methods, name="dataset__preprocessing_cleaning_labeling_methods", curie=DATA_SHEETS_SCHEMA.curie('preprocessing_cleaning_labeling_methods'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__preprocessing_cleaning_labeling_methods, domain=None, range=Optional[Union[Union[str, PreprocessingCleaningLabelingId], List[Union[str, PreprocessingCleaningLabelingId]]]])
+slots.dataset__preprocessing_strategies = Slot(uri=DATA_SHEETS_SCHEMA.preprocessing_strategies, name="dataset__preprocessing_strategies", curie=DATA_SHEETS_SCHEMA.curie('preprocessing_strategies'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__preprocessing_strategies, domain=None, range=Optional[Union[Union[str, PreprocessingStrategyId], List[Union[str, PreprocessingStrategyId]]]])
+
+slots.dataset__cleaning_strategies = Slot(uri=DATA_SHEETS_SCHEMA.cleaning_strategies, name="dataset__cleaning_strategies", curie=DATA_SHEETS_SCHEMA.curie('cleaning_strategies'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__cleaning_strategies, domain=None, range=Optional[Union[Union[str, CleaningStrategyId], List[Union[str, CleaningStrategyId]]]])
+
+slots.dataset__labeling_strategies = Slot(uri=DATA_SHEETS_SCHEMA.labeling_strategies, name="dataset__labeling_strategies", curie=DATA_SHEETS_SCHEMA.curie('labeling_strategies'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__labeling_strategies, domain=None, range=Optional[Union[Union[str, LabelingStrategyId], List[Union[str, LabelingStrategyId]]]])
 
 slots.dataset__raw_sources = Slot(uri=DATA_SHEETS_SCHEMA.raw_sources, name="dataset__raw_sources", curie=DATA_SHEETS_SCHEMA.curie('raw_sources'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__raw_sources, domain=None, range=Optional[Union[Union[str, RawDataId], List[Union[str, RawDataId]]]])
@@ -2823,6 +2931,9 @@ slots.dataset__version_access = Slot(uri=DATA_SHEETS_SCHEMA.version_access, name
 slots.dataset__extension_mechanism = Slot(uri=DATA_SHEETS_SCHEMA.extension_mechanism, name="dataset__extension_mechanism", curie=DATA_SHEETS_SCHEMA.curie('extension_mechanism'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__extension_mechanism, domain=None, range=Optional[Union[str, ExtensionMechanismId]])
 
+slots.dataset__is_deidentified = Slot(uri=DATA_SHEETS_SCHEMA.is_deidentified, name="dataset__is_deidentified", curie=DATA_SHEETS_SCHEMA.curie('is_deidentified'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__is_deidentified, domain=None, range=Optional[Union[str, DeidentificationId]])
+
 slots.purpose__response = Slot(uri=DATA_SHEETS_SCHEMA.response, name="purpose__response", curie=DATA_SHEETS_SCHEMA.curie('response'),
                    model_uri=DATA_SHEETS_SCHEMA.purpose__response, domain=None, range=Optional[str])
 
@@ -2862,29 +2973,38 @@ slots.instance__counts = Slot(uri=DATA_SHEETS_SCHEMA.counts, name="instance__cou
 slots.instance__label = Slot(uri=DATA_SHEETS_SCHEMA.label, name="instance__label", curie=DATA_SHEETS_SCHEMA.curie('label'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label, domain=None, range=Optional[str])
 
-slots.sampling__ia_sample = Slot(uri=DATA_SHEETS_SCHEMA.ia_sample, name="sampling__ia_sample", curie=DATA_SHEETS_SCHEMA.curie('ia_sample'),
-                   model_uri=DATA_SHEETS_SCHEMA.sampling__ia_sample, domain=None, range=Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]])
+slots.instance__sampling_strategies = Slot(uri=DATA_SHEETS_SCHEMA.sampling_strategies, name="instance__sampling_strategies", curie=DATA_SHEETS_SCHEMA.curie('sampling_strategies'),
+                   model_uri=DATA_SHEETS_SCHEMA.instance__sampling_strategies, domain=None, range=Optional[Union[Union[str, SamplingStrategyId], List[Union[str, SamplingStrategyId]]]])
 
-slots.sampling__israndom = Slot(uri=DATA_SHEETS_SCHEMA.israndom, name="sampling__israndom", curie=DATA_SHEETS_SCHEMA.curie('israndom'),
-                   model_uri=DATA_SHEETS_SCHEMA.sampling__israndom, domain=None, range=Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]])
+slots.instance__missing_information = Slot(uri=DATA_SHEETS_SCHEMA.missing_information, name="instance__missing_information", curie=DATA_SHEETS_SCHEMA.curie('missing_information'),
+                   model_uri=DATA_SHEETS_SCHEMA.instance__missing_information, domain=None, range=Optional[Union[Union[str, MissingInfoId], List[Union[str, MissingInfoId]]]])
 
-slots.sampling__source_data = Slot(uri=DATA_SHEETS_SCHEMA.source_data, name="sampling__source_data", curie=DATA_SHEETS_SCHEMA.curie('source_data'),
-                   model_uri=DATA_SHEETS_SCHEMA.sampling__source_data, domain=None, range=Optional[Union[str, List[str]]])
+slots.samplingStrategy__ia_sample = Slot(uri=DATA_SHEETS_SCHEMA.ia_sample, name="samplingStrategy__ia_sample", curie=DATA_SHEETS_SCHEMA.curie('ia_sample'),
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__ia_sample, domain=None, range=Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]])
 
-slots.sampling__is_representative = Slot(uri=DATA_SHEETS_SCHEMA.is_representative, name="sampling__is_representative", curie=DATA_SHEETS_SCHEMA.curie('is_representative'),
-                   model_uri=DATA_SHEETS_SCHEMA.sampling__is_representative, domain=None, range=Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]])
+slots.samplingStrategy__israndom = Slot(uri=DATA_SHEETS_SCHEMA.israndom, name="samplingStrategy__israndom", curie=DATA_SHEETS_SCHEMA.curie('israndom'),
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__israndom, domain=None, range=Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]])
 
-slots.sampling__representative_verification = Slot(uri=DATA_SHEETS_SCHEMA.representative_verification, name="sampling__representative_verification", curie=DATA_SHEETS_SCHEMA.curie('representative_verification'),
-                   model_uri=DATA_SHEETS_SCHEMA.sampling__representative_verification, domain=None, range=Optional[Union[str, List[str]]])
+slots.samplingStrategy__source_data = Slot(uri=DATA_SHEETS_SCHEMA.source_data, name="samplingStrategy__source_data", curie=DATA_SHEETS_SCHEMA.curie('source_data'),
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__source_data, domain=None, range=Optional[Union[str, List[str]]])
 
-slots.sampling__why_not_representative = Slot(uri=DATA_SHEETS_SCHEMA.why_not_representative, name="sampling__why_not_representative", curie=DATA_SHEETS_SCHEMA.curie('why_not_representative'),
-                   model_uri=DATA_SHEETS_SCHEMA.sampling__why_not_representative, domain=None, range=Optional[Union[str, List[str]]])
+slots.samplingStrategy__is_representative = Slot(uri=DATA_SHEETS_SCHEMA.is_representative, name="samplingStrategy__is_representative", curie=DATA_SHEETS_SCHEMA.curie('is_representative'),
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_representative, domain=None, range=Optional[Union[Union[bool, Bool], List[Union[bool, Bool]]]])
 
-slots.missing__missing = Slot(uri=DATA_SHEETS_SCHEMA.missing, name="missing__missing", curie=DATA_SHEETS_SCHEMA.curie('missing'),
-                   model_uri=DATA_SHEETS_SCHEMA.missing__missing, domain=None, range=Optional[Union[str, List[str]]])
+slots.samplingStrategy__representative_verification = Slot(uri=DATA_SHEETS_SCHEMA.representative_verification, name="samplingStrategy__representative_verification", curie=DATA_SHEETS_SCHEMA.curie('representative_verification'),
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__representative_verification, domain=None, range=Optional[Union[str, List[str]]])
 
-slots.missing__why_missing = Slot(uri=DATA_SHEETS_SCHEMA.why_missing, name="missing__why_missing", curie=DATA_SHEETS_SCHEMA.curie('why_missing'),
-                   model_uri=DATA_SHEETS_SCHEMA.missing__why_missing, domain=None, range=Optional[Union[str, List[str]]])
+slots.samplingStrategy__why_not_representative = Slot(uri=DATA_SHEETS_SCHEMA.why_not_representative, name="samplingStrategy__why_not_representative", curie=DATA_SHEETS_SCHEMA.curie('why_not_representative'),
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__why_not_representative, domain=None, range=Optional[Union[str, List[str]]])
+
+slots.samplingStrategy__strategies = Slot(uri=DATA_SHEETS_SCHEMA.strategies, name="samplingStrategy__strategies", curie=DATA_SHEETS_SCHEMA.curie('strategies'),
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__strategies, domain=None, range=Optional[Union[str, List[str]]])
+
+slots.missingInfo__missing = Slot(uri=DATA_SHEETS_SCHEMA.missing, name="missingInfo__missing", curie=DATA_SHEETS_SCHEMA.curie('missing'),
+                   model_uri=DATA_SHEETS_SCHEMA.missingInfo__missing, domain=None, range=Optional[Union[str, List[str]]])
+
+slots.missingInfo__why_missing = Slot(uri=DATA_SHEETS_SCHEMA.why_missing, name="missingInfo__why_missing", curie=DATA_SHEETS_SCHEMA.curie('why_missing'),
+                   model_uri=DATA_SHEETS_SCHEMA.missingInfo__why_missing, domain=None, range=Optional[Union[str, List[str]]])
 
 slots.relationships__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="relationships__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.relationships__description, domain=None, range=Optional[Union[str, List[str]]])
@@ -2928,11 +3048,20 @@ slots.sensitiveElement__description = Slot(uri=DATA_SHEETS_SCHEMA.description, n
 slots.instanceAcquisition__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="instanceAcquisition__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__description, domain=None, range=Optional[Union[str, List[str]]])
 
+slots.instanceAcquisition__was_directly_observed = Slot(uri=DATA_SHEETS_SCHEMA.was_directly_observed, name="instanceAcquisition__was_directly_observed", curie=DATA_SHEETS_SCHEMA.curie('was_directly_observed'),
+                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_directly_observed, domain=None, range=Optional[Union[bool, Bool]])
+
+slots.instanceAcquisition__was_reported_by_subjects = Slot(uri=DATA_SHEETS_SCHEMA.was_reported_by_subjects, name="instanceAcquisition__was_reported_by_subjects", curie=DATA_SHEETS_SCHEMA.curie('was_reported_by_subjects'),
+                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_reported_by_subjects, domain=None, range=Optional[Union[bool, Bool]])
+
+slots.instanceAcquisition__was_inferred_derived = Slot(uri=DATA_SHEETS_SCHEMA.was_inferred_derived, name="instanceAcquisition__was_inferred_derived", curie=DATA_SHEETS_SCHEMA.curie('was_inferred_derived'),
+                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_inferred_derived, domain=None, range=Optional[Union[bool, Bool]])
+
+slots.instanceAcquisition__was_validated_verified = Slot(uri=DATA_SHEETS_SCHEMA.was_validated_verified, name="instanceAcquisition__was_validated_verified", curie=DATA_SHEETS_SCHEMA.curie('was_validated_verified'),
+                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_validated_verified, domain=None, range=Optional[Union[bool, Bool]])
+
 slots.collectionMechanism__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="collectionMechanism__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.collectionMechanism__description, domain=None, range=Optional[Union[str, List[str]]])
-
-slots.samplingStrategy__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="samplingStrategy__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__description, domain=None, range=Optional[Union[str, List[str]]])
 
 slots.dataCollector__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="dataCollector__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.dataCollector__description, domain=None, range=Optional[Union[str, List[str]]])
@@ -2958,8 +3087,14 @@ slots.consentRevocation__description = Slot(uri=DATA_SHEETS_SCHEMA.description, 
 slots.dataProtectionImpact__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="dataProtectionImpact__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__description, domain=None, range=Optional[Union[str, List[str]]])
 
-slots.preprocessingCleaningLabeling__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="preprocessingCleaningLabeling__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.preprocessingCleaningLabeling__description, domain=None, range=Optional[Union[str, List[str]]])
+slots.preprocessingStrategy__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="preprocessingStrategy__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__description, domain=None, range=Optional[Union[str, List[str]]])
+
+slots.cleaningStrategy__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="cleaningStrategy__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__description, domain=None, range=Optional[Union[str, List[str]]])
+
+slots.labelingStrategy__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="labelingStrategy__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__description, domain=None, range=Optional[Union[str, List[str]]])
 
 slots.rawData__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="rawData__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.rawData__description, domain=None, range=Optional[Union[str, List[str]]])

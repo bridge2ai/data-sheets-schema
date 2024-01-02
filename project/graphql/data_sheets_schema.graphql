@@ -6,6 +6,13 @@ type AddressingGap
     response: String
   }
 
+type CleaningStrategy
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
 type CollectionConsent
   {
     id: String!
@@ -191,7 +198,9 @@ type Dataset
     collectionTimeframes: [CollectionTimeframe]
     ethicalReviews: [EthicalReview]
     dataProtectionImpacts: [DataProtectionImpact]
-    preprocessingCleaningLabelingMethods: [PreprocessingCleaningLabeling]
+    preprocessingStrategies: [PreprocessingStrategy]
+    cleaningStrategies: [CleaningStrategy]
+    labelingStrategies: [LabelingStrategy]
     rawSources: [RawData]
     existingUses: [ExistingUse]
     useRepository: [UseRepository]
@@ -209,6 +218,7 @@ type Dataset
     retentionLimit: RetentionLimits
     versionAccess: VersionAccess
     extensionMechanism: ExtensionMechanism
+    isDeidentified: Deidentification
   }
 
 type DatasetCollection
@@ -241,6 +251,78 @@ type DatasetProperty
     id: String!
     name: String
     description: String
+  }
+
+type DataSubset
+  {
+    id: String!
+    downloadUrl: Uri
+    license: String
+    conformsTo: Uriorcurie
+    conformsToSchema: Uriorcurie
+    conformsToClass: Uriorcurie
+    version: String
+    language: String
+    publisher: Uriorcurie
+    keywords: [String]
+    issued: Datetime
+    createdBy: Uriorcurie
+    createdOn: Datetime
+    compression: String
+    wasDerivedFrom: String
+    page: String
+    testRoles: [TestRole]
+    path: String
+    title: String
+    description: String
+    format: FormatEnum
+    mediaType: String
+    encoding: String
+    bytes: Integer
+    hash: String
+    md5: String
+    sha256: String
+    dialect: String
+    purposes: [Purpose]
+    tasks: [Task]
+    addressingGaps: [AddressingGap]
+    creators: [Creator]
+    funders: [FundingMechanism]
+    instances: [Instance]
+    anomalies: [DataAnomaly]
+    externalResources: [ExternalResource]
+    confidentialElements: [Confidentiality]
+    contentWarnings: [ContentWarning]
+    subpopulations: [Subpopulation]
+    sensitiveElements: [SensitiveElement]
+    acquisitionMethods: [InstanceAcquisition]
+    collectionMechanisms: [CollectionMechanism]
+    samplingStrategies: [SamplingStrategy]
+    dataCollectors: [DataCollector]
+    collectionTimeframes: [CollectionTimeframe]
+    ethicalReviews: [EthicalReview]
+    dataProtectionImpacts: [DataProtectionImpact]
+    preprocessingStrategies: [PreprocessingStrategy]
+    cleaningStrategies: [CleaningStrategy]
+    labelingStrategies: [LabelingStrategy]
+    rawSources: [RawData]
+    existingUses: [ExistingUse]
+    useRepository: [UseRepository]
+    otherTasks: [OtherTask]
+    futureUseImpacts: [FutureUseImpact]
+    discouragedUses: [DiscouragedUse]
+    distributionFormats: [DistributionFormat]
+    distributionDates: [DistributionDate]
+    licenseAndUseTerms: LicenseAndUseTerms
+    ipRestrictions: IPRestrictions
+    regulatoryRestrictions: ExportControlRegulatoryRestrictions
+    maintainers: [Maintainer]
+    errata: [Erratum]
+    updates: UpdatePlan
+    retentionLimit: RetentionLimits
+    versionAccess: VersionAccess
+    extensionMechanism: ExtensionMechanism
+    isDeidentified: Deidentification
   }
 
 type Deidentification
@@ -400,6 +482,8 @@ type Instance
     dataType: String
     counts: Integer
     label: String
+    samplingStrategies: [SamplingStrategy]
+    missingInformation: [MissingInfo]
   }
 
 type InstanceAcquisition
@@ -407,9 +491,20 @@ type InstanceAcquisition
     id: String!
     name: String
     description: [String]
+    wasDirectlyObserved: Boolean
+    wasReportedBySubjects: Boolean
+    wasInferredDerived: Boolean
+    wasValidatedVerified: Boolean
   }
 
 type IPRestrictions
+  {
+    id: String!
+    name: String
+    description: [String]
+  }
+
+type LabelingStrategy
   {
     id: String!
     name: String
@@ -438,7 +533,7 @@ type MaintainerContact
     email: [String]
   }
 
-type Missing
+type MissingInfo
   {
     id: String!
     name: String
@@ -478,14 +573,14 @@ type Person
     affiliation: Organization
   }
 
-type PreprocessingCleaningLabeling
+type PreprocessingCleaningLabelingSoftware
   {
     id: String!
     name: String
     description: [String]
   }
 
-type PreprocessingCleaningLabelingSoftware
+type PreprocessingStrategy
   {
     id: String!
     name: String
@@ -521,7 +616,7 @@ type RetentionLimits
     description: [String]
   }
 
-type Sampling
+type SamplingStrategy
   {
     id: String!
     name: String
@@ -532,13 +627,7 @@ type Sampling
     isRepresentative: [Boolean]
     representativeVerification: [String]
     whyNotRepresentative: [String]
-  }
-
-type SamplingStrategy
-  {
-    id: String!
-    name: String
-    description: [String]
+    strategies: [String]
   }
 
 type SensitiveElement

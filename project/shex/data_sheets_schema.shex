@@ -62,6 +62,15 @@ linkml:Sparqlpath xsd:string
     )
 }
 
+<CleaningStrategy> CLOSED {
+    (  $<CleaningStrategy_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <CleaningStrategy> ]
+    )
+}
+
 <CollectionConsent> CLOSED {
     (  $<CollectionConsent_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
@@ -192,50 +201,55 @@ linkml:Sparqlpath xsd:string
     } OR @<Dataset>
 )
 
-<Dataset> CLOSED {
-    (  $<Dataset_tes> (  &<DataResource_tes> ;
-          rdf:type [ dcat:Distribution ] ? ;
-          <purposes> @<Purpose> * ;
-          <tasks> @<Task> * ;
-          <addressing_gaps> @<AddressingGap> * ;
-          <creators> @<Creator> * ;
-          <funders> @<FundingMechanism> * ;
-          <instances> @<Instance> * ;
-          <anomalies> @<DataAnomaly> * ;
-          <external_resources> @<ExternalResource> * ;
-          <confidential_elements> @<Confidentiality> * ;
-          <content_warnings> @<ContentWarning> * ;
-          <subpopulations> @<Subpopulation> * ;
-          <sensitive_elements> @<SensitiveElement> * ;
-          <acquisition_methods> @<InstanceAcquisition> * ;
-          <collection_mechanisms> @<CollectionMechanism> * ;
-          <sampling_strategies> @<SamplingStrategy> * ;
-          <data_collectors> @<DataCollector> * ;
-          <collection_timeframes> @<CollectionTimeframe> * ;
-          <ethical_reviews> @<EthicalReview> * ;
-          <data_protection_impacts> @<DataProtectionImpact> * ;
-          <preprocessing_cleaning_labeling_methods> @<PreprocessingCleaningLabeling> * ;
-          <raw_sources> @<RawData> * ;
-          <existing_uses> @<ExistingUse> * ;
-          <use_repository> @<UseRepository> * ;
-          <other_tasks> @<OtherTask> * ;
-          <future_use_impacts> @<FutureUseImpact> * ;
-          <discouraged_uses> @<DiscouragedUse> * ;
-          <distribution_formats> @<DistributionFormat> * ;
-          <distribution_dates> @<DistributionDate> * ;
-          <license_and_use_terms> @<LicenseAndUseTerms> ? ;
-          <ip_restrictions> @<IPRestrictions> ? ;
-          <regulatory_restrictions> @<ExportControlRegulatoryRestrictions> ? ;
-          <maintainers> @<Maintainer> * ;
-          <errata> @<Erratum> * ;
-          <updates> @<UpdatePlan> ? ;
-          <retention_limit> @<RetentionLimits> ? ;
-          <version_access> @<VersionAccess> ? ;
-          <extension_mechanism> @<ExtensionMechanism> ?
-       ) ;
-       rdf:type [ <Dataset> ]
-    )
-}
+<Dataset>  (
+    CLOSED {
+       (  $<Dataset_tes> (  &<DataResource_tes> ;
+             rdf:type [ dcat:Distribution ] ? ;
+             <purposes> @<Purpose> * ;
+             <tasks> @<Task> * ;
+             <addressing_gaps> @<AddressingGap> * ;
+             <creators> @<Creator> * ;
+             <funders> @<FundingMechanism> * ;
+             <instances> @<Instance> * ;
+             <anomalies> @<DataAnomaly> * ;
+             <external_resources> @<ExternalResource> * ;
+             <confidential_elements> @<Confidentiality> * ;
+             <content_warnings> @<ContentWarning> * ;
+             <subpopulations> @<Subpopulation> * ;
+             <sensitive_elements> @<SensitiveElement> * ;
+             <acquisition_methods> @<InstanceAcquisition> * ;
+             <collection_mechanisms> @<CollectionMechanism> * ;
+             <sampling_strategies> @<SamplingStrategy> * ;
+             <data_collectors> @<DataCollector> * ;
+             <collection_timeframes> @<CollectionTimeframe> * ;
+             <ethical_reviews> @<EthicalReview> * ;
+             <data_protection_impacts> @<DataProtectionImpact> * ;
+             <preprocessing_strategies> @<PreprocessingStrategy> * ;
+             <cleaning_strategies> @<CleaningStrategy> * ;
+             <labeling_strategies> @<LabelingStrategy> * ;
+             <raw_sources> @<RawData> * ;
+             <existing_uses> @<ExistingUse> * ;
+             <use_repository> @<UseRepository> * ;
+             <other_tasks> @<OtherTask> * ;
+             <future_use_impacts> @<FutureUseImpact> * ;
+             <discouraged_uses> @<DiscouragedUse> * ;
+             <distribution_formats> @<DistributionFormat> * ;
+             <distribution_dates> @<DistributionDate> * ;
+             <license_and_use_terms> @<LicenseAndUseTerms> ? ;
+             <ip_restrictions> @<IPRestrictions> ? ;
+             <regulatory_restrictions> @<ExportControlRegulatoryRestrictions> ? ;
+             <maintainers> @<Maintainer> * ;
+             <errata> @<Erratum> * ;
+             <updates> @<UpdatePlan> ? ;
+             <retention_limit> @<RetentionLimits> ? ;
+             <version_access> @<VersionAccess> ? ;
+             <extension_mechanism> @<ExtensionMechanism> ? ;
+             <is_deidentified> @<Deidentification> ?
+          ) ;
+          rdf:type [ <Dataset> ]
+       )
+    } OR @<DataSubset>
+)
 
 <DatasetCollection> CLOSED {
     (  $<DatasetCollection_tes> (  &<DataPackage_tes> ;
@@ -253,16 +267,25 @@ linkml:Sparqlpath xsd:string
           ) ;
           rdf:type [ <DatasetProperty> ]
        )
-    } OR @<AddressingGap> OR @<CollectionConsent> OR @<CollectionMechanism> OR @<CollectionNotification> OR @<CollectionTimeframe>
-    OR @<Confidentiality> OR @<ConsentRevocation> OR @<ContentWarning> OR @<Creator> OR @<DataAnomaly> OR @<DataCollector> OR
-    @<DataProtectionImpact> OR @<Deidentification> OR @<DirectCollection> OR @<DiscouragedUse> OR @<DistributionDate> OR
-    @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUse> OR @<ExportControlRegulatoryRestrictions> OR
-    @<ExtensionMechanism> OR @<ExternalResource> OR @<FundingMechanism> OR @<FutureUseImpact> OR @<IPRestrictions> OR @<Instance>
-    OR @<InstanceAcquisition> OR @<LicenseAndUseTerms> OR @<Maintainer> OR @<MaintainerContact> OR @<Missing> OR @<OtherTask> OR
-    @<PreprocessingCleaningLabeling> OR @<PreprocessingCleaningLabelingSoftware> OR @<Purpose> OR @<RawData> OR @<Relationships> OR
-    @<RetentionLimits> OR @<Sampling> OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR @<Subpopulation> OR @<Task> OR
+    } OR @<AddressingGap> OR @<CleaningStrategy> OR @<CollectionConsent> OR @<CollectionMechanism> OR @<CollectionNotification> OR
+    @<CollectionTimeframe> OR @<Confidentiality> OR @<ConsentRevocation> OR @<ContentWarning> OR @<Creator> OR @<DataAnomaly> OR
+    @<DataCollector> OR @<DataProtectionImpact> OR @<Deidentification> OR @<DirectCollection> OR @<DiscouragedUse> OR
+    @<DistributionDate> OR @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUse> OR
+    @<ExportControlRegulatoryRestrictions> OR @<ExtensionMechanism> OR @<ExternalResource> OR @<FundingMechanism> OR
+    @<FutureUseImpact> OR @<IPRestrictions> OR @<Instance> OR @<InstanceAcquisition> OR @<LabelingStrategy> OR
+    @<LicenseAndUseTerms> OR @<Maintainer> OR @<MaintainerContact> OR @<MissingInfo> OR @<OtherTask> OR
+    @<PreprocessingCleaningLabelingSoftware> OR @<PreprocessingStrategy> OR @<Purpose> OR @<RawData> OR @<Relationships> OR
+    @<RetentionLimits> OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR @<Subpopulation> OR @<Task> OR
     @<ThirdPartySharing> OR @<UpdatePlan> OR @<UseRepository> OR @<VersionAccess>
 )
+
+<DataSubset> CLOSED {
+    (  $<DataSubset_tes> (  &<Dataset_tes> ;
+          rdf:type [ <Dataset> ] ?
+       ) ;
+       rdf:type [ <DataSubset> ]
+    )
+}
 
 <Deidentification> CLOSED {
     (  $<Deidentification_tes> (  &<DatasetProperty_tes> ;
@@ -449,7 +472,9 @@ linkml:Sparqlpath xsd:string
           <instance_type> @linkml:String ? ;
           <data_type> @linkml:String ? ;
           <counts> @linkml:Integer ? ;
-          <label> @linkml:String ?
+          <label> @linkml:String ? ;
+          <sampling_strategies> @<SamplingStrategy> * ;
+          <missing_information> @<MissingInfo> *
        ) ;
        rdf:type [ <Instance> ]
     )
@@ -458,7 +483,11 @@ linkml:Sparqlpath xsd:string
 <InstanceAcquisition> CLOSED {
     (  $<InstanceAcquisition_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String *
+          <description> @linkml:String * ;
+          <was_directly_observed> @linkml:Boolean ? ;
+          <was_reported_by_subjects> @linkml:Boolean ? ;
+          <was_inferred_derived> @linkml:Boolean ? ;
+          <was_validated_verified> @linkml:Boolean ?
        ) ;
        rdf:type [ <InstanceAcquisition> ]
     )
@@ -470,6 +499,15 @@ linkml:Sparqlpath xsd:string
           <description> @linkml:String *
        ) ;
        rdf:type [ <IPRestrictions> ]
+    )
+}
+
+<LabelingStrategy> CLOSED {
+    (  $<LabelingStrategy_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <LabelingStrategy> ]
     )
 }
 
@@ -501,13 +539,13 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<Missing> CLOSED {
-    (  $<Missing_tes> (  &<DatasetProperty_tes> ;
+<MissingInfo> CLOSED {
+    (  $<MissingInfo_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <missing> @linkml:String * ;
           <why_missing> @linkml:String *
        ) ;
-       rdf:type [ <Missing> ]
+       rdf:type [ <MissingInfo> ]
     )
 }
 
@@ -551,21 +589,21 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<PreprocessingCleaningLabeling> CLOSED {
-    (  $<PreprocessingCleaningLabeling_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String *
-       ) ;
-       rdf:type [ <PreprocessingCleaningLabeling> ]
-    )
-}
-
 <PreprocessingCleaningLabelingSoftware> CLOSED {
     (  $<PreprocessingCleaningLabelingSoftware_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <description> @linkml:String *
        ) ;
        rdf:type [ <PreprocessingCleaningLabelingSoftware> ]
+    )
+}
+
+<PreprocessingStrategy> CLOSED {
+    (  $<PreprocessingStrategy_tes> (  &<DatasetProperty_tes> ;
+          rdf:type [ <DatasetProperty> ] ? ;
+          <description> @linkml:String *
+       ) ;
+       rdf:type [ <PreprocessingStrategy> ]
     )
 }
 
@@ -605,24 +643,16 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<Sampling> CLOSED {
-    (  $<Sampling_tes> (  &<DatasetProperty_tes> ;
+<SamplingStrategy> CLOSED {
+    (  $<SamplingStrategy_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <ia_sample> @linkml:Boolean * ;
           <israndom> @linkml:Boolean * ;
           <source_data> @linkml:String * ;
           <is_representative> @linkml:Boolean * ;
           <representative_verification> @linkml:String * ;
-          <why_not_representative> @linkml:String *
-       ) ;
-       rdf:type [ <Sampling> ]
-    )
-}
-
-<SamplingStrategy> CLOSED {
-    (  $<SamplingStrategy_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String *
+          <why_not_representative> @linkml:String * ;
+          <strategies> @linkml:String *
        ) ;
        rdf:type [ <SamplingStrategy> ]
     )

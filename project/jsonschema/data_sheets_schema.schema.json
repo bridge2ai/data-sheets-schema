@@ -25,6 +25,30 @@
             "title": "AddressingGap",
             "type": "object"
         },
+        "CleaningStrategy": {
+            "additionalProperties": false,
+            "description": "Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?",
+            "properties": {
+                "description": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "CleaningStrategy",
+            "type": "object"
+        },
         "CollectionConsent": {
             "additionalProperties": false,
             "description": "Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented.",
@@ -502,9 +526,9 @@
             "title": "DataResource",
             "type": "object"
         },
-        "Dataset": {
+        "DataSubset": {
             "additionalProperties": false,
-            "description": "A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted.",
+            "description": "A subset of a dataset, likely containing multiple files of multiple potential purposes and properties.",
             "properties": {
                 "acquisition_methods": {
                     "items": {
@@ -526,6 +550,12 @@
                 },
                 "bytes": {
                     "type": "integer"
+                },
+                "cleaning_strategies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "collection_mechanisms": {
                     "items": {
@@ -680,11 +710,20 @@
                 "ip_restrictions": {
                     "type": "string"
                 },
+                "is_deidentified": {
+                    "type": "string"
+                },
                 "issued": {
                     "format": "date-time",
                     "type": "string"
                 },
                 "keywords": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "labeling_strategies": {
                     "items": {
                         "type": "string"
                     },
@@ -725,7 +764,336 @@
                 "path": {
                     "type": "string"
                 },
-                "preprocessing_cleaning_labeling_methods": {
+                "preprocessing_strategies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "publisher": {
+                    "type": "string"
+                },
+                "purposes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "raw_sources": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "regulatory_restrictions": {
+                    "type": "string"
+                },
+                "retention_limit": {
+                    "type": "string"
+                },
+                "sampling_strategies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "sensitive_elements": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "subpopulations": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "tasks": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "test_roles": {
+                    "items": {
+                        "$ref": "#/$defs/TestRole"
+                    },
+                    "type": "array"
+                },
+                "title": {
+                    "description": "the official title of the element",
+                    "type": "string"
+                },
+                "updates": {
+                    "type": "string"
+                },
+                "use_repository": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "version": {
+                    "description": "particular version of schema",
+                    "type": "string"
+                },
+                "version_access": {
+                    "type": "string"
+                },
+                "was_derived_from": {
+                    "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "DataSubset",
+            "type": "object"
+        },
+        "Dataset": {
+            "additionalProperties": false,
+            "description": "A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted.",
+            "properties": {
+                "acquisition_methods": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "addressing_gaps": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "anomalies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "bytes": {
+                    "type": "integer"
+                },
+                "cleaning_strategies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "collection_mechanisms": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "collection_timeframes": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "compression": {
+                    "type": "string"
+                },
+                "confidential_elements": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "conforms_to": {
+                    "type": "string"
+                },
+                "conforms_to_class": {
+                    "description": "class in schema which the data object instantiates",
+                    "type": "string"
+                },
+                "conforms_to_schema": {
+                    "type": "string"
+                },
+                "content_warnings": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "created_by": {
+                    "description": "agent that created the element",
+                    "type": "string"
+                },
+                "created_on": {
+                    "description": "time at which the element was created",
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "creators": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "data_collectors": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "data_protection_impacts": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "description": {
+                    "description": "human readable description of the information",
+                    "type": "string"
+                },
+                "dialect": {
+                    "type": "string"
+                },
+                "discouraged_uses": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "distribution_dates": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "distribution_formats": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "download_url": {
+                    "type": "string"
+                },
+                "encoding": {
+                    "type": "string"
+                },
+                "errata": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "ethical_reviews": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "existing_uses": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "extension_mechanism": {
+                    "type": "string"
+                },
+                "external_resources": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "format": {
+                    "$ref": "#/$defs/FormatEnum"
+                },
+                "funders": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "future_use_impacts": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "instances": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "ip_restrictions": {
+                    "type": "string"
+                },
+                "is_deidentified": {
+                    "type": "string"
+                },
+                "issued": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "keywords": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "labeling_strategies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "language": {
+                    "description": "language in which the information is expressed",
+                    "type": "string"
+                },
+                "license": {
+                    "description": "license for the data",
+                    "type": "string"
+                },
+                "license_and_use_terms": {
+                    "type": "string"
+                },
+                "maintainers": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "md5": {
+                    "type": "string"
+                },
+                "media_type": {
+                    "type": "string"
+                },
+                "other_tasks": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "page": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "preprocessing_strategies": {
                     "items": {
                         "type": "string"
                     },
@@ -1440,11 +1808,23 @@
                     "description": "Is there a label or target associated with each instance?",
                     "type": "string"
                 },
+                "missing_information": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "name": {
                     "type": "string"
                 },
                 "representation": {
                     "type": "string"
+                },
+                "sampling_strategies": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1469,12 +1849,52 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "was_directly_observed": {
+                    "description": "Was the data directly observable (e.g., raw text, movie ratings)?",
+                    "type": "boolean"
+                },
+                "was_inferred_derived": {
+                    "description": "Was the data indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)?",
+                    "type": "boolean"
+                },
+                "was_reported_by_subjects": {
+                    "description": "Was the data reported by subjects (e.g., survey responses)?",
+                    "type": "boolean"
+                },
+                "was_validated_verified": {
+                    "description": "Was the data validated/verified?",
+                    "type": "boolean"
                 }
             },
             "required": [
                 "id"
             ],
             "title": "InstanceAcquisition",
+            "type": "object"
+        },
+        "LabelingStrategy": {
+            "additionalProperties": false,
+            "description": "Was any preprocessing/cleaning/labeling of the data done (e.g., part-of-speech tagging)?",
+            "properties": {
+                "description": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "LabelingStrategy",
             "type": "object"
         },
         "LicenseAndUseTerms": {
@@ -1564,7 +1984,7 @@
             "title": "MediaTypeEnum",
             "type": "string"
         },
-        "Missing": {
+        "MissingInfo": {
             "additionalProperties": false,
             "description": "Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (e.g., because it was unavailable). This does not include intentionally removed information, but might include, e.g., redacted text.",
             "properties": {
@@ -1595,7 +2015,7 @@
             "required": [
                 "id"
             ],
-            "title": "Missing",
+            "title": "MissingInfo",
             "type": "object"
         },
         "NamedThing": {
@@ -1699,30 +2119,6 @@
             "title": "Person",
             "type": "object"
         },
-        "PreprocessingCleaningLabeling": {
-            "additionalProperties": false,
-            "description": "Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)?",
-            "properties": {
-                "description": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "PreprocessingCleaningLabeling",
-            "type": "object"
-        },
         "PreprocessingCleaningLabelingSoftware": {
             "additionalProperties": false,
             "description": "Is the software that was used to preprocess/clean/label the data available?",
@@ -1745,6 +2141,30 @@
                 "id"
             ],
             "title": "PreprocessingCleaningLabelingSoftware",
+            "type": "object"
+        },
+        "PreprocessingStrategy": {
+            "additionalProperties": false,
+            "description": "Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?",
+            "properties": {
+                "description": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "id": {
+                    "description": "the unique name of th dataset",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "PreprocessingStrategy",
             "type": "object"
         },
         "Purpose": {
@@ -1844,7 +2264,7 @@
             "title": "RetentionLimits",
             "type": "object"
         },
-        "Sampling": {
+        "SamplingStrategy": {
             "additionalProperties": false,
             "description": "Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (e.g., geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (e.g., to cover a more diverse range of instances, because instances were withheld or unavailable).",
             "properties": {
@@ -1889,35 +2309,18 @@
                     },
                     "type": "array"
                 },
+                "strategies": {
+                    "description": "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
                 "why_not_representative": {
                     "items": {
                         "type": "string"
                     },
                     "type": "array"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "Sampling",
-            "type": "object"
-        },
-        "SamplingStrategy": {
-            "additionalProperties": false,
-            "description": "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?",
-            "properties": {
-                "description": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
                 }
             },
             "required": [
