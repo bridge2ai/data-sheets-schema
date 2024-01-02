@@ -1218,6 +1218,62 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "person__affiliation",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/affiliation",
+      "alias": "affiliation",
+      "owner": "Person",
+      "domain_of": [
+        "Person"
+      ],
+      "range": "Organization",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "organization__ror_id",
+      "description": "Unique ROR identifier.",
+      "examples": [
+        {
+          "value": "ROR:02mp31p96",
+          "@type": "Example"
+        }
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "values_from": [
+        "ROR"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ror_id",
+      "alias": "ror_id",
+      "owner": "Organization",
+      "domain_of": [
+        "Organization"
+      ],
+      "range": "ror_identifier",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "organization__wikidata_id",
+      "description": "Unique Wikidata identifier.",
+      "examples": [
+        {
+          "value": "WIKIDATA:Q282186",
+          "@type": "Example"
+        }
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "values_from": [
+        "WIKIDATA"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/wikidata_id",
+      "alias": "wikidata_id",
+      "owner": "Organization",
+      "domain_of": [
+        "Organization"
+      ],
+      "range": "wikidata_identifier",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "datasetCollection__entries",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/entries",
@@ -1292,7 +1348,7 @@
       "domain_of": [
         "Dataset"
       ],
-      "range": "Funder",
+      "range": "FundingMechanism",
       "@type": "SlotDefinition"
     },
     {
@@ -1478,16 +1534,42 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "dataset__preprocessing_cleaning_labeling_methods",
+      "name": "dataset__preprocessing_strategies",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing_cleaning_labeling_methods",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing_strategies",
       "multivalued": true,
-      "alias": "preprocessing_cleaning_labeling_methods",
+      "alias": "preprocessing_strategies",
       "owner": "Dataset",
       "domain_of": [
         "Dataset"
       ],
-      "range": "PreprocessingCleaningLabeling",
+      "range": "PreprocessingStrategy",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__cleaning_strategies",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/cleaning_strategies",
+      "multivalued": true,
+      "alias": "cleaning_strategies",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "CleaningStrategy",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__labeling_strategies",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/labeling_strategies",
+      "multivalued": true,
+      "alias": "labeling_strategies",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "LabelingStrategy",
       "@type": "SlotDefinition"
     },
     {
@@ -1705,6 +1787,18 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "dataset__is_deidentified",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/is_deidentified",
+      "alias": "is_deidentified",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "Deidentification",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "purpose__response",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/response",
@@ -1749,87 +1843,43 @@
       "domain_of": [
         "Creator"
       ],
-      "range": "string",
+      "range": "Person",
       "@type": "SlotDefinition"
     },
     {
-      "name": "creator__institution",
+      "name": "creator__affiliation",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/institution",
-      "alias": "institution",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/affiliation",
+      "alias": "affiliation",
       "owner": "Creator",
       "domain_of": [
         "Creator"
       ],
-      "range": "string",
+      "range": "Organization",
       "@type": "SlotDefinition"
     },
     {
-      "name": "funder__grantor",
+      "name": "fundingMechanism__grantor",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/grantor",
       "alias": "grantor",
-      "owner": "Funder",
+      "owner": "FundingMechanism",
       "domain_of": [
-        "Funder"
+        "FundingMechanism"
       ],
       "range": "Grantor",
       "@type": "SlotDefinition"
     },
     {
-      "name": "funder__grant",
+      "name": "fundingMechanism__grant",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/grant",
       "alias": "grant",
-      "owner": "Funder",
+      "owner": "FundingMechanism",
       "domain_of": [
-        "Funder"
+        "FundingMechanism"
       ],
       "range": "Grant",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "grantor__ror_id",
-      "description": "Unique ROR identifier.",
-      "examples": [
-        {
-          "value": "ROR:02mp31p96",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "values_from": [
-        "ROR"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ror_id",
-      "alias": "ror_id",
-      "owner": "Grantor",
-      "domain_of": [
-        "Grantor"
-      ],
-      "range": "ror_identifier",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "grantor__wikidata_id",
-      "description": "Unique Wikidata identifier.",
-      "examples": [
-        {
-          "value": "WIKIDATA:Q282186",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "values_from": [
-        "WIKIDATA"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/wikidata_id",
-      "alias": "wikidata_id",
-      "owner": "Grantor",
-      "domain_of": [
-        "Grantor"
-      ],
-      "range": "wikidata_identifier",
       "@type": "SlotDefinition"
     },
     {
@@ -1849,7 +1899,6 @@
       "name": "instance__representation",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/representation",
-      "multivalued": true,
       "alias": "representation",
       "owner": "Instance",
       "domain_of": [
@@ -1859,144 +1908,197 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "counts__count_values",
+      "name": "instance__instance_type",
+      "description": "Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/count_values",
-      "multivalued": true,
-      "alias": "count_values",
-      "owner": "Counts",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/instance_type",
+      "alias": "instance_type",
+      "owner": "Instance",
       "domain_of": [
-        "Counts"
+        "Instance"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "instance__data_type",
+      "description": "What data does each instance consist of? \u201cRaw\u201d data (e.g., unprocessed text or images) or features? In either case, please provide a description.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data_type",
+      "alias": "data_type",
+      "owner": "Instance",
+      "domain_of": [
+        "Instance"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "instance__counts",
+      "description": "How many instances are there in total (of each type, if appropriate)?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/counts",
+      "alias": "counts",
+      "owner": "Instance",
+      "domain_of": [
+        "Instance"
       ],
       "range": "integer",
       "@type": "SlotDefinition"
     },
     {
-      "name": "sampling__ia_sample",
+      "name": "instance__label",
+      "description": "Is there a label or target associated with each instance?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/label",
+      "alias": "label",
+      "owner": "Instance",
+      "domain_of": [
+        "Instance"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "instance__sampling_strategies",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sampling_strategies",
+      "multivalued": true,
+      "alias": "sampling_strategies",
+      "owner": "Instance",
+      "domain_of": [
+        "Instance"
+      ],
+      "range": "SamplingStrategy",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "instance__missing_information",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/missing_information",
+      "multivalued": true,
+      "alias": "missing_information",
+      "owner": "Instance",
+      "domain_of": [
+        "Instance"
+      ],
+      "range": "MissingInfo",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "samplingStrategy__ia_sample",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ia_sample",
       "multivalued": true,
       "alias": "ia_sample",
-      "owner": "Sampling",
+      "owner": "SamplingStrategy",
       "domain_of": [
-        "Sampling"
+        "SamplingStrategy"
       ],
       "range": "boolean",
       "@type": "SlotDefinition"
     },
     {
-      "name": "sampling__israndom",
+      "name": "samplingStrategy__israndom",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/israndom",
       "multivalued": true,
       "alias": "israndom",
-      "owner": "Sampling",
+      "owner": "SamplingStrategy",
       "domain_of": [
-        "Sampling"
+        "SamplingStrategy"
       ],
       "range": "boolean",
       "@type": "SlotDefinition"
     },
     {
-      "name": "sampling__source_data",
+      "name": "samplingStrategy__source_data",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/source_data",
       "multivalued": true,
       "alias": "source_data",
-      "owner": "Sampling",
+      "owner": "SamplingStrategy",
       "domain_of": [
-        "Sampling"
+        "SamplingStrategy"
       ],
       "range": "string",
       "@type": "SlotDefinition"
     },
     {
-      "name": "sampling__is_representative",
+      "name": "samplingStrategy__is_representative",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/is_representative",
       "multivalued": true,
       "alias": "is_representative",
-      "owner": "Sampling",
+      "owner": "SamplingStrategy",
       "domain_of": [
-        "Sampling"
+        "SamplingStrategy"
       ],
       "range": "boolean",
       "@type": "SlotDefinition"
     },
     {
-      "name": "sampling__representative_verification",
+      "name": "samplingStrategy__representative_verification",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/representative_verification",
       "multivalued": true,
       "alias": "representative_verification",
-      "owner": "Sampling",
+      "owner": "SamplingStrategy",
       "domain_of": [
-        "Sampling"
+        "SamplingStrategy"
       ],
       "range": "string",
       "@type": "SlotDefinition"
     },
     {
-      "name": "sampling__why_not_representative",
+      "name": "samplingStrategy__why_not_representative",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/why_not_representative",
       "multivalued": true,
       "alias": "why_not_representative",
-      "owner": "Sampling",
+      "owner": "SamplingStrategy",
       "domain_of": [
-        "Sampling"
+        "SamplingStrategy"
       ],
       "range": "string",
       "@type": "SlotDefinition"
     },
     {
-      "name": "data__type",
+      "name": "samplingStrategy__strategies",
+      "description": "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/type",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/strategies",
       "multivalued": true,
-      "alias": "type",
-      "owner": "Data",
+      "alias": "strategies",
+      "owner": "SamplingStrategy",
       "domain_of": [
-        "Data"
+        "SamplingStrategy"
       ],
       "range": "string",
       "@type": "SlotDefinition"
     },
     {
-      "name": "labels__label",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/label",
-      "multivalued": true,
-      "alias": "label",
-      "owner": "Labels",
-      "domain_of": [
-        "Labels"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "missing__missing",
+      "name": "missingInfo__missing",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/missing",
       "multivalued": true,
       "alias": "missing",
-      "owner": "Missing",
+      "owner": "MissingInfo",
       "domain_of": [
-        "Missing"
+        "MissingInfo"
       ],
       "range": "string",
       "@type": "SlotDefinition"
     },
     {
-      "name": "missing__why_missing",
+      "name": "missingInfo__why_missing",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/why_missing",
       "multivalued": true,
       "alias": "why_missing",
-      "owner": "Missing",
+      "owner": "MissingInfo",
       "domain_of": [
-        "Missing"
+        "MissingInfo"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -2184,6 +2286,58 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "instanceAcquisition__was_directly_observed",
+      "description": "Was the data directly observable (e.g., raw text, movie ratings)?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/was_directly_observed",
+      "alias": "was_directly_observed",
+      "owner": "InstanceAcquisition",
+      "domain_of": [
+        "InstanceAcquisition"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "instanceAcquisition__was_reported_by_subjects",
+      "description": "Was the data reported by subjects (e.g., survey responses)?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/was_reported_by_subjects",
+      "alias": "was_reported_by_subjects",
+      "owner": "InstanceAcquisition",
+      "domain_of": [
+        "InstanceAcquisition"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "instanceAcquisition__was_inferred_derived",
+      "description": "Was the data indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/was_inferred_derived",
+      "alias": "was_inferred_derived",
+      "owner": "InstanceAcquisition",
+      "domain_of": [
+        "InstanceAcquisition"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "instanceAcquisition__was_validated_verified",
+      "description": "Was the data validated/verified?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/was_validated_verified",
+      "alias": "was_validated_verified",
+      "owner": "InstanceAcquisition",
+      "domain_of": [
+        "InstanceAcquisition"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "collectionMechanism__description",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/description",
@@ -2192,19 +2346,6 @@
       "owner": "CollectionMechanism",
       "domain_of": [
         "CollectionMechanism"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "samplingStrategy__description",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/description",
-      "multivalued": true,
-      "alias": "description",
-      "owner": "SamplingStrategy",
-      "domain_of": [
-        "SamplingStrategy"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -2314,14 +2455,40 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "preprocessingCleaningLabeling__description",
+      "name": "preprocessingStrategy__description",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/description",
       "multivalued": true,
       "alias": "description",
-      "owner": "PreprocessingCleaningLabeling",
+      "owner": "PreprocessingStrategy",
       "domain_of": [
-        "PreprocessingCleaningLabeling"
+        "PreprocessingStrategy"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "cleaningStrategy__description",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/description",
+      "multivalued": true,
+      "alias": "description",
+      "owner": "CleaningStrategy",
+      "domain_of": [
+        "CleaningStrategy"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "labelingStrategy__description",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/description",
+      "multivalued": true,
+      "alias": "description",
+      "owner": "LabelingStrategy",
+      "domain_of": [
+        "LabelingStrategy"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -2801,6 +2968,78 @@
       "@type": "ClassDefinition"
     },
     {
+      "name": "Person",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Person",
+      "description": "An individual human being.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "NamedThing",
+      "slots": [
+        "id",
+        "name",
+        "description",
+        "person__affiliation"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "affiliation",
+          "range": "Organization",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Person",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Organization",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Organization",
+      "description": "A collection of people acting in common interests.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "NamedThing",
+      "slots": [
+        "id",
+        "name",
+        "description",
+        "organization__ror_id",
+        "organization__wikidata_id"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "ror_id",
+          "description": "Unique ROR identifier.",
+          "examples": [
+            {
+              "value": "ROR:02mp31p96",
+              "@type": "Example"
+            }
+          ],
+          "values_from": [
+            "ROR"
+          ],
+          "range": "ror_identifier",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "wikidata_id",
+          "description": "Unique Wikidata identifier.",
+          "examples": [
+            {
+              "value": "WIKIDATA:Q282186",
+              "@type": "Example"
+            }
+          ],
+          "values_from": [
+            "WIKIDATA"
+          ],
+          "range": "wikidata_identifier",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Organization",
+      "@type": "ClassDefinition"
+    },
+    {
       "name": "DatasetProperty",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DatasetProperty",
       "description": "Represents a single property of a dataset, or a set of related properties.",
@@ -2911,7 +3150,9 @@
         "dataset__collection_timeframes",
         "dataset__ethical_reviews",
         "dataset__data_protection_impacts",
-        "dataset__preprocessing_cleaning_labeling_methods",
+        "dataset__preprocessing_strategies",
+        "dataset__cleaning_strategies",
+        "dataset__labeling_strategies",
         "dataset__raw_sources",
         "dataset__existing_uses",
         "dataset__use_repository",
@@ -2928,7 +3169,8 @@
         "dataset__updates",
         "dataset__retention_limit",
         "dataset__version_access",
-        "dataset__extension_mechanism"
+        "dataset__extension_mechanism",
+        "dataset__is_deidentified"
       ],
       "slot_usage": {},
       "attributes": [
@@ -2959,7 +3201,7 @@
         {
           "name": "funders",
           "multivalued": true,
-          "range": "Funder",
+          "range": "FundingMechanism",
           "@type": "SlotDefinition"
         },
         {
@@ -3047,9 +3289,21 @@
           "@type": "SlotDefinition"
         },
         {
-          "name": "preprocessing_cleaning_labeling_methods",
+          "name": "preprocessing_strategies",
           "multivalued": true,
-          "range": "PreprocessingCleaningLabeling",
+          "range": "PreprocessingStrategy",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "cleaning_strategies",
+          "multivalued": true,
+          "range": "CleaningStrategy",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "labeling_strategies",
+          "multivalued": true,
+          "range": "LabelingStrategy",
           "@type": "SlotDefinition"
         },
         {
@@ -3146,9 +3400,94 @@
           "name": "extension_mechanism",
           "range": "ExtensionMechanism",
           "@type": "SlotDefinition"
+        },
+        {
+          "name": "is_deidentified",
+          "range": "Deidentification",
+          "@type": "SlotDefinition"
         }
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Dataset",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "DataSubset",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataSubset",
+      "description": "A subset of a dataset, likely containing multiple files of multiple potential purposes and properties.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "Dataset",
+      "slots": [
+        "id",
+        "download_url",
+        "license",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "version",
+        "language",
+        "publisher",
+        "keywords",
+        "issued",
+        "created_by",
+        "created_on",
+        "compression",
+        "was_derived_from",
+        "page",
+        "test_roles",
+        "path",
+        "title",
+        "description",
+        "format",
+        "media_type",
+        "encoding",
+        "bytes",
+        "hash",
+        "md5",
+        "sha256",
+        "dialect",
+        "dataset__purposes",
+        "dataset__tasks",
+        "dataset__addressing_gaps",
+        "dataset__creators",
+        "dataset__funders",
+        "dataset__instances",
+        "dataset__anomalies",
+        "dataset__external_resources",
+        "dataset__confidential_elements",
+        "dataset__content_warnings",
+        "dataset__subpopulations",
+        "dataset__sensitive_elements",
+        "dataset__acquisition_methods",
+        "dataset__collection_mechanisms",
+        "dataset__sampling_strategies",
+        "dataset__data_collectors",
+        "dataset__collection_timeframes",
+        "dataset__ethical_reviews",
+        "dataset__data_protection_impacts",
+        "dataset__preprocessing_strategies",
+        "dataset__cleaning_strategies",
+        "dataset__labeling_strategies",
+        "dataset__raw_sources",
+        "dataset__existing_uses",
+        "dataset__use_repository",
+        "dataset__other_tasks",
+        "dataset__future_use_impacts",
+        "dataset__discouraged_uses",
+        "dataset__distribution_formats",
+        "dataset__distribution_dates",
+        "dataset__license_and_use_terms",
+        "dataset__ip_restrictions",
+        "dataset__regulatory_restrictions",
+        "dataset__maintainers",
+        "dataset__errata",
+        "dataset__updates",
+        "dataset__retention_limit",
+        "dataset__version_access",
+        "dataset__extension_mechanism",
+        "dataset__is_deidentified"
+      ],
+      "slot_usage": {},
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataSubset",
       "@type": "ClassDefinition"
     },
     {
@@ -3232,7 +3571,7 @@
     {
       "name": "Creator",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Creator",
-      "description": "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)?",
+      "description": "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team.",
       "in_subset": [
         "Motivation"
       ],
@@ -3243,18 +3582,18 @@
         "name",
         "description",
         "creator__principal_investigator",
-        "creator__institution"
+        "creator__affiliation"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "principal_investigator",
-          "range": "string",
+          "range": "Person",
           "@type": "SlotDefinition"
         },
         {
-          "name": "institution",
-          "range": "string",
+          "name": "affiliation",
+          "range": "Organization",
           "@type": "SlotDefinition"
         }
       ],
@@ -3262,8 +3601,8 @@
       "@type": "ClassDefinition"
     },
     {
-      "name": "Funder",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Funder",
+      "name": "FundingMechanism",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FundingMechanism",
       "description": "Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.",
       "in_subset": [
         "Motivation"
@@ -3274,8 +3613,8 @@
         "id",
         "name",
         "description",
-        "funder__grantor",
-        "funder__grant"
+        "fundingMechanism__grantor",
+        "fundingMechanism__grant"
       ],
       "slot_usage": {},
       "attributes": [
@@ -3290,7 +3629,7 @@
           "@type": "SlotDefinition"
         }
       ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Funder",
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FundingMechanism",
       "@type": "ClassDefinition"
     },
     {
@@ -3298,47 +3637,15 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Grantor",
       "description": "What is the name and/or identifier of the organization providing monetary support or other resources supporting creation of the dataset?",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "NamedThing",
+      "is_a": "Organization",
       "slots": [
         "id",
         "name",
         "description",
-        "grantor__ror_id",
-        "grantor__wikidata_id"
+        "organization__ror_id",
+        "organization__wikidata_id"
       ],
       "slot_usage": {},
-      "attributes": [
-        {
-          "name": "ror_id",
-          "description": "Unique ROR identifier.",
-          "examples": [
-            {
-              "value": "ROR:02mp31p96",
-              "@type": "Example"
-            }
-          ],
-          "values_from": [
-            "ROR"
-          ],
-          "range": "ror_identifier",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "wikidata_id",
-          "description": "Unique Wikidata identifier.",
-          "examples": [
-            {
-              "value": "WIKIDATA:Q282186",
-              "@type": "Example"
-            }
-          ],
-          "values_from": [
-            "WIKIDATA"
-          ],
-          "range": "wikidata_identifier",
-          "@type": "SlotDefinition"
-        }
-      ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Grantor",
       "@type": "ClassDefinition"
     },
@@ -3369,7 +3676,7 @@
     {
       "name": "Instance",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Instance",
-      "description": "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)? Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?",
+      "description": "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?",
       "in_subset": [
         "Composition"
       ],
@@ -3379,14 +3686,55 @@
         "id",
         "name",
         "description",
-        "instance__representation"
+        "instance__representation",
+        "instance__instance_type",
+        "instance__data_type",
+        "instance__counts",
+        "instance__label",
+        "instance__sampling_strategies",
+        "instance__missing_information"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "representation",
-          "multivalued": true,
           "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "instance_type",
+          "description": "Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "data_type",
+          "description": "What data does each instance consist of? \u201cRaw\u201d data (e.g., unprocessed text or images) or features? In either case, please provide a description.",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "counts",
+          "description": "How many instances are there in total (of each type, if appropriate)?",
+          "range": "integer",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "label",
+          "description": "Is there a label or target associated with each instance?",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "sampling_strategies",
+          "multivalued": true,
+          "range": "SamplingStrategy",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "missing_information",
+          "multivalued": true,
+          "range": "MissingInfo",
           "@type": "SlotDefinition"
         }
       ],
@@ -3394,38 +3742,12 @@
       "@type": "ClassDefinition"
     },
     {
-      "name": "Counts",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Counts",
-      "description": "How many instances are there in total (of each type, if appropriate)?",
-      "in_subset": [
-        "Composition"
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "DatasetProperty",
-      "slots": [
-        "id",
-        "name",
-        "description",
-        "counts__count_values"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "count_values",
-          "multivalued": true,
-          "range": "integer",
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Counts",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "Sampling",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Sampling",
+      "name": "SamplingStrategy",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/SamplingStrategy",
       "description": "Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (e.g., geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (e.g., to cover a more diverse range of instances, because instances were withheld or unavailable).",
       "in_subset": [
-        "Composition"
+        "Composition",
+        "Collection"
       ],
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "is_a": "DatasetProperty",
@@ -3433,12 +3755,13 @@
         "id",
         "name",
         "description",
-        "sampling__ia_sample",
-        "sampling__israndom",
-        "sampling__source_data",
-        "sampling__is_representative",
-        "sampling__representative_verification",
-        "sampling__why_not_representative"
+        "samplingStrategy__ia_sample",
+        "samplingStrategy__israndom",
+        "samplingStrategy__source_data",
+        "samplingStrategy__is_representative",
+        "samplingStrategy__representative_verification",
+        "samplingStrategy__why_not_representative",
+        "samplingStrategy__strategies"
       ],
       "slot_usage": {},
       "attributes": [
@@ -3477,68 +3800,21 @@
           "multivalued": true,
           "range": "string",
           "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Sampling",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "Data",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Data",
-      "description": "What data does each instance consist of? \u201cRaw\u201d data (e.g., unprocessed text or images) or features? In either case, please provide a description.",
-      "in_subset": [
-        "Composition"
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "DatasetProperty",
-      "slots": [
-        "id",
-        "name",
-        "description",
-        "data__type"
-      ],
-      "slot_usage": {},
-      "attributes": [
+        },
         {
-          "name": "type",
+          "name": "strategies",
+          "description": "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?",
           "multivalued": true,
           "range": "string",
           "@type": "SlotDefinition"
         }
       ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Data",
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/SamplingStrategy",
       "@type": "ClassDefinition"
     },
     {
-      "name": "Labels",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Labels",
-      "description": "Is there a label or target associated with each instance?",
-      "in_subset": [
-        "Composition"
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "DatasetProperty",
-      "slots": [
-        "id",
-        "name",
-        "description",
-        "labels__label"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "label",
-          "multivalued": true,
-          "range": "string",
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Labels",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "Missing",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Missing",
+      "name": "MissingInfo",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/MissingInfo",
       "description": "Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (e.g., because it was unavailable). This does not include intentionally removed information, but might include, e.g., redacted text.",
       "in_subset": [
         "Composition"
@@ -3549,8 +3825,8 @@
         "id",
         "name",
         "description",
-        "missing__missing",
-        "missing__why_missing"
+        "missingInfo__missing",
+        "missingInfo__why_missing"
       ],
       "slot_usage": {},
       "attributes": [
@@ -3567,7 +3843,7 @@
           "@type": "SlotDefinition"
         }
       ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Missing",
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/MissingInfo",
       "@type": "ClassDefinition"
     },
     {
@@ -3847,7 +4123,11 @@
       "slots": [
         "id",
         "name",
-        "instanceAcquisition__description"
+        "instanceAcquisition__description",
+        "instanceAcquisition__was_directly_observed",
+        "instanceAcquisition__was_reported_by_subjects",
+        "instanceAcquisition__was_inferred_derived",
+        "instanceAcquisition__was_validated_verified"
       ],
       "slot_usage": {},
       "attributes": [
@@ -3855,6 +4135,30 @@
           "name": "description",
           "multivalued": true,
           "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "was_directly_observed",
+          "description": "Was the data directly observable (e.g., raw text, movie ratings)?",
+          "range": "boolean",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "was_reported_by_subjects",
+          "description": "Was the data reported by subjects (e.g., survey responses)?",
+          "range": "boolean",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "was_inferred_derived",
+          "description": "Was the data indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)?",
+          "range": "boolean",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "was_validated_verified",
+          "description": "Was the data validated/verified?",
+          "range": "boolean",
           "@type": "SlotDefinition"
         }
       ],
@@ -3885,32 +4189,6 @@
         }
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/CollectionMechanism",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "SamplingStrategy",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/SamplingStrategy",
-      "description": "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?",
-      "in_subset": [
-        "Collection"
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "DatasetProperty",
-      "slots": [
-        "id",
-        "name",
-        "samplingStrategy__description"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "description",
-          "multivalued": true,
-          "range": "string",
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/SamplingStrategy",
       "@type": "ClassDefinition"
     },
     {
@@ -4122,9 +4400,9 @@
       "@type": "ClassDefinition"
     },
     {
-      "name": "PreprocessingCleaningLabeling",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/PreprocessingCleaningLabeling",
-      "description": "Was any preprocessing/cleaning/labeling of the data done (e.g., discretization or bucketing, tokenization, part-of-speech tagging, SIFT feature extraction, removal of instances, processing of missing values)?",
+      "name": "PreprocessingStrategy",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/PreprocessingStrategy",
+      "description": "Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?",
       "in_subset": [
         "Preprocessing_Cleaning_Labeling"
       ],
@@ -4133,7 +4411,7 @@
       "slots": [
         "id",
         "name",
-        "preprocessingCleaningLabeling__description"
+        "preprocessingStrategy__description"
       ],
       "slot_usage": {},
       "attributes": [
@@ -4144,7 +4422,59 @@
           "@type": "SlotDefinition"
         }
       ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/PreprocessingCleaningLabeling",
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/PreprocessingStrategy",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "CleaningStrategy",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/CleaningStrategy",
+      "description": "Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?",
+      "in_subset": [
+        "Preprocessing_Cleaning_Labeling"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "id",
+        "name",
+        "cleaningStrategy__description"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "description",
+          "multivalued": true,
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/CleaningStrategy",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "LabelingStrategy",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/LabelingStrategy",
+      "description": "Was any preprocessing/cleaning/labeling of the data done (e.g., part-of-speech tagging)?",
+      "in_subset": [
+        "Preprocessing_Cleaning_Labeling"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "id",
+        "name",
+        "labelingStrategy__description"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "description",
+          "multivalued": true,
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/LabelingStrategy",
       "@type": "ClassDefinition"
     },
     {
@@ -4684,9 +5014,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2023-12-20T15:35:53",
-  "source_file_size": 40324,
-  "generation_date": "2023-12-20T15:36:22",
+  "source_file_date": "2024-01-02T15:07:12",
+  "source_file_size": 41314,
+  "generation_date": "2024-01-02T15:08:02",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

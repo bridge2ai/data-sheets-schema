@@ -177,6 +177,33 @@ classes:
       header:
       quote_char:
 
+  Person:
+    description: An individual human being.
+    is_a: NamedThing
+    attributes:
+      affiliation:
+        range: Organization
+
+  # TODO: align with the Bridge2AI Standards Schema equivalent class
+  Organization:
+    description: A collection of people acting in common interests.
+    is_a: NamedThing
+    attributes:
+      ror_id:
+        description: Unique ROR identifier.
+        examples:
+          - value: ROR:02mp31p96
+        range: ror_identifier
+        values_from:
+          - ROR
+      wikidata_id:
+        description: Unique Wikidata identifier.
+        examples:
+          - value: WIKIDATA:Q282186
+        range: wikidata_identifier
+        values_from:
+          - WIKIDATA
+
   DatasetProperty:
     # Individual properties have their own attributes
     description: >-
@@ -196,8 +223,6 @@ classes:
 
   # TODO: add simple property about whether there is a tabular component
   #       This may be a property of a subset or an instance type.
-  # TODO: consider adding DataSubset class that is a child of Dataset
-  #       ANd perhaps data splits and subselections are 'DataSubset's
   Dataset:
     description: >-
       A single component of related observations and/or information that can be
@@ -217,7 +242,7 @@ classes:
         range: Creator
         multivalued: true
       funders:
-        range: Funder
+        range: FundingMechanism
         multivalued: true
       instances:
         range: Instance
@@ -261,8 +286,14 @@ classes:
       data_protection_impacts:
         range: DataProtectionImpact
         multivalued: true
-      preprocessing_cleaning_labeling_methods:
-        range: PreprocessingCleaningLabeling
+      preprocessing_strategies:
+        range: PreprocessingStrategy
+        multivalued: true
+      cleaning_strategies:
+        range: CleaningStrategy
+        multivalued: true
+      labeling_strategies:
+        range: LabelingStrategy
         multivalued: true
       raw_sources:
         range: RawData
@@ -308,6 +339,15 @@ classes:
         range: VersionAccess
       extension_mechanism:
         range: ExtensionMechanism
+      is_deidentified:
+        range: Deidentification
+
+  # TODO: provide way to state a subset is a split or some subpopulation
+  DataSubset:
+    description: >-
+      A subset of a dataset, likely containing multiple files
+      of multiple potential purposes and properties.
+    is_a: Dataset
 
   Purpose:
     description: >-
@@ -340,22 +380,23 @@ classes:
     in_subset:
       - Motivation
 
-  Creator:  # TODO: Institution may need to be more granular
+  Creator:
     description: >-
       Who created the dataset (e.g., which team, research group) and on behalf
       of which entity (e.g., company, institution, organization)?
+      This may also be considered a team.
     is_a: DatasetProperty
     attributes:
-      principal_investigator:  # TODO: connect this to a Person class
-        range: string
-      institution:  # TODO: connect this to an Organization class
-        range: string
+      principal_investigator:
+        range: Person
+      affiliation:
+        # Note that creators have affiliations which may differ
+        # from that of their members
+        range: Organization
     in_subset:
       - Motivation
 
-  # TODO: make this a child of an Organization class
-  #       and move the Grantor attributes into Organization
-  Funder:
+  FundingMechanism:
     description: >-
       Who funded the creation of the dataset? If there is an associated grant,
       please provide the name of the grantor and the grant name and number.
@@ -373,22 +414,7 @@ classes:
     description: >-
       What is the name and/or identifier of the organization providing
       monetary support or other resources supporting creation of the dataset?
-    is_a: NamedThing
-    attributes:
-      ror_id:
-        description: Unique ROR identifier.
-        examples:
-          - value: ROR:02mp31p96
-        range: ror_identifier
-        values_from:
-          - ROR
-      wikidata_id:
-        description: Unique Wikidata identifier.
-        examples:
-          - value: WIKIDATA:Q282186
-        range: wikidata_identifier
-        values_from:
-          - WIKIDATA
+    is_a: Organization
 
   Grant:
     # Note this will have a name slot due to being a NamedThing
@@ -402,35 +428,44 @@ classes:
         range: string
 
   Instance:
+    # Note this does not model the instance itself, but rather the
+    # description of each instance type or class.
     description: >-
       What do the instances that comprise the dataset represent (e.g.,
-      documents, photos, people, countries)? Are there multiple types of
-      instances (e.g., movies, users, and ratings; people and interactions
-      between them; nodes and edges)?
+      documents, photos, people, countries)?
     is_a: DatasetProperty
     attributes:
-      representation:
+      representation:  # TODO: align with Bridge2AI Standards Schema topics
         range: string
-        multivalued: true
-        # inlined: true
-    in_subset:
-      - Composition
-
-  # TODO: add this as an attribute of the Instance class
-  Counts:
-    description: >-
-      How many instances are there in total (of each type, if appropriate)?
-    is_a: DatasetProperty
-    attributes:
-      count_values:
+      instance_type:
+        description: >-
+          Are there multiple types of instances (e.g., movies, users, and
+          ratings; people and interactions between them; nodes and edges)?
+        range: string
+      data_type:  # TODO: align with Bridge2AI Standards Schema types
+        description: >-
+          What data does each instance consist of? “Raw” data (e.g., unprocessed
+          text or images) or features? In either case, please provide a
+          description.
+        range: string
+      counts:
+        description: >-
+          How many instances are there in total (of each type, if appropriate)?
         range: integer
+      label:  # TODO: clarify what this means - it's fuzzy, and maybe redundant
+        description: >-
+          Is there a label or target associated with each instance?
+        range: string
+      sampling_strategies:
+        range: SamplingStrategy
         multivalued: true
-        # inlined: true
+      missing_information:
+        range: MissingInfo
+        multivalued: true
     in_subset:
       - Composition
 
-  # TODO: consider this as an attribute of the Instance class
-  Sampling:
+  SamplingStrategy:
     description: >-
       Does the dataset contain all possible instances or is it a sample (not
       necessarily random) of instances from a larger set? If the dataset is a
@@ -444,60 +479,33 @@ classes:
       ia_sample:
         range: boolean
         multivalued: true
-        # inlined: true
       israndom:
         range: boolean
         multivalued: true
-        # inlined: true
       source_data:
         range: string
         multivalued: true
-        # inlined: true
       is_representative:
         range: boolean
         multivalued: true
-        # inlined: true
       representative_verification:
         range: string
         multivalued: true
-        # inlined: true
       why_not_representative:
         range: string
         multivalued: true
-        # inlined: true
-      # subsample
-    in_subset:
-      - Composition
-
-  # TODO: consider this as an attribute of the Instance class
-  Data:
-    description: >-
-      What data does each instance consist of? “Raw” data (e.g., unprocessed
-      text or images) or features? In either case, please provide a description.
-    is_a: DatasetProperty
-    attributes:
-      type:
+      strategies:
+        description: >-
+          If the dataset is a sample from a larger set, what was the sampling
+          strategy (e.g., deterministic, probabilistic with specific sampling
+          probabilities)?
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
+      - Collection
 
-  # TODO: consider this as an attribute of the Instance class
-  Labels:
-    description: >-
-      Is there a label or target associated with each instance?
-    is_a: DatasetProperty
-    attributes:
-      label:
-        range: string
-        multivalued: true
-        # inlined: true
-    in_subset:
-      - Composition
-
-  # TODO: consider this as an attribute of the Instance class
-  Missing:
+  MissingInfo:
     description: >-
       Is any information missing from individual instances? If so, please
       provide a description, explaining why this information is missing (e.g.,
@@ -508,11 +516,9 @@ classes:
       missing:
         range: string
         multivalued: true
-        # inlined: true
       why_missing:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -576,19 +582,15 @@ classes:
       external_resources:
         range: string
         multivalued: true
-        # inlined: true
       future_guarantees:
         range: string
         multivalued: true
-        # inlined: true
       archival:
         range: boolean
         multivalued: true
-        # inlined: true
       restrictions:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -603,7 +605,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -641,6 +642,9 @@ classes:
 
   # TODO: consider other ways to model this - is it just a boolean?
   # or are we concerned about specific PHI subtypes?
+  # In practice, if data is Safe Harbor de-identified, that's one thing,
+  # but it could also be anonymized, and the standard for that isn't as
+  # explicit. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5977668/
   Deidentification:
     description: >-
       Is it possible to identify individuals (i.e., one or more natural
@@ -651,7 +655,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -671,7 +674,6 @@ classes:
     in_subset:
       - Composition
 
-  # TODO: consider other modeling options here
   InstanceAcquisition:
     description: >-
       How was the data associated with each instance acquired? Was the data
@@ -685,7 +687,23 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
+      was_directly_observed:
+        description: >-
+          Was the data directly observable (e.g., raw text, movie ratings)?
+        range: boolean
+      was_reported_by_subjects:
+        description: >-
+          Was the data reported by subjects (e.g., survey responses)?
+        range: boolean
+      was_inferred_derived:
+        description: >-
+          Was the data indirectly inferred/derived from other data (e.g.,
+          part-of-speech tags, model-based guesses for age or language)?
+        range: boolean
+      was_validated_verified:
+        description: >-
+          Was the data validated/verified?
+        range: boolean
     in_subset:
       - Collection
 
@@ -699,22 +717,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
-    in_subset:
-      - Collection
-
-  # TODO: probably an interdependency relationship here
-  SamplingStrategy:
-    description: >-
-      If the dataset is a sample from a larger set, what was the sampling
-      strategy (e.g., deterministic, probabilistic with specific sampling
-      probabilities)?
-    is_a: DatasetProperty
-    attributes:
-      description:
-        range: string
-        multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -728,7 +730,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -743,7 +744,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -758,7 +758,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -773,7 +772,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -808,7 +806,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -846,17 +843,40 @@ classes:
       - Collection
 
   # TODO: consider this as different tasks
-  PreprocessingCleaningLabeling:
+  PreprocessingStrategy:
     description: >-
-      Was any preprocessing/cleaning/labeling of the data done (e.g.,
-      discretization or bucketing, tokenization, part-of-speech tagging, SIFT
-      feature extraction, removal of instances, processing of missing values)?
+      Was any preprocessing of the data done (e.g.,
+      discretization or bucketing, tokenization, SIFT
+      feature extraction)?
     is_a: DatasetProperty
     attributes:
       description:
         range: string
         multivalued: true
-        # inlined: true
+    in_subset:
+      - Preprocessing-Cleaning-Labeling
+
+  CleaningStrategy:
+    description: >-
+      Was any cleaning of the data done (e.g.,
+      removal of instances, processing of missing values)?
+    is_a: DatasetProperty
+    attributes:
+      description:
+        range: string
+        multivalued: true
+    in_subset:
+      - Preprocessing-Cleaning-Labeling
+
+  LabelingStrategy:
+    description: >-
+      Was any preprocessing/cleaning/labeling of the data done (e.g.,
+      part-of-speech tagging)?
+    is_a: DatasetProperty
+    attributes:
+      description:
+        range: string
+        multivalued: true
     in_subset:
       - Preprocessing-Cleaning-Labeling
 

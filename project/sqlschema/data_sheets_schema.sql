@@ -1,6 +1,26 @@
 
 
+CREATE TABLE "AddressingGap" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	response TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "CleaningStrategy" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "CollectionConsent" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "CollectionMechanism" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	PRIMARY KEY (id)
@@ -12,23 +32,40 @@ CREATE TABLE "CollectionNotification" (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE "CollectionTimeframe" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Confidentiality" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "ConsentRevocation" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "Counts" (
+CREATE TABLE "ContentWarning" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "Data" (
+CREATE TABLE "DataAnomaly" (
 	id TEXT NOT NULL, 
 	name TEXT, 
-	description TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "DataCollector" (
+	id TEXT NOT NULL, 
+	name TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -51,6 +88,12 @@ CREATE TABLE "DataPackage" (
 	was_derived_from TEXT, 
 	page TEXT, 
 	resources TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "DataProtectionImpact" (
+	id TEXT NOT NULL, 
+	name TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -125,6 +168,43 @@ CREATE TABLE "DirectCollection" (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE "DiscouragedUse" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "DistributionDate" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "DistributionFormat" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	doi TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Erratum" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "EthicalReview" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "ExistingUse" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "ExportControlRegulatoryRestrictions" (
 	id TEXT NOT NULL, 
 	name TEXT, 
@@ -137,6 +217,13 @@ CREATE TABLE "ExtensionMechanism" (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE "ExternalResource" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "FormatDialect" (
 	comment_prefix TEXT, 
 	delimiter TEXT, 
@@ -144,6 +231,12 @@ CREATE TABLE "FormatDialect" (
 	header TEXT, 
 	quote_char TEXT, 
 	PRIMARY KEY (comment_prefix, delimiter, double_quote, header, quote_char)
+);
+
+CREATE TABLE "FutureUseImpact" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Grant" (
@@ -163,20 +256,48 @@ CREATE TABLE "Grantor" (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE "Instance" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	representation TEXT, 
+	instance_type TEXT, 
+	data_type TEXT, 
+	counts INTEGER, 
+	label TEXT, 
+	sampling_strategies TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "InstanceAcquisition" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	was_directly_observed BOOLEAN, 
+	was_reported_by_subjects BOOLEAN, 
+	was_inferred_derived BOOLEAN, 
+	was_validated_verified BOOLEAN, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "IPRestrictions" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "Labels" (
+CREATE TABLE "LabelingStrategy" (
 	id TEXT NOT NULL, 
 	name TEXT, 
-	description TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "LicenseAndUseTerms" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Maintainer" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	PRIMARY KEY (id)
@@ -188,13 +309,6 @@ CREATE TABLE "MaintainerContact" (
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "Missing" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	PRIMARY KEY (id)
-);
-
 CREATE TABLE "NamedThing" (
 	id TEXT NOT NULL, 
 	name TEXT, 
@@ -202,7 +316,42 @@ CREATE TABLE "NamedThing" (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE "Organization" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	ror_id TEXT, 
+	wikidata_id TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "OtherTask" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "PreprocessingCleaningLabelingSoftware" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "PreprocessingStrategy" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Purpose" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	response TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "RawData" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	PRIMARY KEY (id)
@@ -220,16 +369,37 @@ CREATE TABLE "RetentionLimits" (
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "Sampling" (
+CREATE TABLE "SamplingStrategy" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE "SensitiveElement" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "Splits" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Subpopulation" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Task" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	response TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -240,6 +410,12 @@ CREATE TABLE "ThirdPartySharing" (
 );
 
 CREATE TABLE "UpdatePlan" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "UseRepository" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	PRIMARY KEY (id)
@@ -278,13 +454,46 @@ CREATE TABLE "Dataset" (
 	md5 TEXT, 
 	sha256 TEXT, 
 	dialect TEXT, 
+	purposes TEXT, 
+	tasks TEXT, 
+	addressing_gaps TEXT, 
+	creators TEXT, 
+	funders TEXT, 
+	instances TEXT, 
+	anomalies TEXT, 
+	external_resources TEXT, 
+	confidential_elements TEXT, 
+	content_warnings TEXT, 
+	subpopulations TEXT, 
+	sensitive_elements TEXT, 
+	acquisition_methods TEXT, 
+	collection_mechanisms TEXT, 
+	sampling_strategies TEXT, 
+	data_collectors TEXT, 
+	collection_timeframes TEXT, 
+	ethical_reviews TEXT, 
+	data_protection_impacts TEXT, 
+	preprocessing_strategies TEXT, 
+	cleaning_strategies TEXT, 
+	labeling_strategies TEXT, 
+	raw_sources TEXT, 
+	existing_uses TEXT, 
+	use_repository TEXT, 
+	other_tasks TEXT, 
+	future_use_impacts TEXT, 
+	discouraged_uses TEXT, 
+	distribution_formats TEXT, 
+	distribution_dates TEXT, 
 	license_and_use_terms TEXT, 
 	ip_restrictions TEXT, 
 	regulatory_restrictions TEXT, 
+	maintainers TEXT, 
+	errata TEXT, 
 	updates TEXT, 
 	retention_limit TEXT, 
 	version_access TEXT, 
 	extension_mechanism TEXT, 
+	is_deidentified TEXT, 
 	"DatasetCollection_id" TEXT, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(license_and_use_terms) REFERENCES "LicenseAndUseTerms" (id), 
@@ -294,7 +503,122 @@ CREATE TABLE "Dataset" (
 	FOREIGN KEY(retention_limit) REFERENCES "RetentionLimits" (id), 
 	FOREIGN KEY(version_access) REFERENCES "VersionAccess" (id), 
 	FOREIGN KEY(extension_mechanism) REFERENCES "ExtensionMechanism" (id), 
+	FOREIGN KEY(is_deidentified) REFERENCES "Deidentification" (id), 
 	FOREIGN KEY("DatasetCollection_id") REFERENCES "DatasetCollection" (id)
+);
+
+CREATE TABLE "DataSubset" (
+	id TEXT NOT NULL, 
+	download_url TEXT, 
+	license TEXT, 
+	conforms_to TEXT, 
+	conforms_to_schema TEXT, 
+	conforms_to_class TEXT, 
+	version TEXT, 
+	language TEXT, 
+	publisher TEXT, 
+	issued DATETIME, 
+	created_by TEXT, 
+	created_on DATETIME, 
+	compression TEXT, 
+	was_derived_from TEXT, 
+	page TEXT, 
+	path TEXT, 
+	title TEXT, 
+	description TEXT, 
+	format VARCHAR(22), 
+	media_type TEXT, 
+	encoding TEXT, 
+	bytes INTEGER, 
+	hash TEXT, 
+	md5 TEXT, 
+	sha256 TEXT, 
+	dialect TEXT, 
+	purposes TEXT, 
+	tasks TEXT, 
+	addressing_gaps TEXT, 
+	creators TEXT, 
+	funders TEXT, 
+	instances TEXT, 
+	anomalies TEXT, 
+	external_resources TEXT, 
+	confidential_elements TEXT, 
+	content_warnings TEXT, 
+	subpopulations TEXT, 
+	sensitive_elements TEXT, 
+	acquisition_methods TEXT, 
+	collection_mechanisms TEXT, 
+	sampling_strategies TEXT, 
+	data_collectors TEXT, 
+	collection_timeframes TEXT, 
+	ethical_reviews TEXT, 
+	data_protection_impacts TEXT, 
+	preprocessing_strategies TEXT, 
+	cleaning_strategies TEXT, 
+	labeling_strategies TEXT, 
+	raw_sources TEXT, 
+	existing_uses TEXT, 
+	use_repository TEXT, 
+	other_tasks TEXT, 
+	future_use_impacts TEXT, 
+	discouraged_uses TEXT, 
+	distribution_formats TEXT, 
+	distribution_dates TEXT, 
+	license_and_use_terms TEXT, 
+	ip_restrictions TEXT, 
+	regulatory_restrictions TEXT, 
+	maintainers TEXT, 
+	errata TEXT, 
+	updates TEXT, 
+	retention_limit TEXT, 
+	version_access TEXT, 
+	extension_mechanism TEXT, 
+	is_deidentified TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(license_and_use_terms) REFERENCES "LicenseAndUseTerms" (id), 
+	FOREIGN KEY(ip_restrictions) REFERENCES "IPRestrictions" (id), 
+	FOREIGN KEY(regulatory_restrictions) REFERENCES "ExportControlRegulatoryRestrictions" (id), 
+	FOREIGN KEY(updates) REFERENCES "UpdatePlan" (id), 
+	FOREIGN KEY(retention_limit) REFERENCES "RetentionLimits" (id), 
+	FOREIGN KEY(version_access) REFERENCES "VersionAccess" (id), 
+	FOREIGN KEY(extension_mechanism) REFERENCES "ExtensionMechanism" (id), 
+	FOREIGN KEY(is_deidentified) REFERENCES "Deidentification" (id)
+);
+
+CREATE TABLE "FundingMechanism" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	grantor TEXT, 
+	grant TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(grantor) REFERENCES "Grantor" (id), 
+	FOREIGN KEY(grant) REFERENCES "Grant" (id)
+);
+
+CREATE TABLE "MissingInfo" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	"Instance_id" TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY("Instance_id") REFERENCES "Instance" (id)
+);
+
+CREATE TABLE "Person" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	affiliation TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(affiliation) REFERENCES "Organization" (id)
+);
+
+CREATE TABLE "CleaningStrategy_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "CleaningStrategy" (id)
 );
 
 CREATE TABLE "CollectionConsent_description" (
@@ -304,11 +628,32 @@ CREATE TABLE "CollectionConsent_description" (
 	FOREIGN KEY(backref_id) REFERENCES "CollectionConsent" (id)
 );
 
+CREATE TABLE "CollectionMechanism_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "CollectionMechanism" (id)
+);
+
 CREATE TABLE "CollectionNotification_description" (
 	backref_id TEXT, 
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "CollectionNotification" (id)
+);
+
+CREATE TABLE "CollectionTimeframe_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "CollectionTimeframe" (id)
+);
+
+CREATE TABLE "Confidentiality_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "Confidentiality" (id)
 );
 
 CREATE TABLE "ConsentRevocation_description" (
@@ -318,18 +663,25 @@ CREATE TABLE "ConsentRevocation_description" (
 	FOREIGN KEY(backref_id) REFERENCES "ConsentRevocation" (id)
 );
 
-CREATE TABLE "Counts_count_values" (
+CREATE TABLE "ContentWarning_warnings" (
 	backref_id TEXT, 
-	count_values INTEGER, 
-	PRIMARY KEY (backref_id, count_values), 
-	FOREIGN KEY(backref_id) REFERENCES "Counts" (id)
+	warnings TEXT, 
+	PRIMARY KEY (backref_id, warnings), 
+	FOREIGN KEY(backref_id) REFERENCES "ContentWarning" (id)
 );
 
-CREATE TABLE "Data_type" (
+CREATE TABLE "DataAnomaly_description" (
 	backref_id TEXT, 
-	type TEXT, 
-	PRIMARY KEY (backref_id, type), 
-	FOREIGN KEY(backref_id) REFERENCES "Data" (id)
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "DataAnomaly" (id)
+);
+
+CREATE TABLE "DataCollector_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "DataCollector" (id)
 );
 
 CREATE TABLE "DataPackage_keywords" (
@@ -344,6 +696,13 @@ CREATE TABLE "DataPackage_test_roles" (
 	test_roles VARCHAR(14), 
 	PRIMARY KEY (backref_id, test_roles), 
 	FOREIGN KEY(backref_id) REFERENCES "DataPackage" (id)
+);
+
+CREATE TABLE "DataProtectionImpact_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "DataProtectionImpact" (id)
 );
 
 CREATE TABLE "DataResource_keywords" (
@@ -388,482 +747,6 @@ CREATE TABLE "DirectCollection_description" (
 	FOREIGN KEY(backref_id) REFERENCES "DirectCollection" (id)
 );
 
-CREATE TABLE "ExportControlRegulatoryRestrictions_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "ExportControlRegulatoryRestrictions" (id)
-);
-
-CREATE TABLE "ExtensionMechanism_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "ExtensionMechanism" (id)
-);
-
-CREATE TABLE "IPRestrictions_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "IPRestrictions" (id)
-);
-
-CREATE TABLE "Labels_label" (
-	backref_id TEXT, 
-	label TEXT, 
-	PRIMARY KEY (backref_id, label), 
-	FOREIGN KEY(backref_id) REFERENCES "Labels" (id)
-);
-
-CREATE TABLE "LicenseAndUseTerms_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "LicenseAndUseTerms" (id)
-);
-
-CREATE TABLE "MaintainerContact_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "MaintainerContact" (id)
-);
-
-CREATE TABLE "MaintainerContact_email" (
-	backref_id TEXT, 
-	email TEXT, 
-	PRIMARY KEY (backref_id, email), 
-	FOREIGN KEY(backref_id) REFERENCES "MaintainerContact" (id)
-);
-
-CREATE TABLE "Missing_missing" (
-	backref_id TEXT, 
-	missing TEXT, 
-	PRIMARY KEY (backref_id, missing), 
-	FOREIGN KEY(backref_id) REFERENCES "Missing" (id)
-);
-
-CREATE TABLE "Missing_why_missing" (
-	backref_id TEXT, 
-	why_missing TEXT, 
-	PRIMARY KEY (backref_id, why_missing), 
-	FOREIGN KEY(backref_id) REFERENCES "Missing" (id)
-);
-
-CREATE TABLE "PreprocessingCleaningLabelingSoftware_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "PreprocessingCleaningLabelingSoftware" (id)
-);
-
-CREATE TABLE "Relationships_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "Relationships" (id)
-);
-
-CREATE TABLE "RetentionLimits_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "RetentionLimits" (id)
-);
-
-CREATE TABLE "Sampling_ia_sample" (
-	backref_id TEXT, 
-	ia_sample BOOLEAN, 
-	PRIMARY KEY (backref_id, ia_sample), 
-	FOREIGN KEY(backref_id) REFERENCES "Sampling" (id)
-);
-
-CREATE TABLE "Sampling_israndom" (
-	backref_id TEXT, 
-	israndom BOOLEAN, 
-	PRIMARY KEY (backref_id, israndom), 
-	FOREIGN KEY(backref_id) REFERENCES "Sampling" (id)
-);
-
-CREATE TABLE "Sampling_source_data" (
-	backref_id TEXT, 
-	source_data TEXT, 
-	PRIMARY KEY (backref_id, source_data), 
-	FOREIGN KEY(backref_id) REFERENCES "Sampling" (id)
-);
-
-CREATE TABLE "Sampling_is_representative" (
-	backref_id TEXT, 
-	is_representative BOOLEAN, 
-	PRIMARY KEY (backref_id, is_representative), 
-	FOREIGN KEY(backref_id) REFERENCES "Sampling" (id)
-);
-
-CREATE TABLE "Sampling_representative_verification" (
-	backref_id TEXT, 
-	representative_verification TEXT, 
-	PRIMARY KEY (backref_id, representative_verification), 
-	FOREIGN KEY(backref_id) REFERENCES "Sampling" (id)
-);
-
-CREATE TABLE "Sampling_why_not_representative" (
-	backref_id TEXT, 
-	why_not_representative TEXT, 
-	PRIMARY KEY (backref_id, why_not_representative), 
-	FOREIGN KEY(backref_id) REFERENCES "Sampling" (id)
-);
-
-CREATE TABLE "Splits_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "Splits" (id)
-);
-
-CREATE TABLE "ThirdPartySharing_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "ThirdPartySharing" (id)
-);
-
-CREATE TABLE "UpdatePlan_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "UpdatePlan" (id)
-);
-
-CREATE TABLE "VersionAccess_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "VersionAccess" (id)
-);
-
-CREATE TABLE "AddressingGap" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	response TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "CollectionMechanism" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "CollectionTimeframe" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Confidentiality" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "ContentWarning" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Creator" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	principal_investigator TEXT, 
-	institution TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "DataAnomaly" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "DataCollector" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "DataProtectionImpact" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "DiscouragedUse" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "DistributionDate" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "DistributionFormat" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	doi TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Erratum" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "EthicalReview" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "ExistingUse" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "ExternalResource" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Funder" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	grantor TEXT, 
-	grant TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY(grantor) REFERENCES "Grantor" (id), 
-	FOREIGN KEY(grant) REFERENCES "Grant" (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "FutureUseImpact" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Instance" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "InstanceAcquisition" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Maintainer" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "OtherTask" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "PreprocessingCleaningLabeling" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Purpose" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	response TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "RawData" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "SamplingStrategy" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "SensitiveElement" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Subpopulation" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Task" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	response TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "UseRepository" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	"Dataset_id" TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY("Dataset_id") REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Dataset_keywords" (
-	backref_id TEXT, 
-	keywords TEXT, 
-	PRIMARY KEY (backref_id, keywords), 
-	FOREIGN KEY(backref_id) REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "Dataset_test_roles" (
-	backref_id TEXT, 
-	test_roles VARCHAR(14), 
-	PRIMARY KEY (backref_id, test_roles), 
-	FOREIGN KEY(backref_id) REFERENCES "Dataset" (id)
-);
-
-CREATE TABLE "CollectionMechanism_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "CollectionMechanism" (id)
-);
-
-CREATE TABLE "CollectionTimeframe_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "CollectionTimeframe" (id)
-);
-
-CREATE TABLE "Confidentiality_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "Confidentiality" (id)
-);
-
-CREATE TABLE "ContentWarning_warnings" (
-	backref_id TEXT, 
-	warnings TEXT, 
-	PRIMARY KEY (backref_id, warnings), 
-	FOREIGN KEY(backref_id) REFERENCES "ContentWarning" (id)
-);
-
-CREATE TABLE "DataAnomaly_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "DataAnomaly" (id)
-);
-
-CREATE TABLE "DataCollector_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "DataCollector" (id)
-);
-
-CREATE TABLE "DataProtectionImpact_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "DataProtectionImpact" (id)
-);
-
 CREATE TABLE "DiscouragedUse_description" (
 	backref_id TEXT, 
 	description TEXT, 
@@ -906,6 +789,20 @@ CREATE TABLE "ExistingUse_description" (
 	FOREIGN KEY(backref_id) REFERENCES "ExistingUse" (id)
 );
 
+CREATE TABLE "ExportControlRegulatoryRestrictions_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "ExportControlRegulatoryRestrictions" (id)
+);
+
+CREATE TABLE "ExtensionMechanism_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "ExtensionMechanism" (id)
+);
+
 CREATE TABLE "ExternalResource_external_resources" (
 	backref_id TEXT, 
 	external_resources TEXT, 
@@ -941,18 +838,32 @@ CREATE TABLE "FutureUseImpact_description" (
 	FOREIGN KEY(backref_id) REFERENCES "FutureUseImpact" (id)
 );
 
-CREATE TABLE "Instance_representation" (
-	backref_id TEXT, 
-	representation TEXT, 
-	PRIMARY KEY (backref_id, representation), 
-	FOREIGN KEY(backref_id) REFERENCES "Instance" (id)
-);
-
 CREATE TABLE "InstanceAcquisition_description" (
 	backref_id TEXT, 
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "InstanceAcquisition" (id)
+);
+
+CREATE TABLE "IPRestrictions_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "IPRestrictions" (id)
+);
+
+CREATE TABLE "LabelingStrategy_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "LabelingStrategy" (id)
+);
+
+CREATE TABLE "LicenseAndUseTerms_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "LicenseAndUseTerms" (id)
 );
 
 CREATE TABLE "Maintainer_description" (
@@ -962,6 +873,20 @@ CREATE TABLE "Maintainer_description" (
 	FOREIGN KEY(backref_id) REFERENCES "Maintainer" (id)
 );
 
+CREATE TABLE "MaintainerContact_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "MaintainerContact" (id)
+);
+
+CREATE TABLE "MaintainerContact_email" (
+	backref_id TEXT, 
+	email TEXT, 
+	PRIMARY KEY (backref_id, email), 
+	FOREIGN KEY(backref_id) REFERENCES "MaintainerContact" (id)
+);
+
 CREATE TABLE "OtherTask_description" (
 	backref_id TEXT, 
 	description TEXT, 
@@ -969,11 +894,18 @@ CREATE TABLE "OtherTask_description" (
 	FOREIGN KEY(backref_id) REFERENCES "OtherTask" (id)
 );
 
-CREATE TABLE "PreprocessingCleaningLabeling_description" (
+CREATE TABLE "PreprocessingCleaningLabelingSoftware_description" (
 	backref_id TEXT, 
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "PreprocessingCleaningLabeling" (id)
+	FOREIGN KEY(backref_id) REFERENCES "PreprocessingCleaningLabelingSoftware" (id)
+);
+
+CREATE TABLE "PreprocessingStrategy_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "PreprocessingStrategy" (id)
 );
 
 CREATE TABLE "RawData_description" (
@@ -983,10 +915,66 @@ CREATE TABLE "RawData_description" (
 	FOREIGN KEY(backref_id) REFERENCES "RawData" (id)
 );
 
-CREATE TABLE "SamplingStrategy_description" (
+CREATE TABLE "Relationships_description" (
 	backref_id TEXT, 
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "Relationships" (id)
+);
+
+CREATE TABLE "RetentionLimits_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "RetentionLimits" (id)
+);
+
+CREATE TABLE "SamplingStrategy_ia_sample" (
+	backref_id TEXT, 
+	ia_sample BOOLEAN, 
+	PRIMARY KEY (backref_id, ia_sample), 
+	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
+);
+
+CREATE TABLE "SamplingStrategy_israndom" (
+	backref_id TEXT, 
+	israndom BOOLEAN, 
+	PRIMARY KEY (backref_id, israndom), 
+	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
+);
+
+CREATE TABLE "SamplingStrategy_source_data" (
+	backref_id TEXT, 
+	source_data TEXT, 
+	PRIMARY KEY (backref_id, source_data), 
+	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
+);
+
+CREATE TABLE "SamplingStrategy_is_representative" (
+	backref_id TEXT, 
+	is_representative BOOLEAN, 
+	PRIMARY KEY (backref_id, is_representative), 
+	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
+);
+
+CREATE TABLE "SamplingStrategy_representative_verification" (
+	backref_id TEXT, 
+	representative_verification TEXT, 
+	PRIMARY KEY (backref_id, representative_verification), 
+	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
+);
+
+CREATE TABLE "SamplingStrategy_why_not_representative" (
+	backref_id TEXT, 
+	why_not_representative TEXT, 
+	PRIMARY KEY (backref_id, why_not_representative), 
+	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
+);
+
+CREATE TABLE "SamplingStrategy_strategies" (
+	backref_id TEXT, 
+	strategies TEXT, 
+	PRIMARY KEY (backref_id, strategies), 
 	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
 );
 
@@ -995,6 +983,13 @@ CREATE TABLE "SensitiveElement_description" (
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "SensitiveElement" (id)
+);
+
+CREATE TABLE "Splits_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "Splits" (id)
 );
 
 CREATE TABLE "Subpopulation_identification" (
@@ -1011,9 +1006,83 @@ CREATE TABLE "Subpopulation_distribution" (
 	FOREIGN KEY(backref_id) REFERENCES "Subpopulation" (id)
 );
 
+CREATE TABLE "ThirdPartySharing_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "ThirdPartySharing" (id)
+);
+
+CREATE TABLE "UpdatePlan_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "UpdatePlan" (id)
+);
+
 CREATE TABLE "UseRepository_description" (
 	backref_id TEXT, 
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "UseRepository" (id)
+);
+
+CREATE TABLE "VersionAccess_description" (
+	backref_id TEXT, 
+	description TEXT, 
+	PRIMARY KEY (backref_id, description), 
+	FOREIGN KEY(backref_id) REFERENCES "VersionAccess" (id)
+);
+
+CREATE TABLE "Creator" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	principal_investigator TEXT, 
+	affiliation TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(principal_investigator) REFERENCES "Person" (id), 
+	FOREIGN KEY(affiliation) REFERENCES "Organization" (id)
+);
+
+CREATE TABLE "Dataset_keywords" (
+	backref_id TEXT, 
+	keywords TEXT, 
+	PRIMARY KEY (backref_id, keywords), 
+	FOREIGN KEY(backref_id) REFERENCES "Dataset" (id)
+);
+
+CREATE TABLE "Dataset_test_roles" (
+	backref_id TEXT, 
+	test_roles VARCHAR(14), 
+	PRIMARY KEY (backref_id, test_roles), 
+	FOREIGN KEY(backref_id) REFERENCES "Dataset" (id)
+);
+
+CREATE TABLE "DataSubset_keywords" (
+	backref_id TEXT, 
+	keywords TEXT, 
+	PRIMARY KEY (backref_id, keywords), 
+	FOREIGN KEY(backref_id) REFERENCES "DataSubset" (id)
+);
+
+CREATE TABLE "DataSubset_test_roles" (
+	backref_id TEXT, 
+	test_roles VARCHAR(14), 
+	PRIMARY KEY (backref_id, test_roles), 
+	FOREIGN KEY(backref_id) REFERENCES "DataSubset" (id)
+);
+
+CREATE TABLE "MissingInfo_missing" (
+	backref_id TEXT, 
+	missing TEXT, 
+	PRIMARY KEY (backref_id, missing), 
+	FOREIGN KEY(backref_id) REFERENCES "MissingInfo" (id)
+);
+
+CREATE TABLE "MissingInfo_why_missing" (
+	backref_id TEXT, 
+	why_missing TEXT, 
+	PRIMARY KEY (backref_id, why_missing), 
+	FOREIGN KEY(backref_id) REFERENCES "MissingInfo" (id)
 );
