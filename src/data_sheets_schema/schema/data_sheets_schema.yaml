@@ -420,6 +420,8 @@ classes:
         range: string
 
   Instance:
+    # Note this does not model the instance itself, but rather the
+    # description of each instance type or class.
     description: >-
       What do the instances that comprise the dataset represent (e.g.,
       documents, photos, people, countries)?
@@ -446,11 +448,16 @@ classes:
         description: >-
           Is there a label or target associated with each instance?
         range: string
+      sampling_strategies:
+        range: SamplingStrategy
+        multivalued: true
+      missing_information:
+        range: MissingInfo
+        multivalued: true
     in_subset:
       - Composition
 
-  # TODO: consider this as an attribute of the Instance class
-  Sampling:
+  SamplingStrategy:
     description: >-
       Does the dataset contain all possible instances or is it a sample (not
       necessarily random) of instances from a larger set? If the dataset is a
@@ -464,32 +471,25 @@ classes:
       ia_sample:
         range: boolean
         multivalued: true
-        # inlined: true
       israndom:
         range: boolean
         multivalued: true
-        # inlined: true
       source_data:
         range: string
         multivalued: true
-        # inlined: true
       is_representative:
         range: boolean
         multivalued: true
-        # inlined: true
       representative_verification:
         range: string
         multivalued: true
-        # inlined: true
       why_not_representative:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
-  # TODO: consider this as an attribute of the Instance class
-  Missing:
+  MissingInfo:
     description: >-
       Is any information missing from individual instances? If so, please
       provide a description, explaining why this information is missing (e.g.,
@@ -500,11 +500,9 @@ classes:
       missing:
         range: string
         multivalued: true
-        # inlined: true
       why_missing:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
