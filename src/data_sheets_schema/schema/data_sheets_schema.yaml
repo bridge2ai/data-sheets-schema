@@ -223,8 +223,6 @@ classes:
 
   # TODO: add simple property about whether there is a tabular component
   #       This may be a property of a subset or an instance type.
-  # TODO: consider adding DataSubset class that is a child of Dataset
-  #       ANd perhaps data splits and subselections are 'DataSubset's
   Dataset:
     description: >-
       A single component of related observations and/or information that can be
@@ -335,6 +333,13 @@ classes:
         range: VersionAccess
       extension_mechanism:
         range: ExtensionMechanism
+
+  # TODO: provide way to state a subset is a split or some subpopulation
+  DataSubset:
+    description: >-
+      A subset of a dataset, likely containing multiple files
+      of multiple potential purposes and properties.
+    is_a: Dataset
 
   Purpose:
     description: >-
@@ -638,7 +643,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
