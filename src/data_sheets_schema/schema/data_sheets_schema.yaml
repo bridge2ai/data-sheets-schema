@@ -488,8 +488,16 @@ classes:
       why_not_representative:
         range: string
         multivalued: true
+      strategies:
+        description: >-
+          If the dataset is a sample from a larger set, what was the sampling
+          strategy (e.g., deterministic, probabilistic with specific sampling
+          probabilities)?
+        range: string
+        multivalued: true
     in_subset:
       - Composition
+      - Collection
 
   MissingInfo:
     description: >-
@@ -698,21 +706,6 @@ classes:
       What mechanisms or procedures were used to collect the data (e.g.,
       hardware apparatuses or sensors, manual human curation, software programs,
       software APIs)? How were these mechanisms or procedures validated?
-    is_a: DatasetProperty
-    attributes:
-      description:
-        range: string
-        multivalued: true
-        # inlined: true
-    in_subset:
-      - Collection
-
-  # TODO: probably an interdependency relationship here
-  SamplingStrategy:
-    description: >-
-      If the dataset is a sample from a larger set, what was the sampling
-      strategy (e.g., deterministic, probabilistic with specific sampling
-      probabilities)?
     is_a: DatasetProperty
     attributes:
       description:
