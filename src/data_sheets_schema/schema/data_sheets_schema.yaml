@@ -286,8 +286,14 @@ classes:
       data_protection_impacts:
         range: DataProtectionImpact
         multivalued: true
-      preprocessing_cleaning_labeling_methods:
-        range: PreprocessingCleaningLabeling
+      preprocessing_strategies:
+        range: PreprocessingStrategy
+        multivalued: true
+      cleaning_strategies:
+        range: CleaningStrategy
+        multivalued: true
+      labeling_strategies:
+        range: LabelingStrategy
         multivalued: true
       raw_sources:
         range: RawData
@@ -711,7 +717,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -725,7 +730,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -740,7 +744,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -755,7 +758,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -770,7 +772,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -805,7 +806,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -843,17 +843,40 @@ classes:
       - Collection
 
   # TODO: consider this as different tasks
-  PreprocessingCleaningLabeling:
+  PreprocessingStrategy:
     description: >-
-      Was any preprocessing/cleaning/labeling of the data done (e.g.,
-      discretization or bucketing, tokenization, part-of-speech tagging, SIFT
-      feature extraction, removal of instances, processing of missing values)?
+      Was any preprocessing of the data done (e.g.,
+      discretization or bucketing, tokenization, SIFT
+      feature extraction)?
     is_a: DatasetProperty
     attributes:
       description:
         range: string
         multivalued: true
-        # inlined: true
+    in_subset:
+      - Preprocessing-Cleaning-Labeling
+
+  CleaningStrategy:
+    description: >-
+      Was any cleaning of the data done (e.g.,
+      removal of instances, processing of missing values)?
+    is_a: DatasetProperty
+    attributes:
+      description:
+        range: string
+        multivalued: true
+    in_subset:
+      - Preprocessing-Cleaning-Labeling
+
+  LabelingStrategy:
+    description: >-
+      Was any preprocessing/cleaning/labeling of the data done (e.g.,
+      part-of-speech tagging)?
+    is_a: DatasetProperty
+    attributes:
+      description:
+        range: string
+        multivalued: true
     in_subset:
       - Preprocessing-Cleaning-Labeling
 
