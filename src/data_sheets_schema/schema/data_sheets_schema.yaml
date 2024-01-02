@@ -660,7 +660,6 @@ classes:
     in_subset:
       - Composition
 
-  # TODO: consider other modeling options here
   InstanceAcquisition:
     description: >-
       How was the data associated with each instance acquired? Was the data
@@ -674,7 +673,23 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
+      was_directly_observed:
+        description: >-
+          Was the data directly observable (e.g., raw text, movie ratings)?
+        range: boolean
+      was_reported_by_subjects:
+        description: >-
+          Was the data reported by subjects (e.g., survey responses)?
+        range: boolean
+      was_inferred_derived:
+        description: >-
+          Was the data indirectly inferred/derived from other data (e.g.,
+          part-of-speech tags, model-based guesses for age or language)?
+        range: boolean
+      was_validated_verified:
+        description: >-
+          Was the data validated/verified?
+        range: boolean
     in_subset:
       - Collection
 
