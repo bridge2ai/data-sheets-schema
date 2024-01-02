@@ -333,6 +333,8 @@ classes:
         range: VersionAccess
       extension_mechanism:
         range: ExtensionMechanism
+      is_deidentified:
+        range: Deidentification
 
   # TODO: provide way to state a subset is a split or some subpopulation
   DataSubset:
@@ -566,19 +568,15 @@ classes:
       external_resources:
         range: string
         multivalued: true
-        # inlined: true
       future_guarantees:
         range: string
         multivalued: true
-        # inlined: true
       archival:
         range: boolean
         multivalued: true
-        # inlined: true
       restrictions:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -593,7 +591,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -631,6 +628,9 @@ classes:
 
   # TODO: consider other ways to model this - is it just a boolean?
   # or are we concerned about specific PHI subtypes?
+  # In practice, if data is Safe Harbor de-identified, that's one thing,
+  # but it could also be anonymized, and the standard for that isn't as
+  # explicit. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5977668/
   Deidentification:
     description: >-
       Is it possible to identify individuals (i.e., one or more natural
