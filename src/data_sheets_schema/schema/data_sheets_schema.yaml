@@ -96,6 +96,8 @@ classes:
     close_mappings:
       - schema:Thing
 
+  # TODO: much of this could be merged down into Dataset class,
+  # to avoid extra nesting
   # From linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
   Information:
@@ -122,7 +124,6 @@ classes:
       - compression
       - was_derived_from
       - page
-      - test_roles
 
   # From linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
@@ -1340,6 +1341,7 @@ slots:
     range: uriorcurie
     slot_uri: dcat:theme
 
+  # TODO: add slots directly to the Dataset class
   created_by:
     range: uriorcurie
     description: agent that created the element
