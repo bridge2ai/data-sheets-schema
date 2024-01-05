@@ -209,6 +209,12 @@ classes:
     description: >-
       Represents a single property of a dataset, or a set of related properties.
     is_a: NamedThing
+    attributes:
+      used_software:
+        description: >-
+          What software was used as part of this dataset property?
+        range: Software
+        multivalued: true
 
   DatasetCollection:
     tree_root: true
@@ -359,6 +365,18 @@ classes:
           Is this subset a subpopulation of the larger dataset,
           e.g., is it a set of data for a specific demographic?
         range: boolean
+
+  Software:
+    description: >-
+      A software program or library.
+    is_a: NamedThing
+    attributes:
+      version:
+        range: string
+      license:
+        range: string
+      url:
+        range: string
 
   Purpose:
     description: >-
@@ -799,7 +817,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -833,7 +850,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -849,11 +865,9 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
-  # TODO: consider this as different tasks
   PreprocessingStrategy:
     description: >-
       Was any preprocessing of the data done (e.g.,
@@ -901,21 +915,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
-    in_subset:
-      - Preprocessing-Cleaning-Labeling
-
-  # TODO: this is probably an attribute of a task defined above
-  PreprocessingCleaningLabelingSoftware:
-    description: >-
-      Is the software that was used to preprocess/clean/label the data
-      available?
-    is_a: DatasetProperty
-    attributes:
-      description:
-        range: string
-        multivalued: true
-        # inlined: true
     in_subset:
       - Preprocessing-Cleaning-Labeling
 
