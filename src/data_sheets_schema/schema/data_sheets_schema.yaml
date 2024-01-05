@@ -342,12 +342,23 @@ classes:
       is_deidentified:
         range: Deidentification
 
-  # TODO: provide way to state a subset is a split or some subpopulation
   DataSubset:
     description: >-
       A subset of a dataset, likely containing multiple files
       of multiple potential purposes and properties.
     is_a: Dataset
+    attributes:
+      is_data_split:
+        description: >-
+          Is this subset a split of the larger dataset,
+          e.g., is it a set for model training, testing,
+          or validation?
+        range: boolean
+      is_subpopulation:
+        description: >-
+          Is this subset a subpopulation of the larger dataset,
+          e.g., is it a set of data for a specific demographic?
+        range: boolean
 
   Purpose:
     description: >-
@@ -476,10 +487,10 @@ classes:
       range of instances, because instances were withheld or unavailable).
     is_a: DatasetProperty
     attributes:
-      ia_sample:
+      is_sample:
         range: boolean
         multivalued: true
-      israndom:
+      is_random:
         range: boolean
         multivalued: true
       source_data:
