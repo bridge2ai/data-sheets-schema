@@ -182,13 +182,24 @@ classes:
     is_a: NamedThing
     attributes:
       affiliation:
+        description: >-
+          The organization(s) to which the person belongs.
         range: Organization
+        multivalued: true
+      email:
+        description: >-
+          The email address of the person.
+        range: string
 
   # TODO: align with the Bridge2AI Standards Schema equivalent class
   Organization:
     description: A collection of people acting in common interests.
     is_a: NamedThing
     attributes:
+      email:
+        description: >-
+          The email address of the organization.
+        range: string
       ror_id:
         description: Unique ROR identifier.
         examples:
@@ -227,8 +238,6 @@ classes:
         range: Dataset
         multivalued: true
 
-  # TODO: add simple property about whether there is a tabular component
-  #       This may be a property of a subset or an instance type.
   Dataset:
     description: >-
       A single component of related observations and/or information that can be
@@ -347,6 +356,8 @@ classes:
         range: ExtensionMechanism
       is_deidentified:
         range: Deidentification
+      is_tabular:
+        range: boolean
 
   DataSubset:
     description: >-
@@ -1059,7 +1070,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Distribution
 
@@ -1074,39 +1084,17 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Distribution
 
-  # TODO: this isn't just a property but a person, so it there can be a
-  # parent class for Person
   Maintainer:
     description: >-
       Who will be supporting/hosting/maintaining the dataset?
     is_a: DatasetProperty
     attributes:
       description:
-        range: string
+        range: MaintainerEnum
         multivalued: true
-        # inlined: true
-    in_subset:
-      - Maintenance
-
-  # TODO: this is a property of a Maintainer, or even a parent Person class
-  MaintainerContact:
-    description: >-
-      How can the owner/curator/manager of the dataset be contacted (e.g.,
-      email address)?
-    is_a: DatasetProperty
-    attributes:
-      description:
-        range: string
-        multivalued: true
-        # inlined: true
-      email:
-        range: string
-        multivalued: true
-        # inlined: true
     in_subset:
       - Maintenance
 
@@ -1362,6 +1350,14 @@ slots:
 
 ## ENUMS ##
 enums:
+
+  MaintainerEnum:
+    description: >-
+      The entity responsible for maintaining a dataset.
+    permissible_values:
+      Person:
+      Organization:
+
 
   # These enums are adapted from
   # the linkml Datasets schema - see
