@@ -1246,6 +1246,12 @@ slots:
     range: CompressionEnum
 
   encoding:
+    description: >-
+      The encoding of the data. This is not the same as the media type.
+      Rather, this is the encoding of the data in a more specific sense,
+      e.g., UTF-8, ASCII, etc.
+    range: EncodingEnum
+
   hash:
     notes:
       - we recommend using a more specific slot such as sha256 or md5
@@ -1434,3 +1440,47 @@ enums:
         meaning: formats:TriG
       YAML:
       JSON:
+
+  CompressionEnum:
+    permissible_values:
+      GZIP:
+      TAR:
+      TARGZIP:
+      ZIP:
+
+  EncodingEnum:
+    permissible_values:
+      ASCII:
+      Big5:
+      EUC-JP:
+      EUC-KR:
+      EUC-TW:
+      GB2312:
+      HZ-GB-2312:
+      ISO-2022-CN-EXT:
+      ISO-2022-CN:
+      ISO-2022-JP-2:
+      ISO-2022-JP:
+      ISO-2022-KR:
+      ISO-8859-10:
+      ISO-8859-11:
+      ISO-8859-13:
+      ISO-8859-14:
+      ISO-8859-15:
+      ISO-8859-16:
+      ISO-8859-1:
+      ISO-8859-2:
+      ISO-8859-3:
+      ISO-8859-4:
+      ISO-8859-5:
+      ISO-8859-6:
+      ISO-8859-7:
+      ISO-8859-8:
+      ISO-8859-9:
+      KOI8-R:
+      KOI8-U:
+      Shift_JIS:
+      UTF-16:
+      UTF-32:
+      UTF-7:
+      UTF-8:
