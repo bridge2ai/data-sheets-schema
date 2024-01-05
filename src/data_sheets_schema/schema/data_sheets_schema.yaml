@@ -259,6 +259,12 @@ classes:
       funders:
         range: FundingMechanism
         multivalued: true
+      subsets:
+        range: DataSubset
+        multivalued: true
+        slot_uri: dcat:distribution
+        exact_mappings:
+          - schema:distribution
       instances:
         range: Instance
         multivalued: true
@@ -1093,7 +1099,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: MaintainerEnum
+        range: CreatorOrMaintainerEnum
         multivalued: true
     in_subset:
       - Maintenance
@@ -1253,15 +1259,25 @@ slots:
     range: EncodingEnum
 
   hash:
-    notes:
-      - we recommend using a more specific slot such as sha256 or md5
+    description: >-
+      The hash representation of the data, e.g., sha256, md5, etc.
+      Subtypes have their own slots.
+    range: string
   sha256:
+    description: >-
+      The sha256 hash representation of the data.
     is_a: hash
   md5:
+    description: >-
+      The md5 hash representation of the data.
     is_a: hash
 
   media_type:
-    # range: MediaTypeEnum
+    description: >-
+      The media type of the data. This is not the same as the format.
+      Rather, this is the media type of the data in a more general sense,
+      e.g., text/csv, application/json, etc., though as it is defined here
+      the media type can be any string.
     range: string
     examples:
       - value: text/csv
@@ -1272,24 +1288,41 @@ slots:
       - schema:encodingFormat
 
   conforms_to:
+    description: >-
+      The standard to which the data conforms. This is not the same as the
+      media type. Rather, this is the standard to which the data conforms
+      in a more specific sense, e.g., frictionless, schema.org, etc.
     slot_uri: dcterms:conformsTo
     range: uriorcurie
 
+  # TODO: Align with Bridge2AI Standards Schema
   conforms_to_schema:
+    description: >-
+      The schema to which the data conforms. This is not the same as the
+      media type. Rather, this is the schema to which the data conforms
+      in a more specific sense, and even more specific than the general
+      set of standards it conforms to.
     is_a: conforms_to
     exact_mappings:
       - frictionless:schema
 
   conforms_to_class:
+    description: >-
+      The class in the schema to which the data object instantiates.
     is_a: conforms_to
-    description: class in schema which the data object instantiates
 
   profile:
+    description: >-
+      The frictionless data profile to which the data conforms.
     range: uriorcurie
     exact_mappings:
       - frictionless:profiles
 
   keywords:
+    description: >-
+      Keywords associated with the data. These may be provided by
+      the data creator or assigned later in a manual or automated
+      manner.
     singular_name: keyword
     multivalued: true
     range: string
@@ -1298,21 +1331,14 @@ slots:
       - schema:keywords
 
   themes:
+    description: >-
+      Themes associated with the data. These may be provided by
+      the data creator or assigned later in a manual or automated
+      manner.
     singular_name: theme
     multivalued: true
     range: uriorcurie
     slot_uri: dcat:theme
-
-  resources:
-    multivalued: true
-    range: DataResource
-    slot_uri: dcat:distribution
-    exact_mappings:
-      - schema:distribution
-
-  test_roles:
-    multivalued: true
-    range: TestRole
 
   created_by:
     range: uriorcurie
@@ -1364,7 +1390,7 @@ slots:
 ## ENUMS ##
 enums:
 
-  MaintainerEnum:
+  CreatorOrMaintainerEnum:
     description: >-
       The entity responsible for maintaining a dataset.
     permissible_values:
@@ -1375,11 +1401,6 @@ enums:
   # These enums are adapted from
   # the linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-
-  TestRole:
-    permissible_values:
-      Example:
-      CounterExample:
 
   MediaTypeEnum:
     exact_mappings:
