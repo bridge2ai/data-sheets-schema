@@ -106,24 +106,27 @@ classes:
     close_mappings:
       - schema:CreativeWork
     slots:
-      - id
-      - download_url
-      - license
-      - title
-      - description
+      - compression
       - conforms_to
-      - conforms_to_schema
       - conforms_to_class
-      - version
-      - language
-      - publisher
-      - keywords
-      - issued
+      - conforms_to_schema
       - created_by
       - created_on
-      - compression
-      - was_derived_from
+      - description
+      - download_url
+      - id
+      - issued
+      - keywords
+      - language
+      - last_updated_on
+      - license
+      - modified_by
       - page
+      - publisher
+      - status
+      - title
+      - version
+      - was_derived_from
 
   # From linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
@@ -1328,30 +1331,30 @@ slots:
     range: uriorcurie
     slot_uri: dcat:theme
 
-  # TODO: add slots directly to the Dataset class
   created_by:
-    range: uriorcurie
-    description: agent that created the element
+    range: CreatorOrMaintainerEnum
+    description: Agent that created the element
     slot_uri: pav:createdBy
+    multivalued: true
 
   created_on:
     range: datetime
-    description: time at which the element was created
+    description: Date and Time at which the element was created
     slot_uri: pav:createdOn
 
   last_updated_on:
     range: datetime
-    description: time at which the element was last updated
+    description: Date and Time at which the element was last updated
     slot_uri: pav:lastUpdatedOn
 
   modified_by:
-    range: uriorcurie
+    range: CreatorOrMaintainerEnum
     description: agent that modified the element
     slot_uri: oslc:modifiedBy
 
   status:
     range: uriorcurie
-    description: status of the element
+    description: Status of the element in terms of its maturity or life cycle
     slot_uri: bibo:status
     examples:
       - value: "bibo:draft"
