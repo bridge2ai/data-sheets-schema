@@ -1,13 +1,14 @@
 BASE <https://w3id.org/bridge2ai/data-sheets-schema/>
 PREFIX csvw: <http://www.w3.org/ns/csvw#>
 PREFIX dcat: <http://www.w3.org/ns/dcat#>
-PREFIX void: <http://rdfs.org/ns/void#>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX linkml: <https://w3id.org/linkml/>
 PREFIX pav: <http://purl.org/pav/>
 PREFIX schema1: <http://schema.org/>
 PREFIX dcterms1: <http://example.org/UNKNOWN/dcterms/>
+PREFIX oslc: <http://example.org/UNKNOWN/oslc/>
+PREFIX bibo: <http://example.org/UNKNOWN/bibo/>
 PREFIX prov1: <http://example.org/UNKNOWN/prov/>
 
 
@@ -162,17 +163,6 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<DataPackage>  (
-    CLOSED {
-       (  $<DataPackage_tes> (  &<Information_tes> ;
-             rdf:type [ <Information> ] ? ;
-             dcat:distribution @<DataResource> *
-          ) ;
-          rdf:type [ void:Dataset ]
-       )
-    } OR @<DatasetCollection>
-)
-
 <DataProtectionImpact> CLOSED {
     (  $<DataProtectionImpact_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
@@ -182,34 +172,25 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<DataResource>  (
-    CLOSED {
-       (  $<DataResource_tes> (  &<Information_tes> ;
-             rdf:type [ <Information> ] ? ;
-             <path> @linkml:String ? ;
-             dcterms1:format @<FormatEnum> ? ;
-             dcat:mediaType @linkml:String ? ;
-             <encoding> @linkml:String ? ;
-             dcat:byteSize @linkml:Integer ? ;
-             <hash> @linkml:String ? ;
-             <md5> @linkml:String ? ;
-             <sha256> @linkml:String ? ;
-             csvw:dialect @linkml:String ?
-          ) ;
-          rdf:type [ dcat:Distribution ]
-       )
-    } OR @<Dataset>
-)
-
 <Dataset>  (
     CLOSED {
-       (  $<Dataset_tes> (  &<DataResource_tes> ;
-             rdf:type [ dcat:Distribution ] ? ;
+       (  $<Dataset_tes> (  &<Information_tes> ;
+             rdf:type [ <Information> ] ? ;
+             dcat:byteSize @linkml:Integer ? ;
+             csvw:dialect @linkml:String ? ;
+             <encoding> @<EncodingEnum> ? ;
+             dcterms1:format @<FormatEnum> ? ;
+             <hash> @linkml:String ? ;
+             <md5> @linkml:String ? ;
+             dcat:mediaType @linkml:String ? ;
+             <path> @linkml:String ? ;
+             <sha256> @linkml:String ? ;
              <purposes> @<Purpose> * ;
              <tasks> @<Task> * ;
              <addressing_gaps> @<AddressingGap> * ;
              <creators> @<Creator> * ;
              <funders> @<FundingMechanism> * ;
+             dcat:distribution @<DataSubset> * ;
              <instances> @<Instance> * ;
              <anomalies> @<DataAnomaly> * ;
              <external_resources> @<ExternalResource> * ;
@@ -244,17 +225,18 @@ linkml:Sparqlpath xsd:string
              <retention_limit> @<RetentionLimits> ? ;
              <version_access> @<VersionAccess> ? ;
              <extension_mechanism> @<ExtensionMechanism> ? ;
-             <is_deidentified> @<Deidentification> ?
+             <is_deidentified> @<Deidentification> ? ;
+             <is_tabular> @linkml:Boolean ?
           ) ;
-          rdf:type [ <Dataset> ]
+          rdf:type [ dcat:Distribution ]
        )
     } OR @<DataSubset>
 )
 
 <DatasetCollection> CLOSED {
-    (  $<DatasetCollection_tes> (  &<DataPackage_tes> ;
-          rdf:type [ void:Dataset ] ? ;
-          <entries> @<Dataset> *
+    (  $<DatasetCollection_tes> (  &<Information_tes> ;
+          rdf:type [ <Information> ] ? ;
+          <resources> @<Dataset> *
        ) ;
        rdf:type [ <DatasetCollection> ]
     )
@@ -263,7 +245,8 @@ linkml:Sparqlpath xsd:string
 <DatasetProperty>  (
     CLOSED {
        (  $<DatasetProperty_tes> (  &<NamedThing_tes> ;
-             rdf:type [ <NamedThing> ] ?
+             rdf:type [ <NamedThing> ] ? ;
+             <used_software> @<Software> *
           ) ;
           rdf:type [ <DatasetProperty> ]
        )
@@ -273,15 +256,16 @@ linkml:Sparqlpath xsd:string
     @<DistributionDate> OR @<DistributionFormat> OR @<Erratum> OR @<EthicalReview> OR @<ExistingUse> OR
     @<ExportControlRegulatoryRestrictions> OR @<ExtensionMechanism> OR @<ExternalResource> OR @<FundingMechanism> OR
     @<FutureUseImpact> OR @<IPRestrictions> OR @<Instance> OR @<InstanceAcquisition> OR @<LabelingStrategy> OR
-    @<LicenseAndUseTerms> OR @<Maintainer> OR @<MaintainerContact> OR @<MissingInfo> OR @<OtherTask> OR
-    @<PreprocessingCleaningLabelingSoftware> OR @<PreprocessingStrategy> OR @<Purpose> OR @<RawData> OR @<Relationships> OR
-    @<RetentionLimits> OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR @<Subpopulation> OR @<Task> OR
-    @<ThirdPartySharing> OR @<UpdatePlan> OR @<UseRepository> OR @<VersionAccess>
+    @<LicenseAndUseTerms> OR @<Maintainer> OR @<MissingInfo> OR @<OtherTask> OR @<PreprocessingStrategy> OR @<Purpose> OR
+    @<RawData> OR @<Relationships> OR @<RetentionLimits> OR @<SamplingStrategy> OR @<SensitiveElement> OR @<Splits> OR
+    @<Subpopulation> OR @<Task> OR @<ThirdPartySharing> OR @<UpdatePlan> OR @<UseRepository> OR @<VersionAccess>
 )
 
 <DataSubset> CLOSED {
     (  $<DataSubset_tes> (  &<Dataset_tes> ;
-          rdf:type [ <Dataset> ] ?
+          rdf:type [ dcat:Distribution ] ? ;
+          <is_data_split> @linkml:Boolean ? ;
+          <is_subpopulation> @linkml:Boolean ?
        ) ;
        rdf:type [ <DataSubset> ]
     )
@@ -326,8 +310,7 @@ linkml:Sparqlpath xsd:string
 <DistributionFormat> CLOSED {
     (  $<DistributionFormat_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String * ;
-          <doi> @linkml:String ?
+          <description> @linkml:String *
        ) ;
        rdf:type [ <DistributionFormat> ]
     )
@@ -438,28 +421,31 @@ linkml:Sparqlpath xsd:string
 }
 
 <Information>  (
-    @<DataPackage> OR @<DataResource>
+    @<Dataset> OR @<DatasetCollection>
 )
 
 <Information_struct> {
-    (  $<Information_tes> (  dcat:downloadURL @linkml:Uri ? ;
-          dcterms1:license @linkml:String ? ;
-          dcterms1:title @linkml:String ? ;
-          dcterms1:description @linkml:String ? ;
+    (  $<Information_tes> (  <compression> @<CompressionEnum> ? ;
           dcterms1:conformsTo @linkml:Uriorcurie ? ;
-          <conforms_to_schema> @linkml:Uriorcurie ? ;
           <conforms_to_class> @linkml:Uriorcurie ? ;
-          pav:version @linkml:String ? ;
-          <language> @linkml:String ? ;
-          dcterms1:publisher @linkml:Uriorcurie ? ;
-          dcat:keyword @linkml:String * ;
-          dcterms1:issued @linkml:Datetime ? ;
-          pav:createdBy @linkml:Uriorcurie ? ;
+          <conforms_to_schema> @linkml:Uriorcurie ? ;
+          pav:createdBy @<CreatorOrMaintainerEnum> * ;
           pav:createdOn @linkml:Datetime ? ;
-          <compression> @linkml:String ? ;
-          prov1:wasDerivedFrom @linkml:String ? ;
+          dcterms1:description @linkml:String ? ;
+          <doi> @linkml:Uriorcurie ? ;
+          dcat:downloadURL @linkml:Uri ? ;
+          dcterms1:issued @linkml:Datetime ? ;
+          dcat:keyword @linkml:String * ;
+          <language> @linkml:String ? ;
+          pav:lastUpdatedOn @linkml:Datetime ? ;
+          dcterms1:license @linkml:String ? ;
+          oslc:modifiedBy @<CreatorOrMaintainerEnum> ? ;
           dcat:landingPage @linkml:String ? ;
-          <test_roles> @<TestRole> *
+          dcterms1:publisher @linkml:Uriorcurie ? ;
+          bibo:status @linkml:Uriorcurie ? ;
+          dcterms1:title @linkml:String ? ;
+          pav:version @linkml:String ? ;
+          prov1:wasDerivedFrom @linkml:String ?
        ) ;
        rdf:type [ <Information> ]
     )
@@ -523,19 +509,9 @@ linkml:Sparqlpath xsd:string
 <Maintainer> CLOSED {
     (  $<Maintainer_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String *
+          <description> @<CreatorOrMaintainerEnum> *
        ) ;
        rdf:type [ <Maintainer> ]
-    )
-}
-
-<MaintainerContact> CLOSED {
-    (  $<MaintainerContact_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String * ;
-          <email> @linkml:String *
-       ) ;
-       rdf:type [ <MaintainerContact> ]
     )
 }
 
@@ -556,13 +532,14 @@ linkml:Sparqlpath xsd:string
           ) ;
           rdf:type [ <NamedThing> ]
        )
-    } OR @<DatasetProperty> OR @<Grant> OR @<Organization> OR @<Person>
+    } OR @<DatasetProperty> OR @<Grant> OR @<Organization> OR @<Person> OR @<Software>
 )
 
 <Organization>  (
     CLOSED {
        (  $<Organization_tes> (  &<NamedThing_tes> ;
              rdf:type [ <NamedThing> ] ? ;
+             <email> @linkml:String ? ;
              <ror_id> @<RorIdentifier> ? ;
              <wikidata_id> @<WikidataIdentifier> ?
           ) ;
@@ -583,18 +560,10 @@ linkml:Sparqlpath xsd:string
 <Person> CLOSED {
     (  $<Person_tes> (  &<NamedThing_tes> ;
           rdf:type [ <NamedThing> ] ? ;
-          <affiliation> @<Organization> ?
+          <affiliation> @<Organization> * ;
+          <email> @linkml:String ?
        ) ;
        rdf:type [ <Person> ]
-    )
-}
-
-<PreprocessingCleaningLabelingSoftware> CLOSED {
-    (  $<PreprocessingCleaningLabelingSoftware_tes> (  &<DatasetProperty_tes> ;
-          rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String *
-       ) ;
-       rdf:type [ <PreprocessingCleaningLabelingSoftware> ]
     )
 }
 
@@ -646,8 +615,8 @@ linkml:Sparqlpath xsd:string
 <SamplingStrategy> CLOSED {
     (  $<SamplingStrategy_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <ia_sample> @linkml:Boolean * ;
-          <israndom> @linkml:Boolean * ;
+          <is_sample> @linkml:Boolean * ;
+          <is_random> @linkml:Boolean * ;
           <source_data> @linkml:String * ;
           <is_representative> @linkml:Boolean * ;
           <representative_verification> @linkml:String * ;
@@ -664,6 +633,17 @@ linkml:Sparqlpath xsd:string
           <description> @linkml:String *
        ) ;
        rdf:type [ <SensitiveElement> ]
+    )
+}
+
+<Software> CLOSED {
+    (  $<Software_tes> (  &<NamedThing_tes> ;
+          rdf:type [ <NamedThing> ] ? ;
+          <version> @linkml:String ? ;
+          <license> @linkml:String ? ;
+          <url> @linkml:String ?
+       ) ;
+       rdf:type [ <Software> ]
     )
 }
 
@@ -698,7 +678,7 @@ linkml:Sparqlpath xsd:string
 <ThirdPartySharing> CLOSED {
     (  $<ThirdPartySharing_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <description> @linkml:String *
+          <description> @linkml:Boolean ?
        ) ;
        rdf:type [ <ThirdPartySharing> ]
     )

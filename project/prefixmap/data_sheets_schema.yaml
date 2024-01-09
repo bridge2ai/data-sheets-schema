@@ -18,10 +18,7 @@
    "sh": "https://w3id.org/shacl/",
    "skos": "http://www.w3.org/2004/02/skos/core#",
    "void": "http://rdfs.org/ns/void#",
-   "DataPackage": {
-      "@id": "void:Dataset"
-   },
-   "DataResource": {
+   "Dataset": {
       "@id": "dcat:Distribution"
    }
 }

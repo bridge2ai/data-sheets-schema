@@ -4,6 +4,7 @@ message AddressingGap
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
   string response = 0
  }
 // Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?
@@ -11,6 +12,7 @@ message CleaningStrategy
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented.
@@ -18,6 +20,7 @@ message CollectionConsent
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // What mechanisms or procedures were used to collect the data (e.g., hardware apparatuses or sensors, manual human curation, software programs, software APIs)? How were these mechanisms or procedures validated?
@@ -25,6 +28,7 @@ message CollectionMechanism
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Were the individuals in question notified about the data collection? If so, please describe (or show with screenshots or other information) how notice was provided, and provide a link or other access point to, or otherwise reproduce, the exact language of the notification itself.
@@ -32,6 +36,7 @@ message CollectionNotification
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (e.g., recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created.
@@ -39,6 +44,7 @@ message CollectionTimeframe
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals’ non-public communications)?
@@ -46,6 +52,7 @@ message Confidentiality
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or 8 for certain uses? If so, please provide a description, as well as a link or other access point to the mechanism (if appropriate).
@@ -53,6 +60,7 @@ message ConsentRevocation
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why.
@@ -61,6 +69,7 @@ message ContentWarning
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
  repeated  string warnings = 0
  }
 // Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team.
@@ -69,6 +78,7 @@ message Creator
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
   person principalInvestigator = 0
   organization affiliation = 0
  }
@@ -77,6 +87,7 @@ message DataAnomaly
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?
@@ -84,107 +95,57 @@ message DataCollector
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
- }
-// A collection of data resources
-message DataPackage
- {
-  string id = 0
-  uri downloadUrl = 0
-  string license = 0
-  string title = 0
-  string description = 0
-  uriorcurie conformsTo = 0
-  uriorcurie conformsToSchema = 0
-  uriorcurie conformsToClass = 0
-  string version = 0
-  string language = 0
-  uriorcurie publisher = 0
- repeated  string keywords = 0
-  datetime issued = 0
-  uriorcurie createdBy = 0
-  datetime createdOn = 0
-  string compression = 0
-  string wasDerivedFrom = 0
-  string page = 0
- repeated  testRole testRoles = 0
- repeated  dataResource resources = 0
  }
 // Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation.
 message DataProtectionImpact
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
- }
-// An individual file or table
-message DataResource
- {
-  string id = 0
-  uri downloadUrl = 0
-  string license = 0
-  uriorcurie conformsTo = 0
-  uriorcurie conformsToSchema = 0
-  uriorcurie conformsToClass = 0
-  string version = 0
-  string language = 0
-  uriorcurie publisher = 0
- repeated  string keywords = 0
-  datetime issued = 0
-  uriorcurie createdBy = 0
-  datetime createdOn = 0
-  string compression = 0
-  string wasDerivedFrom = 0
-  string page = 0
- repeated  testRole testRoles = 0
-  string path = 0
-  string title = 0
-  string description = 0
-  formatEnum format = 0
-  string mediaType = 0
-  string encoding = 0
-  integer bytes = 0
-  string hash = 0
-  string md5 = 0
-  string sha256 = 0
-  string dialect = 0
  }
 // A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted.
 message Dataset
  {
-  string id = 0
-  uri downloadUrl = 0
-  string license = 0
+  compressionEnum compression = 0
   uriorcurie conformsTo = 0
-  uriorcurie conformsToSchema = 0
   uriorcurie conformsToClass = 0
-  string version = 0
-  string language = 0
-  uriorcurie publisher = 0
- repeated  string keywords = 0
-  datetime issued = 0
-  uriorcurie createdBy = 0
+  uriorcurie conformsToSchema = 0
+ repeated  creatorOrMaintainerEnum createdBy = 0
   datetime createdOn = 0
-  string compression = 0
-  string wasDerivedFrom = 0
-  string page = 0
- repeated  testRole testRoles = 0
-  string path = 0
-  string title = 0
   string description = 0
-  formatEnum format = 0
-  string mediaType = 0
-  string encoding = 0
+  uriorcurie doi = 0
+  uri downloadUrl = 0
+  string id = 0
+  datetime issued = 0
+ repeated  string keywords = 0
+  string language = 0
+  datetime lastUpdatedOn = 0
+  string license = 0
+  creatorOrMaintainerEnum modifiedBy = 0
+  string page = 0
+  uriorcurie publisher = 0
+  uriorcurie status = 0
+  string title = 0
+  string version = 0
+  string wasDerivedFrom = 0
   integer bytes = 0
+  string dialect = 0
+  encodingEnum encoding = 0
+  formatEnum format = 0
   string hash = 0
   string md5 = 0
+  string mediaType = 0
+  string path = 0
   string sha256 = 0
-  string dialect = 0
  repeated  purpose purposes = 0
  repeated  task tasks = 0
  repeated  addressingGap addressingGaps = 0
  repeated  creator creators = 0
  repeated  fundingMechanism funders = 0
+ repeated  dataSubset subsets = 0
  repeated  instance instances = 0
  repeated  dataAnomaly anomalies = 0
  repeated  externalResource externalResources = 0
@@ -220,31 +181,34 @@ message Dataset
   versionAccess versionAccess = 0
   extensionMechanism extensionMechanism = 0
   deidentification isDeidentified = 0
+  boolean isTabular = 0
  }
 // A collection of related datasets, likely containing multiple files of multiple potential purposes and properties.
 message DatasetCollection
  {
-  string id = 0
-  uri downloadUrl = 0
-  string license = 0
-  string title = 0
-  string description = 0
+  compressionEnum compression = 0
   uriorcurie conformsTo = 0
-  uriorcurie conformsToSchema = 0
   uriorcurie conformsToClass = 0
-  string version = 0
-  string language = 0
-  uriorcurie publisher = 0
- repeated  string keywords = 0
-  datetime issued = 0
-  uriorcurie createdBy = 0
+  uriorcurie conformsToSchema = 0
+ repeated  creatorOrMaintainerEnum createdBy = 0
   datetime createdOn = 0
-  string compression = 0
-  string wasDerivedFrom = 0
+  string description = 0
+  uriorcurie doi = 0
+  uri downloadUrl = 0
+  string id = 0
+  datetime issued = 0
+ repeated  string keywords = 0
+  string language = 0
+  datetime lastUpdatedOn = 0
+  string license = 0
+  creatorOrMaintainerEnum modifiedBy = 0
   string page = 0
- repeated  testRole testRoles = 0
- repeated  dataResource resources = 0
- repeated  dataset entries = 0
+  uriorcurie publisher = 0
+  uriorcurie status = 0
+  string title = 0
+  string version = 0
+  string wasDerivedFrom = 0
+ repeated  dataset resources = 0
  }
 // Represents a single property of a dataset, or a set of related properties.
 message DatasetProperty
@@ -252,43 +216,48 @@ message DatasetProperty
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
  }
 // A subset of a dataset, likely containing multiple files of multiple potential purposes and properties.
 message DataSubset
  {
-  string id = 0
-  uri downloadUrl = 0
-  string license = 0
+  compressionEnum compression = 0
   uriorcurie conformsTo = 0
-  uriorcurie conformsToSchema = 0
   uriorcurie conformsToClass = 0
-  string version = 0
-  string language = 0
-  uriorcurie publisher = 0
- repeated  string keywords = 0
-  datetime issued = 0
-  uriorcurie createdBy = 0
+  uriorcurie conformsToSchema = 0
+ repeated  creatorOrMaintainerEnum createdBy = 0
   datetime createdOn = 0
-  string compression = 0
-  string wasDerivedFrom = 0
-  string page = 0
- repeated  testRole testRoles = 0
-  string path = 0
-  string title = 0
   string description = 0
-  formatEnum format = 0
-  string mediaType = 0
-  string encoding = 0
+  uriorcurie doi = 0
+  uri downloadUrl = 0
+  string id = 0
+  datetime issued = 0
+ repeated  string keywords = 0
+  string language = 0
+  datetime lastUpdatedOn = 0
+  string license = 0
+  creatorOrMaintainerEnum modifiedBy = 0
+  string page = 0
+  uriorcurie publisher = 0
+  uriorcurie status = 0
+  string title = 0
+  string version = 0
+  string wasDerivedFrom = 0
   integer bytes = 0
+  string dialect = 0
+  encodingEnum encoding = 0
+  formatEnum format = 0
   string hash = 0
   string md5 = 0
+  string mediaType = 0
+  string path = 0
   string sha256 = 0
-  string dialect = 0
  repeated  purpose purposes = 0
  repeated  task tasks = 0
  repeated  addressingGap addressingGaps = 0
  repeated  creator creators = 0
  repeated  fundingMechanism funders = 0
+ repeated  dataSubset subsets = 0
  repeated  instance instances = 0
  repeated  dataAnomaly anomalies = 0
  repeated  externalResource externalResources = 0
@@ -324,12 +293,16 @@ message DataSubset
   versionAccess versionAccess = 0
   extensionMechanism extensionMechanism = 0
   deidentification isDeidentified = 0
+  boolean isTabular = 0
+  boolean isDataSplit = 0
+  boolean isSubpopulation = 0
  }
 // Is it possible to identify individuals (i.e., one or more natural persons), either directly or indirectly (i.e., in combination with other data) from the dataset?
 message Deidentification
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (e.g., websites)?
@@ -337,6 +310,7 @@ message DirectCollection
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Are there tasks for which the dataset should not be used?
@@ -344,6 +318,7 @@ message DiscouragedUse
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // When will the dataset be distributed?
@@ -351,21 +326,23 @@ message DistributionDate
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
-// How will the dataset will be distributed (e.g., tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?
+// How will the dataset will be distributed (e.g., tarball on website, API, GitHub)?
 message DistributionFormat
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
-  string doi = 0
  }
 // Is there an erratum? If so, please provide a link or other access point.
 message Erratum
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Were any ethical review processes conducted (e.g., by an institutional review board)? If so, please provide a description of these review processes, including the outcomes, as well as a link or other access point to any supporting documentation.
@@ -373,6 +350,7 @@ message EthicalReview
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Has the dataset been used for any tasks already?
@@ -380,6 +358,7 @@ message ExistingUse
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation.
@@ -387,6 +366,7 @@ message ExportControlRegulatoryRestrictions
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please provide a description. Will these contributions be validated/verified? If so, please describe how. If not, why not? Is there a process for communicating/distributing these contributions to dataset consumers? If so, please provide a description.
@@ -394,6 +374,7 @@ message ExtensionMechanism
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Is the dataset self-contained, or does it link to or otherwise rely on external resources (e.g., websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (i.e., including the external resources as they existed at the time the dataset was created); c) are there any restrictions (e.g., licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate.
@@ -402,6 +383,7 @@ message ExternalResource
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
  repeated  string externalResources = 0
  repeated  string futureGuarantees = 0
  repeated  boolean archival = 0
@@ -422,6 +404,7 @@ message FundingMechanism
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
   grantor grantor = 0
   grant grant = 0
  }
@@ -430,6 +413,7 @@ message FutureUseImpact
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // What is the name and/or identifier of the specific mechanism providing monetary support or other resources supporting creation of the dataset?
@@ -446,6 +430,7 @@ message Grantor
   string id = 0
   string name = 0
   string description = 0
+  string email = 0
   rorIdentifier rorId = 0
   wikidataIdentifier wikidataId = 0
  }
@@ -455,6 +440,7 @@ message Instance
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
   string representation = 0
   string instanceType = 0
   string dataType = 0
@@ -468,6 +454,7 @@ message InstanceAcquisition
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
   boolean wasDirectlyObserved = 0
   boolean wasReportedBySubjects = 0
@@ -479,6 +466,7 @@ message IPRestrictions
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Was any preprocessing/cleaning/labeling of the data done (e.g., part-of-speech tagging)?
@@ -486,6 +474,7 @@ message LabelingStrategy
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions.
@@ -493,6 +482,7 @@ message LicenseAndUseTerms
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Who will be supporting/hosting/maintaining the dataset?
@@ -500,15 +490,8 @@ message Maintainer
  {
   string id = 0
   string name = 0
- repeated  string description = 0
- }
-// How can the owner/curator/manager of the dataset be contacted (e.g., email address)?
-message MaintainerContact
- {
-  string id = 0
-  string name = 0
- repeated  string description = 0
- repeated  string email = 0
+ repeated  software usedSoftware = 0
+ repeated  creatorOrMaintainerEnum description = 0
  }
 // Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (e.g., because it was unavailable). This does not include intentionally removed information, but might include, e.g., redacted text.
 message MissingInfo
@@ -516,6 +499,7 @@ message MissingInfo
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
  repeated  string missing = 0
  repeated  string whyMissing = 0
  }
@@ -532,6 +516,7 @@ message Organization
   string id = 0
   string name = 0
   string description = 0
+  string email = 0
   rorIdentifier rorId = 0
   wikidataIdentifier wikidataId = 0
  }
@@ -540,6 +525,7 @@ message OtherTask
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // An individual human being.
@@ -548,20 +534,15 @@ message Person
   string id = 0
   string name = 0
   string description = 0
-  organization affiliation = 0
- }
-// Is the software that was used to preprocess/clean/label the data available?
-message PreprocessingCleaningLabelingSoftware
- {
-  string id = 0
-  string name = 0
- repeated  string description = 0
+ repeated  organization affiliation = 0
+  string email = 0
  }
 // Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?
 message PreprocessingStrategy
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // For what purpose was the dataset created?
@@ -570,6 +551,7 @@ message Purpose
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
   string response = 0
  }
 // Was the “raw” data saved in addition to the preprocessed/cleaned/labeled data (e.g., to support unanticipated future uses)? If so, please provide a link or other access point to the “raw” data.
@@ -577,6 +559,7 @@ message RawData
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Are relationships between individual instances made explicit (e.g., users’ movie ratings, social network links)? If so, please describe how these relationships are made explicit.
@@ -584,6 +567,7 @@ message Relationships
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances (e.g., were the individuals in question told that their data would be retained for a fixed period of time and then deleted)? If so, please describe these limits and explain how they will be enforced.
@@ -591,6 +575,7 @@ message RetentionLimits
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (e.g., geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (e.g., to cover a more diverse range of instances, because instances were withheld or unavailable).
@@ -599,8 +584,9 @@ message SamplingStrategy
   string id = 0
   string name = 0
   string description = 0
- repeated  boolean iaSample = 0
- repeated  boolean israndom = 0
+ repeated  software usedSoftware = 0
+ repeated  boolean isSample = 0
+ repeated  boolean isRandom = 0
  repeated  string sourceData = 0
  repeated  boolean isRepresentative = 0
  repeated  string representativeVerification = 0
@@ -612,13 +598,25 @@ message SensitiveElement
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
+ }
+// A software program or library.
+message Software
+ {
+  string id = 0
+  string name = 0
+  string description = 0
+  string version = 0
+  string license = 0
+  string url = 0
  }
 // Are there recommended data splits (e.g., training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them.
 message Splits
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Does the dataset identify any subpopulations (e.g., by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset.
@@ -627,6 +625,7 @@ message Subpopulation
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
  repeated  string identification = 0
  repeated  string distribution = 0
  }
@@ -636,6 +635,7 @@ message Task
   string id = 0
   string name = 0
   string description = 0
+ repeated  software usedSoftware = 0
   string response = 0
  }
 // Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?
@@ -643,13 +643,15 @@ message ThirdPartySharing
  {
   string id = 0
   string name = 0
- repeated  string description = 0
+ repeated  software usedSoftware = 0
+  boolean description = 0
  }
 // Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (e.g., mailing list, GitHub)?
 message UpdatePlan
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Is there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point.
@@ -657,6 +659,7 @@ message UseRepository
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }
 // Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers.
@@ -664,5 +667,6 @@ message VersionAccess
  {
   string id = 0
   string name = 0
+ repeated  software usedSoftware = 0
  repeated  string description = 0
  }

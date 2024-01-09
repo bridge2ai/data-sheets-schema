@@ -96,7 +96,7 @@ classes:
     close_mappings:
       - schema:Thing
 
-  # From linkml Datasets schema - see
+  # Adapted from linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
   Information:
     abstract: true
@@ -104,67 +104,28 @@ classes:
     close_mappings:
       - schema:CreativeWork
     slots:
-      - id
-      - download_url
-      - license
-      - title
-      - description
+      - compression
       - conforms_to
-      - conforms_to_schema
       - conforms_to_class
-      - version
-      - language
-      - publisher
-      - keywords
-      - issued
+      - conforms_to_schema
       - created_by
       - created_on
-      - compression
-      - was_derived_from
-      - page
-      - test_roles
-
-  # From linkml Datasets schema - see
-  # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-  DataPackage:
-    aliases:
-      - dataset
-      - file collection
-      - data resource collection
-    description: A collection of data resources
-    is_a: Information
-    class_uri: void:Dataset
-    exact_mappings:
-      - dcat:Dataset
-    close_mappings:
-      - dcat:Catalog
-    see_also:
-      - https://specs.frictionlessdata.io/data-package
-    slots:
-      - resources
-
-  # From linkml Datasets schema - see
-  # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-  DataResource:
-    is_a: Information
-    description: An individual file or table
-    class_uri: dcat:Distribution
-    exact_mappings:
-      - schema:DataDownload
-    see_also:
-      - https://specs.frictionlessdata.io/data-resource
-    slots:
-      - path
-      - title
       - description
-      - format
-      - media_type
-      - encoding
-      - bytes
-      - hash
-      - md5
-      - sha256
-      - dialect
+      - doi
+      - download_url
+      - id
+      - issued
+      - keywords
+      - language
+      - last_updated_on
+      - license
+      - modified_by
+      - page
+      - publisher
+      - status
+      - title
+      - version
+      - was_derived_from
 
   # From linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
@@ -182,13 +143,24 @@ classes:
     is_a: NamedThing
     attributes:
       affiliation:
+        description: >-
+          The organization(s) to which the person belongs.
         range: Organization
+        multivalued: true
+      email:
+        description: >-
+          The email address of the person.
+        range: string
 
   # TODO: align with the Bridge2AI Standards Schema equivalent class
   Organization:
     description: A collection of people acting in common interests.
     is_a: NamedThing
     attributes:
+      email:
+        description: >-
+          The email address of the organization.
+        range: string
       ror_id:
         description: Unique ROR identifier.
         examples:
@@ -209,25 +181,56 @@ classes:
     description: >-
       Represents a single property of a dataset, or a set of related properties.
     is_a: NamedThing
+    attributes:
+      used_software:
+        description: >-
+          What software was used as part of this dataset property?
+        range: Software
+        multivalued: true
 
   DatasetCollection:
+    aliases:
+      - file collection
+      - dataset collection
+      - data resource collection
     tree_root: true
     description: >-
       A collection of related datasets, likely containing multiple files
       of multiple potential purposes and properties.
-    is_a: DataPackage
+    exact_mappings:
+      - dcat:Dataset
+    close_mappings:
+      - dcat:Catalog
+    is_a: Information
     attributes:
-      entries:
+      resources:
         range: Dataset
         multivalued: true
 
-  # TODO: add simple property about whether there is a tabular component
-  #       This may be a property of a subset or an instance type.
   Dataset:
+    aliases:
+      - data resource
+      - data file
+      - data package
+    class_uri: dcat:Distribution
+    exact_mappings:
+      - schema:DataDownload
+    see_also:
+      - https://specs.frictionlessdata.io/data-resource
     description: >-
       A single component of related observations and/or information that can be
       read, manipulated, transformed, and otherwise interpreted.
-    is_a: DataResource
+    is_a: Information
+    slots:
+      - bytes
+      - dialect
+      - encoding
+      - format
+      - hash
+      - md5
+      - media_type
+      - path
+      - sha256
     attributes:
       purposes:
         range: Purpose
@@ -244,6 +247,12 @@ classes:
       funders:
         range: FundingMechanism
         multivalued: true
+      subsets:
+        range: DataSubset
+        multivalued: true
+        slot_uri: dcat:distribution
+        exact_mappings:
+          - schema:distribution
       instances:
         range: Instance
         multivalued: true
@@ -341,13 +350,38 @@ classes:
         range: ExtensionMechanism
       is_deidentified:
         range: Deidentification
+      is_tabular:
+        range: boolean
 
-  # TODO: provide way to state a subset is a split or some subpopulation
   DataSubset:
     description: >-
       A subset of a dataset, likely containing multiple files
       of multiple potential purposes and properties.
     is_a: Dataset
+    attributes:
+      is_data_split:
+        description: >-
+          Is this subset a split of the larger dataset,
+          e.g., is it a set for model training, testing,
+          or validation?
+        range: boolean
+      is_subpopulation:
+        description: >-
+          Is this subset a subpopulation of the larger dataset,
+          e.g., is it a set of data for a specific demographic?
+        range: boolean
+
+  Software:
+    description: >-
+      A software program or library.
+    is_a: NamedThing
+    attributes:
+      version:
+        range: string
+      license:
+        range: string
+      url:
+        range: string
 
   Purpose:
     description: >-
@@ -476,10 +510,10 @@ classes:
       range of instances, because instances were withheld or unavailable).
     is_a: DatasetProperty
     attributes:
-      ia_sample:
+      is_sample:
         range: boolean
         multivalued: true
-      israndom:
+      is_random:
         range: boolean
         multivalued: true
       source_data:
@@ -522,7 +556,6 @@ classes:
     in_subset:
       - Composition
 
-  # TODO: Refactor this into more of a triple
   Relationships:
     description: >-
       Are relationships between individual instances made explicit (e.g., users’
@@ -533,11 +566,9 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
-  # TODO: Refactor this into more of a triple
   Splits:
     description: >-
       Are there recommended data splits (e.g., training, development/validation,
@@ -548,7 +579,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -561,7 +591,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -618,7 +647,6 @@ classes:
       warnings:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -632,11 +660,9 @@ classes:
       identification:
         range: string
         multivalued: true
-        # inlined: true
       distribution:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -670,7 +696,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -761,8 +786,6 @@ classes:
     in_subset:
       - Collection
 
-  # TODO: this is just a boolean, model as such
-  # or is it?
   DirectCollection:
     description: >-
       Did you collect the data from the individuals in question directly, or
@@ -775,8 +798,6 @@ classes:
     in_subset:
       - Collection
 
-  # TODO: this is just a boolean, model as such
-  # or is it?
   CollectionNotification:
     description: >-
       Were the individuals in question notified about the data collection? If
@@ -788,12 +809,9 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
-  # TODO: this is just a boolean, model as such
-  # or is it?
   CollectionConsent:
     description: >-
       Did the individuals in question consent to the collection and use of
@@ -809,8 +827,6 @@ classes:
     in_subset:
       - Collection
 
-  # TODO: this is just a boolean, model as such
-  # or is it?
   ConsentRevocation:
     description: >-
       If consent was obtained, were the consenting individuals provided with a
@@ -822,7 +838,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
@@ -838,11 +853,9 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Collection
 
-  # TODO: consider this as different tasks
   PreprocessingStrategy:
     description: >-
       Was any preprocessing of the data done (e.g.,
@@ -890,21 +903,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
-    in_subset:
-      - Preprocessing-Cleaning-Labeling
-
-  # TODO: this is probably an attribute of a task defined above
-  PreprocessingCleaningLabelingSoftware:
-    description: >-
-      Is the software that was used to preprocess/clean/label the data
-      available?
-    is_a: DatasetProperty
-    attributes:
-      description:
-        range: string
-        multivalued: true
-        # inlined: true
     in_subset:
       - Preprocessing-Cleaning-Labeling
 
@@ -916,7 +914,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
       - Maintenance
@@ -930,7 +927,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
 
@@ -942,7 +938,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
 
@@ -961,7 +956,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
 
@@ -973,11 +967,9 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
 
-  # TODO: a boolean, likely
   ThirdPartySharing:
     description: >-
       Will the dataset be distributed to third parties outside of the entity
@@ -986,26 +978,19 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: string
-        multivalued: true
-        # inlined: true
+        range: boolean
     in_subset:
       - Distribution
 
   DistributionFormat:
     description: >-
       How will the dataset will be distributed (e.g., tarball on website, API,
-      GitHub)? Does the dataset have a digital object identifier (DOI)?
+      GitHub)?
     is_a: DatasetProperty
     attributes:
       description:
         range: string
         multivalued: true
-        # inlined: true
-      doi:
-        range: string
-        multivalued: false
-        # inlined: true
     in_subset:
       - Distribution
 
@@ -1017,7 +1002,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Distribution
 
@@ -1033,7 +1017,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Distribution
 
@@ -1049,7 +1032,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Distribution
 
@@ -1064,39 +1046,17 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Distribution
 
-  # TODO: this isn't just a property but a person, so it there can be a
-  # parent class for Person
   Maintainer:
     description: >-
       Who will be supporting/hosting/maintaining the dataset?
     is_a: DatasetProperty
     attributes:
       description:
-        range: string
+        range: CreatorOrMaintainerEnum
         multivalued: true
-        # inlined: true
-    in_subset:
-      - Maintenance
-
-  # TODO: this is a property of a Maintainer, or even a parent Person class
-  MaintainerContact:
-    description: >-
-      How can the owner/curator/manager of the dataset be contacted (e.g.,
-      email address)?
-    is_a: DatasetProperty
-    attributes:
-      description:
-        range: string
-        multivalued: true
-        # inlined: true
-      email:
-        range: string
-        multivalued: true
-        # inlined: true
     in_subset:
       - Maintenance
 
@@ -1108,7 +1068,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Maintenance
 
@@ -1123,7 +1082,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Maintenance
 
@@ -1139,7 +1097,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Maintenance
 
@@ -1153,7 +1110,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Maintenance
 
@@ -1170,11 +1126,8 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Maintenance
-
-## TYPES ##
 
 ## SLOTS ##
 slots:
@@ -1185,7 +1138,7 @@ slots:
 
   id:
     identifier: true
-    description: the unique name of th dataset
+    description: the unique name of the dataset
     slot_uri: dcterms:identifier
     exact_mappings:
       - schema:name
@@ -1219,6 +1172,7 @@ slots:
     slot_uri: csvw:dialect
 
   bytes:
+    description: Size of the data in bytes.
     range: integer
     slot_uri: dcat:byteSize
 
@@ -1227,6 +1181,10 @@ slots:
       - frictionless:path
 
   download_url:
+    description: >-
+      URL from which the data can be downloaded. This is not the same as the
+      landing page, which is a page that describes the dataset. Rather, this
+      URL points directly to the data itself.
     range: uri
     slot_uri: dcat:downloadURL
     exact_mappings:
@@ -1235,22 +1193,47 @@ slots:
       - frictionless:path
 
   format:
+    description: >-
+      The format of the data. This is not the same as the media type.
+      Rather, this is the format of the data in a more specific sense,
+      e.g., CSV, JSON, etc.
     range: FormatEnum
     slot_uri: dcterms:format
 
   compression:
+    description: >-
+      The compression format of the data. This is not the same as the media
+      type. Rather, this is the compression format of the data in a more
+      specific sense, e.g., zip, gzip, etc.
+    range: CompressionEnum
 
   encoding:
+    description: >-
+      The encoding of the data. This is not the same as the media type.
+      Rather, this is the encoding of the data in a more specific sense,
+      e.g., UTF-8, ASCII, etc.
+    range: EncodingEnum
+
   hash:
-    notes:
-      - we recommend using a more specific slot such as sha256 or md5
+    description: >-
+      The hash representation of the data, e.g., sha256, md5, etc.
+      Subtypes have their own slots.
+    range: string
   sha256:
+    description: >-
+      The sha256 hash representation of the data.
     is_a: hash
   md5:
+    description: >-
+      The md5 hash representation of the data.
     is_a: hash
 
   media_type:
-    # range: MediaTypeEnum
+    description: >-
+      The media type of the data. This is not the same as the format.
+      Rather, this is the media type of the data in a more general sense,
+      e.g., text/csv, application/json, etc., though as it is defined here
+      the media type can be any string.
     range: string
     examples:
       - value: text/csv
@@ -1261,24 +1244,48 @@ slots:
       - schema:encodingFormat
 
   conforms_to:
+    description: >-
+      The standard to which the data conforms. This is not the same as the
+      media type. Rather, this is the standard to which the data conforms
+      in a more specific sense, e.g., frictionless, schema.org, etc.
     slot_uri: dcterms:conformsTo
     range: uriorcurie
 
+  # TODO: Align with Bridge2AI Standards Schema
   conforms_to_schema:
+    description: >-
+      The schema to which the data conforms. This is not the same as the
+      media type. Rather, this is the schema to which the data conforms
+      in a more specific sense, and even more specific than the general
+      set of standards it conforms to.
     is_a: conforms_to
     exact_mappings:
       - frictionless:schema
 
   conforms_to_class:
+    description: >-
+      The class in the schema to which the data object instantiates.
     is_a: conforms_to
-    description: class in schema which the data object instantiates
+
+  doi:
+    description: >-
+      The Digital Object Identifier of the data, with the doi prefix.
+    range: uriorcurie
+    examples:
+      - value: "doi:10.48550/arXiv.2310.03666"
 
   profile:
+    description: >-
+      The frictionless data profile to which the data conforms.
     range: uriorcurie
     exact_mappings:
       - frictionless:profiles
 
   keywords:
+    description: >-
+      Keywords associated with the data. These may be provided by
+      the data creator or assigned later in a manual or automated
+      manner.
     singular_name: keyword
     multivalued: true
     range: string
@@ -1287,45 +1294,39 @@ slots:
       - schema:keywords
 
   themes:
+    description: >-
+      Themes associated with the data. These may be provided by
+      the data creator or assigned later in a manual or automated
+      manner.
     singular_name: theme
     multivalued: true
     range: uriorcurie
     slot_uri: dcat:theme
 
-  resources:
-    multivalued: true
-    range: DataResource
-    slot_uri: dcat:distribution
-    exact_mappings:
-      - schema:distribution
-
-  test_roles:
-    multivalued: true
-    range: TestRole
-
   created_by:
-    range: uriorcurie
-    description: agent that created the element
+    range: CreatorOrMaintainerEnum
+    description: Agent that created the element
     slot_uri: pav:createdBy
+    multivalued: true
 
   created_on:
     range: datetime
-    description: time at which the element was created
+    description: Date and Time at which the element was created
     slot_uri: pav:createdOn
 
   last_updated_on:
     range: datetime
-    description: time at which the element was last updated
+    description: Date and Time at which the element was last updated
     slot_uri: pav:lastUpdatedOn
 
   modified_by:
-    range: uriorcurie
+    range: CreatorOrMaintainerEnum
     description: agent that modified the element
     slot_uri: oslc:modifiedBy
 
   status:
     range: uriorcurie
-    description: status of the element
+    description: Status of the element in terms of its maturity or life cycle
     slot_uri: bibo:status
     examples:
       - value: "bibo:draft"
@@ -1353,14 +1354,17 @@ slots:
 ## ENUMS ##
 enums:
 
+  CreatorOrMaintainerEnum:
+    description: >-
+      The entity responsible for maintaining a dataset.
+    permissible_values:
+      Person:
+      Organization:
+
+
   # These enums are adapted from
   # the linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-
-  TestRole:
-    permissible_values:
-      Example:
-      CounterExample:
 
   MediaTypeEnum:
     exact_mappings:
@@ -1421,3 +1425,47 @@ enums:
         meaning: formats:TriG
       YAML:
       JSON:
+
+  CompressionEnum:
+    permissible_values:
+      GZIP:
+      TAR:
+      TARGZIP:
+      ZIP:
+
+  EncodingEnum:
+    permissible_values:
+      ASCII:
+      Big5:
+      EUC-JP:
+      EUC-KR:
+      EUC-TW:
+      GB2312:
+      HZ-GB-2312:
+      ISO-2022-CN-EXT:
+      ISO-2022-CN:
+      ISO-2022-JP-2:
+      ISO-2022-JP:
+      ISO-2022-KR:
+      ISO-8859-10:
+      ISO-8859-11:
+      ISO-8859-13:
+      ISO-8859-14:
+      ISO-8859-15:
+      ISO-8859-16:
+      ISO-8859-1:
+      ISO-8859-2:
+      ISO-8859-3:
+      ISO-8859-4:
+      ISO-8859-5:
+      ISO-8859-6:
+      ISO-8859-7:
+      ISO-8859-8:
+      ISO-8859-9:
+      KOI8-R:
+      KOI8-U:
+      Shift_JIS:
+      UTF-16:
+      UTF-32:
+      UTF-7:
+      UTF-8:
