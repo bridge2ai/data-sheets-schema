@@ -9,7 +9,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -17,6 +17,13 @@
                 },
                 "response": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -36,11 +43,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -60,11 +74,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -84,11 +105,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -108,11 +136,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -132,11 +167,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -144,6 +186,17 @@
             ],
             "title": "CollectionTimeframe",
             "type": "object"
+        },
+        "CompressionEnum": {
+            "description": "",
+            "enum": [
+                "GZIP",
+                "TAR",
+                "TARGZIP",
+                "ZIP"
+            ],
+            "title": "CompressionEnum",
+            "type": "string"
         },
         "Confidentiality": {
             "additionalProperties": false,
@@ -156,11 +209,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -180,11 +240,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -202,11 +269,18 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "warnings": {
                     "items": {
@@ -233,7 +307,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -241,6 +315,13 @@
                 },
                 "principal_investigator": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -248,6 +329,15 @@
             ],
             "title": "Creator",
             "type": "object"
+        },
+        "CreatorOrMaintainerEnum": {
+            "description": "The entity responsible for maintaining a dataset.",
+            "enum": [
+                "Person",
+                "Organization"
+            ],
+            "title": "CreatorOrMaintainerEnum",
+            "type": "string"
         },
         "DataAnomaly": {
             "additionalProperties": false,
@@ -260,11 +350,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -284,109 +381,24 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
                 "id"
             ],
             "title": "DataCollector",
-            "type": "object"
-        },
-        "DataPackage": {
-            "additionalProperties": false,
-            "description": "A collection of data resources",
-            "properties": {
-                "compression": {
-                    "type": "string"
-                },
-                "conforms_to": {
-                    "type": "string"
-                },
-                "conforms_to_class": {
-                    "description": "class in schema which the data object instantiates",
-                    "type": "string"
-                },
-                "conforms_to_schema": {
-                    "type": "string"
-                },
-                "created_by": {
-                    "description": "agent that created the element",
-                    "type": "string"
-                },
-                "created_on": {
-                    "description": "time at which the element was created",
-                    "format": "date-time",
-                    "type": "string"
-                },
-                "description": {
-                    "description": "human readable description of the information",
-                    "type": "string"
-                },
-                "download_url": {
-                    "type": "string"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "issued": {
-                    "format": "date-time",
-                    "type": "string"
-                },
-                "keywords": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "language": {
-                    "description": "language in which the information is expressed",
-                    "type": "string"
-                },
-                "license": {
-                    "description": "license for the data",
-                    "type": "string"
-                },
-                "page": {
-                    "type": "string"
-                },
-                "publisher": {
-                    "type": "string"
-                },
-                "resources": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "test_roles": {
-                    "items": {
-                        "$ref": "#/$defs/TestRole"
-                    },
-                    "type": "array"
-                },
-                "title": {
-                    "description": "the official title of the element",
-                    "type": "string"
-                },
-                "version": {
-                    "description": "particular version of schema",
-                    "type": "string"
-                },
-                "was_derived_from": {
-                    "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "DataPackage",
             "type": "object"
         },
         "DataProtectionImpact": {
@@ -400,130 +412,24 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
                 "id"
             ],
             "title": "DataProtectionImpact",
-            "type": "object"
-        },
-        "DataResource": {
-            "additionalProperties": false,
-            "description": "An individual file or table",
-            "properties": {
-                "bytes": {
-                    "type": "integer"
-                },
-                "compression": {
-                    "type": "string"
-                },
-                "conforms_to": {
-                    "type": "string"
-                },
-                "conforms_to_class": {
-                    "description": "class in schema which the data object instantiates",
-                    "type": "string"
-                },
-                "conforms_to_schema": {
-                    "type": "string"
-                },
-                "created_by": {
-                    "description": "agent that created the element",
-                    "type": "string"
-                },
-                "created_on": {
-                    "description": "time at which the element was created",
-                    "format": "date-time",
-                    "type": "string"
-                },
-                "description": {
-                    "description": "human readable description of the information",
-                    "type": "string"
-                },
-                "dialect": {
-                    "type": "string"
-                },
-                "download_url": {
-                    "type": "string"
-                },
-                "encoding": {
-                    "type": "string"
-                },
-                "format": {
-                    "$ref": "#/$defs/FormatEnum"
-                },
-                "hash": {
-                    "type": "string"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "issued": {
-                    "format": "date-time",
-                    "type": "string"
-                },
-                "keywords": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "language": {
-                    "description": "language in which the information is expressed",
-                    "type": "string"
-                },
-                "license": {
-                    "description": "license for the data",
-                    "type": "string"
-                },
-                "md5": {
-                    "type": "string"
-                },
-                "media_type": {
-                    "type": "string"
-                },
-                "page": {
-                    "type": "string"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "publisher": {
-                    "type": "string"
-                },
-                "sha256": {
-                    "type": "string"
-                },
-                "test_roles": {
-                    "items": {
-                        "$ref": "#/$defs/TestRole"
-                    },
-                    "type": "array"
-                },
-                "title": {
-                    "description": "the official title of the element",
-                    "type": "string"
-                },
-                "version": {
-                    "description": "particular version of schema",
-                    "type": "string"
-                },
-                "was_derived_from": {
-                    "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "DataResource",
             "type": "object"
         },
         "DataSubset": {
@@ -549,6 +455,7 @@
                     "type": "array"
                 },
                 "bytes": {
+                    "description": "Size of the data in bytes.",
                     "type": "integer"
                 },
                 "cleaning_strategies": {
@@ -570,7 +477,8 @@
                     "type": "array"
                 },
                 "compression": {
-                    "type": "string"
+                    "$ref": "#/$defs/CompressionEnum",
+                    "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
                 },
                 "confidential_elements": {
                     "items": {
@@ -579,13 +487,15 @@
                     "type": "array"
                 },
                 "conforms_to": {
+                    "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc.",
                     "type": "string"
                 },
                 "conforms_to_class": {
-                    "description": "class in schema which the data object instantiates",
+                    "description": "The class in the schema to which the data object instantiates.",
                     "type": "string"
                 },
                 "conforms_to_schema": {
+                    "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
                     "type": "string"
                 },
                 "content_warnings": {
@@ -595,11 +505,14 @@
                     "type": "array"
                 },
                 "created_by": {
-                    "description": "agent that created the element",
-                    "type": "string"
+                    "description": "Agent that created the element",
+                    "items": {
+                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
+                    },
+                    "type": "array"
                 },
                 "created_on": {
-                    "description": "time at which the element was created",
+                    "description": "Date and Time at which the element was created",
                     "format": "date-time",
                     "type": "string"
                 },
@@ -646,11 +559,17 @@
                     },
                     "type": "array"
                 },
+                "doi": {
+                    "description": "The Digital Object Identifier of the data, with the doi prefix.",
+                    "type": "string"
+                },
                 "download_url": {
+                    "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
                     "type": "string"
                 },
                 "encoding": {
-                    "type": "string"
+                    "$ref": "#/$defs/EncodingEnum",
+                    "description": "The encoding of the data. This is not the same as the media type. Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8, ASCII, etc."
                 },
                 "errata": {
                     "items": {
@@ -680,7 +599,8 @@
                     "type": "array"
                 },
                 "format": {
-                    "$ref": "#/$defs/FormatEnum"
+                    "$ref": "#/$defs/FormatEnum",
+                    "description": "The format of the data. This is not the same as the media type. Rather, this is the format of the data in a more specific sense, e.g., CSV, JSON, etc."
                 },
                 "funders": {
                     "items": {
@@ -695,10 +615,11 @@
                     "type": "array"
                 },
                 "hash": {
+                    "description": "The hash representation of the data, e.g., sha256, md5, etc. Subtypes have their own slots.",
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "instances": {
@@ -710,14 +631,26 @@
                 "ip_restrictions": {
                     "type": "string"
                 },
+                "is_data_split": {
+                    "description": "Is this subset a split of the larger dataset, e.g., is it a set for model training, testing, or validation?",
+                    "type": "boolean"
+                },
                 "is_deidentified": {
                     "type": "string"
+                },
+                "is_subpopulation": {
+                    "description": "Is this subset a subpopulation of the larger dataset, e.g., is it a set of data for a specific demographic?",
+                    "type": "boolean"
+                },
+                "is_tabular": {
+                    "type": "boolean"
                 },
                 "issued": {
                     "format": "date-time",
                     "type": "string"
                 },
                 "keywords": {
+                    "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
                     "items": {
                         "type": "string"
                     },
@@ -731,6 +664,11 @@
                 },
                 "language": {
                     "description": "language in which the information is expressed",
+                    "type": "string"
+                },
+                "last_updated_on": {
+                    "description": "Date and Time at which the element was last updated",
+                    "format": "date-time",
                     "type": "string"
                 },
                 "license": {
@@ -747,10 +685,16 @@
                     "type": "array"
                 },
                 "md5": {
+                    "description": "The md5 hash representation of the data.",
                     "type": "string"
                 },
                 "media_type": {
+                    "description": "The media type of the data. This is not the same as the format. Rather, this is the media type of the data in a more general sense, e.g., text/csv, application/json, etc., though as it is defined here the media type can be any string.",
                     "type": "string"
+                },
+                "modified_by": {
+                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
+                    "description": "agent that modified the element"
                 },
                 "other_tasks": {
                     "items": {
@@ -804,6 +748,11 @@
                     "type": "array"
                 },
                 "sha256": {
+                    "description": "The sha256 hash representation of the data.",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status of the element in terms of its maturity or life cycle",
                     "type": "string"
                 },
                 "subpopulations": {
@@ -812,15 +761,15 @@
                     },
                     "type": "array"
                 },
-                "tasks": {
+                "subsets": {
                     "items": {
                         "type": "string"
                     },
                     "type": "array"
                 },
-                "test_roles": {
+                "tasks": {
                     "items": {
-                        "$ref": "#/$defs/TestRole"
+                        "type": "string"
                     },
                     "type": "array"
                 },
@@ -878,6 +827,7 @@
                     "type": "array"
                 },
                 "bytes": {
+                    "description": "Size of the data in bytes.",
                     "type": "integer"
                 },
                 "cleaning_strategies": {
@@ -899,7 +849,8 @@
                     "type": "array"
                 },
                 "compression": {
-                    "type": "string"
+                    "$ref": "#/$defs/CompressionEnum",
+                    "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
                 },
                 "confidential_elements": {
                     "items": {
@@ -908,13 +859,15 @@
                     "type": "array"
                 },
                 "conforms_to": {
+                    "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc.",
                     "type": "string"
                 },
                 "conforms_to_class": {
-                    "description": "class in schema which the data object instantiates",
+                    "description": "The class in the schema to which the data object instantiates.",
                     "type": "string"
                 },
                 "conforms_to_schema": {
+                    "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
                     "type": "string"
                 },
                 "content_warnings": {
@@ -924,11 +877,14 @@
                     "type": "array"
                 },
                 "created_by": {
-                    "description": "agent that created the element",
-                    "type": "string"
+                    "description": "Agent that created the element",
+                    "items": {
+                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
+                    },
+                    "type": "array"
                 },
                 "created_on": {
-                    "description": "time at which the element was created",
+                    "description": "Date and Time at which the element was created",
                     "format": "date-time",
                     "type": "string"
                 },
@@ -975,11 +931,17 @@
                     },
                     "type": "array"
                 },
+                "doi": {
+                    "description": "The Digital Object Identifier of the data, with the doi prefix.",
+                    "type": "string"
+                },
                 "download_url": {
+                    "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
                     "type": "string"
                 },
                 "encoding": {
-                    "type": "string"
+                    "$ref": "#/$defs/EncodingEnum",
+                    "description": "The encoding of the data. This is not the same as the media type. Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8, ASCII, etc."
                 },
                 "errata": {
                     "items": {
@@ -1009,7 +971,8 @@
                     "type": "array"
                 },
                 "format": {
-                    "$ref": "#/$defs/FormatEnum"
+                    "$ref": "#/$defs/FormatEnum",
+                    "description": "The format of the data. This is not the same as the media type. Rather, this is the format of the data in a more specific sense, e.g., CSV, JSON, etc."
                 },
                 "funders": {
                     "items": {
@@ -1024,10 +987,11 @@
                     "type": "array"
                 },
                 "hash": {
+                    "description": "The hash representation of the data, e.g., sha256, md5, etc. Subtypes have their own slots.",
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "instances": {
@@ -1042,11 +1006,15 @@
                 "is_deidentified": {
                     "type": "string"
                 },
+                "is_tabular": {
+                    "type": "boolean"
+                },
                 "issued": {
                     "format": "date-time",
                     "type": "string"
                 },
                 "keywords": {
+                    "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
                     "items": {
                         "type": "string"
                     },
@@ -1060,6 +1028,11 @@
                 },
                 "language": {
                     "description": "language in which the information is expressed",
+                    "type": "string"
+                },
+                "last_updated_on": {
+                    "description": "Date and Time at which the element was last updated",
+                    "format": "date-time",
                     "type": "string"
                 },
                 "license": {
@@ -1076,10 +1049,16 @@
                     "type": "array"
                 },
                 "md5": {
+                    "description": "The md5 hash representation of the data.",
                     "type": "string"
                 },
                 "media_type": {
+                    "description": "The media type of the data. This is not the same as the format. Rather, this is the media type of the data in a more general sense, e.g., text/csv, application/json, etc., though as it is defined here the media type can be any string.",
                     "type": "string"
+                },
+                "modified_by": {
+                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
+                    "description": "agent that modified the element"
                 },
                 "other_tasks": {
                     "items": {
@@ -1133,6 +1112,11 @@
                     "type": "array"
                 },
                 "sha256": {
+                    "description": "The sha256 hash representation of the data.",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status of the element in terms of its maturity or life cycle",
                     "type": "string"
                 },
                 "subpopulations": {
@@ -1141,15 +1125,15 @@
                     },
                     "type": "array"
                 },
-                "tasks": {
+                "subsets": {
                     "items": {
                         "type": "string"
                     },
                     "type": "array"
                 },
-                "test_roles": {
+                "tasks": {
                     "items": {
-                        "$ref": "#/$defs/TestRole"
+                        "type": "string"
                     },
                     "type": "array"
                 },
@@ -1189,24 +1173,30 @@
             "description": "A collection of related datasets, likely containing multiple files of multiple potential purposes and properties.",
             "properties": {
                 "compression": {
-                    "type": "string"
+                    "$ref": "#/$defs/CompressionEnum",
+                    "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
                 },
                 "conforms_to": {
+                    "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc.",
                     "type": "string"
                 },
                 "conforms_to_class": {
-                    "description": "class in schema which the data object instantiates",
+                    "description": "The class in the schema to which the data object instantiates.",
                     "type": "string"
                 },
                 "conforms_to_schema": {
+                    "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
                     "type": "string"
                 },
                 "created_by": {
-                    "description": "agent that created the element",
-                    "type": "string"
+                    "description": "Agent that created the element",
+                    "items": {
+                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
+                    },
+                    "type": "array"
                 },
                 "created_on": {
-                    "description": "time at which the element was created",
+                    "description": "Date and Time at which the element was created",
                     "format": "date-time",
                     "type": "string"
                 },
@@ -1214,17 +1204,16 @@
                     "description": "human readable description of the information",
                     "type": "string"
                 },
-                "download_url": {
+                "doi": {
+                    "description": "The Digital Object Identifier of the data, with the doi prefix.",
                     "type": "string"
                 },
-                "entries": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
+                "download_url": {
+                    "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
+                    "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "issued": {
@@ -1232,6 +1221,7 @@
                     "type": "string"
                 },
                 "keywords": {
+                    "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
                     "items": {
                         "type": "string"
                     },
@@ -1241,9 +1231,18 @@
                     "description": "language in which the information is expressed",
                     "type": "string"
                 },
+                "last_updated_on": {
+                    "description": "Date and Time at which the element was last updated",
+                    "format": "date-time",
+                    "type": "string"
+                },
                 "license": {
                     "description": "license for the data",
                     "type": "string"
+                },
+                "modified_by": {
+                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
+                    "description": "agent that modified the element"
                 },
                 "page": {
                     "type": "string"
@@ -1257,11 +1256,9 @@
                     },
                     "type": "array"
                 },
-                "test_roles": {
-                    "items": {
-                        "$ref": "#/$defs/TestRole"
-                    },
-                    "type": "array"
+                "status": {
+                    "description": "Status of the element in terms of its maturity or life cycle",
+                    "type": "string"
                 },
                 "title": {
                     "description": "the official title of the element",
@@ -1291,11 +1288,18 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1315,11 +1319,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1339,11 +1350,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1363,11 +1381,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1387,11 +1412,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1402,7 +1434,7 @@
         },
         "DistributionFormat": {
             "additionalProperties": false,
-            "description": "How will the dataset will be distributed (e.g., tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?",
+            "description": "How will the dataset will be distributed (e.g., tarball on website, API, GitHub)?",
             "properties": {
                 "description": {
                     "items": {
@@ -1410,15 +1442,19 @@
                     },
                     "type": "array"
                 },
-                "doi": {
-                    "type": "string"
-                },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1426,6 +1462,47 @@
             ],
             "title": "DistributionFormat",
             "type": "object"
+        },
+        "EncodingEnum": {
+            "description": "",
+            "enum": [
+                "ASCII",
+                "Big5",
+                "EUC-JP",
+                "EUC-KR",
+                "EUC-TW",
+                "GB2312",
+                "HZ-GB-2312",
+                "ISO-2022-CN-EXT",
+                "ISO-2022-CN",
+                "ISO-2022-JP-2",
+                "ISO-2022-JP",
+                "ISO-2022-KR",
+                "ISO-8859-10",
+                "ISO-8859-11",
+                "ISO-8859-13",
+                "ISO-8859-14",
+                "ISO-8859-15",
+                "ISO-8859-16",
+                "ISO-8859-1",
+                "ISO-8859-2",
+                "ISO-8859-3",
+                "ISO-8859-4",
+                "ISO-8859-5",
+                "ISO-8859-6",
+                "ISO-8859-7",
+                "ISO-8859-8",
+                "ISO-8859-9",
+                "KOI8-R",
+                "KOI8-U",
+                "Shift_JIS",
+                "UTF-16",
+                "UTF-32",
+                "UTF-7",
+                "UTF-8"
+            ],
+            "title": "EncodingEnum",
+            "type": "string"
         },
         "Erratum": {
             "additionalProperties": false,
@@ -1438,11 +1515,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1462,11 +1546,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1486,11 +1577,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1510,11 +1608,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1534,11 +1639,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1574,13 +1686,20 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
                 "restrictions": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
                     "items": {
                         "type": "string"
                     },
@@ -1663,11 +1782,18 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1687,11 +1813,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1713,7 +1846,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -1734,8 +1867,12 @@
                     "description": "human readable description of the information",
                     "type": "string"
                 },
+                "email": {
+                    "description": "The email address of the organization.",
+                    "type": "string"
+                },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -1767,11 +1904,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1797,7 +1941,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "instance_type": {
@@ -1825,6 +1969,13 @@
                         "type": "string"
                     },
                     "type": "array"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1844,11 +1995,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "was_directly_observed": {
                     "description": "Was the data directly observable (e.g., raw text, movie ratings)?",
@@ -1884,11 +2042,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1908,11 +2073,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -1927,52 +2099,29 @@
             "properties": {
                 "description": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
                     },
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
                 "id"
             ],
             "title": "Maintainer",
-            "type": "object"
-        },
-        "MaintainerContact": {
-            "additionalProperties": false,
-            "description": "How can the owner/curator/manager of the dataset be contacted (e.g., email address)?",
-            "properties": {
-                "description": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "email": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "MaintainerContact",
             "type": "object"
         },
         "MediaTypeEnum": {
@@ -1993,7 +2142,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "missing": {
@@ -2004,6 +2153,13 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "why_missing": {
                     "items": {
@@ -2027,7 +2183,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -2048,8 +2204,12 @@
                     "description": "human readable description of the information",
                     "type": "string"
                 },
+                "email": {
+                    "description": "The email address of the organization.",
+                    "type": "string"
+                },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -2081,11 +2241,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2099,14 +2266,22 @@
             "description": "An individual human being.",
             "properties": {
                 "affiliation": {
-                    "type": "string"
+                    "description": "The organization(s) to which the person belongs.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 },
                 "description": {
                     "description": "human readable description of the information",
                     "type": "string"
                 },
+                "email": {
+                    "description": "The email address of the person.",
+                    "type": "string"
+                },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -2117,30 +2292,6 @@
                 "id"
             ],
             "title": "Person",
-            "type": "object"
-        },
-        "PreprocessingCleaningLabelingSoftware": {
-            "additionalProperties": false,
-            "description": "Is the software that was used to preprocess/clean/label the data available?",
-            "properties": {
-                "description": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "required": [
-                "id"
-            ],
-            "title": "PreprocessingCleaningLabelingSoftware",
             "type": "object"
         },
         "PreprocessingStrategy": {
@@ -2154,11 +2305,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2176,7 +2334,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -2184,6 +2342,13 @@
                 },
                 "response": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2203,11 +2368,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2227,11 +2399,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2251,11 +2430,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2272,15 +2458,15 @@
                     "description": "human readable description of the information",
                     "type": "string"
                 },
-                "ia_sample": {
+                "id": {
+                    "description": "the unique name of the dataset",
+                    "type": "string"
+                },
+                "is_random": {
                     "items": {
                         "type": "boolean"
                     },
                     "type": "array"
-                },
-                "id": {
-                    "description": "the unique name of th dataset",
-                    "type": "string"
                 },
                 "is_representative": {
                     "items": {
@@ -2288,7 +2474,7 @@
                     },
                     "type": "array"
                 },
-                "israndom": {
+                "is_sample": {
                     "items": {
                         "type": "boolean"
                     },
@@ -2311,6 +2497,13 @@
                 },
                 "strategies": {
                     "description": "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
                     "items": {
                         "type": "string"
                     },
@@ -2340,17 +2533,55 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
                 "id"
             ],
             "title": "SensitiveElement",
+            "type": "object"
+        },
+        "Software": {
+            "additionalProperties": false,
+            "description": "A software program or library.",
+            "properties": {
+                "description": {
+                    "description": "human readable description of the information",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "the unique name of the dataset",
+                    "type": "string"
+                },
+                "license": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Software",
             "type": "object"
         },
         "Splits": {
@@ -2364,11 +2595,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2392,7 +2630,7 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "identification": {
@@ -2403,6 +2641,13 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2420,7 +2665,7 @@
                     "type": "string"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
@@ -2428,6 +2673,13 @@
                 },
                 "response": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2436,31 +2688,26 @@
             "title": "Task",
             "type": "object"
         },
-        "TestRole": {
-            "description": "",
-            "enum": [
-                "Example",
-                "CounterExample"
-            ],
-            "title": "TestRole",
-            "type": "string"
-        },
         "ThirdPartySharing": {
             "additionalProperties": false,
             "description": "Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?",
             "properties": {
                 "description": {
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": "array"
+                    "type": "boolean"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2480,11 +2727,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2504,11 +2758,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2528,11 +2789,18 @@
                     "type": "array"
                 },
                 "id": {
-                    "description": "the unique name of th dataset",
+                    "description": "the unique name of the dataset",
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
                 }
             },
             "required": [
@@ -2549,24 +2817,30 @@
     "metamodel_version": "1.7.0",
     "properties": {
         "compression": {
-            "type": "string"
+            "$ref": "#/$defs/CompressionEnum",
+            "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
         },
         "conforms_to": {
+            "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc.",
             "type": "string"
         },
         "conforms_to_class": {
-            "description": "class in schema which the data object instantiates",
+            "description": "The class in the schema to which the data object instantiates.",
             "type": "string"
         },
         "conforms_to_schema": {
+            "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
             "type": "string"
         },
         "created_by": {
-            "description": "agent that created the element",
-            "type": "string"
+            "description": "Agent that created the element",
+            "items": {
+                "$ref": "#/$defs/CreatorOrMaintainerEnum"
+            },
+            "type": "array"
         },
         "created_on": {
-            "description": "time at which the element was created",
+            "description": "Date and Time at which the element was created",
             "format": "date-time",
             "type": "string"
         },
@@ -2574,17 +2848,16 @@
             "description": "human readable description of the information",
             "type": "string"
         },
-        "download_url": {
+        "doi": {
+            "description": "The Digital Object Identifier of the data, with the doi prefix.",
             "type": "string"
         },
-        "entries": {
-            "items": {
-                "type": "string"
-            },
-            "type": "array"
+        "download_url": {
+            "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
+            "type": "string"
         },
         "id": {
-            "description": "the unique name of th dataset",
+            "description": "the unique name of the dataset",
             "type": "string"
         },
         "issued": {
@@ -2592,6 +2865,7 @@
             "type": "string"
         },
         "keywords": {
+            "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
             "items": {
                 "type": "string"
             },
@@ -2601,9 +2875,18 @@
             "description": "language in which the information is expressed",
             "type": "string"
         },
+        "last_updated_on": {
+            "description": "Date and Time at which the element was last updated",
+            "format": "date-time",
+            "type": "string"
+        },
         "license": {
             "description": "license for the data",
             "type": "string"
+        },
+        "modified_by": {
+            "$ref": "#/$defs/CreatorOrMaintainerEnum",
+            "description": "agent that modified the element"
         },
         "page": {
             "type": "string"
@@ -2617,11 +2900,9 @@
             },
             "type": "array"
         },
-        "test_roles": {
-            "items": {
-                "$ref": "#/$defs/TestRole"
-            },
-            "type": "array"
+        "status": {
+            "description": "Status of the element in terms of its maturity or life cycle",
+            "type": "string"
         },
         "title": {
             "description": "the official title of the element",

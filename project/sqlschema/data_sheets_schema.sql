@@ -4,6 +4,7 @@ CREATE TABLE "AddressingGap" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	response TEXT, 
 	PRIMARY KEY (id)
 );
@@ -11,42 +12,49 @@ CREATE TABLE "AddressingGap" (
 CREATE TABLE "CleaningStrategy" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "CollectionConsent" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "CollectionMechanism" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "CollectionNotification" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "CollectionTimeframe" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Confidentiality" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ConsentRevocation" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -54,98 +62,52 @@ CREATE TABLE "ContentWarning" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DataAnomaly" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DataCollector" (
 	id TEXT NOT NULL, 
 	name TEXT, 
-	PRIMARY KEY (id)
-);
-
-CREATE TABLE "DataPackage" (
-	id TEXT NOT NULL, 
-	download_url TEXT, 
-	license TEXT, 
-	title TEXT, 
-	description TEXT, 
-	conforms_to TEXT, 
-	conforms_to_schema TEXT, 
-	conforms_to_class TEXT, 
-	version TEXT, 
-	language TEXT, 
-	publisher TEXT, 
-	issued DATETIME, 
-	created_by TEXT, 
-	created_on DATETIME, 
-	compression TEXT, 
-	was_derived_from TEXT, 
-	page TEXT, 
-	resources TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DataProtectionImpact" (
 	id TEXT NOT NULL, 
 	name TEXT, 
-	PRIMARY KEY (id)
-);
-
-CREATE TABLE "DataResource" (
-	id TEXT NOT NULL, 
-	download_url TEXT, 
-	license TEXT, 
-	conforms_to TEXT, 
-	conforms_to_schema TEXT, 
-	conforms_to_class TEXT, 
-	version TEXT, 
-	language TEXT, 
-	publisher TEXT, 
-	issued DATETIME, 
-	created_by TEXT, 
-	created_on DATETIME, 
-	compression TEXT, 
-	was_derived_from TEXT, 
-	page TEXT, 
-	path TEXT, 
-	title TEXT, 
-	description TEXT, 
-	format VARCHAR(22), 
-	media_type TEXT, 
-	encoding TEXT, 
-	bytes INTEGER, 
-	hash TEXT, 
-	md5 TEXT, 
-	sha256 TEXT, 
-	dialect TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DatasetCollection" (
-	id TEXT NOT NULL, 
-	download_url TEXT, 
-	license TEXT, 
-	title TEXT, 
-	description TEXT, 
+	compression VARCHAR(7), 
 	conforms_to TEXT, 
-	conforms_to_schema TEXT, 
 	conforms_to_class TEXT, 
-	version TEXT, 
-	language TEXT, 
-	publisher TEXT, 
-	issued DATETIME, 
-	created_by TEXT, 
+	conforms_to_schema TEXT, 
 	created_on DATETIME, 
-	compression TEXT, 
-	was_derived_from TEXT, 
+	description TEXT, 
+	doi TEXT, 
+	download_url TEXT, 
+	id TEXT NOT NULL, 
+	issued DATETIME, 
+	language TEXT, 
+	last_updated_on DATETIME, 
+	license TEXT, 
+	modified_by VARCHAR(12), 
 	page TEXT, 
-	resources TEXT, 
+	publisher TEXT, 
+	status TEXT, 
+	title TEXT, 
+	version TEXT, 
+	was_derived_from TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -153,67 +115,77 @@ CREATE TABLE "DatasetProperty" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Deidentification" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DirectCollection" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DiscouragedUse" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DistributionDate" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DistributionFormat" (
 	id TEXT NOT NULL, 
 	name TEXT, 
-	doi TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Erratum" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "EthicalReview" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ExistingUse" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ExportControlRegulatoryRestrictions" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ExtensionMechanism" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -221,6 +193,7 @@ CREATE TABLE "ExternalResource" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -236,6 +209,7 @@ CREATE TABLE "FormatDialect" (
 CREATE TABLE "FutureUseImpact" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -251,6 +225,7 @@ CREATE TABLE "Grantor" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	email TEXT, 
 	ror_id TEXT, 
 	wikidata_id TEXT, 
 	PRIMARY KEY (id)
@@ -260,6 +235,7 @@ CREATE TABLE "Instance" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	representation TEXT, 
 	instance_type TEXT, 
 	data_type TEXT, 
@@ -272,6 +248,7 @@ CREATE TABLE "Instance" (
 CREATE TABLE "InstanceAcquisition" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	was_directly_observed BOOLEAN, 
 	was_reported_by_subjects BOOLEAN, 
 	was_inferred_derived BOOLEAN, 
@@ -282,30 +259,28 @@ CREATE TABLE "InstanceAcquisition" (
 CREATE TABLE "IPRestrictions" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "LabelingStrategy" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "LicenseAndUseTerms" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Maintainer" (
 	id TEXT NOT NULL, 
 	name TEXT, 
-	PRIMARY KEY (id)
-);
-
-CREATE TABLE "MaintainerContact" (
-	id TEXT NOT NULL, 
-	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -320,6 +295,7 @@ CREATE TABLE "Organization" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	email TEXT, 
 	ror_id TEXT, 
 	wikidata_id TEXT, 
 	PRIMARY KEY (id)
@@ -328,18 +304,23 @@ CREATE TABLE "Organization" (
 CREATE TABLE "OtherTask" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "PreprocessingCleaningLabelingSoftware" (
+CREATE TABLE "Person" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	description TEXT, 
+	affiliation TEXT, 
+	email TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "PreprocessingStrategy" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -347,6 +328,7 @@ CREATE TABLE "Purpose" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	response TEXT, 
 	PRIMARY KEY (id)
 );
@@ -354,18 +336,21 @@ CREATE TABLE "Purpose" (
 CREATE TABLE "RawData" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Relationships" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "RetentionLimits" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -373,18 +358,31 @@ CREATE TABLE "SamplingStrategy" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "SensitiveElement" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Software" (
+	id TEXT NOT NULL, 
+	name TEXT, 
+	description TEXT, 
+	version TEXT, 
+	license TEXT, 
+	url TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Splits" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -392,6 +390,7 @@ CREATE TABLE "Subpopulation" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -399,6 +398,7 @@ CREATE TABLE "Task" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	response TEXT, 
 	PRIMARY KEY (id)
 );
@@ -406,59 +406,80 @@ CREATE TABLE "Task" (
 CREATE TABLE "ThirdPartySharing" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
+	description BOOLEAN, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "UpdatePlan" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "UseRepository" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "VersionAccess" (
 	id TEXT NOT NULL, 
 	name TEXT, 
+	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE "Dataset" (
+CREATE TABLE "Creator" (
 	id TEXT NOT NULL, 
-	download_url TEXT, 
-	license TEXT, 
-	conforms_to TEXT, 
-	conforms_to_schema TEXT, 
-	conforms_to_class TEXT, 
-	version TEXT, 
-	language TEXT, 
-	publisher TEXT, 
-	issued DATETIME, 
-	created_by TEXT, 
-	created_on DATETIME, 
-	compression TEXT, 
-	was_derived_from TEXT, 
-	page TEXT, 
-	path TEXT, 
-	title TEXT, 
+	name TEXT, 
 	description TEXT, 
-	format VARCHAR(22), 
-	media_type TEXT, 
-	encoding TEXT, 
+	used_software TEXT, 
+	principal_investigator TEXT, 
+	affiliation TEXT, 
+	PRIMARY KEY (id), 
+	FOREIGN KEY(principal_investigator) REFERENCES "Person" (id), 
+	FOREIGN KEY(affiliation) REFERENCES "Organization" (id)
+);
+
+CREATE TABLE "Dataset" (
+	compression VARCHAR(7), 
+	conforms_to TEXT, 
+	conforms_to_class TEXT, 
+	conforms_to_schema TEXT, 
+	created_on DATETIME, 
+	description TEXT, 
+	doi TEXT, 
+	download_url TEXT, 
+	id TEXT NOT NULL, 
+	issued DATETIME, 
+	language TEXT, 
+	last_updated_on DATETIME, 
+	license TEXT, 
+	modified_by VARCHAR(12), 
+	page TEXT, 
+	publisher TEXT, 
+	status TEXT, 
+	title TEXT, 
+	version TEXT, 
+	was_derived_from TEXT, 
 	bytes INTEGER, 
+	dialect TEXT, 
+	encoding VARCHAR(15), 
+	format VARCHAR(22), 
 	hash TEXT, 
 	md5 TEXT, 
+	media_type TEXT, 
+	path TEXT, 
 	sha256 TEXT, 
-	dialect TEXT, 
 	purposes TEXT, 
 	tasks TEXT, 
 	addressing_gaps TEXT, 
 	creators TEXT, 
 	funders TEXT, 
+	subsets TEXT, 
 	instances TEXT, 
 	anomalies TEXT, 
 	external_resources TEXT, 
@@ -494,6 +515,7 @@ CREATE TABLE "Dataset" (
 	version_access TEXT, 
 	extension_mechanism TEXT, 
 	is_deidentified TEXT, 
+	is_tabular BOOLEAN, 
 	"DatasetCollection_id" TEXT, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(license_and_use_terms) REFERENCES "LicenseAndUseTerms" (id), 
@@ -508,37 +530,41 @@ CREATE TABLE "Dataset" (
 );
 
 CREATE TABLE "DataSubset" (
-	id TEXT NOT NULL, 
-	download_url TEXT, 
-	license TEXT, 
+	compression VARCHAR(7), 
 	conforms_to TEXT, 
-	conforms_to_schema TEXT, 
 	conforms_to_class TEXT, 
-	version TEXT, 
-	language TEXT, 
-	publisher TEXT, 
-	issued DATETIME, 
-	created_by TEXT, 
+	conforms_to_schema TEXT, 
 	created_on DATETIME, 
-	compression TEXT, 
-	was_derived_from TEXT, 
-	page TEXT, 
-	path TEXT, 
-	title TEXT, 
 	description TEXT, 
-	format VARCHAR(22), 
-	media_type TEXT, 
-	encoding TEXT, 
+	doi TEXT, 
+	download_url TEXT, 
+	id TEXT NOT NULL, 
+	issued DATETIME, 
+	language TEXT, 
+	last_updated_on DATETIME, 
+	license TEXT, 
+	modified_by VARCHAR(12), 
+	page TEXT, 
+	publisher TEXT, 
+	status TEXT, 
+	title TEXT, 
+	version TEXT, 
+	was_derived_from TEXT, 
 	bytes INTEGER, 
+	dialect TEXT, 
+	encoding VARCHAR(15), 
+	format VARCHAR(22), 
 	hash TEXT, 
 	md5 TEXT, 
+	media_type TEXT, 
+	path TEXT, 
 	sha256 TEXT, 
-	dialect TEXT, 
 	purposes TEXT, 
 	tasks TEXT, 
 	addressing_gaps TEXT, 
 	creators TEXT, 
 	funders TEXT, 
+	subsets TEXT, 
 	instances TEXT, 
 	anomalies TEXT, 
 	external_resources TEXT, 
@@ -574,6 +600,9 @@ CREATE TABLE "DataSubset" (
 	version_access TEXT, 
 	extension_mechanism TEXT, 
 	is_deidentified TEXT, 
+	is_tabular BOOLEAN, 
+	is_data_split BOOLEAN, 
+	is_subpopulation BOOLEAN, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY(license_and_use_terms) REFERENCES "LicenseAndUseTerms" (id), 
 	FOREIGN KEY(ip_restrictions) REFERENCES "IPRestrictions" (id), 
@@ -589,6 +618,7 @@ CREATE TABLE "FundingMechanism" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	grantor TEXT, 
 	grant TEXT, 
 	PRIMARY KEY (id), 
@@ -600,18 +630,10 @@ CREATE TABLE "MissingInfo" (
 	id TEXT NOT NULL, 
 	name TEXT, 
 	description TEXT, 
+	used_software TEXT, 
 	"Instance_id" TEXT, 
 	PRIMARY KEY (id), 
 	FOREIGN KEY("Instance_id") REFERENCES "Instance" (id)
-);
-
-CREATE TABLE "Person" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	affiliation TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY(affiliation) REFERENCES "Organization" (id)
 );
 
 CREATE TABLE "CleaningStrategy_description" (
@@ -684,20 +706,6 @@ CREATE TABLE "DataCollector_description" (
 	FOREIGN KEY(backref_id) REFERENCES "DataCollector" (id)
 );
 
-CREATE TABLE "DataPackage_keywords" (
-	backref_id TEXT, 
-	keywords TEXT, 
-	PRIMARY KEY (backref_id, keywords), 
-	FOREIGN KEY(backref_id) REFERENCES "DataPackage" (id)
-);
-
-CREATE TABLE "DataPackage_test_roles" (
-	backref_id TEXT, 
-	test_roles VARCHAR(14), 
-	PRIMARY KEY (backref_id, test_roles), 
-	FOREIGN KEY(backref_id) REFERENCES "DataPackage" (id)
-);
-
 CREATE TABLE "DataProtectionImpact_description" (
 	backref_id TEXT, 
 	description TEXT, 
@@ -705,31 +713,17 @@ CREATE TABLE "DataProtectionImpact_description" (
 	FOREIGN KEY(backref_id) REFERENCES "DataProtectionImpact" (id)
 );
 
-CREATE TABLE "DataResource_keywords" (
+CREATE TABLE "DatasetCollection_created_by" (
 	backref_id TEXT, 
-	keywords TEXT, 
-	PRIMARY KEY (backref_id, keywords), 
-	FOREIGN KEY(backref_id) REFERENCES "DataResource" (id)
-);
-
-CREATE TABLE "DataResource_test_roles" (
-	backref_id TEXT, 
-	test_roles VARCHAR(14), 
-	PRIMARY KEY (backref_id, test_roles), 
-	FOREIGN KEY(backref_id) REFERENCES "DataResource" (id)
+	created_by VARCHAR(12), 
+	PRIMARY KEY (backref_id, created_by), 
+	FOREIGN KEY(backref_id) REFERENCES "DatasetCollection" (id)
 );
 
 CREATE TABLE "DatasetCollection_keywords" (
 	backref_id TEXT, 
 	keywords TEXT, 
 	PRIMARY KEY (backref_id, keywords), 
-	FOREIGN KEY(backref_id) REFERENCES "DatasetCollection" (id)
-);
-
-CREATE TABLE "DatasetCollection_test_roles" (
-	backref_id TEXT, 
-	test_roles VARCHAR(14), 
-	PRIMARY KEY (backref_id, test_roles), 
 	FOREIGN KEY(backref_id) REFERENCES "DatasetCollection" (id)
 );
 
@@ -868,23 +862,9 @@ CREATE TABLE "LicenseAndUseTerms_description" (
 
 CREATE TABLE "Maintainer_description" (
 	backref_id TEXT, 
-	description TEXT, 
+	description VARCHAR(12), 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "Maintainer" (id)
-);
-
-CREATE TABLE "MaintainerContact_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "MaintainerContact" (id)
-);
-
-CREATE TABLE "MaintainerContact_email" (
-	backref_id TEXT, 
-	email TEXT, 
-	PRIMARY KEY (backref_id, email), 
-	FOREIGN KEY(backref_id) REFERENCES "MaintainerContact" (id)
 );
 
 CREATE TABLE "OtherTask_description" (
@@ -892,13 +872,6 @@ CREATE TABLE "OtherTask_description" (
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "OtherTask" (id)
-);
-
-CREATE TABLE "PreprocessingCleaningLabelingSoftware_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "PreprocessingCleaningLabelingSoftware" (id)
 );
 
 CREATE TABLE "PreprocessingStrategy_description" (
@@ -929,17 +902,17 @@ CREATE TABLE "RetentionLimits_description" (
 	FOREIGN KEY(backref_id) REFERENCES "RetentionLimits" (id)
 );
 
-CREATE TABLE "SamplingStrategy_ia_sample" (
+CREATE TABLE "SamplingStrategy_is_sample" (
 	backref_id TEXT, 
-	ia_sample BOOLEAN, 
-	PRIMARY KEY (backref_id, ia_sample), 
+	is_sample BOOLEAN, 
+	PRIMARY KEY (backref_id, is_sample), 
 	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
 );
 
-CREATE TABLE "SamplingStrategy_israndom" (
+CREATE TABLE "SamplingStrategy_is_random" (
 	backref_id TEXT, 
-	israndom BOOLEAN, 
-	PRIMARY KEY (backref_id, israndom), 
+	is_random BOOLEAN, 
+	PRIMARY KEY (backref_id, is_random), 
 	FOREIGN KEY(backref_id) REFERENCES "SamplingStrategy" (id)
 );
 
@@ -1006,13 +979,6 @@ CREATE TABLE "Subpopulation_distribution" (
 	FOREIGN KEY(backref_id) REFERENCES "Subpopulation" (id)
 );
 
-CREATE TABLE "ThirdPartySharing_description" (
-	backref_id TEXT, 
-	description TEXT, 
-	PRIMARY KEY (backref_id, description), 
-	FOREIGN KEY(backref_id) REFERENCES "ThirdPartySharing" (id)
-);
-
 CREATE TABLE "UpdatePlan_description" (
 	backref_id TEXT, 
 	description TEXT, 
@@ -1034,15 +1000,11 @@ CREATE TABLE "VersionAccess_description" (
 	FOREIGN KEY(backref_id) REFERENCES "VersionAccess" (id)
 );
 
-CREATE TABLE "Creator" (
-	id TEXT NOT NULL, 
-	name TEXT, 
-	description TEXT, 
-	principal_investigator TEXT, 
-	affiliation TEXT, 
-	PRIMARY KEY (id), 
-	FOREIGN KEY(principal_investigator) REFERENCES "Person" (id), 
-	FOREIGN KEY(affiliation) REFERENCES "Organization" (id)
+CREATE TABLE "Dataset_created_by" (
+	backref_id TEXT, 
+	created_by VARCHAR(12), 
+	PRIMARY KEY (backref_id, created_by), 
+	FOREIGN KEY(backref_id) REFERENCES "Dataset" (id)
 );
 
 CREATE TABLE "Dataset_keywords" (
@@ -1052,24 +1014,17 @@ CREATE TABLE "Dataset_keywords" (
 	FOREIGN KEY(backref_id) REFERENCES "Dataset" (id)
 );
 
-CREATE TABLE "Dataset_test_roles" (
+CREATE TABLE "DataSubset_created_by" (
 	backref_id TEXT, 
-	test_roles VARCHAR(14), 
-	PRIMARY KEY (backref_id, test_roles), 
-	FOREIGN KEY(backref_id) REFERENCES "Dataset" (id)
+	created_by VARCHAR(12), 
+	PRIMARY KEY (backref_id, created_by), 
+	FOREIGN KEY(backref_id) REFERENCES "DataSubset" (id)
 );
 
 CREATE TABLE "DataSubset_keywords" (
 	backref_id TEXT, 
 	keywords TEXT, 
 	PRIMARY KEY (backref_id, keywords), 
-	FOREIGN KEY(backref_id) REFERENCES "DataSubset" (id)
-);
-
-CREATE TABLE "DataSubset_test_roles" (
-	backref_id TEXT, 
-	test_roles VARCHAR(14), 
-	PRIMARY KEY (backref_id, test_roles), 
 	FOREIGN KEY(backref_id) REFERENCES "DataSubset" (id)
 );
 

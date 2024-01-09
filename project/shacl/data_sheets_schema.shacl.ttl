@@ -6,116 +6,30 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix schema1: <http://schema.org/> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix void: <http://rdfs.org/ns/void#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-
-void:Dataset a sh:NodeShape ;
-    sh:closed true ;
-    sh:description "A collection of data resources" ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:class dcat:Distribution ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path dcat:distribution ],
-        [ sh:datatype xsd:string ;
-            sh:order 12 ;
-            sh:path dcat:keyword ],
-        [ sh:datatype xsd:string ;
-            sh:description "license for the data" ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path <dcterms:license> ],
-        [ sh:description "class in schema which the data object instantiates" ;
-            sh:maxCount 1 ;
-            sh:order 8 ;
-            sh:path data_sheets_schema:conforms_to_class ],
-        [ sh:datatype xsd:dateTime ;
-            sh:description "time at which the element was created" ;
-            sh:maxCount 1 ;
-            sh:order 15 ;
-            sh:path pav:createdOn ],
-        [ sh:maxCount 1 ;
-            sh:order 7 ;
-            sh:path data_sheets_schema:conforms_to_schema ],
-        [ sh:maxCount 1 ;
-            sh:order 11 ;
-            sh:path <dcterms:publisher> ],
-        [ sh:description "agent that created the element" ;
-            sh:maxCount 1 ;
-            sh:order 14 ;
-            sh:path pav:createdBy ],
-        [ sh:datatype xsd:string ;
-            sh:description "particular version of schema" ;
-            sh:maxCount 1 ;
-            sh:order 9 ;
-            sh:path pav:version ],
-        [ sh:datatype xsd:string ;
-            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
-            sh:maxCount 1 ;
-            sh:order 17 ;
-            sh:path <prov:wasDerivedFrom> ],
-        [ sh:datatype xsd:anyURI ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path dcat:downloadURL ],
-        [ sh:maxCount 1 ;
-            sh:order 6 ;
-            sh:path <dcterms:conformsTo> ],
-        [ sh:in ( "Example" "CounterExample" ) ;
-            sh:order 19 ;
-            sh:path data_sheets_schema:test_roles ],
-        [ sh:datatype xsd:dateTime ;
-            sh:maxCount 1 ;
-            sh:order 13 ;
-            sh:path <dcterms:issued> ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:description "language in which the information is expressed" ;
-            sh:maxCount 1 ;
-            sh:order 10 ;
-            sh:path data_sheets_schema:language ],
-        [ sh:datatype xsd:string ;
-            sh:description "the official title of the element" ;
-            sh:maxCount 1 ;
-            sh:order 4 ;
-            sh:path <dcterms:title> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 18 ;
-            sh:path dcat:landingPage ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 16 ;
-            sh:path data_sheets_schema:compression ],
-        [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 5 ;
-            sh:path <dcterms:description> ] ;
-    sh:targetClass void:Dataset .
 
 data_sheets_schema:CollectionConsent a sh:NodeShape ;
     sh:closed true ;
     sh:description "Did the individuals in question consent to the collection and use of their data? If so, please describe (or show with screenshots or other information) how consent was requested and provided, and provide a link or other access point to, or otherwise reproduce, the exact language to which the individuals consented." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ] ;
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:CollectionConsent .
 
 data_sheets_schema:CollectionNotification a sh:NodeShape ;
@@ -126,418 +40,154 @@ data_sheets_schema:CollectionNotification a sh:NodeShape ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:path <dcterms:identifier> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:CollectionNotification .
 
 data_sheets_schema:ConsentRevocation a sh:NodeShape ;
     sh:closed true ;
     sh:description "If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or 8 for certain uses? If so, please provide a description, as well as a link or other access point to the mechanism (if appropriate)." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ] ;
     sh:targetClass data_sheets_schema:ConsentRevocation .
 
-data_sheets_schema:DataSubset a sh:NodeShape ;
-    sh:closed true ;
-    sh:description "A subset of a dataset, likely containing multiple files of multiple potential purposes and properties." ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 64 ;
-            sh:path data_sheets_schema:compression ],
-        [ sh:class data_sheets_schema:RawData ;
-            sh:nodeKind sh:IRI ;
-            sh:order 22 ;
-            sh:path data_sheets_schema:raw_sources ],
-        [ sh:datatype xsd:string ;
-            sh:description "particular version of schema" ;
-            sh:maxCount 1 ;
-            sh:order 57 ;
-            sh:path pav:version ],
-        [ sh:class data_sheets_schema:Instance ;
-            sh:nodeKind sh:IRI ;
-            sh:order 5 ;
-            sh:path data_sheets_schema:instances ],
-        [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 42 ;
-            sh:path <dcterms:description> ],
-        [ sh:class data_sheets_schema:InstanceAcquisition ;
-            sh:nodeKind sh:IRI ;
-            sh:order 12 ;
-            sh:path data_sheets_schema:acquisition_methods ],
-        [ sh:in ( "Example" "CounterExample" ) ;
-            sh:order 67 ;
-            sh:path data_sheets_schema:test_roles ],
-        [ sh:maxCount 1 ;
-            sh:order 54 ;
-            sh:path <dcterms:conformsTo> ],
-        [ sh:datatype xsd:string ;
-            sh:description "language in which the information is expressed" ;
-            sh:maxCount 1 ;
-            sh:order 58 ;
-            sh:path data_sheets_schema:language ],
-        [ sh:class data_sheets_schema:Maintainer ;
-            sh:nodeKind sh:IRI ;
-            sh:order 33 ;
-            sh:path data_sheets_schema:maintainers ],
-        [ sh:class data_sheets_schema:ExportControlRegulatoryRestrictions ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 32 ;
-            sh:path data_sheets_schema:regulatory_restrictions ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 45 ;
-            sh:path data_sheets_schema:encoding ],
-        [ sh:maxCount 1 ;
-            sh:order 59 ;
-            sh:path <dcterms:publisher> ],
-        [ sh:class data_sheets_schema:DataCollector ;
-            sh:nodeKind sh:IRI ;
-            sh:order 15 ;
-            sh:path data_sheets_schema:data_collectors ],
-        [ sh:class data_sheets_schema:CollectionTimeframe ;
-            sh:nodeKind sh:IRI ;
-            sh:order 16 ;
-            sh:path data_sheets_schema:collection_timeframes ],
-        [ sh:class data_sheets_schema:LicenseAndUseTerms ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 30 ;
-            sh:path data_sheets_schema:license_and_use_terms ],
-        [ sh:class data_sheets_schema:OtherTask ;
-            sh:nodeKind sh:IRI ;
-            sh:order 25 ;
-            sh:path data_sheets_schema:other_tasks ],
-        [ sh:class data_sheets_schema:ExtensionMechanism ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 38 ;
-            sh:path data_sheets_schema:extension_mechanism ],
-        [ sh:class data_sheets_schema:ExternalResource ;
-            sh:nodeKind sh:IRI ;
-            sh:order 7 ;
-            sh:path data_sheets_schema:external_resources ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 40 ;
-            sh:path data_sheets_schema:path ],
-        [ sh:datatype xsd:integer ;
-            sh:maxCount 1 ;
-            sh:order 46 ;
-            sh:path dcat:byteSize ],
-        [ sh:datatype xsd:string ;
-            sh:description "the official title of the element" ;
-            sh:maxCount 1 ;
-            sh:order 41 ;
-            sh:path <dcterms:title> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 50 ;
-            sh:path csvw:dialect ],
-        [ sh:class data_sheets_schema:SamplingStrategy ;
-            sh:nodeKind sh:IRI ;
-            sh:order 14 ;
-            sh:path data_sheets_schema:sampling_strategies ],
-        [ sh:in ( formats:JSON-LD formats:N3 formats:N-Triples formats:N-Quads formats:LD_Patch formats:microdata formats:OWL_XML formats:OWL_Functional formats:OWL_Manchester formats:POWDER formats:POWDER-S formats:PROV-N formats:PROV-XML formats:RDFa formats:RDF_JSON formats:RDF_XML formats:RIF_XML formats:SPARQL_Results_XML formats:SPARQL_Results_JSON formats:SPARQL_Results_CSV formats:SPARQL_Results_TSV formats:Turtle formats:TriG "YAML" "JSON" ) ;
-            sh:maxCount 1 ;
-            sh:order 43 ;
-            sh:path <dcterms:format> ],
-        [ sh:class data_sheets_schema:SensitiveElement ;
-            sh:nodeKind sh:IRI ;
-            sh:order 11 ;
-            sh:path data_sheets_schema:sensitive_elements ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 49 ;
-            sh:path data_sheets_schema:sha256 ],
-        [ sh:class data_sheets_schema:DistributionFormat ;
-            sh:nodeKind sh:IRI ;
-            sh:order 28 ;
-            sh:path data_sheets_schema:distribution_formats ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 48 ;
-            sh:path data_sheets_schema:md5 ],
-        [ sh:class data_sheets_schema:Creator ;
-            sh:nodeKind sh:IRI ;
-            sh:order 3 ;
-            sh:path data_sheets_schema:creators ],
-        [ sh:class data_sheets_schema:RetentionLimits ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 36 ;
-            sh:path data_sheets_schema:retention_limit ],
-        [ sh:datatype xsd:string ;
-            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
-            sh:maxCount 1 ;
-            sh:order 65 ;
-            sh:path <prov:wasDerivedFrom> ],
-        [ sh:class data_sheets_schema:DataAnomaly ;
-            sh:nodeKind sh:IRI ;
-            sh:order 6 ;
-            sh:path data_sheets_schema:anomalies ],
-        [ sh:datatype xsd:string ;
-            sh:description "license for the data" ;
-            sh:maxCount 1 ;
-            sh:order 53 ;
-            sh:path <dcterms:license> ],
-        [ sh:class data_sheets_schema:FutureUseImpact ;
-            sh:nodeKind sh:IRI ;
-            sh:order 26 ;
-            sh:path data_sheets_schema:future_use_impacts ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 66 ;
-            sh:path dcat:landingPage ],
-        [ sh:class data_sheets_schema:DistributionDate ;
-            sh:nodeKind sh:IRI ;
-            sh:order 29 ;
-            sh:path data_sheets_schema:distribution_dates ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 44 ;
-            sh:path dcat:mediaType ],
-        [ sh:class data_sheets_schema:FundingMechanism ;
-            sh:nodeKind sh:IRI ;
-            sh:order 4 ;
-            sh:path data_sheets_schema:funders ],
-        [ sh:class data_sheets_schema:Erratum ;
-            sh:nodeKind sh:IRI ;
-            sh:order 34 ;
-            sh:path data_sheets_schema:errata ],
-        [ sh:class data_sheets_schema:UpdatePlan ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 35 ;
-            sh:path data_sheets_schema:updates ],
-        [ sh:class data_sheets_schema:ExistingUse ;
-            sh:nodeKind sh:IRI ;
-            sh:order 23 ;
-            sh:path data_sheets_schema:existing_uses ],
-        [ sh:class data_sheets_schema:CleaningStrategy ;
-            sh:nodeKind sh:IRI ;
-            sh:order 20 ;
-            sh:path data_sheets_schema:cleaning_strategies ],
-        [ sh:class data_sheets_schema:IPRestrictions ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 31 ;
-            sh:path data_sheets_schema:ip_restrictions ],
-        [ sh:class data_sheets_schema:AddressingGap ;
-            sh:nodeKind sh:IRI ;
-            sh:order 2 ;
-            sh:path data_sheets_schema:addressing_gaps ],
-        [ sh:datatype xsd:string ;
-            sh:order 60 ;
-            sh:path dcat:keyword ],
-        [ sh:description "agent that created the element" ;
-            sh:maxCount 1 ;
-            sh:order 62 ;
-            sh:path pav:createdBy ],
-        [ sh:class data_sheets_schema:Task ;
-            sh:nodeKind sh:IRI ;
-            sh:order 1 ;
-            sh:path data_sheets_schema:tasks ],
-        [ sh:class data_sheets_schema:EthicalReview ;
-            sh:nodeKind sh:IRI ;
-            sh:order 17 ;
-            sh:path data_sheets_schema:ethical_reviews ],
-        [ sh:class data_sheets_schema:DiscouragedUse ;
-            sh:nodeKind sh:IRI ;
-            sh:order 27 ;
-            sh:path data_sheets_schema:discouraged_uses ],
-        [ sh:class data_sheets_schema:VersionAccess ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 37 ;
-            sh:path data_sheets_schema:version_access ],
-        [ sh:class data_sheets_schema:CollectionMechanism ;
-            sh:nodeKind sh:IRI ;
-            sh:order 13 ;
-            sh:path data_sheets_schema:collection_mechanisms ],
-        [ sh:class data_sheets_schema:Subpopulation ;
-            sh:nodeKind sh:IRI ;
-            sh:order 10 ;
-            sh:path data_sheets_schema:subpopulations ],
-        [ sh:datatype xsd:anyURI ;
-            sh:maxCount 1 ;
-            sh:order 52 ;
-            sh:path dcat:downloadURL ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 47 ;
-            sh:path data_sheets_schema:hash ],
-        [ sh:class data_sheets_schema:Deidentification ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 39 ;
-            sh:path data_sheets_schema:is_deidentified ],
-        [ sh:class data_sheets_schema:DataProtectionImpact ;
-            sh:nodeKind sh:IRI ;
-            sh:order 18 ;
-            sh:path data_sheets_schema:data_protection_impacts ],
-        [ sh:maxCount 1 ;
-            sh:order 55 ;
-            sh:path data_sheets_schema:conforms_to_schema ],
-        [ sh:class data_sheets_schema:UseRepository ;
-            sh:nodeKind sh:IRI ;
-            sh:order 24 ;
-            sh:path data_sheets_schema:use_repository ],
-        [ sh:datatype xsd:dateTime ;
-            sh:maxCount 1 ;
-            sh:order 61 ;
-            sh:path <dcterms:issued> ],
-        [ sh:datatype xsd:dateTime ;
-            sh:description "time at which the element was created" ;
-            sh:maxCount 1 ;
-            sh:order 63 ;
-            sh:path pav:createdOn ],
-        [ sh:class data_sheets_schema:LabelingStrategy ;
-            sh:nodeKind sh:IRI ;
-            sh:order 21 ;
-            sh:path data_sheets_schema:labeling_strategies ],
-        [ sh:class data_sheets_schema:Purpose ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:purposes ],
-        [ sh:class data_sheets_schema:Confidentiality ;
-            sh:nodeKind sh:IRI ;
-            sh:order 8 ;
-            sh:path data_sheets_schema:confidential_elements ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 51 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:description "class in schema which the data object instantiates" ;
-            sh:maxCount 1 ;
-            sh:order 56 ;
-            sh:path data_sheets_schema:conforms_to_class ],
-        [ sh:class data_sheets_schema:ContentWarning ;
-            sh:nodeKind sh:IRI ;
-            sh:order 9 ;
-            sh:path data_sheets_schema:content_warnings ],
-        [ sh:class data_sheets_schema:PreprocessingStrategy ;
-            sh:nodeKind sh:IRI ;
-            sh:order 19 ;
-            sh:path data_sheets_schema:preprocessing_strategies ] ;
-    sh:targetClass data_sheets_schema:DataSubset .
-
 data_sheets_schema:DatasetCollection a sh:NodeShape ;
     sh:closed true ;
     sh:description "A collection of related datasets, likely containing multiple files of multiple potential purposes and properties." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the official title of the element" ;
+    sh:property [ sh:description "The class in the schema to which the data object instantiates." ;
             sh:maxCount 1 ;
-            sh:order 5 ;
-            sh:path <dcterms:title> ],
-        [ sh:maxCount 1 ;
-            sh:order 8 ;
-            sh:path data_sheets_schema:conforms_to_schema ],
-        [ sh:class dcat:Distribution ;
-            sh:nodeKind sh:IRI ;
-            sh:order 1 ;
-            sh:path dcat:distribution ],
+            sh:order 3 ;
+            sh:path data_sheets_schema:conforms_to_class ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 10 ;
+            sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:dateTime ;
             sh:maxCount 1 ;
-            sh:order 14 ;
-            sh:path <dcterms:issued> ],
-        [ sh:datatype xsd:string ;
-            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
-            sh:maxCount 1 ;
-            sh:order 18 ;
-            sh:path <prov:wasDerivedFrom> ],
-        [ sh:datatype xsd:string ;
-            sh:description "language in which the information is expressed" ;
-            sh:maxCount 1 ;
             sh:order 11 ;
-            sh:path data_sheets_schema:language ],
+            sh:path <dcterms:issued> ],
         [ sh:datatype xsd:string ;
             sh:description "particular version of schema" ;
             sh:maxCount 1 ;
-            sh:order 10 ;
+            sh:order 21 ;
             sh:path pav:version ],
-        [ sh:in ( "Example" "CounterExample" ) ;
-            sh:order 20 ;
-            sh:path data_sheets_schema:test_roles ],
-        [ sh:maxCount 1 ;
-            sh:order 7 ;
-            sh:path <dcterms:conformsTo> ],
-        [ sh:datatype xsd:anyURI ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path dcat:downloadURL ],
-        [ sh:description "agent that created the element" ;
-            sh:maxCount 1 ;
-            sh:order 15 ;
-            sh:path pav:createdBy ],
-        [ sh:datatype xsd:string ;
-            sh:order 13 ;
-            sh:path dcat:keyword ],
-        [ sh:datatype xsd:dateTime ;
-            sh:description "time at which the element was created" ;
-            sh:maxCount 1 ;
-            sh:order 16 ;
-            sh:path pav:createdOn ],
+        [ sh:class dcat:Distribution ;
+            sh:nodeKind sh:IRI ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:resources ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
             sh:order 17 ;
-            sh:path data_sheets_schema:compression ],
+            sh:path dcat:landingPage ],
+        [ sh:datatype xsd:string ;
+            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
+            sh:maxCount 1 ;
+            sh:order 22 ;
+            sh:path <prov:wasDerivedFrom> ],
         [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 6 ;
+            sh:order 7 ;
             sh:path <dcterms:description> ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+        [ sh:description "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc." ;
+            sh:in ( "GZIP" "TAR" "TARGZIP" "ZIP" ) ;
             sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 2 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:description "class in schema which the data object instantiates" ;
-            sh:maxCount 1 ;
-            sh:order 9 ;
-            sh:path data_sheets_schema:conforms_to_class ],
-        [ sh:maxCount 1 ;
-            sh:order 12 ;
-            sh:path <dcterms:publisher> ],
+            sh:order 1 ;
+            sh:path data_sheets_schema:compression ],
         [ sh:datatype xsd:string ;
             sh:description "license for the data" ;
             sh:maxCount 1 ;
-            sh:order 4 ;
+            sh:order 15 ;
             sh:path <dcterms:license> ],
-        [ sh:class data_sheets_schema:Dataset ;
-            sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:entries ],
         [ sh:datatype xsd:string ;
+            sh:description "the official title of the element" ;
+            sh:maxCount 1 ;
+            sh:order 20 ;
+            sh:path <dcterms:title> ],
+        [ sh:description "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to." ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path data_sheets_schema:conforms_to_schema ],
+        [ sh:datatype xsd:string ;
+            sh:description "language in which the information is expressed" ;
+            sh:maxCount 1 ;
+            sh:order 13 ;
+            sh:path data_sheets_schema:language ],
+        [ sh:description "agent that modified the element" ;
+            sh:in ( "Person" "Organization" ) ;
+            sh:maxCount 1 ;
+            sh:order 16 ;
+            sh:path <oslc:modifiedBy> ],
+        [ sh:description "Status of the element in terms of its maturity or life cycle" ;
             sh:maxCount 1 ;
             sh:order 19 ;
-            sh:path dcat:landingPage ] ;
+            sh:path <bibo:status> ],
+        [ sh:description "The Digital Object Identifier of the data, with the doi prefix." ;
+            sh:maxCount 1 ;
+            sh:order 8 ;
+            sh:path data_sheets_schema:doi ],
+        [ sh:description "Agent that created the element" ;
+            sh:in ( "Person" "Organization" ) ;
+            sh:order 5 ;
+            sh:path pav:createdBy ],
+        [ sh:datatype xsd:string ;
+            sh:description "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner." ;
+            sh:order 12 ;
+            sh:path dcat:keyword ],
+        [ sh:datatype xsd:dateTime ;
+            sh:description "Date and Time at which the element was last updated" ;
+            sh:maxCount 1 ;
+            sh:order 14 ;
+            sh:path pav:lastUpdatedOn ],
+        [ sh:maxCount 1 ;
+            sh:order 18 ;
+            sh:path <dcterms:publisher> ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself." ;
+            sh:maxCount 1 ;
+            sh:order 9 ;
+            sh:path dcat:downloadURL ],
+        [ sh:description "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc." ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
+            sh:path <dcterms:conformsTo> ],
+        [ sh:datatype xsd:dateTime ;
+            sh:description "Date and Time at which the element was created" ;
+            sh:maxCount 1 ;
+            sh:order 6 ;
+            sh:path pav:createdOn ] ;
     sh:targetClass data_sheets_schema:DatasetCollection .
 
 data_sheets_schema:DatasetProperty a sh:NodeShape ;
@@ -546,19 +196,24 @@ data_sheets_schema:DatasetProperty a sh:NodeShape ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path <dcterms:description> ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
+            sh:order 1 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 0 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:DatasetProperty .
 
 data_sheets_schema:DirectCollection a sh:NodeShape ;
@@ -566,18 +221,23 @@ data_sheets_schema:DirectCollection a sh:NodeShape ;
     sh:description "Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (e.g., websites)?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:DirectCollection .
 
 data_sheets_schema:FormatDialect a sh:NodeShape ;
@@ -594,12 +254,12 @@ data_sheets_schema:FormatDialect a sh:NodeShape ;
             sh:path data_sheets_schema:double_quote ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:comment_prefix ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
             sh:order 4 ;
             sh:path data_sheets_schema:quote_char ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:comment_prefix ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
             sh:order 1 ;
@@ -610,184 +270,173 @@ data_sheets_schema:Information a sh:NodeShape ;
     sh:closed false ;
     sh:description "Grouping for datasets and data files" ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:maxCount 1 ;
-            sh:order 5 ;
-            sh:path <dcterms:conformsTo> ],
-        [ sh:datatype xsd:anyURI ;
-            sh:maxCount 1 ;
-            sh:order 1 ;
-            sh:path dcat:downloadURL ],
-        [ sh:datatype xsd:dateTime ;
-            sh:description "time at which the element was created" ;
-            sh:maxCount 1 ;
-            sh:order 14 ;
-            sh:path pav:createdOn ],
-        [ sh:datatype xsd:string ;
-            sh:description "the official title of the element" ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path <dcterms:title> ],
-        [ sh:description "class in schema which the data object instantiates" ;
-            sh:maxCount 1 ;
-            sh:order 7 ;
-            sh:path data_sheets_schema:conforms_to_class ],
-        [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 4 ;
-            sh:path <dcterms:description> ],
-        [ sh:datatype xsd:string ;
-            sh:order 11 ;
-            sh:path dcat:keyword ],
-        [ sh:datatype xsd:string ;
-            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
-            sh:maxCount 1 ;
-            sh:order 16 ;
-            sh:path <prov:wasDerivedFrom> ],
-        [ sh:datatype xsd:string ;
+    sh:property [ sh:datatype xsd:string ;
             sh:description "particular version of schema" ;
             sh:maxCount 1 ;
-            sh:order 8 ;
+            sh:order 20 ;
             sh:path pav:version ],
+        [ sh:datatype xsd:string ;
+            sh:description "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner." ;
+            sh:order 11 ;
+            sh:path dcat:keyword ],
+        [ sh:description "The class in the schema to which the data object instantiates." ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:conforms_to_class ],
+        [ sh:description "agent that modified the element" ;
+            sh:in ( "Person" "Organization" ) ;
+            sh:maxCount 1 ;
+            sh:order 15 ;
+            sh:path <oslc:modifiedBy> ],
+        [ sh:description "Agent that created the element" ;
+            sh:in ( "Person" "Organization" ) ;
+            sh:order 4 ;
+            sh:path pav:createdBy ],
         [ sh:datatype xsd:string ;
             sh:description "license for the data" ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 14 ;
             sh:path <dcterms:license> ],
         [ sh:datatype xsd:dateTime ;
+            sh:description "Date and Time at which the element was created" ;
             sh:maxCount 1 ;
-            sh:order 12 ;
+            sh:order 5 ;
+            sh:path pav:createdOn ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 9 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 6 ;
+            sh:path <dcterms:description> ],
+        [ sh:description "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to." ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path data_sheets_schema:conforms_to_schema ],
+        [ sh:description "Status of the element in terms of its maturity or life cycle" ;
+            sh:maxCount 1 ;
+            sh:order 18 ;
+            sh:path <bibo:status> ],
+        [ sh:datatype xsd:dateTime ;
+            sh:maxCount 1 ;
+            sh:order 10 ;
             sh:path <dcterms:issued> ],
+        [ sh:maxCount 1 ;
+            sh:order 17 ;
+            sh:path <dcterms:publisher> ],
+        [ sh:datatype xsd:string ;
+            sh:description "the official title of the element" ;
+            sh:maxCount 1 ;
+            sh:order 19 ;
+            sh:path <dcterms:title> ],
+        [ sh:datatype xsd:string ;
+            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
+            sh:maxCount 1 ;
+            sh:order 21 ;
+            sh:path <prov:wasDerivedFrom> ],
+        [ sh:description "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc." ;
+            sh:in ( "GZIP" "TAR" "TARGZIP" "ZIP" ) ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:compression ],
+        [ sh:datatype xsd:dateTime ;
+            sh:description "Date and Time at which the element was last updated" ;
+            sh:maxCount 1 ;
+            sh:order 13 ;
+            sh:path pav:lastUpdatedOn ],
         [ sh:datatype xsd:string ;
             sh:description "language in which the information is expressed" ;
             sh:maxCount 1 ;
-            sh:order 9 ;
+            sh:order 12 ;
             sh:path data_sheets_schema:language ],
-        [ sh:maxCount 1 ;
-            sh:order 6 ;
-            sh:path data_sheets_schema:conforms_to_schema ],
-        [ sh:maxCount 1 ;
-            sh:order 10 ;
-            sh:path <dcterms:publisher> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 17 ;
+            sh:order 16 ;
             sh:path dcat:landingPage ],
-        [ sh:datatype xsd:string ;
+        [ sh:datatype xsd:anyURI ;
+            sh:description "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself." ;
             sh:maxCount 1 ;
-            sh:order 15 ;
-            sh:path data_sheets_schema:compression ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:order 8 ;
+            sh:path dcat:downloadURL ],
+        [ sh:description "The Digital Object Identifier of the data, with the doi prefix." ;
             sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 0 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:description "agent that created the element" ;
+            sh:order 7 ;
+            sh:path data_sheets_schema:doi ],
+        [ sh:description "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc." ;
             sh:maxCount 1 ;
-            sh:order 13 ;
-            sh:path pav:createdBy ],
-        [ sh:in ( "Example" "CounterExample" ) ;
-            sh:order 18 ;
-            sh:path data_sheets_schema:test_roles ] ;
-    sh:targetClass data_sheets_schema:Information .
-
-data_sheets_schema:MaintainerContact a sh:NodeShape ;
-    sh:closed true ;
-    sh:description "How can the owner/curator/manager of the dataset be contacted (e.g., email address)?" ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
             sh:order 1 ;
-            sh:path data_sheets_schema:email ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 2 ;
-            sh:path <dcterms:identifier> ] ;
-    sh:targetClass data_sheets_schema:MaintainerContact .
+            sh:path <dcterms:conformsTo> ] ;
+    sh:targetClass data_sheets_schema:Information .
 
 data_sheets_schema:NamedThing a sh:NodeShape ;
     sh:closed true ;
     sh:description "A generic grouping for any identifiable entity" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 1 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
             sh:order 2 ;
-            sh:path <dcterms:description> ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:order 0 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 1 ;
-            sh:path schema1:name ] ;
+            sh:path <dcterms:description> ] ;
     sh:targetClass data_sheets_schema:NamedThing .
-
-data_sheets_schema:PreprocessingCleaningLabelingSoftware a sh:NodeShape ;
-    sh:closed true ;
-    sh:description "Is the software that was used to preprocess/clean/label the data available?" ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ] ;
-    sh:targetClass data_sheets_schema:PreprocessingCleaningLabelingSoftware .
 
 data_sheets_schema:Relationships a sh:NodeShape ;
     sh:closed true ;
     sh:description "Are relationships between individual instances made explicit (e.g., users’ movie ratings, social network links)? If so, please describe how these relationships are made explicit." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:Relationships .
 
 data_sheets_schema:Splits a sh:NodeShape ;
     sh:closed true ;
     sh:description "Are there recommended data splits (e.g., training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path <dcterms:identifier> ],
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
             sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:Splits .
 
@@ -795,364 +444,410 @@ data_sheets_schema:ThirdPartySharing a sh:NodeShape ;
     sh:closed true ;
     sh:description "Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?" ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:boolean ;
+            sh:maxCount 1 ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:ThirdPartySharing .
 
-data_sheets_schema:Dataset a sh:NodeShape ;
+dcat:Distribution a sh:NodeShape ;
     sh:closed true ;
     sh:description "A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "license for the data" ;
+    sh:property [ sh:datatype xsd:boolean ;
             sh:maxCount 1 ;
-            sh:order 53 ;
-            sh:path <dcterms:license> ],
-        [ sh:description "class in schema which the data object instantiates" ;
-            sh:maxCount 1 ;
-            sh:order 56 ;
-            sh:path data_sheets_schema:conforms_to_class ],
-        [ sh:maxCount 1 ;
-            sh:order 54 ;
-            sh:path <dcterms:conformsTo> ],
-        [ sh:class data_sheets_schema:UpdatePlan ;
-            sh:maxCount 1 ;
+            sh:order 50 ;
+            sh:path data_sheets_schema:is_tabular ],
+        [ sh:class data_sheets_schema:DistributionDate ;
             sh:nodeKind sh:IRI ;
-            sh:order 35 ;
-            sh:path data_sheets_schema:updates ],
-        [ sh:class data_sheets_schema:PreprocessingStrategy ;
-            sh:nodeKind sh:IRI ;
-            sh:order 19 ;
-            sh:path data_sheets_schema:preprocessing_strategies ],
+            sh:order 39 ;
+            sh:path data_sheets_schema:distribution_dates ],
         [ sh:datatype xsd:string ;
+            sh:description "The media type of the data. This is not the same as the format. Rather, this is the media type of the data in a more general sense, e.g., text/csv, application/json, etc., though as it is defined here the media type can be any string." ;
             sh:maxCount 1 ;
-            sh:order 45 ;
-            sh:path data_sheets_schema:encoding ],
+            sh:order 6 ;
+            sh:path dcat:mediaType ],
         [ sh:datatype xsd:string ;
+            sh:description "The md5 hash representation of the data." ;
             sh:maxCount 1 ;
-            sh:order 47 ;
-            sh:path data_sheets_schema:hash ],
+            sh:order 5 ;
+            sh:path data_sheets_schema:md5 ],
         [ sh:class data_sheets_schema:VersionAccess ;
             sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
-            sh:order 37 ;
+            sh:order 47 ;
             sh:path data_sheets_schema:version_access ],
-        [ sh:class data_sheets_schema:DistributionFormat ;
-            sh:nodeKind sh:IRI ;
-            sh:order 28 ;
-            sh:path data_sheets_schema:distribution_formats ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 49 ;
-            sh:path data_sheets_schema:sha256 ],
-        [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 42 ;
-            sh:path <dcterms:description> ],
-        [ sh:class data_sheets_schema:UseRepository ;
-            sh:nodeKind sh:IRI ;
-            sh:order 24 ;
-            sh:path data_sheets_schema:use_repository ],
-        [ sh:class data_sheets_schema:FutureUseImpact ;
-            sh:nodeKind sh:IRI ;
-            sh:order 26 ;
-            sh:path data_sheets_schema:future_use_impacts ],
-        [ sh:datatype xsd:string ;
-            sh:description "particular version of schema" ;
-            sh:maxCount 1 ;
-            sh:order 57 ;
-            sh:path pav:version ],
-        [ sh:class data_sheets_schema:Subpopulation ;
-            sh:nodeKind sh:IRI ;
-            sh:order 10 ;
-            sh:path data_sheets_schema:subpopulations ],
-        [ sh:class data_sheets_schema:Confidentiality ;
-            sh:nodeKind sh:IRI ;
-            sh:order 8 ;
-            sh:path data_sheets_schema:confidential_elements ],
-        [ sh:description "agent that created the element" ;
-            sh:maxCount 1 ;
-            sh:order 62 ;
-            sh:path pav:createdBy ],
-        [ sh:class data_sheets_schema:ExtensionMechanism ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 38 ;
-            sh:path data_sheets_schema:extension_mechanism ],
-        [ sh:datatype xsd:anyURI ;
-            sh:maxCount 1 ;
-            sh:order 52 ;
-            sh:path dcat:downloadURL ],
-        [ sh:datatype xsd:string ;
-            sh:description "the official title of the element" ;
-            sh:maxCount 1 ;
-            sh:order 41 ;
-            sh:path <dcterms:title> ],
-        [ sh:class data_sheets_schema:OtherTask ;
-            sh:nodeKind sh:IRI ;
-            sh:order 25 ;
-            sh:path data_sheets_schema:other_tasks ],
-        [ sh:class data_sheets_schema:DistributionDate ;
-            sh:nodeKind sh:IRI ;
-            sh:order 29 ;
-            sh:path data_sheets_schema:distribution_dates ],
-        [ sh:class data_sheets_schema:SensitiveElement ;
-            sh:nodeKind sh:IRI ;
-            sh:order 11 ;
-            sh:path data_sheets_schema:sensitive_elements ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 51 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
             sh:order 60 ;
-            sh:path dcat:keyword ],
-        [ sh:maxCount 1 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself." ;
+            sh:maxCount 1 ;
             sh:order 59 ;
-            sh:path <dcterms:publisher> ],
-        [ sh:datatype xsd:integer ;
+            sh:path dcat:downloadURL ],
+        [ sh:description "The class in the schema to which the data object instantiates." ;
             sh:maxCount 1 ;
-            sh:order 46 ;
-            sh:path dcat:byteSize ],
-        [ sh:datatype xsd:string ;
-            sh:description "language in which the information is expressed" ;
-            sh:maxCount 1 ;
-            sh:order 58 ;
-            sh:path data_sheets_schema:language ],
-        [ sh:class data_sheets_schema:Instance ;
-            sh:nodeKind sh:IRI ;
-            sh:order 5 ;
-            sh:path data_sheets_schema:instances ],
-        [ sh:class data_sheets_schema:EthicalReview ;
-            sh:nodeKind sh:IRI ;
-            sh:order 17 ;
-            sh:path data_sheets_schema:ethical_reviews ],
-        [ sh:class data_sheets_schema:IPRestrictions ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 31 ;
-            sh:path data_sheets_schema:ip_restrictions ],
-        [ sh:class data_sheets_schema:CollectionMechanism ;
+            sh:order 53 ;
+            sh:path data_sheets_schema:conforms_to_class ],
+        [ sh:class data_sheets_schema:FundingMechanism ;
             sh:nodeKind sh:IRI ;
             sh:order 13 ;
-            sh:path data_sheets_schema:collection_mechanisms ],
-        [ sh:class data_sheets_schema:ContentWarning ;
+            sh:path data_sheets_schema:funders ],
+        [ sh:class data_sheets_schema:ExportControlRegulatoryRestrictions ;
+            sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
-            sh:order 9 ;
-            sh:path data_sheets_schema:content_warnings ],
-        [ sh:class data_sheets_schema:Purpose ;
+            sh:order 42 ;
+            sh:path data_sheets_schema:regulatory_restrictions ],
+        [ sh:class data_sheets_schema:Creator ;
             sh:nodeKind sh:IRI ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:purposes ],
-        [ sh:class data_sheets_schema:DataAnomaly ;
-            sh:nodeKind sh:IRI ;
-            sh:order 6 ;
-            sh:path data_sheets_schema:anomalies ],
-        [ sh:class data_sheets_schema:CleaningStrategy ;
-            sh:nodeKind sh:IRI ;
-            sh:order 20 ;
-            sh:path data_sheets_schema:cleaning_strategies ],
+            sh:order 12 ;
+            sh:path data_sheets_schema:creators ],
         [ sh:datatype xsd:string ;
+            sh:description "The sha256 hash representation of the data." ;
             sh:maxCount 1 ;
-            sh:order 40 ;
-            sh:path data_sheets_schema:path ],
-        [ sh:class data_sheets_schema:Task ;
-            sh:nodeKind sh:IRI ;
-            sh:order 1 ;
-            sh:path data_sheets_schema:tasks ],
-        [ sh:in ( formats:JSON-LD formats:N3 formats:N-Triples formats:N-Quads formats:LD_Patch formats:microdata formats:OWL_XML formats:OWL_Functional formats:OWL_Manchester formats:POWDER formats:POWDER-S formats:PROV-N formats:PROV-XML formats:RDFa formats:RDF_JSON formats:RDF_XML formats:RIF_XML formats:SPARQL_Results_XML formats:SPARQL_Results_JSON formats:SPARQL_Results_CSV formats:SPARQL_Results_TSV formats:Turtle formats:TriG "YAML" "JSON" ) ;
+            sh:order 8 ;
+            sh:path data_sheets_schema:sha256 ],
+        [ sh:description "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to." ;
             sh:maxCount 1 ;
-            sh:order 43 ;
-            sh:path <dcterms:format> ],
-        [ sh:class data_sheets_schema:ExternalResource ;
+            sh:order 54 ;
+            sh:path data_sheets_schema:conforms_to_schema ],
+        [ sh:class data_sheets_schema:InstanceAcquisition ;
             sh:nodeKind sh:IRI ;
-            sh:order 7 ;
-            sh:path data_sheets_schema:external_resources ],
-        [ sh:class data_sheets_schema:DiscouragedUse ;
-            sh:nodeKind sh:IRI ;
-            sh:order 27 ;
-            sh:path data_sheets_schema:discouraged_uses ],
-        [ sh:class data_sheets_schema:ExistingUse ;
-            sh:nodeKind sh:IRI ;
-            sh:order 23 ;
-            sh:path data_sheets_schema:existing_uses ],
-        [ sh:class data_sheets_schema:Maintainer ;
-            sh:nodeKind sh:IRI ;
-            sh:order 33 ;
-            sh:path data_sheets_schema:maintainers ],
-        [ sh:in ( "Example" "CounterExample" ) ;
-            sh:order 67 ;
-            sh:path data_sheets_schema:test_roles ],
-        [ sh:class data_sheets_schema:SamplingStrategy ;
-            sh:nodeKind sh:IRI ;
-            sh:order 14 ;
-            sh:path data_sheets_schema:sampling_strategies ],
-        [ sh:class data_sheets_schema:RetentionLimits ;
-            sh:maxCount 1 ;
-            sh:nodeKind sh:IRI ;
-            sh:order 36 ;
-            sh:path data_sheets_schema:retention_limit ],
+            sh:order 22 ;
+            sh:path data_sheets_schema:acquisition_methods ],
         [ sh:class data_sheets_schema:CollectionTimeframe ;
             sh:nodeKind sh:IRI ;
-            sh:order 16 ;
+            sh:order 26 ;
             sh:path data_sheets_schema:collection_timeframes ],
-        [ sh:class data_sheets_schema:AddressingGap ;
+        [ sh:class data_sheets_schema:Purpose ;
             sh:nodeKind sh:IRI ;
-            sh:order 2 ;
-            sh:path data_sheets_schema:addressing_gaps ],
+            sh:order 9 ;
+            sh:path data_sheets_schema:purposes ],
+        [ sh:class data_sheets_schema:EthicalReview ;
+            sh:nodeKind sh:IRI ;
+            sh:order 27 ;
+            sh:path data_sheets_schema:ethical_reviews ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 48 ;
-            sh:path data_sheets_schema:md5 ],
-        [ sh:datatype xsd:string ;
+            sh:order 1 ;
+            sh:path csvw:dialect ],
+        [ sh:class data_sheets_schema:RawData ;
+            sh:nodeKind sh:IRI ;
+            sh:order 32 ;
+            sh:path data_sheets_schema:raw_sources ],
+        [ sh:description "Status of the element in terms of its maturity or life cycle" ;
             sh:maxCount 1 ;
-            sh:order 66 ;
-            sh:path dcat:landingPage ],
+            sh:order 69 ;
+            sh:path <bibo:status> ],
+        [ sh:class data_sheets_schema:LabelingStrategy ;
+            sh:nodeKind sh:IRI ;
+            sh:order 31 ;
+            sh:path data_sheets_schema:labeling_strategies ],
         [ sh:class data_sheets_schema:LicenseAndUseTerms ;
             sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
-            sh:order 30 ;
+            sh:order 40 ;
             sh:path data_sheets_schema:license_and_use_terms ],
-        [ sh:class data_sheets_schema:LabelingStrategy ;
+        [ sh:class data_sheets_schema:ExternalResource ;
             sh:nodeKind sh:IRI ;
-            sh:order 21 ;
-            sh:path data_sheets_schema:labeling_strategies ],
+            sh:order 17 ;
+            sh:path data_sheets_schema:external_resources ],
+        [ sh:description "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc." ;
+            sh:maxCount 1 ;
+            sh:order 52 ;
+            sh:path <dcterms:conformsTo> ],
+        [ sh:class data_sheets_schema:FutureUseImpact ;
+            sh:nodeKind sh:IRI ;
+            sh:order 36 ;
+            sh:path data_sheets_schema:future_use_impacts ],
+        [ sh:class data_sheets_schema:ContentWarning ;
+            sh:nodeKind sh:IRI ;
+            sh:order 19 ;
+            sh:path data_sheets_schema:content_warnings ],
+        [ sh:datatype xsd:string ;
+            sh:description "language in which the information is expressed" ;
+            sh:maxCount 1 ;
+            sh:order 63 ;
+            sh:path data_sheets_schema:language ],
+        [ sh:class data_sheets_schema:ExtensionMechanism ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 48 ;
+            sh:path data_sheets_schema:extension_mechanism ],
+        [ sh:class data_sheets_schema:ExistingUse ;
+            sh:nodeKind sh:IRI ;
+            sh:order 33 ;
+            sh:path data_sheets_schema:existing_uses ],
+        [ sh:datatype xsd:string ;
+            sh:description "particular version of schema" ;
+            sh:maxCount 1 ;
+            sh:order 71 ;
+            sh:path pav:version ],
+        [ sh:class data_sheets_schema:Instance ;
+            sh:nodeKind sh:IRI ;
+            sh:order 15 ;
+            sh:path data_sheets_schema:instances ],
+        [ sh:datatype xsd:string ;
+            sh:description "The hash representation of the data, e.g., sha256, md5, etc. Subtypes have their own slots." ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path data_sheets_schema:hash ],
+        [ sh:description "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc." ;
+            sh:in ( "GZIP" "TAR" "TARGZIP" "ZIP" ) ;
+            sh:maxCount 1 ;
+            sh:order 51 ;
+            sh:path data_sheets_schema:compression ],
+        [ sh:class data_sheets_schema:RetentionLimits ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 46 ;
+            sh:path data_sheets_schema:retention_limit ],
+        [ sh:class data_sheets_schema:Erratum ;
+            sh:nodeKind sh:IRI ;
+            sh:order 44 ;
+            sh:path data_sheets_schema:errata ],
+        [ sh:class data_sheets_schema:Deidentification ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 49 ;
+            sh:path data_sheets_schema:is_deidentified ],
+        [ sh:class data_sheets_schema:DiscouragedUse ;
+            sh:nodeKind sh:IRI ;
+            sh:order 37 ;
+            sh:path data_sheets_schema:discouraged_uses ],
+        [ sh:description "The format of the data. This is not the same as the media type. Rather, this is the format of the data in a more specific sense, e.g., CSV, JSON, etc." ;
+            sh:in ( formats:JSON-LD formats:N3 formats:N-Triples formats:N-Quads formats:LD_Patch formats:microdata formats:OWL_XML formats:OWL_Functional formats:OWL_Manchester formats:POWDER formats:POWDER-S formats:PROV-N formats:PROV-XML formats:RDFa formats:RDF_JSON formats:RDF_XML formats:RIF_XML formats:SPARQL_Results_XML formats:SPARQL_Results_JSON formats:SPARQL_Results_CSV formats:SPARQL_Results_TSV formats:Turtle formats:TriG "YAML" "JSON" ) ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path <dcterms:format> ],
+        [ sh:datatype xsd:dateTime ;
+            sh:description "Date and Time at which the element was created" ;
+            sh:maxCount 1 ;
+            sh:order 56 ;
+            sh:path pav:createdOn ],
+        [ sh:description "agent that modified the element" ;
+            sh:in ( "Person" "Organization" ) ;
+            sh:maxCount 1 ;
+            sh:order 66 ;
+            sh:path <oslc:modifiedBy> ],
+        [ sh:class data_sheets_schema:IPRestrictions ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 41 ;
+            sh:path data_sheets_schema:ip_restrictions ],
+        [ sh:class data_sheets_schema:DataProtectionImpact ;
+            sh:nodeKind sh:IRI ;
+            sh:order 28 ;
+            sh:path data_sheets_schema:data_protection_impacts ],
+        [ sh:datatype xsd:string ;
+            sh:description "the official title of the element" ;
+            sh:maxCount 1 ;
+            sh:order 70 ;
+            sh:path <dcterms:title> ],
+        [ sh:description "The Digital Object Identifier of the data, with the doi prefix." ;
+            sh:maxCount 1 ;
+            sh:order 58 ;
+            sh:path data_sheets_schema:doi ],
+        [ sh:datatype xsd:string ;
+            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
+            sh:maxCount 1 ;
+            sh:order 72 ;
+            sh:path <prov:wasDerivedFrom> ],
+        [ sh:datatype xsd:string ;
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 57 ;
+            sh:path <dcterms:description> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
+            sh:order 7 ;
+            sh:path data_sheets_schema:path ],
+        [ sh:class data_sheets_schema:DistributionFormat ;
+            sh:nodeKind sh:IRI ;
+            sh:order 38 ;
+            sh:path data_sheets_schema:distribution_formats ],
+        [ sh:class data_sheets_schema:AddressingGap ;
+            sh:nodeKind sh:IRI ;
+            sh:order 11 ;
+            sh:path data_sheets_schema:addressing_gaps ],
+        [ sh:datatype xsd:integer ;
+            sh:description "Size of the data in bytes." ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path dcat:byteSize ],
+        [ sh:class data_sheets_schema:PreprocessingStrategy ;
+            sh:nodeKind sh:IRI ;
+            sh:order 29 ;
+            sh:path data_sheets_schema:preprocessing_strategies ],
+        [ sh:description "The encoding of the data. This is not the same as the media type. Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8, ASCII, etc." ;
+            sh:in ( "ASCII" "Big5" "EUC-JP" "EUC-KR" "EUC-TW" "GB2312" "HZ-GB-2312" "ISO-2022-CN-EXT" "ISO-2022-CN" "ISO-2022-JP-2" "ISO-2022-JP" "ISO-2022-KR" "ISO-8859-10" "ISO-8859-11" "ISO-8859-13" "ISO-8859-14" "ISO-8859-15" "ISO-8859-16" "ISO-8859-1" "ISO-8859-2" "ISO-8859-3" "ISO-8859-4" "ISO-8859-5" "ISO-8859-6" "ISO-8859-7" "ISO-8859-8" "ISO-8859-9" "KOI8-R" "KOI8-U" "Shift_JIS" "UTF-16" "UTF-32" "UTF-7" "UTF-8" ) ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:encoding ],
+        [ sh:class data_sheets_schema:CollectionMechanism ;
+            sh:nodeKind sh:IRI ;
+            sh:order 23 ;
+            sh:path data_sheets_schema:collection_mechanisms ],
+        [ sh:description "Agent that created the element" ;
+            sh:in ( "Person" "Organization" ) ;
+            sh:order 55 ;
+            sh:path pav:createdBy ],
+        [ sh:class data_sheets_schema:Confidentiality ;
+            sh:nodeKind sh:IRI ;
+            sh:order 18 ;
+            sh:path data_sheets_schema:confidential_elements ],
+        [ sh:class data_sheets_schema:SensitiveElement ;
+            sh:nodeKind sh:IRI ;
+            sh:order 21 ;
+            sh:path data_sheets_schema:sensitive_elements ],
+        [ sh:class data_sheets_schema:CleaningStrategy ;
+            sh:nodeKind sh:IRI ;
+            sh:order 30 ;
+            sh:path data_sheets_schema:cleaning_strategies ],
+        [ sh:datatype xsd:string ;
+            sh:description "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner." ;
+            sh:order 62 ;
+            sh:path dcat:keyword ],
+        [ sh:class data_sheets_schema:DataCollector ;
+            sh:nodeKind sh:IRI ;
+            sh:order 25 ;
+            sh:path data_sheets_schema:data_collectors ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 67 ;
+            sh:path dcat:landingPage ],
+        [ sh:maxCount 1 ;
+            sh:order 68 ;
+            sh:path <dcterms:publisher> ],
+        [ sh:class data_sheets_schema:Task ;
+            sh:nodeKind sh:IRI ;
+            sh:order 10 ;
+            sh:path data_sheets_schema:tasks ],
+        [ sh:datatype xsd:dateTime ;
+            sh:description "Date and Time at which the element was last updated" ;
+            sh:maxCount 1 ;
             sh:order 64 ;
-            sh:path data_sheets_schema:compression ],
+            sh:path pav:lastUpdatedOn ],
+        [ sh:class data_sheets_schema:UseRepository ;
+            sh:nodeKind sh:IRI ;
+            sh:order 34 ;
+            sh:path data_sheets_schema:use_repository ],
+        [ sh:class data_sheets_schema:OtherTask ;
+            sh:nodeKind sh:IRI ;
+            sh:order 35 ;
+            sh:path data_sheets_schema:other_tasks ],
         [ sh:datatype xsd:dateTime ;
             sh:maxCount 1 ;
             sh:order 61 ;
             sh:path <dcterms:issued> ],
-        [ sh:class data_sheets_schema:InstanceAcquisition ;
+        [ sh:class data_sheets_schema:Maintainer ;
             sh:nodeKind sh:IRI ;
-            sh:order 12 ;
-            sh:path data_sheets_schema:acquisition_methods ],
-        [ sh:class data_sheets_schema:Deidentification ;
-            sh:maxCount 1 ;
+            sh:order 43 ;
+            sh:path data_sheets_schema:maintainers ],
+        [ sh:class data_sheets_schema:DataSubset ;
             sh:nodeKind sh:IRI ;
-            sh:order 39 ;
-            sh:path data_sheets_schema:is_deidentified ],
-        [ sh:class data_sheets_schema:DataProtectionImpact ;
-            sh:nodeKind sh:IRI ;
-            sh:order 18 ;
-            sh:path data_sheets_schema:data_protection_impacts ],
-        [ sh:class data_sheets_schema:DataCollector ;
-            sh:nodeKind sh:IRI ;
-            sh:order 15 ;
-            sh:path data_sheets_schema:data_collectors ],
+            sh:order 14 ;
+            sh:path dcat:distribution ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 44 ;
-            sh:path dcat:mediaType ],
-        [ sh:class data_sheets_schema:FundingMechanism ;
-            sh:nodeKind sh:IRI ;
-            sh:order 4 ;
-            sh:path data_sheets_schema:funders ],
-        [ sh:class data_sheets_schema:RawData ;
-            sh:nodeKind sh:IRI ;
-            sh:order 22 ;
-            sh:path data_sheets_schema:raw_sources ],
-        [ sh:datatype xsd:string ;
-            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
+            sh:description "license for the data" ;
             sh:maxCount 1 ;
             sh:order 65 ;
-            sh:path <prov:wasDerivedFrom> ],
-        [ sh:class data_sheets_schema:ExportControlRegulatoryRestrictions ;
+            sh:path <dcterms:license> ],
+        [ sh:class data_sheets_schema:DataAnomaly ;
+            sh:nodeKind sh:IRI ;
+            sh:order 16 ;
+            sh:path data_sheets_schema:anomalies ],
+        [ sh:class data_sheets_schema:Subpopulation ;
+            sh:nodeKind sh:IRI ;
+            sh:order 20 ;
+            sh:path data_sheets_schema:subpopulations ],
+        [ sh:class data_sheets_schema:UpdatePlan ;
             sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
-            sh:order 32 ;
-            sh:path data_sheets_schema:regulatory_restrictions ],
-        [ sh:class data_sheets_schema:Creator ;
+            sh:order 45 ;
+            sh:path data_sheets_schema:updates ],
+        [ sh:class data_sheets_schema:SamplingStrategy ;
             sh:nodeKind sh:IRI ;
-            sh:order 3 ;
-            sh:path data_sheets_schema:creators ],
-        [ sh:maxCount 1 ;
-            sh:order 55 ;
-            sh:path data_sheets_schema:conforms_to_schema ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 50 ;
-            sh:path csvw:dialect ],
-        [ sh:class data_sheets_schema:Erratum ;
-            sh:nodeKind sh:IRI ;
-            sh:order 34 ;
-            sh:path data_sheets_schema:errata ],
-        [ sh:datatype xsd:dateTime ;
-            sh:description "time at which the element was created" ;
-            sh:maxCount 1 ;
-            sh:order 63 ;
-            sh:path pav:createdOn ] ;
-    sh:targetClass data_sheets_schema:Dataset .
+            sh:order 24 ;
+            sh:path data_sheets_schema:sampling_strategies ] ;
+    sh:targetClass dcat:Distribution .
 
 data_sheets_schema:Grant a sh:NodeShape ;
     sh:closed true ;
     sh:description "What is the name and/or identifier of the specific mechanism providing monetary support or other resources supporting creation of the dataset?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:order 1 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
-            sh:description "The alphanumeric identifier for the grant." ;
-            sh:maxCount 1 ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:grant_number ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
             sh:order 3 ;
-            sh:path <dcterms:description> ] ;
+            sh:path <dcterms:description> ],
+        [ sh:datatype xsd:string ;
+            sh:description "The alphanumeric identifier for the grant." ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:grant_number ] ;
     sh:targetClass data_sheets_schema:Grant .
 
 data_sheets_schema:Grantor a sh:NodeShape ;
     sh:closed true ;
     sh:description "What is the name and/or identifier of the organization providing monetary support or other resources supporting creation of the dataset?" ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path schema1:name ],
-        [ sh:description "Unique ROR identifier." ;
-            sh:maxCount 1 ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:ror_id ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 2 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:description "Unique Wikidata identifier." ;
+    sh:property [ sh:description "Unique ROR identifier." ;
             sh:maxCount 1 ;
             sh:order 1 ;
+            sh:path data_sheets_schema:ror_id ],
+        [ sh:datatype xsd:string ;
+            sh:description "The email address of the organization." ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:email ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path schema1:name ],
+        [ sh:description "Unique Wikidata identifier." ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
             sh:path data_sheets_schema:wikidata_id ],
         [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 4 ;
-            sh:path <dcterms:description> ] ;
+            sh:order 5 ;
+            sh:path <dcterms:description> ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 3 ;
+            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:Grantor .
 
 data_sheets_schema:MissingInfo a sh:NodeShape ;
@@ -1160,195 +855,88 @@ data_sheets_schema:MissingInfo a sh:NodeShape ;
     sh:description "Is any information missing from individual instances? If so, please provide a description, explaining why this information is missing (e.g., because it was unavailable). This does not include intentionally removed information, but might include, e.g., redacted text." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 3 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
             sh:order 1 ;
             sh:path data_sheets_schema:why_missing ],
         [ sh:datatype xsd:string ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:missing ],
+        [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 4 ;
+            sh:order 5 ;
             sh:path <dcterms:description> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 2 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:missing ] ;
+            sh:order 4 ;
+            sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:MissingInfo .
 
 data_sheets_schema:Person a sh:NodeShape ;
     sh:closed true ;
     sh:description "An individual human being." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:class data_sheets_schema:Organization ;
-            sh:maxCount 1 ;
+    sh:property [ sh:class data_sheets_schema:Organization ;
+            sh:description "The organization(s) to which the person belongs." ;
             sh:nodeKind sh:IRI ;
             sh:order 0 ;
             sh:path data_sheets_schema:affiliation ],
         [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path <dcterms:description> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ] ;
-    sh:targetClass data_sheets_schema:Person .
-
-dcat:Distribution a sh:NodeShape ;
-    sh:closed true ;
-    sh:description "An individual file or table" ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:in ( formats:JSON-LD formats:N3 formats:N-Triples formats:N-Quads formats:LD_Patch formats:microdata formats:OWL_XML formats:OWL_Functional formats:OWL_Manchester formats:POWDER formats:POWDER-S formats:PROV-N formats:PROV-XML formats:RDFa formats:RDF_JSON formats:RDF_XML formats:RIF_XML formats:SPARQL_Results_XML formats:SPARQL_Results_JSON formats:SPARQL_Results_CSV formats:SPARQL_Results_TSV formats:Turtle formats:TriG "YAML" "JSON" ) ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path <dcterms:format> ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 11 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 7 ;
-            sh:path data_sheets_schema:hash ],
-        [ sh:datatype xsd:integer ;
-            sh:maxCount 1 ;
-            sh:order 6 ;
-            sh:path dcat:byteSize ],
+            sh:order 3 ;
+            sh:path schema1:name ],
         [ sh:datatype xsd:string ;
+            sh:description "The email address of the person." ;
             sh:maxCount 1 ;
-            sh:order 10 ;
-            sh:path csvw:dialect ],
-        [ sh:maxCount 1 ;
-            sh:order 15 ;
-            sh:path data_sheets_schema:conforms_to_schema ],
-        [ sh:datatype xsd:dateTime ;
-            sh:maxCount 1 ;
-            sh:order 21 ;
-            sh:path <dcterms:issued> ],
-        [ sh:maxCount 1 ;
-            sh:order 19 ;
-            sh:path <dcterms:publisher> ],
-        [ sh:datatype xsd:string ;
-            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
-            sh:maxCount 1 ;
-            sh:order 25 ;
-            sh:path <prov:wasDerivedFrom> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 5 ;
-            sh:path data_sheets_schema:encoding ],
-        [ sh:datatype xsd:string ;
-            sh:description "license for the data" ;
-            sh:maxCount 1 ;
-            sh:order 13 ;
-            sh:path <dcterms:license> ],
-        [ sh:datatype xsd:string ;
-            sh:description "particular version of schema" ;
-            sh:maxCount 1 ;
-            sh:order 17 ;
-            sh:path pav:version ],
+            sh:order 1 ;
+            sh:path data_sheets_schema:email ],
         [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path <dcterms:description> ],
-        [ sh:description "agent that created the element" ;
-            sh:maxCount 1 ;
-            sh:order 22 ;
-            sh:path pav:createdBy ],
-        [ sh:datatype xsd:dateTime ;
-            sh:description "time at which the element was created" ;
-            sh:maxCount 1 ;
-            sh:order 23 ;
-            sh:path pav:createdOn ],
-        [ sh:in ( "Example" "CounterExample" ) ;
-            sh:order 27 ;
-            sh:path data_sheets_schema:test_roles ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 26 ;
-            sh:path dcat:landingPage ],
-        [ sh:datatype xsd:string ;
-            sh:description "the official title of the element" ;
-            sh:maxCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:title> ],
-        [ sh:datatype xsd:anyURI ;
-            sh:maxCount 1 ;
-            sh:order 12 ;
-            sh:path dcat:downloadURL ],
-        [ sh:description "class in schema which the data object instantiates" ;
-            sh:maxCount 1 ;
-            sh:order 16 ;
-            sh:path data_sheets_schema:conforms_to_class ],
-        [ sh:datatype xsd:string ;
-            sh:description "language in which the information is expressed" ;
-            sh:maxCount 1 ;
-            sh:order 18 ;
-            sh:path data_sheets_schema:language ],
-        [ sh:datatype xsd:string ;
-            sh:order 20 ;
-            sh:path dcat:keyword ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 9 ;
-            sh:path data_sheets_schema:sha256 ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:path ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 8 ;
-            sh:path data_sheets_schema:md5 ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 24 ;
-            sh:path data_sheets_schema:compression ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
             sh:order 4 ;
-            sh:path dcat:mediaType ],
-        [ sh:maxCount 1 ;
-            sh:order 14 ;
-            sh:path <dcterms:conformsTo> ] ;
-    sh:targetClass dcat:Distribution .
+            sh:path <dcterms:description> ] ;
+    sh:targetClass data_sheets_schema:Person .
 
 data_sheets_schema:AddressingGap a sh:NodeShape ;
     sh:closed true ;
     sh:description "Was there a specific gap that needed to be filled by creation of the dataset?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 3 ;
+            sh:order 4 ;
             sh:path <dcterms:description> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
             sh:order 0 ;
@@ -1359,19 +947,24 @@ data_sheets_schema:CleaningStrategy a sh:NodeShape ;
     sh:closed true ;
     sh:description "Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?" ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ],
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:description ] ;
     sh:targetClass data_sheets_schema:CleaningStrategy .
 
 data_sheets_schema:CollectionMechanism a sh:NodeShape ;
@@ -1380,16 +973,21 @@ data_sheets_schema:CollectionMechanism a sh:NodeShape ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:CollectionMechanism .
 
@@ -1398,18 +996,23 @@ data_sheets_schema:CollectionTimeframe a sh:NodeShape ;
     sh:description "Over what timeframe was the data collected? Does this timeframe match the creation timeframe of the data associated with the instances (e.g., recent crawl of old news articles)? If not, please describe the timeframe in which the data associated with the instances was created." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
-            sh:path data_sheets_schema:description ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:path data_sheets_schema:description ] ;
     sh:targetClass data_sheets_schema:CollectionTimeframe .
 
 data_sheets_schema:Confidentiality a sh:NodeShape ;
@@ -1417,47 +1020,28 @@ data_sheets_schema:Confidentiality a sh:NodeShape ;
     sh:description "Does the dataset contain data that might be considered confidential (e.g., data that is protected by legal privilege or by doctor patient confidentiality, data that includes the content of individuals’ non-public communications)?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:Confidentiality .
 
 data_sheets_schema:ContentWarning a sh:NodeShape ;
     sh:closed true ;
     sh:description "Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety? If so, please describe why." ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:warnings ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path <dcterms:description> ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
-    sh:targetClass data_sheets_schema:ContentWarning .
-
-data_sheets_schema:Creator a sh:NodeShape ;
-    sh:closed true ;
-    sh:description "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
@@ -1468,41 +1052,80 @@ data_sheets_schema:Creator a sh:NodeShape ;
             sh:maxCount 1 ;
             sh:order 3 ;
             sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:warnings ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
+    sh:targetClass data_sheets_schema:ContentWarning .
+
+data_sheets_schema:Creator a sh:NodeShape ;
+    sh:closed true ;
+    sh:description "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team." ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 5 ;
+            sh:path <dcterms:description> ],
+        [ sh:class data_sheets_schema:Organization ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:affiliation ],
         [ sh:class data_sheets_schema:Person ;
             sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
             sh:order 0 ;
             sh:path data_sheets_schema:principal_investigator ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path <dcterms:identifier> ],
-        [ sh:class data_sheets_schema:Organization ;
-            sh:maxCount 1 ;
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
             sh:nodeKind sh:IRI ;
-            sh:order 1 ;
-            sh:path data_sheets_schema:affiliation ] ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:Creator .
 
 data_sheets_schema:DataAnomaly a sh:NodeShape ;
     sh:closed true ;
     sh:description "Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
             sh:order 0 ;
-            sh:path data_sheets_schema:description ] ;
+            sh:path data_sheets_schema:description ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:DataAnomaly .
 
 data_sheets_schema:DataCollector a sh:NodeShape ;
@@ -1510,18 +1133,23 @@ data_sheets_schema:DataCollector a sh:NodeShape ;
     sh:description "Who was involved in the data collection process (e.g., students, crowdworkers, contractors) and how were they compensated (e.g., how much were crowdworkers paid)?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
             sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
-            sh:path data_sheets_schema:description ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:path data_sheets_schema:description ] ;
     sh:targetClass data_sheets_schema:DataCollector .
 
 data_sheets_schema:DataProtectionImpact a sh:NodeShape ;
@@ -1529,56 +1157,406 @@ data_sheets_schema:DataProtectionImpact a sh:NodeShape ;
     sh:description "Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, as well as a link or other access point to any supporting documentation." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ],
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:description ] ;
+    sh:targetClass data_sheets_schema:DataProtectionImpact .
+
+data_sheets_schema:DataSubset a sh:NodeShape ;
+    sh:closed true ;
+    sh:description "A subset of a dataset, likely containing multiple files of multiple potential purposes and properties." ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 69 ;
+            sh:path dcat:landingPage ],
+        [ sh:class data_sheets_schema:Instance ;
+            sh:nodeKind sh:IRI ;
+            sh:order 17 ;
+            sh:path data_sheets_schema:instances ],
+        [ sh:class data_sheets_schema:AddressingGap ;
+            sh:nodeKind sh:IRI ;
+            sh:order 13 ;
+            sh:path data_sheets_schema:addressing_gaps ],
+        [ sh:class data_sheets_schema:RetentionLimits ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 48 ;
+            sh:path data_sheets_schema:retention_limit ],
+        [ sh:class data_sheets_schema:Maintainer ;
+            sh:nodeKind sh:IRI ;
+            sh:order 45 ;
+            sh:path data_sheets_schema:maintainers ],
+        [ sh:class data_sheets_schema:DataProtectionImpact ;
+            sh:nodeKind sh:IRI ;
+            sh:order 30 ;
+            sh:path data_sheets_schema:data_protection_impacts ],
+        [ sh:class data_sheets_schema:ExistingUse ;
+            sh:nodeKind sh:IRI ;
+            sh:order 35 ;
+            sh:path data_sheets_schema:existing_uses ],
+        [ sh:class data_sheets_schema:ContentWarning ;
+            sh:nodeKind sh:IRI ;
+            sh:order 21 ;
+            sh:path data_sheets_schema:content_warnings ],
+        [ sh:class data_sheets_schema:ExtensionMechanism ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 50 ;
+            sh:path data_sheets_schema:extension_mechanism ],
+        [ sh:datatype xsd:string ;
+            sh:description "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en" ;
+            sh:maxCount 1 ;
+            sh:order 74 ;
+            sh:path <prov:wasDerivedFrom> ],
+        [ sh:class data_sheets_schema:CollectionTimeframe ;
+            sh:nodeKind sh:IRI ;
+            sh:order 28 ;
+            sh:path data_sheets_schema:collection_timeframes ],
+        [ sh:datatype xsd:dateTime ;
+            sh:description "Date and Time at which the element was last updated" ;
+            sh:maxCount 1 ;
+            sh:order 66 ;
+            sh:path pav:lastUpdatedOn ],
+        [ sh:class data_sheets_schema:DiscouragedUse ;
+            sh:nodeKind sh:IRI ;
+            sh:order 39 ;
+            sh:path data_sheets_schema:discouraged_uses ],
+        [ sh:datatype xsd:string ;
+            sh:description "The md5 hash representation of the data." ;
+            sh:maxCount 1 ;
+            sh:order 7 ;
+            sh:path data_sheets_schema:md5 ],
+        [ sh:class data_sheets_schema:SamplingStrategy ;
+            sh:nodeKind sh:IRI ;
+            sh:order 26 ;
+            sh:path data_sheets_schema:sampling_strategies ],
+        [ sh:datatype xsd:boolean ;
+            sh:description "Is this subset a split of the larger dataset, e.g., is it a set for model training, testing, or validation?" ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:is_data_split ],
+        [ sh:class data_sheets_schema:DistributionFormat ;
+            sh:nodeKind sh:IRI ;
+            sh:order 40 ;
+            sh:path data_sheets_schema:distribution_formats ],
+        [ sh:class data_sheets_schema:FundingMechanism ;
+            sh:nodeKind sh:IRI ;
+            sh:order 15 ;
+            sh:path data_sheets_schema:funders ],
+        [ sh:datatype xsd:string ;
+            sh:description "The media type of the data. This is not the same as the format. Rather, this is the media type of the data in a more general sense, e.g., text/csv, application/json, etc., though as it is defined here the media type can be any string." ;
+            sh:maxCount 1 ;
+            sh:order 8 ;
+            sh:path dcat:mediaType ],
+        [ sh:class data_sheets_schema:DistributionDate ;
+            sh:nodeKind sh:IRI ;
+            sh:order 41 ;
+            sh:path data_sheets_schema:distribution_dates ],
+        [ sh:class data_sheets_schema:LabelingStrategy ;
+            sh:nodeKind sh:IRI ;
+            sh:order 33 ;
+            sh:path data_sheets_schema:labeling_strategies ],
+        [ sh:class data_sheets_schema:EthicalReview ;
+            sh:nodeKind sh:IRI ;
+            sh:order 29 ;
+            sh:path data_sheets_schema:ethical_reviews ],
+        [ sh:description "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc." ;
+            sh:maxCount 1 ;
+            sh:order 54 ;
+            sh:path <dcterms:conformsTo> ],
+        [ sh:datatype xsd:string ;
+            sh:description "license for the data" ;
+            sh:maxCount 1 ;
+            sh:order 67 ;
+            sh:path <dcterms:license> ],
+        [ sh:description "The format of the data. This is not the same as the media type. Rather, this is the format of the data in a more specific sense, e.g., CSV, JSON, etc." ;
+            sh:in ( formats:JSON-LD formats:N3 formats:N-Triples formats:N-Quads formats:LD_Patch formats:microdata formats:OWL_XML formats:OWL_Functional formats:OWL_Manchester formats:POWDER formats:POWDER-S formats:PROV-N formats:PROV-XML formats:RDFa formats:RDF_JSON formats:RDF_XML formats:RIF_XML formats:SPARQL_Results_XML formats:SPARQL_Results_JSON formats:SPARQL_Results_CSV formats:SPARQL_Results_TSV formats:Turtle formats:TriG "YAML" "JSON" ) ;
+            sh:maxCount 1 ;
+            sh:order 5 ;
+            sh:path <dcterms:format> ],
+        [ sh:datatype xsd:string ;
+            sh:description "language in which the information is expressed" ;
+            sh:maxCount 1 ;
+            sh:order 65 ;
+            sh:path data_sheets_schema:language ],
+        [ sh:datatype xsd:dateTime ;
+            sh:maxCount 1 ;
+            sh:order 63 ;
+            sh:path <dcterms:issued> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path csvw:dialect ],
+        [ sh:class data_sheets_schema:Erratum ;
+            sh:nodeKind sh:IRI ;
+            sh:order 46 ;
+            sh:path data_sheets_schema:errata ],
+        [ sh:class data_sheets_schema:PreprocessingStrategy ;
+            sh:nodeKind sh:IRI ;
+            sh:order 31 ;
+            sh:path data_sheets_schema:preprocessing_strategies ],
+        [ sh:class data_sheets_schema:RawData ;
+            sh:nodeKind sh:IRI ;
+            sh:order 34 ;
+            sh:path data_sheets_schema:raw_sources ],
+        [ sh:class data_sheets_schema:Purpose ;
+            sh:nodeKind sh:IRI ;
+            sh:order 11 ;
+            sh:path data_sheets_schema:purposes ],
+        [ sh:datatype xsd:dateTime ;
+            sh:description "Date and Time at which the element was created" ;
+            sh:maxCount 1 ;
+            sh:order 58 ;
+            sh:path pav:createdOn ],
+        [ sh:description "The class in the schema to which the data object instantiates." ;
+            sh:maxCount 1 ;
+            sh:order 55 ;
+            sh:path data_sheets_schema:conforms_to_class ],
+        [ sh:class data_sheets_schema:IPRestrictions ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 43 ;
+            sh:path data_sheets_schema:ip_restrictions ],
+        [ sh:datatype xsd:string ;
+            sh:description "The sha256 hash representation of the data." ;
+            sh:maxCount 1 ;
+            sh:order 10 ;
+            sh:path data_sheets_schema:sha256 ],
+        [ sh:description "Agent that created the element" ;
+            sh:in ( "Person" "Organization" ) ;
+            sh:order 57 ;
+            sh:path pav:createdBy ],
+        [ sh:class data_sheets_schema:Deidentification ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 51 ;
+            sh:path data_sheets_schema:is_deidentified ],
+        [ sh:class data_sheets_schema:Creator ;
+            sh:nodeKind sh:IRI ;
+            sh:order 14 ;
+            sh:path data_sheets_schema:creators ],
+        [ sh:class data_sheets_schema:DataCollector ;
+            sh:nodeKind sh:IRI ;
+            sh:order 27 ;
+            sh:path data_sheets_schema:data_collectors ],
+        [ sh:class data_sheets_schema:Task ;
+            sh:nodeKind sh:IRI ;
+            sh:order 12 ;
+            sh:path data_sheets_schema:tasks ],
+        [ sh:class data_sheets_schema:InstanceAcquisition ;
+            sh:nodeKind sh:IRI ;
+            sh:order 24 ;
+            sh:path data_sheets_schema:acquisition_methods ],
+        [ sh:datatype xsd:string ;
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 59 ;
+            sh:path <dcterms:description> ],
+        [ sh:datatype xsd:string ;
+            sh:description "particular version of schema" ;
+            sh:maxCount 1 ;
+            sh:order 73 ;
+            sh:path pav:version ],
+        [ sh:class data_sheets_schema:ExternalResource ;
+            sh:nodeKind sh:IRI ;
+            sh:order 19 ;
+            sh:path data_sheets_schema:external_resources ],
+        [ sh:datatype xsd:boolean ;
+            sh:description "Is this subset a subpopulation of the larger dataset, e.g., is it a set of data for a specific demographic?" ;
+            sh:maxCount 1 ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:is_subpopulation ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 9 ;
+            sh:path data_sheets_schema:path ],
+        [ sh:description "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc." ;
+            sh:in ( "GZIP" "TAR" "TARGZIP" "ZIP" ) ;
+            sh:maxCount 1 ;
+            sh:order 53 ;
+            sh:path data_sheets_schema:compression ],
+        [ sh:class data_sheets_schema:VersionAccess ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 49 ;
+            sh:path data_sheets_schema:version_access ],
+        [ sh:description "The encoding of the data. This is not the same as the media type. Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8, ASCII, etc." ;
+            sh:in ( "ASCII" "Big5" "EUC-JP" "EUC-KR" "EUC-TW" "GB2312" "HZ-GB-2312" "ISO-2022-CN-EXT" "ISO-2022-CN" "ISO-2022-JP-2" "ISO-2022-JP" "ISO-2022-KR" "ISO-8859-10" "ISO-8859-11" "ISO-8859-13" "ISO-8859-14" "ISO-8859-15" "ISO-8859-16" "ISO-8859-1" "ISO-8859-2" "ISO-8859-3" "ISO-8859-4" "ISO-8859-5" "ISO-8859-6" "ISO-8859-7" "ISO-8859-8" "ISO-8859-9" "KOI8-R" "KOI8-U" "Shift_JIS" "UTF-16" "UTF-32" "UTF-7" "UTF-8" ) ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path data_sheets_schema:encoding ],
+        [ sh:class data_sheets_schema:Subpopulation ;
+            sh:nodeKind sh:IRI ;
+            sh:order 22 ;
+            sh:path data_sheets_schema:subpopulations ],
+        [ sh:class data_sheets_schema:DataAnomaly ;
+            sh:nodeKind sh:IRI ;
+            sh:order 18 ;
+            sh:path data_sheets_schema:anomalies ],
+        [ sh:class data_sheets_schema:Confidentiality ;
+            sh:nodeKind sh:IRI ;
+            sh:order 20 ;
+            sh:path data_sheets_schema:confidential_elements ],
+        [ sh:class data_sheets_schema:CleaningStrategy ;
+            sh:nodeKind sh:IRI ;
+            sh:order 32 ;
+            sh:path data_sheets_schema:cleaning_strategies ],
+        [ sh:class data_sheets_schema:CollectionMechanism ;
+            sh:nodeKind sh:IRI ;
+            sh:order 25 ;
+            sh:path data_sheets_schema:collection_mechanisms ],
+        [ sh:datatype xsd:anyURI ;
+            sh:description "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself." ;
+            sh:maxCount 1 ;
+            sh:order 61 ;
+            sh:path dcat:downloadURL ],
+        [ sh:datatype xsd:integer ;
+            sh:description "Size of the data in bytes." ;
             sh:maxCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ] ;
-    sh:targetClass data_sheets_schema:DataProtectionImpact .
+            sh:path dcat:byteSize ],
+        [ sh:class data_sheets_schema:SensitiveElement ;
+            sh:nodeKind sh:IRI ;
+            sh:order 23 ;
+            sh:path data_sheets_schema:sensitive_elements ],
+        [ sh:datatype xsd:string ;
+            sh:description "the official title of the element" ;
+            sh:maxCount 1 ;
+            sh:order 72 ;
+            sh:path <dcterms:title> ],
+        [ sh:class data_sheets_schema:DataSubset ;
+            sh:nodeKind sh:IRI ;
+            sh:order 16 ;
+            sh:path dcat:distribution ],
+        [ sh:class data_sheets_schema:UseRepository ;
+            sh:nodeKind sh:IRI ;
+            sh:order 36 ;
+            sh:path data_sheets_schema:use_repository ],
+        [ sh:class data_sheets_schema:FutureUseImpact ;
+            sh:nodeKind sh:IRI ;
+            sh:order 38 ;
+            sh:path data_sheets_schema:future_use_impacts ],
+        [ sh:description "agent that modified the element" ;
+            sh:in ( "Person" "Organization" ) ;
+            sh:maxCount 1 ;
+            sh:order 68 ;
+            sh:path <oslc:modifiedBy> ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 62 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:class data_sheets_schema:LicenseAndUseTerms ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 42 ;
+            sh:path data_sheets_schema:license_and_use_terms ],
+        [ sh:maxCount 1 ;
+            sh:order 70 ;
+            sh:path <dcterms:publisher> ],
+        [ sh:description "Status of the element in terms of its maturity or life cycle" ;
+            sh:maxCount 1 ;
+            sh:order 71 ;
+            sh:path <bibo:status> ],
+        [ sh:class data_sheets_schema:UpdatePlan ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 47 ;
+            sh:path data_sheets_schema:updates ],
+        [ sh:datatype xsd:string ;
+            sh:description "The hash representation of the data, e.g., sha256, md5, etc. Subtypes have their own slots." ;
+            sh:maxCount 1 ;
+            sh:order 6 ;
+            sh:path data_sheets_schema:hash ],
+        [ sh:class data_sheets_schema:ExportControlRegulatoryRestrictions ;
+            sh:maxCount 1 ;
+            sh:nodeKind sh:IRI ;
+            sh:order 44 ;
+            sh:path data_sheets_schema:regulatory_restrictions ],
+        [ sh:description "The Digital Object Identifier of the data, with the doi prefix." ;
+            sh:maxCount 1 ;
+            sh:order 60 ;
+            sh:path data_sheets_schema:doi ],
+        [ sh:class data_sheets_schema:OtherTask ;
+            sh:nodeKind sh:IRI ;
+            sh:order 37 ;
+            sh:path data_sheets_schema:other_tasks ],
+        [ sh:description "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to." ;
+            sh:maxCount 1 ;
+            sh:order 56 ;
+            sh:path data_sheets_schema:conforms_to_schema ],
+        [ sh:datatype xsd:string ;
+            sh:description "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner." ;
+            sh:order 64 ;
+            sh:path dcat:keyword ],
+        [ sh:datatype xsd:boolean ;
+            sh:maxCount 1 ;
+            sh:order 52 ;
+            sh:path data_sheets_schema:is_tabular ] ;
+    sh:targetClass data_sheets_schema:DataSubset .
 
 data_sheets_schema:Deidentification a sh:NodeShape ;
     sh:closed true ;
     sh:description "Is it possible to identify individuals (i.e., one or more natural persons), either directly or indirectly (i.e., in combination with other data) from the dataset?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:Deidentification .
 
 data_sheets_schema:DiscouragedUse a sh:NodeShape ;
     sh:closed true ;
     sh:description "Are there tasks for which the dataset should not be used?" ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
-            sh:path data_sheets_schema:description ] ;
+            sh:path data_sheets_schema:description ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:DiscouragedUse .
 
 data_sheets_schema:DistributionDate a sh:NodeShape ;
@@ -1586,37 +1564,43 @@ data_sheets_schema:DistributionDate a sh:NodeShape ;
     sh:description "When will the dataset be distributed?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:DistributionDate .
 
 data_sheets_schema:DistributionFormat a sh:NodeShape ;
     sh:closed true ;
-    sh:description "How will the dataset will be distributed (e.g., tarball on website, API, GitHub)? Does the dataset have a digital object identifier (DOI)?" ;
+    sh:description "How will the dataset will be distributed (e.g., tarball on website, API, GitHub)?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
             sh:order 3 ;
             sh:path schema1:name ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 1 ;
-            sh:path data_sheets_schema:doi ],
-        [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:order 2 ;
@@ -1627,18 +1611,23 @@ data_sheets_schema:Erratum a sh:NodeShape ;
     sh:closed true ;
     sh:description "Is there an erratum? If so, please provide a link or other access point." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:Erratum .
 
@@ -1649,16 +1638,21 @@ data_sheets_schema:EthicalReview a sh:NodeShape ;
     sh:property [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:EthicalReview .
 
 data_sheets_schema:ExistingUse a sh:NodeShape ;
@@ -1666,18 +1660,23 @@ data_sheets_schema:ExistingUse a sh:NodeShape ;
     sh:description "Has the dataset been used for any tasks already?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
+            sh:order 0 ;
+            sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ],
         [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ] ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:ExistingUse .
 
 data_sheets_schema:ExportControlRegulatoryRestrictions a sh:NodeShape ;
@@ -1685,18 +1684,23 @@ data_sheets_schema:ExportControlRegulatoryRestrictions a sh:NodeShape ;
     sh:description "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any supporting documentation." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:description ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ] ;
+            sh:order 3 ;
+            sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:ExportControlRegulatoryRestrictions .
 
 data_sheets_schema:ExtensionMechanism a sh:NodeShape ;
@@ -1706,49 +1710,59 @@ data_sheets_schema:ExtensionMechanism a sh:NodeShape ;
     sh:property [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:ExtensionMechanism .
 
 data_sheets_schema:ExternalResource a sh:NodeShape ;
     sh:closed true ;
     sh:description "Is the dataset self-contained, or does it link to or otherwise rely on external resources (e.g., websites, tweets, other datasets)? If it links to or relies on external resources, a) are there guarantees that they will exist, and remain constant, over time; b) are there official archival versions of the complete dataset (i.e., including the external resources as they existed at the time the dataset was created); c) are there any restrictions (e.g., licenses, fees) associated with any of the external resources that might apply to a dataset consumer? Please provide descriptions of all external resources and any restrictions associated with them, as well as links or other access points, as appropriate." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:boolean ;
-            sh:order 2 ;
-            sh:path data_sheets_schema:archival ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+    sh:property [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 4 ;
-            sh:path <dcterms:identifier> ],
+            sh:order 6 ;
+            sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 6 ;
+            sh:order 7 ;
             sh:path <dcterms:description> ],
-        [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:external_resources ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 4 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:boolean ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:archival ],
         [ sh:datatype xsd:string ;
             sh:order 3 ;
             sh:path data_sheets_schema:restrictions ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 5 ;
-            sh:path schema1:name ],
+            sh:order 0 ;
+            sh:path data_sheets_schema:external_resources ],
         [ sh:datatype xsd:string ;
             sh:order 1 ;
-            sh:path data_sheets_schema:future_guarantees ] ;
+            sh:path data_sheets_schema:future_guarantees ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 5 ;
+            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:ExternalResource .
 
 data_sheets_schema:FundingMechanism a sh:NodeShape ;
@@ -1756,30 +1770,35 @@ data_sheets_schema:FundingMechanism a sh:NodeShape ;
     sh:description "Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 2 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 4 ;
+            sh:order 5 ;
             sh:path <dcterms:description> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:used_software ],
         [ sh:class data_sheets_schema:Grantor ;
             sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
             sh:order 0 ;
             sh:path data_sheets_schema:grantor ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 3 ;
+            sh:path <dcterms:identifier> ],
         [ sh:class data_sheets_schema:Grant ;
             sh:maxCount 1 ;
             sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path data_sheets_schema:grant ] ;
+            sh:path data_sheets_schema:grant ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:FundingMechanism .
 
 data_sheets_schema:FutureUseImpact a sh:NodeShape ;
@@ -1787,36 +1806,46 @@ data_sheets_schema:FutureUseImpact a sh:NodeShape ;
     sh:description "Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ],
-        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
-    sh:targetClass data_sheets_schema:FutureUseImpact .
-
-data_sheets_schema:IPRestrictions a sh:NodeShape ;
-    sh:closed true ;
-    sh:description "Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions." ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
+    sh:targetClass data_sheets_schema:FutureUseImpact .
+
+data_sheets_schema:IPRestrictions a sh:NodeShape ;
+    sh:closed true ;
+    sh:description "Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, please describe these restrictions, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms, as well as any fees associated with these restrictions." ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:description ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
             sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:IPRestrictions .
 
@@ -1825,10 +1854,48 @@ data_sheets_schema:Instance a sh:NodeShape ;
     sh:description "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
+            sh:description "Is there a label or target associated with each instance?" ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path data_sheets_schema:label ],
+        [ sh:class data_sheets_schema:SamplingStrategy ;
+            sh:nodeKind sh:IRI ;
+            sh:order 5 ;
+            sh:path data_sheets_schema:sampling_strategies ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 7 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:representation ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 8 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:integer ;
+            sh:description "How many instances are there in total (of each type, if appropriate)?" ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path data_sheets_schema:counts ],
+        [ sh:datatype xsd:string ;
             sh:description "Are there multiple types of instances (e.g., movies, users, and ratings; people and interactions between them; nodes and edges)?" ;
             sh:maxCount 1 ;
             sh:order 1 ;
             sh:path data_sheets_schema:instance_type ],
+        [ sh:datatype xsd:string ;
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 10 ;
+            sh:path <dcterms:description> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 9 ;
+            sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:description "What data does each instance consist of? “Raw” data (e.g., unprocessed text or images) or features? In either case, please provide a description." ;
             sh:maxCount 1 ;
@@ -1837,40 +1904,7 @@ data_sheets_schema:Instance a sh:NodeShape ;
         [ sh:class data_sheets_schema:MissingInfo ;
             sh:nodeKind sh:IRI ;
             sh:order 6 ;
-            sh:path data_sheets_schema:missing_information ],
-        [ sh:datatype xsd:integer ;
-            sh:description "How many instances are there in total (of each type, if appropriate)?" ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path data_sheets_schema:counts ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 8 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "Is there a label or target associated with each instance?" ;
-            sh:maxCount 1 ;
-            sh:order 4 ;
-            sh:path data_sheets_schema:label ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:representation ],
-        [ sh:class data_sheets_schema:SamplingStrategy ;
-            sh:nodeKind sh:IRI ;
-            sh:order 5 ;
-            sh:path data_sheets_schema:sampling_strategies ],
-        [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 9 ;
-            sh:path <dcterms:description> ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 7 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:path data_sheets_schema:missing_information ] ;
     sh:targetClass data_sheets_schema:Instance .
 
 data_sheets_schema:InstanceAcquisition a sh:NodeShape ;
@@ -1878,38 +1912,43 @@ data_sheets_schema:InstanceAcquisition a sh:NodeShape ;
     sh:description "How was the data associated with each instance acquired? Was the data directly observable (e.g., raw text, movie ratings), reported by subjects (e.g., survey responses), or indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)? If the data was reported by subjects or indirectly inferred/derived from other data, was the data validated/verified?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:boolean ;
-            sh:description "Was the data validated/verified?" ;
+            sh:description "Was the data directly observable (e.g., raw text, movie ratings)?" ;
             sh:maxCount 1 ;
-            sh:order 4 ;
-            sh:path data_sheets_schema:was_validated_verified ],
+            sh:order 1 ;
+            sh:path data_sheets_schema:was_directly_observed ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 7 ;
+            sh:path schema1:name ],
         [ sh:datatype xsd:boolean ;
             sh:description "Was the data indirectly inferred/derived from other data (e.g., part-of-speech tags, model-based guesses for age or language)?" ;
             sh:maxCount 1 ;
             sh:order 3 ;
             sh:path data_sheets_schema:was_inferred_derived ],
         [ sh:datatype xsd:boolean ;
-            sh:description "Was the data directly observable (e.g., raw text, movie ratings)?" ;
-            sh:maxCount 1 ;
-            sh:order 1 ;
-            sh:path data_sheets_schema:was_directly_observed ],
-        [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 5 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 6 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:boolean ;
             sh:description "Was the data reported by subjects (e.g., survey responses)?" ;
             sh:maxCount 1 ;
             sh:order 2 ;
-            sh:path data_sheets_schema:was_reported_by_subjects ] ;
+            sh:path data_sheets_schema:was_reported_by_subjects ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 6 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:description ],
+        [ sh:datatype xsd:boolean ;
+            sh:description "Was the data validated/verified?" ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path data_sheets_schema:was_validated_verified ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 5 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:InstanceAcquisition .
 
 data_sheets_schema:LabelingStrategy a sh:NodeShape ;
@@ -1918,35 +1957,45 @@ data_sheets_schema:LabelingStrategy a sh:NodeShape ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:LabelingStrategy .
 
 data_sheets_schema:LicenseAndUseTerms a sh:NodeShape ;
     sh:closed true ;
     sh:description "Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)? If so, please describe this license and/or ToU, and provide a link or other access point to, or otherwise reproduce, any relevant licensing terms or ToU, as well as any fees associated with these restrictions." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
             sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:LicenseAndUseTerms .
 
@@ -1955,47 +2004,57 @@ data_sheets_schema:Maintainer a sh:NodeShape ;
     sh:description "Who will be supporting/hosting/maintaining the dataset?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
+        [ sh:in ( "Person" "Organization" ) ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ] ;
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:Maintainer .
 
 data_sheets_schema:Organization a sh:NodeShape ;
     sh:closed true ;
     sh:description "A collection of people acting in common interests." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
+    sh:property [ sh:description "Unique Wikidata identifier." ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:wikidata_id ],
+        [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
-            sh:order 4 ;
+            sh:order 5 ;
             sh:path <dcterms:description> ],
         [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path <dcterms:identifier> ],
-        [ sh:description "Unique Wikidata identifier." ;
+        [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 1 ;
-            sh:path data_sheets_schema:wikidata_id ],
+            sh:order 4 ;
+            sh:path schema1:name ],
         [ sh:description "Unique ROR identifier." ;
             sh:maxCount 1 ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:ror_id ],
+        [ sh:datatype xsd:string ;
+            sh:description "The email address of the organization." ;
+            sh:maxCount 1 ;
             sh:order 0 ;
-            sh:path data_sheets_schema:ror_id ] ;
+            sh:path data_sheets_schema:email ] ;
     sh:targetClass data_sheets_schema:Organization .
 
 data_sheets_schema:OtherTask a sh:NodeShape ;
@@ -2003,18 +2062,23 @@ data_sheets_schema:OtherTask a sh:NodeShape ;
     sh:description "What (other) tasks could the dataset be used for?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:description ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ] ;
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:OtherTask .
 
 data_sheets_schema:PreprocessingStrategy a sh:NodeShape ;
@@ -2025,15 +2089,20 @@ data_sheets_schema:PreprocessingStrategy a sh:NodeShape ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:PreprocessingStrategy .
 
 data_sheets_schema:Purpose a sh:NodeShape ;
@@ -2041,42 +2110,52 @@ data_sheets_schema:Purpose a sh:NodeShape ;
     sh:description "For what purpose was the dataset created?" ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
             sh:maxCount 1 ;
-            sh:minCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path <dcterms:description> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path <dcterms:identifier> ],
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
             sh:order 0 ;
             sh:path data_sheets_schema:response ],
         [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path <dcterms:description> ] ;
+            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:Purpose .
 
 data_sheets_schema:RawData a sh:NodeShape ;
     sh:closed true ;
     sh:description "Was the “raw” data saved in addition to the preprocessed/cleaned/labeled data (e.g., to support unanticipated future uses)? If so, please provide a link or other access point to the “raw” data." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ] ;
     sh:targetClass data_sheets_schema:RawData .
 
@@ -2088,31 +2167,41 @@ data_sheets_schema:RetentionLimits a sh:NodeShape ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:RetentionLimits .
 
 data_sheets_schema:SensitiveElement a sh:NodeShape ;
     sh:closed true ;
     sh:description "Does the dataset contain data that might be considered sensitive in any way (e.g., data that reveals race or ethnic origins, sexual orientations, religious beliefs, political opinions or union memberships, or locations; financial or health data; biometric or genetic data; forms of government identification, such as social security numbers; criminal history)?" ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path <dcterms:identifier> ],
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 2 ;
+            sh:path <dcterms:identifier> ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ] ;
@@ -2123,17 +2212,52 @@ data_sheets_schema:Subpopulation a sh:NodeShape ;
     sh:description "Does the dataset identify any subpopulations (e.g., by age, gender)? If so, please describe how these subpopulations are identified and provide a description of their respective distributions within the dataset." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 3 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:identification ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 5 ;
+            sh:path <dcterms:description> ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:distribution ] ;
+    sh:targetClass data_sheets_schema:Subpopulation .
+
+data_sheets_schema:Task a sh:NodeShape ;
+    sh:closed true ;
+    sh:description "Was there a specific task in mind for the dataset's application?" ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:response ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
             sh:order 2 ;
             sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:order 1 ;
-            sh:path data_sheets_schema:distribution ],
         [ sh:datatype xsd:string ;
             sh:description "human readable description of the information" ;
             sh:maxCount 1 ;
@@ -2143,69 +2267,54 @@ data_sheets_schema:Subpopulation a sh:NodeShape ;
             sh:maxCount 1 ;
             sh:order 3 ;
             sh:path schema1:name ] ;
-    sh:targetClass data_sheets_schema:Subpopulation .
-
-data_sheets_schema:Task a sh:NodeShape ;
-    sh:closed true ;
-    sh:description "Was there a specific task in mind for the dataset's application?" ;
-    sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 3 ;
-            sh:path <dcterms:description> ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:response ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 2 ;
-            sh:path schema1:name ],
-        [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
-            sh:order 1 ;
-            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:Task .
 
 data_sheets_schema:UpdatePlan a sh:NodeShape ;
     sh:closed true ;
     sh:description "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, please describe how often, by whom, and how updates will be communicated to dataset consumers (e.g., mailing list, GitHub)?" ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path <dcterms:identifier> ],
+            sh:path data_sheets_schema:used_software ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:UpdatePlan .
 
 data_sheets_schema:UseRepository a sh:NodeShape ;
     sh:closed true ;
     sh:description "Is there a repository that links to any or all papers or systems that use the dataset? If so, please provide a link or other access point." ;
     sh:ignoredProperties ( rdf:type ) ;
-    sh:property [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
-            sh:maxCount 1 ;
-            sh:minCount 1 ;
+    sh:property [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 1 ;
-            sh:path <dcterms:identifier> ],
+            sh:path data_sheets_schema:used_software ],
         [ sh:datatype xsd:string ;
             sh:order 0 ;
             sh:path data_sheets_schema:description ],
         [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
+            sh:order 3 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
             sh:order 2 ;
-            sh:path schema1:name ] ;
+            sh:path <dcterms:identifier> ] ;
     sh:targetClass data_sheets_schema:UseRepository .
 
 data_sheets_schema:VersionAccess a sh:NodeShape ;
@@ -2213,18 +2322,23 @@ data_sheets_schema:VersionAccess a sh:NodeShape ;
     sh:description "Will older versions of the dataset continue to be supported/hosted/maintained? If so, please describe how. If not, please describe how its obsolescence will be communicated to dataset consumers." ;
     sh:ignoredProperties ( rdf:type ) ;
     sh:property [ sh:datatype xsd:string ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:description ],
+        [ sh:datatype xsd:string ;
             sh:maxCount 1 ;
-            sh:order 2 ;
+            sh:order 3 ;
             sh:path schema1:name ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
-            sh:order 1 ;
+            sh:order 2 ;
             sh:path <dcterms:identifier> ],
-        [ sh:datatype xsd:string ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:description ] ;
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:VersionAccess .
 
 data_sheets_schema:SamplingStrategy a sh:NodeShape ;
@@ -2235,38 +2349,76 @@ data_sheets_schema:SamplingStrategy a sh:NodeShape ;
             sh:order 3 ;
             sh:path data_sheets_schema:is_representative ],
         [ sh:datatype xsd:string ;
-            sh:order 2 ;
-            sh:path data_sheets_schema:source_data ],
-        [ sh:datatype xsd:string ;
-            sh:order 5 ;
-            sh:path data_sheets_schema:why_not_representative ],
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 10 ;
+            sh:path <dcterms:description> ],
         [ sh:datatype xsd:string ;
             sh:description "If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?" ;
             sh:order 6 ;
             sh:path data_sheets_schema:strategies ],
-        [ sh:datatype xsd:boolean ;
-            sh:order 0 ;
-            sh:path data_sheets_schema:ia_sample ],
-        [ sh:datatype xsd:string ;
-            sh:description "human readable description of the information" ;
-            sh:maxCount 1 ;
-            sh:order 9 ;
-            sh:path <dcterms:description> ],
-        [ sh:datatype xsd:boolean ;
-            sh:order 1 ;
-            sh:path data_sheets_schema:israndom ],
-        [ sh:datatype xsd:string ;
-            sh:maxCount 1 ;
-            sh:order 8 ;
-            sh:path schema1:name ],
         [ sh:datatype xsd:string ;
             sh:order 4 ;
             sh:path data_sheets_schema:representative_verification ],
         [ sh:datatype xsd:string ;
-            sh:description "the unique name of th dataset" ;
+            sh:description "the unique name of the dataset" ;
             sh:maxCount 1 ;
             sh:minCount 1 ;
+            sh:order 8 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 9 ;
+            sh:path schema1:name ],
+        [ sh:datatype xsd:string ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:source_data ],
+        [ sh:datatype xsd:boolean ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:is_sample ],
+        [ sh:datatype xsd:string ;
+            sh:order 5 ;
+            sh:path data_sheets_schema:why_not_representative ],
+        [ sh:datatype xsd:boolean ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:is_random ],
+        [ sh:class data_sheets_schema:Software ;
+            sh:description "What software was used as part of this dataset property?" ;
+            sh:nodeKind sh:IRI ;
             sh:order 7 ;
-            sh:path <dcterms:identifier> ] ;
+            sh:path data_sheets_schema:used_software ] ;
     sh:targetClass data_sheets_schema:SamplingStrategy .
+
+data_sheets_schema:Software a sh:NodeShape ;
+    sh:closed true ;
+    sh:description "A software program or library." ;
+    sh:ignoredProperties ( rdf:type ) ;
+    sh:property [ sh:datatype xsd:string ;
+            sh:description "human readable description of the information" ;
+            sh:maxCount 1 ;
+            sh:order 5 ;
+            sh:path <dcterms:description> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 2 ;
+            sh:path data_sheets_schema:url ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 0 ;
+            sh:path data_sheets_schema:version ],
+        [ sh:datatype xsd:string ;
+            sh:description "the unique name of the dataset" ;
+            sh:maxCount 1 ;
+            sh:minCount 1 ;
+            sh:order 3 ;
+            sh:path <dcterms:identifier> ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 1 ;
+            sh:path data_sheets_schema:license ],
+        [ sh:datatype xsd:string ;
+            sh:maxCount 1 ;
+            sh:order 4 ;
+            sh:path schema1:name ] ;
+    sh:targetClass data_sheets_schema:Software .
 
