@@ -127,48 +127,6 @@ classes:
 
   # From linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-  DataPackage:
-    aliases:
-      - dataset
-      - file collection
-      - data resource collection
-    description: A collection of data resources
-    is_a: Information
-    class_uri: void:Dataset
-    exact_mappings:
-      - dcat:Dataset
-    close_mappings:
-      - dcat:Catalog
-    see_also:
-      - https://specs.frictionlessdata.io/data-package
-    slots:
-      - resources
-
-  # From linkml Datasets schema - see
-  # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-  DataResource:
-    is_a: Information
-    description: An individual file or table
-    class_uri: dcat:Distribution
-    exact_mappings:
-      - schema:DataDownload
-    see_also:
-      - https://specs.frictionlessdata.io/data-resource
-    slots:
-      - path
-      - title
-      - description
-      - format
-      - media_type
-      - encoding
-      - bytes
-      - hash
-      - md5
-      - sha256
-      - dialect
-
-  # From linkml Datasets schema - see
-  # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
   FormatDialect:
     description: Additional format information for a file
     attributes:
@@ -229,21 +187,50 @@ classes:
         multivalued: true
 
   DatasetCollection:
+    aliases:
+      - file collection
+      - dataset collection
+      - data resource collection
     tree_root: true
     description: >-
       A collection of related datasets, likely containing multiple files
       of multiple potential purposes and properties.
-    is_a: DataPackage
+    exact_mappings:
+      - dcat:Dataset
+    close_mappings:
+      - dcat:Catalog
+    is_a: Information
     attributes:
-      entries:
+      resources:
         range: Dataset
         multivalued: true
 
   Dataset:
+    aliases:
+      - data resource
+      - data file
+      - data package
+    class_uri: dcat:Distribution
+    exact_mappings:
+      - schema:DataDownload
+    see_also:
+      - https://specs.frictionlessdata.io/data-resource
     description: >-
       A single component of related observations and/or information that can be
       read, manipulated, transformed, and otherwise interpreted.
-    is_a: DataResource
+    is_a: Information
+    slots:
+      - path
+      - title
+      - description
+      - format
+      - media_type
+      - encoding
+      - bytes
+      - hash
+      - md5
+      - sha256
+      - dialect
     attributes:
       purposes:
         range: Purpose
