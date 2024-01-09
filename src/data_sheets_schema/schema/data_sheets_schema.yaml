@@ -96,9 +96,7 @@ classes:
     close_mappings:
       - schema:Thing
 
-  # TODO: much of this could be merged down into Dataset class,
-  # to avoid extra nesting
-  # From linkml Datasets schema - see
+  # Adapted from linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
   Information:
     abstract: true
@@ -558,7 +556,6 @@ classes:
     in_subset:
       - Composition
 
-  # TODO: Refactor this into more of a triple
   Relationships:
     description: >-
       Are relationships between individual instances made explicit (e.g., users’
@@ -569,11 +566,9 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
-  # TODO: Refactor this into more of a triple
   Splits:
     description: >-
       Are there recommended data splits (e.g., training, development/validation,
@@ -584,7 +579,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -597,7 +591,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -654,7 +647,6 @@ classes:
       warnings:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -668,11 +660,9 @@ classes:
       identification:
         range: string
         multivalued: true
-        # inlined: true
       distribution:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -706,7 +696,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Composition
 
@@ -797,8 +786,6 @@ classes:
     in_subset:
       - Collection
 
-  # TODO: this is just a boolean, model as such
-  # or is it?
   DirectCollection:
     description: >-
       Did you collect the data from the individuals in question directly, or
@@ -811,8 +798,6 @@ classes:
     in_subset:
       - Collection
 
-  # TODO: this is just a boolean, model as such
-  # or is it?
   CollectionNotification:
     description: >-
       Were the individuals in question notified about the data collection? If
@@ -827,8 +812,6 @@ classes:
     in_subset:
       - Collection
 
-  # TODO: this is just a boolean, model as such
-  # or is it?
   CollectionConsent:
     description: >-
       Did the individuals in question consent to the collection and use of
@@ -844,8 +827,6 @@ classes:
     in_subset:
       - Collection
 
-  # TODO: this is just a boolean, model as such
-  # or is it?
   ConsentRevocation:
     description: >-
       If consent was obtained, were the consenting individuals provided with a
@@ -933,7 +914,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
       - Maintenance
@@ -947,7 +927,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
 
@@ -959,7 +938,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
 
@@ -1024,7 +1002,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Distribution
 
@@ -1040,7 +1017,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Distribution
 
