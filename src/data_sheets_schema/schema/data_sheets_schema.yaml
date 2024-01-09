@@ -113,6 +113,7 @@ classes:
       - created_by
       - created_on
       - description
+      - doi
       - download_url
       - id
       - issued
@@ -223,17 +224,15 @@ classes:
       read, manipulated, transformed, and otherwise interpreted.
     is_a: Information
     slots:
-      - path
-      - title
-      - description
-      - format
-      - media_type
-      - encoding
       - bytes
+      - dialect
+      - encoding
+      - format
       - hash
       - md5
+      - media_type
+      - path
       - sha256
-      - dialect
     attributes:
       purposes:
         range: Purpose
@@ -979,7 +978,6 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
 
@@ -991,11 +989,9 @@ classes:
       description:
         range: string
         multivalued: true
-        # inlined: true
     in_subset:
       - Uses
 
-  # TODO: a boolean, likely
   ThirdPartySharing:
     description: >-
       Will the dataset be distributed to third parties outside of the entity
@@ -1004,26 +1000,19 @@ classes:
     is_a: DatasetProperty
     attributes:
       description:
-        range: string
-        multivalued: true
-        # inlined: true
+        range: boolean
     in_subset:
       - Distribution
 
   DistributionFormat:
     description: >-
       How will the dataset will be distributed (e.g., tarball on website, API,
-      GitHub)? Does the dataset have a digital object identifier (DOI)?
+      GitHub)?
     is_a: DatasetProperty
     attributes:
       description:
         range: string
         multivalued: true
-        # inlined: true
-      doi:
-        range: string
-        multivalued: false
-        # inlined: true
     in_subset:
       - Distribution
 
@@ -1173,7 +1162,7 @@ slots:
 
   id:
     identifier: true
-    description: the unique name of th dataset
+    description: the unique name of the dataset
     slot_uri: dcterms:identifier
     exact_mappings:
       - schema:name
@@ -1301,6 +1290,13 @@ slots:
     description: >-
       The class in the schema to which the data object instantiates.
     is_a: conforms_to
+
+  doi:
+    description: >-
+      The Digital Object Identifier of the data, with the doi prefix.
+    range: uriorcurie
+    examples:
+      - value: "doi:10.48550/arXiv.2310.03666"
 
   profile:
     description: >-
