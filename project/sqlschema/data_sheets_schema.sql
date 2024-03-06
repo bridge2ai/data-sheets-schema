@@ -2,87 +2,187 @@
 
 CREATE TABLE "AddressingGap" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	response TEXT, 
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE "AnatomicalEntity" (
+	id TEXT NOT NULL, 
+	category TEXT, 
+	name TEXT, 
+	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE "CleaningStrategy" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "CollectionConsent" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "CollectionMechanism" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "CollectionNotification" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "CollectionTimeframe" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Confidentiality" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
+	confidential_elements_present BOOLEAN, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ConsentRevocation" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ContentWarning" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
+	content_warnings_present BOOLEAN, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DataAnomaly" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DataCollector" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DataProtectionImpact" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
@@ -113,86 +213,171 @@ CREATE TABLE "DatasetCollection" (
 
 CREATE TABLE "DatasetProperty" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Deidentification" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
+	identifiable_elements_present BOOLEAN, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DirectCollection" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DiscouragedUse" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DistributionDate" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "DistributionFormat" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Erratum" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "EthicalReview" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ExistingUse" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ExportControlRegulatoryRestrictions" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ExtensionMechanism" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "ExternalResource" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
@@ -208,46 +393,82 @@ CREATE TABLE "FormatDialect" (
 
 CREATE TABLE "FutureUseImpact" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Grant" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	grant_number TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Grantor" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
-	email TEXT, 
+	subclass_of TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	ror_id TEXT, 
 	wikidata_id TEXT, 
+	url TEXT, 
+	related_to TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Instance" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
-	representation TEXT, 
+	data_topic TEXT, 
 	instance_type TEXT, 
-	data_type TEXT, 
+	data_substrate TEXT, 
 	counts INTEGER, 
-	label TEXT, 
+	label BOOLEAN, 
+	label_description TEXT, 
 	sampling_strategies TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "InstanceAcquisition" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	was_directly_observed BOOLEAN, 
 	was_reported_by_subjects BOOLEAN, 
@@ -258,60 +479,121 @@ CREATE TABLE "InstanceAcquisition" (
 
 CREATE TABLE "IPRestrictions" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "LabelingStrategy" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "LicenseAndUseTerms" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Maintainer" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "NamedThing" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Organization" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
-	email TEXT, 
+	subclass_of TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	ror_id TEXT, 
 	wikidata_id TEXT, 
+	url TEXT, 
+	related_to TEXT, 
 	PRIMARY KEY (id)
+);
+
+CREATE TABLE "OrganizationContainer" (
+	organizations TEXT, 
+	PRIMARY KEY (organizations)
 );
 
 CREATE TABLE "OtherTask" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Person" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	affiliation TEXT, 
 	email TEXT, 
 	PRIMARY KEY (id)
@@ -319,15 +601,29 @@ CREATE TABLE "Person" (
 
 CREATE TABLE "PreprocessingStrategy" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Purpose" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	response TEXT, 
 	PRIMARY KEY (id)
@@ -335,44 +631,87 @@ CREATE TABLE "Purpose" (
 
 CREATE TABLE "RawData" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Relationships" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "RetentionLimits" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "SamplingStrategy" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "SensitiveElement" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
+	sensitive_elements_present BOOLEAN, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Software" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	version TEXT, 
 	license TEXT, 
 	url TEXT, 
@@ -381,23 +720,45 @@ CREATE TABLE "Software" (
 
 CREATE TABLE "Splits" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Subpopulation" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
+	subpopulation_elements_present BOOLEAN, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Task" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	response TEXT, 
 	PRIMARY KEY (id)
@@ -405,7 +766,14 @@ CREATE TABLE "Task" (
 
 CREATE TABLE "ThirdPartySharing" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	description BOOLEAN, 
 	PRIMARY KEY (id)
@@ -413,29 +781,57 @@ CREATE TABLE "ThirdPartySharing" (
 
 CREATE TABLE "UpdatePlan" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "UseRepository" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "VersionAccess" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	PRIMARY KEY (id)
 );
 
 CREATE TABLE "Creator" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	principal_investigator TEXT, 
 	affiliation TEXT, 
@@ -616,8 +1012,15 @@ CREATE TABLE "DataSubset" (
 
 CREATE TABLE "FundingMechanism" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	grantor TEXT, 
 	grant TEXT, 
@@ -628,8 +1031,15 @@ CREATE TABLE "FundingMechanism" (
 
 CREATE TABLE "MissingInfo" (
 	id TEXT NOT NULL, 
+	category TEXT, 
 	name TEXT, 
 	description TEXT, 
+	subclass_of TEXT, 
+	related_to TEXT, 
+	contributor_name TEXT, 
+	contributor_github_name TEXT, 
+	contributor_orcid TEXT, 
+	contribution_date DATE, 
 	used_software TEXT, 
 	"Instance_id" TEXT, 
 	PRIMARY KEY (id), 

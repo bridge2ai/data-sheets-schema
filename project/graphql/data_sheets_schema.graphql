@@ -1,82 +1,168 @@
 type AddressingGap
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     response: String
   }
 
+type AnatomicalEntity
+  {
+    id: Uriorcurie!
+    category: CategoryType
+    name: String
+    description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
+  }
+
 type CleaningStrategy
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type CollectionConsent
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type CollectionMechanism
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type CollectionNotification
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type CollectionTimeframe
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type Confidentiality
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
+    confidentialElementsPresent: Boolean
     description: [String]
   }
 
 type ConsentRevocation
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type ContentWarning
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
+    contentWarningsPresent: Boolean
     warnings: [String]
   }
 
 type Creator
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     principalInvestigator: Person
     affiliation: Organization
@@ -84,24 +170,45 @@ type Creator
 
 type DataAnomaly
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type DataCollector
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type DataProtectionImpact
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
@@ -117,7 +224,7 @@ type Dataset
     description: String
     doi: Uriorcurie
     downloadUrl: Uri
-    id: String!
+    id: Uriorcurie!
     issued: Datetime
     keywords: [String]
     language: String
@@ -194,7 +301,7 @@ type DatasetCollection
     description: String
     doi: Uriorcurie
     downloadUrl: Uri
-    id: String!
+    id: Uriorcurie!
     issued: Datetime
     keywords: [String]
     language: String
@@ -212,9 +319,16 @@ type DatasetCollection
 
 type DatasetProperty
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
   }
 
@@ -229,7 +343,7 @@ type DataSubset
     description: String
     doi: Uriorcurie
     downloadUrl: Uri
-    id: String!
+    id: Uriorcurie!
     issued: Datetime
     keywords: [String]
     language: String
@@ -299,89 +413,167 @@ type DataSubset
 
 type Deidentification
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
+    identifiableElementsPresent: Boolean
     description: [String]
   }
 
 type DirectCollection
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type DiscouragedUse
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type DistributionDate
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type DistributionFormat
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type Erratum
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type EthicalReview
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type ExistingUse
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type ExportControlRegulatoryRestrictions
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type ExtensionMechanism
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type ExternalResource
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     externalResources: [String]
     futureGuarantees: [String]
@@ -400,9 +592,16 @@ type FormatDialect
 
 type FundingMechanism
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     grantor: Grantor
     grant: Grant
@@ -410,28 +609,49 @@ type FundingMechanism
 
 type FutureUseImpact
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type Grant
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     grantNumber: String
   }
 
 type Grantor
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
-    email: String
+    subclassOf: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     rorId: RorIdentifier
     wikidataId: WikidataIdentifier
+    url: Uriorcurie
+    relatedTo: [NamedThing]
   }
 
 interface Information
@@ -445,7 +665,7 @@ interface Information
     description: String
     doi: Uriorcurie
     downloadUrl: Uri
-    id: String!
+    id: Uriorcurie!
     issued: Datetime
     keywords: [String]
     language: String
@@ -462,23 +682,38 @@ interface Information
 
 type Instance
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
-    representation: String
+    dataTopic: Uriorcurie
     instanceType: String
-    dataType: String
+    dataSubstrate: Uriorcurie
     counts: Integer
-    label: String
+    label: Boolean
+    labelDescription: String
     samplingStrategies: [SamplingStrategy]
     missingInformation: [MissingInfo]
   }
 
 type InstanceAcquisition
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
     wasDirectlyObserved: Boolean
@@ -489,41 +724,76 @@ type InstanceAcquisition
 
 type IPRestrictions
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type LabelingStrategy
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type LicenseAndUseTerms
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type Maintainer
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [CreatorOrMaintainerEnum]
   }
 
 type MissingInfo
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     missing: [String]
     whyMissing: [String]
@@ -531,84 +801,159 @@ type MissingInfo
 
 type NamedThing
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
   }
 
 type Organization
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
-    email: String
+    subclassOf: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     rorId: RorIdentifier
     wikidataId: WikidataIdentifier
+    url: Uriorcurie
+    relatedTo: [NamedThing]
+  }
+
+type OrganizationContainer
+  {
+    organizations: [Organization]
   }
 
 type OtherTask
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type Person
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     affiliation: [Organization]
     email: String
   }
 
 type PreprocessingStrategy
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type Purpose
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     response: String
   }
 
 type RawData
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type Relationships
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type RetentionLimits
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type SamplingStrategy
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     isSample: [Boolean]
     isRandom: [Boolean]
@@ -621,17 +966,32 @@ type SamplingStrategy
 
 type SensitiveElement
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
+    sensitiveElementsPresent: Boolean
     description: [String]
   }
 
 type Software
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     version: String
     license: String
     url: String
@@ -639,59 +999,109 @@ type Software
 
 type Splits
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type Subpopulation
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
+    subpopulationElementsPresent: Boolean
     identification: [String]
     distribution: [String]
   }
 
 type Task
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
     description: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     response: String
   }
 
 type ThirdPartySharing
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: Boolean
   }
 
 type UpdatePlan
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type UseRepository
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
 
 type VersionAccess
   {
-    id: String!
+    id: Uriorcurie!
+    category: CategoryType
     name: String
+    subclassOf: [NamedThing]
+    relatedTo: [NamedThing]
+    contributorName: String
+    contributorGithubName: String
+    contributorOrcid: Uriorcurie
+    contributionDate: Date
     usedSoftware: [Software]
     description: [String]
   }
