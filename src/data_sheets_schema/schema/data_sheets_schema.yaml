@@ -24,6 +24,8 @@ prefixes:
   sh: https://w3id.org/shacl/
   skos: http://www.w3.org/2004/02/skos/core#
   void: http://rdfs.org/ns/void#
+  B2AI_TOPIC: https://w3id.org/bridge2ai/b2ai-standards-registry/
+  B2AI_SUBSTRATE: https://w3id.org/bridge2ai/b2ai-standards-registry/
 default_prefix: data_sheets_schema
 default_range: string
 
@@ -432,19 +434,27 @@ classes:
       documents, photos, people, countries)?
     is_a: DatasetProperty
     attributes:
-      representation:  # TODO: align with Bridge2AI Standards Schema topics
-        range: string
+      data_topic:
+        description: >-
+          What general topic does the data represent?
+          This should be one of the Bridge2AI standards data topics,
+          e.g., B2AI_TOPIC:26
+        range: uriorcurie
+        values_from:
+          - B2AI_TOPIC
       instance_type:
         description: >-
           Are there multiple types of instances (e.g., movies, users, and
           ratings; people and interactions between them; nodes and edges)?
         range: string
-      data_type:  # TODO: align with Bridge2AI Standards Schema types
+      data_substrate:
         description: >-
           What data does each instance consist of? “Raw” data (e.g., unprocessed
-          text or images) or features? In either case, please provide a
-          description.
-        range: string
+          text or images) or features? This should be one of the Bridge2AI
+          standards data substrates, e.g., B2AI_SUBSTRATE:6
+        range: uriorcurie
+        values_from:
+          - B2AI_SUBSTRATE
       counts:
         description: >-
           How many instances are there in total (of each type, if appropriate)?
