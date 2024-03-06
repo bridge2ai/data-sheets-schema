@@ -1,6 +1,6 @@
 ## Add your own custom Makefile targets here
 
-IMPORTS = standards-organization-schema
+IMPORTS = standards-schema standards-organization-schema
 
 all: update-imports site
 
