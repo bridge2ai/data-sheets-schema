@@ -25,6 +25,7 @@ prefixes:
   skos: http://www.w3.org/2004/02/skos/core#
   void: http://rdfs.org/ns/void#
   B2AI_TOPIC: https://w3id.org/bridge2ai/b2ai-standards-registry/
+  B2AI_STANDARD: https://w3id.org/bridge2ai/b2ai-standards-registry/
   B2AI_SUBSTRATE: https://w3id.org/bridge2ai/b2ai-standards-registry/
 default_prefix: data_sheets_schema
 default_range: string
@@ -1225,10 +1226,12 @@ slots:
       The standard to which the data conforms. This is not the same as the
       media type. Rather, this is the standard to which the data conforms
       in a more specific sense, e.g., frictionless, schema.org, etc.
+      This should be a standard from the Bridge2AI standards registry.
     slot_uri: dcterms:conformsTo
     range: uriorcurie
+    values_from:
+      - B2AI_STANDARD
 
-  # TODO: Align with Bridge2AI Standards Schema
   conforms_to_schema:
     description: >-
       The schema to which the data conforms. This is not the same as the
