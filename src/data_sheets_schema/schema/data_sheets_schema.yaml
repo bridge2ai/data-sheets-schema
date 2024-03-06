@@ -636,6 +636,8 @@ classes:
       non-public communications)?
     is_a: DatasetProperty
     attributes:
+      confidential_elements_present:
+        range: boolean
       description:
         range: string
         multivalued: true
@@ -649,6 +651,8 @@ classes:
       so, please describe why.
     is_a: DatasetProperty
     attributes:
+      content_warnings_present:
+        range: boolean
       warnings:
         range: string
         multivalued: true
@@ -662,6 +666,8 @@ classes:
       description of their respective distributions within the dataset.
     is_a: DatasetProperty
     attributes:
+      subpopulation_elements_present:
+        range: boolean
       identification:
         range: string
         multivalued: true
@@ -671,8 +677,7 @@ classes:
     in_subset:
       - Composition
 
-  # TODO: consider other ways to model this - is it just a boolean?
-  # or are we concerned about specific PHI subtypes?
+  # TODO: consider specific PHI subtypes
   # In practice, if data is Safe Harbor de-identified, that's one thing,
   # but it could also be anonymized, and the standard for that isn't as
   # explicit. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5977668/
@@ -683,6 +688,8 @@ classes:
       data) from the dataset?
     is_a: DatasetProperty
     attributes:
+      identifiable_elements_present:
+        range: boolean
       description:
         range: string
         multivalued: true
@@ -698,6 +705,8 @@ classes:
       identification, such as social security numbers; criminal history)?
     is_a: DatasetProperty
     attributes:
+      sensitive_elements_present:
+        range: boolean
       description:
         range: string
         multivalued: true
