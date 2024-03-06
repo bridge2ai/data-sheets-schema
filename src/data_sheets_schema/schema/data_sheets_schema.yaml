@@ -486,9 +486,14 @@ classes:
         description: >-
           How many instances are there in total (of each type, if appropriate)?
         range: integer
-      label:  # TODO: clarify what this means - it's fuzzy, and maybe redundant
+      label:
         description: >-
           Is there a label or target associated with each instance?
+        range: boolean
+      label_description:
+        description: >-
+          If there is a label or target associated with each instance,
+          what pattern or format does it follow?
         range: string
       sampling_strategies:
         range: SamplingStrategy
