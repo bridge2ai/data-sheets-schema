@@ -9,7 +9,7 @@ see_also:
   - https://bridge2ai.github.io/data-sheets-schema
 
 prefixes:
-  biolink: https://w3id.org/biolink/
+  biolink: https://w3id.org/biolink/vocab/
   csvw: http://www.w3.org/ns/csvw#
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
   datasets: https://w3id.org/linkml/report
@@ -29,20 +29,11 @@ default_range: string
 
 imports:
   - linkml:types
+  - standards_schema
+  - standards_organization_schema
 
 ## TYPES ##
 
-types:
-  ror_identifier:
-    description: Identifier from Research Organization Registry.
-    typeof: uriorcurie
-    id_prefixes:
-      - ror
-  wikidata_identifier:
-    description: Identifier from Wikidata open knowledge base.
-    typeof: uriorcurie
-    id_prefixes:
-      - wikidata
 
 ## SUBSETS ##
 subsets:
@@ -86,15 +77,7 @@ subsets:
 ## CLASSES ##
 classes:
 
-  NamedThing:
-    description: >-
-      A generic grouping for any identifiable entity
-    slots:
-      - id
-      - name
-      - description
-    close_mappings:
-      - schema:Thing
+  # NamedThing is imported from Bridge2AI standards schema
 
   # Adapted from linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
@@ -151,30 +134,6 @@ classes:
         description: >-
           The email address of the person.
         range: string
-
-  # TODO: align with the Bridge2AI Standards Schema equivalent class
-  Organization:
-    description: A collection of people acting in common interests.
-    is_a: NamedThing
-    attributes:
-      email:
-        description: >-
-          The email address of the organization.
-        range: string
-      ror_id:
-        description: Unique ROR identifier.
-        examples:
-          - value: ROR:02mp31p96
-        range: ror_identifier
-        values_from:
-          - ROR
-      wikidata_id:
-        description: Unique Wikidata identifier.
-        examples:
-          - value: WIKIDATA:Q282186
-        range: wikidata_identifier
-        values_from:
-          - WIKIDATA
 
   DatasetProperty:
     # Individual properties have their own attributes
@@ -428,6 +387,7 @@ classes:
       affiliation:
         # Note that creators have affiliations which may differ
         # from that of their members
+        # Organization is imported from Bridge2AI standards schema
         range: Organization
     in_subset:
       - Motivation
@@ -450,6 +410,7 @@ classes:
     description: >-
       What is the name and/or identifier of the organization providing
       monetary support or other resources supporting creation of the dataset?
+    # Organization is imported from Bridge2AI standards schema
     is_a: Organization
 
   Grant:
@@ -1152,23 +1113,13 @@ slots:
   # the linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
 
-  id:
-    identifier: true
-    description: the unique name of the dataset
-    slot_uri: dcterms:identifier
-    exact_mappings:
-      - schema:name
-
-  name:
-    slot_uri: schema:name
+  # id is imported from Bridge2AI standards schema
+  # name is imported from Bridge2AI standards schema
+  # description is imported from Bridge2AI standards schema
 
   title:
     description: the official title of the element
     slot_uri: dcterms:title
-
-  description:
-    description: human readable description of the information
-    slot_uri: dcterms:description
 
   language:
     description: language in which the information is expressed
@@ -1374,6 +1325,7 @@ enums:
     description: >-
       The entity responsible for maintaining a dataset.
     permissible_values:
+      # Organization is imported from Bridge2AI standards schema
       Person:
       Organization:
 
