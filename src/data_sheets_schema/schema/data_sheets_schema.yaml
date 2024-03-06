@@ -207,6 +207,8 @@ classes:
         range: Dataset
         multivalued: true
 
+  # TODO: consider how to distinguish between metadata only vs
+  # instances where data file is present (and we can extract metadata)
   Dataset:
     aliases:
       - data resource
