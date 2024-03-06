@@ -9,7 +9,7 @@ see_also:
   - https://bridge2ai.github.io/data-sheets-schema
 
 prefixes:
-  biolink: https://w3id.org/biolink/
+  biolink: https://w3id.org/biolink/vocab/
   csvw: http://www.w3.org/ns/csvw#
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
   datasets: https://w3id.org/linkml/report
@@ -24,25 +24,19 @@ prefixes:
   sh: https://w3id.org/shacl/
   skos: http://www.w3.org/2004/02/skos/core#
   void: http://rdfs.org/ns/void#
+  B2AI_TOPIC: https://w3id.org/bridge2ai/b2ai-standards-registry/
+  B2AI_STANDARD: https://w3id.org/bridge2ai/b2ai-standards-registry/
+  B2AI_SUBSTRATE: https://w3id.org/bridge2ai/b2ai-standards-registry/
 default_prefix: data_sheets_schema
 default_range: string
 
 imports:
   - linkml:types
+  - standards_schema
+  - standards_organization_schema
 
 ## TYPES ##
 
-types:
-  ror_identifier:
-    description: Identifier from Research Organization Registry.
-    typeof: uriorcurie
-    id_prefixes:
-      - ror
-  wikidata_identifier:
-    description: Identifier from Wikidata open knowledge base.
-    typeof: uriorcurie
-    id_prefixes:
-      - wikidata
 
 ## SUBSETS ##
 subsets:
@@ -86,15 +80,7 @@ subsets:
 ## CLASSES ##
 classes:
 
-  NamedThing:
-    description: >-
-      A generic grouping for any identifiable entity
-    slots:
-      - id
-      - name
-      - description
-    close_mappings:
-      - schema:Thing
+  # NamedThing is imported from Bridge2AI standards schema
 
   # Adapted from linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
@@ -152,30 +138,6 @@ classes:
           The email address of the person.
         range: string
 
-  # TODO: align with the Bridge2AI Standards Schema equivalent class
-  Organization:
-    description: A collection of people acting in common interests.
-    is_a: NamedThing
-    attributes:
-      email:
-        description: >-
-          The email address of the organization.
-        range: string
-      ror_id:
-        description: Unique ROR identifier.
-        examples:
-          - value: ROR:02mp31p96
-        range: ror_identifier
-        values_from:
-          - ROR
-      wikidata_id:
-        description: Unique Wikidata identifier.
-        examples:
-          - value: WIKIDATA:Q282186
-        range: wikidata_identifier
-        values_from:
-          - WIKIDATA
-
   DatasetProperty:
     # Individual properties have their own attributes
     description: >-
@@ -207,6 +169,8 @@ classes:
         range: Dataset
         multivalued: true
 
+  # TODO: consider how to distinguish between metadata only vs
+  # instances where data file is present (and we can extract metadata)
   Dataset:
     aliases:
       - data resource
@@ -426,6 +390,7 @@ classes:
       affiliation:
         # Note that creators have affiliations which may differ
         # from that of their members
+        # Organization is imported from Bridge2AI standards schema
         range: Organization
     in_subset:
       - Motivation
@@ -448,6 +413,7 @@ classes:
     description: >-
       What is the name and/or identifier of the organization providing
       monetary support or other resources supporting creation of the dataset?
+    # Organization is imported from Bridge2AI standards schema
     is_a: Organization
 
   Grant:
@@ -469,26 +435,39 @@ classes:
       documents, photos, people, countries)?
     is_a: DatasetProperty
     attributes:
-      representation:  # TODO: align with Bridge2AI Standards Schema topics
-        range: string
+      data_topic:
+        description: >-
+          What general topic does the data represent?
+          This should be one of the Bridge2AI standards data topics,
+          e.g., B2AI_TOPIC:26
+        range: uriorcurie
+        values_from:
+          - B2AI_TOPIC
       instance_type:
         description: >-
           Are there multiple types of instances (e.g., movies, users, and
           ratings; people and interactions between them; nodes and edges)?
         range: string
-      data_type:  # TODO: align with Bridge2AI Standards Schema types
+      data_substrate:
         description: >-
           What data does each instance consist of? “Raw” data (e.g., unprocessed
-          text or images) or features? In either case, please provide a
-          description.
-        range: string
+          text or images) or features? This should be one of the Bridge2AI
+          standards data substrates, e.g., B2AI_SUBSTRATE:6
+        range: uriorcurie
+        values_from:
+          - B2AI_SUBSTRATE
       counts:
         description: >-
           How many instances are there in total (of each type, if appropriate)?
         range: integer
-      label:  # TODO: clarify what this means - it's fuzzy, and maybe redundant
+      label:
         description: >-
           Is there a label or target associated with each instance?
+        range: boolean
+      label_description:
+        description: >-
+          If there is a label or target associated with each instance,
+          what pattern or format does it follow?
         range: string
       sampling_strategies:
         range: SamplingStrategy
@@ -631,6 +610,8 @@ classes:
       non-public communications)?
     is_a: DatasetProperty
     attributes:
+      confidential_elements_present:
+        range: boolean
       description:
         range: string
         multivalued: true
@@ -644,6 +625,8 @@ classes:
       so, please describe why.
     is_a: DatasetProperty
     attributes:
+      content_warnings_present:
+        range: boolean
       warnings:
         range: string
         multivalued: true
@@ -657,6 +640,8 @@ classes:
       description of their respective distributions within the dataset.
     is_a: DatasetProperty
     attributes:
+      subpopulation_elements_present:
+        range: boolean
       identification:
         range: string
         multivalued: true
@@ -666,8 +651,7 @@ classes:
     in_subset:
       - Composition
 
-  # TODO: consider other ways to model this - is it just a boolean?
-  # or are we concerned about specific PHI subtypes?
+  # TODO: consider specific PHI subtypes
   # In practice, if data is Safe Harbor de-identified, that's one thing,
   # but it could also be anonymized, and the standard for that isn't as
   # explicit. See https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5977668/
@@ -678,6 +662,8 @@ classes:
       data) from the dataset?
     is_a: DatasetProperty
     attributes:
+      identifiable_elements_present:
+        range: boolean
       description:
         range: string
         multivalued: true
@@ -693,6 +679,8 @@ classes:
       identification, such as social security numbers; criminal history)?
     is_a: DatasetProperty
     attributes:
+      sensitive_elements_present:
+        range: boolean
       description:
         range: string
         multivalued: true
@@ -1136,23 +1124,13 @@ slots:
   # the linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
 
-  id:
-    identifier: true
-    description: the unique name of the dataset
-    slot_uri: dcterms:identifier
-    exact_mappings:
-      - schema:name
-
-  name:
-    slot_uri: schema:name
+  # id is imported from Bridge2AI standards schema
+  # name is imported from Bridge2AI standards schema
+  # description is imported from Bridge2AI standards schema
 
   title:
     description: the official title of the element
     slot_uri: dcterms:title
-
-  description:
-    description: human readable description of the information
-    slot_uri: dcterms:description
 
   language:
     description: language in which the information is expressed
@@ -1248,10 +1226,12 @@ slots:
       The standard to which the data conforms. This is not the same as the
       media type. Rather, this is the standard to which the data conforms
       in a more specific sense, e.g., frictionless, schema.org, etc.
+      This should be a standard from the Bridge2AI standards registry.
     slot_uri: dcterms:conformsTo
     range: uriorcurie
+    values_from:
+      - B2AI_STANDARD
 
-  # TODO: Align with Bridge2AI Standards Schema
   conforms_to_schema:
     description: >-
       The schema to which the data conforms. This is not the same as the
@@ -1358,6 +1338,7 @@ enums:
     description: >-
       The entity responsible for maintaining a dataset.
     permissible_values:
+      # Organization is imported from Bridge2AI standards schema
       Person:
       Organization:
 

@@ -6,15 +6,13 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 PREFIX linkml: <https://w3id.org/linkml/>
 PREFIX pav: <http://purl.org/pav/>
 PREFIX schema1: <http://schema.org/>
+PREFIX B2AI: <https://w3id.org/bridge2ai/standards-schema/>
+PREFIX B2AI_ORG: <https://w3id.org/bridge2ai/standards-organization-schema/>
 PREFIX dcterms1: <http://example.org/UNKNOWN/dcterms/>
 PREFIX oslc: <http://example.org/UNKNOWN/oslc/>
 PREFIX bibo: <http://example.org/UNKNOWN/bibo/>
 PREFIX prov1: <http://example.org/UNKNOWN/prov/>
 
-
-<RorIdentifier> IRI
-
-<WikidataIdentifier> IRI
 
 linkml:String xsd:string
 
@@ -54,12 +52,32 @@ linkml:Jsonpath xsd:string
 
 linkml:Sparqlpath xsd:string
 
+B2AI:CategoryType IRI
+
+B2AI:EdamIdentifier IRI
+
+B2AI:MeshIdentifier IRI
+
+B2AI:NcitIdentifier IRI
+
+B2AI_ORG:RorIdentifier IRI
+
+B2AI_ORG:WikidataIdentifier IRI
+
 <AddressingGap> CLOSED {
     (  $<AddressingGap_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <response> @linkml:String ?
        ) ;
        rdf:type [ <AddressingGap> ]
+    )
+}
+
+B2AI:AnatomicalEntity CLOSED {
+    (  $B2AI:AnatomicalEntity_tes (  &B2AI:NamedThing_tes ;
+          rdf:type [ schema1:Thing ] ?
+       ) ;
+       rdf:type [ B2AI:AnatomicalEntity ]
     )
 }
 
@@ -111,6 +129,7 @@ linkml:Sparqlpath xsd:string
 <Confidentiality> CLOSED {
     (  $<Confidentiality_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
+          <confidential_elements_present> @linkml:Boolean ? ;
           <description> @linkml:String *
        ) ;
        rdf:type [ <Confidentiality> ]
@@ -129,6 +148,7 @@ linkml:Sparqlpath xsd:string
 <ContentWarning> CLOSED {
     (  $<ContentWarning_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
+          <content_warnings_present> @linkml:Boolean ? ;
           <warnings> @linkml:String *
        ) ;
        rdf:type [ <ContentWarning> ]
@@ -139,7 +159,7 @@ linkml:Sparqlpath xsd:string
     (  $<Creator_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
           <principal_investigator> @<Person> ? ;
-          <affiliation> @<Organization> ?
+          <affiliation> @B2AI_ORG:Organization ?
        ) ;
        rdf:type [ <Creator> ]
     )
@@ -244,8 +264,8 @@ linkml:Sparqlpath xsd:string
 
 <DatasetProperty>  (
     CLOSED {
-       (  $<DatasetProperty_tes> (  &<NamedThing_tes> ;
-             rdf:type [ <NamedThing> ] ? ;
+       (  $<DatasetProperty_tes> (  &B2AI:NamedThing_tes ;
+             rdf:type [ schema1:Thing ] ? ;
              <used_software> @<Software> *
           ) ;
           rdf:type [ <DatasetProperty> ]
@@ -274,6 +294,7 @@ linkml:Sparqlpath xsd:string
 <Deidentification> CLOSED {
     (  $<Deidentification_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
+          <identifiable_elements_present> @linkml:Boolean ? ;
           <description> @linkml:String *
        ) ;
        rdf:type [ <Deidentification> ]
@@ -404,8 +425,8 @@ linkml:Sparqlpath xsd:string
 }
 
 <Grant> CLOSED {
-    (  $<Grant_tes> (  &<NamedThing_tes> ;
-          rdf:type [ <NamedThing> ] ? ;
+    (  $<Grant_tes> (  &B2AI:NamedThing_tes ;
+          rdf:type [ schema1:Thing ] ? ;
           <grant_number> @linkml:String ?
        ) ;
        rdf:type [ <Grant> ]
@@ -413,8 +434,8 @@ linkml:Sparqlpath xsd:string
 }
 
 <Grantor> CLOSED {
-    (  $<Grantor_tes> (  &<Organization_tes> ;
-          rdf:type [ <Organization> ] ?
+    (  $<Grantor_tes> (  &B2AI_ORG:Organization_tes ;
+          rdf:type [ B2AI_ORG:Organization ] ?
        ) ;
        rdf:type [ <Grantor> ]
     )
@@ -431,7 +452,7 @@ linkml:Sparqlpath xsd:string
           <conforms_to_schema> @linkml:Uriorcurie ? ;
           pav:createdBy @<CreatorOrMaintainerEnum> * ;
           pav:createdOn @linkml:Datetime ? ;
-          dcterms1:description @linkml:String ? ;
+          schema1:description @linkml:String ? ;
           <doi> @linkml:Uriorcurie ? ;
           dcat:downloadURL @linkml:Uri ? ;
           dcterms1:issued @linkml:Datetime ? ;
@@ -454,11 +475,12 @@ linkml:Sparqlpath xsd:string
 <Instance> CLOSED {
     (  $<Instance_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
-          <representation> @linkml:String ? ;
+          <data_topic> @linkml:Uriorcurie ? ;
           <instance_type> @linkml:String ? ;
-          <data_type> @linkml:String ? ;
+          <data_substrate> @linkml:Uriorcurie ? ;
           <counts> @linkml:Integer ? ;
-          <label> @linkml:String ? ;
+          <label> @linkml:Boolean ? ;
+          <label_description> @linkml:String ? ;
           <sampling_strategies> @<SamplingStrategy> * ;
           <missing_information> @<MissingInfo> *
        ) ;
@@ -525,28 +547,41 @@ linkml:Sparqlpath xsd:string
     )
 }
 
-<NamedThing>  (
+B2AI:NamedThing  (
     CLOSED {
-       (  $<NamedThing_tes> (  schema1:name @linkml:String ? ;
-             dcterms1:description @linkml:String ?
+       (  $B2AI:NamedThing_tes (  B2AI:category @B2AI:CategoryType ? ;
+             schema1:name @linkml:String ? ;
+             schema1:description @linkml:String ? ;
+             B2AI:subclass_of @B2AI:NamedThing * ;
+             B2AI:related_to @B2AI:NamedThing * ;
+             B2AI:contributor_name @linkml:String ? ;
+             B2AI:contributor_github_name @linkml:String ? ;
+             B2AI:contributor_orcid @linkml:Uriorcurie ? ;
+             B2AI:contribution_date @linkml:Date ?
           ) ;
-          rdf:type [ <NamedThing> ]
+          rdf:type [ schema1:Thing ]
        )
-    } OR @<DatasetProperty> OR @<Grant> OR @<Organization> OR @<Person> OR @<Software>
+    } OR @B2AI:AnatomicalEntity OR @<DatasetProperty> OR @<Grant> OR @B2AI_ORG:Organization OR @<Person> OR @<Software>
 )
 
-<Organization>  (
+B2AI_ORG:Organization  (
     CLOSED {
-       (  $<Organization_tes> (  &<NamedThing_tes> ;
-             rdf:type [ <NamedThing> ] ? ;
-             <email> @linkml:String ? ;
-             <ror_id> @<RorIdentifier> ? ;
-             <wikidata_id> @<WikidataIdentifier> ?
+       (  $B2AI_ORG:Organization_tes (  &B2AI:NamedThing_tes ;
+             rdf:type [ schema1:Thing ] ? ;
+             B2AI_ORG:ror_id @B2AI_ORG:RorIdentifier ? ;
+             B2AI_ORG:wikidata_id @B2AI_ORG:WikidataIdentifier ? ;
+             B2AI:url @linkml:Uriorcurie ?
           ) ;
-          rdf:type [ <Organization> ]
+          rdf:type [ B2AI_ORG:Organization ]
        )
     } OR @<Grantor>
 )
+
+B2AI_ORG:OrganizationContainer CLOSED {
+    (  $B2AI_ORG:OrganizationContainer_tes B2AI_ORG:organizations @B2AI_ORG:Organization * ;
+       rdf:type [ B2AI_ORG:OrganizationContainer ] ?
+    )
+}
 
 <OtherTask> CLOSED {
     (  $<OtherTask_tes> (  &<DatasetProperty_tes> ;
@@ -558,9 +593,9 @@ linkml:Sparqlpath xsd:string
 }
 
 <Person> CLOSED {
-    (  $<Person_tes> (  &<NamedThing_tes> ;
-          rdf:type [ <NamedThing> ] ? ;
-          <affiliation> @<Organization> * ;
+    (  $<Person_tes> (  &B2AI:NamedThing_tes ;
+          rdf:type [ schema1:Thing ] ? ;
+          <affiliation> @B2AI_ORG:Organization * ;
           <email> @linkml:String ?
        ) ;
        rdf:type [ <Person> ]
@@ -630,6 +665,7 @@ linkml:Sparqlpath xsd:string
 <SensitiveElement> CLOSED {
     (  $<SensitiveElement_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
+          <sensitive_elements_present> @linkml:Boolean ? ;
           <description> @linkml:String *
        ) ;
        rdf:type [ <SensitiveElement> ]
@@ -637,8 +673,8 @@ linkml:Sparqlpath xsd:string
 }
 
 <Software> CLOSED {
-    (  $<Software_tes> (  &<NamedThing_tes> ;
-          rdf:type [ <NamedThing> ] ? ;
+    (  $<Software_tes> (  &B2AI:NamedThing_tes ;
+          rdf:type [ schema1:Thing ] ? ;
           <version> @linkml:String ? ;
           <license> @linkml:String ? ;
           <url> @linkml:String ?
@@ -659,6 +695,7 @@ linkml:Sparqlpath xsd:string
 <Subpopulation> CLOSED {
     (  $<Subpopulation_tes> (  &<DatasetProperty_tes> ;
           rdf:type [ <DatasetProperty> ] ? ;
+          <subpopulation_elements_present> @linkml:Boolean ? ;
           <identification> @linkml:String * ;
           <distribution> @linkml:String *
        ) ;

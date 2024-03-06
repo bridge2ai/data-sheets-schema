@@ -1,6 +1,12 @@
 {
+   "B2AI": "https://w3id.org/bridge2ai/standards-schema/",
+   "B2AI_ORG": "https://w3id.org/bridge2ai/standards-organization-schema/",
+   "B2AI_STANDARD": "https://w3id.org/bridge2ai/b2ai-standards-registry/",
+   "B2AI_SUBSTRATE": "https://w3id.org/bridge2ai/b2ai-standards-registry/",
+   "B2AI_TOPIC": "https://w3id.org/bridge2ai/b2ai-standards-registry/",
+   "MESH": "http://id.nlm.nih.gov/mesh/",
    "bibo": "http://example.org/UNKNOWN/bibo/",
-   "biolink": "https://w3id.org/biolink/",
+   "biolink": "https://w3id.org/biolink/vocab/",
    "csvw": "http://www.w3.org/ns/csvw#",
    "data_sheets_schema": "https://w3id.org/bridge2ai/data-sheets-schema/",
    "datasets": "https://w3id.org/linkml/report",
@@ -11,14 +17,30 @@
    "frictionless": "https://specs.frictionlessdata.io/",
    "linkml": "https://w3id.org/linkml/",
    "mediatypes": "https://www.iana.org/assignments/media-types/",
+   "ncit": "http://purl.obolibrary.org/obo/NCIT_",
    "oslc": "http://example.org/UNKNOWN/oslc/",
    "pav": "http://purl.org/pav/",
    "prov": "http://example.org/UNKNOWN/prov/",
+   "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
    "schema": "http://schema.org/",
    "sh": "https://w3id.org/shacl/",
    "skos": "http://www.w3.org/2004/02/skos/core#",
+   "uberon": "http://purl.obolibrary.org/obo/uberon/core#",
    "void": "http://rdfs.org/ns/void#",
+   "wikidata": "http://www.wikidata.org/wiki/",
+   "AnatomicalEntity": {
+      "@id": "B2AI:AnatomicalEntity"
+   },
    "Dataset": {
       "@id": "dcat:Distribution"
+   },
+   "NamedThing": {
+      "@id": "schema:Thing"
+   },
+   "Organization": {
+      "@id": "B2AI_ORG:Organization"
+   },
+   "OrganizationContainer": {
+      "@id": "B2AI_ORG:OrganizationContainer"
    }
 }
