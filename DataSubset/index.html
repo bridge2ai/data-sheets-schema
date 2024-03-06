@@ -1,0 +1,1905 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="https://bridge2ai.github.io/data-sheets-schema/DataSubset/" rel="canonical"/>
+<link href="../assets/images/favicon.png" rel="icon"/>
+<meta content="mkdocs-1.5.3, mkdocs-material-8.5.10" name="generator"/>
+<title>Class: DataSubset - data-sheets-schema</title>
+<link href="../assets/stylesheets/main.975780f9.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.2505c338.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="None" data-md-color-primary="None" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#class-datasubset">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="data-sheets-schema" class="md-header__button md-logo" data-md-component="logo" href=".." title="data-sheets-schema">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Class: DataSubset
+            
+          </span>
+</div>
+</div>
+</div>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="data-sheets-schema" class="md-nav__button md-logo" data-md-component="logo" href=".." title="data-sheets-schema">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+    data-sheets-schema
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+        Index
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../about/">
+        About
+      </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#inheritance">
+    Inheritance
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#slots">
+    Slots
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#usages">
+    Usages
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#identifier-and-mapping-information">
+    Identifier and Mapping Information
+  </a>
+<nav aria-label="Identifier and Mapping Information" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#schema-source">
+    Schema Source
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mappings">
+    Mappings
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#linkml-source">
+    LinkML Source
+  </a>
+<nav aria-label="LinkML Source" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#direct">
+    Direct
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#induced">
+    Induced
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<a class="md-content__button md-icon" href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/DataSubset.md" title="Edit this page">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
+</a>
+<h1 id="class-datasubset">Class: DataSubset</h1>
+<p><em>A subset of a dataset, likely containing multiple files of multiple potential purposes and properties.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/DataSubset">data_sheets_schema:DataSubset</a></p>
+<div class="mermaid"> classDiagram
+    class DataSubset
+      Dataset &lt;|-- DataSubset
+
+      DataSubset : acquisition_methods
+
+          DataSubset --|&gt; InstanceAcquisition : acquisition_methods
+
+      DataSubset : addressing_gaps
+
+          DataSubset --|&gt; AddressingGap : addressing_gaps
+
+      DataSubset : anomalies
+
+          DataSubset --|&gt; DataAnomaly : anomalies
+
+      DataSubset : bytes
+
+      DataSubset : cleaning_strategies
+
+          DataSubset --|&gt; CleaningStrategy : cleaning_strategies
+
+      DataSubset : collection_mechanisms
+
+          DataSubset --|&gt; CollectionMechanism : collection_mechanisms
+
+      DataSubset : collection_timeframes
+
+          DataSubset --|&gt; CollectionTimeframe : collection_timeframes
+
+      DataSubset : compression
+
+          DataSubset --|&gt; CompressionEnum : compression
+
+      DataSubset : confidential_elements
+
+          DataSubset --|&gt; Confidentiality : confidential_elements
+
+      DataSubset : conforms_to
+
+      DataSubset : conforms_to_class
+
+      DataSubset : conforms_to_schema
+
+      DataSubset : content_warnings
+
+          DataSubset --|&gt; ContentWarning : content_warnings
+
+      DataSubset : created_by
+
+          DataSubset --|&gt; CreatorOrMaintainerEnum : created_by
+
+      DataSubset : created_on
+
+      DataSubset : creators
+
+          DataSubset --|&gt; Creator : creators
+
+      DataSubset : data_collectors
+
+          DataSubset --|&gt; DataCollector : data_collectors
+
+      DataSubset : data_protection_impacts
+
+          DataSubset --|&gt; DataProtectionImpact : data_protection_impacts
+
+      DataSubset : description
+
+      DataSubset : dialect
+
+      DataSubset : discouraged_uses
+
+          DataSubset --|&gt; DiscouragedUse : discouraged_uses
+
+      DataSubset : distribution_dates
+
+          DataSubset --|&gt; DistributionDate : distribution_dates
+
+      DataSubset : distribution_formats
+
+          DataSubset --|&gt; DistributionFormat : distribution_formats
+
+      DataSubset : doi
+
+      DataSubset : download_url
+
+      DataSubset : encoding
+
+          DataSubset --|&gt; EncodingEnum : encoding
+
+      DataSubset : errata
+
+          DataSubset --|&gt; Erratum : errata
+
+      DataSubset : ethical_reviews
+
+          DataSubset --|&gt; EthicalReview : ethical_reviews
+
+      DataSubset : existing_uses
+
+          DataSubset --|&gt; ExistingUse : existing_uses
+
+      DataSubset : extension_mechanism
+
+          DataSubset --|&gt; ExtensionMechanism : extension_mechanism
+
+      DataSubset : external_resources
+
+          DataSubset --|&gt; ExternalResource : external_resources
+
+      DataSubset : format
+
+          DataSubset --|&gt; FormatEnum : format
+
+      DataSubset : funders
+
+          DataSubset --|&gt; FundingMechanism : funders
+
+      DataSubset : future_use_impacts
+
+          DataSubset --|&gt; FutureUseImpact : future_use_impacts
+
+      DataSubset : hash
+
+      DataSubset : id
+
+      DataSubset : instances
+
+          DataSubset --|&gt; Instance : instances
+
+      DataSubset : ip_restrictions
+
+          DataSubset --|&gt; IPRestrictions : ip_restrictions
+
+      DataSubset : is_data_split
+
+      DataSubset : is_deidentified
+
+          DataSubset --|&gt; Deidentification : is_deidentified
+
+      DataSubset : is_subpopulation
+
+      DataSubset : is_tabular
+
+      DataSubset : issued
+
+      DataSubset : keywords
+
+      DataSubset : labeling_strategies
+
+          DataSubset --|&gt; LabelingStrategy : labeling_strategies
+
+      DataSubset : language
+
+      DataSubset : last_updated_on
+
+      DataSubset : license
+
+      DataSubset : license_and_use_terms
+
+          DataSubset --|&gt; LicenseAndUseTerms : license_and_use_terms
+
+      DataSubset : maintainers
+
+          DataSubset --|&gt; Maintainer : maintainers
+
+      DataSubset : md5
+
+      DataSubset : media_type
+
+      DataSubset : modified_by
+
+          DataSubset --|&gt; CreatorOrMaintainerEnum : modified_by
+
+      DataSubset : other_tasks
+
+          DataSubset --|&gt; OtherTask : other_tasks
+
+      DataSubset : page
+
+      DataSubset : path
+
+      DataSubset : preprocessing_strategies
+
+          DataSubset --|&gt; PreprocessingStrategy : preprocessing_strategies
+
+      DataSubset : publisher
+
+      DataSubset : purposes
+
+          DataSubset --|&gt; Purpose : purposes
+
+      DataSubset : raw_sources
+
+          DataSubset --|&gt; RawData : raw_sources
+
+      DataSubset : regulatory_restrictions
+
+          DataSubset --|&gt; ExportControlRegulatoryRestrictions : regulatory_restrictions
+
+      DataSubset : retention_limit
+
+          DataSubset --|&gt; RetentionLimits : retention_limit
+
+      DataSubset : sampling_strategies
+
+          DataSubset --|&gt; SamplingStrategy : sampling_strategies
+
+      DataSubset : sensitive_elements
+
+          DataSubset --|&gt; SensitiveElement : sensitive_elements
+
+      DataSubset : sha256
+
+      DataSubset : status
+
+      DataSubset : subpopulations
+
+          DataSubset --|&gt; Subpopulation : subpopulations
+
+      DataSubset : subsets
+
+          DataSubset --|&gt; DataSubset : subsets
+
+      DataSubset : tasks
+
+          DataSubset --|&gt; Task : tasks
+
+      DataSubset : title
+
+      DataSubset : updates
+
+          DataSubset --|&gt; UpdatePlan : updates
+
+      DataSubset : use_repository
+
+          DataSubset --|&gt; UseRepository : use_repository
+
+      DataSubset : version
+
+      DataSubset : version_access
+
+          DataSubset --|&gt; VersionAccess : version_access
+
+      DataSubset : was_derived_from
+
+
+</div>
+<h2 id="inheritance">Inheritance</h2>
+<ul>
+<li><a href="../Information/">Information</a><ul>
+<li><a href="../Dataset/">Dataset</a><ul>
+<li><strong>DataSubset</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="slots">Slots</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Cardinality and Range</th>
+<th>Description</th>
+<th>Inheritance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../is_data_split/">is_data_split</a></td>
+<td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
+<td>Is this subset a split of the larger dataset, e</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../is_subpopulation/">is_subpopulation</a></td>
+<td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
+<td>Is this subset a subpopulation of the larger dataset, e</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../bytes/">bytes</a></td>
+<td>0..1 <br/> <a href="../Integer/">Integer</a></td>
+<td>Size of the data in bytes</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../dialect/">dialect</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../encoding/">encoding</a></td>
+<td>0..1 <br/> <a href="../EncodingEnum/">EncodingEnum</a></td>
+<td>The encoding of the data</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../format/">format</a></td>
+<td>0..1 <br/> <a href="../FormatEnum/">FormatEnum</a></td>
+<td>The format of the data</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../hash/">hash</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>The hash representation of the data, e</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../md5/">md5</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>The md5 hash representation of the data</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../media_type/">media_type</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>The media type of the data</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../path/">path</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../sha256/">sha256</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>The sha256 hash representation of the data</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../purposes/">purposes</a></td>
+<td>0..* <br/> <a href="../Purpose/">Purpose</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../tasks/">tasks</a></td>
+<td>0..* <br/> <a href="../Task/">Task</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../addressing_gaps/">addressing_gaps</a></td>
+<td>0..* <br/> <a href="../AddressingGap/">AddressingGap</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../creators/">creators</a></td>
+<td>0..* <br/> <a href="../Creator/">Creator</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../funders/">funders</a></td>
+<td>0..* <br/> <a href="../FundingMechanism/">FundingMechanism</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../subsets/">subsets</a></td>
+<td>0..* <br/> <a href="./">DataSubset</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../instances/">instances</a></td>
+<td>0..* <br/> <a href="../Instance/">Instance</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../anomalies/">anomalies</a></td>
+<td>0..* <br/> <a href="../DataAnomaly/">DataAnomaly</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../external_resources/">external_resources</a></td>
+<td>0..* <br/> <a href="../ExternalResource/">ExternalResource</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../confidential_elements/">confidential_elements</a></td>
+<td>0..* <br/> <a href="../Confidentiality/">Confidentiality</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../content_warnings/">content_warnings</a></td>
+<td>0..* <br/> <a href="../ContentWarning/">ContentWarning</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../subpopulations/">subpopulations</a></td>
+<td>0..* <br/> <a href="../Subpopulation/">Subpopulation</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../sensitive_elements/">sensitive_elements</a></td>
+<td>0..* <br/> <a href="../SensitiveElement/">SensitiveElement</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../acquisition_methods/">acquisition_methods</a></td>
+<td>0..* <br/> <a href="../InstanceAcquisition/">InstanceAcquisition</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../collection_mechanisms/">collection_mechanisms</a></td>
+<td>0..* <br/> <a href="../CollectionMechanism/">CollectionMechanism</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../sampling_strategies/">sampling_strategies</a></td>
+<td>0..* <br/> <a href="../SamplingStrategy/">SamplingStrategy</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../data_collectors/">data_collectors</a></td>
+<td>0..* <br/> <a href="../DataCollector/">DataCollector</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../collection_timeframes/">collection_timeframes</a></td>
+<td>0..* <br/> <a href="../CollectionTimeframe/">CollectionTimeframe</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../ethical_reviews/">ethical_reviews</a></td>
+<td>0..* <br/> <a href="../EthicalReview/">EthicalReview</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../data_protection_impacts/">data_protection_impacts</a></td>
+<td>0..* <br/> <a href="../DataProtectionImpact/">DataProtectionImpact</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../preprocessing_strategies/">preprocessing_strategies</a></td>
+<td>0..* <br/> <a href="../PreprocessingStrategy/">PreprocessingStrategy</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../cleaning_strategies/">cleaning_strategies</a></td>
+<td>0..* <br/> <a href="../CleaningStrategy/">CleaningStrategy</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../labeling_strategies/">labeling_strategies</a></td>
+<td>0..* <br/> <a href="../LabelingStrategy/">LabelingStrategy</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../raw_sources/">raw_sources</a></td>
+<td>0..* <br/> <a href="../RawData/">RawData</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../existing_uses/">existing_uses</a></td>
+<td>0..* <br/> <a href="../ExistingUse/">ExistingUse</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../use_repository/">use_repository</a></td>
+<td>0..* <br/> <a href="../UseRepository/">UseRepository</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../other_tasks/">other_tasks</a></td>
+<td>0..* <br/> <a href="../OtherTask/">OtherTask</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../future_use_impacts/">future_use_impacts</a></td>
+<td>0..* <br/> <a href="../FutureUseImpact/">FutureUseImpact</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../discouraged_uses/">discouraged_uses</a></td>
+<td>0..* <br/> <a href="../DiscouragedUse/">DiscouragedUse</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../distribution_formats/">distribution_formats</a></td>
+<td>0..* <br/> <a href="../DistributionFormat/">DistributionFormat</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../distribution_dates/">distribution_dates</a></td>
+<td>0..* <br/> <a href="../DistributionDate/">DistributionDate</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../license_and_use_terms/">license_and_use_terms</a></td>
+<td>0..1 <br/> <a href="../LicenseAndUseTerms/">LicenseAndUseTerms</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../ip_restrictions/">ip_restrictions</a></td>
+<td>0..1 <br/> <a href="../IPRestrictions/">IPRestrictions</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../regulatory_restrictions/">regulatory_restrictions</a></td>
+<td>0..1 <br/> <a href="../ExportControlRegulatoryRestrictions/">ExportControlRegulatoryRestrictions</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../maintainers/">maintainers</a></td>
+<td>0..* <br/> <a href="../Maintainer/">Maintainer</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../errata/">errata</a></td>
+<td>0..* <br/> <a href="../Erratum/">Erratum</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../updates/">updates</a></td>
+<td>0..1 <br/> <a href="../UpdatePlan/">UpdatePlan</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../retention_limit/">retention_limit</a></td>
+<td>0..1 <br/> <a href="../RetentionLimits/">RetentionLimits</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../version_access/">version_access</a></td>
+<td>0..1 <br/> <a href="../VersionAccess/">VersionAccess</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../extension_mechanism/">extension_mechanism</a></td>
+<td>0..1 <br/> <a href="../ExtensionMechanism/">ExtensionMechanism</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../is_deidentified/">is_deidentified</a></td>
+<td>0..1 <br/> <a href="../Deidentification/">Deidentification</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../is_tabular/">is_tabular</a></td>
+<td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
+<td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../compression/">compression</a></td>
+<td>0..1 <br/> <a href="../CompressionEnum/">CompressionEnum</a></td>
+<td>The compression format of the data</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../conforms_to/">conforms_to</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>The standard to which the data conforms</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../conforms_to_class/">conforms_to_class</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>The class in the schema to which the data object instantiates</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../conforms_to_schema/">conforms_to_schema</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>The schema to which the data conforms</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../created_by/">created_by</a></td>
+<td>0..* <br/> <a href="../CreatorOrMaintainerEnum/">CreatorOrMaintainerEnum</a></td>
+<td>Agent that created the element</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../created_on/">created_on</a></td>
+<td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
+<td>Date and Time at which the element was created</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../description/">description</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable description for a thing</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../doi/">doi</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>The Digital Object Identifier of the data, with the doi prefix</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../download_url/">download_url</a></td>
+<td>0..1 <br/> <a href="../Uri/">Uri</a></td>
+<td>URL from which the data can be downloaded</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../id/">id</a></td>
+<td>1..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>A unique identifier for a thing</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../issued/">issued</a></td>
+<td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
+<td></td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../keywords/">keywords</a></td>
+<td>0..* <br/> <a href="../String/">String</a></td>
+<td>Keywords associated with the data</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../language/">language</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>language in which the information is expressed</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../last_updated_on/">last_updated_on</a></td>
+<td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
+<td>Date and Time at which the element was last updated</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../license/">license</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>license for the data</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../modified_by/">modified_by</a></td>
+<td>0..1 <br/> <a href="../CreatorOrMaintainerEnum/">CreatorOrMaintainerEnum</a></td>
+<td>agent that modified the element</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../page/">page</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../publisher/">publisher</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td></td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../status/">status</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>Status of the element in terms of its maturity or life cycle</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../title/">title</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>the official title of the element</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../version/">version</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>particular version of schema</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../was_derived_from/">was_derived_from</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A derivation is a transformation of an entity into another, an update of an e...</td>
+<td><a href="../Information/">Information</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="usages">Usages</h2>
+<table>
+<thead>
+<tr>
+<th>used by</th>
+<th>used in</th>
+<th>type</th>
+<th>used</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td><a href="../subsets/">subsets</a></td>
+<td>range</td>
+<td><a href="./">DataSubset</a></td>
+</tr>
+<tr>
+<td><a href="./">DataSubset</a></td>
+<td><a href="../subsets/">subsets</a></td>
+<td>range</td>
+<td><a href="./">DataSubset</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="schema-source">Schema Source</h3>
+<ul>
+<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
+</ul>
+<h2 id="mappings">Mappings</h2>
+<table>
+<thead>
+<tr>
+<th>Mapping Type</th>
+<th>Mapped Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>self</td>
+<td>data_sheets_schema:DataSubset</td>
+</tr>
+<tr>
+<td>native</td>
+<td>data_sheets_schema:DataSubset</td>
+</tr>
+</tbody>
+</table>
+<h2 id="linkml-source">LinkML Source</h2>
+<!-- TODO: investigate https://stackoverflow.com/questions/37606292/how-to-create-tabbed-code-blocks-in-mkdocs-or-sphinx -->
+<h3 id="direct">Direct</h3>
+<details>
+<pre><code class="language-yaml">name: DataSubset
+description: A subset of a dataset, likely containing multiple files of multiple potential
+  purposes and properties.
+from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+is_a: Dataset
+attributes:
+  is_data_split:
+    name: is_data_split
+    description: Is this subset a split of the larger dataset, e.g., is it a set for
+      model training, testing, or validation?
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    range: boolean
+  is_subpopulation:
+    name: is_subpopulation
+    description: Is this subset a subpopulation of the larger dataset, e.g., is it
+      a set of data for a specific demographic?
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    range: boolean
+
+</code></pre>
+</details>
+<h3 id="induced">Induced</h3>
+<details>
+<pre><code class="language-yaml">name: DataSubset
+description: A subset of a dataset, likely containing multiple files of multiple potential
+  purposes and properties.
+from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+is_a: Dataset
+attributes:
+  is_data_split:
+    name: is_data_split
+    description: Is this subset a split of the larger dataset, e.g., is it a set for
+      model training, testing, or validation?
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: is_data_split
+    owner: DataSubset
+    domain_of:
+    - DataSubset
+    range: boolean
+  is_subpopulation:
+    name: is_subpopulation
+    description: Is this subset a subpopulation of the larger dataset, e.g., is it
+      a set of data for a specific demographic?
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: is_subpopulation
+    owner: DataSubset
+    domain_of:
+    - DataSubset
+    range: boolean
+  bytes:
+    name: bytes
+    description: Size of the data in bytes.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcat:byteSize
+    alias: bytes
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: integer
+  dialect:
+    name: dialect
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: csvw:dialect
+    alias: dialect
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: string
+  encoding:
+    name: encoding
+    description: The encoding of the data. This is not the same as the media type.
+      Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8,
+      ASCII, etc.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: encoding
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: EncodingEnum
+  format:
+    name: format
+    description: The format of the data. This is not the same as the media type. Rather,
+      this is the format of the data in a more specific sense, e.g., CSV, JSON, etc.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcterms:format
+    alias: format
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: FormatEnum
+  hash:
+    name: hash
+    description: The hash representation of the data, e.g., sha256, md5, etc. Subtypes
+      have their own slots.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: hash
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: string
+  md5:
+    name: md5
+    description: The md5 hash representation of the data.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    is_a: hash
+    alias: md5
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: string
+  media_type:
+    name: media_type
+    description: The media type of the data. This is not the same as the format. Rather,
+      this is the media type of the data in a more general sense, e.g., text/csv,
+      application/json, etc., though as it is defined here the media type can be any
+      string.
+    examples:
+    - value: text/csv
+    - value: application/json
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - frictionless:mediatype
+    - schema:encodingFormat
+    rank: 1000
+    slot_uri: dcat:mediaType
+    alias: media_type
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: string
+  path:
+    name: path
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    close_mappings:
+    - frictionless:path
+    rank: 1000
+    alias: path
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: string
+  sha256:
+    name: sha256
+    description: The sha256 hash representation of the data.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    is_a: hash
+    alias: sha256
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: string
+  purposes:
+    name: purposes
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: purposes
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Purpose
+  tasks:
+    name: tasks
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: tasks
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Task
+  addressing_gaps:
+    name: addressing_gaps
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: addressing_gaps
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: AddressingGap
+  creators:
+    name: creators
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: creators
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Creator
+  funders:
+    name: funders
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: funders
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: FundingMechanism
+  subsets:
+    name: subsets
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:distribution
+    rank: 1000
+    slot_uri: dcat:distribution
+    multivalued: true
+    alias: subsets
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DataSubset
+  instances:
+    name: instances
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: instances
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Instance
+  anomalies:
+    name: anomalies
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: anomalies
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DataAnomaly
+  external_resources:
+    name: external_resources
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: external_resources
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    - ExternalResource
+    range: ExternalResource
+  confidential_elements:
+    name: confidential_elements
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: confidential_elements
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Confidentiality
+  content_warnings:
+    name: content_warnings
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: content_warnings
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ContentWarning
+  subpopulations:
+    name: subpopulations
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: subpopulations
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Subpopulation
+  sensitive_elements:
+    name: sensitive_elements
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: sensitive_elements
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: SensitiveElement
+  acquisition_methods:
+    name: acquisition_methods
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: acquisition_methods
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: InstanceAcquisition
+  collection_mechanisms:
+    name: collection_mechanisms
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: collection_mechanisms
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: CollectionMechanism
+  sampling_strategies:
+    name: sampling_strategies
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: sampling_strategies
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    - Instance
+    range: SamplingStrategy
+  data_collectors:
+    name: data_collectors
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: data_collectors
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DataCollector
+  collection_timeframes:
+    name: collection_timeframes
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: collection_timeframes
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: CollectionTimeframe
+  ethical_reviews:
+    name: ethical_reviews
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: ethical_reviews
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: EthicalReview
+  data_protection_impacts:
+    name: data_protection_impacts
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: data_protection_impacts
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DataProtectionImpact
+  preprocessing_strategies:
+    name: preprocessing_strategies
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: preprocessing_strategies
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: PreprocessingStrategy
+  cleaning_strategies:
+    name: cleaning_strategies
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: cleaning_strategies
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: CleaningStrategy
+  labeling_strategies:
+    name: labeling_strategies
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: labeling_strategies
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: LabelingStrategy
+  raw_sources:
+    name: raw_sources
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: raw_sources
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: RawData
+  existing_uses:
+    name: existing_uses
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: existing_uses
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ExistingUse
+  use_repository:
+    name: use_repository
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: use_repository
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: UseRepository
+  other_tasks:
+    name: other_tasks
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: other_tasks
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: OtherTask
+  future_use_impacts:
+    name: future_use_impacts
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: future_use_impacts
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: FutureUseImpact
+  discouraged_uses:
+    name: discouraged_uses
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: discouraged_uses
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DiscouragedUse
+  distribution_formats:
+    name: distribution_formats
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: distribution_formats
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DistributionFormat
+  distribution_dates:
+    name: distribution_dates
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: distribution_dates
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DistributionDate
+  license_and_use_terms:
+    name: license_and_use_terms
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: license_and_use_terms
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: LicenseAndUseTerms
+  ip_restrictions:
+    name: ip_restrictions
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: ip_restrictions
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: IPRestrictions
+  regulatory_restrictions:
+    name: regulatory_restrictions
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: regulatory_restrictions
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ExportControlRegulatoryRestrictions
+  maintainers:
+    name: maintainers
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: maintainers
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Maintainer
+  errata:
+    name: errata
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    multivalued: true
+    alias: errata
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Erratum
+  updates:
+    name: updates
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: updates
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: UpdatePlan
+  retention_limit:
+    name: retention_limit
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: retention_limit
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: RetentionLimits
+  version_access:
+    name: version_access
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: version_access
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: VersionAccess
+  extension_mechanism:
+    name: extension_mechanism
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: extension_mechanism
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ExtensionMechanism
+  is_deidentified:
+    name: is_deidentified
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: is_deidentified
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Deidentification
+  is_tabular:
+    name: is_tabular
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: is_tabular
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: boolean
+  compression:
+    name: compression
+    description: The compression format of the data. This is not the same as the media
+      type. Rather, this is the compression format of the data in a more specific
+      sense, e.g., zip, gzip, etc.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: compression
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: CompressionEnum
+  conforms_to:
+    name: conforms_to
+    description: The standard to which the data conforms. This is not the same as
+      the media type. Rather, this is the standard to which the data conforms in a
+      more specific sense, e.g., frictionless, schema.org, etc. This should be a standard
+      from the Bridge2AI standards registry.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    values_from:
+    - B2AI_STANDARD
+    slot_uri: dcterms:conformsTo
+    alias: conforms_to
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: uriorcurie
+  conforms_to_class:
+    name: conforms_to_class
+    description: The class in the schema to which the data object instantiates.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    is_a: conforms_to
+    alias: conforms_to_class
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: uriorcurie
+  conforms_to_schema:
+    name: conforms_to_schema
+    description: The schema to which the data conforms. This is not the same as the
+      media type. Rather, this is the schema to which the data conforms in a more
+      specific sense, and even more specific than the general set of standards it
+      conforms to.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - frictionless:schema
+    rank: 1000
+    is_a: conforms_to
+    alias: conforms_to_schema
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: uriorcurie
+  created_by:
+    name: created_by
+    description: Agent that created the element
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: pav:createdBy
+    multivalued: true
+    alias: created_by
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: CreatorOrMaintainerEnum
+  created_on:
+    name: created_on
+    description: Date and Time at which the element was created
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: pav:createdOn
+    alias: created_on
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: datetime
+  description:
+    name: description
+    description: A human-readable description for a thing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: schema:description
+    alias: description
+    owner: DataSubset
+    domain_of:
+    - Information
+    - Relationships
+    - Splits
+    - DataAnomaly
+    - Confidentiality
+    - Deidentification
+    - SensitiveElement
+    - InstanceAcquisition
+    - CollectionMechanism
+    - DataCollector
+    - CollectionTimeframe
+    - EthicalReview
+    - DirectCollection
+    - CollectionNotification
+    - CollectionConsent
+    - ConsentRevocation
+    - DataProtectionImpact
+    - PreprocessingStrategy
+    - CleaningStrategy
+    - LabelingStrategy
+    - RawData
+    - ExistingUse
+    - UseRepository
+    - OtherTask
+    - FutureUseImpact
+    - DiscouragedUse
+    - ThirdPartySharing
+    - DistributionFormat
+    - DistributionDate
+    - LicenseAndUseTerms
+    - IPRestrictions
+    - ExportControlRegulatoryRestrictions
+    - Maintainer
+    - Erratum
+    - UpdatePlan
+    - RetentionLimits
+    - VersionAccess
+    - ExtensionMechanism
+    - NamedThing
+    range: string
+  doi:
+    name: doi
+    description: The Digital Object Identifier of the data, with the doi prefix.
+    examples:
+    - value: doi:10.48550/arXiv.2310.03666
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: doi
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: uriorcurie
+  download_url:
+    name: download_url
+    description: URL from which the data can be downloaded. This is not the same as
+      the landing page, which is a page that describes the dataset. Rather, this URL
+      points directly to the data itself.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:url
+    close_mappings:
+    - frictionless:path
+    rank: 1000
+    slot_uri: dcat:downloadURL
+    alias: download_url
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: uri
+  id:
+    name: id
+    description: A unique identifier for a thing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: schema:identifier
+    identifier: true
+    alias: id
+    owner: DataSubset
+    domain_of:
+    - Information
+    - NamedThing
+    range: uriorcurie
+    required: true
+  issued:
+    name: issued
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcterms:issued
+    alias: issued
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: datetime
+  keywords:
+    name: keywords
+    description: Keywords associated with the data. These may be provided by the data
+      creator or assigned later in a manual or automated manner.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:keywords
+    rank: 1000
+    singular_name: keyword
+    slot_uri: dcat:keyword
+    multivalued: true
+    alias: keywords
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: string
+  language:
+    name: language
+    description: language in which the information is expressed
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: language
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: string
+  last_updated_on:
+    name: last_updated_on
+    description: Date and Time at which the element was last updated
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: pav:lastUpdatedOn
+    alias: last_updated_on
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: datetime
+  license:
+    name: license
+    description: license for the data
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - frictionless:licenses
+    rank: 1000
+    slot_uri: dcterms:license
+    alias: license
+    owner: DataSubset
+    domain_of:
+    - Information
+    - Software
+    range: string
+  modified_by:
+    name: modified_by
+    description: agent that modified the element
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: oslc:modifiedBy
+    alias: modified_by
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: CreatorOrMaintainerEnum
+  page:
+    name: page
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcat:landingPage
+    alias: page
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: string
+  publisher:
+    name: publisher
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcterms:publisher
+    alias: publisher
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: uriorcurie
+  status:
+    name: status
+    description: Status of the element in terms of its maturity or life cycle
+    examples:
+    - value: bibo:draft
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: bibo:status
+    alias: status
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: uriorcurie
+  title:
+    name: title
+    description: the official title of the element
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcterms:title
+    alias: title
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: string
+  version:
+    name: version
+    description: particular version of schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:version
+    - dcterms:hasVersion
+    rank: 1000
+    slot_uri: pav:version
+    alias: version
+    owner: DataSubset
+    domain_of:
+    - Information
+    - Software
+    range: string
+  was_derived_from:
+    name: was_derived_from
+    description: A derivation is a transformation of an entity into another, an update
+      of an entity resulting in a new one, or the construction of a new entity based
+      on a pre-existing entity.@en
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: prov:wasDerivedFrom
+    alias: was_derived_from
+    owner: DataSubset
+    domain_of:
+    - Information
+    range: string
+
+</code></pre>
+</details>
+</article>
+</div>
+<script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+<script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+<script src="https://unpkg.com/mermaid@8.8.0/dist/mermaid.min.js"></script><script>mermaid.initialize({});</script></body>
+</html>
