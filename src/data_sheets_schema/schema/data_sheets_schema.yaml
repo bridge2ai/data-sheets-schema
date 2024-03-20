@@ -85,7 +85,6 @@ classes:
   # Adapted from linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
   Information:
-    abstract: true
     description: Grouping for datasets and data files
     close_mappings:
       - schema:CreativeWork
