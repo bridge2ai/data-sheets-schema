@@ -1,3 +1,13 @@
-# Example data file - needs more contents
+# Example data file
 ---
-id: "data_sheets_schema:123"
+id: alice_smith
+name: "Alice Smith"
+description: "A person with a background in computer science and a passion for open source."
+affiliation:
+  - B2AI_ORG:8
+  - B2AI_ORG:31
+email: "alice.smith@example.com"
+contributor_name: "John Doe"
+contributor_github_name: "johndoe"
+contributor_orcid: "0000-0000-0000-0000"
+contribution_date: "2023-03-22"
