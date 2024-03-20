@@ -122,6 +122,8 @@ classes:
       double_quote:
       header:
       quote_char:
+    slots:
+      - id
 
   Person:
     description: An individual human being.
