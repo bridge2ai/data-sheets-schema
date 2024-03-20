@@ -207,6 +207,8 @@
 
       FormatDialect : header
 
+      FormatDialect : id
+
       FormatDialect : quote_char
 
 
@@ -223,6 +225,12 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><a href="../id/">id</a></td>
+<td>1..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>A unique identifier for a thing</td>
+<td>direct</td>
+</tr>
 <tr>
 <td><a href="../comment_prefix/">comment_prefix</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
@@ -286,6 +294,8 @@
 <pre><code class="language-yaml">name: FormatDialect
 description: Additional format information for a file
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+slots:
+- id
 attributes:
   comment_prefix:
     name: comment_prefix
@@ -361,6 +371,21 @@ attributes:
     domain_of:
     - FormatDialect
     range: string
+  id:
+    name: id
+    description: A unique identifier for a thing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: schema:identifier
+    identifier: true
+    alias: id
+    owner: FormatDialect
+    domain_of:
+    - Information
+    - FormatDialect
+    - NamedThing
+    range: uriorcurie
+    required: true
 
 </code></pre>
 </details>

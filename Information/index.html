@@ -201,9 +201,6 @@
 </a>
 <h1 id="class-information">Class: Information</h1>
 <p><em>Grouping for datasets and data files</em></p>
-<ul>
-<li><strong>NOTE</strong>: this is an abstract class and should not be instantiated directly</li>
-</ul>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/Information">data_sheets_schema:Information</a></p>
 <div class="mermaid"> classDiagram
     class Information
@@ -452,7 +449,6 @@ description: Grouping for datasets and data files
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 close_mappings:
 - schema:CreativeWork
-abstract: true
 slots:
 - compression
 - conforms_to
@@ -486,7 +482,6 @@ description: Grouping for datasets and data files
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 close_mappings:
 - schema:CreativeWork
-abstract: true
 attributes:
   compression:
     name: compression
@@ -655,6 +650,7 @@ attributes:
     owner: Information
     domain_of:
     - Information
+    - FormatDialect
     - NamedThing
     range: uriorcurie
     required: true

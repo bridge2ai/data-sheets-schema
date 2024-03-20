@@ -286,7 +286,7 @@
 <td><a href="../related_to/">related_to</a></td>
 <td>0..* <br/> <a href="../NamedThing/">NamedThing</a></td>
 <td>A relationship that is asserted between two named things</td>
-<td><a href="../Organization/">Organization</a>, <a href="../NamedThing/">NamedThing</a></td>
+<td><a href="../NamedThing/">NamedThing</a>, <a href="../Organization/">Organization</a></td>
 </tr>
 <tr>
 <td><a href="../id/">id</a></td>
@@ -474,6 +474,7 @@ attributes:
     owner: Grantor
     domain_of:
     - Information
+    - FormatDialect
     - NamedThing
     range: uriorcurie
     required: true
