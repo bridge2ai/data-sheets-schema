@@ -584,6 +584,7 @@ message ExternalResource
 // Additional format information for a file
 message FormatDialect
  {
+  uriorcurie id = 0
   string commentPrefix = 0
   string delimiter = 0
   string doubleQuote = 0
@@ -653,6 +654,32 @@ message Grantor
   wikidataIdentifier wikidataId = 0
   uriorcurie url = 0
  repeated  namedThing relatedTo = 0
+ }
+// Grouping for datasets and data files
+message Information
+ {
+  compressionEnum compression = 0
+  uriorcurie conformsTo = 0
+  uriorcurie conformsToClass = 0
+  uriorcurie conformsToSchema = 0
+ repeated  creatorOrMaintainerEnum createdBy = 0
+  datetime createdOn = 0
+  string description = 0
+  uriorcurie doi = 0
+  uri downloadUrl = 0
+  uriorcurie id = 0
+  datetime issued = 0
+ repeated  string keywords = 0
+  string language = 0
+  datetime lastUpdatedOn = 0
+  string license = 0
+  creatorOrMaintainerEnum modifiedBy = 0
+  string page = 0
+  uriorcurie publisher = 0
+  uriorcurie status = 0
+  string title = 0
+  string version = 0
+  string wasDerivedFrom = 0
  }
 // What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?
 message Instance
