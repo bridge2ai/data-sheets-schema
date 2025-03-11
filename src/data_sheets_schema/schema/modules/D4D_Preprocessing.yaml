@@ -1,0 +1,97 @@
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling"
+name: "data-sheets-schema-preprocessing"
+title: "Datasheets for Datasets – Preprocessing-Cleaning-Labeling Module"
+description: >
+  Subschema for Preprocessing, Cleaning, and Labeling–related information in
+  Datasheets for Datasets. The questions in this section are intended to provide
+  dataset consumers with information needed to determine whether the “raw” data
+  has been processed in ways that are compatible with their chosen tasks.
+
+
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+
+imports:
+  # Import the main data-sheets-schema so we can reference DatasetProperty, etc.
+  - "https://w3id.org/bridge2ai/data-sheets-schema"
+
+
+subsets:
+  Preprocessing-Cleaning-Labeling:
+    description: >
+      The questions in this section are intended to provide dataset consumers
+      with the information they need to determine whether the “raw” data has
+      been processed in ways that are compatible with their chosen tasks.
+
+
+prefixes:
+  linkml: "https://w3id.org/linkml/"
+  d4d-preprocessing: "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#"
+
+
+default_prefix: "d4d-preprocessing"
+
+
+# ------------------------------------------------------------------------------
+# Classes
+# ------------------------------------------------------------------------------
+
+
+classes:
+
+
+  PreprocessingStrategy:
+    description: >
+      Was any preprocessing of the data done (e.g., discretization or bucketing,
+      tokenization, SIFT feature extraction)?
+    is_a: DatasetProperty
+    in_subset:
+      - Preprocessing-Cleaning-Labeling
+    attributes:
+      description:
+        description: "Explanation of any preprocessing steps performed on the data."
+        range: string
+        multivalued: true
+
+
+  CleaningStrategy:
+    description: >
+      Was any cleaning of the data done (e.g., removal of instances,
+      processing of missing values)?
+    is_a: DatasetProperty
+    in_subset:
+      - Preprocessing-Cleaning-Labeling
+    attributes:
+      description:
+        description: "Explanation of any data cleaning steps performed."
+        range: string
+        multivalued: true
+
+
+  LabelingStrategy:
+    description: >
+      Was any labeling of the data done (e.g., part-of-speech tagging)?
+    is_a: DatasetProperty
+    in_subset:
+      - Preprocessing-Cleaning-Labeling
+    attributes:
+      description:
+        description: "Explanation of any labeling steps performed."
+        range: string
+        multivalued: true
+
+
+  RawData:
+    description: >
+      Was the “raw” data saved in addition to the preprocessed/cleaned/labeled
+      data? If so, please provide a link or other access point to the “raw” data.
+    is_a: DatasetProperty
+    in_subset:
+      - Preprocessing-Cleaning-Labeling
+    attributes:
+      description:
+        description: "Details about the availability or location of raw data."
+        range: string
+        multivalued: true
