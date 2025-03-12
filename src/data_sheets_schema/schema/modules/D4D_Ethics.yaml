@@ -42,9 +42,9 @@ classes:
 
   EthicalReview:
     description: >
-      Were any ethical review processes conducted (e.g., by an institutional
+      Were any ethical or compliance review processes conducted (e.g., by an institutional
       review board)? If so, please provide a description of these review processes,
-      including the outcomes, as well as a link or other access point to any
+      including the frequency of review and documentation of outcomes, as well as a link or other access point to any
       supporting documentation.
     is_a: DatasetProperty
     in_subset:
@@ -80,7 +80,7 @@ classes:
       - Ethics
     attributes:
       description:
-        description: "Explanation of how data was obtained, e.g., from the subjects or elsewhere."
+        description: "Explanation of how data were obtained, e.g., from the subjects or elsewhere."
         range: string
         multivalued: true
 

@@ -1,7 +1,9 @@
 import requests
 
-# Dictionary mapping each label to its public Google Docs URL.
+# Updated dictionary mapping each label to its public Google Docs URL.
 docs = {
+    "D4D - Minimal": "https://docs.google.com/document/d/1JXDX_GEPje24ibG-mZaVSBYmjYAMZUGNoj0JaaKQ44c/edit?usp=drivesdk",
+    "D4D - Metadata": "https://docs.google.com/document/d/1VgIk418dG-MMqwmaNwXeYWUJmM07hGEKkkXCxJpR4K0/edit?usp=drivesdk",
     "D4D - Data Governance": "https://docs.google.com/document/d/14nJ8PGLx_MKIhRXcMjELRWUXpw1lgFA-fMDmmmHOOvU/edit?usp=drivesdk",
     "D4D - Ethics": "https://docs.google.com/document/d/1ae54itDf-pCXd-r05s4DA0GivBuFz6tsokPqjjacwQk/edit?usp=drivesdk",
     "D4D - Maintenance": "https://docs.google.com/document/d/1jieYwBw_iCnaLJRcTi0ZQv39ZJGtsZI0xghr85SF96w/edit?usp=drivesdk",
@@ -11,8 +13,7 @@ docs = {
     "D4D - Composition": "https://docs.google.com/document/d/1PeTsag7NZCBRe-RjJjKYTQtakc3RWJixwrjAGvBkARA/edit?usp=drivesdk",
     "D4D - Collection": "https://docs.google.com/document/d/1Q79gwEtAIvsiXAmzIKu5BpiQ39rbp3JAijiucpobABM/edit?usp=drivesdk",
     "D4D - Motivation": "https://docs.google.com/document/d/1k7FsVsZKS_W6N_erfnq49SHV4JbuNhJXvH7vLAd1hUI/edit?usp=drivesdk",
-    "D4D - Human": "https://docs.google.com/document/d/1chaelMfa1gcXH3wDt1aZiigQutHks3cYJU3WhnKfP2E/edit?usp=drivesdk",
-    "D4D - Metadata": "https://docs.google.com/document/d/1JXDX_GEPje24ibG-mZaVSBYmjYAMZUGNoj0JaaKQ44c/edit?usp=drivesdk"
+    "D4D - Human": "https://docs.google.com/document/d/1chaelMfa1gcXH3wDt1aZiigQutHks3cYJU3WhnKfP2E/edit?usp=drivesdk"
 }
 
 for label, url in docs.items():
@@ -28,8 +29,7 @@ for label, url in docs.items():
     response = requests.get(export_url)
     
     if response.status_code == 200:
-        # Replace " - " with "_" then any remaining spaces with "_" to form the file name.
-        # Then add .yaml extension instead of .txt.
+        # Replace " - " with "_" then any remaining spaces with "_" and use .yaml as the extension.
         filename = label.replace(" - ", "_").replace(" ", "_") + ".yaml"
         with open(filename, "wb") as f:
             f.write(response.content)

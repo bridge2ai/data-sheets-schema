@@ -1,13 +1,13 @@
-﻿id: https://w3id.org/bridge2ai/data-sheets-schema/minimal
-name: minimal-data-sheets-schema
-title: Minimal Data Sheets Schema
+﻿id: https://w3id.org/bridge2ai/data-sheets-schema/metadata
+name: d4d-metadata
+title: "D4D Metadata Module"
 description: >
-  A very minimal LinkML schema for generic dataset metadata. 
-  This version omits human-subject–specific elements and 
-  focuses on high-level metadata only.
+  A LinkML schema subset for high-level, generic dataset metadata from 
+  the Bridge2AI "Datasheets for Datasets" schema. Focuses on classes 
+  like Information, Dataset, and DatasetCollection, plus related slots.
+
+
 license: MIT
-see_also:
-  - https://bridge2ai.github.io/data-sheets-schema
 
 
 prefixes:
@@ -15,19 +15,80 @@ prefixes:
   dcterms: http://purl.org/dc/terms/
   dcat: http://www.w3.org/ns/dcat#
   schema: http://schema.org/
+  pav: http://purl.org/pav/
+  oslc: http://open-services.net/ns/core#
+  bibo: http://purl.org/ontology/bibo/
+  prov: http://www.w3.org/ns/prov#
+  csvw: http://www.w3.org/ns/csvw#
 
 
-default_prefix: http://example.org/minimal-schema#
+default_prefix: https://example.org/d4d/metadata#
 
 
-# Minimal set of classes
+#########################
+#   ENUM DEFINITIONS    #
+#########################
+
+
+enums:
+  FormatEnum:
+    description: >
+      Common file/data formats (e.g., CSV, JSON) 
+      used for the "format" slot.
+    permissible_values:
+      CSV:
+      JSON:
+      TXT:
+      OTHER:
+
+
+  CompressionEnum:
+    description: >
+      Common compression formats (e.g., zip, gzip) 
+      used for the "compression" slot.
+    permissible_values:
+      ZIP:
+      GZIP:
+      NONE:
+      OTHER:
+
+
+  EncodingEnum:
+    description: >
+      Common encodings (e.g., UTF-8, ASCII) 
+      used for the "encoding" slot.
+    permissible_values:
+      UTF-8:
+      ASCII:
+      OTHER:
+
+
+  CreatorOrMaintainerEnum:
+    description: >
+      Indicates whether an agent is acting as a creator, maintainer, or both.
+    permissible_values:
+      CREATOR:
+      MAINTAINER:
+      BOTH:
+
+
+#########################
+#   CLASS DEFINITIONS   #
+#########################
+
+
+# A minimal superclass (optional if you import a "core" module).
 classes:
+  NamedThing:
+    description: "A generic superclass for all identifiable entities."
+    slots:
+      - id
 
 
   Information:
-    description: A generic class for basic descriptive metadata.
+    description: "Grouping class for generic datasets, data files, or other top-level metadata."
+    is_a: NamedThing
     slots:
-      - id
       - title
       - description
       - keywords
@@ -40,20 +101,25 @@ classes:
       - modified_by
       - doi
       - conforms_to
+      - issued
+      - publisher
+      - page
+      - status
+      - was_derived_from
 
 
   DatasetCollection:
-    description: A top-level collection or package that contains one or more datasets.
+    description: >
+      A collection of related datasets, likely containing multiple files/resources 
+      with distinct metadata or purposes.
     is_a: Information
-    attributes:
-      resources:
-        description: The datasets in this collection.
-        range: Dataset
-        multivalued: true
+    slots:
+      - resources
 
 
   Dataset:
-    description: A single dataset (e.g., one file or resource) with associated metadata.
+    description: >
+      A single dataset (e.g., one file or data resource) with associated metadata.
     is_a: Information
     slots:
       - download_url
@@ -66,143 +132,232 @@ classes:
       - hash
       - md5
       - sha256
+      - dialect
+      - conforms_to_class
+      - conforms_to_schema
+      - profile
 
 
-# Minimal set of slots
+  FormatDialect:
+    description: "Additional format information for a file."
+    is_a: NamedThing
+    attributes:
+      comment_prefix:
+        range: string
+      delimiter:
+        range: string
+      double_quote:
+        range: boolean
+      header:
+        range: boolean
+      quote_char:
+        range: string
+
+
+#########################
+#    SLOT DEFINITIONS   #
+#########################
+
+
 slots:
 
 
+  ## From NamedThing
   id:
-    description: A unique identifier for the element (dataset or collection).
+    description: "A unique identifier for the element (dataset, collection, etc.)."
     slot_uri: schema:identifier
     range: string
+    required: true
 
 
+  ## Core metadata slots
   title:
-    description: The official title or name of the dataset.
+    description: "The official title or name of the data element."
     slot_uri: dcterms:title
     range: string
 
 
   description:
-    description: A short summary or free-text description of the dataset.
+    description: "A free-text description or summary."
     slot_uri: dcterms:description
     range: string
-    multivalued: false
 
 
   keywords:
-    description: Keywords or tags describing the dataset.
+    description: "Keywords or tags describing the data."
     slot_uri: dcat:keyword
     range: string
     multivalued: true
 
 
   language:
-    description: The language(s) of the dataset, if applicable.
+    description: "The language(s) of the dataset."
     slot_uri: dcterms:language
     range: string
     multivalued: true
 
 
   license:
-    description: The license or usage terms for the dataset.
+    description: "The license or usage terms for the data."
     slot_uri: dcterms:license
     range: string
 
 
   version:
-    description: The current version identifier of the dataset or schema.
-    slot_uri: schema:version
+    description: "The version identifier of the dataset or metadata."
+    slot_uri: pav:version
     range: string
 
 
   created_on:
-    description: Timestamp when the dataset was first created or published.
-    slot_uri: schema:dateCreated
+    description: "Timestamp when the dataset was created or published."
+    slot_uri: pav:createdOn
     range: datetime
 
 
   created_by:
-    description: Agent (person or organization) that created the dataset or schema.
-    slot_uri: schema:creator
-    range: string
+    description: "Agent that created the dataset (person or organization)."
+    slot_uri: pav:createdBy
+    range: CreatorOrMaintainerEnum
     multivalued: true
 
 
   last_updated_on:
-    description: Timestamp of the most recent update to the dataset or schema.
-    slot_uri: schema:dateModified
+    description: "Timestamp of the most recent update."
+    slot_uri: pav:lastUpdatedOn
     range: datetime
 
 
   modified_by:
-    description: Agent (person or organization) that modified the dataset or schema.
-    slot_uri: schema:editor
-    range: string
+    description: "Agent that last modified the dataset or metadata."
+    slot_uri: oslc:modifiedBy
+    range: CreatorOrMaintainerEnum
     multivalued: true
 
 
   doi:
-    description: Digital Object Identifier for the dataset, if applicable.
+    description: "Digital Object Identifier for the dataset, if applicable."
     range: uriorcurie
 
 
   conforms_to:
-    description: A standard or schema to which the dataset conforms.
+    description: "A standard or specification to which this data conforms."
     slot_uri: dcterms:conformsTo
     range: uriorcurie
 
 
+  issued:
+    description: "Date when the dataset was officially issued or published."
+    slot_uri: dcterms:issued
+    range: datetime
+
+
+  publisher:
+    description: "Publisher or entity distributing the dataset."
+    slot_uri: dcterms:publisher
+    range: uriorcurie
+
+
+  status:
+    description: "Status of the dataset (e.g., draft, stable, deprecated)."
+    slot_uri: bibo:status
+    range: uriorcurie
+
+
+  page:
+    description: "A landing page or URL describing the dataset."
+    slot_uri: dcat:landingPage
+    range: string
+
+
+  was_derived_from:
+    description: "Indicates derivation from some other dataset or source."
+    slot_uri: prov:wasDerivedFrom
+    range: string
+
+
+  ## DatasetCollection-specific slot
+  resources:
+    description: "List of Datasets in this collection."
+    range: Dataset
+    multivalued: true
+
+
+  ## Dataset-specific slots
   download_url:
-    description: URL pointing directly to the raw data file.
+    description: >
+      URL from which the data can be downloaded. This is not the same 
+      as a landing page, but points directly to the data.
     slot_uri: dcat:downloadURL
     range: uri
 
 
   path:
-    description: Path or location of the data file within a local or remote system.
+    description: "Local or remote path to the data file."
     range: string
 
 
   format:
-    description: The format of the data (e.g. “CSV,” “JSON,” “TXT”).
+    description: >
+      Format of the data (e.g., CSV, JSON). Not to be confused 
+      with `media_type` (e.g., text/csv).
     slot_uri: dcterms:format
-    range: string
+    range: FormatEnum
 
 
   encoding:
-    description: The encoding of the data (e.g. “UTF-8,” “ASCII”).
-    range: string
+    description: "The encoding of the data (e.g., UTF-8, ASCII)."
+    range: EncodingEnum
 
 
   compression:
-    description: The compression method, if any (e.g. “zip,” “gzip”).
-    range: string
+    description: "The compression format used (e.g., zip, gzip)."
+    range: CompressionEnum
 
 
   media_type:
-    description: The MIME type of the data (e.g. “text/csv,” “application/json”).
+    description: "MIME type of the data (e.g., text/csv, application/json)."
     slot_uri: dcat:mediaType
     range: string
 
 
   bytes:
-    description: Size of the data in bytes.
+    description: "File size in bytes."
     slot_uri: dcat:byteSize
     range: integer
 
 
   hash:
-    description: A generic hash of the data.
+    description: "A generic hash of the data."
     range: string
 
 
   md5:
-    description: An MD5 hash of the data.
+    description: "MD5 hash of the data."
     is_a: hash
 
 
   sha256:
-    description: A SHA-256 hash of the data.
+    description: "SHA-256 hash of the data."
     is_a: hash
+
+
+  dialect:
+    description: "Reference to an object describing the file's format dialect (e.g., CSV dialect)."
+    slot_uri: csvw:dialect
+    range: FormatDialect
+
+
+  conforms_to_class:
+    description: "Class definition from the schema that this data instantiates."
+    is_a: conforms_to
+
+
+  conforms_to_schema:
+    description: "Schema reference that this data instantiates."
+    is_a: conforms_to
+
+
+  profile:
+    description: "A frictionless data profile to which this dataset conforms."
+    range: uriorcurie
