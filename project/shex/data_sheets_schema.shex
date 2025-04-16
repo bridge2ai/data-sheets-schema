@@ -401,7 +401,7 @@ B2AI:AnatomicalEntity CLOSED {
           <header> @linkml:String ? ;
           <quote_char> @linkml:String ?
        ) ;
-       rdf:type [ <FormatDialect> ] ?
+       rdf:type [ <FormatDialect> ]
     )
 }
 
@@ -442,35 +442,33 @@ B2AI:AnatomicalEntity CLOSED {
 }
 
 <Information>  (
-    @<Dataset> OR @<DatasetCollection>
+    CLOSED {
+       (  $<Information_tes> (  <compression> @<CompressionEnum> ? ;
+             dcterms1:conformsTo @linkml:Uriorcurie ? ;
+             <conforms_to_class> @linkml:Uriorcurie ? ;
+             <conforms_to_schema> @linkml:Uriorcurie ? ;
+             pav:createdBy @<CreatorOrMaintainerEnum> * ;
+             pav:createdOn @linkml:Datetime ? ;
+             schema1:description @linkml:String ? ;
+             <doi> @linkml:Uriorcurie ? ;
+             dcat:downloadURL @linkml:Uri ? ;
+             dcterms1:issued @linkml:Datetime ? ;
+             dcat:keyword @linkml:String * ;
+             <language> @linkml:String ? ;
+             pav:lastUpdatedOn @linkml:Datetime ? ;
+             dcterms1:license @linkml:String ? ;
+             oslc:modifiedBy @<CreatorOrMaintainerEnum> ? ;
+             dcat:landingPage @linkml:String ? ;
+             dcterms1:publisher @linkml:Uriorcurie ? ;
+             bibo:status @linkml:Uriorcurie ? ;
+             dcterms1:title @linkml:String ? ;
+             pav:version @linkml:String ? ;
+             prov1:wasDerivedFrom @linkml:String ?
+          ) ;
+          rdf:type [ <Information> ]
+       )
+    } OR @<Dataset> OR @<DatasetCollection>
 )
-
-<Information_struct> {
-    (  $<Information_tes> (  <compression> @<CompressionEnum> ? ;
-          dcterms1:conformsTo @linkml:Uriorcurie ? ;
-          <conforms_to_class> @linkml:Uriorcurie ? ;
-          <conforms_to_schema> @linkml:Uriorcurie ? ;
-          pav:createdBy @<CreatorOrMaintainerEnum> * ;
-          pav:createdOn @linkml:Datetime ? ;
-          schema1:description @linkml:String ? ;
-          <doi> @linkml:Uriorcurie ? ;
-          dcat:downloadURL @linkml:Uri ? ;
-          dcterms1:issued @linkml:Datetime ? ;
-          dcat:keyword @linkml:String * ;
-          <language> @linkml:String ? ;
-          pav:lastUpdatedOn @linkml:Datetime ? ;
-          dcterms1:license @linkml:String ? ;
-          oslc:modifiedBy @<CreatorOrMaintainerEnum> ? ;
-          dcat:landingPage @linkml:String ? ;
-          dcterms1:publisher @linkml:Uriorcurie ? ;
-          bibo:status @linkml:Uriorcurie ? ;
-          dcterms1:title @linkml:String ? ;
-          pav:version @linkml:String ? ;
-          prov1:wasDerivedFrom @linkml:String ?
-       ) ;
-       rdf:type [ <Information> ]
-    )
-}
 
 <Instance> CLOSED {
     (  $<Instance_tes> (  &<DatasetProperty_tes> ;

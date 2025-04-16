@@ -383,12 +383,13 @@ CREATE TABLE "ExternalResource" (
 );
 
 CREATE TABLE "FormatDialect" (
+	id TEXT NOT NULL, 
 	comment_prefix TEXT, 
 	delimiter TEXT, 
 	double_quote TEXT, 
 	header TEXT, 
 	quote_char TEXT, 
-	PRIMARY KEY (comment_prefix, delimiter, double_quote, header, quote_char)
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE "FutureUseImpact" (
@@ -434,6 +435,30 @@ CREATE TABLE "Grantor" (
 	wikidata_id TEXT, 
 	url TEXT, 
 	related_to TEXT, 
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE "Information" (
+	compression VARCHAR(7), 
+	conforms_to TEXT, 
+	conforms_to_class TEXT, 
+	conforms_to_schema TEXT, 
+	created_on DATETIME, 
+	description TEXT, 
+	doi TEXT, 
+	download_url TEXT, 
+	id TEXT NOT NULL, 
+	issued DATETIME, 
+	language TEXT, 
+	last_updated_on DATETIME, 
+	license TEXT, 
+	modified_by VARCHAR(12), 
+	page TEXT, 
+	publisher TEXT, 
+	status TEXT, 
+	title TEXT, 
+	version TEXT, 
+	was_derived_from TEXT, 
 	PRIMARY KEY (id)
 );
 
@@ -1240,6 +1265,20 @@ CREATE TABLE "FutureUseImpact_description" (
 	description TEXT, 
 	PRIMARY KEY (backref_id, description), 
 	FOREIGN KEY(backref_id) REFERENCES "FutureUseImpact" (id)
+);
+
+CREATE TABLE "Information_created_by" (
+	backref_id TEXT, 
+	created_by VARCHAR(12), 
+	PRIMARY KEY (backref_id, created_by), 
+	FOREIGN KEY(backref_id) REFERENCES "Information" (id)
+);
+
+CREATE TABLE "Information_keywords" (
+	backref_id TEXT, 
+	keywords TEXT, 
+	PRIMARY KEY (backref_id, keywords), 
+	FOREIGN KEY(backref_id) REFERENCES "Information" (id)
 );
 
 CREATE TABLE "InstanceAcquisition_description" (

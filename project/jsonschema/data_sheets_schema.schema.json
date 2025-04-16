@@ -2784,10 +2784,17 @@
                 "header": {
                     "type": "string"
                 },
+                "id": {
+                    "description": "A unique identifier for a thing.",
+                    "type": "string"
+                },
                 "quote_char": {
                     "type": "string"
                 }
             },
+            "required": [
+                "id"
+            ],
             "title": "FormatDialect",
             "type": "object"
         },
@@ -3173,6 +3180,111 @@
                 "id"
             ],
             "title": "IPRestrictions",
+            "type": "object"
+        },
+        "Information": {
+            "additionalProperties": false,
+            "description": "Grouping for datasets and data files",
+            "properties": {
+                "compression": {
+                    "$ref": "#/$defs/CompressionEnum",
+                    "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
+                },
+                "conforms_to": {
+                    "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc. This should be a standard from the Bridge2AI standards registry.",
+                    "type": "string"
+                },
+                "conforms_to_class": {
+                    "description": "The class in the schema to which the data object instantiates.",
+                    "type": "string"
+                },
+                "conforms_to_schema": {
+                    "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
+                    "type": "string"
+                },
+                "created_by": {
+                    "description": "Agent that created the element",
+                    "items": {
+                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
+                    },
+                    "type": "array"
+                },
+                "created_on": {
+                    "description": "Date and Time at which the element was created",
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "A human-readable description for a thing.",
+                    "type": "string"
+                },
+                "doi": {
+                    "description": "The Digital Object Identifier of the data, with the doi prefix.",
+                    "type": "string"
+                },
+                "download_url": {
+                    "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "A unique identifier for a thing.",
+                    "type": "string"
+                },
+                "issued": {
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "keywords": {
+                    "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "language": {
+                    "description": "language in which the information is expressed",
+                    "type": "string"
+                },
+                "last_updated_on": {
+                    "description": "Date and Time at which the element was last updated",
+                    "format": "date-time",
+                    "type": "string"
+                },
+                "license": {
+                    "description": "license for the data",
+                    "type": "string"
+                },
+                "modified_by": {
+                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
+                    "description": "agent that modified the element"
+                },
+                "page": {
+                    "type": "string"
+                },
+                "publisher": {
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Status of the element in terms of its maturity or life cycle",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "the official title of the element",
+                    "type": "string"
+                },
+                "version": {
+                    "description": "particular version of schema",
+                    "type": "string"
+                },
+                "was_derived_from": {
+                    "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Information",
             "type": "object"
         },
         "Instance": {
