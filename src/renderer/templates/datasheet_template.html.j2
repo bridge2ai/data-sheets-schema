@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #3498db;
+        }
+        .section {
+            margin-bottom: 40px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .metadata {
+            background-color: #f3f7f9;
+        }
+        .question {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .question-text {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #34495e;
+        }
+        .question-description {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+        .question-type {
+            font-size: 0.8em;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+        .properties {
+            margin-left: 20px;
+            padding-left: 10px;
+            border-left: 2px solid #ddd;
+        }
+        .property {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Datasheets for Datasets Template</h1>
+
+    {% if 'datasheet' in template %}
+        {% set ds = template.datasheet %}
+    {% else %}
+        {% set ds = template %}
+    {% endif %}
+
+    <!-- Metadata Section -->
+    {% if 'metadata' in ds %}
+    <div class="section metadata">
+        <h2>Dataset Metadata</h2>
+        {% for field_id, field in ds.metadata.fields.items() %}
+        <div class="question">
+            <div class="question-text">{{ field_id }}</div>
+            <div class="question-description">{{ field.description }}</div>
+            <div class="question-type">Type: {{ field.type }}{% if field.multivalued %} (multiple values){% endif %}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Collections -->
+    {% if 'collections' in ds %}
+        {% for collection_id, collection in ds.collections.items() %}
+        <div class="section">
+            <h2>{{ collection.title }}</h2>
+            <p>{{ collection.description }}</p>
+            
+            {% for question_id, question in collection.questions.items() %}
+            <div class="question">
+                <div class="question-text">{{ question.question }}</div>
+                <div class="question-description">{{ question.description }}</div>
+                <div class="question-type">Type: {{ question.type }}</div>
+                
+                {% if question.type == 'complex' and 'properties' in question %}
+                <div class="properties">
+                    <h4>Properties:</h4>
+                    {% for prop_id, prop in question.properties.items() %}
+                    <div class="property">
+                        <strong>{{ prop_id }}</strong>: {{ prop.type }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <!-- For YAML format (collections are direct keys) -->
+        {% for section_id, section in ds.items() %}
+            {% if section_id.startswith('D4D-') %}
+            <div class="section">
+                <h2>{{ section.title }}</h2>
+                <p>{{ section.description }}</p>
+                
+                {% for question_id, question in section.questions.items() %}
+                <div class="question">
+                    <div class="question-text">{{ question.question }}</div>
+                    <div class="question-description">{{ question.description }}</div>
+                    <div class="question-type">Type: {{ question.type }}</div>
+                    
+                    {% if question.type == 'complex' and 'properties' in question %}
+                    <div class="properties">
+                        <h4>Properties:</h4>
+                        {% for prop_id, prop in question.properties.items() %}
+                        <div class="property">
+                            <strong>{{ prop_id }}</strong>: {{ prop.type }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

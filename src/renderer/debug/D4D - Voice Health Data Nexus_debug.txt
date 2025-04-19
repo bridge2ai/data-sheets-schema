@@ -1,0 +1,852 @@
+Document: D4D - Voice Health Data Nexus.docx
+==================================================
+
+PARAGRAPHS:
+--------------------------------------------------
+[0] Style: normal
+Text: id: "bridge2ai-voice-v1_0-collection"
+
+[1] Style: normal
+Text: name: "Bridge2AI-Voice v1.0 DataSheet"
+
+[2] Style: normal
+Text: title: "Bridge2AI-Voice: An Ethically-Sourced, Diverse Voice Dataset Linked to Health Information"
+
+[3] Style: normal
+Text: description: >
+
+[4] Style: normal
+Text: A multi-site, ethically sourced flagship dataset enabling AI research on the use
+
+[5] Style: normal
+Text: of voice as a biomarker of health. Includes spectrogram-derived data,
+
+[6] Style: normal
+Text: acoustic features, and corresponding clinical and demographic information.
+
+[7] Style: normal
+Text: license: "Bridge2AI Voice Registered Access License"
+
+[8] Style: normal
+Text: doi: "https://doi.org/10.57764/qb6h-em84"          # v1.0 DOI
+
+[9] Style: normal
+Text: keywords:
+
+[10] Style: normal
+Text: - "voice"
+
+[11] Style: normal
+Text: - "bridge2ai"
+
+[12] Style: normal
+Text: - "audio"
+
+[13] Style: normal
+Text: - "health"
+
+[14] Style: normal
+Text: publisher: "Health Data Nexus"
+
+[15] Style: normal
+Text: issued: "2024-11-27"
+
+[16] Style: normal
+Text: last_updated_on: "2024-11-27T18:11:00Z"
+
+[17] Style: normal
+Text: status: "published"
+
+[18] Style: normal
+Text: see_also: "https://bridge2ai.github.io/data-sheets-schema"
+
+[19] Style: normal
+Text: is_a: "DatasetCollection"
+
+[20] Style: normal
+Text: # ------------------------------------------------------------------------------
+
+[21] Style: normal
+Text: # The top-level collection can include multiple DataSets
+
+[22] Style: normal
+Text: # (one entry per file/resource in your release).
+
+[23] Style: normal
+Text: # ------------------------------------------------------------------------------
+
+[24] Style: normal
+Text: resources:
+
+[26] Style: normal
+Text: - id: "spectrograms-parquet"
+
+[27] Style: normal
+Text: name: "spectrograms.parquet"
+
+[28] Style: normal
+Text: title: "Spectrograms Derived from Voice Recordings"
+
+[29] Style: normal
+Text: description: >
+
+[30] Style: normal
+Text: A Parquet file containing time-frequency representations of recorded voice
+
+[31] Style: normal
+Text: data. Each row corresponds to a participant session with a 513×N spectrogram.
+
+[32] Style: normal
+Text: path: "spectrograms.parquet"
+
+[33] Style: normal
+Text: format: "PARQUET"
+
+[34] Style: normal
+Text: media_type: "application/octet-stream"
+
+[35] Style: normal
+Text: bytes: 1256300000   # Example approximate size in bytes
+
+[36] Style: normal
+Text: download_url: "RESTRICTED_ACCESS"  # Since access is controlled, no public URL
+
+[37] Style: normal
+Text: license: "Bridge2AI Voice Registered Access License"
+
+[38] Style: normal
+Text: version: "1.0"
+
+[39] Style: normal
+Text: issued: "2024-11-27"
+
+[40] Style: normal
+Text: # Below are dataset-level properties (many repeated in each "Dataset" entry).
+
+[41] Style: normal
+Text: # For example, only referencing "confidential_elements", "acquisition_methods", etc. if different by file.
+
+[42] Style: normal
+Text: creators:
+
+[43] Style: normal
+Text: - principal_investigator:
+
+[44] Style: normal
+Text: name: "Alistair Johnson"
+
+[45] Style: normal
+Text: affiliation:
+
+[46] Style: normal
+Text: name: "Multiple institutions (multi-site project)"
+
+[47] Style: normal
+Text: funders:
+
+[48] Style: normal
+Text: - grantor:
+
+[49] Style: normal
+Text: name: "National Institutes of Health (NIH)"
+
+[50] Style: normal
+Text: grant:
+
+[51] Style: normal
+Text: name: "Bridge2AI: Voice as a Biomarker of Health"
+
+[52] Style: normal
+Text: grant_number: "3OT2OD032720-01S1"
+
+[53] Style: normal
+Text: # Indicate conformance if relevant
+
+[54] Style: normal
+Text: conforms_to_schema: "https://w3id.org/bridge2ai/data-sheets-schema"
+
+[55] Style: normal
+Text: # Example properties with in_subset references
+
+[56] Style: normal
+Text: purposes:
+
+[57] Style: normal
+Text: - response: "Enable AI research on voice as a biomarker"
+
+[58] Style: normal
+Text: in_subset: "Motivation"
+
+[59] Style: normal
+Text: tasks:
+
+[60] Style: normal
+Text: - response: "Voice-based predictive modeling for clinical conditions"
+
+[61] Style: normal
+Text: in_subset: "Motivation"
+
+[62] Style: normal
+Text: addressing_gaps:
+
+[63] Style: normal
+Text: - response: "Lack of large, diverse, ethically sourced voice data"
+
+[64] Style: normal
+Text: in_subset: "Motivation"
+
+[66] Style: normal
+Text: - id: "phenotype-tsv"
+
+[67] Style: normal
+Text: name: "phenotype.tsv"
+
+[68] Style: normal
+Text: title: "Phenotypic and Clinical Data"
+
+[69] Style: normal
+Text: description: >
+
+[70] Style: normal
+Text: A TSV file containing demographic data, acoustic confounders, and responses
+
+[71] Style: normal
+Text: to validated questionnaires for each participant. One row per participant.
+
+[72] Style: normal
+Text: path: "phenotype.tsv"
+
+[73] Style: normal
+Text: format: "TSV"
+
+[74] Style: normal
+Text: media_type: "text/tab-separated-values"
+
+[75] Style: normal
+Text: bytes: 105000
+
+[76] Style: normal
+Text: download_url: "RESTRICTED_ACCESS"
+
+[77] Style: normal
+Text: license: "Bridge2AI Voice Registered Access License"
+
+[78] Style: normal
+Text: version: "1.0"
+
+[79] Style: normal
+Text: issued: "2024-11-27"
+
+[80] Style: normal
+Text: creators:
+
+[81] Style: normal
+Text: - principal_investigator:
+
+[82] Style: normal
+Text: name: "Alistair Johnson"
+
+[83] Style: normal
+Text: funders:
+
+[84] Style: normal
+Text: - grantor:
+
+[85] Style: normal
+Text: name: "National Institutes of Health (NIH)"
+
+[86] Style: normal
+Text: grant:
+
+[87] Style: normal
+Text: name: "Bridge2AI: Voice as a Biomarker of Health"
+
+[88] Style: normal
+Text: grant_number: "3OT2OD032720-01S1"
+
+[89] Style: normal
+Text: conforms_to_schema: "https://w3id.org/bridge2ai/data-sheets-schema"
+
+[90] Style: normal
+Text: # Composition example
+
+[91] Style: normal
+Text: instances:
+
+[92] Style: normal
+Text: - data_topic: "B2AI_TOPIC:health"
+
+[93] Style: normal
+Text: data_substrate: "B2AI_SUBSTRATE:tabular"
+
+[94] Style: normal
+Text: instance_type: "Participant-level records"
+
+[95] Style: normal
+Text: counts: 306
+
+[96] Style: normal
+Text: label: false
+
+[97] Style: normal
+Text: label_description: "No single 'label'—but includes multiple clinical fields"
+
+[98] Style: normal
+Text: missing_information:
+
+[99] Style: normal
+Text: - missing: "Some items in validated questionnaires"
+
+[100] Style: normal
+Text: why_missing: "Certain participants did not complete all forms"
+
+[101] Style: normal
+Text: in_subset: "Composition"
+
+[102] Style: normal
+Text: # Collection example
+
+[103] Style: normal
+Text: acquisition_methods:
+
+[104] Style: normal
+Text: - description: "Validated clinical questionnaires, direct patient demographics"
+
+[105] Style: normal
+Text: was_directly_observed: false
+
+[106] Style: normal
+Text: was_reported_by_subjects: true
+
+[107] Style: normal
+Text: was_inferred_derived: false
+
+[108] Style: normal
+Text: was_validated_verified: true
+
+[109] Style: normal
+Text: in_subset: "Collection"
+
+[110] Style: normal
+Text: collection_mechanisms:
+
+[111] Style: normal
+Text: - description: "Data collected via REDCap forms on a tablet"
+
+[112] Style: normal
+Text: in_subset: "Collection"
+
+[113] Style: normal
+Text: collection_timeframes:
+
+[114] Style: normal
+Text: - description: "Collected between Jan 2023 and Oct 2024"
+
+[115] Style: normal
+Text: in_subset: "Collection"
+
+[116] Style: normal
+Text: data_collectors:
+
+[117] Style: normal
+Text: - description: "Study coordinators and clinical staff at five sites"
+
+[118] Style: normal
+Text: in_subset: "Collection"
+
+[119] Style: normal
+Text: ethical_reviews:
+
+[120] Style: normal
+Text: - description: "Approved by University of South Florida IRB"
+
+[121] Style: normal
+Text: in_subset: "Collection"
+
+[122] Style: normal
+Text: data_protection_impacts:
+
+[123] Style: normal
+Text: - description: "HIPAA Safe Harbor de-identification procedures used"
+
+[124] Style: normal
+Text: in_subset: "Collection"
+
+[125] Style: normal
+Text: # Composition example continued
+
+[126] Style: normal
+Text: subpopulations:
+
+[127] Style: normal
+Text: - subpopulation_elements_present: true
+
+[128] Style: normal
+Text: identification: ["Voice disorders", "Neurological disorders", "Mood disorders", "Respiratory disorders", "Pediatric (not in v1.0)"]
+
+[129] Style: normal
+Text: distribution: ["306 adult participants across 5 sites in North America"]
+
+[130] Style: normal
+Text: in_subset: "Composition"
+
+[131] Style: normal
+Text: deidentification:
+
+[132] Style: normal
+Text: identifiable_elements_present: false
+
+[133] Style: normal
+Text: description:
+
+[134] Style: normal
+Text: - "Original voice recordings omitted; no direct PHI retained"
+
+[135] Style: normal
+Text: in_subset: "Composition"
+
+[136] Style: normal
+Text: sensitive_elements:
+
+[137] Style: normal
+Text: sensitive_elements_present: true
+
+[138] Style: normal
+Text: description:
+
+[139] Style: normal
+Text: - "Clinical diagnoses, demographic details"
+
+[140] Style: normal
+Text: in_subset: "Composition"
+
+[141] Style: normal
+Text: # Preprocessing example
+
+[142] Style: normal
+Text: preprocessing_strategies:
+
+[143] Style: normal
+Text: - description: "Normalization of free-text fields, standard coding of questionnaires"
+
+[144] Style: normal
+Text: in_subset: "Preprocessing-Cleaning-Labeling"
+
+[145] Style: normal
+Text: cleaning_strategies:
+
+[146] Style: normal
+Text: - description: "Removed incomplete or invalid questionnaire submissions"
+
+[147] Style: normal
+Text: in_subset: "Preprocessing-Cleaning-Labeling"
+
+[148] Style: normal
+Text: # Uses
+
+[149] Style: normal
+Text: existing_uses:
+
+[150] Style: normal
+Text: - description: "Initial published study describing dataset (Johnson et al., 2024)"
+
+[151] Style: normal
+Text: in_subset: "Uses"
+
+[152] Style: normal
+Text: other_tasks:
+
+[153] Style: normal
+Text: - description: "Potential for multi-modal fusion with imaging or genomic data"
+
+[154] Style: normal
+Text: in_subset: "Uses"
+
+[155] Style: normal
+Text: future_use_impacts:
+
+[156] Style: normal
+Text: - description: >
+
+[157] Style: normal
+Text: "Voice data can carry sensitive health information. Need caution
+
+[158] Style: normal
+Text: against re-identification or stigmatizing subgroups."
+
+[159] Style: normal
+Text: in_subset: "Uses"
+
+[160] Style: normal
+Text: discouraged_uses:
+
+[161] Style: normal
+Text: - description: >
+
+[162] Style: normal
+Text: "Using derived features to attempt re-identification of participants
+
+[163] Style: normal
+Text: or link data back to individuals."
+
+[164] Style: normal
+Text: in_subset: "Uses"
+
+[165] Style: normal
+Text: # Distribution
+
+[166] Style: normal
+Text: distribution_formats:
+
+[167] Style: normal
+Text: - description: "TSV file, restricted access"
+
+[168] Style: normal
+Text: in_subset: "Distribution"
+
+[169] Style: normal
+Text: distribution_dates:
+
+[170] Style: normal
+Text: - description: "Released on 2024-11-27"
+
+[171] Style: normal
+Text: in_subset: "Distribution"
+
+[172] Style: normal
+Text: license_and_use_terms:
+
+[173] Style: normal
+Text: - description: >
+
+[174] Style: normal
+Text: "Distributed under Bridge2AI Voice Registered Access License. Must sign DUA
+
+[175] Style: normal
+Text: and complete training (TCPS 2: CORE 2022)."
+
+[176] Style: normal
+Text: in_subset: "Distribution"
+
+[177] Style: normal
+Text: ip_restrictions:
+
+[178] Style: normal
+Text: - description: >
+
+[179] Style: normal
+Text: "Access is restricted to credentialed users with a signed DUA."
+
+[180] Style: normal
+Text: in_subset: "Distribution"
+
+[181] Style: normal
+Text: # Maintenance
+
+[182] Style: normal
+Text: maintainers:
+
+[183] Style: normal
+Text: - description: "Health Data Nexus staff"
+
+[184] Style: normal
+Text: in_subset: "Maintenance"
+
+[185] Style: normal
+Text: update_plan:
+
+[186] Style: normal
+Text: - description: >
+
+[187] Style: normal
+Text: "Future releases may add raw waveforms once additional security measures
+
+[188] Style: normal
+Text: are in place. Minor phenotype corrections will be periodically updated."
+
+[189] Style: normal
+Text: in_subset: "Maintenance"
+
+[190] Style: normal
+Text: version_access:
+
+[191] Style: normal
+Text: - description: >
+
+[192] Style: normal
+Text: "Older versions will remain accessible with distinct DOIs."
+
+[193] Style: normal
+Text: in_subset: "Maintenance"
+
+[194] Style: normal
+Text: extension_mechanism:
+
+[195] Style: normal
+Text: - description: >
+
+[196] Style: normal
+Text: "Researchers can propose additional data or improvements by contacting
+
+[197] Style: normal
+Text: the Bridge2AI-Voice team. Proposed additions subject to IRB review."
+
+[198] Style: normal
+Text: in_subset: "Maintenance"
+
+[199] Style: normal
+Text: errata:
+
+[200] Style: normal
+Text: - description: "No errata at this time."
+
+[201] Style: normal
+Text: in_subset: "Maintenance"
+
+[202] Style: normal
+Text: retention_limit:
+
+[203] Style: normal
+Text: - description: "No firm retention limit, but plan to store at least 10 years post-collection."
+
+[204] Style: normal
+Text: in_subset: "Maintenance"
+
+[205] Style: normal
+Text: is_deidentified:
+
+[206] Style: normal
+Text: identifiable_elements_present: false
+
+[207] Style: normal
+Text: description:
+
+[208] Style: normal
+Text: - "De-identification by removing HIPAA Safe Harbor fields"
+
+[209] Style: normal
+Text: is_tabular: true
+
+[211] Style: normal
+Text: - id: "phenotype-json"
+
+[212] Style: normal
+Text: name: "phenotype.json"
+
+[213] Style: normal
+Text: title: "Phenotype Data Dictionary"
+
+[214] Style: normal
+Text: description: "A JSON-formatted data dictionary describing each column in phenotype.tsv."
+
+[215] Style: normal
+Text: path: "phenotype.json"
+
+[216] Style: normal
+Text: format: "JSON"
+
+[217] Style: normal
+Text: media_type: "application/json"
+
+[218] Style: normal
+Text: bytes: 30000
+
+[219] Style: normal
+Text: download_url: "RESTRICTED_ACCESS"
+
+[220] Style: normal
+Text: license: "Bridge2AI Voice Registered Access License"
+
+[221] Style: normal
+Text: version: "1.0"
+
+[222] Style: normal
+Text: issued: "2024-11-27"
+
+[224] Style: normal
+Text: - id: "static-features-tsv"
+
+[225] Style: normal
+Text: name: "static_features.tsv"
+
+[226] Style: normal
+Text: title: "Derived Acoustic and Prosodic Features"
+
+[227] Style: normal
+Text: description: >
+
+[228] Style: normal
+Text: A TSV file containing one row per audio recording, with various acoustic,
+
+[229] Style: normal
+Text: phonetic, and prosodic features extracted via openSMILE, Praat, and Parselmouth.
+
+[230] Style: normal
+Text: path: "static_features.tsv"
+
+[231] Style: normal
+Text: format: "TSV"
+
+[232] Style: normal
+Text: media_type: "text/tab-separated-values"
+
+[233] Style: normal
+Text: bytes: 850000
+
+[234] Style: normal
+Text: download_url: "RESTRICTED_ACCESS"
+
+[235] Style: normal
+Text: license: "Bridge2AI Voice Registered Access License"
+
+[236] Style: normal
+Text: version: "1.0"
+
+[237] Style: normal
+Text: issued: "2024-11-27"
+
+[239] Style: normal
+Text: - id: "static-features-json"
+
+[240] Style: normal
+Text: name: "static_features.json"
+
+[241] Style: normal
+Text: title: "Acoustic Feature Data Dictionary"
+
+[242] Style: normal
+Text: description: >
+
+[243] Style: normal
+Text: JSON dictionary describing each feature column in static_features.tsv.
+
+[244] Style: normal
+Text: path: "static_features.json"
+
+[245] Style: normal
+Text: format: "JSON"
+
+[246] Style: normal
+Text: media_type: "application/json"
+
+[247] Style: normal
+Text: bytes: 40000
+
+[248] Style: normal
+Text: download_url: "RESTRICTED_ACCESS"
+
+[249] Style: normal
+Text: license: "Bridge2AI Voice Registered Access License"
+
+[250] Style: normal
+Text: version: "1.0"
+
+[251] Style: normal
+Text: issued: "2024-11-27"
+
+[254] Style: normal
+Text: # ------------------------------------------------------------------------------
+
+[255] Style: normal
+Text: # High-level dataset-wide properties that apply across all files in this collection:
+
+[256] Style: normal
+Text: # ------------------------------------------------------------------------------
+
+[257] Style: normal
+Text: purposes:
+
+[258] Style: normal
+Text: - response: "Enable research on using voice data as a biomarker of health conditions"
+
+[259] Style: normal
+Text: in_subset: "Motivation"
+
+[260] Style: normal
+Text: tasks:
+
+[261] Style: normal
+Text: - response: "AI-driven classification, regression, or risk stratification from voice features"
+
+[262] Style: normal
+Text: in_subset: "Motivation"
+
+[263] Style: normal
+Text: addressing_gaps:
+
+[264] Style: normal
+Text: - response: "Provides a large, multi-institutional, ethically sourced voice database"
+
+[265] Style: normal
+Text: in_subset: "Motivation"
+
+[266] Style: normal
+Text: creators:
+
+[267] Style: normal
+Text: - principal_investigator:
+
+[268] Style: normal
+Text: name: "Alistair Johnson"
+
+[269] Style: normal
+Text: affiliation:
+
+[270] Style: normal
+Text: name: "Massachusetts Institute of Technology (example affiliation)"
+
+[271] Style: normal
+Text: - principal_investigator:
+
+[272] Style: normal
+Text: name: "Jean-Christophe Bélisle-Pipon"
+
+[273] Style: normal
+Text: affiliation:
+
+[274] Style: normal
+Text: name: "University of Montreal (example affiliation)"
+
+[275] Style: normal
+Text: - principal_investigator:
+
+[276] Style: normal
+Text: name: "David Dorr"
+
+[277] Style: normal
+Text: affiliation:
+
+[278] Style: normal
+Text: name: "Oregon Health & Science University"
+
+[279] Style: normal
+Text: # ... etc. for all authors ...
+
+[280] Style: normal
+Text: funders:
+
+[281] Style: normal
+Text: - grantor:
+
+[282] Style: normal
+Text: name: "National Institutes of Health (NIH)"
+
+[283] Style: normal
+Text: grant:
+
+[284] Style: normal
+Text: name: "Bridge2AI: Voice as a Biomarker of Health"
+
+[285] Style: normal
+Text: grant_number: "3OT2OD032720-01S1"
+
+
+TABLES:
+--------------------------------------------------
+
+DOCUMENT PROPERTIES:
+--------------------------------------------------
+Title: Word Document
+Author: 
+Created: None
+Modified: 2025-04-16 17:44:58+00:00

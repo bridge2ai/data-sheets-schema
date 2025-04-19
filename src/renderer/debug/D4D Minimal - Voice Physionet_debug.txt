@@ -1,0 +1,34 @@
+Spreadsheet: D4D Minimal - VOICE Physionet.xlsx
+==================================================
+
+SHEET: Sheet1
+--------------------------------------------------
+Dimensions: A1:W24
+Max Row: 24, Max Column: 23
+
+Row 1: Field | Value |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 2: id | https://doi.org/10.13026/249v-w155 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 3: title | Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 4: description | The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in AI and provide insights into using voice as a biomarker of health. This release provides derived voice features (e.g., spectrograms, MFCCs) alongside extensive clinical phenotype data, all collected under a standardized protocol across multiple sites. |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 5: keywords | voice; bridge2ai; health; AI; acoustics; speech |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 6: language | en |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 7: license | Bridge2AI Voice Registered Access License |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 8: version | 1.1 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 9: created_on | 2025-01-17T00:00:00Z |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 10: created_by | Alistair Johnson; Jean-Christophe Bélisle-Pipon; David Dorr; Satrajit Ghosh; Philip Payne; Maria Powell; Anais Rameau; Vardit Ravitsky; Alexandros Sigaras; Olivier Elemento; Yael Bensoussan |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 11: last_updated_on | 2025-01-17T00:00:00Z |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 12: modified_by |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 13: doi | https://doi.org/10.13026/249v-w155 |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 14: conforms_to | https://w3id.org/bridge2ai/data-sheets-schema/minimal |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 15:  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 16:  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 17:  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+Row 18: id | title | description | keywords | language | license | version | created_on | created_by | last_updated_on | modified_by | doi | conforms_to | download_url | path | format | encoding | compression | media_type | bytes | hash | md5 | sha256
+Row 19: spectrograms.parquet | spectrograms.parquet | A Parquet file storing dense data derived from voice waveforms (513xN dimension). | spectrogram; voice; audio; derived_data | en | Bridge2AI Voice Registered Access License | 1.1 | 2025-01-17T00:00:00Z |  | 2025-01-17T00:00:00Z |  |  |  | https://physionet.org/content/bridge2ai-voice/1.1/spectrograms.parquet | bridge2ai-voice/1.1/spectrograms.parquet | parquet | PCM 16kHz mono (power representation) |  | application/octet-stream |  |  |  | 
+Row 20: mfcc.parquet | mfcc.parquet | A Parquet file storing Mel-frequency cepstral coefficients (60xN dimension). | mfcc; voice; audio; derived_data | en | Bridge2AI Voice Registered Access License | 1.1 | 2025-01-17T00:00:00Z |  | 2025-01-17T00:00:00Z |  |  |  | https://physionet.org/content/bridge2ai-voice/1.1/mfcc.parquet | bridge2ai-voice/1.1/mfcc.parquet | parquet | PCM 16kHz mono |  | application/octet-stream |  |  |  | 
+Row 21: phenotype.tsv | phenotype.tsv | A tab-delimited file with one row per participant, containing demographics, acoustic confounders, and questionnaire data. | metadata; clinical; questionnaire; demographics | en | Bridge2AI Voice Registered Access License | 1.1 | 2025-01-17T00:00:00Z |  | 2025-01-17T00:00:00Z |  |  |  | https://physionet.org/content/bridge2ai-voice/1.1/phenotype.tsv | bridge2ai-voice/1.1/phenotype.tsv | TSV | UTF-8 |  | text/tab-separated-values |  |  |  | 
+Row 22: phenotype.json | phenotype.json | A data dictionary describing each column in phenotype.tsv. | dictionary; metadata; clinical; schema | en | Bridge2AI Voice Registered Access License | 1.1 | 2025-01-17T00:00:00Z |  | 2025-01-17T00:00:00Z |  |  |  | https://physionet.org/content/bridge2ai-voice/1.1/phenotype.json | bridge2ai-voice/1.1/phenotype.json | JSON | UTF-8 |  | application/json |  |  |  | 
+Row 23: static_features.tsv | static_features.tsv | A tab-delimited file with one row per audio recording, containing derived voice features from openSMILE, Praat, parselmouth, etc. | features; voice; audio; analysis | en | Bridge2AI Voice Registered Access License | 1.1 | 2025-01-17T00:00:00Z |  | 2025-01-17T00:00:00Z |  |  |  | https://physionet.org/content/bridge2ai-voice/1.1/static_features.tsv | bridge2ai-voice/1.1/static_features.tsv | TSV | UTF-8 |  | text/tab-separated-values |  |  |  | 
+Row 24: static_features.json | static_features.json | A data dictionary describing each column in static_features.tsv. | dictionary; metadata; derived_features | en | Bridge2AI Voice Registered Access License | 1.1 | 2025-01-17T00:00:00Z |  | 2025-01-17T00:00:00Z |  |  |  | https://physionet.org/content/bridge2ai-voice/1.1/static_features.json | bridge2ai-voice/1.1/static_features.json | JSON | UTF-8 |  | application/json |  |  |  | 
+
+

@@ -1,0 +1,60 @@
+# Datasheets for Datasets Template
+
+{% if 'datasheet' in template %}
+    {% set ds = template.datasheet %}
+{% else %}
+    {% set ds = template %}
+{% endif %}
+
+{% if 'metadata' in ds %}
+## Dataset Metadata
+
+{% for field_id, field in ds.metadata.fields.items() %}
+### {{ field_id }}
+**Description:** {{ field.description }}
+**Type:** {{ field.type }}{% if field.multivalued %} (multiple values){% endif %}
+
+{% endfor %}
+{% endif %}
+
+{% if 'collections' in ds %}
+    {% for collection_id, collection in ds.collections.items() %}
+## {{ collection.title }}
+{{ collection.description }}
+
+{% for question_id, question in collection.questions.items() %}
+### {{ question.question }}
+**Description:** {{ question.description }}
+**Type:** {{ question.type }}
+
+{% if question.type == 'complex' and 'properties' in question %}
+**Properties:**
+{% for prop_id, prop in question.properties.items() %}
+- **{{ prop_id }}**: {{ prop.type }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+    {% endfor %}
+{% else %}
+    {% for section_id, section in ds.items() %}
+        {% if section_id.startswith('D4D-') %}
+## {{ section.title }}
+{{ section.description }}
+
+{% for question_id, question in section.questions.items() %}
+### {{ question.question }}
+**Description:** {{ question.description }}
+**Type:** {{ question.type }}
+
+{% if question.type == 'complex' and 'properties' in question %}
+**Properties:**
+{% for prop_id, prop in question.properties.items() %}
+- **{{ prop_id }}**: {{ prop.type }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endif %}

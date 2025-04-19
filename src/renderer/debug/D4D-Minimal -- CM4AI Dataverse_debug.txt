@@ -1,0 +1,1009 @@
+Document: D4D-Minimal -- CM4AI Dataverse.docx
+==================================================
+
+PARAGRAPHS:
+--------------------------------------------------
+[0] Style: normal
+Text: Returned a filled out json record conforming to this schema below -- and to fill out the schema use the text further below:
+
+
+Schema:
+
+Text:
+
+[2] Style: normal
+Text: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/DXWOS5
+
+[5] Style: normal
+Text: Output:
+
+{
+
+[6] Style: normal
+Text: "@context": "https://w3id.org/bridge2ai/data-sheets-schema/minimal",
+
+[7] Style: normal
+Text: "type": "DatasetCollection",
+
+[8] Style: normal
+Text: "id": "doi:10.18130/V3/DXWOS5",
+
+[9] Style: normal
+Text: "title": "Cell Maps for Artificial Intelligence - Data Release (Version 1.2)",
+
+[10] Style: normal
+Text: "description": "This collection is the 0.5 alpha data release of the Cell Maps for Artificial Intelligence (CM4AI) Functional Genomics Data Generation Project, a component of the U.S. National Institute of Health’s (NIH) Bridge2AI program. CM4AI’s objective is to deliver machine-readable hierarchical maps of cell architecture as AI-Ready data produced from multimodal interrogation of 100 chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders in disease-relevant cell lines under perturbed and unperturbed conditions. Input data streams include immunofluorescence subcellular microscopy (IF) for spatial proteomics data, AP-MS/SEC-MS for protein–protein interactions, and single-cell CRISPR screens. These data are integrated via the MuSIC software pipeline, producing cell maps with provenance graphs and rich metadata as AI-Ready RO-Crate outputs using FAIRSCAPE. Copyright (c) 2024 The Regents of the University of California and The Board of Trustees of the Leland Stanford Junior University (for raw image data), licensed under CC BY-NC-SA 4.0. Attribution to the copyright holders and authors is required, and publications referencing or deriving from these data should cite the related article and this data collection.",
+
+[11] Style: normal
+Text: "keywords": [
+
+[12] Style: normal
+Text: "CM4AI",
+
+[13] Style: normal
+Text: "Bridge2AI",
+
+[14] Style: normal
+Text: "proteomics",
+
+[15] Style: normal
+Text: "spatial proteomics",
+
+[16] Style: normal
+Text: "AP-MS",
+
+[17] Style: normal
+Text: "SEC-MS",
+
+[18] Style: normal
+Text: "single-cell",
+
+[19] Style: normal
+Text: "CRISPR",
+
+[20] Style: normal
+Text: "medicine",
+
+[21] Style: normal
+Text: "health",
+
+[22] Style: normal
+Text: "life sciences"
+
+[23] Style: normal
+Text: ],
+
+[24] Style: normal
+Text: "language": [
+
+[25] Style: normal
+Text: "en"
+
+[26] Style: normal
+Text: ],
+
+[27] Style: normal
+Text: "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+
+[28] Style: normal
+Text: "version": "1.2",
+
+[29] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[30] Style: normal
+Text: "created_by": [
+
+[31] Style: normal
+Text: "Clark, Timothy",
+
+[32] Style: normal
+Text: "Schaffer, Leah",
+
+[33] Style: normal
+Text: "Obernier, K",
+
+[34] Style: normal
+Text: "Al Manir, Sadnan",
+
+[35] Style: normal
+Text: "Churas, Christopher",
+
+[36] Style: normal
+Text: "Dailamy, A",
+
+[37] Style: normal
+Text: "Doctor, Y",
+
+[38] Style: normal
+Text: "Forget, A",
+
+[39] Style: normal
+Text: "Hansen, JN",
+
+[40] Style: normal
+Text: "Hu, M",
+
+[41] Style: normal
+Text: "Lenkiewicz, J",
+
+[42] Style: normal
+Text: "Levinson, MA",
+
+[43] Style: normal
+Text: "Marquez, C",
+
+[44] Style: normal
+Text: "Mohan, J",
+
+[45] Style: normal
+Text: "Nourreddine, S",
+
+[46] Style: normal
+Text: "Niestroy, J",
+
+[47] Style: normal
+Text: "Pratt, D",
+
+[48] Style: normal
+Text: "Qian, G",
+
+[49] Style: normal
+Text: "Thaker, S",
+
+[50] Style: normal
+Text: "Belisle-Pipon, J-C",
+
+[51] Style: normal
+Text: "Brandt, C",
+
+[52] Style: normal
+Text: "Chen, J",
+
+[53] Style: normal
+Text: "Ding, Y",
+
+[54] Style: normal
+Text: "Fodeh, S",
+
+[55] Style: normal
+Text: "Krogan, N",
+
+[56] Style: normal
+Text: "Lundberg, E",
+
+[57] Style: normal
+Text: "Mali, P",
+
+[58] Style: normal
+Text: "Payne-Foster, P",
+
+[59] Style: normal
+Text: "Ratcliffe, S",
+
+[60] Style: normal
+Text: "Ravitsky, V",
+
+[61] Style: normal
+Text: "Sali, A",
+
+[62] Style: normal
+Text: "Schulz, W",
+
+[63] Style: normal
+Text: "Ideker, T"
+
+[64] Style: normal
+Text: ],
+
+[65] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[66] Style: normal
+Text: "modified_by": [],
+
+[67] Style: normal
+Text: "doi": "https://doi.org/10.18130/V3/DXWOS5",
+
+[68] Style: normal
+Text: "conforms_to": "https://w3id.org/bridge2ai/data-sheets-schema/minimal",
+
+[69] Style: normal
+Text: "resources": [
+
+[70] Style: normal
+Text: {
+
+[71] Style: normal
+Text: "type": "Dataset",
+
+[72] Style: normal
+Text: "id": "file1",
+
+[73] Style: normal
+Text: "title": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha.zip",
+
+[74] Style: normal
+Text: "description": "ZIP Archive for AP-MS loader (initial run, 0.1 alpha)",
+
+[75] Style: normal
+Text: "keywords": [],
+
+[76] Style: normal
+Text: "language": [],
+
+[77] Style: normal
+Text: "license": "",
+
+[78] Style: normal
+Text: "version": "0.1 alpha",
+
+[79] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[80] Style: normal
+Text: "created_by": [],
+
+[81] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[82] Style: normal
+Text: "modified_by": [],
+
+[83] Style: normal
+Text: "doi": "",
+
+[84] Style: normal
+Text: "conforms_to": "",
+
+[85] Style: normal
+Text: "download_url": "https://dataverse.example.org/file1",
+
+[86] Style: normal
+Text: "path": "1.cm4ai_chromatin_mda-mb-468_untreated_apmsloader_initialrun0.1alpha.zip",
+
+[87] Style: normal
+Text: "format": "ZIP Archive",
+
+[88] Style: normal
+Text: "encoding": "",
+
+[89] Style: normal
+Text: "compression": "zip",
+
+[90] Style: normal
+Text: "media_type": "application/zip",
+
+[91] Style: normal
+Text: "bytes": 32768,
+
+[92] Style: normal
+Text: "hash": "",
+
+[93] Style: normal
+Text: "md5": "8db...aa5",
+
+[94] Style: normal
+Text: "sha256": ""
+
+[95] Style: normal
+Text: },
+
+[96] Style: normal
+Text: {
+
+[97] Style: normal
+Text: "type": "Dataset",
+
+[98] Style: normal
+Text: "id": "file2",
+
+[99] Style: normal
+Text: "title": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha.zip",
+
+[100] Style: normal
+Text: "description": "ZIP Archive for image loader (initial run, 0.1 alpha)",
+
+[101] Style: normal
+Text: "keywords": [],
+
+[102] Style: normal
+Text: "language": [],
+
+[103] Style: normal
+Text: "license": "",
+
+[104] Style: normal
+Text: "version": "0.1 alpha",
+
+[105] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[106] Style: normal
+Text: "created_by": [],
+
+[107] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[108] Style: normal
+Text: "modified_by": [],
+
+[109] Style: normal
+Text: "doi": "",
+
+[110] Style: normal
+Text: "conforms_to": "",
+
+[111] Style: normal
+Text: "download_url": "https://dataverse.example.org/file2",
+
+[112] Style: normal
+Text: "path": "1.cm4ai_chromatin_mda-mb-468_untreated_imageloader_initialrun0.1alpha.zip",
+
+[113] Style: normal
+Text: "format": "ZIP Archive",
+
+[114] Style: normal
+Text: "encoding": "",
+
+[115] Style: normal
+Text: "compression": "zip",
+
+[116] Style: normal
+Text: "media_type": "application/zip",
+
+[117] Style: normal
+Text: "bytes": 1400000000,
+
+[118] Style: normal
+Text: "hash": "",
+
+[119] Style: normal
+Text: "md5": "467...e0c",
+
+[120] Style: normal
+Text: "sha256": ""
+
+[121] Style: normal
+Text: },
+
+[122] Style: normal
+Text: {
+
+[123] Style: normal
+Text: "type": "Dataset",
+
+[124] Style: normal
+Text: "id": "file3",
+
+[125] Style: normal
+Text: "title": "2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha.zip",
+
+[126] Style: normal
+Text: "description": "ZIP Archive for AP-MS embeddings (initial run, 0.1 alpha)",
+
+[127] Style: normal
+Text: "keywords": [],
+
+[128] Style: normal
+Text: "language": [],
+
+[129] Style: normal
+Text: "license": "",
+
+[130] Style: normal
+Text: "version": "0.1 alpha",
+
+[131] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[132] Style: normal
+Text: "created_by": [],
+
+[133] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[134] Style: normal
+Text: "modified_by": [],
+
+[135] Style: normal
+Text: "doi": "",
+
+[136] Style: normal
+Text: "conforms_to": "",
+
+[137] Style: normal
+Text: "download_url": "https://dataverse.example.org/file3",
+
+[138] Style: normal
+Text: "path": "2.cm4ai_chromatin_mda-mb-468_untreated_apmsembed_initialrun0.1alpha.zip",
+
+[139] Style: normal
+Text: "format": "ZIP Archive",
+
+[140] Style: normal
+Text: "encoding": "",
+
+[141] Style: normal
+Text: "compression": "zip",
+
+[142] Style: normal
+Text: "media_type": "application/zip",
+
+[143] Style: normal
+Text: "bytes": 12900000,
+
+[144] Style: normal
+Text: "hash": "",
+
+[145] Style: normal
+Text: "md5": "86e...f39",
+
+[146] Style: normal
+Text: "sha256": ""
+
+[147] Style: normal
+Text: },
+
+[148] Style: normal
+Text: {
+
+[149] Style: normal
+Text: "type": "Dataset",
+
+[150] Style: normal
+Text: "id": "file4",
+
+[151] Style: normal
+Text: "title": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha.zip",
+
+[152] Style: normal
+Text: "description": "ZIP Archive for image embeddings, fold 1 (initial run, 0.1 alpha)",
+
+[153] Style: normal
+Text: "keywords": [],
+
+[154] Style: normal
+Text: "language": [],
+
+[155] Style: normal
+Text: "license": "",
+
+[156] Style: normal
+Text: "version": "0.1 alpha",
+
+[157] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[158] Style: normal
+Text: "created_by": [],
+
+[159] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[160] Style: normal
+Text: "modified_by": [],
+
+[161] Style: normal
+Text: "doi": "",
+
+[162] Style: normal
+Text: "conforms_to": "",
+
+[163] Style: normal
+Text: "download_url": "https://dataverse.example.org/file4",
+
+[164] Style: normal
+Text: "path": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold1_initialrun0.1alpha.zip",
+
+[165] Style: normal
+Text: "format": "ZIP Archive",
+
+[166] Style: normal
+Text: "encoding": "",
+
+[167] Style: normal
+Text: "compression": "zip",
+
+[168] Style: normal
+Text: "media_type": "application/zip",
+
+[169] Style: normal
+Text: "bytes": 680000000,
+
+[170] Style: normal
+Text: "hash": "",
+
+[171] Style: normal
+Text: "md5": "70f...18d",
+
+[172] Style: normal
+Text: "sha256": ""
+
+[173] Style: normal
+Text: },
+
+[174] Style: normal
+Text: {
+
+[175] Style: normal
+Text: "type": "Dataset",
+
+[176] Style: normal
+Text: "id": "file5",
+
+[177] Style: normal
+Text: "title": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha.zip",
+
+[178] Style: normal
+Text: "description": "ZIP Archive for image embeddings, fold 2 (initial run, 0.1 alpha)",
+
+[179] Style: normal
+Text: "keywords": [],
+
+[180] Style: normal
+Text: "language": [],
+
+[181] Style: normal
+Text: "license": "",
+
+[182] Style: normal
+Text: "version": "0.1 alpha",
+
+[183] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[184] Style: normal
+Text: "created_by": [],
+
+[185] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[186] Style: normal
+Text: "modified_by": [],
+
+[187] Style: normal
+Text: "doi": "",
+
+[188] Style: normal
+Text: "conforms_to": "",
+
+[189] Style: normal
+Text: "download_url": "https://dataverse.example.org/file5",
+
+[190] Style: normal
+Text: "path": "2.cm4ai_chromatin_mda-mb-468_untreated_imageembedfold2_initialrun0.1alpha.zip",
+
+[191] Style: normal
+Text: "format": "ZIP Archive",
+
+[192] Style: normal
+Text: "encoding": "",
+
+[193] Style: normal
+Text: "compression": "zip",
+
+[194] Style: normal
+Text: "media_type": "application/zip",
+
+[195] Style: normal
+Text: "bytes": 680000000,
+
+[196] Style: normal
+Text: "hash": "",
+
+[197] Style: normal
+Text: "md5": "b01...df3",
+
+[198] Style: normal
+Text: "sha256": ""
+
+[199] Style: normal
+Text: },
+
+[200] Style: normal
+Text: {
+
+[201] Style: normal
+Text: "type": "Dataset",
+
+[202] Style: normal
+Text: "id": "file6",
+
+[203] Style: normal
+Text: "title": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha.zip",
+
+[204] Style: normal
+Text: "description": "ZIP Archive for combined embeddings, fold 1 (initial run, 0.1 alpha)",
+
+[205] Style: normal
+Text: "keywords": [],
+
+[206] Style: normal
+Text: "language": [],
+
+[207] Style: normal
+Text: "license": "",
+
+[208] Style: normal
+Text: "version": "0.1 alpha",
+
+[209] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[210] Style: normal
+Text: "created_by": [],
+
+[211] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[212] Style: normal
+Text: "modified_by": [],
+
+[213] Style: normal
+Text: "doi": "",
+
+[214] Style: normal
+Text: "conforms_to": "",
+
+[215] Style: normal
+Text: "download_url": "https://dataverse.example.org/file6",
+
+[216] Style: normal
+Text: "path": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold1_initialrun0.1alpha.zip",
+
+[217] Style: normal
+Text: "format": "ZIP Archive",
+
+[218] Style: normal
+Text: "encoding": "",
+
+[219] Style: normal
+Text: "compression": "zip",
+
+[220] Style: normal
+Text: "media_type": "application/zip",
+
+[221] Style: normal
+Text: "bytes": 2800000,
+
+[222] Style: normal
+Text: "hash": "",
+
+[223] Style: normal
+Text: "md5": "ae9...8de",
+
+[224] Style: normal
+Text: "sha256": ""
+
+[225] Style: normal
+Text: },
+
+[226] Style: normal
+Text: {
+
+[227] Style: normal
+Text: "type": "Dataset",
+
+[228] Style: normal
+Text: "id": "file7",
+
+[229] Style: normal
+Text: "title": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha.zip",
+
+[230] Style: normal
+Text: "description": "ZIP Archive for combined embeddings, fold 2 (initial run, 0.1 alpha)",
+
+[231] Style: normal
+Text: "keywords": [],
+
+[232] Style: normal
+Text: "language": [],
+
+[233] Style: normal
+Text: "license": "",
+
+[234] Style: normal
+Text: "version": "0.1 alpha",
+
+[235] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[236] Style: normal
+Text: "created_by": [],
+
+[237] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[238] Style: normal
+Text: "modified_by": [],
+
+[239] Style: normal
+Text: "doi": "",
+
+[240] Style: normal
+Text: "conforms_to": "",
+
+[241] Style: normal
+Text: "download_url": "https://dataverse.example.org/file7",
+
+[242] Style: normal
+Text: "path": "3.cm4ai_chromatin_mda-mb-468_untreated_coembedfold2_initialrun0.1alpha.zip",
+
+[243] Style: normal
+Text: "format": "ZIP Archive",
+
+[244] Style: normal
+Text: "encoding": "",
+
+[245] Style: normal
+Text: "compression": "zip",
+
+[246] Style: normal
+Text: "media_type": "application/zip",
+
+[247] Style: normal
+Text: "bytes": 2800000,
+
+[248] Style: normal
+Text: "hash": "",
+
+[249] Style: normal
+Text: "md5": "4f7...389",
+
+[250] Style: normal
+Text: "sha256": ""
+
+[251] Style: normal
+Text: },
+
+[252] Style: normal
+Text: {
+
+[253] Style: normal
+Text: "type": "Dataset",
+
+[254] Style: normal
+Text: "id": "file8",
+
+[255] Style: normal
+Text: "title": "4.cm4ai_chromatin_mda-mb-468_untreated_hierarchy_initialrun0.1alpha.zip",
+
+[256] Style: normal
+Text: "description": "ZIP Archive for hierarchy (initial run, 0.1 alpha)",
+
+[257] Style: normal
+Text: "keywords": [],
+
+[258] Style: normal
+Text: "language": [],
+
+[259] Style: normal
+Text: "license": "",
+
+[260] Style: normal
+Text: "version": "0.1 alpha",
+
+[261] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[262] Style: normal
+Text: "created_by": [],
+
+[263] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[264] Style: normal
+Text: "modified_by": [],
+
+[265] Style: normal
+Text: "doi": "",
+
+[266] Style: normal
+Text: "conforms_to": "",
+
+[267] Style: normal
+Text: "download_url": "https://dataverse.example.org/file8",
+
+[268] Style: normal
+Text: "path": "4.cm4ai_chromatin_mda-mb-468_untreated_hierarchy_initialrun0.1alpha.zip",
+
+[269] Style: normal
+Text: "format": "ZIP Archive",
+
+[270] Style: normal
+Text: "encoding": "",
+
+[271] Style: normal
+Text: "compression": "zip",
+
+[272] Style: normal
+Text: "media_type": "application/zip",
+
+[273] Style: normal
+Text: "bytes": 43110,
+
+[274] Style: normal
+Text: "hash": "",
+
+[275] Style: normal
+Text: "md5": "90f...b75",
+
+[276] Style: normal
+Text: "sha256": ""
+
+[277] Style: normal
+Text: },
+
+[278] Style: normal
+Text: {
+
+[279] Style: normal
+Text: "type": "Dataset",
+
+[280] Style: normal
+Text: "id": "file9",
+
+[281] Style: normal
+Text: "title": "cm4ai_chromatin_mda-mb-468_paclitaxel_ifimage_0.1_alpha.zip",
+
+[282] Style: normal
+Text: "description": "ZIP Archive for Paclitaxel-treated IF image data (0.1 alpha)",
+
+[283] Style: normal
+Text: "keywords": [],
+
+[284] Style: normal
+Text: "language": [],
+
+[285] Style: normal
+Text: "license": "",
+
+[286] Style: normal
+Text: "version": "0.1 alpha",
+
+[287] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[288] Style: normal
+Text: "created_by": [],
+
+[289] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[290] Style: normal
+Text: "modified_by": [],
+
+[291] Style: normal
+Text: "doi": "",
+
+[292] Style: normal
+Text: "conforms_to": "",
+
+[293] Style: normal
+Text: "download_url": "https://dataverse.example.org/file9",
+
+[294] Style: normal
+Text: "path": "cm4ai_chromatin_mda-mb-468_paclitaxel_ifimage_0.1_alpha.zip",
+
+[295] Style: normal
+Text: "format": "ZIP Archive",
+
+[296] Style: normal
+Text: "encoding": "",
+
+[297] Style: normal
+Text: "compression": "zip",
+
+[298] Style: normal
+Text: "media_type": "application/zip",
+
+[299] Style: normal
+Text: "bytes": 934700000,
+
+[300] Style: normal
+Text: "hash": "",
+
+[301] Style: normal
+Text: "md5": "45c...81d",
+
+[302] Style: normal
+Text: "sha256": ""
+
+[303] Style: normal
+Text: },
+
+[304] Style: normal
+Text: {
+
+[305] Style: normal
+Text: "type": "Dataset",
+
+[306] Style: normal
+Text: "id": "file10",
+
+[307] Style: normal
+Text: "title": "cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha.zip",
+
+[308] Style: normal
+Text: "description": "ZIP Archive for untreated AP-MS data (0.1 alpha)",
+
+[309] Style: normal
+Text: "keywords": [],
+
+[310] Style: normal
+Text: "language": [],
+
+[311] Style: normal
+Text: "license": "",
+
+[312] Style: normal
+Text: "version": "0.1 alpha",
+
+[313] Style: normal
+Text: "created_on": "2024-05-11T00:00:00Z",
+
+[314] Style: normal
+Text: "created_by": [],
+
+[315] Style: normal
+Text: "last_updated_on": "2024-05-11T00:00:00Z",
+
+[316] Style: normal
+Text: "modified_by": [],
+
+[317] Style: normal
+Text: "doi": "",
+
+[318] Style: normal
+Text: "conforms_to": "",
+
+[319] Style: normal
+Text: "download_url": "https://dataverse.example.org/file10",
+
+[320] Style: normal
+Text: "path": "cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha.zip",
+
+[321] Style: normal
+Text: "format": "ZIP Archive",
+
+[322] Style: normal
+Text: "encoding": "",
+
+[323] Style: normal
+Text: "compression": "zip",
+
+[324] Style: normal
+Text: "media_type": "application/zip",
+
+[325] Style: normal
+Text: "bytes": 67891,
+
+[326] Style: normal
+Text: "hash": "",
+
+[327] Style: normal
+Text: "md5": "aa8...b96",
+
+[328] Style: normal
+Text: "sha256": ""
+
+[329] Style: normal
+Text: }
+
+[330] Style: normal
+Text: ]
+
+[331] Style: normal
+Text: }
+
+
+TABLES:
+--------------------------------------------------
+
+DOCUMENT PROPERTIES:
+--------------------------------------------------
+Title: Word Document
+Author: 
+Created: None
+Modified: 2025-04-16 17:44:58+00:00
