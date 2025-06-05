@@ -1,0 +1,1104 @@
+'@context':
+  '@vocab': https://schema.org/
+  EVI: https://w3id.org/EVI#
+'@graph':
+- '@id': ro-crate-metadata.json
+  '@type': CreativeWork
+  about:
+    '@id': ark:59852/cm4ai-march-2025-release
+  conformsTo:
+    '@id': https://w3id.org/ro/crate/1.2-DRAFT
+- '@id': ark:59852/cm4ai-march-2025-release
+  '@type':
+  - Dataset
+  - https://w3id.org/EVI#ROCrate
+  additionalProperty:
+  - '@type': PropertyValue
+    name: Completeness
+    value: These data are not yet in completed final form, and some datasets are under
+      temporary pre-publication embargo. Protein-protein interaction (SEC-MS), protein
+      localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins
+      which incompletely overlap. Computed cell maps not included in this release.
+  - '@type': PropertyValue
+    name: Maintenance Plan
+    value: Dataset will be regularly updated and augmented through the end of the
+      project in November 2026, on a quarterly basis. Long term preservation in the
+      University of Virginia Dataverse, supported by committed institutional funds.
+  - '@type': PropertyValue
+    name: Intended Use
+    value: AI-ready datasets to support research in functional genomics, AI model
+      training, cellular process analysis, cell architectural changes, and interactions
+      in presence of specific disease processes, treatment conditions, or genetic
+      perturbations. A major goal is to enable visible machine learning applications,
+      as proposed in Ma et al. (2018) Nature Methods.
+  - '@type': PropertyValue
+    name: Limitations
+    value: This is an interim release. It does not contain predicted cell maps, which
+      will be added in future releases. The current release is most suitable for bioinformatics
+      analysis of the individual datasets. Requires domain expertise for meaningful
+      analysis.
+  - '@type': PropertyValue
+    name: Prohibited Uses
+    value: These laboratory data are not to be used in clinical decision-making or
+      in any context involving patient care without appropriate regulatory oversight
+      and approval.
+  - '@type': PropertyValue
+    name: Human Subject
+    value: 'No'
+  - '@type': PropertyValue
+    name: De-identified Samples
+    value: 'Yes'
+  - '@type': PropertyValue
+    name: FDA Regulated
+    value: 'No'
+  - '@type': PropertyValue
+    name: Data Governance Committee
+    value: Jillian Parker; jillianparker@health.ucsd.edu
+  - '@type': PropertyValue
+    name: Potential Sources of Bias
+    value: 'Data in this release was derived from commercially available de-identified
+      human cell lines, and does not represent all biological variants which may be
+      seen in the population at large. '
+  associatedPublication:
+  - 'Clark T, Parker J, Al Manir S, et al. (2024) "Cell Maps for Artificial Intelligence:
+    AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines" bioRxiv
+    2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311'
+  - 'Nourreddine S, et al. (2024) "A Perturbation Cell Atlas of Human Induced Pluripotent
+    Stem Cells." bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.11.03.621734'
+  - "Qin, Y., Huttlin, E.L., Winsnes, C.F. et al. A multi-scale map of cell structure\
+    \ fusing protein images and interactions. Nature 600, 536\u2013542 (2021). https://doi.org/10.1038/s41586-021-04115-9"
+  - 'Schaffer LV, Hu M, Qian G, et al. "Multimodal cell maps as a foundation for structural
+    and functional genomics." Nature [Internet]. 2025 Apr 9; Available from: https://www.nature.com/articles/s41586-025-08878-3'
+  author: "Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn\
+    \ B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M;\
+    \ Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo\
+    \ C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B;\
+    \ Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; B\xE9lisle-Pipon\
+    \ JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster\
+    \ P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T"
+  citation: "Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn\
+    \ B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M;\
+    \ Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo\
+    \ C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B;\
+    \ Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; B\xE9lisle-Pipon\
+    \ JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster\
+    \ P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T, 2025, \"Cell Maps for\
+    \ Artificial Intelligence - March 2025 Data Release (Beta)\", https://doi.org/10.18130/V3/B35XWX\
+    \ , University of Virginia Dataverse, V1"
+  conditionsOfAccess: Attribution is required to the copyright holders and the authors.
+    Any publications referencing this data or derived data products should cite the
+    Related Publications below, as well as directly citing this data collection.
+  confidentialityLevel: Unrestricted
+  contactEmail: tideker@health.ucsd.edu
+  contentSize: 12.53 GB
+  copyrightNotice: Copyright (c) 2025 The Regents of the University of California
+    except where otherwise noted. Spatial proteomics raw image data is copyright (c)
+    2025 The Board of Trustees of the Leland Stanford Junior University.
+  datePublished: '2025-03-03'
+  description: This dataset is the March 2025 Data Release of Cell Maps for Artificial
+    Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the
+    NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated
+    KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived
+    NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells
+    in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI
+    output data are packaged with provenance graphs and rich metadata as AI-ready
+    datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here
+    will be augmented regularly through the end of the project. CM4AI is a collaboration
+    of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and
+    the Hastings Center.
+  funder: 'National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS131560,
+    U54CA274502, #S10 OD026929. Department of Defense: W81XWH-22-1-0401. CIRM training:
+    EDUC4-12804. Dutch Research Council: NWO, 019.231EN.013. National Cancer Institute:
+    P30CA023100'
+  hasPart:
+  - '@id': ark:59852/rocrate-paclitaxel-if-data-release
+  - '@id': ark:59852/rocrate-a-perturbation-cell-atlas-of-human-induced-pluripotent-stem-cells-Cmx85JJSgWm/
+  - '@id': ark:59852/rocrate-data-from-undifferentiated-human-ipsc-generated-by-sec-ms/
+  - '@id': ark:59852/rocrate-sra-data-for-perturbation-cell-atlas-58RmCGMQBj/
+  - '@id': ark:59852/rocrate-untreated-if-data-release
+  - '@id': ark:59852/rocrate-vorinostat-if-data-release
+  identifier: https://doi.org/10.18130/V3/B35XWX
+  isPartOf:
+  - '@id': ark:59852/organization-university-of-california-san-diego-pQA9LP0kxY
+  - '@id': ark:59852/project-cell-maps-for-artificial-intelligence-uhBDcaR21Cf
+  keywords:
+  - AI
+  - affinity purification
+  - AP-MS
+  - artificial intelligence
+  - breast cancer
+  - Bridge2AI
+  - cardiomyocyte
+  - CM4AI
+  - CRISPR/Cas9
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - machine learning
+  - mass spectroscopy
+  - MDA-MB-468
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - paclitaxel
+  - perturb-seq
+  - perturbation sequencing
+  - protein-protein interaction
+  - protein localization
+  - single-cell RNA sequencing
+  - scRNAseq
+  - SEC-MS
+  - size exclusion chromatography
+  - subcellular imaging
+  - vorinostat
+  license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+  name: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+  principalInvestigator: Trey Ideker
+  publisher: University of Virginia Dataverse
+  usageInfo: These laboratory data are not to be used in clinical decision-making
+    or in any context involving patient care without appropriate regulatory oversight
+    and approval.
+  version: '1.4'
+- '@id': ark:59852/rocrate-sra-data-for-perturbation-cell-atlas-58RmCGMQBj/
+  '@type':
+  - Dataset
+  - https://w3id.org/EVI#ROCrate
+  associatedPublication: 'Nourreddine S, Doctor Y, Dailamy A, et al. (2024) "A Perturbation
+    Cell Atlas of Human Induced Pluripotent Stem Cells" bioRxiv 2024.11.03.621734;
+    doi: https://doi.org/10.1101/2024.11.03.621734'
+  author: Doctor Y; Dailamy A; Forget A; Lee YH; Chinn B; Khaliq H; Polacco B; Muralidharan,
+    M; Pan E; Zhang Y; Sigaeva A; Hansen JN; Gao J; Parker JA; Obernier K; Clark T;
+    Chen JY; Metallo C; Lundberg E; Idkeker T; Krogan N; Mali P
+  conditionsOfAccess: 'This dataset was created by investigators and staff of the
+    Cell Maps for Artificial Intelligence project (CM4AI - https://cm4ai.org), a Data
+    Generation Project of the NIH Bridge2AI program, and is copyright (c) 2024 by
+    The Regents of the University of California and, for cellular imaging data, by
+    The Board of Trustees of the Leland Stanford Junior University. It is licensed
+    for reuse under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+    International (CC-BY-NC-SA 4.0) license, whose terms are summarized here: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en.  Proper
+    attribution credit as required by the license includes citation of the copyright
+    holders and of the attribution parties, which includes citation of the following
+    article: Clark T, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor
+    Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Mohan J, Nourreddine
+    S, Niestroy J, Pratt D, Qian G, Thaker S, Belisle-Pipon J-C, Brandt C, Chen J,
+    Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky
+    V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence: AI-Ready
+    Maps of Human Cell Architecture from Disease-Relevant Cell Lines. BioRXiv 2024.'
+  contactEmail: pmali@ucsd.edu
+  copyrightNotice: Copyright (c) 2024 by The Regents of the University of California
+  description: This dataset represents raw sequence data from an expressed genome-scale
+    CRISPRi Perturbation Cell Atlas in KOLF2.1J human induced pluripotent stem cells
+    (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739
+    targeted genes, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org)
+    Functional Genomics Grand Challenge, a component of the U.S. National Institute
+    of Health's (NIH) Bridge2AI program. This data is Copyright (c) 2025 The Regents
+    of the University of California. It is licensed for reuse under Creative Commons
+    Attribution Share-Alike Noncommercial 4.0 International License (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+    Attribution is required to the copyright holders and the authors. Any publications
+    referencing this data or derived products should cite the related article as well
+    as directly citing this data collection.
+  funder: 'National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS131560,
+    U54CA274502, #S10 OD026929. Department of Defense: W81XWH-22-1-0401. CIRM training:
+    EDUC4-12804. Dutch Research Council: NWO, 019.231EN.013. National Cancer Institute:
+    P30CA023100'
+  hasPart:
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-1-9LpadE6Fu1Q
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-10-hf97WzABoZ
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-11-n0TB2HCq3BA
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-12-s6glvp08on5
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-13-IoleAaBvTu
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-14-fULJ7Yg9zSj
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-15-eVXPo546wX3
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-16-SxoRQJBIMJZ
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-2-Fpkt4hbGZo
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-3-Ewf13NRhma
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-4-qT1jYVx3Xh
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-5-317wEXoWsV
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-6-Xnq2NRSboB
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-7-RHVDxKJewhW
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-8-kAsIy9TK1p
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-1-channel-9-HZMcDsCVD1C
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-1-Ks8vrF75FZi
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-10-yIvAkdwrDj
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-11-58RmCG4QqJ
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-12-bq3YzexZkP
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-13-kAsIy9dKM0k
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-14-n0TB2HDqaSh
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-15-Ae6oILtsgeD
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-16-n0TB2HPql1
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-2-317wEXcWka
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-3-Ewf13NZhZlZ
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-4-yIvAkdUrWcr
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-5-rvmsK4LCEUe
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-6-xDPHRrsoehx
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-7-oPNVeC8ljl
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-8-DcuZHvgP3h2
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-crispr-chip-2-channel-9-2Bj0nDMY6xx
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-1-W7dfhbh0Z6
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-10-kAsIy9yKM3x
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-11-oPNVeC6lddz
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-12-Ae6oILmsXM
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-13-bq3YzeuZYp5
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-14-6XbNlQPgbSc
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-15-8gHimkiRzv
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-16-L5QCawSp6bM
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-2-L5QCawSpn9y
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-3-OyrkG05JNBG
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-4-SxoRQJ6IqT
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-5-0d49BZUTSMk
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-6-vli6stVml8
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-7-tSIQp7RyFwG
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-8-datL93Q4vd
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-1-channel-9-vli6stbmo5J
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-1-jFG4Turwugd
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-10-0d49BZkTmVX
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-11-1OJGwnQ79xQ
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-12-MW0hugGno1v
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-13-8gHimkYR6z
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-14-QRexSUcAae
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-15-lNzX6STinR
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-16-1OJGwns7e9
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-2-miDg8yWxJiP
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-3-6XbNlQwgbw7
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-4-qT1jYV53FOE
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-5-xDPHRrToNth
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-6-eVXPo5f6wDB
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-7-n0TB2H5qa4Y
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-8-IoleAa0vdN
+  - '@id': ark:59852/dataset-sra-data-kolf2-alpha-gex-chip-2-channel-9-GkKyOBNUVB
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-1-uhBWMiS21VX
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-10-uhBWMiS2E4
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-11-Ae6oILwsgS2
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-12-VMnuP8kX1H
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-13-n0TB2H8q3ug
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-14-qT1jYVe3YdE
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-15-L5QCawEpnPi
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-16-HZMcDs5VrkH
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-2-gbZziAKHE2
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-3-GkKyOBEUU5X
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-4-SxoRQJ4IOzM
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-5-Z3WEc6eMS3
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-6-58RmCGFQdy
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-7-T4OFjMM1R3G
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-8-0d49BZZTLZ
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-1-channel-9-YjwTqPNElb
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-1-B9Fd0cuj3PC
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-10-W7dfhbM0j9n
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-11-8gHimk5Ra6
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-12-uhBWMiN23t
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-13-7JaUfq0dXKd
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-14-2Bj0nDcY6HE
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-15-n0TB2HZqa3a
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-16-MW0hugZnHe7
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-2-rvmsK4yCtOZ
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-3-jFG4TujwxB
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-4-tSIQp7tyEb
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-5-UK5rJwpLcF
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-6-Xnq2NeZbOH
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-7-JrCKU1yadN
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-8-tSIQpdCy3F
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-crispr-chip-2-channel-9-Xnq2NenbHf5
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-1-qT1jYXT3YCB
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-10-MW0huH0na2
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-11-oPNVeSzlXxj
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-12-kAsIyF8KMBi
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-13-OyrkGTSJbi
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-14-DcuZHmYP3HI
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-15-DcuZHmEP16W
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-16-yIvAk4orW7y
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-2-N2YnXojzUY
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-3-JrCKU1mag2a
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-4-N2YnXowzjF
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-5-Ae6oIpZsba
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-6-Cmx85JNSpoJ
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-7-bq3Yz64Z58q
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-8-L5QCafgpbT
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-1-channel-9-kAsIyFXKMzc
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-1-hf97Wc5B8iZ
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-10-izcbgvfD6v
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-11-Xnq2NeObHGr
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-12-vli6syhmF5
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-13-Xnq2NeJbHY
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-14-Xnq2Neab27
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-15-bq3Yz6tZYWp
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-16-Pu2MVxLNnj0
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-2-pQASt9Mkc4
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-3-vli6sywmfw
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-4-hf97WcRB5oC
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-5-miDg8r9xuw
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-6-7JaUf3PdGKs
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-7-datL9Wz46lv
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-8-T4OFjnP1zz
+  - '@id': ark:59852/dataset-sra-data-kolf2-beta-gex-chip-2-channel-9-HZMcD8rVDxU
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-1-L5QCafWpneF
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-10-Xnq2NeIbH7I
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-11-Ae6oIpOsgPa
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-12-uhBWMDe21QL
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-13-8gHimKtRrw
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-14-datL9WY4QMX
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-15-MW0huHinor2
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-16-jFG4T2MwLvy
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-2-xDPHRC5o59
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-3-Pu2MVxRNNJD
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-4-58RmCUaQRCb
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-5-VMnuPRoXFRZ
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-6-SxoRQakIO9w
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-7-4typF0wO6Tm
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-8-Cmx85JkSpAG
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-1-channel-9-6XbNlAxgeg0
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-1-eVXPoQx6wpp
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-10-bq3Yz6NZYkT
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-11-eVXPoQo6Nc
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-12-gbZzisiHDN
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-13-tSIQpdkyvMD
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-14-lNzX6IgiYK1
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-15-N2YnXoZzxeC
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-16-Ae6oIpmszBW
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-2-1OJGwqF79ng
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-3-8gHimKlRin
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-4-Xnq2Ne2bHJI
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-5-fULJ7EJ9in5
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-6-Ks8vrGm5YYI
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-7-W7dfhZ90Eka
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-8-SxoRQa6IMTB
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-crispr-chip-2-channel-9-fULJ7Et9i3n
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-1-4typF05OZ0
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-10-izcbgvnDjOe
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-11-hf97WcJB5ki
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-12-GkKyOjIUYWV
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-13-qT1jYXG3xb
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-14-VMnuPRBX33P
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-15-2Bj0nPOYBl
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-16-IoleAtbv2h
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-2-Ewf13zthwo
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-3-B9Fd0urj37V
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-4-7JaUf3sdGiS
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-5-VMnuPR9X37C
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-6-Ks8vrGz5mu
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-7-s6glvkE8GPu
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-8-Ewf13zChZDN
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-1-channel-9-IoleAt3vcPo
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-1-Fpkt4BiGNmx
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-10-58RmCUYQR4d
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-11-IoleAt0vcUQ
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-12-hf97WcxB8RK
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-13-8gHimKfR7HO
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-14-7JaUf3VdXEY
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-15-qT1jYX83Yy0
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-16-Ae6oIpfszX0
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-2-L5QCafEp6nf
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-3-W7dfhZg0jau
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-4-2Bj0nPoYtc
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-5-bq3Yz68ZYJv
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-6-RHVDx5pewIc
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-7-W7dfhZX0Xt
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-8-W7dfhZb0EM0
+  - '@id': ark:59852/dataset-sra-data-kolf2-gamma-gex-chip-2-channel-9-W7dfhZb0jh3
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-1-n0TBY3nq3q9
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-10-JrCKLyta5m
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-11-wGUO7F9fQe
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-12-T4OFwdd1Yq
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-13-lNzXgPPiYPH
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-14-yIvAKSIrot
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-15-Cmx8QvmS0Q
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-16-0d49j74TSQI
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-2-7JaU9OadGcl
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-3-2Bj0qhwYMjs
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-4-lNzXgPciYoj
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-5-Ks8vCAe5AD
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-6-Pu2MXcENNBt
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-7-miDgRlzxfS
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-8-GkKyJpAUUBT
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-1-channel-9-1OJGf4r79MY
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-1-7JaU9OCdXMC
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-10-IolesxzvcWU
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-11-wGUO7F5fpIQ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-12-SxoRAmzI7F
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-13-tSIQkCiyNW
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-14-uhBWnEU2gp
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-15-MW0h23JnHdI
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-16-317whTrWTJ1
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-2-gbZzDX1HfqQ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-3-IolesxYvSHu
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-4-datLFJo4Qgy
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-5-IolesxEvS3s
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-6-aCS5prNtLoU
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-7-oPNV6Dflden
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-8-Ewf1WjAhR
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-crispr-chip-2-channel-9-hf970w8BlO
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-1-9Lpa4UHFoo
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-10-9Lpa4UVFh9
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-11-9Lpa4UVFRxK
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-12-L5QCtKnpIf
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-13-W7dfB1o0EaV
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-14-Z3WEuqIM4r
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-15-Ks8vCA05sg
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-16-2Bj0qhRYaw
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-2-Ks8vCA15so
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-3-JrCKLyEagSp
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-4-hf970wVBRc
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-5-n0TBYWlq3Ru
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-6-2Bj0qhgY64e
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-7-QRexI8OAcwA
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-8-cEh3MY6uNw
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-1-channel-9-Ewf1WjXhgz
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-1-N2YnbuezT8A
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-10-datLFJh46tP
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-11-jFG419qwLCE
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-12-HZMcPbxVu8
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-13-fULJdG09Ln
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-14-6XbNiVmgu1
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-15-6XbNiVxgbK0
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-16-6XbNiVxgbca
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-2-s6glmeI83K
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-3-MW0h23cnBC
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-4-GkKyJpOUUaN
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-5-yIvAKSkrWML
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-6-jFG4191wLb7
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-7-OyrkUtUJNIn
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-8-1OJGf497sqU
+  - '@id': ark:59852/computation-sra-experiment-kolf2-alpha-gex-chip-2-channel-9-B9FdTf1jFJ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-1-FpktOLaGahQ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-10-datLFJU4Q1n
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-11-7JaU9OUdXxv
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-12-317whTwWTd0
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-13-W7dfB190jBz
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-14-bq3YcnEZYAV
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-15-L5QCtKIpnBn
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-16-UK5rakSL1l
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-2-OyrkUtQJNSs
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-3-hf970wOB5Ve
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-4-gbZzDXYHDi
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-5-fULJdGr9Sm
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-6-1OJGf4K79BZ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-7-W7dfB1L0jcd
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-8-eVXPlHY6w5M
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-1-channel-9-8gHix6uRfEf
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-1-JrCKLyeaZD
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-10-Z3WEuqFM7Cb
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-11-gbZzDXjHfFe
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-12-HZMcPbwVpw
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-13-uhBWnEa2vK
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-14-2Bj0qhtYMAZ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-15-hf970wSB8d7
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-16-vli68o3mNrm
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-2-7JaU9OedTH
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-3-kAsIrQcKV4H
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-4-oPNV6D7lXve
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-5-oPNV6D7lXf8
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-6-bq3YcnkZRI
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-7-lNzXgP4iYh6
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-8-B9FdTfoj3bP
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-crispr-chip-2-channel-9-RHVDog9ep4
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-1-0d49j76Tye
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-10-UK5rakuLgQZ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-11-bq3YcnQZYt5
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-12-Ae6ovRfsgfR
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-13-uhBWnEm2st
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-14-xDPHeiaoNNQ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-15-JrCKLy3agDH
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-16-1OJGf4Z7sK9
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-2-eVXPlHk6VJF
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-3-izcbHNSDjbS
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-4-gbZzDXQHzi
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-5-zYEqZ2oc2o
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-6-Iolesxavcn0
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-7-zYEqZ2lc3PO
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-8-tSIQkCdyvr8
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-1-channel-9-s6glmeK8oDB
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-1-0d49j7nTZZ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-10-JrCKLydagap
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-11-bq3YcnHZ5IL
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-12-Z3WEuqXM7H8
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-13-2Bj0qhcYMmc
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-14-eVXPlHR6w8G
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-15-HZMcPbgVOu
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-16-7JaU9O7dCJ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-2-4typGa4Optp
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-3-DcuZVcNP3Mf
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-4-wGUO7G9fpal
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-5-7JaU9JOdGYg
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-6-fULJdUU96g
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-7-317wh11WTsJ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-8-QRexIReAOt
+  - '@id': ark:59852/computation-sra-experiment-kolf2-beta-gex-chip-2-channel-9-rvms5vmCEAJ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-1-rvms5vxCtJN
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-10-RHVDoHberBp
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-11-IolesoDvcue
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-12-IolesoPvSR6
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-13-Ks8vCsg5JG
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-14-DcuZVchP1qA
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-15-vli68lcmAJ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-16-GkKyJk8UYD7
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-2-jFG41F5wuXE
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-3-OyrkUyoJcY
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-4-UK5raK6LgCr
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-5-DcuZVcfP3zS
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-6-4typGtoOpst
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-7-2Bj0qBkYpQ
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-8-OyrkUyDJNzC
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-1-channel-9-qT1jETC3k6
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-1-9Lpa4LgFyN
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-10-DcuZVcUP3hD
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-11-MW0h2WCnobo
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-12-pQASyQnkDw
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-13-wGUO7GHfTS
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-14-Ks8vCsW5FUS
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-15-wGUO7GVfp4u
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-16-0d49jdiTSEo
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-2-YjwT3jeEpm
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-3-N2Ynb2QzTtc
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-4-fULJdUZ9i9u
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-5-0d49jdNTSOW
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-6-HZMcPZSVrCN
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-7-OyrkUyhJcbc
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-8-QRexIRJAcEH
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-crispr-chip-2-channel-9-RHVDoHrej6
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-1-Ewf1Wwbh9KV
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-10-jFG41FnwFj
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-11-qT1jETz3Fk
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-12-fULJdU098J
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-13-pQASyQOkTd
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-14-s6glm6S8Gbb
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-15-bq3YcqPZYQs
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-16-58RmS8rQLp
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-2-Ewf1WwqhZpe
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-3-qT1jETY3FFu
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-4-hf970f0B5r
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-5-JrCKLrLaa1
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-6-1OJGfO979ay
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-7-pQASyQrkeP5
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-8-2Bj0qBWY6fR
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-1-channel-9-DcuZVcbP1y7
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-1-0d49jd9TSfW
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-10-GkKyJkrU34
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-11-yIvAKIsr9w
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-12-58RmS8oQCWw
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-13-2Bj0qB1Ya2
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-14-Ewf1Ww4h9bA
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-15-Ae6ovePsAO
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-16-1OJGfOk790e
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-2-Xnq2znjbHcN
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-3-RHVDoHueml
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-4-IolesobvSCw
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-5-JrCKLreaek
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-6-jFG41FSwLPL
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-7-B9FdT9Cj2Y
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-8-n0TBY0pq35t
+  - '@id': ark:59852/computation-sra-experiment-kolf2-gamma-gex-chip-2-channel-9-hf970fSB5it
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-1
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-2
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-3
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-4
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-5
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-6
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-7
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-8
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-9
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-10
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-11
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-12
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-13
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-14
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-15
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-1-channel-16
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-1
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-2
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-4
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-5
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-6
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-7
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-8
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-9
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-10
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-11
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-12
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-13
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-15
+  - '@id': ark:59852/dataset-molecule-data-alpha-chip-2-channel-16
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-2
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-3
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-4
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-5
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-6
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-7
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-8
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-9
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-10
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-11
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-12
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-13
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-14
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-15
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-1-channel-16
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-1
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-2
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-3
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-4
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-5
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-6
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-7
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-8
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-9
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-10
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-11
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-12
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-13
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-14
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-15
+  - '@id': ark:59852/dataset-molecule-data-beta-chip-2-channel-16
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-1
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-2
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-3
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-4
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-5
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-6
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-7
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-8
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-9
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-10
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-11
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-12
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-13
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-14
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-15
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-1-channel-16
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-1
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-2
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-3
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-4
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-5
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-6
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-9
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-10
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-11
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-12
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-13
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-15
+  - '@id': ark:59852/dataset-molecule-data-gamma-chip-2-channel-16
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-1
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-2
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-3
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-4
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-5
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-6
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-7
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-8
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-9
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-10
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-11
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-12
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-13
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-14
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-15
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-1-channel-16
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-1
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-2
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-4
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-5
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-6
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-7
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-8
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-9
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-10
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-11
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-12
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-13
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-15
+  - '@id': ark:59852/computation-cellranger-count-alpha-chip-2-channel-16
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-2
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-3
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-4
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-5
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-6
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-7
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-8
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-9
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-10
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-11
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-12
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-13
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-14
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-15
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-1-channel-16
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-1
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-2
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-3
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-4
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-5
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-6
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-7
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-8
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-9
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-10
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-11
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-12
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-13
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-14
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-15
+  - '@id': ark:59852/computation-cellranger-count-beta-chip-2-channel-16
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-1
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-2
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-3
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-4
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-5
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-6
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-7
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-8
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-9
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-10
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-11
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-12
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-13
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-14
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-15
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-1-channel-16
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-1
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-2
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-3
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-4
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-5
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-6
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-9
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-10
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-11
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-12
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-13
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-15
+  - '@id': ark:59852/computation-cellranger-count-gamma-chip-2-channel-16
+  isPartOf:
+  - '@id': ark:59852/organization-university-of-california-san-diego
+  - '@id': ark:59852/project-cm4ai
+  keywords:
+  - AI
+  - Artificial intelligence
+  - Cell maps
+  - CM4AI
+  - CRISPR perturbation
+  - IPSC
+  - KOLF2.1J
+  - Machine learning
+  - Perturb-seq
+  - scRNAseq
+  - single-cell RNA sequencing
+  license: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+  name: Perturbation Cell Atlas of Human Induced Pluripotent Stem Cells - Raw Sequence
+    Data
+  ro-crate-metadata: subcrate_sra/ro-crate-metadata.json
+  version: '0.6'
+- '@id': ark:59852/rocrate-a-perturbation-cell-atlas-of-human-induced-pluripotent-stem-cells-Cmx85JJSgWm/
+  '@type':
+  - Dataset
+  - https://w3id.org/EVI#ROCrate
+  associatedPublication: 'Nourreddine S, Doctor Y, Dailamy A, et al. (2024) "A Perturbation
+    Cell Atlas of Human Induced Pluripotent Stem Cells" bioRxiv 2024.11.03.621734;
+    doi: https://doi.org/10.1101/2024.11.03.621734'
+  author: Doctor Y; Dailamy A; Forget A; Lee YH; Chinn B; Khaliq H; Polacco B; Muralidharan,
+    M; Pan E; Zhang Y; Sigaeva A; Hansen JN; Gao J; Parker JA; Obernier K; Clark T;
+    Chen JY; Metallo C; Lundberg E; Idkeker T; Krogan N; Mali P
+  conditionsOfAccess: 'This dataset was created by investigators and staff of the
+    Cell Maps for Artificial Intelligence project (CM4AI - https://cm4ai.org), a Data
+    Generation Project of the NIH Bridge2AI program, and is copyright (c) 2024 by
+    The Regents of the University of California and, for cellular imaging data, by
+    The Board of Trustees of the Leland Stanford Junior University. It is licensed
+    for reuse under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+    International (CC-BY-NC-SA 4.0) license, whose terms are summarized here: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en.  Proper
+    attribution credit as required by the license includes citation of the copyright
+    holders and of the attribution parties, which includes citation of the following
+    article: Clark T, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor
+    Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Mohan J, Nourreddine
+    S, Niestroy J, Pratt D, Qian G, Thaker S, Belisle-Pipon J-C, Brandt C, Chen J,
+    Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky
+    V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence: AI-Ready
+    Maps of Human Cell Architecture from Disease-Relevant Cell Lines. BioRXiv 2024.'
+  contactEmail: pmali@ucsd.edu
+  contentSize: 195.97 GB
+  copyrightNotice: Copyright (c) 2024 by The Regents of the University of California
+  description: This dataset represents an expressed genome-scale CRISPRi Perturbation
+    Cell Atlas in KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional
+    and fitness phenotypes associated with 11,739 targeted genes, as part of the Cell
+    Maps for Artificial Intelligence (CM4AI) Functional Genomics Grand Challenge,
+    a component of the U.S. National Institute of Health's (NIH) Bridge2AI program.
+    We validated these findings via phenotypic, protein-interaction, and metabolic
+    tracing assays. This data is Copyright (c) 2025 The Regents of the University
+    of California. It is licensed for reuse under Creative Commons Attribution Share-Alike
+    Non-Commercial 4.0 International License (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+    Attribution is required to the copyright holders and the authors. Any publications
+    referencing this data or derived products should cite the related article as well
+    as directly citing this data collection.
+  funder: 'National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS131560,
+    U54CA274502, #S10 OD026929. Department of Defense: W81XWH-22-1-0401. CIRM training:
+    EDUC4-12804. Dutch Research Council: NWO, 019.231EN.013. National Cancer Institute:
+    P30CA023100'
+  hasPart:
+  - '@id': ark:59852/dataset-kolf-pan-genome-aggregated-data-B9Fd0uujkz
+  - '@id': ark:59852/dataset-protospacer-calls-per-cell-B9Fd0u2jQx
+  - '@id': ark:59852/dataset-aggregation-data-fULJ7Eh9Al
+  - '@id': ark:59852/computation-perturbation-cell-atlas-data-processing-Cmx85JtSguG
+  - '@id': ark:59852/rocrate-data-analysis-pipeline-qT1jYXZ3sf/
+  - '@id': ark:59852/software-perturb-seq-heuristic-pipeline-uhBWMDz215T
+  - '@id': ark:59852/software-pan-genome-heatmap-analysis-317wEbnWTKW
+  - '@id': ark:59852/software-pan-genome-umap-analysis-YjwTqN2ECNl
+  - '@id': ark:59852/software-pan-genome-analysis-qT1jYXq3vb
+  - '@id': ark:59852/software-pan-genome-ml-analysis-wGUO1YwfpBP
+  - '@id': ark:59852/software-pan-genome-mde-coloring-QRexSpsAccG
+  - '@id': ark:59852/dataset-analysis-pipeline-documentation-Pu2MVozN9K
+  - '@id': ark:59852/dataset-analysis-pipeline-demo-fULJ7hG9ii6
+  isPartOf:
+  - '@id': ark:59852/organization-university-of-california-san-diego
+  - '@id': ark:59852/project-cm4ai
+  keywords:
+  - AI
+  - Artificial intelligence
+  - Cell maps
+  - CM4AI
+  - CRISPR perturbation
+  - IPSC
+  - KOLF2.1J
+  - Machine learning
+  - Perturb-seq
+  - scRNAseq
+  - single-cell RNA sequencing
+  license: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+  name: Perturbation Cell Atlas of Human Induced Pluripotent Stem Cells - Perturb
+    Seq
+  ro-crate-metadata: subcrate_real/ro-crate-metadata.json
+  version: '1.0'
+- '@id': ark:59852/rocrate-paclitaxel-if-data-release
+  '@type':
+  - Dataset
+  - https://w3id.org/EVI#ROCrate
+  associatedPublication: ''
+  author:
+  - Hansen JN
+  - Axelsson U
+  - Johannesson A
+  - Fall J
+  - Ballllosera Navarro F
+  - Lundberg E
+  conditionsOfAccess: "This dataset was created by investigators and staff of the\
+    \ Cell Maps for Artificial Intelligence project (CM4AI - https://cm4ai.org), a\
+    \ Data Generation Project of the NIH Bridge2AI program for cellular imaging data\
+    \ by The Board of Trustees of the Leland Stanford Junior University. It is licensed\
+    \ for reuse under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0\
+    \ International (CC-BY-NC-SA 4.0) license, whose terms are summarized here: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en.\
+    \  Proper attribution credit as required by the license includes citation of the\
+    \ copyright holders and of the attribution parties, which includes citation of\
+    \ the following article: Clark T, Schaffer L, Obernier K, Al Manir S, Churas CP,\
+    \ Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez\
+    \ C, Mohan J, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Belisle-Pipon\
+    \ J-C, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster\
+    \ P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial\
+    \ Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant\
+    \ Cell Lines. BioRXiv 2024.\u201D"
+  contactEmail: emmalu@stanford.edu
+  contentSize: 2.6 GB
+  copyrightNotice: Copyright (c) 2025 by The Board of Trustees of the Leland Stanford
+    Junior University
+  datePublished: 02/28/2025
+  description: "This data set displays the spatial localization of 464 proteins of\
+    \ interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel\
+    \ as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy\
+    \ in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial\
+    \ Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue\
+    \ channel); endoplasmic reticulum with a calreticulin antibody (yellow channel);\
+    \ microtubules with tubulin antibody (red channel); and antibody against protein\
+    \ of interest (green channel). \n\nThis data is Copyright (c) 2025 The Board of\
+    \ Trustees of the Leland Stanford Junior University. It is licensed for reuse\
+    \ under Creative Commons Attribution ShareAlike NonCommercial 4.0 International\
+    \ License (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is\
+    \ required to the copyright holders and the authors. Any publications referencing\
+    \ this data or derived products should cite the related article as well as directly\
+    \ citing this data collection.\n"
+  funder: 'National Institutes of Health: 1OT2OD032742-01'
+  hasPart: []
+  isPartOf: []
+  keywords:
+  - AI
+  - artificial intelligence
+  - breast cancer
+  - cell maps
+  - CM4AI
+  - machine learning
+  - MDA-MB-468
+  - paclitaxel
+  - protein localization
+  - protein localization
+  license: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+  name: Paclitaxel IF Images
+  ro-crate-metadata: paclitaxel/ro-crate-metadata.json
+  version: 0.1.0
+- '@id': ark:59852/rocrate-untreated-if-data-release
+  '@type':
+  - Dataset
+  - https://w3id.org/EVI#ROCrate
+  associatedPublication: ''
+  author:
+  - Hansen JN
+  - Axelsson U
+  - Johannesson A
+  - Fall J
+  - Ballllosera Navarro F
+  - Lundberg E
+  conditionsOfAccess: "This dataset was created by investigators and staff of the\
+    \ Cell Maps for Artificial Intelligence project (CM4AI - https://cm4ai.org), a\
+    \ Data Generation Project of the NIH Bridge2AI program for cellular imaging data\
+    \ by The Board of Trustees of the Leland Stanford Junior University. It is licensed\
+    \ for reuse under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0\
+    \ International (CC-BY-NC-SA 4.0) license, whose terms are summarized here: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en.\
+    \  Proper attribution credit as required by the license includes citation of the\
+    \ copyright holders and of the attribution parties, which includes citation of\
+    \ the following article: Clark T, Schaffer L, Obernier K, Al Manir S, Churas CP,\
+    \ Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez\
+    \ C, Mohan J, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Belisle-Pipon\
+    \ J-C, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster\
+    \ P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial\
+    \ Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant\
+    \ Cell Lines. BioRXiv 2024.\u201D"
+  contactEmail: emmalu@stanford.edu
+  contentSize: 3.2 GB
+  copyrightNotice: Copyright (c) 2025 by The Board of Trustees of the Leland Stanford
+    Junior University
+  datePublished: 02/28/2025
+  description: "This data set displays the spatial localization of 464 proteins of\
+    \ interest in untreated cells of the breast cancer cell line MDA-MB-468 as imaged\
+    \ by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the\
+    \ Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial\
+    \ Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue\
+    \ channel); endoplasmic reticulum with a calreticulin antibody (yellow channel);\
+    \ microtubules with tubulin antibody (red channel); and antibody against protein\
+    \ of interest (green channel). \n\nThis data is Copyright (c) 2025 The Board of\
+    \ Trustees of the Leland Stanford Junior University. It is licensed for reuse\
+    \ under Creative Commons Attribution Share Alike Noncommercial 4.0 International\
+    \ License (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is\
+    \ required to the copyright holders and the authors. Any publications referencing\
+    \ this data or derived products should cite the related article as well as directly\
+    \ citing this data collection.\n"
+  funder: 'National Institutes of Health: 1OT2OD032742-01'
+  hasPart: []
+  isPartOf: []
+  keywords:
+  - artificial intelligence
+  - breast cancer
+  - cell maps
+  - CM4AI
+  - machine learning
+  - MDA-MB-468
+  - protein localization
+  license: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+  name: Untreated IF Image ROCrate
+  ro-crate-metadata: untreated/ro-crate-metadata.json
+  version: 0.1.0
+- '@id': ark:59852/rocrate-vorinostat-if-data-release
+  '@type':
+  - Dataset
+  - https://w3id.org/EVI#ROCrate
+  associatedPublication: ''
+  author:
+  - Hansen JN
+  - Axelsson U
+  - Johannesson A
+  - Fall J
+  - Ballllosera Navarro F
+  - Lundberg E
+  conditionsOfAccess: "This dataset was created by investigators and staff of the\
+    \ Cell Maps for Artificial Intelligence project (CM4AI - https://cm4ai.org), a\
+    \ Data Generation Project of the NIH Bridge2AI program for cellular imaging data\
+    \ by The Board of Trustees of the Leland Stanford Junior University. It is licensed\
+    \ for reuse under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0\
+    \ International (CC-BY-NC-SA 4.0) license, whose terms are summarized here: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en.\
+    \  Proper attribution credit as required by the license includes citation of the\
+    \ copyright holders and of the attribution parties, which includes citation of\
+    \ the following article: Clark T, Schaffer L, Obernier K, Al Manir S, Churas CP,\
+    \ Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez\
+    \ C, Mohan J, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Belisle-Pipon\
+    \ J-C, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster\
+    \ P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial\
+    \ Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant\
+    \ Cell Lines. BioRXiv 2024.\u201D"
+  contactEmail: emmalu@stanford.edu
+  contentSize: 2.8 GB
+  copyrightNotice: Copyright (c) 2025 by The Board of Trustees of the Leland Stanford
+    Junior University
+  datePublished: 02/28/2025
+  description: "This data set displays the spatial localization of 464 proteins of\
+    \ interest in cells of the breast cancer cell line MDA-MB-468 treated with vorinostat\
+    \ as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy\
+    \ in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial\
+    \ Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue\
+    \ channel); endoplasmic reticulum with a calreticulin antibody (yellow channel);\
+    \ microtubules with tubulin antibody (red channel); and antibody against protein\
+    \ of interest (green channel). \n\nThis data is Copyright (c) 2025 The Board of\
+    \ Trustees of the Leland Stanford Junior University. It is licensed for reuse\
+    \ under Creative Commons Attribution Share Alike Noncommercial 4.0 International\
+    \ License (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is\
+    \ required to the copyright holders and the authors. Any publications referencing\
+    \ this data or derived products should cite the related article as well as directly\
+    \ citing this data collection.\n"
+  funder: 'National Institutes of Health: 1OT2OD032742-01'
+  hasPart: []
+  isPartOf: []
+  keywords:
+  - AI
+  - artificial intelligence
+  - breast cancer
+  - cell maps
+  - CM4AI
+  - machine learning
+  - MDA-MB-468
+  - protein localization
+  - protein localization
+  - vorinostat
+  license: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+  name: Vorinostat IF Image ROCrate
+  ro-crate-metadata: vorinostat/ro-crate-metadata.json
+  version: 0.1.0
+- '@id': ark:59852/rocrate-data-from-undifferentiated-human-ipsc-generated-by-sec-ms/
+  '@type':
+  - Dataset
+  - https://w3id.org/EVI#ROCrate
+  associatedPublication: http://doi.org/10.1101/2024.05.21.589311
+  author: Forget A, Obernier K, Krogan N
+  conditionsOfAccess: This data is Copyright (c) 2025 The Regents of the University
+    of California. It is licensed for reuse under Creative Commons Attribution Share-Alike
+    Non-Commercial 4.0 International License (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+    Attribution is required to the copyright holders and the authors. Any publications
+    referencing this data or derived products should cite the related article as well
+    as directly citing this data collection.
+  contactEmail: nevan.krogan@ucsf.edu
+  contentUrl: Embargoed
+  copyrightNotice: Copyright (c) 2025 by The Regents of the University of California
+  description: This dataset was generated by size exclusion chromatography-mass spectroscopy
+    (SEC-MS) on undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs),
+    in the Nevan Krogan laboratory at the University of California San Francisco,
+    as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) Functional
+    Genomics Grand Challenge, a component of the U.S. National Institute of Health's
+    (NIH) Bridge2AI program. The data will be uploaded to Pride when available. This
+    data is Copyright (c) 2025 The Regents of the University of California. It is
+    licensed for reuse under Creative Commons Attribution Share-Alike Non-Commercial
+    4.0 International License (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+    Attribution is required to the copyright holders and the authors. Any publications
+    referencing this data or derived products should cite the related article as well
+    as directly citing this data collection.
+  funder: 'National Institutes of Health: 1OT2OD032742-01'
+  hasPart: []
+  isPartOf:
+  - '@id': ark:59852/organization-university-of-california-san-diego
+  - '@id': ark:59852/project-cm4ai
+  keywords:
+  - AI
+  - Artificial intelligence
+  - Breast cancer
+  - Cell maps
+  - CM4AI
+  - IPSC
+  - KOLF2.1J
+  - Machine learning
+  - Mass spectroscopy
+  - Protein-protein interaction
+  - SEC-MS
+  license: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+  name: Data from Undifferentiated Human iPSCs Generated by SizeExclusion Chromatography
+    Coupled Mass Spectroscopy - SEC-MS
+  ro-crate-metadata: mass-spec/ro-crate-metadata.json
+  version: '0.6'

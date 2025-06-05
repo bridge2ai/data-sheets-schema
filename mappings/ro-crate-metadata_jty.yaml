@@ -1,0 +1,17 @@
+
+id: ro-crate-metadata.j-to-linkml
+description: Mapping from ro-crate-metadata.json back to Data-Sheets schema
+source_schema: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/src/data_sheets_schema/schema/data_sheets_schema.yaml
+target_format: yaml
+direction: reverse
+
+mappings:
+  $."@context": crate['@context']
+  $."@id": crate['@id']
+  $.license: crate.license
+  $.conformsTo: crate.conformsTo
+  $.metadataVersion: crate.metadataVersion
+
+  $.distribution[*].name: crate.distribution.name
+  $.distribution[*].url: crate.distribution.url
+  $.distribution[*].encodingFormat: crate.distribution.encodingFormat

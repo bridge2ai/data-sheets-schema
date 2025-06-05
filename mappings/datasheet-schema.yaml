@@ -1,0 +1,282 @@
+$schema: http://json-schema.org/draft-07/schema#
+description: JSON Schema for validating CM4AI ROCrate Datasheets
+properties:
+  composition:
+    properties:
+      datasets:
+        items:
+          properties:
+            authors:
+              description: Authors of the dataset
+              type: string
+            contact:
+              description: Contact email for the dataset
+              format: email
+              type: string
+            content:
+              properties:
+                files:
+                  properties:
+                    access:
+                      description: Access information
+                      type: string
+                    count:
+                      description: Number of files
+                      type: integer
+                    formats:
+                      description: File formats
+                      type: string
+                  type: object
+                inputs:
+                  properties:
+                    count:
+                      description: Number of inputs
+                      type: integer
+                    details:
+                      description: Input details
+                      type: string
+                  type: object
+                otherComponents:
+                  properties:
+                    computationDetails:
+                      description: Computation details
+                      type: string
+                    computations:
+                      description: Number of computations
+                      type: integer
+                    experimentDetails:
+                      description: Experiment details
+                      type: string
+                    experiments:
+                      description: Number of experiments
+                      type: integer
+                    other:
+                      description: Number of other components
+                      type: integer
+                    schemas:
+                      description: Number of schemas
+                      type: integer
+                  type: object
+                software:
+                  properties:
+                    count:
+                      description: Number of software/instruments
+                      type: integer
+                    instruments:
+                      description: Number of instruments
+                      type: integer
+                    software:
+                      description: Number of software components
+                      type: integer
+                  type: object
+              type: object
+            copyright:
+              description: Copyright statement
+              type: string
+            date:
+              description: Date the dataset was created
+              format: date
+              type: string
+            description:
+              description: Description of the dataset
+              type: string
+            doi:
+              description: DOI for the dataset
+              format: uri
+              type: string
+            funding:
+              description: Funding sources for the dataset
+              type: string
+            identifier:
+              description: Identifier for the dataset
+              pattern: ^ark:[0-9]{5}/rocrate-[a-zA-Z0-9_\-\.]+/?$
+              type: string
+            keywords:
+              description: Keywords describing the dataset
+              type: string
+            license:
+              description: License URL
+              format: uri
+              type: string
+            md5:
+              description: MD5 hash of the dataset
+              pattern: ^[a-f0-9]{32}$
+              type: string
+            provenanceId:
+              description: Provenance identifier for the dataset pointing to evidence
+                graph for the dataset
+              pattern: ^ark:[0-9]{5}/evidence-graph-[a-zA-Z0-9_\-\.]+$
+              type: string
+            relatedPublications:
+              description: Related publications
+              items:
+                type: string
+              type: array
+            size:
+              description: Size of the dataset
+              type: string
+            termsOfUse:
+              description: Terms of use information
+              type: string
+            title:
+              description: Title of the dataset
+              type: string
+          required:
+          - title
+          - identifier
+          - description
+          - authors
+          - size
+          - copyright
+          - license
+          type: object
+        type: array
+    required:
+    - datasets
+    type: object
+  overview:
+    properties:
+      authors:
+        description: Authors of the dataset
+        type: string
+      citation:
+        description: Recommended citation for the dataset
+        type: string
+      completeness:
+        description: Statement about the completeness of the data
+        type: string
+      confidentialityLevel:
+        description: HL7 Confidentiality Level
+        type: string
+      contentSize:
+        description: Total size of the dataset
+        type: string
+      copyright:
+        description: Copyright statement
+        type: string
+      dataGovernanceCommittee:
+        description: Data Governance Committee contact information
+        type: string
+      datePublished:
+        description: Publication date of the release
+        format: date
+        type: string
+      description:
+        description: Detailed description of the dataset
+        type: string
+      doi:
+        description: DOI for the dataset
+        format: uri
+        type: string
+      funding:
+        description: Funding grant numbers for the dataset
+        type: string
+      humanSubjects:
+        properties:
+          deIdentifiedSamples:
+            enum:
+            - 'Yes'
+            - 'No'
+            - N/A
+            type: string
+          fdaRegulated:
+            enum:
+            - 'Yes'
+            - 'No'
+            - N/A
+            type: string
+          humanSubjectsExemptions:
+            type: string
+          humanSubjectsResearch:
+            enum:
+            - 'Yes'
+            - 'No'
+            - N/A
+            type: string
+          irb:
+            type: string
+          irbProtocolId:
+            type: string
+        type: object
+      identifier:
+        description: Identifier for the ROCrate
+        pattern: ^ark:[0-9]{5}/[a-zA-Z0-9_\-\.]+$
+        type: string
+      keywords:
+        description: Keywords describing the dataset
+        type: string
+      license:
+        description: License URL
+        format: uri
+        type: string
+      principalInvestigator:
+        description: Principal Investigator name and contact
+        type: string
+      publisher:
+        description: Publisher of the dataset
+        type: string
+      relatedPublications:
+        description: Related publications
+        items:
+          type: string
+        type: array
+      termsOfUse:
+        description: Terms of use information
+        type: string
+      title:
+        description: Title of the ROCrate
+        type: string
+      version:
+        description: Version number of the release
+        type: string
+    required:
+    - title
+    - identifier
+    - version
+    - datePublished
+    - description
+    - contentSize
+    - authors
+    - publisher
+    - principalInvestigator
+    - contactEmail
+    - copyright
+    - license
+    - termsOfUse
+    - confidentialityLevel
+    - keywords
+    - citation
+    - funding
+    - completeness
+    - relatedPublications
+    type: object
+  useCases:
+    properties:
+      intendedUses:
+        description: Intended uses of the dataset
+        type: string
+      limitations:
+        description: Limitations of the dataset
+        type: string
+      maintenancePlan:
+        description: Plan for maintaining the dataset
+        type: string
+      potentialSourcesOfBias:
+        description: Potential sources of bias in the dataset
+        type: string
+      prohibitedUses:
+        description: Prohibited uses of the dataset
+        type: string
+    required:
+    - intendedUses
+    - limitations
+    - prohibitedUses
+    - potentialSourcesOfBias
+    - maintenancePlan
+    type: object
+required:
+- overview
+- useCases
+- composition
+title: CM4AI ROCrate Datasheet
+type: object

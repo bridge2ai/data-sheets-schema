@@ -1,0 +1,44 @@
+
+id: datasheet-schema.l-to-json
+description: Mapping from Data-Sheets LinkML schema to datasheet-schema.json
+source_schema: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/src/data_sheets_schema/schema/data_sheets_schema.yaml
+target_format: json
+
+mappings:
+  overview.title:
+    path: $.overview.title
+  overview.identifier:
+    path: $.overview.identifier
+  overview.version:
+    path: $.overview.version
+  overview.datePublished:
+    path: $.overview.datePublished
+  overview.description:
+    path: $.overview.description
+  overview.contentSize:
+    path: $.overview.contentSize
+  overview.publisher:
+    path: $.overview.publisher
+  overview.contactEmail:
+    path: $.overview.contactEmail
+
+  overview.authors:
+    path: $.overview.authors[*]
+    slot: Person
+    mappings:
+      name: $.name
+      email: $.email
+
+  useCases:
+    path: $.useCases[*]
+    slot: useCases
+
+  composition.description:
+    path: $.composition.description
+  composition.files:
+    path: $.composition.files[*]
+    slot: FileSpec
+    mappings:
+      filename: $.filename
+      fileSize: $.fileSize
+      encodingFormat: $.encodingFormat

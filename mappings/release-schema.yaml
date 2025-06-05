@@ -1,0 +1,432 @@
+$schema: http://json-schema.org/draft-07/schema#
+definitions:
+  Computation:
+    properties:
+      '@id':
+        type: string
+      '@type':
+        enum:
+        - Computation
+        - EVI:Computation
+        - https://w3id.org/EVI#Computation
+        type: string
+      additionalDocumentation:
+        type:
+        - string
+        - 'null'
+      additionalType:
+        type: string
+      associatedPublication:
+        type:
+        - string
+        - 'null'
+      command:
+        type: string
+      dateCreated:
+        format: date
+        type: string
+      description:
+        type: string
+      generated:
+        items:
+          $ref: '#/definitions/IdentifierRef'
+        minItems: 0
+        type: array
+      keywords:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      runBy:
+        oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      usedDataset:
+        items:
+          $ref: '#/definitions/IdentifierRef'
+        minItems: 0
+        type: array
+      usedSoftware:
+        items:
+          $ref: '#/definitions/IdentifierRef'
+        minItems: 0
+        type: array
+    required:
+    - '@id'
+    - '@type'
+    - name
+    - description
+    - command
+    - keywords
+    type: object
+  Dataset:
+    properties:
+      '@id':
+        type: string
+      '@type':
+        enum:
+        - Dataset
+        - EVI:Dataset
+        - https://w3id.org/EVI#Dataset
+        type: string
+      additionalDocumentation:
+        type:
+        - string
+        - 'null'
+      additionalType:
+        type: string
+      associatedPublication:
+        type:
+        - string
+        - 'null'
+      author:
+        oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      contentUrl:
+        type: string
+      datePublished:
+        format: date
+        type: string
+      description:
+        type: string
+      evi:Schema:
+        oneOf:
+        - $ref: '#/definitions/IdentifierRef'
+        - type: 'null'
+      format:
+        type: string
+      generatedBy:
+        items:
+          $ref: '#/definitions/IdentifierRef'
+        minItems: 0
+        type: array
+      keywords:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      usedByComputation:
+        items:
+          $ref: '#/definitions/IdentifierRef'
+        minItems: 0
+        type: array
+      version:
+        type: string
+    required:
+    - '@id'
+    - '@type'
+    - name
+    - description
+    - keywords
+    - author
+    - format
+    type: object
+  IdentifierRef:
+    maxProperties: 1
+    properties:
+      '@id':
+        type: string
+    required:
+    - '@id'
+    type: object
+  RoCrateMetadata:
+    properties:
+      '@id':
+        type: string
+      '@type':
+        additionalItems: false
+        items:
+        - const: Dataset
+          type: string
+        - const: https://w3id.org/EVI#ROCrate
+          type: string
+        maxItems: 2
+        minItems: 2
+        type: array
+      additionalProperty:
+        description: Extension mechanism for properties that don't have schema.org
+          equivalents, including use case information, limitations, bias sources,
+          etc.
+        items:
+          properties:
+            '@type':
+              const: PropertyValue
+              type: string
+            name:
+              description: 'Property name, examples include: ''Completeness'', ''Maintenance
+                Plan'', ''Intended Use'', ''Limitations'', ''Prohibited Uses'', ''Potential
+                Sources of Bias'', ''Human Subject'', ''De-identified Samples'', ''FDA
+                Regulated'', ''Data Governance Committee'''
+              type: string
+            value:
+              description: Property value containing the actual content
+              type: string
+          required:
+          - '@type'
+          - name
+          - value
+          type: object
+        type: array
+      associatedPublication:
+        oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      author:
+        oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      citation:
+        type: string
+      conditionsOfAccess:
+        type: string
+      confidentialityLevel:
+        type: string
+      contactEmail:
+        format: email
+        type: string
+      contentSize:
+        type: string
+      copyrightNotice:
+        type: string
+      datePublished:
+        format: date
+        type: string
+      description:
+        type: string
+      funder:
+        type: string
+      hasPart:
+        items:
+          $ref: '#/definitions/IdentifierRef'
+        type: array
+      identifier:
+        format: uri
+        type: string
+      isPartOf:
+        items:
+          $ref: '#/definitions/IdentifierRef'
+        type: array
+      keywords:
+        items:
+          type: string
+        type: array
+      license:
+        format: uri
+        type: string
+      name:
+        type: string
+      principalInvestigator:
+        type: string
+      publisher:
+        type: string
+      ro-crate-metadata:
+        type: string
+      usageInfo:
+        type: string
+      version:
+        type: string
+    required:
+    - '@id'
+    - '@type'
+    - name
+    - description
+    - keywords
+    - isPartOf
+    - version
+    - hasPart
+    - author
+    - license
+    type: object
+  RoCrateMetadataFile:
+    properties:
+      '@id':
+        const: ro-crate-metadata.json
+        type: string
+      '@type':
+        const: CreativeWork
+        type: string
+      about:
+        $ref: '#/definitions/IdentifierRef'
+      conformsTo:
+        $ref: '#/definitions/IdentifierRef'
+    required:
+    - '@id'
+    - '@type'
+    - conformsTo
+    - about
+    type: object
+  Schema:
+    properties:
+      $schema:
+        type: string
+      '@id':
+        type: string
+      '@type':
+        enum:
+        - Schema
+        - EVI:Schema
+        - https://w3id.org/EVI#Schema
+        type: string
+      additionalProperties:
+        type: boolean
+      description:
+        type: string
+      examples:
+        type: array
+      header:
+        type: boolean
+      keywords:
+        items:
+          type: string
+        type: array
+      license:
+        format: uri
+        type: string
+      name:
+        type: string
+      properties:
+        additionalProperties:
+          properties:
+            description:
+              type: string
+            index:
+              type: integer
+            items:
+              type:
+              - string
+              - 'null'
+            max-items:
+              type:
+              - integer
+              - 'null'
+            min-items:
+              type:
+              - integer
+              - 'null'
+            pattern:
+              type:
+              - string
+              - 'null'
+            type:
+              type: string
+            unique-items:
+              type:
+              - boolean
+              - 'null'
+            value-url:
+              type:
+              - string
+              - 'null'
+          type: object
+        type: object
+      published:
+        type: boolean
+      required:
+        items:
+          type: string
+        type: array
+      separator:
+        type: string
+      type:
+        type: string
+      url:
+        type:
+        - string
+        - 'null'
+    required:
+    - '@id'
+    - '@type'
+    - name
+    - description
+    - properties
+    type: object
+  Software:
+    properties:
+      '@id':
+        type: string
+      '@type':
+        enum:
+        - Software
+        - EVI:Software
+        - https://w3id.org/EVI#Software
+        type: string
+      additionalDocumentation:
+        type:
+        - string
+        - 'null'
+      additionalType:
+        type: string
+      associatedPublication:
+        type:
+        - string
+        - 'null'
+      author:
+        oneOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      contentUrl:
+        type: string
+      dateModified:
+        format: date
+        type: string
+      description:
+        type: string
+      format:
+        type: string
+      keywords:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      usedByComputation:
+        items:
+          $ref: '#/definitions/IdentifierRef'
+        minItems: 0
+        type: array
+      version:
+        type: string
+    required:
+    - '@id'
+    - '@type'
+    - name
+    - description
+    - keywords
+    - author
+    - format
+    type: object
+description: JSON Schema for validating CM4AI Release RO-Crate metadata with nested
+  RO-Crates
+properties:
+  '@context':
+    oneOf:
+    - type: string
+    - type: object
+  '@graph':
+    items:
+      oneOf:
+      - $ref: '#/definitions/RoCrateMetadataFile'
+      - $ref: '#/definitions/RoCrateMetadata'
+      - $ref: '#/definitions/Dataset'
+      - $ref: '#/definitions/Software'
+      - $ref: '#/definitions/Computation'
+      - $ref: '#/definitions/Schema'
+    type: array
+required:
+- '@context'
+- '@graph'
+title: CM4AI Release RO-Crate Schema
+type: object

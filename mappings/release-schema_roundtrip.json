@@ -1,0 +1,651 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CM4AI Release RO-Crate Schema",
+  "description": "JSON Schema for validating CM4AI Release RO-Crate metadata with nested RO-Crates",
+  "type": "object",
+  "required": [
+    "@context",
+    "@graph"
+  ],
+  "properties": {
+    "@context": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "@graph": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/RoCrateMetadataFile"
+          },
+          {
+            "$ref": "#/definitions/RoCrateMetadata"
+          },
+          {
+            "$ref": "#/definitions/Dataset"
+          },
+          {
+            "$ref": "#/definitions/Software"
+          },
+          {
+            "$ref": "#/definitions/Computation"
+          },
+          {
+            "$ref": "#/definitions/Schema"
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "IdentifierRef": {
+      "type": "object",
+      "required": [
+        "@id"
+      ],
+      "maxProperties": 1,
+      "properties": {
+        "@id": {
+          "type": "string"
+        }
+      }
+    },
+    "RoCrateMetadataFile": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "conformsTo",
+        "about"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string",
+          "const": "ro-crate-metadata.json"
+        },
+        "@type": {
+          "type": "string",
+          "const": "CreativeWork"
+        },
+        "conformsTo": {
+          "$ref": "#/definitions/IdentifierRef"
+        },
+        "about": {
+          "$ref": "#/definitions/IdentifierRef"
+        }
+      }
+    },
+    "RoCrateMetadata": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "name",
+        "description",
+        "keywords",
+        "isPartOf",
+        "version",
+        "hasPart",
+        "author",
+        "license"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string",
+              "const": "Dataset"
+            },
+            {
+              "type": "string",
+              "const": "https://w3id.org/EVI#ROCrate"
+            }
+          ],
+          "additionalItems": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "isPartOf": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IdentifierRef"
+          }
+        },
+        "version": {
+          "type": "string"
+        },
+        "hasPart": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IdentifierRef"
+          }
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "license": {
+          "type": "string",
+          "format": "uri"
+        },
+        "associatedPublication": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "conditionsOfAccess": {
+          "type": "string"
+        },
+        "copyrightNotice": {
+          "type": "string"
+        },
+        "datePublished": {
+          "type": "string",
+          "format": "date"
+        },
+        "identifier": {
+          "type": "string",
+          "format": "uri"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "principalInvestigator": {
+          "type": "string"
+        },
+        "contactEmail": {
+          "type": "string",
+          "format": "email"
+        },
+        "confidentialityLevel": {
+          "type": "string"
+        },
+        "citation": {
+          "type": "string"
+        },
+        "funder": {
+          "type": "string"
+        },
+        "usageInfo": {
+          "type": "string"
+        },
+        "contentSize": {
+          "type": "string"
+        },
+        "additionalProperty": {
+          "type": "array",
+          "description": "Extension mechanism for properties that don't have schema.org equivalents, including use case information, limitations, bias sources, etc.",
+          "items": {
+            "type": "object",
+            "required": [
+              "@type",
+              "name",
+              "value"
+            ],
+            "properties": {
+              "@type": {
+                "type": "string",
+                "const": "PropertyValue"
+              },
+              "name": {
+                "type": "string",
+                "description": "Property name, examples include: 'Completeness', 'Maintenance Plan', 'Intended Use', 'Limitations', 'Prohibited Uses', 'Potential Sources of Bias', 'Human Subject', 'De-identified Samples', 'FDA Regulated', 'Data Governance Committee'"
+              },
+              "value": {
+                "type": "string",
+                "description": "Property value containing the actual content"
+              }
+            }
+          }
+        },
+        "ro-crate-metadata": {
+          "type": "string"
+        }
+      }
+    },
+    "Dataset": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "name",
+        "description",
+        "keywords",
+        "author",
+        "format"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "type": "string",
+          "enum": [
+            "Dataset",
+            "EVI:Dataset",
+            "https://w3id.org/EVI#Dataset"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "usedByComputation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IdentifierRef"
+          },
+          "minItems": 0
+        },
+        "generatedBy": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IdentifierRef"
+          },
+          "minItems": 0
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "datePublished": {
+          "type": "string",
+          "format": "date"
+        },
+        "version": {
+          "type": "string"
+        },
+        "additionalType": {
+          "type": "string"
+        },
+        "associatedPublication": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "additionalDocumentation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "format": {
+          "type": "string"
+        },
+        "contentUrl": {
+          "type": "string"
+        },
+        "evi:Schema": {
+          "oneOf": [
+            {
+              "$ref": "#/definitions/IdentifierRef"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "Software": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "name",
+        "description",
+        "keywords",
+        "author",
+        "format"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "type": "string",
+          "enum": [
+            "Software",
+            "EVI:Software",
+            "https://w3id.org/EVI#Software"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "usedByComputation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IdentifierRef"
+          },
+          "minItems": 0
+        },
+        "author": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "dateModified": {
+          "type": "string",
+          "format": "date"
+        },
+        "version": {
+          "type": "string"
+        },
+        "additionalType": {
+          "type": "string"
+        },
+        "associatedPublication": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "additionalDocumentation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "format": {
+          "type": "string"
+        },
+        "contentUrl": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Schema": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "name",
+        "description",
+        "properties"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "type": "string",
+          "enum": [
+            "Schema",
+            "EVI:Schema",
+            "https://w3id.org/EVI#Schema"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string",
+          "format": "uri"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "published": {
+          "type": "boolean"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "index": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "string"
+              },
+              "value-url": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pattern": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "items": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "min-items": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "max-items": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "unique-items": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "type": {
+          "type": "string"
+        },
+        "additionalProperties": {
+          "type": "boolean"
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "separator": {
+          "type": "string"
+        },
+        "header": {
+          "type": "boolean"
+        },
+        "examples": {
+          "type": "array"
+        },
+        "$schema": {
+          "type": "string"
+        }
+      }
+    },
+    "Computation": {
+      "type": "object",
+      "required": [
+        "@id",
+        "@type",
+        "name",
+        "description",
+        "command",
+        "keywords"
+      ],
+      "properties": {
+        "@id": {
+          "type": "string"
+        },
+        "@type": {
+          "type": "string",
+          "enum": [
+            "Computation",
+            "EVI:Computation",
+            "https://w3id.org/EVI#Computation"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "additionalType": {
+          "type": "string"
+        },
+        "runBy": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "dateCreated": {
+          "type": "string",
+          "format": "date"
+        },
+        "associatedPublication": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "additionalDocumentation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "command": {
+          "type": "string"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "usedDataset": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IdentifierRef"
+          },
+          "minItems": 0
+        },
+        "generated": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IdentifierRef"
+          },
+          "minItems": 0
+        },
+        "usedSoftware": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/IdentifierRef"
+          },
+          "minItems": 0
+        }
+      }
+    }
+  }
+}

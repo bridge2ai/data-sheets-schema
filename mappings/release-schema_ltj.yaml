@@ -1,0 +1,23 @@
+
+id: release-schema.l-to-json
+description: Mapping from Data-Sheets schema to release-schema.json
+source_schema: /Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/src/data_sheets_schema/schema/data_sheets_schema.yaml
+target_format: json
+
+mappings:
+  release.version:
+    path: $.version
+  release.dateReleased:
+    path: $.dateReleased
+  release.changes:
+    path: $.changes[*]
+    slot: ChangeLog
+    mappings:
+      changeType: $.type
+      description: $.description
+  release.authors:
+    path: $.authors[*]
+    slot: Person
+    mappings:
+      name: $.name
+      email: $.email
