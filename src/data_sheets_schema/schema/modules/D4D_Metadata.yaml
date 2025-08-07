@@ -63,80 +63,16 @@ enums:
       OTHER:
 
 
-  CreatorOrMaintainerEnum:
-    description: >
-      Indicates whether an agent is acting as a creator, maintainer, or both.
-    permissible_values:
-      CREATOR:
-      MAINTAINER:
-      BOTH:
-
-
 #########################
 #   CLASS DEFINITIONS   #
 #########################
 
 
-# A minimal superclass (optional if you import a "core" module).
+imports:
+  - linkml:types
+  - ../D4D_Base
+
 classes:
-  NamedThing:
-    description: "A generic superclass for all identifiable entities."
-    slots:
-      - id
-
-
-  Information:
-    description: "Grouping class for generic datasets, data files, or other top-level metadata."
-    is_a: NamedThing
-    slots:
-      - title
-      - description
-      - keywords
-      - language
-      - license
-      - version
-      - created_on
-      - created_by
-      - last_updated_on
-      - modified_by
-      - doi
-      - conforms_to
-      - issued
-      - publisher
-      - page
-      - status
-      - was_derived_from
-
-
-  DatasetCollection:
-    description: >
-      A collection of related datasets, likely containing multiple files/resources 
-      with distinct metadata or purposes.
-    is_a: Information
-    slots:
-      - resources
-
-
-  Dataset:
-    description: >
-      A single dataset (e.g., one file or data resource) with associated metadata.
-    is_a: Information
-    slots:
-      - download_url
-      - path
-      - format
-      - encoding
-      - compression
-      - media_type
-      - bytes
-      - hash
-      - md5
-      - sha256
-      - dialect
-      - conforms_to_class
-      - conforms_to_schema
-      - profile
-
 
   FormatDialect:
     description: "Additional format information for a file."

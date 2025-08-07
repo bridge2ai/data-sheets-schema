@@ -13,16 +13,10 @@ see_also:
 
 imports:
   # Import the main data-sheets-schema so we can reference DatasetProperty, Person, Organization, etc.
-  - "https://w3id.org/bridge2ai/data-sheets-schema"
+  - ../D4D_Base
 
 
-subsets:
-  Motivation:
-    description: >
-      The questions in this section are primarily intended to encourage dataset
-      creators to clearly articulate their reasons for creating the dataset and
-      to promote transparency about funding interests. The latter may be particularly
-      relevant for datasets created for research purposes.
+# Subsets are defined in the main schema
 
 
 prefixes:
@@ -47,8 +41,6 @@ classes:
   Purpose:
     description: "For what purpose was the dataset created?"
     is_a: DatasetProperty
-    in_subset:
-      - Motivation
     attributes:
       response:
         description: "Short explanation describing the primary purpose of creating the dataset."
@@ -58,8 +50,6 @@ classes:
   Task:
     description: "Was there a specific task in mind for the dataset's application?"
     is_a: DatasetProperty
-    in_subset:
-      - Motivation
     attributes:
       response:
         description: "Short explanation describing the specific task or tasks for which this dataset was created."
@@ -69,8 +59,6 @@ classes:
   AddressingGap:
     description: "Was there a specific gap that needed to be filled by creation of the dataset?"
     is_a: DatasetProperty
-    in_subset:
-      - Motivation
     attributes:
       response:
         description: "Short explanation of the knowledge or resource gap that this dataset was intended to address."
@@ -82,8 +70,6 @@ classes:
       Who created the dataset (e.g., which team, research group) and on behalf of which 
       entity (e.g., company, institution, organization)? This may also be considered a team.
     is_a: DatasetProperty
-    in_subset:
-      - Motivation
     attributes:
       principal_investigator:
         description: "A key individual (Principal Investigator) responsible for or overseeing dataset creation."
@@ -98,8 +84,6 @@ classes:
       Who funded the creation of the dataset? If there is an associated grant, please provide
       the name of the grantor and the grant name and number.
     is_a: DatasetProperty
-    in_subset:
-      - Motivation
     attributes:
       grantor:
         description: "Name/identifier of the organization providing monetary or resource support."

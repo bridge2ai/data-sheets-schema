@@ -15,15 +15,10 @@ see_also:
 
 imports:
   # Import the main schema so that we can reference DatasetProperty, etc.
-  - "https://w3id.org/bridge2ai/data-sheets-schema"
+  - ../D4D_Base
 
 
-subsets:
-  Distribution:
-    description: >
-      The questions in this section relate to how the dataset will be distributed,
-      whether it will be shared externally, any fees or licensing terms, and
-      export or regulatory restrictions that may apply.
+# Subsets are defined in the main schema
 
 
 prefixes:
@@ -48,8 +43,6 @@ classes:
       (e.g., company, institution, organization) on behalf of which the dataset
       was created?
     is_a: DatasetProperty
-    in_subset:
-      - Distribution
     attributes:
       description:
         description: >
@@ -63,8 +56,6 @@ classes:
       How will the dataset be distributed (e.g., tarball on a website,
       API, GitHub)?
     is_a: DatasetProperty
-    in_subset:
-      - Distribution
     attributes:
       description:
         description: "Details of the distribution channel(s) or format(s)."
@@ -76,8 +67,6 @@ classes:
     description: >
       When will the dataset be distributed?
     is_a: DatasetProperty
-    in_subset:
-      - Distribution
     attributes:
       description:
         description: >
@@ -93,8 +82,6 @@ classes:
       property license, and/or under applicable terms of use (ToU)? If so, describe
       this license/ToU, include any fees, and provide a link or copy of relevant terms.
     is_a: DatasetProperty
-    in_subset:
-      - Distribution
     attributes:
       description:
         description: >
@@ -110,8 +97,6 @@ classes:
       associated with the instances? If so, describe these restrictions, referencing
       any licenses or fees.
     is_a: DatasetProperty
-    in_subset:
-      - Distribution
     attributes:
       description:
         description: >
@@ -127,8 +112,6 @@ classes:
       or to individual instances? If so, describe them, referencing relevant legal
       documentation or guidelines.
     is_a: DatasetProperty
-    in_subset:
-      - Distribution
     attributes:
       description:
         description: >

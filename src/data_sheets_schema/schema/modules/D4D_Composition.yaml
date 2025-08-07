@@ -15,17 +15,10 @@ see_also:
 
 imports:
   # Import the main data-sheets-schema so we can reference DatasetProperty, Dataset, etc.
-  - "https://w3id.org/bridge2ai/data-sheets-schema"
+  - ../D4D_Base
 
 
-subsets:
-  Composition:
-    description: >
-      The questions in this section are intended to provide dataset consumers
-      with the information they need to make informed decisions about using
-      the dataset for their chosen tasks. Some of the questions are designed
-      to elicit information about compliance with the EU’s GDPR or comparable
-      regulations in other jurisdictions.
+# Subsets are defined in the main schema
 
 
 prefixes:
@@ -45,33 +38,11 @@ default_prefix: "d4d-composition"
 classes:
 
 
-  DataSubset:
-    description: >
-      A subset of a dataset, likely containing multiple files of multiple
-      potential purposes and properties.
-    is_a: Dataset
-    in_subset:
-      - Composition
-    attributes:
-      is_data_split:
-        description: >
-          Is this subset a split of the larger dataset, e.g., for model
-          training, testing, or validation?
-        range: boolean
-      is_subpopulation:
-        description: >
-          Is this subset a subpopulation of the larger dataset, e.g., a set
-          of data for a specific demographic?
-        range: boolean
-
-
   Instance:
     description: >
       What do the instances that comprise the dataset represent (e.g.,
       documents, photos, people, countries)?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       data_topic:
         description: >
@@ -119,8 +90,6 @@ classes:
       (not necessarily random) of instances from a larger set? If so, how
       representative is it?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       is_sample:
         description: "Indicates whether it is a sample of a larger set."
@@ -162,8 +131,6 @@ classes:
       Is any information missing from individual instances? (e.g.,
       unavailable data)
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       missing:
         description: >
@@ -182,8 +149,6 @@ classes:
       Are relationships between individual instances made explicit
       (e.g., users’ movie ratings, social network links)?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       description:
         description: "Explanation of how these relationships are represented."
@@ -196,8 +161,6 @@ classes:
       Are there recommended data splits (e.g., training, validation, testing)?
       If so, how are they defined and why?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       description:
         range: string
@@ -208,8 +171,6 @@ classes:
     description: >
       Are there any errors, sources of noise, or redundancies in the dataset?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       description:
         range: string
@@ -222,8 +183,6 @@ classes:
       websites, other datasets)? If external, are there guarantees that those
       resources will remain available and unchanged?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       external_resources:
         description: "List of links or identifiers for external resources."
@@ -253,8 +212,6 @@ classes:
       Does the dataset contain data that might be confidential (e.g., protected
       by legal privilege, patient data, non-public communications)?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       confidential_elements_present:
         range: boolean
@@ -269,8 +226,6 @@ classes:
       Does the dataset contain any data that might be offensive, insulting,
       threatening, or otherwise anxiety-provoking if viewed directly?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       content_warnings_present:
         range: boolean
@@ -285,8 +240,6 @@ classes:
       Does the dataset identify any subpopulations (e.g., by age, gender)?
       If so, how are they identified and what are their distributions?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       subpopulation_elements_present:
         range: boolean
@@ -304,8 +257,6 @@ classes:
       Is it possible to identify individuals in the dataset, either directly
       or indirectly (in combination with other data)?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       identifiable_elements_present:
         range: boolean
@@ -320,8 +271,6 @@ classes:
       Does the dataset contain data that might be considered sensitive
       (e.g., race, sexual orientation, religion, biometrics)?
     is_a: DatasetProperty
-    in_subset:
-      - Composition
     attributes:
       sensitive_elements_present:
         range: boolean

@@ -1,10 +1,11 @@
-﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/human"
+id: "https://w3id.org/bridge2ai/data-sheets-schema/human"
 name: "data-sheets-schema-human"
-title: "Datasheets for Datasets – Human Module"
+title: "Datasheets for Datasets – Human Subjects Module"
 description: >
-  Subschema for human-related information in Datasheets for Datasets.
-  This module covers classes, attributes, and properties connected to 
-  data about or from human subjects (e.g., privacy, consent, ethical reviews).
+  Subschema for human subjects research information in Datasheets for Datasets.
+  This module covers classes, attributes, and properties specific to datasets
+  involving human participants, focusing on ethical considerations, consent,
+  privacy protections, and regulatory compliance unique to human subjects research.
 
 
 license: MIT
@@ -13,16 +14,10 @@ see_also:
 
 
 imports:
-  # Import the full data-sheets-schema so we can reference its definitions
-  - "https://w3id.org/bridge2ai/data-sheets-schema"
+  - ../D4D_Base
 
 
-subsets:
-  Human:
-    description: >
-      Classes and properties relating to data about or collected from
-      human subjects, including consent, ethics, privacy, confidentiality,
-      subpopulations, and personal identifiers.
+# Subsets are defined in the main schema
 
 
 prefixes:
@@ -34,268 +29,167 @@ default_prefix: "d4d-human"
 
 
 # ------------------------------------------------------------------------------
-# Classes
+# Classes for Human Subjects Research
 # ------------------------------------------------------------------------------
 
 
 classes:
 
 
-  Person:
+  HumanSubjectResearch:
     description: >
-      An individual human being.
-    # This was already defined in the main schema as Person is_a NamedThing.
-    # Here, we mark it for the Human subset. 
-    is_a: NamedThing
-    in_subset:
-      - Human
-    attributes:
-      affiliation:
-        description: "The organization(s) to which the person belongs."
-        range: Organization
-        multivalued: true
-      email:
-        description: "The email address of the person."
-        range: string
-
-
-  Creator:
-    description: >
-      Who created the dataset (e.g., which team or research group) and on behalf
-      of which entity (e.g., company, institution, organization)? Potentially a team.
-    # Already exists as a DatasetProperty in the main schema. 
-    # For the 'Human' module, we highlight it if it includes human roles.
+      Information about whether the dataset involves human subjects research
+      and what regulatory or ethical review processes were followed.
     is_a: DatasetProperty
-    in_subset:
-      - Human
     attributes:
-      principal_investigator:
-        range: Person
-        description: "Individual primarily responsible for or overseeing creation."
-      affiliation:
-        range: Organization
-        description: "Organization(s) affiliated with the dataset creator(s)."
-
-
-  DataCollector:
-    description: >
-      Who was involved in the data collection process (e.g., students, crowdworkers, contractors)
-      and how they were compensated (e.g., wages)?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
-        range: string
-        multivalued: true
-
-
-  Subpopulation:
-    description: >
-      Does the dataset identify any subpopulations (e.g., by age, gender)?
-      If so, how and what are their distributions?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      subpopulation_elements_present:
+      involves_human_subjects:
+        description: "Does this dataset involve human subjects research?"
         range: boolean
-        description: "Whether explicit subpopulations are identified."
-      identification:
-        range: string
-        multivalued: true
-      distribution:
-        range: string
-        multivalued: true
-
-
-  SensitiveElement:
-    description: >
-      Does the dataset contain data that might be considered sensitive
-      (race, ethnic origins, sexual orientations, religious beliefs, etc.)?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      sensitive_elements_present:
-        range: boolean
-        description: "Whether sensitive data elements are present."
-      description:
-        range: string
-        multivalued: true
-
-
-  Deidentification:
-    description: >
-      Is it possible to identify individuals, either directly or indirectly
-      from the dataset?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      identifiable_elements_present:
-        range: boolean
+      irb_approval:
         description: >
-          Whether one or more natural persons can be identified directly
-          or indirectly.
-      description:
+          Was Institutional Review Board (IRB) approval obtained?
+          Include approval number and institution if applicable.
+        range: string
+        multivalued: true
+      ethics_review_board:
+        description: >
+          What ethics review board(s) reviewed this research?
+          Include institution names and approval details.
+        range: string
+        multivalued: true
+      special_populations:
+        description: >
+          Does the research involve any special populations that require
+          additional protections (e.g., minors, pregnant women, prisoners)?
+        range: string
+        multivalued: true
+      regulatory_compliance:
+        description: >
+          What regulatory frameworks govern this human subjects research
+          (e.g., 45 CFR 46, GDPR, HIPAA)?
         range: string
         multivalued: true
 
 
-  Confidentiality:
+  InformedConsent:
     description: >
-      Does the dataset contain data that might be confidential, such as data
-      protected by legal privilege or by doctor-patient confidentiality?
+      Details about informed consent procedures used in human subjects research.
     is_a: DatasetProperty
-    in_subset:
-      - Human
     attributes:
-      confidential_elements_present:
+      consent_obtained:
+        description: "Was informed consent obtained from all participants?"
         range: boolean
-        description: "Indicates the presence of confidential information."
-      description:
+      consent_type:
+        description: >
+          What type of consent was obtained (e.g., written, verbal, electronic,
+          implied through participation)?
+        range: string
+        multivalued: true
+      consent_documentation:
+        description: >
+          How is consent documented? Include references to consent forms
+          or procedures used.
+        range: string
+        multivalued: true
+      withdrawal_mechanism:
+        description: >
+          How can participants withdraw their consent? What procedures
+          are in place for data deletion upon withdrawal?
+        range: string
+        multivalued: true
+      consent_scope:
+        description: >
+          What specific uses did participants consent to? Are there
+          limitations on data use based on consent?
         range: string
         multivalued: true
 
 
-  ContentWarning:
+  ParticipantPrivacy:
     description: >
-      Does the dataset contain data that might be offensive, insulting,
-      threatening, or otherwise cause anxiety if viewed directly?
+      Information about privacy protections and anonymization procedures
+      for human research participants.
     is_a: DatasetProperty
-    in_subset:
-      - Human
     attributes:
-      content_warnings_present:
+      anonymization_method:
+        description: >
+          What methods were used to anonymize or de-identify participant data?
+          Include technical details of privacy-preserving techniques.
+        range: string
+        multivalued: true
+      reidentification_risk:
+        description: >
+          What is the assessed risk of re-identification? What measures
+          were taken to minimize this risk?
+        range: string
+        multivalued: true
+      privacy_techniques:
+        description: >
+          What privacy-preserving techniques were applied (e.g., differential
+          privacy, k-anonymity, data masking)?
+        range: string
+        multivalued: true
+      data_linkage:
+        description: >
+          Can this dataset be linked to other datasets in ways that might
+          compromise participant privacy?
+        range: string
+        multivalued: true
+
+
+  HumanSubjectCompensation:
+    description: >
+      Information about compensation or incentives provided to human research participants.
+    is_a: DatasetProperty
+    attributes:
+      compensation_provided:
+        description: "Were participants compensated for their participation?"
         range: boolean
-        description: "Indicates whether content warnings apply."
-      warnings:
+      compensation_type:
+        description: >
+          What type of compensation was provided (e.g., monetary payment,
+          gift cards, course credit, other incentives)?
+        range: string
+        multivalued: true
+      compensation_amount:
+        description: >
+          What was the amount or value of compensation provided?
+          Include currency or equivalent value.
+        range: string
+        multivalued: true
+      compensation_rationale:
+        description: >
+          What was the rationale for the compensation structure?
+          How was the amount determined to be appropriate?
         range: string
         multivalued: true
 
 
-  InstanceAcquisition:
+  VulnerablePopulations:
     description: >
-      How was the data associated with each instance acquired? For instance,
-      was it directly observed, reported by subjects, or inferred from other data?
-      If reported or inferred, was it validated?
+      Information about protections for vulnerable populations in human subjects research.
     is_a: DatasetProperty
-    in_subset:
-      - Human
     attributes:
-      description:
-        range: string
-        multivalued: true
-      was_directly_observed:
+      vulnerable_groups_included:
+        description: >
+          Are any vulnerable populations included (e.g., children, pregnant women,
+          prisoners, cognitively impaired individuals)?
         range: boolean
-      was_reported_by_subjects:
-        range: boolean
-      was_inferred_derived:
-        range: boolean
-      was_validated_verified:
-        range: boolean
-
-
-  CollectionMechanism:
-    description: >
-      What mechanisms or procedures were used to collect the data (e.g., hardware
-      sensors, manual human curation, software APIs)? How were these mechanisms validated?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
+      special_protections:
+        description: >
+          What additional protections were implemented for vulnerable populations?
+          Include safeguards, modified procedures, or additional oversight.
         range: string
         multivalued: true
-
-
-  CollectionTimeframe:
-    description: >
-      Over what timeframe was the data collected, and does that timeframe match
-      the creation timeframe of the underlying data?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
+      assent_procedures:
+        description: >
+          For research involving minors, what assent procedures were used?
+          How was developmentally appropriate assent obtained?
         range: string
         multivalued: true
-
-
-  DirectCollection:
-    description: >
-      Were data collected directly from individuals or acquired via third parties
-      or other sources (e.g., websites)?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
-        range: string
-        multivalued: true
-
-
-  CollectionNotification:
-    description: >
-      Were individuals notified about the data collection? If so, how was notice
-      provided, and what was its exact wording?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
-        range: string
-        multivalued: true
-
-
-  CollectionConsent:
-    description: >
-      Did individuals consent to the collection and use of their data? 
-      If so, how was consent requested, provided, and documented?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
-        range: string
-        multivalued: true
-
-
-  ConsentRevocation:
-    description: >
-      If consent was obtained, were individuals given a mechanism to revoke
-      their consent in the future or for certain uses?
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
-        range: string
-        multivalued: true
-
-
-  EthicalReview:
-    description: >
-      Were any ethical review processes (e.g., IRB) conducted for the dataset?
-      Provide a description of the process, outcomes, and supporting documentation.
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
-        range: string
-        multivalued: true
-
-
-  DataProtectionImpact:
-    description: >
-      Was a data protection impact analysis (DPIA) or similar performed?
-      If so, provide details and outcomes, plus any relevant documentation.
-    is_a: DatasetProperty
-    in_subset:
-      - Human
-    attributes:
-      description:
+      guardian_consent:
+        description: >
+          For participants unable to provide their own consent, how was
+          guardian or surrogate consent obtained?
         range: string
         multivalued: true
