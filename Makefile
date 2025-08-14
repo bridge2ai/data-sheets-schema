@@ -36,7 +36,7 @@ endif
 
 
 # basename of a YAML file in model/
-.PHONY: all clean
+.PHONY: all clean gen-d4d-full
 
 # note: "help" MUST be the first target in the file,
 # when the user types "make" they should get help info
@@ -47,6 +47,7 @@ help: status
 	@echo "make install -- install dependencies"
 	@echo "make test -- runs tests"
 	@echo "make lint -- perfom linting"
+	@echo "make gen-d4d-full -- generate D4D-Full schema with merged imports"
 	@echo "make testdoc -- builds docs and runs local test server"
 	@echo "make deploy -- deploys site"
 	@echo "make update -- updates linkml version"
@@ -105,6 +106,18 @@ gen-examples:
 
 gen-project: $(PYMODEL)
 	$(RUN) gen-project -I python -I jsonschema -I jsonld -I owl ${GEN_PARGS} -d $(DEST) $(SOURCE_SCHEMA_PATH) && mv $(DEST)/*.py $(PYMODEL)
+
+gen-d4d-full:
+	@echo "Generating D4D-Full schema with merged imports..."
+	cd $(SOURCE_SCHEMA_DIR) && $(RUN) gen-linkml --format yaml --mergeimports data_sheets_schema.yaml > D4D_Full_Schema.yaml
+	@if [ -f "$(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml" ]; then \
+		echo "✅ D4D-Full schema generated successfully: $(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml"; \
+		echo "📊 Schema size: $$(wc -l < $(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml) lines"; \
+		echo "🎯 This is a fully merged version with no imports - suitable for tools that don't handle imports"; \
+	else \
+		echo "❌ Failed to generate D4D-Full schema"; \
+		exit 1; \
+	fi
 
 test: test-schema test-python test-examples
 
