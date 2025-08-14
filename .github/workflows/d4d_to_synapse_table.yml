@@ -1,6 +1,7 @@
 name: "Run script to update the D4D Synapse table"
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
