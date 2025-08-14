@@ -1366,6 +1366,7 @@
       "owner": "NamedThing",
       "domain_of": [
         "Information",
+        "FormatDialect",
         "NamedThing"
       ],
       "range": "uriorcurie",
@@ -3433,7 +3434,6 @@
       "close_mappings": [
         "schema:CreativeWork"
       ],
-      "abstract": true,
       "slots": [
         "compression",
         "conforms_to",
@@ -3468,6 +3468,7 @@
       "description": "Additional format information for a file",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slots": [
+        "id",
         "formatDialect__comment_prefix",
         "formatDialect__delimiter",
         "formatDialect__double_quote",
@@ -6111,9 +6112,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2024-03-06T17:00:18",
-  "source_file_size": 43014,
-  "generation_date": "2024-03-06T17:00:45",
+  "source_file_date": "2024-08-21T16:00:47",
+  "source_file_size": 43017,
+  "generation_date": "2024-10-21T12:19:34",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

@@ -1,0 +1,158 @@
+Returned a filled out json record conforming to this schema below -- and to fill out the schema use the text further below:
+
+
+Schema:
+
+Text:
+https://www.biorxiv.org/content/10.1101/2024.05.21.589311v1.full.pdf
+
+
+Output:
+
+{
+  "@context": "https://w3id.org/bridge2ai/data-sheets-schema/minimal",
+  "@type": "DatasetCollection",
+  "id": "ark:12345/cm4ai-collection",
+  "title": "Cell Maps for Artificial Intelligence (CM4AI): AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines",
+  "description": "This dataset collection contains multiple CM4AI data releases, including proteomics, imaging, and genetic perturbation data for MDA-MB-468 breast cancer cells (treated and untreated) and differentiated and naive KOLF2.1J iPSCs. Data and metadata are packaged with FAIRSCAPE for AI-readiness and ethical dissemination under a CC-BY-NC-ND 4.0 International license.",
+  "keywords": [
+    "Cell Maps",
+    "Artificial Intelligence",
+    "Cancer",
+    "iPSC",
+    "Proteomics",
+    "Spatial Proteomics",
+    "CRISPR"
+  ],
+  "language": [
+    "en"
+  ],
+  "license": "CC-BY-NC-ND 4.0 International",
+  "version": "v0.5-alpha",
+  "created_on": "2024-05-24T00:00:00Z",
+  "created_by": [
+    "Timothy Clark",
+    "Jillian Mohan",
+    "Leah Schaffer",
+    "Trey Ideker (corresponding)",
+    "CM4AI Collaboration"
+  ],
+  "last_updated_on": "2024-05-24T00:00:00Z",
+  "modified_by": [
+    "CM4AI Tools Module",
+    "CM4AI Standards Module"
+  ],
+  "doi": "https://doi.org/10.1101/2024.05.21.589311",
+  "conforms_to": "https://w3id.org/bridge2ai/data-sheets-schema/minimal",
+  "resources": [
+    {
+      "@type": "Dataset",
+      "id": "ark:12345/cm4ai-protein-interactions",
+      "title": "CM4AI Protein-Protein Interaction Data (AP-MS, SEC-MS)",
+      "description": "Affinity purification mass spectrometry (AP-MS) and size-exclusion chromatography mass spectrometry (SEC-MS) data capturing protein-protein interactions, focusing on 100 chromatin regulators in MDA-MB-468 cells (untreated, paclitaxel, vorinostat) and KOLF2.1J iPSCs (undifferentiated, neurons, cardiomyocytes).",
+      "keywords": [
+        "Protein-Protein Interaction",
+        "Mass Spectrometry",
+        "Chromatin Regulators"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "CC-BY-NC-ND 4.0 International",
+      "version": "v0.5-alpha",
+      "created_on": "2024-05-24T00:00:00Z",
+      "created_by": [
+        "CM4AI Data Module"
+      ],
+      "last_updated_on": "2024-05-24T00:00:00Z",
+      "modified_by": [
+        "CM4AI Tools Module"
+      ],
+      "doi": "https://doi.org/10.1101/2024.05.21.589311",
+      "conforms_to": "https://w3id.org/bridge2ai/data-sheets-schema/minimal",
+      "download_url": "https://example.org/cm4ai/data/protein_interactions_v0.5-alpha.json",
+      "path": "s3://cm4ai-bucket/data/protein_interactions_v0.5-alpha.json",
+      "format": "JSON",
+      "encoding": "UTF-8",
+      "compression": "none",
+      "media_type": "application/json",
+      "bytes": 12500432,
+      "hash": "390ac5ba138feaedb913b9f43bafb850",
+      "md5": "390ac5ba138feaedb913b9f43bafb850",
+      "sha256": "85b02f57081fb9cfb9d9097e25883d7f6ffac0b93465acfac614f10200500acf"
+    },
+    {
+      "@type": "Dataset",
+      "id": "ark:12345/cm4ai-imaging",
+      "title": "CM4AI Spatial Proteomics Imaging Data (Immunofluorescence)",
+      "description": "High-resolution immunofluorescence (IF) images of targeted proteins in MDA-MB-468 cells (with/without drug treatment) and KOLF2.1J iPSCs (undifferentiated vs. neurons/cardiomyocytes). Generated using a standardized automated fixation and staining protocol, capturing spatial distribution of 100 chromatin regulators.",
+      "keywords": [
+        "Immunofluorescence",
+        "Microscopy",
+        "Spatial Proteomics"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "CC-BY-NC-ND 4.0 International",
+      "version": "v0.5-alpha",
+      "created_on": "2024-05-24T00:00:00Z",
+      "created_by": [
+        "Stanford University Team"
+      ],
+      "last_updated_on": "2024-05-24T00:00:00Z",
+      "modified_by": [
+        "CM4AI Tools Module"
+      ],
+      "doi": "https://doi.org/10.1101/2024.05.21.589311",
+      "conforms_to": "https://w3id.org/bridge2ai/data-sheets-schema/minimal",
+      "download_url": "https://example.org/cm4ai/data/spatial_imaging_v0.5-alpha.zip",
+      "path": "s3://cm4ai-bucket/data/spatial_imaging_v0.5-alpha.zip",
+      "format": "OME-TIFF",
+      "encoding": "N/A",
+      "compression": "zip",
+      "media_type": "application/zip",
+      "bytes": 2513409123,
+      "hash": "f74d47a3c2b6190baa02779e972932ef",
+      "md5": "f74d47a3c2b6190baa02779e972932ef",
+      "sha256": "c26a00612b418a4e16bb65d2b00263f6ee7600fc8fdb07dfed79b870ba9d6635"
+    },
+    {
+      "@type": "Dataset",
+      "id": "ark:12345/cm4ai-crispr",
+      "title": "CM4AI Genetic Perturbation Data (Single-Cell CRISPR Screens)",
+      "description": "Single-cell CRISPR-Cas9 perturbation screens targeting 100 chromatin regulators in MDA-MB-468 cells under 3 conditions (no treatment, paclitaxel, vorinostat) and in undifferentiated KOLF2.1J iPSCs. The dataset includes 10x Genomics 3’HT raw and processed files with gene expression profiles.",
+      "keywords": [
+        "CRISPR",
+        "Genetic Perturbation",
+        "Single-Cell Transcriptomics"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "CC-BY-NC-ND 4.0 International",
+      "version": "v0.5-alpha",
+      "created_on": "2024-05-24T00:00:00Z",
+      "created_by": [
+        "UC San Diego Team"
+      ],
+      "last_updated_on": "2024-05-24T00:00:00Z",
+      "modified_by": [
+        "CM4AI Tools Module"
+      ],
+      "doi": "https://doi.org/10.1101/2024.05.21.589311",
+      "conforms_to": "https://w3id.org/bridge2ai/data-sheets-schema/minimal",
+      "download_url": "https://example.org/cm4ai/data/crispr_screens_v0.5-alpha.tar.gz",
+      "path": "s3://cm4ai-bucket/data/crispr_screens_v0.5-alpha.tar.gz",
+      "format": "FASTQ, CSV",
+      "encoding": "UTF-8",
+      "compression": "tar.gz",
+      "media_type": "application/gzip",
+      "bytes": 1893245120,
+      "hash": "8bf35341fb3fe98ee6547cd3ae2e3ad1",
+      "md5": "8bf35341fb3fe98ee6547cd3ae2e3ad1",
+      "sha256": "e11179bd9f158b55b34bd66c58e5797081e27578e019adfe8a16010df3a7cd97"
+    }
+  ]
+}
+

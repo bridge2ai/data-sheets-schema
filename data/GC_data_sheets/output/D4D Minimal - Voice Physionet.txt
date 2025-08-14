@@ -1,0 +1,432 @@
+D4D MINIMAL - VOICE PHYSIONET REPORT
+================================================================================
+
+COLLECTION: Collection
+--------------------------------------------------------------------------------
+  Item_6_DatasetCollection:
+    DatasetCollection: {
+  "id": "https://doi.org/10.13026/249v-w155",
+  "title": "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information",
+  "description": "The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in AI and provide insights into using voice as a biomarker of health. This release provides derived voice features (e.g., spectrograms, MFCCs) alongside extensive clinical phenotype data, all collected under a standardized protocol across multiple sites.",
+  "keywords": [
+    "voice",
+    "bridge2ai",
+    "health",
+    "AI",
+    "acoustics",
+    "speech"
+  ],
+  "language": [
+    "en"
+  ],
+  "license": "Bridge2AI Voice Registered Access License",
+  "version": "1.1",
+  "created_on": "2025-01-17T00:00:00Z",
+  "created_by": [
+    "Alistair Johnson",
+    "Jean-Christophe B\u00e9lisle-Pipon",
+    "David Dorr",
+    "Satrajit Ghosh",
+    "Philip Payne",
+    "Maria Powell",
+    "Anais Rameau",
+    "Vardit Ravitsky",
+    "Alexandros Sigaras",
+    "Olivier Elemento",
+    "Yael Bensoussan"
+  ],
+  "last_updated_on": "2025-01-17T00:00:00Z",
+  "modified_by": [],
+  "doi": "https://doi.org/10.13026/249v-w155",
+  "conforms_to": [
+    "https://w3id.org/bridge2ai/data-sheets-schema/minimal"
+  ],
+  "resources": [
+    {
+      "id": "spectrograms.parquet",
+      "title": "spectrograms.parquet",
+      "description": "A Parquet file storing dense data derived from voice waveforms (513xN dimension).",
+      "keywords": [
+        "spectrogram",
+        "voice",
+        "audio",
+        "derived_data"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.1",
+      "created_on": "2025-01-17T00:00:00Z",
+      "created_by": [],
+      "last_updated_on": "2025-01-17T00:00:00Z",
+      "modified_by": [],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": "https://physionet.org/content/bridge2ai-voice/1.1/spectrograms.parquet",
+      "path": "bridge2ai-voice/1.1/spectrograms.parquet",
+      "format": "parquet",
+      "encoding": "PCM 16kHz mono (power representation)",
+      "compression": null,
+      "media_type": "application/octet-stream",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "mfcc.parquet",
+      "title": "mfcc.parquet",
+      "description": "A Parquet file storing Mel-frequency cepstral coefficients (60xN dimension).",
+      "keywords": [
+        "mfcc",
+        "voice",
+        "audio",
+        "derived_data"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.1",
+      "created_on": "2025-01-17T00:00:00Z",
+      "created_by": [],
+      "last_updated_on": "2025-01-17T00:00:00Z",
+      "modified_by": [],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": "https://physionet.org/content/bridge2ai-voice/1.1/mfcc.parquet",
+      "path": "bridge2ai-voice/1.1/mfcc.parquet",
+      "format": "parquet",
+      "encoding": "PCM 16kHz mono",
+      "compression": null,
+      "media_type": "application/octet-stream",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "phenotype.tsv",
+      "title": "phenotype.tsv",
+      "description": "A tab-delimited file with one row per participant, containing demographics, acoustic confounders, and questionnaire data.",
+      "keywords": [
+        "metadata",
+        "clinical",
+        "questionnaire",
+        "demographics"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.1",
+      "created_on": "2025-01-17T00:00:00Z",
+      "created_by": [],
+      "last_updated_on": "2025-01-17T00:00:00Z",
+      "modified_by": [],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": "https://physionet.org/content/bridge2ai-voice/1.1/phenotype.tsv",
+      "path": "bridge2ai-voice/1.1/phenotype.tsv",
+      "format": "TSV",
+      "encoding": "UTF-8",
+      "compression": null,
+      "media_type": "text/tab-separated-values",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "phenotype.json",
+      "title": "phenotype.json",
+      "description": "A data dictionary describing each column in phenotype.tsv.",
+      "keywords": [
+        "dictionary",
+        "metadata",
+        "clinical",
+        "schema"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.1",
+      "created_on": "2025-01-17T00:00:00Z",
+      "created_by": [],
+      "last_updated_on": "2025-01-17T00:00:00Z",
+      "modified_by": [],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": "https://physionet.org/content/bridge2ai-voice/1.1/phenotype.json",
+      "path": "bridge2ai-voice/1.1/phenotype.json",
+      "format": "JSON",
+      "encoding": "UTF-8",
+      "compression": null,
+      "media_type": "application/json",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "static_features.tsv",
+      "title": "static_features.tsv",
+      "description": "A tab-delimited file with one row per audio recording, containing derived voice features from openSMILE, Praat, parselmouth, etc.",
+      "keywords": [
+        "features",
+        "voice",
+        "audio",
+        "analysis"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.1",
+      "created_on": "2025-01-17T00:00:00Z",
+      "created_by": [],
+      "last_updated_on": "2025-01-17T00:00:00Z",
+      "modified_by": [],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": "https://physionet.org/content/bridge2ai-voice/1.1/static_features.tsv",
+      "path": "bridge2ai-voice/1.1/static_features.tsv",
+      "format": "TSV",
+      "encoding": "UTF-8",
+      "compression": null,
+      "media_type": "text/tab-separated-values",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "static_features.json",
+      "title": "static_features.json",
+      "description": "A data dictionary describing each column in static_features.tsv.",
+      "keywords": [
+        "dictionary",
+        "metadata",
+        "derived_features"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.1",
+      "created_on": "2025-01-17T00:00:00Z",
+      "created_by": [],
+      "last_updated_on": "2025-01-17T00:00:00Z",
+      "modified_by": [],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": "https://physionet.org/content/bridge2ai-voice/1.1/static_features.json",
+      "path": "bridge2ai-voice/1.1/static_features.json",
+      "format": "JSON",
+      "encoding": "UTF-8",
+      "compression": null,
+      "media_type": "application/json",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    }
+  ]
+}
+
+
+COLLECTION: Metadata
+--------------------------------------------------------------------------------
+  Item_0:
+    id: spectrograms.parquet
+    title: spectrograms.parquet
+    description: A Parquet file storing dense data derived from voice waveforms (513xN dimension).
+    keywords: [
+  "spectrogram",
+  "voice",
+  "audio",
+  "derived_data"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.1
+    created_on: 2025-01-17T00:00:00Z
+    created_by: []
+    last_updated_on: 2025-01-17T00:00:00Z
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: https://physionet.org/content/bridge2ai-voice/1.1/spectrograms.parquet
+    path: bridge2ai-voice/1.1/spectrograms.parquet
+    format: parquet
+    encoding: PCM 16kHz mono (power representation)
+    compression: None
+    media_type: application/octet-stream
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_1:
+    id: mfcc.parquet
+    title: mfcc.parquet
+    description: A Parquet file storing Mel-frequency cepstral coefficients (60xN dimension).
+    keywords: [
+  "mfcc",
+  "voice",
+  "audio",
+  "derived_data"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.1
+    created_on: 2025-01-17T00:00:00Z
+    created_by: []
+    last_updated_on: 2025-01-17T00:00:00Z
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: https://physionet.org/content/bridge2ai-voice/1.1/mfcc.parquet
+    path: bridge2ai-voice/1.1/mfcc.parquet
+    format: parquet
+    encoding: PCM 16kHz mono
+    compression: None
+    media_type: application/octet-stream
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_2:
+    id: phenotype.tsv
+    title: phenotype.tsv
+    description: A tab-delimited file with one row per participant, containing demographics, acoustic confounders, and questionnaire data.
+    keywords: [
+  "metadata",
+  "clinical",
+  "questionnaire",
+  "demographics"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.1
+    created_on: 2025-01-17T00:00:00Z
+    created_by: []
+    last_updated_on: 2025-01-17T00:00:00Z
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: https://physionet.org/content/bridge2ai-voice/1.1/phenotype.tsv
+    path: bridge2ai-voice/1.1/phenotype.tsv
+    format: TSV
+    encoding: UTF-8
+    compression: None
+    media_type: text/tab-separated-values
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_3:
+    id: phenotype.json
+    title: phenotype.json
+    description: A data dictionary describing each column in phenotype.tsv.
+    keywords: [
+  "dictionary",
+  "metadata",
+  "clinical",
+  "schema"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.1
+    created_on: 2025-01-17T00:00:00Z
+    created_by: []
+    last_updated_on: 2025-01-17T00:00:00Z
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: https://physionet.org/content/bridge2ai-voice/1.1/phenotype.json
+    path: bridge2ai-voice/1.1/phenotype.json
+    format: JSON
+    encoding: UTF-8
+    compression: None
+    media_type: application/json
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_4:
+    id: static_features.tsv
+    title: static_features.tsv
+    description: A tab-delimited file with one row per audio recording, containing derived voice features from openSMILE, Praat, parselmouth, etc.
+    keywords: [
+  "features",
+  "voice",
+  "audio",
+  "analysis"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.1
+    created_on: 2025-01-17T00:00:00Z
+    created_by: []
+    last_updated_on: 2025-01-17T00:00:00Z
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: https://physionet.org/content/bridge2ai-voice/1.1/static_features.tsv
+    path: bridge2ai-voice/1.1/static_features.tsv
+    format: TSV
+    encoding: UTF-8
+    compression: None
+    media_type: text/tab-separated-values
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_5:
+    id: static_features.json
+    title: static_features.json
+    description: A data dictionary describing each column in static_features.tsv.
+    keywords: [
+  "dictionary",
+  "metadata",
+  "derived_features"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.1
+    created_on: 2025-01-17T00:00:00Z
+    created_by: []
+    last_updated_on: 2025-01-17T00:00:00Z
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: https://physionet.org/content/bridge2ai-voice/1.1/static_features.json
+    path: bridge2ai-voice/1.1/static_features.json
+    format: JSON
+    encoding: UTF-8
+    compression: None
+    media_type: application/json
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+

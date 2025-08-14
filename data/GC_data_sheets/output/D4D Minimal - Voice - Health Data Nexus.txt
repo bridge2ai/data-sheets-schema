@@ -1,0 +1,180 @@
+D4D MINIMAL - VOICE - HEALTH DATA NEXUS REPORT
+================================================================================
+
+COLLECTION: Metadata
+--------------------------------------------------------------------------------
+  Item_0:
+    id: b2ai-voice-spectrograms
+    title: Spectrograms Parquet File
+    description: A Parquet file storing dense spectrogram data derived from 12,523 voice recordings across 306 participants.
+    keywords: [
+  "spectrograms",
+  "voice",
+  "audio"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.0
+    created_on: 2024-11-27T00:00:00Z
+    created_by: [
+  "Bridge2AI-Voice Team"
+]
+    last_updated_on: 2024-11-27T18:11:00Z
+    modified_by: [
+  "Bridge2AI-Voice Team"
+]
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: spectrograms.parquet
+    format: Parquet
+    encoding: binary
+    compression: None
+    media_type: application/x-parquet
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_1:
+    id: b2ai-voice-phenotype-tsv
+    title: Phenotype Tab-Delimited File
+    description: Tab-delimited file containing demographic, clinical, and validated questionnaire data (one row per participant).
+    keywords: [
+  "phenotype",
+  "voice",
+  "audio"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.0
+    created_on: 2024-11-27T00:00:00Z
+    created_by: [
+  "Bridge2AI-Voice Team"
+]
+    last_updated_on: 2024-11-27T18:11:00Z
+    modified_by: [
+  "Bridge2AI-Voice Team"
+]
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: phenotype.tsv
+    format: TSV
+    encoding: UTF-8
+    compression: None
+    media_type: text/tab-separated-values
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_2:
+    id: b2ai-voice-phenotype-json
+    title: Phenotype Data Dictionary
+    description: JSON data dictionary describing each column in the phenotype TSV file.
+    keywords: [
+  "phenotype",
+  "dictionary",
+  "metadata"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.0
+    created_on: 2024-11-27T00:00:00Z
+    created_by: [
+  "Bridge2AI-Voice Team"
+]
+    last_updated_on: 2024-11-27T18:11:00Z
+    modified_by: [
+  "Bridge2AI-Voice Team"
+]
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: phenotype.json
+    format: JSON
+    encoding: UTF-8
+    compression: None
+    media_type: application/json
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_3:
+    id: b2ai-voice-static-features-tsv
+    title: Static Features Tab-Delimited File
+    description: Tab-delimited file with derived acoustic features (e.g., openSMILE, Praat) for each recorded sample.
+    keywords: [
+  "static features",
+  "acoustic",
+  "voice"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.0
+    created_on: 2024-11-27T00:00:00Z
+    created_by: [
+  "Bridge2AI-Voice Team"
+]
+    last_updated_on: 2024-11-27T18:11:00Z
+    modified_by: [
+  "Bridge2AI-Voice Team"
+]
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: static_features.tsv
+    format: TSV
+    encoding: UTF-8
+    compression: None
+    media_type: text/tab-separated-values
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
+  Item_4:
+    id: b2ai-voice-static-features-json
+    title: Static Features Data Dictionary
+    description: JSON data dictionary describing each column in the static features TSV file.
+    keywords: [
+  "static features",
+  "dictionary",
+  "metadata"
+]
+    language: [
+  "en"
+]
+    license: Bridge2AI Voice Registered Access License
+    version: 1.0
+    created_on: 2024-11-27T00:00:00Z
+    created_by: [
+  "Bridge2AI-Voice Team"
+]
+    last_updated_on: 2024-11-27T18:11:00Z
+    modified_by: [
+  "Bridge2AI-Voice Team"
+]
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: static_features.json
+    format: JSON
+    encoding: UTF-8
+    compression: None
+    media_type: application/json
+    bytes: None
+    hash: None
+    md5: None
+    sha256: None
+
