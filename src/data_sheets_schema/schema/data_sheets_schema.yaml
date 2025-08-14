@@ -34,19 +34,18 @@ imports:
   - linkml:types
   - standards_schema
   - standards_organization_schema
-  # Base classes module
-  - modules/D4D_Base
   # D4D Modules in original paper order
-  - modules/D4D_Motivation
-  - modules/D4D_Composition
-  - modules/D4D_Collection
-  - modules/D4D_Preprocessing
-  - modules/D4D_Uses
-  - modules/D4D_Distribution
-  - modules/D4D_Maintenance
+  - D4D_Motivation
+  - D4D_Composition
+  - D4D_Collection
+  - D4D_Preprocessing
+  - D4D_Uses
+  - D4D_Distribution
+  - D4D_Maintenance
   # Additional extended modules
-  - modules/D4D_Ethics
-  - modules/D4D_Human
+  - D4D_Ethics
+  - D4D_Human
+  - D4D_Data_Governance
 
 ## TYPES ##
 
@@ -105,9 +104,67 @@ classes:
 
   # NamedThing is imported from Bridge2AI standards schema
 
-  # Information class is imported from modules/D4D_Base
-  # Adapted from linkml Datasets schema - see
-  # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
+  # Base classes for D4D modules (moved from D4D_Base)
+  DatasetProperty:
+    description: "Represents a single property of a dataset, or a set of related properties."
+    is_a: NamedThing
+    attributes:
+      used_software:
+        description: "What software was used as part of this dataset property?"
+        range: Software
+        multivalued: true
+
+  Software:
+    description: "A software program or library."
+    is_a: NamedThing
+    attributes:
+      version:
+        range: string
+      license:
+        range: string
+      url:
+        range: string
+
+  Person:
+    description: "An individual human being."
+    is_a: NamedThing
+    attributes:
+      affiliation:
+        description: "The organization(s) to which the person belongs."
+        range: Organization
+        multivalued: true
+      email:
+        description: "The email address of the person."
+        range: string
+
+  Information:
+    description: "Grouping for datasets and data files"
+    close_mappings:
+      - schema:CreativeWork
+    is_a: NamedThing
+    slots:
+      - compression
+      - conforms_to
+      - conforms_to_class
+      - conforms_to_schema
+      - created_by
+      - created_on
+      - description
+      - doi
+      - download_url
+      - id
+      - issued
+      - keywords
+      - language
+      - last_updated_on
+      - license
+      - modified_by
+      - page
+      - publisher
+      - status
+      - title
+      - version
+      - was_derived_from
 
   # From linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
@@ -122,7 +179,7 @@ classes:
     slots:
       - id
 
-  # Person, DatasetProperty, Software are imported from modules/D4D_Base
+  # Person, DatasetProperty, Software are defined above as base classes
 
   DatasetCollection:
     aliases:
@@ -547,7 +604,12 @@ slots:
 ## ENUMS ##
 enums:
 
-  # CreatorOrMaintainerEnum is imported from modules/D4D_Base
+  CreatorOrMaintainerEnum:
+    description: >-
+      The entity responsible for maintaining a dataset.
+    permissible_values:
+      Person:
+      Organization:
 
 
   # These enums are adapted from

@@ -15,7 +15,7 @@ see_also:
 
 imports:
   # Import the main schema so that we can reference DatasetProperty, etc.
-  - ../D4D_Base
+  - data_sheets_schema
 
 
 # Subsets are defined in the main schema
@@ -76,46 +76,3 @@ classes:
         multivalued: true
 
 
-  LicenseAndUseTerms:
-    description: >
-      Will the dataset be distributed under a copyright or other intellectual
-      property license, and/or under applicable terms of use (ToU)? If so, describe
-      this license/ToU, include any fees, and provide a link or copy of relevant terms.
-    is_a: DatasetProperty
-    attributes:
-      description:
-        description: >
-          Information on licenses or terms of use, including references,
-          links, or summaries of the key terms, usage restrictions, or fees.
-        range: string
-        multivalued: true
-
-
-  IPRestrictions:
-    description: >
-      Have any third parties imposed IP-based or other restrictions on the data
-      associated with the instances? If so, describe these restrictions, referencing
-      any licenses or fees.
-    is_a: DatasetProperty
-    attributes:
-      description:
-        description: >
-          Explanation of third-party intellectual property restrictions that may
-          limit or constrain dataset distribution.
-        range: string
-        multivalued: true
-
-
-  ExportControlRegulatoryRestrictions:
-    description: >
-      Do any export controls or other regulatory restrictions apply to the dataset
-      or to individual instances? If so, describe them, referencing relevant legal
-      documentation or guidelines.
-    is_a: DatasetProperty
-    attributes:
-      description:
-        description: >
-          Details of export control or other regulatory constraints that apply
-          to distributing the dataset.
-        range: string
-        multivalued: true

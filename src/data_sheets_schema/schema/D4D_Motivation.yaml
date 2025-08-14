@@ -13,7 +13,7 @@ see_also:
 
 imports:
   # Import the main data-sheets-schema so we can reference DatasetProperty, Person, Organization, etc.
-  - ../D4D_Base
+  - data_sheets_schema
 
 
 # Subsets are defined in the main schema

@@ -15,7 +15,7 @@ prefixes:
 
 
 imports:
-  - ../D4D_Base
+  - data_sheets_schema
 
 
 # Subsets are defined in the main schema

@@ -70,7 +70,7 @@ enums:
 
 imports:
   - linkml:types
-  - ../D4D_Base
+  - data_sheets_schema
 
 classes:
 
