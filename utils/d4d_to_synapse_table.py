@@ -57,6 +57,7 @@ def generate_table(syn, table_name: str, table_id: str|None, project_id: str, d4
 	table_schema = Schema(name=table_name, columns=table_cols, parent=project_id)
 
 	if table_id is not None:
+		syn.create_snapshot_version(table_id)
 		csv.field_size_limit(sys.maxsize)
 		existing_rows = syn.tableQuery(f"select * from {table_id}")
 		syn.delete(existing_rows)
