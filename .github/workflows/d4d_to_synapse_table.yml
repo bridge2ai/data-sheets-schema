@@ -28,7 +28,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry install
+          poetry install --no-interaction
 
       - name: Install jq
         run: sudo apt-get install jq
