@@ -36,7 +36,7 @@ endif
 
 
 # basename of a YAML file in model/
-.PHONY: all clean gen-d4d-full
+.PHONY: all clean gen-d4d-full validate-d4d-examples render-d4d-examples
 
 # note: "help" MUST be the first target in the file,
 # when the user types "make" they should get help info
@@ -48,6 +48,8 @@ help: status
 	@echo "make test -- runs tests"
 	@echo "make lint -- perfom linting"
 	@echo "make gen-d4d-full -- generate D4D-Full schema with merged imports"
+	@echo "make validate-d4d-examples -- validate D4D example YAML files against Full schema"
+	@echo "make render-d4d-examples -- generate HTML rendering of D4D example YAML files"
 	@echo "make testdoc -- builds docs and runs local test server"
 	@echo "make deploy -- deploys site"
 	@echo "make update -- updates linkml version"
@@ -109,7 +111,7 @@ gen-project: $(PYMODEL)
 
 gen-d4d-full:
 	@echo "Generating D4D-Full schema with merged imports..."
-	cd $(SOURCE_SCHEMA_DIR) && $(RUN) gen-linkml --format yaml --mergeimports data_sheets_schema.yaml > D4D_Full_Schema.yaml
+	cd $(SOURCE_SCHEMA_DIR) && $(RUN) gen-linkml --format yaml --mergeimports D4D_Root.yaml > D4D_Full_Schema.yaml
 	@if [ -f "$(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml" ]; then \
 		echo "✅ D4D-Full schema generated successfully: $(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml"; \
 		echo "📊 Schema size: $$(wc -l < $(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml) lines"; \
@@ -118,6 +120,18 @@ gen-d4d-full:
 		echo "❌ Failed to generate D4D-Full schema"; \
 		exit 1; \
 	fi
+
+validate-d4d-examples:
+	@echo "Validating D4D example YAML files against Full schema..."
+	$(RUN) python scripts/validate_d4d_examples.py
+
+render-d4d-examples:
+	@echo "Generating HTML rendering of D4D example YAML files..."
+	$(RUN) python scripts/render_yaml_to_html.py \
+		data/sheets/html_output/D4D_-_AI-READI_FAIRHub_v3_data.yaml \
+		data/sheets/html_output/D4D_-_CM4AI_Dataverse_v3_data.yaml \
+		data/sheets/html_output/D4D_-_VOICE_PhysioNet_v3_data.yaml
+	@echo "✅ HTML rendering complete. Files saved to data/sheets/html_output/"
 
 test: test-schema test-python test-examples
 

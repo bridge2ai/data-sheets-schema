@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D4D_-_VOICE_PhysioNet_v3 - Datasheet for Dataset</title>
+    <title>Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information - Datasheet for Dataset</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
@@ -31,838 +30,559 @@
             font-weight: 300;
         }
         
-        .header .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin: 0;
-        }
-        
-        .section {
+        .content {
             background: white;
-            margin-bottom: 2rem;
+            padding: 2rem;
             border-radius: 8px;
-            overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        .section-header {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .section-icon {
-            font-size: 1.5rem;
-        }
-        
-        .section-title {
-            margin: 0;
+        .key {
+            font-weight: bold;
             color: #2c3e50;
-            font-size: 1.25rem;
-            font-weight: 600;
         }
         
-        .section-description {
-            margin: 0.25rem 0 0 0;
-            color: #6c757d;
-            font-size: 0.9rem;
+        .value {
+            color: #34495e;
         }
         
-        .section-content {
-            padding: 1.5rem;
-        }
-        
-        .data-item {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #f1f3f4;
-        }
-        
-        .data-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-        
-        .item-label {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-        
-        .item-context {
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-bottom: 0.25rem;
-            font-style: italic;
-        }
-        
-        .nested-dict {
-            margin: 0.5rem 0;
+        pre {
             background: #f8f9fa;
-            border-radius: 6px;
             padding: 1rem;
-        }
-        
-        .nested-dict dt {
-            font-weight: 600;
-            color: #495057;
-            margin-top: 0.75rem;
-        }
-        
-        .nested-dict dt:first-child {
-            margin-top: 0;
-        }
-        
-        .nested-dict dd {
-            margin: 0.25rem 0 0.5rem 1rem;
-            color: #6c757d;
-        }
-        
-        .formatted-list {
-            margin: 0.5rem 0;
-            padding-left: 1.5rem;
-        }
-        
-        .formatted-list li {
-            margin-bottom: 0.5rem;
-        }
-        
-        .long-description {
-            background: #f8f9fa;
-            border-left: 4px solid #007bff;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            border-radius: 0 6px 6px 0;
-            line-height: 1.7;
-        }
-        
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        
-        a:hover {
-            text-decoration: underline;
+            border-radius: 4px;
+            overflow-x: auto;
+            border-left: 4px solid #667eea;
         }
         
         .timestamp {
             text-align: center;
-            color: #6c757d;
-            font-size: 0.85rem;
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 1rem;
-            }
-            
-            .header {
-                padding: 1.5rem;
-            }
-            
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .section-content {
-                padding: 1rem;
-            }
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>D4D_-_VOICE_PhysioNet_v3</h1>
-        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
+        <h1>Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information</h1>
+        <p class="subtitle">Datasheet for Dataset</p>
     </div>
-    
-    
-        
-            
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-icon">🎯</span>
-                    <div>
-                        <h2 class="section-title">Motivation</h2>
-                        <p class="section-description">Why was the dataset created?</p>
-                    </div>
-                </div>
-                <div class="section-content">
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Funders</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Grantor</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>NIH</dd><dt>Name</dt><dd>National Institutes of Health</dd></dl></dd><dt>Grant</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>3OT2OD032720-01S1</dd><dt>Name</dt><dd>Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before</dd><dt>Grant Number</dt><dd>3OT2OD032720-01S1</dd></dl></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Purposes</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Response</dt><dd><div class="long-description">The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health.</div></dd></dl></li></ul></div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-        
-            
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-icon">📊</span>
-                    <div>
-                        <h2 class="section-title">Composition</h2>
-                        <p class="section-description">What do the instances represent?</p>
-                    </div>
-                </div>
-                <div class="section-content">
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Instances</label>
-                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Counts</dt><dd>442</dd><dt>Instance Type</dt><dd>participants</dd><dt>Data Topic</dt><dd><em>Not specified</em></dd><dt>Data Substrate</dt><dd><em>Not specified</em></dd><dt>Label</dt><dd><em>Not specified</em></dd><dt>Label Description</dt><dd><em>Not specified</em></dd><dt>Sampling Strategies</dt><dd><em>No items</em></dd><dt>Missing Information</dt><dd><em>No items</em></dd></dl></li><li><dl class='nested-dict'><dt>Counts</dt><dd>19,271</dd><dt>Instance Type</dt><dd>recordings</dd><dt>Data Topic</dt><dd><em>Not specified</em></dd><dt>Data Substrate</dt><dd><em>Not specified</em></dd><dt>Label</dt><dd><em>Not specified</em></dd><dt>Label Description</dt><dd><em>Not specified</em></dd><dt>Sampling Strategies</dt><dd><em>No items</em></dd><dt>Missing Information</dt><dd><em>No items</em></dd></dl></li></ol></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Subpopulations</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Subpopulation Elements Present</dt><dd>True</dd><dt>Identification</dt><dd><ul class='formatted-list'><li>Disease cohort categories</li></ul></dd><dt>Distribution</dt><dd><ul class='formatted-list'><li><div class="long-description">Voice Disorders, Neurological and Neurodegenerative Disorders, Mood and Psychiatric Disorders, Respiratory disorders. Note: The v2.0.0 dataset does not contain pediatric data and does not contain an equal distribution across categories of diseases.</div></li></ul></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Distribution Formats</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>spectrograms.parquet, mfcc.parquet, phenotype.tsv, static_features.tsv</dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Distribution Dates</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-        
-            
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-icon">🔍</span>
-                    <div>
-                        <h2 class="section-title">Collection Process</h2>
-                        <p class="section-description">How was the data acquired?</p>
-                    </div>
-                </div>
-                <div class="section-content">
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">ID</label>
-                        <div class="item-value"><a href="https://doi.org/10.13026/3xt6-rf05" target="_blank">https://doi.org/10.13026/3xt6-rf05</a></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Title</label>
-                        <div class="item-value">Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information</div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Description</label>
-                        <div class="item-value"><div class="long-description">Bridge2AI-Voice v2.0 contains data for 19,271 recordings collected from 442 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.</div></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Creators</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Principal Investigator</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Yael Bensoussan</dd><dt>Name</dt><dd>Yael Bensoussan</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Principal Investigator</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Olivier Elemento</dd><dt>Name</dt><dd>Olivier Elemento</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Principal Investigator</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Satrajit Ghosh</dd><dt>Name</dt><dd>Satrajit Ghosh</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Alexandros Sigaras</dd><dt>Name</dt><dd>Alexandros Sigaras</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Anais Rameau</dd><dt>Name</dt><dd>Anais Rameau</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Maria Powell</dd><dt>Name</dt><dd>Maria Powell</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>David Dorr</dd><dt>Name</dt><dd>David Dorr</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Philip Payne</dd><dt>Name</dt><dd>Philip Payne</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Vardit Ravitsky</dd><dt>Name</dt><dd>Vardit Ravitsky</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Jean-Christophe Bélisle-Pipon</dd><dt>Name</dt><dd>Jean-Christophe Bélisle-Pipon</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Alistair Johnson</dd><dt>Name</dt><dd>Alistair Johnson</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Ruth Bahr</dd><dt>Name</dt><dd>Ruth Bahr</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Stephanie Watts</dd><dt>Name</dt><dd>Stephanie Watts</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Donald Bolser</dd><dt>Name</dt><dd>Donald Bolser</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Jennifer Siu</dd><dt>Name</dt><dd>Jennifer Siu</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Jordan Lerner-Ellis</dd><dt>Name</dt><dd>Jordan Lerner-Ellis</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Frank Rudzicz</dd><dt>Name</dt><dd>Frank Rudzicz</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Micah Boyer</dd><dt>Name</dt><dd>Micah Boyer</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Samantha Salvi Cruz</dd><dt>Name</dt><dd>Samantha Salvi Cruz</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Yassmeen Abdel-Aty</dd><dt>Name</dt><dd>Yassmeen Abdel-Aty</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Toufeeq Ahmed Syed</dd><dt>Name</dt><dd>Toufeeq Ahmed Syed</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>James Anibal</dd><dt>Name</dt><dd>James Anibal</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Stephen Aradi</dd><dt>Name</dt><dd>Stephen Aradi</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Ana Sophia Martinez</dd><dt>Name</dt><dd>Ana Sophia Martinez</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Shaheen Awan</dd><dt>Name</dt><dd>Shaheen Awan</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Steven Bedrick</dd><dt>Name</dt><dd>Steven Bedrick</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Isaac Bevers</dd><dt>Name</dt><dd>Isaac Bevers</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Rahul Brito</dd><dt>Name</dt><dd>Rahul Brito</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Selina Casalino</dd><dt>Name</dt><dd>Selina Casalino</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>John Costello</dd><dt>Name</dt><dd>John Costello</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Iris De Santiago</dd><dt>Name</dt><dd>Iris De Santiago</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Enrique Diaz-Ocampo</dd><dt>Name</dt><dd>Enrique Diaz-Ocampo</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Mohamed Ebraheem</dd><dt>Name</dt><dd>Mohamed Ebraheem</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Ellie Eiseman</dd><dt>Name</dt><dd>Ellie Eiseman</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Mahmoud Elmahdy</dd><dt>Name</dt><dd>Mahmoud Elmahdy</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Emily Evangelista</dd><dt>Name</dt><dd>Emily Evangelista</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Kenneth Fletcher</dd><dt>Name</dt><dd>Kenneth Fletcher</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Alexander Gelbard</dd><dt>Name</dt><dd>Alexander Gelbard</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Anna Goldenberg</dd><dt>Name</dt><dd>Anna Goldenberg</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Karim Hanna</dd><dt>Name</dt><dd>Karim Hanna</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>William Hersh</dd><dt>Name</dt><dd>William Hersh</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Lochana Jayachandran</dd><dt>Name</dt><dd>Lochana Jayachandran</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Kaley Jenney</dd><dt>Name</dt><dd>Kaley Jenney</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Kathy Jenkins</dd><dt>Name</dt><dd>Kathy Jenkins</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Stacy Jo</dd><dt>Name</dt><dd>Stacy Jo</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Ayush Kalia</dd><dt>Name</dt><dd>Ayush Kalia</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Andrea Krussel</dd><dt>Name</dt><dd>Andrea Krussel</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Elisa Lapadula</dd><dt>Name</dt><dd>Elisa Lapadula</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Chloe Loewith</dd><dt>Name</dt><dd>Chloe Loewith</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Radhika Mahajan</dd><dt>Name</dt><dd>Radhika Mahajan</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Vrishni Maharaj</dd><dt>Name</dt><dd>Vrishni Maharaj</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Siyu Miao</dd><dt>Name</dt><dd>Siyu Miao</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Matthew Mifsud</dd><dt>Name</dt><dd>Matthew Mifsud</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Marian Mikhael</dd><dt>Name</dt><dd>Marian Mikhael</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Elijah Moothedan</dd><dt>Name</dt><dd>Elijah Moothedan</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Yosef Nafii</dd><dt>Name</dt><dd>Yosef Nafii</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Tempestt Neal</dd><dt>Name</dt><dd>Tempestt Neal</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Karlee Newberry</dd><dt>Name</dt><dd>Karlee Newberry</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Evan Ng</dd><dt>Name</dt><dd>Evan Ng</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Christopher Nickel</dd><dt>Name</dt><dd>Christopher Nickel</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Trevor Pharr</dd><dt>Name</dt><dd>Trevor Pharr</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Claire Premi-Bortolotto</dd><dt>Name</dt><dd>Claire Premi-Bortolotto</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>JM Rahman</dd><dt>Name</dt><dd>JM Rahman</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Sarah Rohde</dd><dt>Name</dt><dd>Sarah Rohde</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Laurie Russell</dd><dt>Name</dt><dd>Laurie Russell</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Suketu Shah</dd><dt>Name</dt><dd>Suketu Shah</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Ahmed Shawkat</dd><dt>Name</dt><dd>Ahmed Shawkat</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Elizabeth Silberholz</dd><dt>Name</dt><dd>Elizabeth Silberholz</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Duncan Sutherland</dd><dt>Name</dt><dd>Duncan Sutherland</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Venkata Swarna Mukhi</dd><dt>Name</dt><dd>Venkata Swarna Mukhi</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Jeffrey Tang</dd><dt>Name</dt><dd>Jeffrey Tang</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Jamie Toghranegar</dd><dt>Name</dt><dd>Jamie Toghranegar</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Kimberly Vinson</dd><dt>Name</dt><dd>Kimberly Vinson</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Claire Wilson</dd><dt>Name</dt><dd>Claire Wilson</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Madeleine Zanin</dd><dt>Name</dt><dd>Madeleine Zanin</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Xijie Zeng</dd><dt>Name</dt><dd>Xijie Zeng</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Theresa Zesiewicz</dd><dt>Name</dt><dd>Theresa Zesiewicz</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Robin Zhao</dd><dt>Name</dt><dd>Robin Zhao</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li><li><dl class='nested-dict'><dt>Author</dt><dd><dl class='nested-dict'><dt>ID</dt><dd>Pantelis Zisimopoulos</dd><dt>Name</dt><dd>Pantelis Zisimopoulos</dd></dl></dd><dt>Affiliation</dt><dd><em>Not specified</em></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Issued</label>
-                        <div class="item-value">2025-04-16</div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Keywords</label>
-                        <div class="item-value"><ul class='formatted-list'><li>voice</li><li>bridge2ai</li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Collection Timeframes</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><em>Not specified</em></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Conforms To</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Preprocessing Strategies</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter. Derived data includes: Spectrograms (short-time FFT), 60 Mel-frequency cepstral coefficients (MFCCs), acoustic features extracted using OpenSMILE, phonetic and prosodic features computed using Parselmouth and Praat, and transcriptions generated using OpenAI's Whisper Large model.</div></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Cleaning Strategies</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">HIPAA Safe Harbor identifiers were removed. State and province were removed. Country of data collection was retained. Audio records with sensitive information were removed, but their static features were retained. In this release, audio waveforms are omitted.</div></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Is Deidentified</label>
-                        <div class="item-value"><dl class='nested-dict'><dt>Identifiable Elements Present</dt><dd>False</dd><dt>Description</dt><dd><ul class='formatted-list'><li>HIPAA Safe Harbor identifiers were removed. State and province were removed. Audio records with sensitive information were removed. Audio waveforms are omitted from this release.</li></ul></dd></dl></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Sensitive Elements</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Sensitive Elements Present</dt><dd>True</dd><dt>Description</dt><dd><ul class='formatted-list'><li><div class="long-description">The dataset contains data linked to health conditions including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The raw voice recordings are considered sensitive and are not included in this release but are available in a companion release.</div></li></ul></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Acquisition Methods</label>
-                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Data was collected via patient consent from individuals at specialty clinics and institutions. A standardized protocol involved collecting demographic information, health questionnaires, and voice recording tasks.</div></dd><dt>Was Directly Observed</dt><dd><em>Not specified</em></dd><dt>Was Reported By Subjects</dt><dd>True</dd><dt>Was Inferred Derived</dt><dd>True</dd><dt>Was Validated Verified</dt><dd><em>Not specified</em></dd></dl></li></ol></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Compression</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Conforms To Class</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Conforms To Schema</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Created By</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Created On</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Language</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Modified By</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Page</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Publisher</label>
-                        <div class="item-value">PhysioNet</div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Status</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Was Derived From</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Dialect</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Encoding</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Format</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Hash</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Md5</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Media Type</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Path</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Sha256</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Addressing Gaps</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Response</dt><dd><div class="long-description">For voice to emerge as a biomarker of health, there is a pressing need for large, high quality, multi-institutional and diverse voice database linked to other health biomarkers from various data of different modality to fuel voice AI research and answer tangible clinical questions.</div></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Subsets</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Anomalies</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">External Resources</label>
-                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>External Resources</dt><dd><ul class='formatted-list'><li>Audio recordings are included on a companion release on PhysioNet with the title 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (Audio Included)'.</li></ul></dd><dt>Future Guarantees</dt><dd><em>Not specified</em></dd><dt>Archival</dt><dd><em>Not specified</em></dd><dt>Restrictions</dt><dd><em>Not specified</em></dd></dl></li></ol></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Confidential Elements</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Content Warnings</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Collection Mechanisms</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible. Data were exported and converted from RedCap using the b2aiprep open source library.</div></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Sampling Strategies</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Patients presenting at specialty clinics and institutions were considered for enrollment. Patients were selected based on membership to five predetermined groups (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric). This is a purposive sampling strategy.</div></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Data Collectors</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Ethical Reviews</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>Data collection and sharing was approved by the University of South Florida Institutional Review Board.</dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Data Protection Impacts</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Labeling Strategies</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Raw Sources</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>Yes, the raw audio data is available in a companion release on PhysioNet.</dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Ip Restrictions</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Regulatory Restrictions</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Maintainers</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Errata</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Retention Limit</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Extension Mechanism</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Is Tabular</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-        
-            
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-icon">🚀</span>
-                    <div>
-                        <h2 class="section-title">Uses</h2>
-                        <p class="section-description">What (other) tasks could the dataset be used for?</p>
-                    </div>
-                </div>
-                <div class="section-content">
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Existing Uses</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Discouraged Uses</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">License And Use Terms</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>Access is restricted to credentialed users who sign the 'Bridge2AI Voice Registered Access Agreement' Data Use Agreement. The license is the 'Bridge2AI Voice Registered Access License'.</dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Tasks</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Use Repository</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Other Tasks</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Future Use Impacts</label>
-                        <div class="item-value"><em>No items</em></div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-        
-            
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-icon">📤</span>
-                    <div>
-                        <h2 class="section-title">Distribution</h2>
-                        <p class="section-description">How will the dataset be distributed?</p>
-                    </div>
-                </div>
-                <div class="section-content">
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">License</label>
-                        <div class="item-value">Bridge2AI Voice Registered Access License</div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">DOI</label>
-                        <div class="item-value"><a href="https://doi.org/10.13026/3xt6-rf05" target="_blank">https://doi.org/10.13026/3xt6-rf05</a></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Download URL</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Bytes</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Version Access</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>Previous versions are available. v1.1 was released Jan. 17, 2025. v1.0 is available at https://doi.org/10.57764/qb6h-em84.</dd></dl></li></ul></div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-        
-            
-            <div class="section">
-                <div class="section-header">
-                    <span class="section-icon">🔄</span>
-                    <div>
-                        <h2 class="section-title">Maintenance</h2>
-                        <p class="section-description">How will the dataset be maintained?</p>
-                    </div>
-                </div>
-                <div class="section-content">
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Version</label>
-                        <div class="item-value">2.0.0</div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Updates</label>
-                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">b2ai-voice v2.0: This release provides data for an additional 136 new participants. Spectrograms were reprocessed. All spectrograms and Mel-frequency cepstral coefficients from free speech related files have been removed. b2ai-voice v1.1: This release added Mel-frequency cepstral coefficients (MFCCs). b2ai-voice v1.0: This was the first release.</div></dd></dl></li></ul></div>
-                    </div>
-                    
-                    <div class="data-item">
-                        
-                        <div class="item-context">Dataset Resource</div>
-                        
-                        <label class="item-label">Last Updated On</label>
-                        <div class="item-value"><em>Not specified</em></div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-        
-    
-    
+    <div class="content">
+        <pre>creators: &id001
+- affiliation: ''
+  principal_investigator:
+    id: Yael Bensoussan
+    name: Yael Bensoussan
+- affiliation: ''
+  principal_investigator:
+    id: Olivier Elemento
+    name: Olivier Elemento
+- affiliation: ''
+  principal_investigator:
+    id: Satrajit Ghosh
+    name: Satrajit Ghosh
+- affiliation: ''
+  author:
+    id: Alexandros Sigaras
+    name: Alexandros Sigaras
+- affiliation: ''
+  author:
+    id: Anais Rameau
+    name: Anais Rameau
+- affiliation: ''
+  author:
+    id: Maria Powell
+    name: Maria Powell
+- affiliation: ''
+  author:
+    id: David Dorr
+    name: David Dorr
+- affiliation: ''
+  author:
+    id: Philip Payne
+    name: Philip Payne
+- affiliation: ''
+  author:
+    id: Vardit Ravitsky
+    name: Vardit Ravitsky
+- affiliation: ''
+  author:
+    id: "Jean-Christophe B\xE9lisle-Pipon"
+    name: "Jean-Christophe B\xE9lisle-Pipon"
+- affiliation: ''
+  author:
+    id: Alistair Johnson
+    name: Alistair Johnson
+- affiliation: ''
+  author:
+    id: Ruth Bahr
+    name: Ruth Bahr
+- affiliation: ''
+  author:
+    id: Stephanie Watts
+    name: Stephanie Watts
+- affiliation: ''
+  author:
+    id: Donald Bolser
+    name: Donald Bolser
+- affiliation: ''
+  author:
+    id: Jennifer Siu
+    name: Jennifer Siu
+- affiliation: ''
+  author:
+    id: Jordan Lerner-Ellis
+    name: Jordan Lerner-Ellis
+- affiliation: ''
+  author:
+    id: Frank Rudzicz
+    name: Frank Rudzicz
+- affiliation: ''
+  author:
+    id: Micah Boyer
+    name: Micah Boyer
+- affiliation: ''
+  author:
+    id: Samantha Salvi Cruz
+    name: Samantha Salvi Cruz
+- affiliation: ''
+  author:
+    id: Yassmeen Abdel-Aty
+    name: Yassmeen Abdel-Aty
+- affiliation: ''
+  author:
+    id: Toufeeq Ahmed Syed
+    name: Toufeeq Ahmed Syed
+- affiliation: ''
+  author:
+    id: James Anibal
+    name: James Anibal
+- affiliation: ''
+  author:
+    id: Stephen Aradi
+    name: Stephen Aradi
+- affiliation: ''
+  author:
+    id: Ana Sophia Martinez
+    name: Ana Sophia Martinez
+- affiliation: ''
+  author:
+    id: Shaheen Awan
+    name: Shaheen Awan
+- affiliation: ''
+  author:
+    id: Steven Bedrick
+    name: Steven Bedrick
+- affiliation: ''
+  author:
+    id: Isaac Bevers
+    name: Isaac Bevers
+- affiliation: ''
+  author:
+    id: Rahul Brito
+    name: Rahul Brito
+- affiliation: ''
+  author:
+    id: Selina Casalino
+    name: Selina Casalino
+- affiliation: ''
+  author:
+    id: John Costello
+    name: John Costello
+- affiliation: ''
+  author:
+    id: Iris De Santiago
+    name: Iris De Santiago
+- affiliation: ''
+  author:
+    id: Enrique Diaz-Ocampo
+    name: Enrique Diaz-Ocampo
+- affiliation: ''
+  author:
+    id: Mohamed Ebraheem
+    name: Mohamed Ebraheem
+- affiliation: ''
+  author:
+    id: Ellie Eiseman
+    name: Ellie Eiseman
+- affiliation: ''
+  author:
+    id: Mahmoud Elmahdy
+    name: Mahmoud Elmahdy
+- affiliation: ''
+  author:
+    id: Emily Evangelista
+    name: Emily Evangelista
+- affiliation: ''
+  author:
+    id: Kenneth Fletcher
+    name: Kenneth Fletcher
+- affiliation: ''
+  author:
+    id: Alexander Gelbard
+    name: Alexander Gelbard
+- affiliation: ''
+  author:
+    id: Anna Goldenberg
+    name: Anna Goldenberg
+- affiliation: ''
+  author:
+    id: Karim Hanna
+    name: Karim Hanna
+- affiliation: ''
+  author:
+    id: William Hersh
+    name: William Hersh
+- affiliation: ''
+  author:
+    id: Lochana Jayachandran
+    name: Lochana Jayachandran
+- affiliation: ''
+  author:
+    id: Kaley Jenney
+    name: Kaley Jenney
+- affiliation: ''
+  author:
+    id: Kathy Jenkins
+    name: Kathy Jenkins
+- affiliation: ''
+  author:
+    id: Stacy Jo
+    name: Stacy Jo
+- affiliation: ''
+  author:
+    id: Ayush Kalia
+    name: Ayush Kalia
+- affiliation: ''
+  author:
+    id: Andrea Krussel
+    name: Andrea Krussel
+- affiliation: ''
+  author:
+    id: Elisa Lapadula
+    name: Elisa Lapadula
+- affiliation: ''
+  author:
+    id: Chloe Loewith
+    name: Chloe Loewith
+- affiliation: ''
+  author:
+    id: Radhika Mahajan
+    name: Radhika Mahajan
+- affiliation: ''
+  author:
+    id: Vrishni Maharaj
+    name: Vrishni Maharaj
+- affiliation: ''
+  author:
+    id: Siyu Miao
+    name: Siyu Miao
+- affiliation: ''
+  author:
+    id: Matthew Mifsud
+    name: Matthew Mifsud
+- affiliation: ''
+  author:
+    id: Marian Mikhael
+    name: Marian Mikhael
+- affiliation: ''
+  author:
+    id: Elijah Moothedan
+    name: Elijah Moothedan
+- affiliation: ''
+  author:
+    id: Yosef Nafii
+    name: Yosef Nafii
+- affiliation: ''
+  author:
+    id: Tempestt Neal
+    name: Tempestt Neal
+- affiliation: ''
+  author:
+    id: Karlee Newberry
+    name: Karlee Newberry
+- affiliation: ''
+  author:
+    id: Evan Ng
+    name: Evan Ng
+- affiliation: ''
+  author:
+    id: Christopher Nickel
+    name: Christopher Nickel
+- affiliation: ''
+  author:
+    id: Trevor Pharr
+    name: Trevor Pharr
+- affiliation: ''
+  author:
+    id: Claire Premi-Bortolotto
+    name: Claire Premi-Bortolotto
+- affiliation: ''
+  author:
+    id: JM Rahman
+    name: JM Rahman
+- affiliation: ''
+  author:
+    id: Sarah Rohde
+    name: Sarah Rohde
+- affiliation: ''
+  author:
+    id: Laurie Russell
+    name: Laurie Russell
+- affiliation: ''
+  author:
+    id: Suketu Shah
+    name: Suketu Shah
+- affiliation: ''
+  author:
+    id: Ahmed Shawkat
+    name: Ahmed Shawkat
+- affiliation: ''
+  author:
+    id: Elizabeth Silberholz
+    name: Elizabeth Silberholz
+- affiliation: ''
+  author:
+    id: Duncan Sutherland
+    name: Duncan Sutherland
+- affiliation: ''
+  author:
+    id: Venkata Swarna Mukhi
+    name: Venkata Swarna Mukhi
+- affiliation: ''
+  author:
+    id: Jeffrey Tang
+    name: Jeffrey Tang
+- affiliation: ''
+  author:
+    id: Jamie Toghranegar
+    name: Jamie Toghranegar
+- affiliation: ''
+  author:
+    id: Kimberly Vinson
+    name: Kimberly Vinson
+- affiliation: ''
+  author:
+    id: Claire Wilson
+    name: Claire Wilson
+- affiliation: ''
+  author:
+    id: Madeleine Zanin
+    name: Madeleine Zanin
+- affiliation: ''
+  author:
+    id: Xijie Zeng
+    name: Xijie Zeng
+- affiliation: ''
+  author:
+    id: Theresa Zesiewicz
+    name: Theresa Zesiewicz
+- affiliation: ''
+  author:
+    id: Robin Zhao
+    name: Robin Zhao
+- affiliation: ''
+  author:
+    id: Pantelis Zisimopoulos
+    name: Pantelis Zisimopoulos
+description: Bridge2AI-Voice v2.0 contains data for 19,271 recordings collected from
+  442 participants across five sites in North America. Participants were selected
+  based on known conditions which manifest within the voice waveform including voice
+  disorders, neurological disorders, mood disorders, and respiratory disorders. The
+  release contains data considered low risk, including derivations such as spectrograms
+  but not the original voice recordings. Detailed demographic, clinical, and validated
+  questionnaire data are also made available.
+funders: &id002
+- grant:
+    grant_number: 3OT2OD032720-01S1
+    id: 3OT2OD032720-01S1
+    name: 'Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced,
+      bioaccoustic database to understand disease like never before'
+  grantor:
+    id: NIH
+    name: National Institutes of Health
+id: https://doi.org/10.13026/3xt6-rf05
+issued: '2025-04-16'
+keywords: &id003
+- voice
+- bridge2ai
+resources:
+- acquisition_methods:
+  - description: Data was collected via patient consent from individuals at specialty
+      clinics and institutions. A standardized protocol involved collecting demographic
+      information, health questionnaires, and voice recording tasks.
+    was_directly_observed: ''
+    was_inferred_derived: true
+    was_reported_by_subjects: true
+    was_validated_verified: ''
+  addressing_gaps:
+  - response: For voice to emerge as a biomarker of health, there is a pressing need
+      for large, high quality, multi-institutional and diverse voice database linked
+      to other health biomarkers from various data of different modality to fuel voice
+      AI research and answer tangible clinical questions.
+  anomalies: []
+  bytes: ''
+  cleaning_strategies:
+  - description: HIPAA Safe Harbor identifiers were removed. State and province were
+      removed. Country of data collection was retained. Audio records with sensitive
+      information were removed, but their static features were retained. In this release,
+      audio waveforms are omitted.
+  collection_mechanisms:
+  - description: Data collection was conducted using a custom application on a tablet
+      with a headset used for data collection when possible. Data were exported and
+      converted from RedCap using the b2aiprep open source library.
+  collection_timeframes:
+  - description: ''
+  compression: ''
+  confidential_elements: []
+  conforms_to: []
+  conforms_to_class: ''
+  conforms_to_schema: ''
+  content_warnings: []
+  created_by: []
+  created_on: ''
+  creators: *id001
+  data_collectors: []
+  data_protection_impacts: []
+  description: Bridge2AI-Voice v2.0 contains data for 19,271 recordings collected
+    from 442 participants across five sites in North America. Participants were selected
+    based on known conditions which manifest within the voice waveform including voice
+    disorders, neurological disorders, mood disorders, and respiratory disorders.
+    The release contains data considered low risk, including derivations such as spectrograms
+    but not the original voice recordings. Detailed demographic, clinical, and validated
+    questionnaire data are also made available.
+  dialect: ''
+  discouraged_uses: []
+  distribution_dates: []
+  distribution_formats:
+  - description: spectrograms.parquet, mfcc.parquet, phenotype.tsv, static_features.tsv
+  doi: https://doi.org/10.13026/3xt6-rf05
+  download_url: ''
+  encoding: ''
+  errata: []
+  ethical_reviews:
+  - description: Data collection and sharing was approved by the University of South
+      Florida Institutional Review Board.
+  existing_uses: []
+  extension_mechanism: ''
+  external_resources:
+  - archival: ''
+    external_resources:
+    - 'Audio recordings are included on a companion release on PhysioNet with the
+      title ''Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked
+      to health information (Audio Included)''.'
+    future_guarantees: ''
+    restrictions: ''
+  format: ''
+  funders: *id002
+  future_use_impacts: []
+  hash: ''
+  id: https://doi.org/10.13026/3xt6-rf05
+  instances:
+  - counts: 442
+    data_substrate: ''
+    data_topic: ''
+    instance_type: participants
+    label: ''
+    label_description: ''
+    missing_information: []
+    sampling_strategies: []
+  - counts: 19271
+    data_substrate: ''
+    data_topic: ''
+    instance_type: recordings
+    label: ''
+    label_description: ''
+    missing_information: []
+    sampling_strategies: []
+  ip_restrictions: ''
+  is_deidentified:
+    description:
+    - HIPAA Safe Harbor identifiers were removed. State and province were removed.
+      Audio records with sensitive information were removed. Audio waveforms are omitted
+      from this release.
+    identifiable_elements_present: false
+  is_tabular: ''
+  issued: '2025-04-16'
+  keywords: *id003
+  labeling_strategies: []
+  language: ''
+  last_updated_on: ''
+  license: Bridge2AI Voice Registered Access License
+  license_and_use_terms:
+  - description: Access is restricted to credentialed users who sign the 'Bridge2AI
+      Voice Registered Access Agreement' Data Use Agreement. The license is the 'Bridge2AI
+      Voice Registered Access License'.
+  maintainers: []
+  md5: ''
+  media_type: ''
+  modified_by: []
+  other_tasks: []
+  page: ''
+  path: ''
+  preprocessing_strategies:
+  - description: 'Raw audio was preprocessed by converting to monaural and resampling
+      to 16 kHz with a Butterworth anti-aliasing filter. Derived data includes: Spectrograms
+      (short-time FFT), 60 Mel-frequency cepstral coefficients (MFCCs), acoustic features
+      extracted using OpenSMILE, phonetic and prosodic features computed using Parselmouth
+      and Praat, and transcriptions generated using OpenAI''s Whisper Large model.'
+  publisher: PhysioNet
+  purposes:
+  - response: The Bridge2AI-Voice project seeks to create an ethically sourced flagship
+      dataset to enable future research in artificial intelligence and support critical
+      insights into the use of voice as a biomarker of health.
+  raw_sources:
+  - description: Yes, the raw audio data is available in a companion release on PhysioNet.
+  regulatory_restrictions: ''
+  retention_limit: ''
+  sampling_strategies:
+  - description: Patients presenting at specialty clinics and institutions were considered
+      for enrollment. Patients were selected based on membership to five predetermined
+      groups (Respiratory disorders, Voice disorders, Neurological disorders, Mood
+      disorders, Pediatric). This is a purposive sampling strategy.
+  sensitive_elements:
+  - description:
+    - The dataset contains data linked to health conditions including voice disorders,
+      neurological disorders, mood disorders, and respiratory disorders. The raw voice
+      recordings are considered sensitive and are not included in this release but
+      are available in a companion release.
+    sensitive_elements_present: true
+  sha256: ''
+  status: ''
+  subpopulations:
+  - distribution:
+    - 'Voice Disorders, Neurological and Neurodegenerative Disorders, Mood and Psychiatric
+      Disorders, Respiratory disorders. Note: The v2.0.0 dataset does not contain
+      pediatric data and does not contain an equal distribution across categories
+      of diseases.'
+    identification:
+    - Disease cohort categories
+    subpopulation_elements_present: true
+  subsets: []
+  tasks: []
+  title: 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health
+    information'
+  updates:
+  - description: 'b2ai-voice v2.0: This release provides data for an additional 136
+      new participants. Spectrograms were reprocessed. All spectrograms and Mel-frequency
+      cepstral coefficients from free speech related files have been removed. b2ai-voice
+      v1.1: This release added Mel-frequency cepstral coefficients (MFCCs). b2ai-voice
+      v1.0: This was the first release.'
+  use_repository: []
+  version: 2.0.0
+  version_access:
+  - description: Previous versions are available. v1.1 was released Jan. 17, 2025.
+      v1.0 is available at https://doi.org/10.57764/qb6h-em84.
+  was_derived_from: ''
+title: 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health
+  information'
+version: 2.0.0
+</pre>
+    </div>
     <div class="timestamp">
-        Generated on 2025-07-09 23:12:33 using Bridge2AI Data Sheets Schema
+        Generated on 2025-08-14 19:52:46
     </div>
 </body>
 </html>
