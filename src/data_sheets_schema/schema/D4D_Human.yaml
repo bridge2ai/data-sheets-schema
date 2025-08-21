@@ -22,10 +22,10 @@ imports:
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-human: "https://w3id.org/bridge2ai/data-sheets-schema/human#"
+  d4dhuman: "https://w3id.org/bridge2ai/data-sheets-schema/human#"
 
 
-default_prefix: "d4d-human"
+default_prefix: "d4dhuman"
 
 
 # ------------------------------------------------------------------------------

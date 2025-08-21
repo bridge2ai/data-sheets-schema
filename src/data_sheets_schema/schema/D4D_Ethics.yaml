@@ -21,10 +21,10 @@ imports:
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-ethics: "https://w3id.org/bridge2ai/data-sheets-schema/ethics#"
+  d4dethics: "https://w3id.org/bridge2ai/data-sheets-schema/ethics#"
 
 
-default_prefix: "d4d-ethics"
+default_prefix: "d4dethics"
 
 
 # ------------------------------------------------------------------------------

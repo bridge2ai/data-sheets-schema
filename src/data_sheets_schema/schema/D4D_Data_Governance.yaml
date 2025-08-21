@@ -21,10 +21,10 @@ imports:
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-data-governance: "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#"
+  d4ddatagovernance: "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#"
 
 
-default_prefix: "d4d-data-governance"
+default_prefix: "d4ddatagovernance"
 
 
 # ------------------------------------------------------------------------------

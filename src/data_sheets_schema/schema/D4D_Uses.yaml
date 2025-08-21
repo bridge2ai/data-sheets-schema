@@ -21,10 +21,10 @@ imports:
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-uses: "https://w3id.org/bridge2ai/data-sheets-schema/uses#"
+  d4duses: "https://w3id.org/bridge2ai/data-sheets-schema/uses#"
 
 
-default_prefix: "d4d-uses"
+default_prefix: "d4duses"
 
 
 # ------------------------------------------------------------------------------

@@ -104,10 +104,21 @@ classes:
   NamedThing:
     description: >-
       A generic grouping for any identifiable entity.
-    slots:
-      - id
-      - name
-      - description
+    attributes:
+      id:
+        identifier: true
+        slot_uri: schema:identifier
+        range: uriorcurie
+        description: A unique identifier for a thing.
+        required: true
+      name:
+        slot_uri: schema:name
+        description: A human-readable name for a thing.
+        range: string
+      description:
+        slot_uri: schema:description
+        description: A human-readable description for a thing.
+        range: string
     class_uri: schema:Thing
 
   Organization:
@@ -160,7 +171,6 @@ classes:
       - conforms_to_schema
       - created_by
       - created_on
-      - description
       - doi
       - download_url
       - issued
@@ -401,23 +411,6 @@ slots:
   # The majority of these slots are adapted from
   # the linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-
-  id:
-    identifier: true
-    slot_uri: schema:identifier
-    range: uriorcurie
-    description: A unique identifier for a thing.
-    required: true
-
-  name:
-    slot_uri: schema:name
-    description: A human-readable name for a thing.
-    range: string
-
-  description:
-    slot_uri: schema:description
-    description: A human-readable description for a thing.
-    range: string
 
   title:
     description: the official title of the element

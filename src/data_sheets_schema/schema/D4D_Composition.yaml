@@ -23,11 +23,11 @@ imports:
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-composition: "https://w3id.org/bridge2ai/data-sheets-schema/composition#"
+  d4dcomposition: "https://w3id.org/bridge2ai/data-sheets-schema/composition#"
   # Additional prefixes if needed
 
 
-default_prefix: "d4d-composition"
+default_prefix: "d4dcomposition"
 
 
 # ------------------------------------------------------------------------------

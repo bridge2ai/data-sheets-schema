@@ -21,10 +21,10 @@ imports:
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-maintenance: "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#"
+  d4dmaintenance: "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#"
 
 
-default_prefix: "d4d-maintenance"
+default_prefix: "d4dmaintenance"
 
 
 # ------------------------------------------------------------------------------

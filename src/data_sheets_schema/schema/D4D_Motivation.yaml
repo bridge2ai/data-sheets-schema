@@ -22,12 +22,12 @@ imports:
 prefixes:
   # Common LinkML prefixes and any that your environment requires
   linkml: "https://w3id.org/linkml/"
-  d4d-motivation: "https://w3id.org/bridge2ai/data-sheets-schema/motivation#"
+  d4dmotivation: "https://w3id.org/bridge2ai/data-sheets-schema/motivation#"
   # You can add or customize additional prefixes as needed:
   # ex: "http://example.org/"
 
 
-default_prefix: "d4d-motivation"
+default_prefix: "d4dmotivation"
 
 
 # ------------------------------------------------------------------------------

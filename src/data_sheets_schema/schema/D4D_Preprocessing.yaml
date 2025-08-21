@@ -23,10 +23,10 @@ imports:
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-preprocessing: "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#"
+  d4dpreprocessing: "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#"
 
 
-default_prefix: "d4d-preprocessing"
+default_prefix: "d4dpreprocessing"
 
 
 # ------------------------------------------------------------------------------

@@ -23,10 +23,10 @@ imports:
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-distribution: "https://w3id.org/bridge2ai/data-sheets-schema/distribution#"
+  d4ddistribution: "https://w3id.org/bridge2ai/data-sheets-schema/distribution#"
 
 
-default_prefix: "d4d-distribution"
+default_prefix: "d4ddistribution"
 
 
 # ------------------------------------------------------------------------------
