@@ -37,7 +37,7 @@ endif
 
 
 # basename of a YAML file in model/
-.PHONY: all clean gen-d4d-full validate-d4d-examples render-d4d-examples
+.PHONY: all clean validate-d4d-examples render-d4d-examples
 
 # note: "help" MUST be the first target in the file,
 # when the user types "make" they should get help info
@@ -48,7 +48,6 @@ help: status
 	@echo "make install -- install dependencies"
 	@echo "make test -- runs tests"
 	@echo "make lint -- perfom linting"
-	@echo "make gen-d4d-full -- generate D4D-Full schema with merged imports"
 	@echo "make validate-d4d-examples -- validate D4D example YAML files against Full schema"
 	@echo "make render-d4d-examples -- generate HTML rendering of D4D example YAML files"
 	@echo "make testdoc -- builds docs and runs local test server"
@@ -108,6 +107,7 @@ gen-examples:
 # Build the combined schema
 # Also write proper yaml header to it
 $(SOURCE_SCHEMA_ALL):
+	@echo "Generating D4D-Full schema with merged imports..."
 	$(RUN) gen-linkml -o $@ -f 'yaml' $(SOURCE_SCHEMA_PATH)
 	@echo '---' | cat - $@ > $@.tmp && mv $@.tmp $@
 
@@ -115,18 +115,6 @@ $(SOURCE_SCHEMA_ALL):
 
 gen-project: $(PYMODEL) $(SOURCE_SCHEMA_ALL)
 	$(RUN) gen-project -I python -I jsonschema -I jsonld -I owl ${GEN_PARGS} -d $(DEST) $(SOURCE_SCHEMA_PATH) && mv $(DEST)/*.py $(PYMODEL)
-
-gen-d4d-full:
-	@echo "Generating D4D-Full schema with merged imports..."
-	cd $(SOURCE_SCHEMA_DIR) && $(RUN) gen-linkml --format yaml --mergeimports D4D_Root.yaml > D4D_Full_Schema.yaml
-	@if [ -f "$(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml" ]; then \
-		echo "✅ D4D-Full schema generated successfully: $(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml"; \
-		echo "📊 Schema size: $$(wc -l < $(SOURCE_SCHEMA_DIR)/D4D_Full_Schema.yaml) lines"; \
-		echo "🎯 This is a fully merged version with no imports - suitable for tools that don't handle imports"; \
-	else \
-		echo "❌ Failed to generate D4D-Full schema"; \
-		exit 1; \
-	fi
 
 validate-d4d-examples:
 	@echo "Validating D4D example YAML files against Full schema..."
