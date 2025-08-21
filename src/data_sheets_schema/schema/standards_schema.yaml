@@ -53,7 +53,7 @@ types:
       coverage of the cancer domain.
     typeof: uriorcurie
     id_prefixes:
-      - NCIT
+      - ncit
 
 classes:
 
@@ -71,6 +71,7 @@ classes:
       - contributor_github_name
       - contributor_orcid
       - contribution_date
+      - used_in_bridge2ai
     class_uri: schema:Thing
 
   AnatomicalEntity:  # Based on Biolink Model v.3.2.6
@@ -99,7 +100,7 @@ slots:
     required: true
   type:
     description: >-
-      A generic slot for any label corresponding to the label 
+      A generic slot for any label corresponding to the label
       for an entity type associated to the class.
     domain: NamedThing
   category:
@@ -108,8 +109,9 @@ slots:
     range: category_type
     designates_type: true
     description: >-
-      Name of the high level ontology class in which this entity is categorized.
-      Corresponds to the label for the entity type class, e.g., "BiomedicalStandard".
+      CURIE for the high level ontology class in which this entity is
+      categorized. Corresponds to the label for the entity type class,
+      e.g., "B2AI_STANDARD:DataStandard".
   name:
     slot_uri: schema:name
     description: A human-readable name for a thing.
@@ -131,17 +133,17 @@ slots:
   mesh_id:
     description: Unique MeSH identifier
     examples:
-      - value: MeSH:D014831
+      - value: mesh:D014831
     range: mesh_identifier
     values_from:
-      - MeSH
+      - mesh
   ncit_id:
     description: Unique NCIt Identifier
     examples:
-      - value: NCIT:C92692
+      - value: ncit:C92692
     range: ncit_identifier
     values_from:
-      - NCIT
+      - ncit
   url:
     is_a: node_property
     range: uriorcurie
@@ -203,30 +205,13 @@ slots:
     narrow_mappings:
       - rdfs:subPropertyOf
 
-enums:
-  DataGeneratingProject:
-    description: One of the Bridge2AI Data Generating Projects.
-    permissible_values:
-      aireadi:
-        description: >-
-          AI-READI: Uncovering the details of how human health is restored
-          after disease, using type 2 diabetes as a model.
-        meaning: https://reporter.nih.gov/project-details/10471118
-      chorus:
-        description: >-
-          CHoRUS: Collaborative Hospital Repository Uniting Standards.
-          Using imaging, clinical, and other data collected in
-          an ICU setting for diagnosis and risk prediction.
-        meaning: https://reporter.nih.gov/project-details/10472824
-      cm4ai:
-        description: >-
-          CM4AI: Cell Maps for AI. Mapping spatiotemporal architecture
-          of human cells to interpret cell structure/function in health
-          and disease.
-        meaning: https://reporter.nih.gov/project-details/10473403
-      voice:
-        description: >-
-          Voice as a Biomarker of Health: Building an ethically
-          sourced, bioaccoustic database to understand disease
-          like never before.
-        meaning: https://reporter.nih.gov/project-details/10473236
+  used_in_bridge2ai:
+    is_a: node_property
+    description: >-
+      True if the entity is used, developed, or
+      otherwise related to work in the Bridge2AI
+      consortium. If false, the entity is not
+      explicitly related to Bridge2AI. If not
+      specified, it is not known if the entity is
+      related to Bridge2AI.
+    range: boolean
