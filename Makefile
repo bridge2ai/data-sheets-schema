@@ -106,6 +106,9 @@ gen-examples:
 
 # Build the combined schema
 # Also write proper yaml header to it
+.PHONY: full-schema
+full-schema: $(SOURCE_SCHEMA_ALL)
+
 $(SOURCE_SCHEMA_ALL):
 	@echo "Generating D4D-Full schema with merged imports..."
 	$(RUN) gen-linkml -o $@ -f 'yaml' $(SOURCE_SCHEMA_PATH)
