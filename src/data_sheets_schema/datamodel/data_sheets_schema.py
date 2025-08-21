@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-08-21T15:00:56
+# Generation date: 2025-08-21T15:20:27
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -69,15 +69,15 @@ B2AI_TOPIC = CurieNamespace('B2AI_TOPIC', 'https://w3id.org/bridge2ai/b2ai-stand
 BIBO = CurieNamespace('bibo', 'http://example.org/UNKNOWN/bibo/')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/vocab/')
 CSVW = CurieNamespace('csvw', 'http://www.w3.org/ns/csvw#')
-D4D_COMPOSITION = CurieNamespace('d4d-composition', 'https://w3id.org/bridge2ai/data-sheets-schema/composition#')
-D4D_DATA_GOVERNANCE = CurieNamespace('d4d-data-governance', 'https://w3id.org/bridge2ai/data-sheets-schema/data-governance#')
-D4D_DISTRIBUTION = CurieNamespace('d4d-distribution', 'https://w3id.org/bridge2ai/data-sheets-schema/distribution#')
-D4D_ETHICS = CurieNamespace('d4d-ethics', 'https://w3id.org/bridge2ai/data-sheets-schema/ethics#')
-D4D_HUMAN = CurieNamespace('d4d-human', 'https://w3id.org/bridge2ai/data-sheets-schema/human#')
-D4D_MAINTENANCE = CurieNamespace('d4d-maintenance', 'https://w3id.org/bridge2ai/data-sheets-schema/maintenance#')
-D4D_MOTIVATION = CurieNamespace('d4d-motivation', 'https://w3id.org/bridge2ai/data-sheets-schema/motivation#')
-D4D_PREPROCESSING = CurieNamespace('d4d-preprocessing', 'https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#')
-D4D_USES = CurieNamespace('d4d-uses', 'https://w3id.org/bridge2ai/data-sheets-schema/uses#')
+D4DCOMPOSITION = CurieNamespace('d4dcomposition', 'https://w3id.org/bridge2ai/data-sheets-schema/composition#')
+D4DDATAGOVERNANCE = CurieNamespace('d4ddatagovernance', 'https://w3id.org/bridge2ai/data-sheets-schema/data-governance#')
+D4DDISTRIBUTION = CurieNamespace('d4ddistribution', 'https://w3id.org/bridge2ai/data-sheets-schema/distribution#')
+D4DETHICS = CurieNamespace('d4dethics', 'https://w3id.org/bridge2ai/data-sheets-schema/ethics#')
+D4DHUMAN = CurieNamespace('d4dhuman', 'https://w3id.org/bridge2ai/data-sheets-schema/human#')
+D4DMAINTENANCE = CurieNamespace('d4dmaintenance', 'https://w3id.org/bridge2ai/data-sheets-schema/maintenance#')
+D4DMOTIVATION = CurieNamespace('d4dmotivation', 'https://w3id.org/bridge2ai/data-sheets-schema/motivation#')
+D4DPREPROCESSING = CurieNamespace('d4dpreprocessing', 'https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#')
+D4DUSES = CurieNamespace('d4duses', 'https://w3id.org/bridge2ai/data-sheets-schema/uses#')
 DATA_SHEETS_SCHEMA = CurieNamespace('data_sheets_schema', 'https://w3id.org/bridge2ai/data-sheets-schema/')
 DATASETS = CurieNamespace('datasets', 'https://w3id.org/linkml/report')
 DCAT = CurieNamespace('dcat', 'http://www.w3.org/ns/dcat#')
@@ -524,7 +524,6 @@ class Information(NamedThing):
     conforms_to_schema: Optional[Union[str, URIorCURIE]] = None
     created_by: Optional[Union[Union[str, "CreatorOrMaintainerEnum"], list[Union[str, "CreatorOrMaintainerEnum"]]]] = empty_list()
     created_on: Optional[Union[str, XSDDateTime]] = None
-    description: Optional[str] = None
     doi: Optional[Union[str, URIorCURIE]] = None
     download_url: Optional[Union[str, URI]] = None
     issued: Optional[Union[str, XSDDateTime]] = None
@@ -564,9 +563,6 @@ class Information(NamedThing):
 
         if self.created_on is not None and not isinstance(self.created_on, XSDDateTime):
             self.created_on = XSDDateTime(self.created_on)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         if self.doi is not None and not isinstance(self.doi, URIorCURIE):
             self.doi = URIorCURIE(self.doi)
@@ -978,8 +974,8 @@ class Purpose(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Purpose"]
-    class_class_curie: ClassVar[str] = "d4d-motivation:Purpose"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Purpose"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Purpose"
     class_name: ClassVar[str] = "Purpose"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Purpose
 
@@ -1005,8 +1001,8 @@ class Task(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Task"]
-    class_class_curie: ClassVar[str] = "d4d-motivation:Task"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Task"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Task"
     class_name: ClassVar[str] = "Task"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Task
 
@@ -1032,8 +1028,8 @@ class AddressingGap(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["AddressingGap"]
-    class_class_curie: ClassVar[str] = "d4d-motivation:AddressingGap"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["AddressingGap"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:AddressingGap"
     class_name: ClassVar[str] = "AddressingGap"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.AddressingGap
 
@@ -1060,8 +1056,8 @@ class Creator(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Creator"]
-    class_class_curie: ClassVar[str] = "d4d-motivation:Creator"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Creator"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Creator"
     class_name: ClassVar[str] = "Creator"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Creator
 
@@ -1092,8 +1088,8 @@ class FundingMechanism(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["FundingMechanism"]
-    class_class_curie: ClassVar[str] = "d4d-motivation:FundingMechanism"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["FundingMechanism"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:FundingMechanism"
     class_name: ClassVar[str] = "FundingMechanism"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FundingMechanism
 
@@ -1124,8 +1120,8 @@ class Grantor(Organization):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Grantor"]
-    class_class_curie: ClassVar[str] = "d4d-motivation:Grantor"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Grantor"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Grantor"
     class_name: ClassVar[str] = "Grantor"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Grantor
 
@@ -1148,8 +1144,8 @@ class Grant(NamedThing):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Grant"]
-    class_class_curie: ClassVar[str] = "d4d-motivation:Grant"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Grant"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Grant"
     class_name: ClassVar[str] = "Grant"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Grant
 
@@ -1175,8 +1171,8 @@ class Instance(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Instance"]
-    class_class_curie: ClassVar[str] = "d4d-composition:Instance"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Instance"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Instance"
     class_name: ClassVar[str] = "Instance"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Instance
 
@@ -1233,8 +1229,8 @@ class SamplingStrategy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["SamplingStrategy"]
-    class_class_curie: ClassVar[str] = "d4d-composition:SamplingStrategy"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["SamplingStrategy"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:SamplingStrategy"
     class_name: ClassVar[str] = "SamplingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SamplingStrategy
 
@@ -1291,8 +1287,8 @@ class MissingInfo(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["MissingInfo"]
-    class_class_curie: ClassVar[str] = "d4d-composition:MissingInfo"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["MissingInfo"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:MissingInfo"
     class_name: ClassVar[str] = "MissingInfo"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.MissingInfo
 
@@ -1324,8 +1320,8 @@ class Relationships(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Relationships"]
-    class_class_curie: ClassVar[str] = "d4d-composition:Relationships"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Relationships"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Relationships"
     class_name: ClassVar[str] = "Relationships"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Relationships
 
@@ -1352,8 +1348,8 @@ class Splits(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Splits"]
-    class_class_curie: ClassVar[str] = "d4d-composition:Splits"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Splits"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Splits"
     class_name: ClassVar[str] = "Splits"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Splits
 
@@ -1380,8 +1376,8 @@ class DataAnomaly(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["DataAnomaly"]
-    class_class_curie: ClassVar[str] = "d4d-composition:DataAnomaly"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["DataAnomaly"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:DataAnomaly"
     class_name: ClassVar[str] = "DataAnomaly"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataAnomaly
 
@@ -1409,8 +1405,8 @@ class ExternalResource(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["ExternalResource"]
-    class_class_curie: ClassVar[str] = "d4d-composition:ExternalResource"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["ExternalResource"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:ExternalResource"
     class_name: ClassVar[str] = "ExternalResource"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExternalResource
 
@@ -1453,8 +1449,8 @@ class Confidentiality(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Confidentiality"]
-    class_class_curie: ClassVar[str] = "d4d-composition:Confidentiality"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Confidentiality"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Confidentiality"
     class_name: ClassVar[str] = "Confidentiality"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Confidentiality
 
@@ -1486,8 +1482,8 @@ class ContentWarning(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["ContentWarning"]
-    class_class_curie: ClassVar[str] = "d4d-composition:ContentWarning"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["ContentWarning"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:ContentWarning"
     class_name: ClassVar[str] = "ContentWarning"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ContentWarning
 
@@ -1519,8 +1515,8 @@ class Subpopulation(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Subpopulation"]
-    class_class_curie: ClassVar[str] = "d4d-composition:Subpopulation"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Subpopulation"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Subpopulation"
     class_name: ClassVar[str] = "Subpopulation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Subpopulation
 
@@ -1557,8 +1553,8 @@ class Deidentification(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Deidentification"]
-    class_class_curie: ClassVar[str] = "d4d-composition:Deidentification"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Deidentification"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Deidentification"
     class_name: ClassVar[str] = "Deidentification"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Deidentification
 
@@ -1590,8 +1586,8 @@ class SensitiveElement(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["SensitiveElement"]
-    class_class_curie: ClassVar[str] = "d4d-composition:SensitiveElement"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["SensitiveElement"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:SensitiveElement"
     class_name: ClassVar[str] = "SensitiveElement"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SensitiveElement
 
@@ -1783,8 +1779,8 @@ class PreprocessingStrategy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-PREPROCESSING["PreprocessingStrategy"]
-    class_class_curie: ClassVar[str] = "d4d-preprocessing:PreprocessingStrategy"
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["PreprocessingStrategy"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:PreprocessingStrategy"
     class_name: ClassVar[str] = "PreprocessingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.PreprocessingStrategy
 
@@ -1811,8 +1807,8 @@ class CleaningStrategy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-PREPROCESSING["CleaningStrategy"]
-    class_class_curie: ClassVar[str] = "d4d-preprocessing:CleaningStrategy"
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["CleaningStrategy"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:CleaningStrategy"
     class_name: ClassVar[str] = "CleaningStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CleaningStrategy
 
@@ -1839,8 +1835,8 @@ class LabelingStrategy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-PREPROCESSING["LabelingStrategy"]
-    class_class_curie: ClassVar[str] = "d4d-preprocessing:LabelingStrategy"
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["LabelingStrategy"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:LabelingStrategy"
     class_name: ClassVar[str] = "LabelingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LabelingStrategy
 
@@ -1868,8 +1864,8 @@ class RawData(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-PREPROCESSING["RawData"]
-    class_class_curie: ClassVar[str] = "d4d-preprocessing:RawData"
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["RawData"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:RawData"
     class_name: ClassVar[str] = "RawData"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.RawData
 
@@ -1896,8 +1892,8 @@ class ExistingUse(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-USES["ExistingUse"]
-    class_class_curie: ClassVar[str] = "d4d-uses:ExistingUse"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["ExistingUse"]
+    class_class_curie: ClassVar[str] = "d4duses:ExistingUse"
     class_name: ClassVar[str] = "ExistingUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExistingUse
 
@@ -1925,8 +1921,8 @@ class UseRepository(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-USES["UseRepository"]
-    class_class_curie: ClassVar[str] = "d4d-uses:UseRepository"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["UseRepository"]
+    class_class_curie: ClassVar[str] = "d4duses:UseRepository"
     class_name: ClassVar[str] = "UseRepository"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.UseRepository
 
@@ -1953,8 +1949,8 @@ class OtherTask(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-USES["OtherTask"]
-    class_class_curie: ClassVar[str] = "d4d-uses:OtherTask"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["OtherTask"]
+    class_class_curie: ClassVar[str] = "d4duses:OtherTask"
     class_name: ClassVar[str] = "OtherTask"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.OtherTask
 
@@ -1982,8 +1978,8 @@ class FutureUseImpact(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-USES["FutureUseImpact"]
-    class_class_curie: ClassVar[str] = "d4d-uses:FutureUseImpact"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["FutureUseImpact"]
+    class_class_curie: ClassVar[str] = "d4duses:FutureUseImpact"
     class_name: ClassVar[str] = "FutureUseImpact"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FutureUseImpact
 
@@ -2010,8 +2006,8 @@ class DiscouragedUse(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-USES["DiscouragedUse"]
-    class_class_curie: ClassVar[str] = "d4d-uses:DiscouragedUse"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["DiscouragedUse"]
+    class_class_curie: ClassVar[str] = "d4duses:DiscouragedUse"
     class_name: ClassVar[str] = "DiscouragedUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DiscouragedUse
 
@@ -2039,8 +2035,8 @@ class ThirdPartySharing(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-DISTRIBUTION["ThirdPartySharing"]
-    class_class_curie: ClassVar[str] = "d4d-distribution:ThirdPartySharing"
+    class_class_uri: ClassVar[URIRef] = D4DDISTRIBUTION["ThirdPartySharing"]
+    class_class_curie: ClassVar[str] = "d4ddistribution:ThirdPartySharing"
     class_name: ClassVar[str] = "ThirdPartySharing"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ThirdPartySharing
 
@@ -2066,8 +2062,8 @@ class DistributionFormat(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-DISTRIBUTION["DistributionFormat"]
-    class_class_curie: ClassVar[str] = "d4d-distribution:DistributionFormat"
+    class_class_uri: ClassVar[URIRef] = D4DDISTRIBUTION["DistributionFormat"]
+    class_class_curie: ClassVar[str] = "d4ddistribution:DistributionFormat"
     class_name: ClassVar[str] = "DistributionFormat"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionFormat
 
@@ -2094,8 +2090,8 @@ class DistributionDate(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-DISTRIBUTION["DistributionDate"]
-    class_class_curie: ClassVar[str] = "d4d-distribution:DistributionDate"
+    class_class_uri: ClassVar[URIRef] = D4DDISTRIBUTION["DistributionDate"]
+    class_class_curie: ClassVar[str] = "d4ddistribution:DistributionDate"
     class_name: ClassVar[str] = "DistributionDate"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionDate
 
@@ -2122,8 +2118,8 @@ class Maintainer(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["Maintainer"]
-    class_class_curie: ClassVar[str] = "d4d-maintenance:Maintainer"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["Maintainer"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:Maintainer"
     class_name: ClassVar[str] = "Maintainer"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Maintainer
 
@@ -2150,8 +2146,8 @@ class Erratum(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["Erratum"]
-    class_class_curie: ClassVar[str] = "d4d-maintenance:Erratum"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["Erratum"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:Erratum"
     class_name: ClassVar[str] = "Erratum"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Erratum
 
@@ -2179,8 +2175,8 @@ class UpdatePlan(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["UpdatePlan"]
-    class_class_curie: ClassVar[str] = "d4d-maintenance:UpdatePlan"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["UpdatePlan"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:UpdatePlan"
     class_name: ClassVar[str] = "UpdatePlan"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.UpdatePlan
 
@@ -2209,8 +2205,8 @@ class RetentionLimits(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["RetentionLimits"]
-    class_class_curie: ClassVar[str] = "d4d-maintenance:RetentionLimits"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["RetentionLimits"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:RetentionLimits"
     class_name: ClassVar[str] = "RetentionLimits"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.RetentionLimits
 
@@ -2238,8 +2234,8 @@ class VersionAccess(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["VersionAccess"]
-    class_class_curie: ClassVar[str] = "d4d-maintenance:VersionAccess"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["VersionAccess"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:VersionAccess"
     class_name: ClassVar[str] = "VersionAccess"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VersionAccess
 
@@ -2267,8 +2263,8 @@ class ExtensionMechanism(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["ExtensionMechanism"]
-    class_class_curie: ClassVar[str] = "d4d-maintenance:ExtensionMechanism"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["ExtensionMechanism"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:ExtensionMechanism"
     class_name: ClassVar[str] = "ExtensionMechanism"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExtensionMechanism
 
@@ -2297,8 +2293,8 @@ class EthicalReview(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-ETHICS["EthicalReview"]
-    class_class_curie: ClassVar[str] = "d4d-ethics:EthicalReview"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["EthicalReview"]
+    class_class_curie: ClassVar[str] = "d4dethics:EthicalReview"
     class_name: ClassVar[str] = "EthicalReview"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.EthicalReview
 
@@ -2327,8 +2323,8 @@ class DataProtectionImpact(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-ETHICS["DataProtectionImpact"]
-    class_class_curie: ClassVar[str] = "d4d-ethics:DataProtectionImpact"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["DataProtectionImpact"]
+    class_class_curie: ClassVar[str] = "d4dethics:DataProtectionImpact"
     class_name: ClassVar[str] = "DataProtectionImpact"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataProtectionImpact
 
@@ -2356,8 +2352,8 @@ class CollectionNotification(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-ETHICS["CollectionNotification"]
-    class_class_curie: ClassVar[str] = "d4d-ethics:CollectionNotification"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["CollectionNotification"]
+    class_class_curie: ClassVar[str] = "d4dethics:CollectionNotification"
     class_name: ClassVar[str] = "CollectionNotification"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionNotification
 
@@ -2385,8 +2381,8 @@ class CollectionConsent(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-ETHICS["CollectionConsent"]
-    class_class_curie: ClassVar[str] = "d4d-ethics:CollectionConsent"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["CollectionConsent"]
+    class_class_curie: ClassVar[str] = "d4dethics:CollectionConsent"
     class_name: ClassVar[str] = "CollectionConsent"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionConsent
 
@@ -2414,8 +2410,8 @@ class ConsentRevocation(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-ETHICS["ConsentRevocation"]
-    class_class_curie: ClassVar[str] = "d4d-ethics:ConsentRevocation"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["ConsentRevocation"]
+    class_class_curie: ClassVar[str] = "d4dethics:ConsentRevocation"
     class_name: ClassVar[str] = "ConsentRevocation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ConsentRevocation
 
@@ -2443,8 +2439,8 @@ class HumanSubjectResearch(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-HUMAN["HumanSubjectResearch"]
-    class_class_curie: ClassVar[str] = "d4d-human:HumanSubjectResearch"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["HumanSubjectResearch"]
+    class_class_curie: ClassVar[str] = "d4dhuman:HumanSubjectResearch"
     class_name: ClassVar[str] = "HumanSubjectResearch"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.HumanSubjectResearch
 
@@ -2490,8 +2486,8 @@ class InformedConsent(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-HUMAN["InformedConsent"]
-    class_class_curie: ClassVar[str] = "d4d-human:InformedConsent"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["InformedConsent"]
+    class_class_curie: ClassVar[str] = "d4dhuman:InformedConsent"
     class_name: ClassVar[str] = "InformedConsent"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.InformedConsent
 
@@ -2537,8 +2533,8 @@ class ParticipantPrivacy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-HUMAN["ParticipantPrivacy"]
-    class_class_curie: ClassVar[str] = "d4d-human:ParticipantPrivacy"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["ParticipantPrivacy"]
+    class_class_curie: ClassVar[str] = "d4dhuman:ParticipantPrivacy"
     class_name: ClassVar[str] = "ParticipantPrivacy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ParticipantPrivacy
 
@@ -2580,8 +2576,8 @@ class HumanSubjectCompensation(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-HUMAN["HumanSubjectCompensation"]
-    class_class_curie: ClassVar[str] = "d4d-human:HumanSubjectCompensation"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["HumanSubjectCompensation"]
+    class_class_curie: ClassVar[str] = "d4dhuman:HumanSubjectCompensation"
     class_name: ClassVar[str] = "HumanSubjectCompensation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.HumanSubjectCompensation
 
@@ -2622,8 +2618,8 @@ class VulnerablePopulations(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-HUMAN["VulnerablePopulations"]
-    class_class_curie: ClassVar[str] = "d4d-human:VulnerablePopulations"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["VulnerablePopulations"]
+    class_class_curie: ClassVar[str] = "d4dhuman:VulnerablePopulations"
     class_name: ClassVar[str] = "VulnerablePopulations"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VulnerablePopulations
 
@@ -2665,8 +2661,8 @@ class LicenseAndUseTerms(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-DATA-GOVERNANCE["LicenseAndUseTerms"]
-    class_class_curie: ClassVar[str] = "d4d-data-governance:LicenseAndUseTerms"
+    class_class_uri: ClassVar[URIRef] = D4DDATAGOVERNANCE["LicenseAndUseTerms"]
+    class_class_curie: ClassVar[str] = "d4ddatagovernance:LicenseAndUseTerms"
     class_name: ClassVar[str] = "LicenseAndUseTerms"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LicenseAndUseTerms
 
@@ -2694,8 +2690,8 @@ class IPRestrictions(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-DATA-GOVERNANCE["IPRestrictions"]
-    class_class_curie: ClassVar[str] = "d4d-data-governance:IPRestrictions"
+    class_class_uri: ClassVar[URIRef] = D4DDATAGOVERNANCE["IPRestrictions"]
+    class_class_curie: ClassVar[str] = "d4ddatagovernance:IPRestrictions"
     class_name: ClassVar[str] = "IPRestrictions"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.IPRestrictions
 
@@ -2723,8 +2719,8 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = D4D-DATA-GOVERNANCE["ExportControlRegulatoryRestrictions"]
-    class_class_curie: ClassVar[str] = "d4d-data-governance:ExportControlRegulatoryRestrictions"
+    class_class_uri: ClassVar[URIRef] = D4DDATAGOVERNANCE["ExportControlRegulatoryRestrictions"]
+    class_class_curie: ClassVar[str] = "d4ddatagovernance:ExportControlRegulatoryRestrictions"
     class_name: ClassVar[str] = "ExportControlRegulatoryRestrictions"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExportControlRegulatoryRestrictions
 
@@ -2961,15 +2957,6 @@ class EncodingEnum(EnumDefinitionImpl):
 class slots:
     pass
 
-slots.id = Slot(uri=SCHEMA.identifier, name="id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.id, domain=None, range=URIRef)
-
-slots.name = Slot(uri=SCHEMA.name, name="name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.name, domain=None, range=Optional[str])
-
-slots.description = Slot(uri=SCHEMA.description, name="description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.description, domain=None, range=Optional[str])
-
 slots.title = Slot(uri=DCTERMS.title, name="title", curie=DCTERMS.curie('title'),
                    model_uri=DATA_SHEETS_SCHEMA.title, domain=None, range=Optional[str])
 
@@ -3062,6 +3049,15 @@ slots.version = Slot(uri=PAV.version, name="version", curie=PAV.curie('version')
 
 slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", curie=PROV.curie('wasDerivedFrom'),
                    model_uri=DATA_SHEETS_SCHEMA.was_derived_from, domain=None, range=Optional[str])
+
+slots.namedThing__id = Slot(uri=SCHEMA.identifier, name="namedThing__id", curie=SCHEMA.curie('identifier'),
+                   model_uri=DATA_SHEETS_SCHEMA.namedThing__id, domain=None, range=URIRef)
+
+slots.namedThing__name = Slot(uri=SCHEMA.name, name="namedThing__name", curie=SCHEMA.curie('name'),
+                   model_uri=DATA_SHEETS_SCHEMA.namedThing__name, domain=None, range=Optional[str])
+
+slots.namedThing__description = Slot(uri=SCHEMA.description, name="namedThing__description", curie=SCHEMA.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.namedThing__description, domain=None, range=Optional[str])
 
 slots.datasetProperty__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="datasetProperty__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
@@ -3231,133 +3227,133 @@ slots.dataSubset__is_data_split = Slot(uri=DATA_SHEETS_SCHEMA.is_data_split, nam
 slots.dataSubset__is_subpopulation = Slot(uri=DATA_SHEETS_SCHEMA.is_subpopulation, name="dataSubset__is_subpopulation", curie=DATA_SHEETS_SCHEMA.curie('is_subpopulation'),
                    model_uri=DATA_SHEETS_SCHEMA.dataSubset__is_subpopulation, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.purpose__response = Slot(uri=D4D-MOTIVATION.response, name="purpose__response", curie=D4D-MOTIVATION.curie('response'),
+slots.purpose__response = Slot(uri=D4DMOTIVATION.response, name="purpose__response", curie=D4DMOTIVATION.curie('response'),
                    model_uri=DATA_SHEETS_SCHEMA.purpose__response, domain=None, range=Optional[str])
 
-slots.task__response = Slot(uri=D4D-MOTIVATION.response, name="task__response", curie=D4D-MOTIVATION.curie('response'),
+slots.task__response = Slot(uri=D4DMOTIVATION.response, name="task__response", curie=D4DMOTIVATION.curie('response'),
                    model_uri=DATA_SHEETS_SCHEMA.task__response, domain=None, range=Optional[str])
 
-slots.addressingGap__response = Slot(uri=D4D-MOTIVATION.response, name="addressingGap__response", curie=D4D-MOTIVATION.curie('response'),
+slots.addressingGap__response = Slot(uri=D4DMOTIVATION.response, name="addressingGap__response", curie=D4DMOTIVATION.curie('response'),
                    model_uri=DATA_SHEETS_SCHEMA.addressingGap__response, domain=None, range=Optional[str])
 
-slots.creator__principal_investigator = Slot(uri=D4D-MOTIVATION.principal_investigator, name="creator__principal_investigator", curie=D4D-MOTIVATION.curie('principal_investigator'),
+slots.creator__principal_investigator = Slot(uri=D4DMOTIVATION.principal_investigator, name="creator__principal_investigator", curie=D4DMOTIVATION.curie('principal_investigator'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.creator__affiliation = Slot(uri=D4D-MOTIVATION.affiliation, name="creator__affiliation", curie=D4D-MOTIVATION.curie('affiliation'),
+slots.creator__affiliation = Slot(uri=D4DMOTIVATION.affiliation, name="creator__affiliation", curie=D4DMOTIVATION.curie('affiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__affiliation, domain=None, range=Optional[Union[str, OrganizationId]])
 
-slots.fundingMechanism__grantor = Slot(uri=D4D-MOTIVATION.grantor, name="fundingMechanism__grantor", curie=D4D-MOTIVATION.curie('grantor'),
+slots.fundingMechanism__grantor = Slot(uri=D4DMOTIVATION.grantor, name="fundingMechanism__grantor", curie=D4DMOTIVATION.curie('grantor'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grantor, domain=None, range=Optional[Union[str, GrantorId]])
 
-slots.fundingMechanism__grant = Slot(uri=D4D-MOTIVATION.grant, name="fundingMechanism__grant", curie=D4D-MOTIVATION.curie('grant'),
+slots.fundingMechanism__grant = Slot(uri=D4DMOTIVATION.grant, name="fundingMechanism__grant", curie=D4DMOTIVATION.curie('grant'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grant, domain=None, range=Optional[Union[str, GrantId]])
 
-slots.grant__grant_number = Slot(uri=D4D-MOTIVATION.grant_number, name="grant__grant_number", curie=D4D-MOTIVATION.curie('grant_number'),
+slots.grant__grant_number = Slot(uri=D4DMOTIVATION.grant_number, name="grant__grant_number", curie=D4DMOTIVATION.curie('grant_number'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])
 
-slots.instance__data_topic = Slot(uri=D4D-COMPOSITION.data_topic, name="instance__data_topic", curie=D4D-COMPOSITION.curie('data_topic'),
+slots.instance__data_topic = Slot(uri=D4DCOMPOSITION.data_topic, name="instance__data_topic", curie=D4DCOMPOSITION.curie('data_topic'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__data_topic, domain=None, range=Optional[Union[str, URIorCURIE]])
 
-slots.instance__instance_type = Slot(uri=D4D-COMPOSITION.instance_type, name="instance__instance_type", curie=D4D-COMPOSITION.curie('instance_type'),
+slots.instance__instance_type = Slot(uri=D4DCOMPOSITION.instance_type, name="instance__instance_type", curie=D4DCOMPOSITION.curie('instance_type'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__instance_type, domain=None, range=Optional[str])
 
-slots.instance__data_substrate = Slot(uri=D4D-COMPOSITION.data_substrate, name="instance__data_substrate", curie=D4D-COMPOSITION.curie('data_substrate'),
+slots.instance__data_substrate = Slot(uri=D4DCOMPOSITION.data_substrate, name="instance__data_substrate", curie=D4DCOMPOSITION.curie('data_substrate'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__data_substrate, domain=None, range=Optional[Union[str, URIorCURIE]])
 
-slots.instance__counts = Slot(uri=D4D-COMPOSITION.counts, name="instance__counts", curie=D4D-COMPOSITION.curie('counts'),
+slots.instance__counts = Slot(uri=D4DCOMPOSITION.counts, name="instance__counts", curie=D4DCOMPOSITION.curie('counts'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__counts, domain=None, range=Optional[int])
 
-slots.instance__label = Slot(uri=D4D-COMPOSITION.label, name="instance__label", curie=D4D-COMPOSITION.curie('label'),
+slots.instance__label = Slot(uri=D4DCOMPOSITION.label, name="instance__label", curie=D4DCOMPOSITION.curie('label'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.instance__label_description = Slot(uri=D4D-COMPOSITION.label_description, name="instance__label_description", curie=D4D-COMPOSITION.curie('label_description'),
+slots.instance__label_description = Slot(uri=D4DCOMPOSITION.label_description, name="instance__label_description", curie=D4DCOMPOSITION.curie('label_description'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label_description, domain=None, range=Optional[str])
 
-slots.instance__sampling_strategies = Slot(uri=D4D-COMPOSITION.sampling_strategies, name="instance__sampling_strategies", curie=D4D-COMPOSITION.curie('sampling_strategies'),
+slots.instance__sampling_strategies = Slot(uri=D4DCOMPOSITION.sampling_strategies, name="instance__sampling_strategies", curie=D4DCOMPOSITION.curie('sampling_strategies'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__sampling_strategies, domain=None, range=Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]])
 
-slots.instance__missing_information = Slot(uri=D4D-COMPOSITION.missing_information, name="instance__missing_information", curie=D4D-COMPOSITION.curie('missing_information'),
+slots.instance__missing_information = Slot(uri=D4DCOMPOSITION.missing_information, name="instance__missing_information", curie=D4DCOMPOSITION.curie('missing_information'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__missing_information, domain=None, range=Optional[Union[Union[str, MissingInfoId], list[Union[str, MissingInfoId]]]])
 
-slots.samplingStrategy__is_sample = Slot(uri=D4D-COMPOSITION.is_sample, name="samplingStrategy__is_sample", curie=D4D-COMPOSITION.curie('is_sample'),
+slots.samplingStrategy__is_sample = Slot(uri=D4DCOMPOSITION.is_sample, name="samplingStrategy__is_sample", curie=D4DCOMPOSITION.curie('is_sample'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_sample, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.samplingStrategy__is_random = Slot(uri=D4D-COMPOSITION.is_random, name="samplingStrategy__is_random", curie=D4D-COMPOSITION.curie('is_random'),
+slots.samplingStrategy__is_random = Slot(uri=D4DCOMPOSITION.is_random, name="samplingStrategy__is_random", curie=D4DCOMPOSITION.curie('is_random'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_random, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.samplingStrategy__source_data = Slot(uri=D4D-COMPOSITION.source_data, name="samplingStrategy__source_data", curie=D4D-COMPOSITION.curie('source_data'),
+slots.samplingStrategy__source_data = Slot(uri=D4DCOMPOSITION.source_data, name="samplingStrategy__source_data", curie=D4DCOMPOSITION.curie('source_data'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__source_data, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.samplingStrategy__is_representative = Slot(uri=D4D-COMPOSITION.is_representative, name="samplingStrategy__is_representative", curie=D4D-COMPOSITION.curie('is_representative'),
+slots.samplingStrategy__is_representative = Slot(uri=D4DCOMPOSITION.is_representative, name="samplingStrategy__is_representative", curie=D4DCOMPOSITION.curie('is_representative'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_representative, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.samplingStrategy__representative_verification = Slot(uri=D4D-COMPOSITION.representative_verification, name="samplingStrategy__representative_verification", curie=D4D-COMPOSITION.curie('representative_verification'),
+slots.samplingStrategy__representative_verification = Slot(uri=D4DCOMPOSITION.representative_verification, name="samplingStrategy__representative_verification", curie=D4DCOMPOSITION.curie('representative_verification'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__representative_verification, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.samplingStrategy__why_not_representative = Slot(uri=D4D-COMPOSITION.why_not_representative, name="samplingStrategy__why_not_representative", curie=D4D-COMPOSITION.curie('why_not_representative'),
+slots.samplingStrategy__why_not_representative = Slot(uri=D4DCOMPOSITION.why_not_representative, name="samplingStrategy__why_not_representative", curie=D4DCOMPOSITION.curie('why_not_representative'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__why_not_representative, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.samplingStrategy__strategies = Slot(uri=D4D-COMPOSITION.strategies, name="samplingStrategy__strategies", curie=D4D-COMPOSITION.curie('strategies'),
+slots.samplingStrategy__strategies = Slot(uri=D4DCOMPOSITION.strategies, name="samplingStrategy__strategies", curie=D4DCOMPOSITION.curie('strategies'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__strategies, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.missingInfo__missing = Slot(uri=D4D-COMPOSITION.missing, name="missingInfo__missing", curie=D4D-COMPOSITION.curie('missing'),
+slots.missingInfo__missing = Slot(uri=D4DCOMPOSITION.missing, name="missingInfo__missing", curie=D4DCOMPOSITION.curie('missing'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__missing, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.missingInfo__why_missing = Slot(uri=D4D-COMPOSITION.why_missing, name="missingInfo__why_missing", curie=D4D-COMPOSITION.curie('why_missing'),
+slots.missingInfo__why_missing = Slot(uri=D4DCOMPOSITION.why_missing, name="missingInfo__why_missing", curie=D4DCOMPOSITION.curie('why_missing'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__why_missing, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.relationships__description = Slot(uri=D4D-COMPOSITION.description, name="relationships__description", curie=D4D-COMPOSITION.curie('description'),
+slots.relationships__description = Slot(uri=D4DCOMPOSITION.description, name="relationships__description", curie=D4DCOMPOSITION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.relationships__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.splits__description = Slot(uri=D4D-COMPOSITION.description, name="splits__description", curie=D4D-COMPOSITION.curie('description'),
+slots.splits__description = Slot(uri=D4DCOMPOSITION.description, name="splits__description", curie=D4DCOMPOSITION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.splits__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.dataAnomaly__description = Slot(uri=D4D-COMPOSITION.description, name="dataAnomaly__description", curie=D4D-COMPOSITION.curie('description'),
+slots.dataAnomaly__description = Slot(uri=D4DCOMPOSITION.description, name="dataAnomaly__description", curie=D4DCOMPOSITION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.externalResource__external_resources = Slot(uri=D4D-COMPOSITION.external_resources, name="externalResource__external_resources", curie=D4D-COMPOSITION.curie('external_resources'),
+slots.externalResource__external_resources = Slot(uri=D4DCOMPOSITION.external_resources, name="externalResource__external_resources", curie=D4DCOMPOSITION.curie('external_resources'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__external_resources, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.externalResource__future_guarantees = Slot(uri=D4D-COMPOSITION.future_guarantees, name="externalResource__future_guarantees", curie=D4D-COMPOSITION.curie('future_guarantees'),
+slots.externalResource__future_guarantees = Slot(uri=D4DCOMPOSITION.future_guarantees, name="externalResource__future_guarantees", curie=D4DCOMPOSITION.curie('future_guarantees'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__future_guarantees, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.externalResource__archival = Slot(uri=D4D-COMPOSITION.archival, name="externalResource__archival", curie=D4D-COMPOSITION.curie('archival'),
+slots.externalResource__archival = Slot(uri=D4DCOMPOSITION.archival, name="externalResource__archival", curie=D4DCOMPOSITION.curie('archival'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__archival, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.externalResource__restrictions = Slot(uri=D4D-COMPOSITION.restrictions, name="externalResource__restrictions", curie=D4D-COMPOSITION.curie('restrictions'),
+slots.externalResource__restrictions = Slot(uri=D4DCOMPOSITION.restrictions, name="externalResource__restrictions", curie=D4DCOMPOSITION.curie('restrictions'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__restrictions, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.confidentiality__confidential_elements_present = Slot(uri=D4D-COMPOSITION.confidential_elements_present, name="confidentiality__confidential_elements_present", curie=D4D-COMPOSITION.curie('confidential_elements_present'),
+slots.confidentiality__confidential_elements_present = Slot(uri=D4DCOMPOSITION.confidential_elements_present, name="confidentiality__confidential_elements_present", curie=D4DCOMPOSITION.curie('confidential_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.confidentiality__confidential_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.confidentiality__description = Slot(uri=D4D-COMPOSITION.description, name="confidentiality__description", curie=D4D-COMPOSITION.curie('description'),
+slots.confidentiality__description = Slot(uri=D4DCOMPOSITION.description, name="confidentiality__description", curie=D4DCOMPOSITION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.confidentiality__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.contentWarning__content_warnings_present = Slot(uri=D4D-COMPOSITION.content_warnings_present, name="contentWarning__content_warnings_present", curie=D4D-COMPOSITION.curie('content_warnings_present'),
+slots.contentWarning__content_warnings_present = Slot(uri=D4DCOMPOSITION.content_warnings_present, name="contentWarning__content_warnings_present", curie=D4DCOMPOSITION.curie('content_warnings_present'),
                    model_uri=DATA_SHEETS_SCHEMA.contentWarning__content_warnings_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.contentWarning__warnings = Slot(uri=D4D-COMPOSITION.warnings, name="contentWarning__warnings", curie=D4D-COMPOSITION.curie('warnings'),
+slots.contentWarning__warnings = Slot(uri=D4DCOMPOSITION.warnings, name="contentWarning__warnings", curie=D4DCOMPOSITION.curie('warnings'),
                    model_uri=DATA_SHEETS_SCHEMA.contentWarning__warnings, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.subpopulation__subpopulation_elements_present = Slot(uri=D4D-COMPOSITION.subpopulation_elements_present, name="subpopulation__subpopulation_elements_present", curie=D4D-COMPOSITION.curie('subpopulation_elements_present'),
+slots.subpopulation__subpopulation_elements_present = Slot(uri=D4DCOMPOSITION.subpopulation_elements_present, name="subpopulation__subpopulation_elements_present", curie=D4DCOMPOSITION.curie('subpopulation_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__subpopulation_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.subpopulation__identification = Slot(uri=D4D-COMPOSITION.identification, name="subpopulation__identification", curie=D4D-COMPOSITION.curie('identification'),
+slots.subpopulation__identification = Slot(uri=D4DCOMPOSITION.identification, name="subpopulation__identification", curie=D4DCOMPOSITION.curie('identification'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__identification, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.subpopulation__distribution = Slot(uri=D4D-COMPOSITION.distribution, name="subpopulation__distribution", curie=D4D-COMPOSITION.curie('distribution'),
+slots.subpopulation__distribution = Slot(uri=D4DCOMPOSITION.distribution, name="subpopulation__distribution", curie=D4DCOMPOSITION.curie('distribution'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__distribution, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.deidentification__identifiable_elements_present = Slot(uri=D4D-COMPOSITION.identifiable_elements_present, name="deidentification__identifiable_elements_present", curie=D4D-COMPOSITION.curie('identifiable_elements_present'),
+slots.deidentification__identifiable_elements_present = Slot(uri=D4DCOMPOSITION.identifiable_elements_present, name="deidentification__identifiable_elements_present", curie=D4DCOMPOSITION.curie('identifiable_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__identifiable_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.deidentification__description = Slot(uri=D4D-COMPOSITION.description, name="deidentification__description", curie=D4D-COMPOSITION.curie('description'),
+slots.deidentification__description = Slot(uri=D4DCOMPOSITION.description, name="deidentification__description", curie=D4DCOMPOSITION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.sensitiveElement__sensitive_elements_present = Slot(uri=D4D-COMPOSITION.sensitive_elements_present, name="sensitiveElement__sensitive_elements_present", curie=D4D-COMPOSITION.curie('sensitive_elements_present'),
+slots.sensitiveElement__sensitive_elements_present = Slot(uri=D4DCOMPOSITION.sensitive_elements_present, name="sensitiveElement__sensitive_elements_present", curie=D4DCOMPOSITION.curie('sensitive_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__sensitive_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.sensitiveElement__description = Slot(uri=D4D-COMPOSITION.description, name="sensitiveElement__description", curie=D4D-COMPOSITION.curie('description'),
+slots.sensitiveElement__description = Slot(uri=D4DCOMPOSITION.description, name="sensitiveElement__description", curie=D4DCOMPOSITION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__description, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.instanceAcquisition__description = Slot(uri=DATA_SHEETS_SCHEMA['collection/description'], name="instanceAcquisition__description", curie=DATA_SHEETS_SCHEMA.curie('collection/description'),
@@ -3387,146 +3383,146 @@ slots.collectionTimeframe__description = Slot(uri=DATA_SHEETS_SCHEMA['collection
 slots.directCollection__description = Slot(uri=DATA_SHEETS_SCHEMA['collection/description'], name="directCollection__description", curie=DATA_SHEETS_SCHEMA.curie('collection/description'),
                    model_uri=DATA_SHEETS_SCHEMA.directCollection__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.preprocessingStrategy__description = Slot(uri=D4D-PREPROCESSING.description, name="preprocessingStrategy__description", curie=D4D-PREPROCESSING.curie('description'),
+slots.preprocessingStrategy__description = Slot(uri=D4DPREPROCESSING.description, name="preprocessingStrategy__description", curie=D4DPREPROCESSING.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.cleaningStrategy__description = Slot(uri=D4D-PREPROCESSING.description, name="cleaningStrategy__description", curie=D4D-PREPROCESSING.curie('description'),
+slots.cleaningStrategy__description = Slot(uri=D4DPREPROCESSING.description, name="cleaningStrategy__description", curie=D4DPREPROCESSING.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.labelingStrategy__description = Slot(uri=D4D-PREPROCESSING.description, name="labelingStrategy__description", curie=D4D-PREPROCESSING.curie('description'),
+slots.labelingStrategy__description = Slot(uri=D4DPREPROCESSING.description, name="labelingStrategy__description", curie=D4DPREPROCESSING.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.rawData__description = Slot(uri=D4D-PREPROCESSING.description, name="rawData__description", curie=D4D-PREPROCESSING.curie('description'),
+slots.rawData__description = Slot(uri=D4DPREPROCESSING.description, name="rawData__description", curie=D4DPREPROCESSING.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.rawData__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.existingUse__description = Slot(uri=D4D-USES.description, name="existingUse__description", curie=D4D-USES.curie('description'),
+slots.existingUse__description = Slot(uri=D4DUSES.description, name="existingUse__description", curie=D4DUSES.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.existingUse__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.useRepository__description = Slot(uri=D4D-USES.description, name="useRepository__description", curie=D4D-USES.curie('description'),
+slots.useRepository__description = Slot(uri=D4DUSES.description, name="useRepository__description", curie=D4DUSES.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.useRepository__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.otherTask__description = Slot(uri=D4D-USES.description, name="otherTask__description", curie=D4D-USES.curie('description'),
+slots.otherTask__description = Slot(uri=D4DUSES.description, name="otherTask__description", curie=D4DUSES.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.otherTask__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.futureUseImpact__description = Slot(uri=D4D-USES.description, name="futureUseImpact__description", curie=D4D-USES.curie('description'),
+slots.futureUseImpact__description = Slot(uri=D4DUSES.description, name="futureUseImpact__description", curie=D4DUSES.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.futureUseImpact__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.discouragedUse__description = Slot(uri=D4D-USES.description, name="discouragedUse__description", curie=D4D-USES.curie('description'),
+slots.discouragedUse__description = Slot(uri=D4DUSES.description, name="discouragedUse__description", curie=D4DUSES.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.discouragedUse__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.thirdPartySharing__description = Slot(uri=D4D-DISTRIBUTION.description, name="thirdPartySharing__description", curie=D4D-DISTRIBUTION.curie('description'),
+slots.thirdPartySharing__description = Slot(uri=D4DDISTRIBUTION.description, name="thirdPartySharing__description", curie=D4DDISTRIBUTION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__description, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.distributionFormat__description = Slot(uri=D4D-DISTRIBUTION.description, name="distributionFormat__description", curie=D4D-DISTRIBUTION.curie('description'),
+slots.distributionFormat__description = Slot(uri=D4DDISTRIBUTION.description, name="distributionFormat__description", curie=D4DDISTRIBUTION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.distributionFormat__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.distributionDate__description = Slot(uri=D4D-DISTRIBUTION.description, name="distributionDate__description", curie=D4D-DISTRIBUTION.curie('description'),
+slots.distributionDate__description = Slot(uri=D4DDISTRIBUTION.description, name="distributionDate__description", curie=D4DDISTRIBUTION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.distributionDate__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.maintainer__description = Slot(uri=D4D-MAINTENANCE.description, name="maintainer__description", curie=D4D-MAINTENANCE.curie('description'),
+slots.maintainer__description = Slot(uri=D4DMAINTENANCE.description, name="maintainer__description", curie=D4DMAINTENANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.maintainer__description, domain=None, range=Optional[Union[Union[str, "CreatorOrMaintainerEnum"], list[Union[str, "CreatorOrMaintainerEnum"]]]])
 
-slots.erratum__description = Slot(uri=D4D-MAINTENANCE.description, name="erratum__description", curie=D4D-MAINTENANCE.curie('description'),
+slots.erratum__description = Slot(uri=D4DMAINTENANCE.description, name="erratum__description", curie=D4DMAINTENANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.erratum__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.updatePlan__description = Slot(uri=D4D-MAINTENANCE.description, name="updatePlan__description", curie=D4D-MAINTENANCE.curie('description'),
+slots.updatePlan__description = Slot(uri=D4DMAINTENANCE.description, name="updatePlan__description", curie=D4DMAINTENANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.updatePlan__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.retentionLimits__description = Slot(uri=D4D-MAINTENANCE.description, name="retentionLimits__description", curie=D4D-MAINTENANCE.curie('description'),
+slots.retentionLimits__description = Slot(uri=D4DMAINTENANCE.description, name="retentionLimits__description", curie=D4DMAINTENANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.retentionLimits__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.versionAccess__description = Slot(uri=D4D-MAINTENANCE.description, name="versionAccess__description", curie=D4D-MAINTENANCE.curie('description'),
+slots.versionAccess__description = Slot(uri=D4DMAINTENANCE.description, name="versionAccess__description", curie=D4DMAINTENANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.versionAccess__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.extensionMechanism__description = Slot(uri=D4D-MAINTENANCE.description, name="extensionMechanism__description", curie=D4D-MAINTENANCE.curie('description'),
+slots.extensionMechanism__description = Slot(uri=D4DMAINTENANCE.description, name="extensionMechanism__description", curie=D4DMAINTENANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.ethicalReview__description = Slot(uri=D4D-ETHICS.description, name="ethicalReview__description", curie=D4D-ETHICS.curie('description'),
+slots.ethicalReview__description = Slot(uri=D4DETHICS.description, name="ethicalReview__description", curie=D4DETHICS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.dataProtectionImpact__description = Slot(uri=D4D-ETHICS.description, name="dataProtectionImpact__description", curie=D4D-ETHICS.curie('description'),
+slots.dataProtectionImpact__description = Slot(uri=D4DETHICS.description, name="dataProtectionImpact__description", curie=D4DETHICS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.collectionNotification__description = Slot(uri=D4D-ETHICS.description, name="collectionNotification__description", curie=D4D-ETHICS.curie('description'),
+slots.collectionNotification__description = Slot(uri=D4DETHICS.description, name="collectionNotification__description", curie=D4DETHICS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.collectionNotification__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.collectionConsent__description = Slot(uri=D4D-ETHICS.description, name="collectionConsent__description", curie=D4D-ETHICS.curie('description'),
+slots.collectionConsent__description = Slot(uri=D4DETHICS.description, name="collectionConsent__description", curie=D4DETHICS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.collectionConsent__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.consentRevocation__description = Slot(uri=D4D-ETHICS.description, name="consentRevocation__description", curie=D4D-ETHICS.curie('description'),
+slots.consentRevocation__description = Slot(uri=D4DETHICS.description, name="consentRevocation__description", curie=D4DETHICS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.consentRevocation__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectResearch__involves_human_subjects = Slot(uri=D4D-HUMAN.involves_human_subjects, name="humanSubjectResearch__involves_human_subjects", curie=D4D-HUMAN.curie('involves_human_subjects'),
+slots.humanSubjectResearch__involves_human_subjects = Slot(uri=D4DHUMAN.involves_human_subjects, name="humanSubjectResearch__involves_human_subjects", curie=D4DHUMAN.curie('involves_human_subjects'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__involves_human_subjects, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.humanSubjectResearch__irb_approval = Slot(uri=D4D-HUMAN.irb_approval, name="humanSubjectResearch__irb_approval", curie=D4D-HUMAN.curie('irb_approval'),
+slots.humanSubjectResearch__irb_approval = Slot(uri=D4DHUMAN.irb_approval, name="humanSubjectResearch__irb_approval", curie=D4DHUMAN.curie('irb_approval'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__irb_approval, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectResearch__ethics_review_board = Slot(uri=D4D-HUMAN.ethics_review_board, name="humanSubjectResearch__ethics_review_board", curie=D4D-HUMAN.curie('ethics_review_board'),
+slots.humanSubjectResearch__ethics_review_board = Slot(uri=D4DHUMAN.ethics_review_board, name="humanSubjectResearch__ethics_review_board", curie=D4DHUMAN.curie('ethics_review_board'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__ethics_review_board, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectResearch__special_populations = Slot(uri=D4D-HUMAN.special_populations, name="humanSubjectResearch__special_populations", curie=D4D-HUMAN.curie('special_populations'),
+slots.humanSubjectResearch__special_populations = Slot(uri=D4DHUMAN.special_populations, name="humanSubjectResearch__special_populations", curie=D4DHUMAN.curie('special_populations'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__special_populations, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectResearch__regulatory_compliance = Slot(uri=D4D-HUMAN.regulatory_compliance, name="humanSubjectResearch__regulatory_compliance", curie=D4D-HUMAN.curie('regulatory_compliance'),
+slots.humanSubjectResearch__regulatory_compliance = Slot(uri=D4DHUMAN.regulatory_compliance, name="humanSubjectResearch__regulatory_compliance", curie=D4DHUMAN.curie('regulatory_compliance'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__regulatory_compliance, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.informedConsent__consent_obtained = Slot(uri=D4D-HUMAN.consent_obtained, name="informedConsent__consent_obtained", curie=D4D-HUMAN.curie('consent_obtained'),
+slots.informedConsent__consent_obtained = Slot(uri=D4DHUMAN.consent_obtained, name="informedConsent__consent_obtained", curie=D4DHUMAN.curie('consent_obtained'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_obtained, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.informedConsent__consent_type = Slot(uri=D4D-HUMAN.consent_type, name="informedConsent__consent_type", curie=D4D-HUMAN.curie('consent_type'),
+slots.informedConsent__consent_type = Slot(uri=D4DHUMAN.consent_type, name="informedConsent__consent_type", curie=D4DHUMAN.curie('consent_type'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_type, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.informedConsent__consent_documentation = Slot(uri=D4D-HUMAN.consent_documentation, name="informedConsent__consent_documentation", curie=D4D-HUMAN.curie('consent_documentation'),
+slots.informedConsent__consent_documentation = Slot(uri=D4DHUMAN.consent_documentation, name="informedConsent__consent_documentation", curie=D4DHUMAN.curie('consent_documentation'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_documentation, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.informedConsent__withdrawal_mechanism = Slot(uri=D4D-HUMAN.withdrawal_mechanism, name="informedConsent__withdrawal_mechanism", curie=D4D-HUMAN.curie('withdrawal_mechanism'),
+slots.informedConsent__withdrawal_mechanism = Slot(uri=D4DHUMAN.withdrawal_mechanism, name="informedConsent__withdrawal_mechanism", curie=D4DHUMAN.curie('withdrawal_mechanism'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__withdrawal_mechanism, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.informedConsent__consent_scope = Slot(uri=D4D-HUMAN.consent_scope, name="informedConsent__consent_scope", curie=D4D-HUMAN.curie('consent_scope'),
+slots.informedConsent__consent_scope = Slot(uri=D4DHUMAN.consent_scope, name="informedConsent__consent_scope", curie=D4DHUMAN.curie('consent_scope'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_scope, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.participantPrivacy__anonymization_method = Slot(uri=D4D-HUMAN.anonymization_method, name="participantPrivacy__anonymization_method", curie=D4D-HUMAN.curie('anonymization_method'),
+slots.participantPrivacy__anonymization_method = Slot(uri=D4DHUMAN.anonymization_method, name="participantPrivacy__anonymization_method", curie=D4DHUMAN.curie('anonymization_method'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__anonymization_method, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.participantPrivacy__reidentification_risk = Slot(uri=D4D-HUMAN.reidentification_risk, name="participantPrivacy__reidentification_risk", curie=D4D-HUMAN.curie('reidentification_risk'),
+slots.participantPrivacy__reidentification_risk = Slot(uri=D4DHUMAN.reidentification_risk, name="participantPrivacy__reidentification_risk", curie=D4DHUMAN.curie('reidentification_risk'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__reidentification_risk, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.participantPrivacy__privacy_techniques = Slot(uri=D4D-HUMAN.privacy_techniques, name="participantPrivacy__privacy_techniques", curie=D4D-HUMAN.curie('privacy_techniques'),
+slots.participantPrivacy__privacy_techniques = Slot(uri=D4DHUMAN.privacy_techniques, name="participantPrivacy__privacy_techniques", curie=D4DHUMAN.curie('privacy_techniques'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__privacy_techniques, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.participantPrivacy__data_linkage = Slot(uri=D4D-HUMAN.data_linkage, name="participantPrivacy__data_linkage", curie=D4D-HUMAN.curie('data_linkage'),
+slots.participantPrivacy__data_linkage = Slot(uri=D4DHUMAN.data_linkage, name="participantPrivacy__data_linkage", curie=D4DHUMAN.curie('data_linkage'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__data_linkage, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectCompensation__compensation_provided = Slot(uri=D4D-HUMAN.compensation_provided, name="humanSubjectCompensation__compensation_provided", curie=D4D-HUMAN.curie('compensation_provided'),
+slots.humanSubjectCompensation__compensation_provided = Slot(uri=D4DHUMAN.compensation_provided, name="humanSubjectCompensation__compensation_provided", curie=D4DHUMAN.curie('compensation_provided'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_provided, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.humanSubjectCompensation__compensation_type = Slot(uri=D4D-HUMAN.compensation_type, name="humanSubjectCompensation__compensation_type", curie=D4D-HUMAN.curie('compensation_type'),
+slots.humanSubjectCompensation__compensation_type = Slot(uri=D4DHUMAN.compensation_type, name="humanSubjectCompensation__compensation_type", curie=D4DHUMAN.curie('compensation_type'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_type, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectCompensation__compensation_amount = Slot(uri=D4D-HUMAN.compensation_amount, name="humanSubjectCompensation__compensation_amount", curie=D4D-HUMAN.curie('compensation_amount'),
+slots.humanSubjectCompensation__compensation_amount = Slot(uri=D4DHUMAN.compensation_amount, name="humanSubjectCompensation__compensation_amount", curie=D4DHUMAN.curie('compensation_amount'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_amount, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectCompensation__compensation_rationale = Slot(uri=D4D-HUMAN.compensation_rationale, name="humanSubjectCompensation__compensation_rationale", curie=D4D-HUMAN.curie('compensation_rationale'),
+slots.humanSubjectCompensation__compensation_rationale = Slot(uri=D4DHUMAN.compensation_rationale, name="humanSubjectCompensation__compensation_rationale", curie=D4DHUMAN.curie('compensation_rationale'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_rationale, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.vulnerablePopulations__vulnerable_groups_included = Slot(uri=D4D-HUMAN.vulnerable_groups_included, name="vulnerablePopulations__vulnerable_groups_included", curie=D4D-HUMAN.curie('vulnerable_groups_included'),
+slots.vulnerablePopulations__vulnerable_groups_included = Slot(uri=D4DHUMAN.vulnerable_groups_included, name="vulnerablePopulations__vulnerable_groups_included", curie=D4DHUMAN.curie('vulnerable_groups_included'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__vulnerable_groups_included, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.vulnerablePopulations__special_protections = Slot(uri=D4D-HUMAN.special_protections, name="vulnerablePopulations__special_protections", curie=D4D-HUMAN.curie('special_protections'),
+slots.vulnerablePopulations__special_protections = Slot(uri=D4DHUMAN.special_protections, name="vulnerablePopulations__special_protections", curie=D4DHUMAN.curie('special_protections'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__special_protections, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.vulnerablePopulations__assent_procedures = Slot(uri=D4D-HUMAN.assent_procedures, name="vulnerablePopulations__assent_procedures", curie=D4D-HUMAN.curie('assent_procedures'),
+slots.vulnerablePopulations__assent_procedures = Slot(uri=D4DHUMAN.assent_procedures, name="vulnerablePopulations__assent_procedures", curie=D4DHUMAN.curie('assent_procedures'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__assent_procedures, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.vulnerablePopulations__guardian_consent = Slot(uri=D4D-HUMAN.guardian_consent, name="vulnerablePopulations__guardian_consent", curie=D4D-HUMAN.curie('guardian_consent'),
+slots.vulnerablePopulations__guardian_consent = Slot(uri=D4DHUMAN.guardian_consent, name="vulnerablePopulations__guardian_consent", curie=D4DHUMAN.curie('guardian_consent'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__guardian_consent, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.licenseAndUseTerms__description = Slot(uri=D4D-DATA-GOVERNANCE.description, name="licenseAndUseTerms__description", curie=D4D-DATA-GOVERNANCE.curie('description'),
+slots.licenseAndUseTerms__description = Slot(uri=D4DDATAGOVERNANCE.description, name="licenseAndUseTerms__description", curie=D4DDATAGOVERNANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.iPRestrictions__description = Slot(uri=D4D-DATA-GOVERNANCE.description, name="iPRestrictions__description", curie=D4D-DATA-GOVERNANCE.curie('description'),
+slots.iPRestrictions__description = Slot(uri=D4DDATAGOVERNANCE.description, name="iPRestrictions__description", curie=D4DDATAGOVERNANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.exportControlRegulatoryRestrictions__description = Slot(uri=D4D-DATA-GOVERNANCE.description, name="exportControlRegulatoryRestrictions__description", curie=D4D-DATA-GOVERNANCE.curie('description'),
+slots.exportControlRegulatoryRestrictions__description = Slot(uri=D4DDATAGOVERNANCE.description, name="exportControlRegulatoryRestrictions__description", curie=D4DDATAGOVERNANCE.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__description, domain=None, range=Optional[Union[str, list[str]]])

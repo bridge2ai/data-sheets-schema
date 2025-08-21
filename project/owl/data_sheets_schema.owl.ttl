@@ -15,10 +15,10 @@ data_sheets_schema:DatasetCollection a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "DatasetCollection" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom data_sheets_schema:Dataset ;
             owl:onProperty data_sheets_schema:resources ],
         [ a owl:Restriction ;
-            owl:allValuesFrom data_sheets_schema:Dataset ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:resources ],
         data_sheets_schema:Information ;
     skos:altLabel "data resource collection",
@@ -34,48 +34,48 @@ data_sheets_schema:FormatDialect a owl:Class,
     rdfs:label "FormatDialect" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:header ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:delimiter ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:header ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:quote_char ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:double_quote ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:delimiter ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:quote_char ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:delimiter ],
+            owl:onProperty data_sheets_schema:double_quote ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:quote_char ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:header ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:comment_prefix ],
+            owl:onProperty data_sheets_schema:double_quote ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:comment_prefix ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:header ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:quote_char ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:double_quote ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:double_quote ],
+            owl:onProperty data_sheets_schema:comment_prefix ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:delimiter ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:quote_char ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:comment_prefix ] ;
     skos:definition "Additional format information for a file" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
@@ -84,10 +84,10 @@ data_sheets_schema:FormatDialect a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "DirectCollection" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/description> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Indicates whether the data was collected directly from the individuals in question  or obtained via third parties/other sources.
@@ -98,10 +98,10 @@ data_sheets_schema:FormatDialect a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Relationships" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Are relationships between individual instances made explicit (e.g., users’ movie ratings, social network links)?
@@ -126,13 +126,13 @@ data_sheets_schema:FormatDialect a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "ThirdPartySharing" ;
     rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/distribution#description> ],
+        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/distribution#description> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/distribution#description> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/distribution#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?
@@ -143,10 +143,10 @@ data_sheets_schema:FormatDialect a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "CollectionConsent" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/ethics#description> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/ethics#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Did the individuals in question consent to the collection and use of their data? If so, how was consent requested and provided, and what language did individuals consent to?
@@ -157,10 +157,10 @@ data_sheets_schema:FormatDialect a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "CollectionNotification" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/ethics#description> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/ethics#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Were the individuals in question notified about the data collection? If so, please describe (or show with screenshots, etc.) how notice was provided, and reproduce the language of the notification itself if possible.
@@ -189,28 +189,28 @@ data_sheets_schema:FormatDialect a owl:Class,
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_rationale> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_amount> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_rationale> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_provided> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_provided> ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_provided> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_type> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_type> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_rationale> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_amount> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_provided> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_type> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_amount> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_type> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Information about compensation or incentives provided to human research participants.
 """ ;
@@ -220,37 +220,37 @@ data_sheets_schema:FormatDialect a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "HumanSubjectResearch" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#ethics_review_board> ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#ethics_review_board> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#regulatory_compliance> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#irb_approval> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#special_populations> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#ethics_review_board> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#regulatory_compliance> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#special_populations> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#involves_human_subjects> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#irb_approval> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#involves_human_subjects> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#regulatory_compliance> ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#involves_human_subjects> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#special_populations> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#irb_approval> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#irb_approval> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#special_populations> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#involves_human_subjects> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Information about whether the dataset involves human subjects research and what regulatory or ethical review processes were followed.
@@ -262,25 +262,13 @@ data_sheets_schema:FormatDialect a owl:Class,
     rdfs:label "InformedConsent" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_documentation> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#withdrawal_mechanism> ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_obtained> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_documentation> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_documentation> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_scope> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_type> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#withdrawal_mechanism> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#withdrawal_mechanism> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_obtained> ],
@@ -288,7 +276,19 @@ data_sheets_schema:FormatDialect a owl:Class,
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_type> ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_type> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_documentation> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#withdrawal_mechanism> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_scope> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#consent_obtained> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
@@ -303,13 +303,16 @@ data_sheets_schema:FormatDialect a owl:Class,
     rdfs:label "ParticipantPrivacy" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#privacy_techniques> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#anonymization_method> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#reidentification_risk> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#anonymization_method> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#reidentification_risk> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#data_linkage> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#privacy_techniques> ],
@@ -317,14 +320,11 @@ data_sheets_schema:FormatDialect a owl:Class,
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#data_linkage> ],
         [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#privacy_techniques> ],
+        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#anonymization_method> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#anonymization_method> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#data_linkage> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#reidentification_risk> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Information about privacy protections and anonymization procedures for human research participants.
 """ ;
@@ -334,31 +334,31 @@ data_sheets_schema:FormatDialect a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "VulnerablePopulations" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#vulnerable_groups_included> ],
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#assent_procedures> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#special_protections> ],
         [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#guardian_consent> ],
+        [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#assent_procedures> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#guardian_consent> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#special_protections> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#vulnerable_groups_included> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#special_protections> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#guardian_consent> ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#guardian_consent> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#vulnerable_groups_included> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#assent_procedures> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/human#vulnerable_groups_included> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Information about protections for vulnerable populations in human subjects research.
@@ -385,21 +385,21 @@ data_sheets_schema:DataSubset a owl:Class,
     rdfs:label "DataSubset" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:is_subpopulation ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:is_subpopulation ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty data_sheets_schema:is_subpopulation ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
             owl:onProperty data_sheets_schema:is_data_split ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:is_subpopulation ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:is_subpopulation ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty data_sheets_schema:is_subpopulation ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:is_data_split ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
+            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:is_data_split ],
         data_sheets_schema:Dataset ;
     skos:definition "A subset of a dataset, likely containing multiple files of multiple potential purposes and properties." ;
@@ -410,18 +410,18 @@ data_sheets_schema:Person a owl:Class,
     rdfs:label "Person" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:affiliation ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:email ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:email ],
+            owl:onProperty data_sheets_schema:affiliation ],
         [ a owl:Restriction ;
             owl:allValuesFrom data_sheets_schema:Organization ;
             owl:onProperty data_sheets_schema:affiliation ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:email ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:email ],
         data_sheets_schema:NamedThing ;
     skos:definition "An individual human being." ;
@@ -431,32 +431,32 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Software" ;
     rdfs:subClassOf [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:license ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:url ],
+        [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:license ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:url ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:license ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:version ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:url ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:version ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:version ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:url ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:version ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:license ],
         data_sheets_schema:NamedThing ;
     skos:definition "A software program or library." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
@@ -465,10 +465,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "CollectionMechanism" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/description> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """What mechanisms or procedures were used to collect the data (e.g., hardware,  manual curation, software APIs)? Also covers how these mechanisms were validated.
@@ -493,10 +493,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "DataCollector" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/description> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Who was involved in the data collection (e.g., students, crowdworkers, contractors),  and how they were compensated.
@@ -507,47 +507,47 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "InstanceAcquisition" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_directly_observed> ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_reported_by_subjects> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_validated_verified> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_reported_by_subjects> ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_validated_verified> ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_directly_observed> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_reported_by_subjects> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/description> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_inferred_derived> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_directly_observed> ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_validated_verified> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/description> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_directly_observed> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_reported_by_subjects> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_validated_verified> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_validated_verified> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_inferred_derived> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_directly_observed> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_inferred_derived> ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_reported_by_subjects> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/collection/was_validated_verified> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Describes how data associated with each instance was acquired  (e.g., directly observed, reported by subjects, inferred).
 """ ;
@@ -557,14 +557,14 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Confidentiality" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#confidential_elements_present> ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#confidential_elements_present> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#confidential_elements_present> ],
@@ -581,16 +581,16 @@ data_sheets_schema:Software a owl:Class,
     rdfs:label "ContentWarning" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#warnings> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#content_warnings_present> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#content_warnings_present> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#warnings> ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#content_warnings_present> ],
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#warnings> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#content_warnings_present> ],
@@ -603,10 +603,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "DataAnomaly" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Are there any errors, sources of noise, or redundancies in the dataset?
@@ -617,9 +617,6 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Deidentification" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
-        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#identifiable_elements_present> ],
         [ a owl:Restriction ;
@@ -630,6 +627,9 @@ data_sheets_schema:Software a owl:Class,
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#identifiable_elements_present> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Is it possible to identify individuals in the dataset, either directly or indirectly (in combination with other data)?
@@ -640,29 +640,29 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "ExternalResource" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#external_resources> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#archival> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#external_resources> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#restrictions> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#future_guarantees> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#archival> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#restrictions> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#future_guarantees> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#restrictions> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#future_guarantees> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#external_resources> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#restrictions> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Is the dataset self-contained or does it rely on external resources (e.g., websites, other datasets)? If external, are there guarantees that those resources will remain available and unchanged?
 """ ;
@@ -672,35 +672,8 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Instance" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label_description> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#missing_information> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label_description> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#MissingInfo> ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#missing_information> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_substrate> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#instance_type> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#counts> ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:Uriorcurie ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_topic> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#SamplingStrategy> ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#sampling_strategies> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label> ],
@@ -708,14 +681,53 @@ data_sheets_schema:Software a owl:Class,
             owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_substrate> ],
         [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label> ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#instance_type> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#MissingInfo> ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#missing_information> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label_description> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_substrate> ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#instance_type> ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#counts> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#counts> ],
+        [ a owl:Restriction ;
             owl:allValuesFrom linkml:Integer ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#counts> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label_description> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_topic> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label> ],
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label_description> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Uriorcurie ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_substrate> ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_topic> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#SamplingStrategy> ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#sampling_strategies> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#sampling_strategies> ],
@@ -723,20 +735,8 @@ data_sheets_schema:Software a owl:Class,
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#instance_type> ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#counts> ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#label_description> ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#instance_type> ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_topic> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#data_substrate> ],
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#missing_information> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?
 """ ;
@@ -746,11 +746,11 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "MissingInfo" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#missing> ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#why_missing> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#missing> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#why_missing> ],
@@ -772,13 +772,13 @@ data_sheets_schema:Software a owl:Class,
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#sensitive_elements_present> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#sensitive_elements_present> ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#description> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#sensitive_elements_present> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#sensitive_elements_present> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Does the dataset contain data that might be considered sensitive (e.g., race, sexual orientation, religion, biometrics)?
@@ -789,9 +789,6 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Subpopulation" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#subpopulation_elements_present> ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#distribution> ],
         [ a owl:Restriction ;
@@ -800,14 +797,17 @@ data_sheets_schema:Software a owl:Class,
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#identification> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#identification> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#subpopulation_elements_present> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#subpopulation_elements_present> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#identification> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#subpopulation_elements_present> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Does the dataset identify any subpopulations (e.g., by age, gender)? If so, how are they identified and what are their distributions?
@@ -832,10 +832,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "IPRestrictions" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#description> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, describe them and note any relevant fees or licensing terms.
@@ -860,10 +860,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "DistributionDate" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/distribution#description> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/distribution#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """When will the dataset be distributed?
@@ -902,10 +902,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "EthicalReview" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/ethics#description> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/ethics#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Were any ethical or compliance review processes conducted (e.g., by an institutional review board)? If so, please provide a description of these review processes, including the frequency of review and documentation of outcomes, as well as a link or other access point to any supporting documentation.
@@ -1000,13 +1000,13 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "AddressingGap" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#response> ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#response> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#response> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#response> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Was there a specific gap that needed to be filled by creation of the dataset?" ;
@@ -1016,6 +1016,15 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Creator" ;
     rdfs:subClassOf [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#affiliation> ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#principal_investigator> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:Organization ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#affiliation> ],
+        [ a owl:Restriction ;
             owl:allValuesFrom data_sheets_schema:Person ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#principal_investigator> ],
         [ a owl:Restriction ;
@@ -1024,15 +1033,6 @@ data_sheets_schema:Software a owl:Class,
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#affiliation> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom data_sheets_schema:Organization ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#affiliation> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#affiliation> ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#principal_investigator> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Who created the dataset (e.g., which team, research group) and on behalf of which  entity (e.g., company, institution, organization)? This may also be considered a team.
 """ ;
@@ -1045,19 +1045,19 @@ data_sheets_schema:Software a owl:Class,
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#Grant> ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grant> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grantor> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grant> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grant> ],
         [ a owl:Restriction ;
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#Grantor> ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grantor> ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grant> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grantor> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.
@@ -1068,10 +1068,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Grant" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grant_number> ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#grant_number> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
@@ -1109,13 +1109,13 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Task" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#response> ],
-        [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#response> ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#response> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/motivation#response> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition "Was there a specific task in mind for the dataset's application?" ;
@@ -1139,10 +1139,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "LabelingStrategy" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Was any labeling of the data done (e.g., part-of-speech tagging)?
@@ -1153,10 +1153,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "PreprocessingStrategy" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?
@@ -1195,10 +1195,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "ExistingUse" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/uses#description> ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/uses#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Has the dataset been used for any tasks already?
@@ -1209,10 +1209,10 @@ data_sheets_schema:Software a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "FutureUseImpact" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/uses#description> ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
+            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/uses#description> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Is there anything about the dataset's composition or collection that might impact future uses or create risks/harm (e.g., unfair treatment, legal or financial risks)? If so, describe these impacts and any mitigation strategies.
@@ -1397,365 +1397,365 @@ data_sheets_schema:Dataset a owl:Class,
     rdfs:label "Dataset" ;
     rdfs:seeAlso frictionless:data-resource ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:data_collectors ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:encoding ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:distribution_formats ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#RetentionLimits> ;
-            owl:onProperty data_sheets_schema:retention_limit ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:retention_limit ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#Confidentiality> ;
-            owl:onProperty data_sheets_schema:confidential_elements ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:md5 ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:discouraged_uses ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:hash ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:updates ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#VersionAccess> ;
-            owl:onProperty data_sheets_schema:version_access ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:maintainers ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty data_sheets_schema:is_tabular ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#Purpose> ;
-            owl:onProperty data_sheets_schema:purposes ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#CleaningStrategy> ;
-            owl:onProperty data_sheets_schema:cleaning_strategies ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#UpdatePlan> ;
-            owl:onProperty data_sheets_schema:updates ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:md5 ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:creators ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:updates ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:extension_mechanism ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:collection_mechanisms ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#DataAnomaly> ;
-            owl:onProperty data_sheets_schema:anomalies ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#LicenseAndUseTerms> ;
-            owl:onProperty data_sheets_schema:license_and_use_terms ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:hash ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:sensitive_elements ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:path ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ExportControlRegulatoryRestrictions> ;
-            owl:onProperty data_sheets_schema:regulatory_restrictions ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:labeling_strategies ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#RawData> ;
-            owl:onProperty data_sheets_schema:raw_sources ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/uses#DiscouragedUse> ;
-            owl:onProperty data_sheets_schema:discouraged_uses ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#ExternalResource> ;
-            owl:onProperty data_sheets_schema:external_resources ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#SensitiveElement> ;
-            owl:onProperty data_sheets_schema:sensitive_elements ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/ethics#EthicalReview> ;
-            owl:onProperty data_sheets_schema:ethical_reviews ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:retention_limit ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:errata ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:is_deidentified ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom data_sheets_schema:DataSubset ;
-            owl:onProperty data_sheets_schema:subsets ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#Subpopulation> ;
-            owl:onProperty data_sheets_schema:subpopulations ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom data_sheets_schema:FormatEnum ;
-            owl:onProperty data_sheets_schema:format ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:dialect ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#Deidentification> ;
-            owl:onProperty data_sheets_schema:is_deidentified ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#FundingMechanism> ;
-            owl:onProperty data_sheets_schema:funders ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:acquisition_methods ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/collection/DataCollector> ;
-            owl:onProperty data_sheets_schema:data_collectors ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/collection/CollectionMechanism> ;
-            owl:onProperty data_sheets_schema:collection_mechanisms ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#LabelingStrategy> ;
-            owl:onProperty data_sheets_schema:labeling_strategies ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/collection/InstanceAcquisition> ;
-            owl:onProperty data_sheets_schema:acquisition_methods ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:media_type ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#Erratum> ;
-            owl:onProperty data_sheets_schema:errata ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#IPRestrictions> ;
-            owl:onProperty data_sheets_schema:ip_restrictions ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:extension_mechanism ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:external_resources ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:encoding ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:anomalies ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:preprocessing_strategies ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:regulatory_restrictions ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/distribution#DistributionFormat> ;
-            owl:onProperty data_sheets_schema:distribution_formats ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:license_and_use_terms ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/uses#ExistingUse> ;
-            owl:onProperty data_sheets_schema:existing_uses ],
-        [ a owl:Restriction ;
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#ExtensionMechanism> ;
             owl:onProperty data_sheets_schema:extension_mechanism ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:funders ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:collection_timeframes ],
         [ a owl:Restriction ;
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/uses#OtherTask> ;
             owl:onProperty data_sheets_schema:other_tasks ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:format ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:addressing_gaps ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:subpopulations ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:sampling_strategies ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:ip_restrictions ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:path ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:ethical_reviews ],
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:bytes ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:hash ],
+            owl:onProperty data_sheets_schema:encoding ],
         [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#Instance> ;
-            owl:onProperty data_sheets_schema:instances ],
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/collection/DataCollector> ;
+            owl:onProperty data_sheets_schema:data_collectors ],
         [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/collection/CollectionTimeframe> ;
-            owl:onProperty data_sheets_schema:collection_timeframes ],
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/distribution#DistributionFormat> ;
+            owl:onProperty data_sheets_schema:distribution_formats ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#Confidentiality> ;
+            owl:onProperty data_sheets_schema:confidential_elements ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/ethics#EthicalReview> ;
+            owl:onProperty data_sheets_schema:ethical_reviews ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:subsets ],
+            owl:onProperty data_sheets_schema:dialect ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/uses#DiscouragedUse> ;
+            owl:onProperty data_sheets_schema:discouraged_uses ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:funders ],
         [ a owl:Restriction ;
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#Maintainer> ;
             owl:onProperty data_sheets_schema:maintainers ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:future_use_impacts ],
+            owl:onProperty data_sheets_schema:acquisition_methods ],
         [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#AddressingGap> ;
-            owl:onProperty data_sheets_schema:addressing_gaps ],
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:data_collectors ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:updates ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:FormatEnum ;
+            owl:onProperty data_sheets_schema:format ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#ExternalResource> ;
+            owl:onProperty data_sheets_schema:external_resources ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:regulatory_restrictions ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:dialect ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#PreprocessingStrategy> ;
-            owl:onProperty data_sheets_schema:preprocessing_strategies ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#ContentWarning> ;
-            owl:onProperty data_sheets_schema:content_warnings ],
+            owl:onProperty data_sheets_schema:updates ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:data_protection_impacts ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:ip_restrictions ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/uses#UseRepository> ;
-            owl:onProperty data_sheets_schema:use_repository ],
+            owl:onProperty data_sheets_schema:path ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:distribution_dates ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:tasks ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:other_tasks ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:sha256 ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:version_access ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:existing_uses ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:use_repository ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:is_tabular ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:content_warnings ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:sha256 ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:media_type ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:media_type ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:purposes ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:cleaning_strategies ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:format ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:is_tabular ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:is_deidentified ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:bytes ],
+            owl:onProperty data_sheets_schema:ip_restrictions ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:dialect ],
+            owl:onProperty data_sheets_schema:collection_mechanisms ],
         [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#SamplingStrategy> ;
-            owl:onProperty data_sheets_schema:sampling_strategies ],
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:hash ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:EncodingEnum ;
+            owl:onProperty data_sheets_schema:encoding ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:collection_timeframes ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:raw_sources ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:cleaning_strategies ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/collection/CollectionTimeframe> ;
+            owl:onProperty data_sheets_schema:collection_timeframes ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:future_use_impacts ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:subsets ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:discouraged_uses ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Integer ;
+            owl:onProperty data_sheets_schema:bytes ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/uses#ExistingUse> ;
+            owl:onProperty data_sheets_schema:existing_uses ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:confidential_elements ],
         [ a owl:Restriction ;
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/ethics#DataProtectionImpact> ;
             owl:onProperty data_sheets_schema:data_protection_impacts ],
         [ a owl:Restriction ;
-            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#Creator> ;
-            owl:onProperty data_sheets_schema:creators ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:md5 ],
+            owl:onProperty data_sheets_schema:path ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#LabelingStrategy> ;
+            owl:onProperty data_sheets_schema:labeling_strategies ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:is_deidentified ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:is_tabular ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#DataAnomaly> ;
+            owl:onProperty data_sheets_schema:anomalies ],
         [ a owl:Restriction ;
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#Task> ;
             owl:onProperty data_sheets_schema:tasks ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:raw_sources ],
+            owl:onProperty data_sheets_schema:instances ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/collection/InstanceAcquisition> ;
+            owl:onProperty data_sheets_schema:acquisition_methods ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:extension_mechanism ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:errata ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#ContentWarning> ;
+            owl:onProperty data_sheets_schema:content_warnings ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#VersionAccess> ;
+            owl:onProperty data_sheets_schema:version_access ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:regulatory_restrictions ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:ethical_reviews ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:encoding ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:content_warnings ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:path ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#Subpopulation> ;
+            owl:onProperty data_sheets_schema:subpopulations ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:retention_limit ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:external_resources ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:extension_mechanism ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:sha256 ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#RetentionLimits> ;
+            owl:onProperty data_sheets_schema:retention_limit ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:md5 ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:hash ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#Creator> ;
+            owl:onProperty data_sheets_schema:creators ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:license_and_use_terms ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:confidential_elements ],
+            owl:onProperty data_sheets_schema:subpopulations ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:hash ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom data_sheets_schema:DataSubset ;
+            owl:onProperty data_sheets_schema:subsets ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#Deidentification> ;
+            owl:onProperty data_sheets_schema:is_deidentified ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:md5 ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:regulatory_restrictions ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:ip_restrictions ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:sha256 ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:purposes ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:anomalies ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/collection/CollectionMechanism> ;
+            owl:onProperty data_sheets_schema:collection_mechanisms ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/uses#UseRepository> ;
+            owl:onProperty data_sheets_schema:use_repository ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:labeling_strategies ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:license_and_use_terms ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:media_type ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:existing_uses ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#UpdatePlan> ;
+            owl:onProperty data_sheets_schema:updates ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:tasks ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:distribution_formats ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#PreprocessingStrategy> ;
+            owl:onProperty data_sheets_schema:preprocessing_strategies ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:media_type ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:dialect ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:dialect ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:preprocessing_strategies ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#LicenseAndUseTerms> ;
+            owl:onProperty data_sheets_schema:license_and_use_terms ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:bytes ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ExportControlRegulatoryRestrictions> ;
+            owl:onProperty data_sheets_schema:regulatory_restrictions ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:sensitive_elements ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:is_tabular ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:creators ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#AddressingGap> ;
+            owl:onProperty data_sheets_schema:addressing_gaps ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#SamplingStrategy> ;
+            owl:onProperty data_sheets_schema:sampling_strategies ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:media_type ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:distribution_dates ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:other_tasks ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:addressing_gaps ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#RawData> ;
+            owl:onProperty data_sheets_schema:raw_sources ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:version_access ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:sha256 ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom data_sheets_schema:EncodingEnum ;
-            owl:onProperty data_sheets_schema:encoding ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:path ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:instances ],
-        [ a owl:Restriction ;
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/distribution#DistributionDate> ;
             owl:onProperty data_sheets_schema:distribution_dates ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Integer ;
-            owl:onProperty data_sheets_schema:bytes ],
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#CleaningStrategy> ;
+            owl:onProperty data_sheets_schema:cleaning_strategies ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:data_protection_impacts ],
         [ a owl:Restriction ;
             owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/uses#FutureUseImpact> ;
             owl:onProperty data_sheets_schema:future_use_impacts ],
         [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#Purpose> ;
+            owl:onProperty data_sheets_schema:purposes ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/maintenance#Erratum> ;
+            owl:onProperty data_sheets_schema:errata ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:md5 ],
+        [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:bytes ],
+            owl:onProperty data_sheets_schema:format ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#IPRestrictions> ;
+            owl:onProperty data_sheets_schema:ip_restrictions ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:use_repository ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:version_access ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#Instance> ;
+            owl:onProperty data_sheets_schema:instances ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty data_sheets_schema:is_tabular ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:maintainers ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:sampling_strategies ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/motivation#FundingMechanism> ;
+            owl:onProperty data_sheets_schema:funders ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:retention_limit ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom <https://w3id.org/bridge2ai/data-sheets-schema/composition#SensitiveElement> ;
+            owl:onProperty data_sheets_schema:sensitive_elements ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:is_deidentified ],
         data_sheets_schema:Information ;
     skos:altLabel "data file",
         "data package",
@@ -1949,38 +1949,23 @@ data_sheets_schema:Information a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "Information" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:modified_by ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:status ],
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:issued ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:created_by ],
+            owl:onProperty data_sheets_schema:doi ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:keywords ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:language ],
+            owl:onProperty data_sheets_schema:conforms_to ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:conforms_to_class ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:last_updated_on ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:compression ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:keywords ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:last_updated_on ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:conforms_to_schema ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:publisher ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:conforms_to ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:title ],
@@ -1988,149 +1973,155 @@ data_sheets_schema:Information a owl:Class,
             owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:created_on ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:license ],
-        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:keywords ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:version ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:was_derived_from ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:issued ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:conforms_to_class ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:conforms_to ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:title ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty data_sheets_schema:conforms_to ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:modified_by ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:issued ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:download_url ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Datetime ;
-            owl:onProperty data_sheets_schema:last_updated_on ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:conforms_to_class ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:page ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:conforms_to_schema ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty data_sheets_schema:doi ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty data_sheets_schema:publisher ],
+            owl:onProperty data_sheets_schema:language ],
         [ a owl:Restriction ;
             owl:allValuesFrom data_sheets_schema:CompressionEnum ;
             owl:onProperty data_sheets_schema:compression ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:publisher ],
+            owl:onProperty data_sheets_schema:page ],
         [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:language ],
+            owl:allValuesFrom data_sheets_schema:CreatorOrMaintainerEnum ;
+            owl:onProperty data_sheets_schema:created_by ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:status ],
+            owl:onProperty data_sheets_schema:conforms_to_schema ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Datetime ;
             owl:onProperty data_sheets_schema:issued ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:language ],
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:last_updated_on ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:compression ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:doi ],
+            owl:onProperty data_sheets_schema:conforms_to_class ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:title ],
+            owl:onProperty data_sheets_schema:version ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:doi ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:was_derived_from ],
+            owl:onProperty data_sheets_schema:last_updated_on ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:was_derived_from ],
+            owl:onProperty data_sheets_schema:download_url ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty data_sheets_schema:status ],
+            owl:onProperty data_sheets_schema:publisher ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Uriorcurie ;
+            owl:onProperty data_sheets_schema:doi ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:license ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:page ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:title ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:was_derived_from ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:compression ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:version ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Uri ;
             owl:onProperty data_sheets_schema:download_url ],
         [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Datetime ;
+            owl:onProperty data_sheets_schema:last_updated_on ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Uriorcurie ;
+            owl:onProperty data_sheets_schema:conforms_to ],
+        [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:was_derived_from ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:conforms_to_class ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:doi ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:issued ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:keywords ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:modified_by ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:title ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:language ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:conforms_to_class ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:created_on ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:language ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:conforms_to_schema ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:page ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:status ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:license ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:status ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:Datetime ;
             owl:onProperty data_sheets_schema:created_on ],
         [ a owl:Restriction ;
-            owl:allValuesFrom data_sheets_schema:CreatorOrMaintainerEnum ;
-            owl:onProperty data_sheets_schema:created_by ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:license ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:publisher ],
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:download_url ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:conforms_to ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:page ],
+            owl:onProperty data_sheets_schema:license ],
         [ a owl:Restriction ;
             owl:allValuesFrom data_sheets_schema:CreatorOrMaintainerEnum ;
             owl:onProperty data_sheets_schema:modified_by ],
         [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty data_sheets_schema:modified_by ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Uriorcurie ;
+            owl:onProperty data_sheets_schema:status ],
+        [ a owl:Restriction ;
             owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:created_on ],
+            owl:onProperty data_sheets_schema:publisher ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:license ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:version ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
-            owl:onProperty data_sheets_schema:page ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:version ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:download_url ],
+            owl:onProperty data_sheets_schema:created_by ],
         data_sheets_schema:NamedThing ;
     skos:closeMatch schema1:CreativeWork ;
     skos:definition "Grouping for datasets and data files" ;
@@ -2177,46 +2168,46 @@ data_sheets_schema:collection_timeframes a owl:ObjectProperty,
     rdfs:label "SamplingStrategy" ;
     rdfs:subClassOf [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_sample> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_representative> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#source_data> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#why_not_representative> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_random> ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#strategies> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#source_data> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_sample> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_random> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:Boolean ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_representative> ],
+        [ a owl:Restriction ;
+            owl:minCardinality 0 ;
+            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#representative_verification> ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#representative_verification> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#why_not_representative> ],
         [ a owl:Restriction ;
             owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#representative_verification> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#why_not_representative> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
             owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#strategies> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#source_data> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_representative> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#source_data> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_random> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#strategies> ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Boolean ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_sample> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_sample> ],
-        [ a owl:Restriction ;
-            owl:minCardinality 0 ;
-            owl:onProperty <https://w3id.org/bridge2ai/data-sheets-schema/composition#is_representative> ],
         data_sheets_schema:DatasetProperty ;
     skos:definition """Does the dataset contain all possible instances, or is it a sample (not necessarily random) of instances from a larger set? If so, how representative is it?
 """ ;
@@ -2786,6 +2777,12 @@ data_sheets_schema:delimiter a owl:ObjectProperty,
     rdfs:label "delimiter" ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
+data_sheets_schema:description a owl:ObjectProperty,
+        linkml:SlotDefinition ;
+    rdfs:label "description" ;
+    skos:definition "A human-readable description for a thing." ;
+    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
+
 data_sheets_schema:dialect a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "dialect" ;
@@ -2870,7 +2867,6 @@ data_sheets_schema:header a owl:ObjectProperty,
 data_sheets_schema:id a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "id" ;
-    rdfs:range linkml:Uriorcurie ;
     skos:definition "A unique identifier for a thing." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
@@ -2981,7 +2977,6 @@ data_sheets_schema:modified_by a owl:ObjectProperty,
 data_sheets_schema:name a owl:ObjectProperty,
         linkml:SlotDefinition ;
     rdfs:label "name" ;
-    rdfs:range linkml:String ;
     skos:definition "A human-readable name for a thing." ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
@@ -3082,45 +3077,38 @@ data_sheets_schema:NamedThing a owl:Class,
         linkml:ClassDefinition ;
     rdfs:label "NamedThing" ;
     rdfs:subClassOf [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:minCardinality 0 ;
             owl:onProperty data_sheets_schema:name ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:Uriorcurie ;
-            owl:onProperty data_sheets_schema:id ],
+            owl:allValuesFrom linkml:String ;
+            owl:onProperty data_sheets_schema:description ],
         [ a owl:Restriction ;
             owl:maxCardinality 1 ;
             owl:onProperty data_sheets_schema:description ],
         [ a owl:Restriction ;
-            owl:minCardinality 0 ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:id ],
+        [ a owl:Restriction ;
+            owl:allValuesFrom linkml:String ;
             owl:onProperty data_sheets_schema:name ],
         [ a owl:Restriction ;
             owl:minCardinality 1 ;
             owl:onProperty data_sheets_schema:id ],
         [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:description ],
-        [ a owl:Restriction ;
-            owl:allValuesFrom linkml:String ;
-            owl:onProperty data_sheets_schema:name ],
-        [ a owl:Restriction ;
-            owl:maxCardinality 1 ;
+            owl:allValuesFrom linkml:Uriorcurie ;
             owl:onProperty data_sheets_schema:id ],
         [ a owl:Restriction ;
             owl:minCardinality 0 ;
-            owl:onProperty data_sheets_schema:description ] ;
+            owl:onProperty data_sheets_schema:description ],
+        [ a owl:Restriction ;
+            owl:maxCardinality 1 ;
+            owl:onProperty data_sheets_schema:name ] ;
     skos:definition "A generic grouping for any identifiable entity." ;
     skos:exactMatch schema1:Thing ;
     skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 <https://w3id.org/bridge2ai/data-sheets-schema/data-governance#description> a owl:ObjectProperty,
         linkml:SlotDefinition .
-
-data_sheets_schema:description a owl:ObjectProperty,
-        linkml:SlotDefinition ;
-    rdfs:label "description" ;
-    rdfs:range linkml:String ;
-    skos:definition "A human-readable description for a thing." ;
-    skos:inScheme <https://w3id.org/bridge2ai/data-sheets-schema> .
 
 data_sheets_schema:license a owl:ObjectProperty,
         linkml:SlotDefinition ;
