@@ -113,7 +113,7 @@ $(SOURCE_SCHEMA_ALL):
 
 # generates all project files
 
-gen-project: $(PYMODEL)
+gen-project: $(PYMODEL) $(SOURCE_SCHEMA_ALL)
 	$(RUN) gen-project -I python -I jsonschema -I jsonld -I owl ${GEN_PARGS} -d $(DEST) $(SOURCE_SCHEMA_PATH) && mv $(DEST)/*.py $(PYMODEL)
 
 gen-d4d-full:
@@ -142,8 +142,9 @@ render-d4d-examples:
 
 test: test-schema test-python test-examples
 
-test-schema:
-	$(RUN) gen-project ${GEN_PARGS} -d tmp $(SOURCE_SCHEMA_PATH)
+# Test the schema - use the full materialized version
+test-schema: $(SOURCE_SCHEMA_ALL)
+	$(RUN) gen-project ${GEN_PARGS} -d tmp $(SOURCE_SCHEMA_ALL)
 
 test-python:
 	$(RUN) python -m unittest discover

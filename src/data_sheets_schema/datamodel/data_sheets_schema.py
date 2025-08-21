@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-08-21T14:14:13
+# Generation date: 2025-08-21T15:00:56
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -56,19 +56,16 @@ from rdflib import (
     URIRef
 )
 
-from linkml_runtime.linkml_model.types import Boolean, Date, Datetime, Integer, String, Uri, Uriorcurie
-from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDate, XSDDateTime
+from linkml_runtime.linkml_model.types import Boolean, Datetime, Integer, String, Uri, Uriorcurie
+from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDateTime
 
 metamodel_version = "1.7.0"
 version = None
 
 # Namespaces
-B2AI = CurieNamespace('B2AI', 'https://w3id.org/bridge2ai/standards-schema/')
-B2AI_ORG = CurieNamespace('B2AI_ORG', 'https://w3id.org/bridge2ai/standards-organization-schema/')
 B2AI_STANDARD = CurieNamespace('B2AI_STANDARD', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 B2AI_SUBSTRATE = CurieNamespace('B2AI_SUBSTRATE', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 B2AI_TOPIC = CurieNamespace('B2AI_TOPIC', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
-MESH = CurieNamespace('MESH', 'http://id.nlm.nih.gov/mesh/')
 BIBO = CurieNamespace('bibo', 'http://example.org/UNKNOWN/bibo/')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/vocab/')
 CSVW = CurieNamespace('csvw', 'http://www.w3.org/ns/csvw#')
@@ -90,76 +87,24 @@ FORMATS = CurieNamespace('formats', 'http://www.w3.org/ns/formats/')
 FRICTIONLESS = CurieNamespace('frictionless', 'https://specs.frictionlessdata.io/')
 LINKML = CurieNamespace('linkml', 'https://w3id.org/linkml/')
 MEDIATYPES = CurieNamespace('mediatypes', 'https://www.iana.org/assignments/media-types/')
-NCIT = CurieNamespace('ncit', 'http://purl.obolibrary.org/obo/NCIT_')
 OSLC = CurieNamespace('oslc', 'http://example.org/UNKNOWN/oslc/')
 PAV = CurieNamespace('pav', 'http://purl.org/pav/')
 PROV = CurieNamespace('prov', 'http://example.org/UNKNOWN/prov/')
-RDFS = CurieNamespace('rdfs', 'http://www.w3.org/2000/01/rdf-schema#')
 SCHEMA = CurieNamespace('schema', 'http://schema.org/')
 SH = CurieNamespace('sh', 'https://w3id.org/shacl/')
 SKOS = CurieNamespace('skos', 'http://www.w3.org/2004/02/skos/core#')
-UBERON = CurieNamespace('uberon', 'http://purl.obolibrary.org/obo/uberon/core#')
 VOID = CurieNamespace('void', 'http://rdfs.org/ns/void#')
-WIKIDATA = CurieNamespace('wikidata', 'http://www.wikidata.org/wiki/')
-XSD = CurieNamespace('xsd', 'http://www.w3.org/2001/XMLSchema#')
 DEFAULT_ = DATA_SHEETS_SCHEMA
 
 
 # Types
-class CategoryType(Uriorcurie):
-    """ A primitive type in which the value denotes a class within the model. """
-    type_class_uri = XSD["anyURI"]
-    type_class_curie = "xsd:anyURI"
-    type_name = "category_type"
-    type_model_uri = DATA_SHEETS_SCHEMA.CategoryType
-
-
-class EdamIdentifier(Uriorcurie):
-    """ Identifier from EDAM ontology """
-    type_class_uri = XSD["anyURI"]
-    type_class_curie = "xsd:anyURI"
-    type_name = "edam_identifier"
-    type_model_uri = DATA_SHEETS_SCHEMA.EdamIdentifier
-
-
-class MeshIdentifier(Uriorcurie):
-    """ Identifier from Medical Subject Headings (MeSH) biomedical vocabulary. """
-    type_class_uri = XSD["anyURI"]
-    type_class_curie = "xsd:anyURI"
-    type_name = "mesh_identifier"
-    type_model_uri = DATA_SHEETS_SCHEMA.MeshIdentifier
-
-
-class NcitIdentifier(Uriorcurie):
-    """ Identifier from NCIT reference terminology with broad coverage of the cancer domain. """
-    type_class_uri = XSD["anyURI"]
-    type_class_curie = "xsd:anyURI"
-    type_name = "ncit_identifier"
-    type_model_uri = DATA_SHEETS_SCHEMA.NcitIdentifier
-
-
-class RorIdentifier(Uriorcurie):
-    """ Identifier from Research Organization Registry. """
-    type_class_uri = XSD["anyURI"]
-    type_class_curie = "xsd:anyURI"
-    type_name = "ror_identifier"
-    type_model_uri = DATA_SHEETS_SCHEMA.RorIdentifier
-
-
-class WikidataIdentifier(Uriorcurie):
-    """ Identifier from Wikidata open knowledge base. """
-    type_class_uri = XSD["anyURI"]
-    type_class_curie = "xsd:anyURI"
-    type_name = "wikidata_identifier"
-    type_model_uri = DATA_SHEETS_SCHEMA.WikidataIdentifier
-
 
 # Class references
-class FormatDialectId(URIorCURIE):
+class NamedThingId(URIorCURIE):
     pass
 
 
-class NamedThingId(URIorCURIE):
+class OrganizationId(NamedThingId):
     pass
 
 
@@ -188,14 +133,6 @@ class DatasetId(InformationId):
 
 
 class DataSubsetId(DatasetId):
-    pass
-
-
-class AnatomicalEntityId(NamedThingId):
-    pass
-
-
-class OrganizationId(NamedThingId):
     pass
 
 
@@ -420,54 +357,11 @@ class ExportControlRegulatoryRestrictionsId(DatasetPropertyId):
 
 
 @dataclass(repr=False)
-class FormatDialect(YAMLRoot):
-    """
-    Additional format information for a file
-    """
-    _inherited_slots: ClassVar[list[str]] = []
-
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["FormatDialect"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:FormatDialect"
-    class_name: ClassVar[str] = "FormatDialect"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FormatDialect
-
-    id: Union[str, FormatDialectId] = None
-    comment_prefix: Optional[str] = None
-    delimiter: Optional[str] = None
-    double_quote: Optional[str] = None
-    header: Optional[str] = None
-    quote_char: Optional[str] = None
-
-    def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, FormatDialectId):
-            self.id = FormatDialectId(self.id)
-
-        if self.comment_prefix is not None and not isinstance(self.comment_prefix, str):
-            self.comment_prefix = str(self.comment_prefix)
-
-        if self.delimiter is not None and not isinstance(self.delimiter, str):
-            self.delimiter = str(self.delimiter)
-
-        if self.double_quote is not None and not isinstance(self.double_quote, str):
-            self.double_quote = str(self.double_quote)
-
-        if self.header is not None and not isinstance(self.header, str):
-            self.header = str(self.header)
-
-        if self.quote_char is not None and not isinstance(self.quote_char, str):
-            self.quote_char = str(self.quote_char)
-
-        super().__post_init__(**kwargs)
-
-
-@dataclass(repr=False)
 class NamedThing(YAMLRoot):
     """
-    A generic grouping for any identifiable entity
+    A generic grouping for any identifiable entity.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = SCHEMA["Thing"]
     class_class_curie: ClassVar[str] = "schema:Thing"
@@ -475,15 +369,8 @@ class NamedThing(YAMLRoot):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.NamedThing
 
     id: Union[str, NamedThingId] = None
-    category: Optional[Union[str, CategoryType]] = None
     name: Optional[str] = None
     description: Optional[str] = None
-    subclass_of: Optional[Union[Union[str, NamedThingId], list[Union[str, NamedThingId]]]] = empty_list()
-    related_to: Optional[Union[Union[str, NamedThingId], list[Union[str, NamedThingId]]]] = empty_list()
-    contributor_name: Optional[str] = None
-    contributor_github_name: Optional[str] = None
-    contributor_orcid: Optional[Union[str, URIorCURIE]] = None
-    contribution_date: Optional[Union[str, XSDDate]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -491,60 +378,36 @@ class NamedThing(YAMLRoot):
         if not isinstance(self.id, NamedThingId):
             self.id = NamedThingId(self.id)
 
-        self.category = str(self.class_class_curie)
-
         if self.name is not None and not isinstance(self.name, str):
             self.name = str(self.name)
 
         if self.description is not None and not isinstance(self.description, str):
             self.description = str(self.description)
 
-        if not isinstance(self.subclass_of, list):
-            self.subclass_of = [self.subclass_of] if self.subclass_of is not None else []
-        self.subclass_of = [v if isinstance(v, NamedThingId) else NamedThingId(v) for v in self.subclass_of]
-
-        if not isinstance(self.related_to, list):
-            self.related_to = [self.related_to] if self.related_to is not None else []
-        self.related_to = [v if isinstance(v, NamedThingId) else NamedThingId(v) for v in self.related_to]
-
-        if self.contributor_name is not None and not isinstance(self.contributor_name, str):
-            self.contributor_name = str(self.contributor_name)
-
-        if self.contributor_github_name is not None and not isinstance(self.contributor_github_name, str):
-            self.contributor_github_name = str(self.contributor_github_name)
-
-        if self.contributor_orcid is not None and not isinstance(self.contributor_orcid, URIorCURIE):
-            self.contributor_orcid = URIorCURIE(self.contributor_orcid)
-
-        if self.contribution_date is not None and not isinstance(self.contribution_date, XSDDate):
-            self.contribution_date = XSDDate(self.contribution_date)
-
         super().__post_init__(**kwargs)
 
 
-    def __new__(cls, *args, **kwargs):
+@dataclass(repr=False)
+class Organization(NamedThing):
+    """
+    Represents a group or organization.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
 
-        type_designator = "category"
-        if not type_designator in kwargs:
-            return super().__new__(cls,*args,**kwargs)
-        else:
-            type_designator_value = kwargs[type_designator]
-            target_cls = cls._class_for("class_class_curie", type_designator_value)
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Organization"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:Organization"
+    class_name: ClassVar[str] = "Organization"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Organization
 
+    id: Union[str, OrganizationId] = None
 
-            if target_cls is None:
-                target_cls = cls._class_for("class_class_uri", type_designator_value)
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, OrganizationId):
+            self.id = OrganizationId(self.id)
 
-
-            if target_cls is None:
-                target_cls = cls._class_for("class_model_uri", type_designator_value)
-
-
-            if target_cls is None:
-                raise ValueError(f"Wrong type designator value: class {cls.__name__} "
-                                 f"has no subclass with ['class_class_curie', 'class_class_uri', 'class_model_uri']='{kwargs[type_designator]}'")
-            return super().__new__(target_cls,*args,**kwargs)
-
+        super().__post_init__(**kwargs)
 
 
 @dataclass(repr=False)
@@ -552,7 +415,7 @@ class DatasetProperty(NamedThing):
     """
     Represents a single property of a dataset, or a set of related properties.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DatasetProperty"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:DatasetProperty"
@@ -573,7 +436,6 @@ class DatasetProperty(NamedThing):
         self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -581,7 +443,7 @@ class Software(NamedThing):
     """
     A software program or library.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Software"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:Software"
@@ -609,7 +471,6 @@ class Software(NamedThing):
             self.url = str(self.url)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -617,7 +478,7 @@ class Person(NamedThing):
     """
     An individual human being.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Person"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:Person"
@@ -642,7 +503,6 @@ class Person(NamedThing):
             self.email = str(self.email)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -650,7 +510,7 @@ class Information(NamedThing):
     """
     Grouping for datasets and data files
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Information"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:Information"
@@ -752,7 +612,43 @@ class Information(NamedThing):
             self.was_derived_from = str(self.was_derived_from)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
+
+
+@dataclass(repr=False)
+class FormatDialect(YAMLRoot):
+    """
+    Additional format information for a file
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["FormatDialect"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:FormatDialect"
+    class_name: ClassVar[str] = "FormatDialect"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FormatDialect
+
+    comment_prefix: Optional[str] = None
+    delimiter: Optional[str] = None
+    double_quote: Optional[str] = None
+    header: Optional[str] = None
+    quote_char: Optional[str] = None
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self.comment_prefix is not None and not isinstance(self.comment_prefix, str):
+            self.comment_prefix = str(self.comment_prefix)
+
+        if self.delimiter is not None and not isinstance(self.delimiter, str):
+            self.delimiter = str(self.delimiter)
+
+        if self.double_quote is not None and not isinstance(self.double_quote, str):
+            self.double_quote = str(self.double_quote)
+
+        if self.header is not None and not isinstance(self.header, str):
+            self.header = str(self.header)
+
+        if self.quote_char is not None and not isinstance(self.quote_char, str):
+            self.quote_char = str(self.quote_char)
+
+        super().__post_init__(**kwargs)
 
 
 @dataclass(repr=False)
@@ -760,7 +656,7 @@ class DatasetCollection(Information):
     """
     A collection of related datasets, likely containing multiple files of multiple potential purposes and properties.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DatasetCollection"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:DatasetCollection"
@@ -781,7 +677,6 @@ class DatasetCollection(Information):
         self.resources = [v if isinstance(v, DatasetId) else DatasetId(v) for v in self.resources]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -790,7 +685,7 @@ class Dataset(Information):
     A single component of related observations and/or information that can be read, manipulated, transformed, and
     otherwise interpreted.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DCAT["Distribution"]
     class_class_curie: ClassVar[str] = "dcat:Distribution"
@@ -1043,7 +938,6 @@ class Dataset(Information):
             self.is_tabular = Bool(self.is_tabular)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1051,7 +945,7 @@ class DataSubset(Dataset):
     """
     A subset of a dataset, likely containing multiple files of multiple potential purposes and properties.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DataSubset"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:DataSubset"
@@ -1075,92 +969,6 @@ class DataSubset(Dataset):
             self.is_subpopulation = Bool(self.is_subpopulation)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
-
-
-@dataclass(repr=False)
-class AnatomicalEntity(NamedThing):
-    """
-    A subcellular location, cell type or gross anatomical part
-    """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
-
-    class_class_uri: ClassVar[URIRef] = B2AI["AnatomicalEntity"]
-    class_class_curie: ClassVar[str] = "B2AI:AnatomicalEntity"
-    class_name: ClassVar[str] = "AnatomicalEntity"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.AnatomicalEntity
-
-    id: Union[str, AnatomicalEntityId] = None
-
-    def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, AnatomicalEntityId):
-            self.id = AnatomicalEntityId(self.id)
-
-        super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
-
-
-@dataclass(repr=False)
-class Organization(NamedThing):
-    """
-    Represents a group or organization related to or responsible for one or more Bridge2AI standards.
-    """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
-
-    class_class_uri: ClassVar[URIRef] = B2AI_ORG["Organization"]
-    class_class_curie: ClassVar[str] = "B2AI_ORG:Organization"
-    class_name: ClassVar[str] = "Organization"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Organization
-
-    id: Union[str, OrganizationId] = None
-    ror_id: Optional[Union[str, RorIdentifier]] = None
-    wikidata_id: Optional[Union[str, WikidataIdentifier]] = None
-    url: Optional[Union[str, URIorCURIE]] = None
-    related_to: Optional[Union[Union[str, NamedThingId], list[Union[str, NamedThingId]]]] = empty_list()
-
-    def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, OrganizationId):
-            self.id = OrganizationId(self.id)
-
-        if self.ror_id is not None and not isinstance(self.ror_id, RorIdentifier):
-            self.ror_id = RorIdentifier(self.ror_id)
-
-        if self.wikidata_id is not None and not isinstance(self.wikidata_id, WikidataIdentifier):
-            self.wikidata_id = WikidataIdentifier(self.wikidata_id)
-
-        if self.url is not None and not isinstance(self.url, URIorCURIE):
-            self.url = URIorCURIE(self.url)
-
-        if not isinstance(self.related_to, list):
-            self.related_to = [self.related_to] if self.related_to is not None else []
-        self.related_to = [v if isinstance(v, NamedThingId) else NamedThingId(v) for v in self.related_to]
-
-        super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
-
-
-@dataclass(repr=False)
-class OrganizationContainer(YAMLRoot):
-    """
-    A container for Organizations.
-    """
-    _inherited_slots: ClassVar[list[str]] = []
-
-    class_class_uri: ClassVar[URIRef] = B2AI_ORG["OrganizationContainer"]
-    class_class_curie: ClassVar[str] = "B2AI_ORG:OrganizationContainer"
-    class_name: ClassVar[str] = "OrganizationContainer"
-    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.OrganizationContainer
-
-    organizations: Optional[Union[dict[Union[str, OrganizationId], Union[dict, Organization]], list[Union[dict, Organization]]]] = empty_dict()
-
-    def __post_init__(self, *_: str, **kwargs: Any):
-        self._normalize_inlined_as_list(slot_name="organizations", slot_type=Organization, key_name="id", keyed=True)
-
-        super().__post_init__(**kwargs)
 
 
 @dataclass(repr=False)
@@ -1168,7 +976,7 @@ class Purpose(DatasetProperty):
     """
     For what purpose was the dataset created?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Purpose"]
     class_class_curie: ClassVar[str] = "d4d-motivation:Purpose"
@@ -1188,7 +996,6 @@ class Purpose(DatasetProperty):
             self.response = str(self.response)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1196,7 +1003,7 @@ class Task(DatasetProperty):
     """
     Was there a specific task in mind for the dataset's application?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Task"]
     class_class_curie: ClassVar[str] = "d4d-motivation:Task"
@@ -1216,7 +1023,6 @@ class Task(DatasetProperty):
             self.response = str(self.response)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1224,7 +1030,7 @@ class AddressingGap(DatasetProperty):
     """
     Was there a specific gap that needed to be filled by creation of the dataset?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["AddressingGap"]
     class_class_curie: ClassVar[str] = "d4d-motivation:AddressingGap"
@@ -1244,7 +1050,6 @@ class AddressingGap(DatasetProperty):
             self.response = str(self.response)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1253,7 +1058,7 @@ class Creator(DatasetProperty):
     Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company,
     institution, organization)? This may also be considered a team.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Creator"]
     class_class_curie: ClassVar[str] = "d4d-motivation:Creator"
@@ -1277,7 +1082,6 @@ class Creator(DatasetProperty):
             self.affiliation = OrganizationId(self.affiliation)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1286,7 +1090,7 @@ class FundingMechanism(DatasetProperty):
     Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor
     and the grant name and number.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["FundingMechanism"]
     class_class_curie: ClassVar[str] = "d4d-motivation:FundingMechanism"
@@ -1310,7 +1114,6 @@ class FundingMechanism(DatasetProperty):
             self.grant = GrantId(self.grant)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1319,7 +1122,7 @@ class Grantor(Organization):
     The name and/or identifier of the organization providing monetary support or other resources supporting creation
     of the dataset.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Grantor"]
     class_class_curie: ClassVar[str] = "d4d-motivation:Grantor"
@@ -1335,7 +1138,6 @@ class Grantor(Organization):
             self.id = GrantorId(self.id)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1344,7 +1146,7 @@ class Grant(NamedThing):
     The name and/or identifier of the specific mechanism providing monetary support or other resources supporting
     creation of the dataset.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MOTIVATION["Grant"]
     class_class_curie: ClassVar[str] = "d4d-motivation:Grant"
@@ -1364,7 +1166,6 @@ class Grant(NamedThing):
             self.grant_number = str(self.grant_number)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1372,7 +1173,7 @@ class Instance(DatasetProperty):
     """
     What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Instance"]
     class_class_curie: ClassVar[str] = "d4d-composition:Instance"
@@ -1422,7 +1223,6 @@ class Instance(DatasetProperty):
         self.missing_information = [v if isinstance(v, MissingInfoId) else MissingInfoId(v) for v in self.missing_information]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1431,7 +1231,7 @@ class SamplingStrategy(DatasetProperty):
     Does the dataset contain all possible instances, or is it a sample (not necessarily random) of instances from a
     larger set? If so, how representative is it?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["SamplingStrategy"]
     class_class_curie: ClassVar[str] = "d4d-composition:SamplingStrategy"
@@ -1482,7 +1282,6 @@ class SamplingStrategy(DatasetProperty):
         self.strategies = [v if isinstance(v, str) else str(v) for v in self.strategies]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1490,7 +1289,7 @@ class MissingInfo(DatasetProperty):
     """
     Is any information missing from individual instances? (e.g., unavailable data)
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["MissingInfo"]
     class_class_curie: ClassVar[str] = "d4d-composition:MissingInfo"
@@ -1516,7 +1315,6 @@ class MissingInfo(DatasetProperty):
         self.why_missing = [v if isinstance(v, str) else str(v) for v in self.why_missing]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1524,7 +1322,7 @@ class Relationships(DatasetProperty):
     """
     Are relationships between individual instances made explicit (e.g., users’ movie ratings, social network links)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Relationships"]
     class_class_curie: ClassVar[str] = "d4d-composition:Relationships"
@@ -1545,7 +1343,6 @@ class Relationships(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1553,7 +1350,7 @@ class Splits(DatasetProperty):
     """
     Are there recommended data splits (e.g., training, validation, testing)? If so, how are they defined and why?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Splits"]
     class_class_curie: ClassVar[str] = "d4d-composition:Splits"
@@ -1574,7 +1371,6 @@ class Splits(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1582,7 +1378,7 @@ class DataAnomaly(DatasetProperty):
     """
     Are there any errors, sources of noise, or redundancies in the dataset?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["DataAnomaly"]
     class_class_curie: ClassVar[str] = "d4d-composition:DataAnomaly"
@@ -1603,7 +1399,6 @@ class DataAnomaly(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1612,7 +1407,7 @@ class ExternalResource(DatasetProperty):
     Is the dataset self-contained or does it rely on external resources (e.g., websites, other datasets)? If external,
     are there guarantees that those resources will remain available and unchanged?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["ExternalResource"]
     class_class_curie: ClassVar[str] = "d4d-composition:ExternalResource"
@@ -1648,7 +1443,6 @@ class ExternalResource(DatasetProperty):
         self.restrictions = [v if isinstance(v, str) else str(v) for v in self.restrictions]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1657,7 +1451,7 @@ class Confidentiality(DatasetProperty):
     Does the dataset contain data that might be confidential (e.g., protected by legal privilege, patient data,
     non-public communications)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Confidentiality"]
     class_class_curie: ClassVar[str] = "d4d-composition:Confidentiality"
@@ -1682,7 +1476,6 @@ class Confidentiality(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1691,7 +1484,7 @@ class ContentWarning(DatasetProperty):
     Does the dataset contain any data that might be offensive, insulting, threatening, or otherwise anxiety-provoking
     if viewed directly?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["ContentWarning"]
     class_class_curie: ClassVar[str] = "d4d-composition:ContentWarning"
@@ -1716,7 +1509,6 @@ class ContentWarning(DatasetProperty):
         self.warnings = [v if isinstance(v, str) else str(v) for v in self.warnings]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1725,7 +1517,7 @@ class Subpopulation(DatasetProperty):
     Does the dataset identify any subpopulations (e.g., by age, gender)? If so, how are they identified and what are
     their distributions?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Subpopulation"]
     class_class_curie: ClassVar[str] = "d4d-composition:Subpopulation"
@@ -1755,7 +1547,6 @@ class Subpopulation(DatasetProperty):
         self.distribution = [v if isinstance(v, str) else str(v) for v in self.distribution]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1764,7 +1555,7 @@ class Deidentification(DatasetProperty):
     Is it possible to identify individuals in the dataset, either directly or indirectly (in combination with other
     data)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["Deidentification"]
     class_class_curie: ClassVar[str] = "d4d-composition:Deidentification"
@@ -1789,7 +1580,6 @@ class Deidentification(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1798,7 +1588,7 @@ class SensitiveElement(DatasetProperty):
     Does the dataset contain data that might be considered sensitive (e.g., race, sexual orientation, religion,
     biometrics)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-COMPOSITION["SensitiveElement"]
     class_class_curie: ClassVar[str] = "d4d-composition:SensitiveElement"
@@ -1823,7 +1613,6 @@ class SensitiveElement(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1832,7 +1621,7 @@ class InstanceAcquisition(DatasetProperty):
     Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects,
     inferred).
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/InstanceAcquisition"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:collection/InstanceAcquisition"
@@ -1869,7 +1658,6 @@ class InstanceAcquisition(DatasetProperty):
             self.was_validated_verified = Bool(self.was_validated_verified)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1878,7 +1666,7 @@ class CollectionMechanism(DatasetProperty):
     What mechanisms or procedures were used to collect the data (e.g., hardware, manual curation, software APIs)? Also
     covers how these mechanisms were validated.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/CollectionMechanism"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:collection/CollectionMechanism"
@@ -1899,7 +1687,6 @@ class CollectionMechanism(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1908,7 +1695,7 @@ class DataCollector(DatasetProperty):
     Who was involved in the data collection (e.g., students, crowdworkers, contractors), and how they were
     compensated.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/DataCollector"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:collection/DataCollector"
@@ -1929,7 +1716,6 @@ class DataCollector(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1938,7 +1724,7 @@ class CollectionTimeframe(DatasetProperty):
     Over what timeframe was the data collected, and does this timeframe match the creation timeframe of the underlying
     data?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/CollectionTimeframe"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:collection/CollectionTimeframe"
@@ -1959,7 +1745,6 @@ class CollectionTimeframe(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1968,7 +1753,7 @@ class DirectCollection(DatasetProperty):
     Indicates whether the data was collected directly from the individuals in question or obtained via third
     parties/other sources.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/DirectCollection"]
     class_class_curie: ClassVar[str] = "data_sheets_schema:collection/DirectCollection"
@@ -1989,7 +1774,6 @@ class DirectCollection(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -1997,7 +1781,7 @@ class PreprocessingStrategy(DatasetProperty):
     """
     Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-PREPROCESSING["PreprocessingStrategy"]
     class_class_curie: ClassVar[str] = "d4d-preprocessing:PreprocessingStrategy"
@@ -2018,7 +1802,6 @@ class PreprocessingStrategy(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2026,7 +1809,7 @@ class CleaningStrategy(DatasetProperty):
     """
     Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-PREPROCESSING["CleaningStrategy"]
     class_class_curie: ClassVar[str] = "d4d-preprocessing:CleaningStrategy"
@@ -2047,7 +1830,6 @@ class CleaningStrategy(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2055,7 +1837,7 @@ class LabelingStrategy(DatasetProperty):
     """
     Was any labeling of the data done (e.g., part-of-speech tagging)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-PREPROCESSING["LabelingStrategy"]
     class_class_curie: ClassVar[str] = "d4d-preprocessing:LabelingStrategy"
@@ -2076,7 +1858,6 @@ class LabelingStrategy(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2085,7 +1866,7 @@ class RawData(DatasetProperty):
     Was the “raw” data saved in addition to the preprocessed/cleaned/labeled data? If so, please provide a link or
     other access point to the “raw” data.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-PREPROCESSING["RawData"]
     class_class_curie: ClassVar[str] = "d4d-preprocessing:RawData"
@@ -2106,7 +1887,6 @@ class RawData(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2114,7 +1894,7 @@ class ExistingUse(DatasetProperty):
     """
     Has the dataset been used for any tasks already?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-USES["ExistingUse"]
     class_class_curie: ClassVar[str] = "d4d-uses:ExistingUse"
@@ -2135,7 +1915,6 @@ class ExistingUse(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2144,7 +1923,7 @@ class UseRepository(DatasetProperty):
     Is there a repository that links to any or all papers or systems that use the dataset? If so, provide a link or
     other access point.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-USES["UseRepository"]
     class_class_curie: ClassVar[str] = "d4d-uses:UseRepository"
@@ -2165,7 +1944,6 @@ class UseRepository(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2173,7 +1951,7 @@ class OtherTask(DatasetProperty):
     """
     What other tasks could the dataset be used for?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-USES["OtherTask"]
     class_class_curie: ClassVar[str] = "d4d-uses:OtherTask"
@@ -2194,7 +1972,6 @@ class OtherTask(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2203,7 +1980,7 @@ class FutureUseImpact(DatasetProperty):
     Is there anything about the dataset's composition or collection that might impact future uses or create risks/harm
     (e.g., unfair treatment, legal or financial risks)? If so, describe these impacts and any mitigation strategies.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-USES["FutureUseImpact"]
     class_class_curie: ClassVar[str] = "d4d-uses:FutureUseImpact"
@@ -2224,7 +2001,6 @@ class FutureUseImpact(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2232,7 +2008,7 @@ class DiscouragedUse(DatasetProperty):
     """
     Are there tasks for which the dataset should not be used?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-USES["DiscouragedUse"]
     class_class_curie: ClassVar[str] = "d4d-uses:DiscouragedUse"
@@ -2253,7 +2029,6 @@ class DiscouragedUse(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2262,7 +2037,7 @@ class ThirdPartySharing(DatasetProperty):
     Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization)
     on behalf of which the dataset was created?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-DISTRIBUTION["ThirdPartySharing"]
     class_class_curie: ClassVar[str] = "d4d-distribution:ThirdPartySharing"
@@ -2282,7 +2057,6 @@ class ThirdPartySharing(DatasetProperty):
             self.description = Bool(self.description)
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2290,7 +2064,7 @@ class DistributionFormat(DatasetProperty):
     """
     How will the dataset be distributed (e.g., tarball on a website, API, GitHub)?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-DISTRIBUTION["DistributionFormat"]
     class_class_curie: ClassVar[str] = "d4d-distribution:DistributionFormat"
@@ -2311,7 +2085,6 @@ class DistributionFormat(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2319,7 +2092,7 @@ class DistributionDate(DatasetProperty):
     """
     When will the dataset be distributed?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-DISTRIBUTION["DistributionDate"]
     class_class_curie: ClassVar[str] = "d4d-distribution:DistributionDate"
@@ -2340,7 +2113,6 @@ class DistributionDate(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2348,7 +2120,7 @@ class Maintainer(DatasetProperty):
     """
     Who will be supporting/hosting/maintaining the dataset?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["Maintainer"]
     class_class_curie: ClassVar[str] = "d4d-maintenance:Maintainer"
@@ -2369,7 +2141,6 @@ class Maintainer(DatasetProperty):
         self.description = [v if isinstance(v, CreatorOrMaintainerEnum) else CreatorOrMaintainerEnum(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2377,7 +2148,7 @@ class Erratum(DatasetProperty):
     """
     Is there an erratum? If so, please provide a link or other access point.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["Erratum"]
     class_class_curie: ClassVar[str] = "d4d-maintenance:Erratum"
@@ -2398,7 +2169,6 @@ class Erratum(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2407,7 +2177,7 @@ class UpdatePlan(DatasetProperty):
     Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, how
     often, by whom, and how will these updates be communicated?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["UpdatePlan"]
     class_class_curie: ClassVar[str] = "d4d-maintenance:UpdatePlan"
@@ -2428,7 +2198,6 @@ class UpdatePlan(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2438,7 +2207,7 @@ class RetentionLimits(DatasetProperty):
     individuals told their data would be deleted after a certain time)? If so, please describe these limits and how
     they will be enforced.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["RetentionLimits"]
     class_class_curie: ClassVar[str] = "d4d-maintenance:RetentionLimits"
@@ -2459,7 +2228,6 @@ class RetentionLimits(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2468,7 +2236,7 @@ class VersionAccess(DatasetProperty):
     Will older versions of the dataset continue to be supported/hosted/maintained? If so, how? If not, how will
     obsolescence be communicated to dataset consumers?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["VersionAccess"]
     class_class_curie: ClassVar[str] = "d4d-maintenance:VersionAccess"
@@ -2489,7 +2257,6 @@ class VersionAccess(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2498,7 +2265,7 @@ class ExtensionMechanism(DatasetProperty):
     If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If
     so, please describe how those contributions are validated and communicated.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-MAINTENANCE["ExtensionMechanism"]
     class_class_curie: ClassVar[str] = "d4d-maintenance:ExtensionMechanism"
@@ -2519,7 +2286,6 @@ class ExtensionMechanism(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2529,7 +2295,7 @@ class EthicalReview(DatasetProperty):
     provide a description of these review processes, including the frequency of review and documentation of outcomes,
     as well as a link or other access point to any supporting documentation.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-ETHICS["EthicalReview"]
     class_class_curie: ClassVar[str] = "d4d-ethics:EthicalReview"
@@ -2550,7 +2316,6 @@ class EthicalReview(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2560,7 +2325,7 @@ class DataProtectionImpact(DatasetProperty):
     impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, and
     any supporting documentation.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-ETHICS["DataProtectionImpact"]
     class_class_curie: ClassVar[str] = "d4d-ethics:DataProtectionImpact"
@@ -2581,7 +2346,6 @@ class DataProtectionImpact(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2590,7 +2354,7 @@ class CollectionNotification(DatasetProperty):
     Were the individuals in question notified about the data collection? If so, please describe (or show with
     screenshots, etc.) how notice was provided, and reproduce the language of the notification itself if possible.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-ETHICS["CollectionNotification"]
     class_class_curie: ClassVar[str] = "d4d-ethics:CollectionNotification"
@@ -2611,7 +2375,6 @@ class CollectionNotification(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2620,7 +2383,7 @@ class CollectionConsent(DatasetProperty):
     Did the individuals in question consent to the collection and use of their data? If so, how was consent requested
     and provided, and what language did individuals consent to?
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-ETHICS["CollectionConsent"]
     class_class_curie: ClassVar[str] = "d4d-ethics:CollectionConsent"
@@ -2641,7 +2404,6 @@ class CollectionConsent(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2650,7 +2412,7 @@ class ConsentRevocation(DatasetProperty):
     If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the
     future or for certain uses? If so, please describe.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-ETHICS["ConsentRevocation"]
     class_class_curie: ClassVar[str] = "d4d-ethics:ConsentRevocation"
@@ -2671,7 +2433,6 @@ class ConsentRevocation(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2680,7 +2441,7 @@ class HumanSubjectResearch(DatasetProperty):
     Information about whether the dataset involves human subjects research and what regulatory or ethical review
     processes were followed.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-HUMAN["HumanSubjectResearch"]
     class_class_curie: ClassVar[str] = "d4d-human:HumanSubjectResearch"
@@ -2720,7 +2481,6 @@ class HumanSubjectResearch(DatasetProperty):
         self.regulatory_compliance = [v if isinstance(v, str) else str(v) for v in self.regulatory_compliance]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2728,7 +2488,7 @@ class InformedConsent(DatasetProperty):
     """
     Details about informed consent procedures used in human subjects research.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-HUMAN["InformedConsent"]
     class_class_curie: ClassVar[str] = "d4d-human:InformedConsent"
@@ -2768,7 +2528,6 @@ class InformedConsent(DatasetProperty):
         self.consent_scope = [v if isinstance(v, str) else str(v) for v in self.consent_scope]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2776,7 +2535,7 @@ class ParticipantPrivacy(DatasetProperty):
     """
     Information about privacy protections and anonymization procedures for human research participants.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-HUMAN["ParticipantPrivacy"]
     class_class_curie: ClassVar[str] = "d4d-human:ParticipantPrivacy"
@@ -2812,7 +2571,6 @@ class ParticipantPrivacy(DatasetProperty):
         self.data_linkage = [v if isinstance(v, str) else str(v) for v in self.data_linkage]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2820,7 +2578,7 @@ class HumanSubjectCompensation(DatasetProperty):
     """
     Information about compensation or incentives provided to human research participants.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-HUMAN["HumanSubjectCompensation"]
     class_class_curie: ClassVar[str] = "d4d-human:HumanSubjectCompensation"
@@ -2855,7 +2613,6 @@ class HumanSubjectCompensation(DatasetProperty):
         self.compensation_rationale = [v if isinstance(v, str) else str(v) for v in self.compensation_rationale]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2863,7 +2620,7 @@ class VulnerablePopulations(DatasetProperty):
     """
     Information about protections for vulnerable populations in human subjects research.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-HUMAN["VulnerablePopulations"]
     class_class_curie: ClassVar[str] = "d4d-human:VulnerablePopulations"
@@ -2898,7 +2655,6 @@ class VulnerablePopulations(DatasetProperty):
         self.guardian_consent = [v if isinstance(v, str) else str(v) for v in self.guardian_consent]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2907,7 +2663,7 @@ class LicenseAndUseTerms(DatasetProperty):
     Will the dataset be distributed under a copyright or other IP license, and/or under applicable terms of use?
     Provide a link or copy of relevant licensing terms and any fees.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-DATA-GOVERNANCE["LicenseAndUseTerms"]
     class_class_curie: ClassVar[str] = "d4d-data-governance:LicenseAndUseTerms"
@@ -2928,7 +2684,6 @@ class LicenseAndUseTerms(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2937,7 +2692,7 @@ class IPRestrictions(DatasetProperty):
     Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so,
     describe them and note any relevant fees or licensing terms.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-DATA-GOVERNANCE["IPRestrictions"]
     class_class_curie: ClassVar[str] = "d4d-data-governance:IPRestrictions"
@@ -2958,7 +2713,6 @@ class IPRestrictions(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 @dataclass(repr=False)
@@ -2967,7 +2721,7 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
     Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so,
     please describe these restrictions and provide a link or copy of any supporting documentation.
     """
-    _inherited_slots: ClassVar[list[str]] = ["subclass_of", "related_to"]
+    _inherited_slots: ClassVar[list[str]] = []
 
     class_class_uri: ClassVar[URIRef] = D4D-DATA-GOVERNANCE["ExportControlRegulatoryRestrictions"]
     class_class_curie: ClassVar[str] = "d4d-data-governance:ExportControlRegulatoryRestrictions"
@@ -2988,7 +2742,6 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
         super().__post_init__(**kwargs)
-        self.category = str(self.class_class_curie)
 
 
 # Enumerations
@@ -3204,35 +2957,18 @@ class EncodingEnum(EnumDefinitionImpl):
         setattr(cls, "UTF-8",
             PermissibleValue(text="UTF-8"))
 
-class DataGeneratingProject(EnumDefinitionImpl):
-    """
-    One of the Bridge2AI Data Generating Projects.
-    """
-    aireadi = PermissibleValue(
-        text="aireadi",
-        description="""AI-READI: Uncovering the details of how human health is restored after disease, using type 2 diabetes as a model.""",
-        meaning=None)
-    chorus = PermissibleValue(
-        text="chorus",
-        description="""CHoRUS: Collaborative Hospital Repository Uniting Standards. Using imaging, clinical, and other data collected in an ICU setting for diagnosis and risk prediction.""",
-        meaning=None)
-    cm4ai = PermissibleValue(
-        text="cm4ai",
-        description="""CM4AI: Cell Maps for AI. Mapping spatiotemporal architecture of human cells to interpret cell structure/function in health and disease.""",
-        meaning=None)
-    voice = PermissibleValue(
-        text="voice",
-        description="""Voice as a Biomarker of Health: Building an ethically sourced, bioaccoustic database to understand disease like never before.""",
-        meaning=None)
-
-    _defn = EnumDefinition(
-        name="DataGeneratingProject",
-        description="One of the Bridge2AI Data Generating Projects.",
-    )
-
 # Slots
 class slots:
     pass
+
+slots.id = Slot(uri=SCHEMA.identifier, name="id", curie=SCHEMA.curie('identifier'),
+                   model_uri=DATA_SHEETS_SCHEMA.id, domain=None, range=URIRef)
+
+slots.name = Slot(uri=SCHEMA.name, name="name", curie=SCHEMA.curie('name'),
+                   model_uri=DATA_SHEETS_SCHEMA.name, domain=None, range=Optional[str])
+
+slots.description = Slot(uri=SCHEMA.description, name="description", curie=SCHEMA.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.description, domain=None, range=Optional[str])
 
 slots.title = Slot(uri=DCTERMS.title, name="title", curie=DCTERMS.curie('title'),
                    model_uri=DATA_SHEETS_SCHEMA.title, domain=None, range=Optional[str])
@@ -3326,66 +3062,6 @@ slots.version = Slot(uri=PAV.version, name="version", curie=PAV.curie('version')
 
 slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", curie=PROV.curie('wasDerivedFrom'),
                    model_uri=DATA_SHEETS_SCHEMA.was_derived_from, domain=None, range=Optional[str])
-
-slots.node_property = Slot(uri=B2AI.node_property, name="node_property", curie=B2AI.curie('node_property'),
-                   model_uri=DATA_SHEETS_SCHEMA.node_property, domain=NamedThing, range=Optional[str])
-
-slots.id = Slot(uri=SCHEMA.identifier, name="id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.id, domain=None, range=URIRef)
-
-slots.type = Slot(uri=B2AI.type, name="type", curie=B2AI.curie('type'),
-                   model_uri=DATA_SHEETS_SCHEMA.type, domain=NamedThing, range=Optional[str])
-
-slots.category = Slot(uri=B2AI.category, name="category", curie=B2AI.curie('category'),
-                   model_uri=DATA_SHEETS_SCHEMA.category, domain=NamedThing, range=Optional[Union[str, CategoryType]])
-
-slots.name = Slot(uri=SCHEMA.name, name="name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.name, domain=None, range=Optional[str])
-
-slots.description = Slot(uri=SCHEMA.description, name="description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.description, domain=None, range=Optional[str])
-
-slots.edam_id = Slot(uri=B2AI.edam_id, name="edam_id", curie=B2AI.curie('edam_id'),
-                   model_uri=DATA_SHEETS_SCHEMA.edam_id, domain=None, range=Optional[Union[str, EdamIdentifier]])
-
-slots.mesh_id = Slot(uri=B2AI.mesh_id, name="mesh_id", curie=B2AI.curie('mesh_id'),
-                   model_uri=DATA_SHEETS_SCHEMA.mesh_id, domain=None, range=Optional[Union[str, MeshIdentifier]])
-
-slots.ncit_id = Slot(uri=B2AI.ncit_id, name="ncit_id", curie=B2AI.curie('ncit_id'),
-                   model_uri=DATA_SHEETS_SCHEMA.ncit_id, domain=None, range=Optional[Union[str, NcitIdentifier]])
-
-slots.url = Slot(uri=B2AI.url, name="url", curie=B2AI.curie('url'),
-                   model_uri=DATA_SHEETS_SCHEMA.url, domain=NamedThing, range=Optional[Union[str, URIorCURIE]])
-
-slots.xref = Slot(uri=B2AI.xref, name="xref", curie=B2AI.curie('xref'),
-                   model_uri=DATA_SHEETS_SCHEMA.xref, domain=NamedThing, range=Optional[Union[Union[str, URIorCURIE], list[Union[str, URIorCURIE]]]])
-
-slots.contributor_name = Slot(uri=B2AI.contributor_name, name="contributor_name", curie=B2AI.curie('contributor_name'),
-                   model_uri=DATA_SHEETS_SCHEMA.contributor_name, domain=NamedThing, range=Optional[str])
-
-slots.contributor_github_name = Slot(uri=B2AI.contributor_github_name, name="contributor_github_name", curie=B2AI.curie('contributor_github_name'),
-                   model_uri=DATA_SHEETS_SCHEMA.contributor_github_name, domain=NamedThing, range=Optional[str])
-
-slots.contributor_orcid = Slot(uri=B2AI.contributor_orcid, name="contributor_orcid", curie=B2AI.curie('contributor_orcid'),
-                   model_uri=DATA_SHEETS_SCHEMA.contributor_orcid, domain=NamedThing, range=Optional[Union[str, URIorCURIE]])
-
-slots.contribution_date = Slot(uri=B2AI.contribution_date, name="contribution_date", curie=B2AI.curie('contribution_date'),
-                   model_uri=DATA_SHEETS_SCHEMA.contribution_date, domain=NamedThing, range=Optional[Union[str, XSDDate]])
-
-slots.related_to = Slot(uri=B2AI.related_to, name="related_to", curie=B2AI.curie('related_to'),
-                   model_uri=DATA_SHEETS_SCHEMA.related_to, domain=NamedThing, range=Optional[Union[Union[str, NamedThingId], list[Union[str, NamedThingId]]]])
-
-slots.subclass_of = Slot(uri=B2AI.subclass_of, name="subclass_of", curie=B2AI.curie('subclass_of'),
-                   model_uri=DATA_SHEETS_SCHEMA.subclass_of, domain=NamedThing, range=Optional[Union[Union[str, NamedThingId], list[Union[str, NamedThingId]]]])
-
-slots.ror_id = Slot(uri=B2AI_ORG.ror_id, name="ror_id", curie=B2AI_ORG.curie('ror_id'),
-                   model_uri=DATA_SHEETS_SCHEMA.ror_id, domain=None, range=Optional[Union[str, RorIdentifier]])
-
-slots.wikidata_id = Slot(uri=B2AI_ORG.wikidata_id, name="wikidata_id", curie=B2AI_ORG.curie('wikidata_id'),
-                   model_uri=DATA_SHEETS_SCHEMA.wikidata_id, domain=None, range=Optional[Union[str, WikidataIdentifier]])
-
-slots.organizations = Slot(uri=B2AI_ORG.organizations, name="organizations", curie=B2AI_ORG.curie('organizations'),
-                   model_uri=DATA_SHEETS_SCHEMA.organizations, domain=None, range=Optional[Union[dict[Union[str, OrganizationId], Union[dict, Organization]], list[Union[dict, Organization]]]])
 
 slots.datasetProperty__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="datasetProperty__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])

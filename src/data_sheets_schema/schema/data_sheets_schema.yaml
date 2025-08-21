@@ -32,8 +32,6 @@ default_range: string
 
 imports:
   - linkml:types
-  - standards_schema
-  - standards_organization_schema
   # D4D Modules in original paper order
   - D4D_Motivation
   - D4D_Composition
@@ -103,6 +101,19 @@ subsets:
 classes:
 
   # NamedThing is imported from Bridge2AI standards schema
+  NamedThing:
+    description: >-
+      A generic grouping for any identifiable entity.
+    slots:
+      - id
+      - name
+      - description
+    class_uri: schema:Thing
+
+  Organization:
+    is_a: NamedThing
+    description: >-
+      Represents a group or organization.
 
   # Base classes for D4D modules (moved from D4D_Base)
   DatasetProperty:
@@ -152,7 +163,6 @@ classes:
       - description
       - doi
       - download_url
-      - id
       - issued
       - keywords
       - language
@@ -176,8 +186,6 @@ classes:
       double_quote:
       header:
       quote_char:
-    slots:
-      - id
 
   # Person, DatasetProperty, Software are defined above as base classes
 
@@ -394,9 +402,22 @@ slots:
   # the linkml Datasets schema - see
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
 
-  # id is imported from Bridge2AI standards schema
-  # name is imported from Bridge2AI standards schema
-  # description is imported from Bridge2AI standards schema
+  id:
+    identifier: true
+    slot_uri: schema:identifier
+    range: uriorcurie
+    description: A unique identifier for a thing.
+    required: true
+
+  name:
+    slot_uri: schema:name
+    description: A human-readable name for a thing.
+    range: string
+
+  description:
+    slot_uri: schema:description
+    description: A human-readable description for a thing.
+    range: string
 
   title:
     description: the official title of the element

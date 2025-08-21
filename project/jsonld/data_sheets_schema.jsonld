@@ -8,8 +8,6 @@
   "id": "https://w3id.org/bridge2ai/data-sheets-schema",
   "imports": [
     "linkml:types",
-    "standards_schema",
-    "standards_organization_schema",
     "D4D_Motivation",
     "D4D_Composition",
     "D4D_Collection",
@@ -472,90 +470,6 @@
       "uri": "http://www.w3.org/2001/XMLSchema#string",
       "repr": "str",
       "@type": "TypeDefinition"
-    },
-    {
-      "name": "category_type",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/CategoryType",
-      "description": "A primitive type in which the value denotes a class within the model.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "typeof": "uriorcurie",
-      "base": "URIorCURIE",
-      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
-      "repr": "str",
-      "@type": "TypeDefinition"
-    },
-    {
-      "name": "edam_identifier",
-      "id_prefixes": [
-        "edam.data",
-        "edam.format",
-        "edam.operation",
-        "edam.topic"
-      ],
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/EdamIdentifier",
-      "description": "Identifier from EDAM ontology",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "typeof": "uriorcurie",
-      "base": "URIorCURIE",
-      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
-      "repr": "str",
-      "@type": "TypeDefinition"
-    },
-    {
-      "name": "mesh_identifier",
-      "id_prefixes": [
-        "mesh"
-      ],
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/MeshIdentifier",
-      "description": "Identifier from Medical Subject Headings (MeSH) biomedical vocabulary.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "typeof": "uriorcurie",
-      "base": "URIorCURIE",
-      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
-      "repr": "str",
-      "@type": "TypeDefinition"
-    },
-    {
-      "name": "ncit_identifier",
-      "id_prefixes": [
-        "NCIT"
-      ],
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/NcitIdentifier",
-      "description": "Identifier from NCIT reference terminology with broad coverage of the cancer domain.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "typeof": "uriorcurie",
-      "base": "URIorCURIE",
-      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
-      "repr": "str",
-      "@type": "TypeDefinition"
-    },
-    {
-      "name": "ror_identifier",
-      "id_prefixes": [
-        "ror"
-      ],
-      "definition_uri": "https://w3id.org/bridge2ai/standards-organization-schema/RorIdentifier",
-      "description": "Identifier from Research Organization Registry.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-organization-schema",
-      "typeof": "uriorcurie",
-      "base": "URIorCURIE",
-      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
-      "repr": "str",
-      "@type": "TypeDefinition"
-    },
-    {
-      "name": "wikidata_identifier",
-      "id_prefixes": [
-        "wikidata"
-      ],
-      "definition_uri": "https://w3id.org/bridge2ai/standards-organization-schema/WikidataIdentifier",
-      "description": "Identifier from Wikidata open knowledge base.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-organization-schema",
-      "typeof": "uriorcurie",
-      "base": "URIorCURIE",
-      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
-      "repr": "str",
-      "@type": "TypeDefinition"
     }
   ],
   "enums": [
@@ -823,37 +737,60 @@
           "text": "UTF-8"
         }
       ]
-    },
-    {
-      "name": "DataGeneratingProject",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/DataGeneratingProject",
-      "description": "One of the Bridge2AI Data Generating Projects.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "permissible_values": [
-        {
-          "text": "aireadi",
-          "description": "AI-READI: Uncovering the details of how human health is restored after disease, using type 2 diabetes as a model.",
-          "meaning": "https://reporter.nih.gov/project-details/10471118"
-        },
-        {
-          "text": "chorus",
-          "description": "CHoRUS: Collaborative Hospital Repository Uniting Standards. Using imaging, clinical, and other data collected in an ICU setting for diagnosis and risk prediction.",
-          "meaning": "https://reporter.nih.gov/project-details/10472824"
-        },
-        {
-          "text": "cm4ai",
-          "description": "CM4AI: Cell Maps for AI. Mapping spatiotemporal architecture of human cells to interpret cell structure/function in health and disease.",
-          "meaning": "https://reporter.nih.gov/project-details/10473403"
-        },
-        {
-          "text": "voice",
-          "description": "Voice as a Biomarker of Health: Building an ethically sourced, bioaccoustic database to understand disease like never before.",
-          "meaning": "https://reporter.nih.gov/project-details/10473236"
-        }
-      ]
     }
   ],
   "slots": [
+    {
+      "name": "id",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/id",
+      "description": "A unique identifier for a thing.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://schema.org/identifier"
+      ],
+      "slot_uri": "http://schema.org/identifier",
+      "identifier": true,
+      "owner": "NamedThing",
+      "domain_of": [
+        "NamedThing"
+      ],
+      "range": "uriorcurie",
+      "required": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "name",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/name",
+      "description": "A human-readable name for a thing.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://schema.org/name"
+      ],
+      "slot_uri": "http://schema.org/name",
+      "owner": "NamedThing",
+      "domain_of": [
+        "NamedThing"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "description",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/description",
+      "description": "A human-readable description for a thing.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://schema.org/description"
+      ],
+      "slot_uri": "http://schema.org/description",
+      "owner": "Information",
+      "domain_of": [
+        "NamedThing",
+        "Information"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
     {
       "name": "title",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/title",
@@ -1365,361 +1302,6 @@
         "Information"
       ],
       "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "node_property",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/node_property",
-      "description": "A grouping for any property that holds between a node and a value.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/node_property",
-      "owner": "node_property",
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "id",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/id",
-      "description": "A unique identifier for a thing.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "mappings": [
-        "http://schema.org/identifier"
-      ],
-      "slot_uri": "http://schema.org/identifier",
-      "identifier": true,
-      "owner": "NamedThing",
-      "domain_of": [
-        "Information",
-        "FormatDialect",
-        "NamedThing"
-      ],
-      "range": "uriorcurie",
-      "required": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "type",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/type",
-      "description": "A generic slot for any label corresponding to the label  for an entity type associated to the class.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/type",
-      "owner": "type",
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "category",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/category",
-      "description": "Name of the high level ontology class in which this entity is categorized. Corresponds to the label for the entity type class, e.g., \"BiomedicalStandard\".",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "is_a": "type",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/category",
-      "designates_type": true,
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
-      ],
-      "range": "category_type",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "name",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/name",
-      "description": "A human-readable name for a thing.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "mappings": [
-        "http://schema.org/name"
-      ],
-      "slot_uri": "http://schema.org/name",
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "description",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/description",
-      "description": "A human-readable description for a thing.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "mappings": [
-        "http://schema.org/description"
-      ],
-      "slot_uri": "http://schema.org/description",
-      "owner": "NamedThing",
-      "domain_of": [
-        "Information",
-        "NamedThing"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "edam_id",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/edam_id",
-      "description": "Unique EDAM identifier",
-      "examples": [
-        {
-          "value": "edam.data:0006",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "values_from": [
-        "edam.data",
-        "edam.format",
-        "edam.operation",
-        "edam.topic"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/edam_id",
-      "range": "edam_identifier",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "mesh_id",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/mesh_id",
-      "description": "Unique MeSH identifier",
-      "examples": [
-        {
-          "value": "MeSH:D014831",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "values_from": [
-        "MeSH"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/mesh_id",
-      "range": "mesh_identifier",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "ncit_id",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/ncit_id",
-      "description": "Unique NCIt Identifier",
-      "examples": [
-        {
-          "value": "NCIT:C92692",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "values_from": [
-        "NCIT"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/ncit_id",
-      "range": "ncit_identifier",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "url",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/url",
-      "description": "URL for basic documentation of the standard or tool.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "is_a": "node_property",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/url",
-      "owner": "Organization",
-      "domain_of": [
-        "Organization"
-      ],
-      "range": "uriorcurie",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "xref",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/xref",
-      "description": "URI of corresponding class in an ontology of experimental procedures, in CURIE form.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "aliases": [
-        "dbxref",
-        "Dbxref",
-        "DbXref"
-      ],
-      "is_a": "node_property",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/xref",
-      "owner": "xref",
-      "range": "uriorcurie",
-      "multivalued": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "contributor_name",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/contributor_name",
-      "description": "The name of the person who added this node.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "is_a": "node_property",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/contributor_name",
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "contributor_github_name",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/contributor_github_name",
-      "description": "The name of the github user who added this node.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "is_a": "node_property",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/contributor_github_name",
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "contributor_orcid",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/contributor_orcid",
-      "description": "The ORCiD of the person who added this node.",
-      "examples": [
-        {
-          "value": "ORCID:0000-0001-1234-5678",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "is_a": "node_property",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/contributor_orcid",
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
-      ],
-      "range": "uriorcurie",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "contribution_date",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/contribution_date",
-      "description": "The date on which the node was added.",
-      "examples": [
-        {
-          "value": "2023-03-20",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "is_a": "node_property",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/contribution_date",
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
-      ],
-      "range": "date",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "related_to",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/related_to",
-      "description": "A relationship that is asserted between two named things.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/related_to",
-      "inherited": true,
-      "owner": "Organization",
-      "domain_of": [
-        "NamedThing",
-        "Organization"
-      ],
-      "symmetric": true,
-      "range": "NamedThing",
-      "multivalued": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "subclass_of",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/subclass_of",
-      "description": "Holds between two classes where the domain class is a specialization of the range class.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "exact_mappings": [
-        "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-        "http://id.nlm.nih.gov/mesh/isa"
-      ],
-      "narrow_mappings": [
-        "http://www.w3.org/2000/01/rdf-schema#subPropertyOf"
-      ],
-      "is_a": "related_to",
-      "domain": "NamedThing",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-schema/subclass_of",
-      "inherited": true,
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
-      ],
-      "range": "NamedThing",
-      "multivalued": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "ror_id",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-organization-schema/ror_id",
-      "description": "Unique ROR identifier.",
-      "examples": [
-        {
-          "value": "ROR:02mp31p96",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/standards-organization-schema",
-      "values_from": [
-        "ROR"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/standards-organization-schema/ror_id",
-      "owner": "Organization",
-      "domain_of": [
-        "Organization"
-      ],
-      "range": "ror_identifier",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "wikidata_id",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-organization-schema/wikidata_id",
-      "description": "Unique Wikidata identifier.",
-      "examples": [
-        {
-          "value": "WIKIDATA:Q282186",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/standards-organization-schema",
-      "values_from": [
-        "WIKIDATA"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/standards-organization-schema/wikidata_id",
-      "owner": "Organization",
-      "domain_of": [
-        "Organization"
-      ],
-      "range": "wikidata_identifier",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "organizations",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-organization-schema/organizations",
-      "description": "Collection of associated organizations.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-organization-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/standards-organization-schema/organizations",
-      "owner": "OrganizationContainer",
-      "domain_of": [
-        "OrganizationContainer"
-      ],
-      "range": "Organization",
-      "multivalued": true,
-      "inlined": true,
-      "inlined_as_list": true,
       "@type": "SlotDefinition"
     },
     {
@@ -3814,6 +3396,38 @@
   ],
   "classes": [
     {
+      "name": "NamedThing",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/NamedThing",
+      "description": "A generic grouping for any identifiable entity.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "schema:Thing"
+      ],
+      "slots": [
+        "id",
+        "name",
+        "description"
+      ],
+      "slot_usage": {},
+      "class_uri": "http://schema.org/Thing",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Organization",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Organization",
+      "description": "Represents a group or organization.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "is_a": "NamedThing",
+      "slots": [
+        "id",
+        "name",
+        "description"
+      ],
+      "slot_usage": {},
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Organization",
+      "@type": "ClassDefinition"
+    },
+    {
       "name": "DatasetProperty",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DatasetProperty",
       "description": "Represents a single property of a dataset, or a set of related properties.",
@@ -3821,15 +3435,8 @@
       "is_a": "NamedThing",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software"
       ],
       "slot_usage": {},
@@ -3853,15 +3460,8 @@
       "is_a": "NamedThing",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "software__version",
         "software__license",
         "software__url"
@@ -3895,15 +3495,8 @@
       "is_a": "NamedThing",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "person__affiliation",
         "person__email"
       ],
@@ -3936,14 +3529,8 @@
       ],
       "is_a": "NamedThing",
       "slots": [
-        "category",
+        "id",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -3953,7 +3540,6 @@
         "description",
         "doi",
         "download_url",
-        "id",
         "issued",
         "keywords",
         "language",
@@ -3977,7 +3563,6 @@
       "description": "Additional format information for a file",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slots": [
-        "id",
         "formatDialect__comment_prefix",
         "formatDialect__delimiter",
         "formatDialect__double_quote",
@@ -4028,14 +3613,8 @@
       ],
       "is_a": "Information",
       "slots": [
-        "category",
+        "id",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -4045,7 +3624,6 @@
         "description",
         "doi",
         "download_url",
-        "id",
         "issued",
         "keywords",
         "language",
@@ -4094,14 +3672,8 @@
       ],
       "is_a": "Information",
       "slots": [
-        "category",
+        "id",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -4111,7 +3683,6 @@
         "description",
         "doi",
         "download_url",
-        "id",
         "issued",
         "keywords",
         "language",
@@ -4436,14 +4007,8 @@
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "is_a": "Dataset",
       "slots": [
-        "category",
+        "id",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "compression",
         "conforms_to",
         "conforms_to_class",
@@ -4453,7 +4018,6 @@
         "description",
         "doi",
         "download_url",
-        "id",
         "issued",
         "keywords",
         "language",
@@ -4539,99 +4103,6 @@
       "@type": "ClassDefinition"
     },
     {
-      "name": "NamedThing",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/NamedThing",
-      "description": "A generic grouping for any identifiable entity",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "mappings": [
-        "schema:Thing"
-      ],
-      "slots": [
-        "id",
-        "category",
-        "name",
-        "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date"
-      ],
-      "slot_usage": {},
-      "class_uri": "http://schema.org/Thing",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "AnatomicalEntity",
-      "id_prefixes": [
-        "uberon"
-      ],
-      "definition_uri": "https://w3id.org/bridge2ai/standards-schema/AnatomicalEntity",
-      "description": "A subcellular location, cell type or gross anatomical part",
-      "from_schema": "https://w3id.org/bridge2ai/standards-schema",
-      "exact_mappings": [
-        "uberon:0001062",
-        "wikidata:Q4936952"
-      ],
-      "narrow_mappings": [
-        "ncit:C12219"
-      ],
-      "is_a": "NamedThing",
-      "slots": [
-        "id",
-        "category",
-        "name",
-        "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date"
-      ],
-      "slot_usage": {},
-      "class_uri": "https://w3id.org/bridge2ai/standards-schema/AnatomicalEntity",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "Organization",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-organization-schema/Organization",
-      "description": "Represents a group or organization related to or responsible for one or more Bridge2AI standards.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-organization-schema",
-      "is_a": "NamedThing",
-      "slots": [
-        "id",
-        "category",
-        "name",
-        "description",
-        "subclass_of",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
-        "ror_id",
-        "wikidata_id",
-        "url",
-        "related_to"
-      ],
-      "slot_usage": {},
-      "class_uri": "https://w3id.org/bridge2ai/standards-organization-schema/Organization",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "OrganizationContainer",
-      "definition_uri": "https://w3id.org/bridge2ai/standards-organization-schema/OrganizationContainer",
-      "description": "A container for Organizations.",
-      "from_schema": "https://w3id.org/bridge2ai/standards-organization-schema",
-      "slots": [
-        "organizations"
-      ],
-      "slot_usage": {},
-      "class_uri": "https://w3id.org/bridge2ai/standards-organization-schema/OrganizationContainer",
-      "@type": "ClassDefinition"
-    },
-    {
       "name": "Purpose",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#Purpose",
       "description": "For what purpose was the dataset created?",
@@ -4639,15 +4110,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "purpose__response"
       ],
@@ -4671,15 +4135,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "task__response"
       ],
@@ -4703,15 +4160,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "addressingGap__response"
       ],
@@ -4735,15 +4185,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "creator__principal_investigator",
         "creator__affiliation"
@@ -4774,15 +4217,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "fundingMechanism__grantor",
         "fundingMechanism__grant"
@@ -4813,18 +4249,8 @@
       "is_a": "Organization",
       "slots": [
         "id",
-        "category",
         "name",
-        "description",
-        "subclass_of",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
-        "ror_id",
-        "wikidata_id",
-        "url",
-        "related_to"
+        "description"
       ],
       "slot_usage": {},
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#Grantor",
@@ -4838,15 +4264,8 @@
       "is_a": "NamedThing",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "grant__grant_number"
       ],
       "slot_usage": {},
@@ -4869,15 +4288,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "instance__data_topic",
         "instance__instance_type",
@@ -4958,15 +4370,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "samplingStrategy__is_sample",
         "samplingStrategy__is_random",
@@ -5039,15 +4444,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "missingInfo__missing",
         "missingInfo__why_missing"
@@ -5080,14 +4478,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "relationships__description"
       ],
@@ -5112,14 +4503,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "splits__description"
       ],
@@ -5143,14 +4527,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "dataAnomaly__description"
       ],
@@ -5174,15 +4551,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "externalResource__external_resources",
         "externalResource__future_guarantees",
@@ -5231,14 +4601,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "confidentiality__confidential_elements_present",
         "confidentiality__description"
@@ -5269,15 +4632,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "contentWarning__content_warnings_present",
         "contentWarning__warnings"
@@ -5308,15 +4664,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "subpopulation__subpopulation_elements_present",
         "subpopulation__identification",
@@ -5354,14 +4703,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "deidentification__identifiable_elements_present",
         "deidentification__description"
@@ -5392,14 +4734,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "sensitiveElement__sensitive_elements_present",
         "sensitiveElement__description"
@@ -5430,14 +4765,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "instanceAcquisition__description",
         "instanceAcquisition__was_directly_observed",
@@ -5490,14 +4818,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "collectionMechanism__description"
       ],
@@ -5522,14 +4843,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "dataCollector__description"
       ],
@@ -5554,14 +4868,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "collectionTimeframe__description"
       ],
@@ -5586,14 +4893,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "directCollection__description"
       ],
@@ -5618,14 +4918,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "preprocessingStrategy__description"
       ],
@@ -5650,14 +4943,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "cleaningStrategy__description"
       ],
@@ -5682,14 +4968,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "labelingStrategy__description"
       ],
@@ -5714,14 +4993,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "rawData__description"
       ],
@@ -5746,14 +5018,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "existingUse__description"
       ],
@@ -5778,14 +5043,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "useRepository__description"
       ],
@@ -5810,14 +5068,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "otherTask__description"
       ],
@@ -5842,14 +5093,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "futureUseImpact__description"
       ],
@@ -5874,14 +5118,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "discouragedUse__description"
       ],
@@ -5906,14 +5143,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "thirdPartySharing__description"
       ],
@@ -5937,14 +5167,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "distributionFormat__description"
       ],
@@ -5969,14 +5192,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "distributionDate__description"
       ],
@@ -6001,14 +5217,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "maintainer__description"
       ],
@@ -6033,14 +5242,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "erratum__description"
       ],
@@ -6065,14 +5267,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "updatePlan__description"
       ],
@@ -6097,14 +5292,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "retentionLimits__description"
       ],
@@ -6129,14 +5317,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "versionAccess__description"
       ],
@@ -6161,14 +5342,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "extensionMechanism__description"
       ],
@@ -6193,14 +5367,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "ethicalReview__description"
       ],
@@ -6225,14 +5392,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "dataProtectionImpact__description"
       ],
@@ -6257,14 +5417,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "collectionNotification__description"
       ],
@@ -6289,14 +5442,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "collectionConsent__description"
       ],
@@ -6321,14 +5467,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "consentRevocation__description"
       ],
@@ -6353,15 +5492,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "humanSubjectResearch__involves_human_subjects",
         "humanSubjectResearch__irb_approval",
@@ -6417,15 +5549,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "informedConsent__consent_obtained",
         "informedConsent__consent_type",
@@ -6481,15 +5606,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "participantPrivacy__anonymization_method",
         "participantPrivacy__reidentification_risk",
@@ -6538,15 +5656,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "humanSubjectCompensation__compensation_provided",
         "humanSubjectCompensation__compensation_type",
@@ -6594,15 +5705,8 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
         "description",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "vulnerablePopulations__vulnerable_groups_included",
         "vulnerablePopulations__special_protections",
@@ -6650,14 +5754,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "licenseAndUseTerms__description"
       ],
@@ -6682,14 +5779,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "iPRestrictions__description"
       ],
@@ -6714,14 +5804,7 @@
       "is_a": "DatasetProperty",
       "slots": [
         "id",
-        "category",
         "name",
-        "subclass_of",
-        "related_to",
-        "contributor_name",
-        "contributor_github_name",
-        "contributor_orcid",
-        "contribution_date",
         "datasetProperty__used_software",
         "exportControlRegulatoryRestrictions__description"
       ],
@@ -6741,15 +5824,13 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-08-21T14:13:09",
-  "source_file_size": 20556,
-  "generation_date": "2025-08-21T14:14:11",
+  "source_file_date": "2025-08-21T15:00:49",
+  "source_file_size": 20956,
+  "generation_date": "2025-08-21T15:00:55",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
     "https://w3id.org/linkml/types.context.jsonld",
-    "standards_schema.context.jsonld",
-    "standards_organization_schema.context.jsonld",
     "D4D_Motivation.context.jsonld",
     "D4D_Composition.context.jsonld",
     "D4D_Collection.context.jsonld",
