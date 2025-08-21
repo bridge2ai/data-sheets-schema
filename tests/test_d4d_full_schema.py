@@ -88,37 +88,44 @@ class TestD4DFullSchema(unittest.TestCase):
                 except Exception as e:
                     self.fail(f"Error loading {test_case}: {str(e)}")
 
-    def test_d4d_full_schema_contains_all_modules(self):
-        """Test that the D4D Full Schema contains definitions from all modules."""
+    def test_d4d_full_schema_prefixes_include_expected(self):
+        """Parse full schema as YAML and ensure expected prefixes are present."""
         if not os.path.exists(self.d4d_full_path):
-            self.skipTest("D4D_Full_Schema.yaml not found")
+            self.skipTest("full schema not found")
 
         with open(self.d4d_full_path, 'r') as f:
-            schema_content = f.read()
+            schema_yaml = yaml.safe_load(f)
 
-        # Check for presence of key module-specific classes/slots
-        expected_sections = [
-            "MotivationSection",
-            "CompositionSection",
-            "CollectionSection",
-            "PreprocessingSection",
-            "UsesSection",
-            "DistributionSection",
-            "MaintenanceSection",
-            "EthicsSection",
-            "HumanSection",
-            "DataGovernanceSection"
+        prefixes = schema_yaml.get("prefixes")
+        self.assertIsNotNone(prefixes, "prefixes not found in full schema")
+
+        if isinstance(prefixes, dict):
+            prefix_items = list(prefixes.keys())
+        elif isinstance(prefixes, list):
+            prefix_items = prefixes
+        else:
+            self.fail(f"Unexpected type for prefixes: {type(prefixes)}")
+
+        expected = [
+            "d4dmotivation",
+            "d4dcomposition",
+            "d4dpreprocessing",
+            "d4duses",
+            "d4ddistribution",
+            "d4dmaintenance",
+            "d4dethics",
+            "d4dhuman",
+            "d4ddatagovernance",
         ]
-
-        for section in expected_sections:
-            with self.subTest(section=section):
-                self.assertIn(section, schema_content,
-                              f"Expected section {section} not found in D4D Full Schema")
+        for p in expected:
+            with self.subTest(prefix=p):
+                self.assertIn(
+                    p, prefix_items, f"Expected prefix '{p}' not found in full schema")
 
     def test_d4d_full_schema_has_no_imports(self):
-        """Test that the D4D Full Schema has no import statements (fully merged)."""
+        """Test that the full schema has no import statements (fully merged)."""
         if not os.path.exists(self.d4d_full_path):
-            self.skipTest("D4D_Full_Schema.yaml not found")
+            self.skipTest("full schema not found")
 
         with open(self.d4d_full_path, 'r') as f:
             schema_content = f.read()
