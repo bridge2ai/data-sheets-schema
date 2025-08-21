@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2024-03-06T17:00:50
+# Generation date: 2024-10-21T12:19:38
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -115,6 +115,10 @@ class WikidataIdentifier(Uriorcurie):
 
 # Class references
 class InformationId(URIorCURIE):
+    pass
+
+
+class FormatDialectId(URIorCURIE):
     pass
 
 
@@ -475,6 +479,7 @@ class FormatDialect(YAMLRoot):
     class_name: ClassVar[str] = "FormatDialect"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FormatDialect
 
+    id: Union[str, FormatDialectId] = None
     comment_prefix: Optional[str] = None
     delimiter: Optional[str] = None
     double_quote: Optional[str] = None
@@ -482,6 +487,11 @@ class FormatDialect(YAMLRoot):
     quote_char: Optional[str] = None
 
     def __post_init__(self, *_: List[str], **kwargs: Dict[str, Any]):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, FormatDialectId):
+            self.id = FormatDialectId(self.id)
+
         if self.comment_prefix is not None and not isinstance(self.comment_prefix, str):
             self.comment_prefix = str(self.comment_prefix)
 

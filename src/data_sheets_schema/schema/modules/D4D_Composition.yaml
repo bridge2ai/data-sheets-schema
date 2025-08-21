@@ -1,0 +1,331 @@
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/composition"
+name: "data-sheets-schema-composition"
+title: "Datasheets for Datasets – Composition Module"
+description: >
+  Subschema for Composition-related information in Datasheets for Datasets.
+  The questions in this section are intended to provide dataset consumers
+  with the information they need to make informed decisions about using the
+  dataset for their chosen tasks.
+
+
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+
+imports:
+  # Import the main data-sheets-schema so we can reference DatasetProperty, Dataset, etc.
+  - "https://w3id.org/bridge2ai/data-sheets-schema"
+
+
+subsets:
+  Composition:
+    description: >
+      The questions in this section are intended to provide dataset consumers
+      with the information they need to make informed decisions about using
+      the dataset for their chosen tasks. Some of the questions are designed
+      to elicit information about compliance with the EU’s GDPR or comparable
+      regulations in other jurisdictions.
+
+
+prefixes:
+  linkml: "https://w3id.org/linkml/"
+  d4d-composition: "https://w3id.org/bridge2ai/data-sheets-schema/composition#"
+  # Additional prefixes if needed
+
+
+default_prefix: "d4d-composition"
+
+
+# ------------------------------------------------------------------------------
+# Classes
+# ------------------------------------------------------------------------------
+
+
+classes:
+
+
+  DataSubset:
+    description: >
+      A subset of a dataset, likely containing multiple files of multiple
+      potential purposes and properties.
+    is_a: Dataset
+    in_subset:
+      - Composition
+    attributes:
+      is_data_split:
+        description: >
+          Is this subset a split of the larger dataset, e.g., for model
+          training, testing, or validation?
+        range: boolean
+      is_subpopulation:
+        description: >
+          Is this subset a subpopulation of the larger dataset, e.g., a set
+          of data for a specific demographic?
+        range: boolean
+
+
+  Instance:
+    description: >
+      What do the instances that comprise the dataset represent (e.g.,
+      documents, photos, people, countries)?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      data_topic:
+        description: >
+          General topic of each instance (e.g., from Bridge2AI standards).
+        range: uriorcurie
+        values_from:
+          - B2AI_TOPIC
+      instance_type:
+        description: >
+          Multiple types of instances? (e.g., movies, users, and ratings).
+        range: string
+      data_substrate:
+        description: >
+          Type of data (e.g., raw text, images) from Bridge2AI standards.
+        range: uriorcurie
+        values_from:
+          - B2AI_SUBSTRATE
+      counts:
+        description: >
+          How many instances are there in total (of each type, if appropriate)?
+        range: integer
+      label:
+        description: >
+          Is there a label or target associated with each instance?
+        range: boolean
+      label_description:
+        description: >
+          If labeled, what pattern or format do labels follow?
+        range: string
+      sampling_strategies:
+        description: >
+          References to one or more SamplingStrategy objects.
+        range: SamplingStrategy
+        multivalued: true
+      missing_information:
+        description: >
+          References to one or more MissingInfo objects describing missing data.
+        range: MissingInfo
+        multivalued: true
+
+
+  SamplingStrategy:
+    description: >
+      Does the dataset contain all possible instances, or is it a sample
+      (not necessarily random) of instances from a larger set? If so, how
+      representative is it?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      is_sample:
+        description: "Indicates whether it is a sample of a larger set."
+        range: boolean
+        multivalued: true
+      is_random:
+        description: "Indicates whether the sample is random."
+        range: boolean
+        multivalued: true
+      source_data:
+        description: >
+          Description of the larger set from which the sample was drawn, if any.
+        range: string
+        multivalued: true
+      is_representative:
+        description: >
+          Indicates whether the sample is representative of the larger set.
+        range: boolean
+        multivalued: true
+      representative_verification:
+        description: >
+          Explanation of how representativeness was validated or verified.
+        range: string
+        multivalued: true
+      why_not_representative:
+        description: >
+          Explanation of why the sample is not representative, if applicable.
+        range: string
+        multivalued: true
+      strategies:
+        description: >
+          Description of the sampling strategy (deterministic, probabilistic, etc.).
+        range: string
+        multivalued: true
+
+
+  MissingInfo:
+    description: >
+      Is any information missing from individual instances? (e.g.,
+      unavailable data)
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      missing:
+        description: >
+          Description of the missing data fields or elements.
+        range: string
+        multivalued: true
+      why_missing:
+        description: >
+          Explanation of why each piece of data is missing.
+        range: string
+        multivalued: true
+
+
+  Relationships:
+    description: >
+      Are relationships between individual instances made explicit
+      (e.g., users’ movie ratings, social network links)?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      description:
+        description: "Explanation of how these relationships are represented."
+        range: string
+        multivalued: true
+
+
+  Splits:
+    description: >
+      Are there recommended data splits (e.g., training, validation, testing)?
+      If so, how are they defined and why?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      description:
+        range: string
+        multivalued: true
+
+
+  DataAnomaly:
+    description: >
+      Are there any errors, sources of noise, or redundancies in the dataset?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      description:
+        range: string
+        multivalued: true
+
+
+  ExternalResource:
+    description: >
+      Is the dataset self-contained or does it rely on external resources (e.g.,
+      websites, other datasets)? If external, are there guarantees that those
+      resources will remain available and unchanged?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      external_resources:
+        description: "List of links or identifiers for external resources."
+        range: string
+        multivalued: true
+      future_guarantees:
+        description: >
+          Explanation of any commitments that external resources will remain
+          available and stable over time.
+        range: string
+        multivalued: true
+      archival:
+        description: >
+          Indication whether official archival versions of external resources
+          are included.
+        range: boolean
+        multivalued: true
+      restrictions:
+        description: >
+          Description of any restrictions or fees associated with external resources.
+        range: string
+        multivalued: true
+
+
+  Confidentiality:
+    description: >
+      Does the dataset contain data that might be confidential (e.g., protected
+      by legal privilege, patient data, non-public communications)?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      confidential_elements_present:
+        range: boolean
+        description: "Indicates whether any confidential data elements are present."
+      description:
+        range: string
+        multivalued: true
+
+
+  ContentWarning:
+    description: >
+      Does the dataset contain any data that might be offensive, insulting,
+      threatening, or otherwise anxiety-provoking if viewed directly?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      content_warnings_present:
+        range: boolean
+        description: "Indicates whether any content warnings are needed."
+      warnings:
+        range: string
+        multivalued: true
+
+
+  Subpopulation:
+    description: >
+      Does the dataset identify any subpopulations (e.g., by age, gender)?
+      If so, how are they identified and what are their distributions?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      subpopulation_elements_present:
+        range: boolean
+        description: "Indicates whether any subpopulations are explicitly identified."
+      identification:
+        range: string
+        multivalued: true
+      distribution:
+        range: string
+        multivalued: true
+
+
+  Deidentification:
+    description: >
+      Is it possible to identify individuals in the dataset, either directly
+      or indirectly (in combination with other data)?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      identifiable_elements_present:
+        range: boolean
+        description: "Indicates whether data subjects can be identified."
+      description:
+        range: string
+        multivalued: true
+
+
+  SensitiveElement:
+    description: >
+      Does the dataset contain data that might be considered sensitive
+      (e.g., race, sexual orientation, religion, biometrics)?
+    is_a: DatasetProperty
+    in_subset:
+      - Composition
+    attributes:
+      sensitive_elements_present:
+        range: boolean
+        description: "Indicates whether sensitive data elements are present."
+      description:
+        range: string
+        multivalued: true

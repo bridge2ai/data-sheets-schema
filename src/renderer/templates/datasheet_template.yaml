@@ -1,0 +1,424 @@
+---
+# Datasheets for Datasets Template
+# Organized by collection areas
+
+D4D-Motivation:
+  title: "Motivation"
+  description: "Questions about the purpose and creation of the dataset"
+  questions:
+    purpose:
+      question: "For what purpose was the dataset created?"
+      description: "The purpose or goals this dataset was designed to meet"
+      type: "text"
+    
+    tasks:
+      question: "Was there a specific task in mind for the dataset's application?"
+      description: "The specific tasks or applications intended for this dataset"
+      type: "text"
+    
+    addressing_gaps:
+      question: "Was there a specific gap that needed to be filled by creation of the dataset?"
+      description: "Specific gaps or needs addressed by this dataset"
+      type: "text"
+    
+    creators:
+      question: "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)?"
+      description: "Information about the dataset creators and their affiliations"
+      type: "complex"
+      properties:
+        principal_investigator:
+          type: "object"
+        affiliation:
+          type: "object"
+    
+    funders:
+      question: "Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number."
+      description: "Information about the funding sources for this dataset"
+      type: "complex"
+      properties:
+        grantor:
+          type: "object"
+        grant:
+          type: "object"
+
+D4D-Composition:
+  title: "Composition"
+  description: "Questions about what the dataset contains"
+  questions:
+    instances:
+      question: "What do the instances that comprise the dataset represent (e.g., documents, photos, people, countries)?"
+      description: "Information about the type and nature of instances in this dataset"
+      type: "complex"
+      properties:
+        data_topic:
+          type: "uri"
+        instance_type:
+          type: "text"
+        data_substrate:
+          type: "uri"
+        counts:
+          type: "integer"
+        label:
+          type: "boolean"
+        label_description:
+          type: "text"
+    
+    relationships:
+      question: "Are relationships between individual instances made explicit (e.g., users' movie ratings, social network links)? If so, please describe how these relationships are made explicit."
+      description: "Information about relationships between instances in the dataset"
+      type: "text"
+    
+    splits:
+      question: "Are there recommended data splits (e.g., training, development/validation, testing)? If so, please provide a description of these splits, explaining the rationale behind them."
+      description: "Information about any pre-defined data splits"
+      type: "text"
+    
+    anomalies:
+      question: "Are there any errors, sources of noise, or redundancies in the dataset? If so, please provide a description."
+      description: "Information about known anomalies or issues in the dataset"
+      type: "text"
+    
+    external_resources:
+      question: "Is the dataset self-contained, or does it link to or otherwise rely on external resources?"
+      description: "Information about external dependencies or resources"
+      type: "complex"
+      properties:
+        external_resources:
+          type: "text"
+        future_guarantees:
+          type: "text"
+        archival:
+          type: "boolean"
+        restrictions:
+          type: "text"
+    
+    confidential_elements:
+      question: "Does the dataset contain data that might be considered confidential?"
+      description: "Information about confidential elements in the dataset"
+      type: "complex"
+      properties:
+        confidential_elements_present:
+          type: "boolean"
+        description:
+          type: "text"
+    
+    content_warnings:
+      question: "Does the dataset contain data that, if viewed directly, might be offensive, insulting, threatening, or might otherwise cause anxiety?"
+      description: "Information about potentially sensitive content"
+      type: "complex"
+      properties:
+        content_warnings_present:
+          type: "boolean"
+        warnings:
+          type: "text"
+    
+    subpopulations:
+      question: "Does the dataset identify any subpopulations (e.g., by age, gender)?"
+      description: "Information about subpopulations represented in the dataset"
+      type: "complex"
+      properties:
+        subpopulation_elements_present:
+          type: "boolean"
+        identification:
+          type: "text"
+        distribution:
+          type: "text"
+    
+    is_deidentified:
+      question: "Is it possible to identify individuals (i.e., one or more natural persons), either directly or indirectly (i.e., in combination with other data) from the dataset?"
+      description: "Information about de-identification or anonymization"
+      type: "complex"
+      properties:
+        identifiable_elements_present:
+          type: "boolean"
+        description:
+          type: "text"
+    
+    sensitive_elements:
+      question: "Does the dataset contain data that might be considered sensitive in any way?"
+      description: "Information about sensitive elements in the dataset"
+      type: "complex"
+      properties:
+        sensitive_elements_present:
+          type: "boolean"
+        description:
+          type: "text"
+
+D4D-Collection:
+  title: "Collection Process"
+  description: "Questions about how the data was collected"
+  questions:
+    acquisition_methods:
+      question: "How was the data associated with each instance acquired?"
+      description: "Information about data acquisition methods"
+      type: "complex"
+      properties:
+        description:
+          type: "text"
+        was_directly_observed:
+          type: "boolean"
+        was_reported_by_subjects:
+          type: "boolean"
+        was_inferred_derived:
+          type: "boolean"
+        was_validated_verified:
+          type: "boolean"
+    
+    collection_mechanisms:
+      question: "What mechanisms or procedures were used to collect the data?"
+      description: "Information about collection mechanisms and validation"
+      type: "text"
+    
+    sampling_strategies:
+      question: "Does the dataset contain all possible instances or is it a sample of instances from a larger set?"
+      description: "Information about sampling approach"
+      type: "complex"
+      properties:
+        is_sample:
+          type: "boolean"
+        is_random:
+          type: "boolean"
+        source_data:
+          type: "text"
+        is_representative:
+          type: "boolean"
+        representative_verification:
+          type: "text"
+        why_not_representative:
+          type: "text"
+        strategies:
+          type: "text"
+    
+    data_collectors:
+      question: "Who was involved in the data collection process and how were they compensated?"
+      description: "Information about the people involved in data collection"
+      type: "text"
+    
+    collection_timeframes:
+      question: "Over what timeframe was the data collected?"
+      description: "Information about collection timeframe"
+      type: "text"
+
+D4D-Preprocessing:
+  title: "Preprocessing, Cleaning, and Labeling"
+  description: "Questions about data preparation"
+  questions:
+    preprocessing_strategies:
+      question: "Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?"
+      description: "Information about preprocessing methods"
+      type: "text"
+    
+    cleaning_strategies:
+      question: "Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?"
+      description: "Information about data cleaning methods"
+      type: "text"
+    
+    labeling_strategies:
+      question: "Was any preprocessing/cleaning/labeling of the data done (e.g., part-of-speech tagging)?"
+      description: "Information about data labeling methods"
+      type: "text"
+    
+    raw_sources:
+      question: "Was the 'raw' data saved in addition to the preprocessed/cleaned/labeled data?"
+      description: "Information about preservation of raw data"
+      type: "text"
+    
+    missing_information:
+      question: "Is any information missing from individual instances?"
+      description: "Information about missing data"
+      type: "complex"
+      properties:
+        missing:
+          type: "text"
+        why_missing:
+          type: "text"
+
+D4D-Uses:
+  title: "Uses"
+  description: "Questions about dataset uses"
+  questions:
+    existing_uses:
+      question: "Has the dataset been used for any tasks already?"
+      description: "Information about existing uses of the dataset"
+      type: "text"
+    
+    use_repository:
+      question: "Is there a repository that links to any or all papers or systems that use the dataset?"
+      description: "Information about a usage repository"
+      type: "text"
+    
+    other_tasks:
+      question: "What (other) tasks could the dataset be used for?"
+      description: "Information about potential other uses"
+      type: "text"
+    
+    future_use_impacts:
+      question: "Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses?"
+      description: "Information about potential impact on future uses"
+      type: "text"
+    
+    discouraged_uses:
+      question: "Are there tasks for which the dataset should not be used?"
+      description: "Information about discouraged or prohibited uses"
+      type: "text"
+
+D4D-Distribution:
+  title: "Distribution"
+  description: "Questions about dataset distribution"
+  questions:
+    third_party_sharing:
+      question: "Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?"
+      description: "Information about third-party sharing"
+      type: "boolean"
+    
+    distribution_formats:
+      question: "How will the dataset will be distributed (e.g., tarball on website, API, GitHub)?"
+      description: "Information about distribution formats"
+      type: "text"
+    
+    distribution_dates:
+      question: "When will the dataset be distributed?"
+      description: "Information about distribution timeline"
+      type: "text"
+    
+    license_and_use_terms:
+      question: "Will the dataset be distributed under a copyright or other intellectual property (IP) license, and/or under applicable terms of use (ToU)?"
+      description: "Information about licensing and terms of use"
+      type: "text"
+    
+    ip_restrictions:
+      question: "Have any third parties imposed IP-based or other restrictions on the data associated with the instances?"
+      description: "Information about IP restrictions"
+      type: "text"
+    
+    regulatory_restrictions:
+      question: "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances?"
+      description: "Information about regulatory restrictions"
+      type: "text"
+
+D4D-Maintenance:
+  title: "Maintenance"
+  description: "Questions about dataset maintenance"
+  questions:
+    maintainers:
+      question: "Who will be supporting/hosting/maintaining the dataset?"
+      description: "Information about dataset maintainers"
+      type: "text"
+    
+    errata:
+      question: "Is there an erratum?"
+      description: "Information about errata or known corrections"
+      type: "text"
+    
+    updates:
+      question: "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)?"
+      description: "Information about update plans"
+      type: "text"
+    
+    retention_limit:
+      question: "If the dataset relates to people, are there applicable limits on the retention of the data associated with the instances?"
+      description: "Information about data retention policies"
+      type: "text"
+    
+    version_access:
+      question: "Will older versions of the dataset continue to be supported/hosted/maintained?"
+      description: "Information about version management"
+      type: "text"
+    
+    extension_mechanism:
+      question: "If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so?"
+      description: "Information about contribution mechanisms"
+      type: "text"
+
+D4D-Ethics-and-Governance:
+  title: "Ethics and Governance"
+  description: "Questions about ethical review and governance of the dataset"
+  questions:
+    ethical_reviews:
+      question: "Were any ethical review processes conducted (e.g., by an institutional review board)?"
+      description: "Information about ethical reviews"
+      type: "text"
+    
+    direct_collection:
+      question: "Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources (e.g., websites)?"
+      description: "Information about data collection source"
+      type: "text"
+    
+    collection_notification:
+      question: "Were the individuals in question notified about the data collection?"
+      description: "Information about notification to data subjects"
+      type: "text"
+    
+    collection_consent:
+      question: "Did the individuals in question consent to the collection and use of their data?"
+      description: "Information about consent process"
+      type: "text"
+    
+    consent_revocation:
+      question: "If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or for certain uses?"
+      description: "Information about consent revocation mechanisms"
+      type: "text"
+    
+    data_protection_impacts:
+      question: "Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted?"
+      description: "Information about data protection impact analysis"
+      type: "text"
+
+# Dataset Metadata (common for all datasheets)
+Metadata:
+  title: "Dataset Metadata"
+  description: "Basic information about the dataset"
+  fields:
+    id:
+      type: "text"
+      description: "Unique identifier for the dataset"
+    
+    title:
+      type: "text"
+      description: "The official title of the dataset"
+    
+    description:
+      type: "text"
+      description: "A detailed description of the dataset"
+    
+    version:
+      type: "text"
+      description: "Dataset version"
+    
+    license:
+      type: "text"
+      description: "License information"
+    
+    issued:
+      type: "datetime"
+      description: "Date the dataset was issued"
+    
+    last_updated_on:
+      type: "datetime"
+      description: "Date the dataset was last updated"
+    
+    language:
+      type: "text"
+      description: "Language(s) of the dataset content"
+      multivalued: true
+    
+    keywords:
+      type: "text"
+      description: "Keywords describing the dataset"
+      multivalued: true
+    
+    publisher:
+      type: "text"
+      description: "The publisher of the dataset"
+    
+    created_by:
+      type: "text"
+      description: "The creator of the dataset"
+    
+    created_on:
+      type: "datetime"
+      description: "Date the dataset was created"
+    
+    is_tabular:
+      type: "boolean"
+      description: "Whether the dataset is in tabular format"
