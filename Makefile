@@ -37,7 +37,7 @@ endif
 
 
 # basename of a YAML file in model/
-.PHONY: all clean validate-d4d-examples render-d4d-examples
+.PHONY: all clean
 
 # note: "help" MUST be the first target in the file,
 # when the user types "make" they should get help info
@@ -48,8 +48,6 @@ help: status
 	@echo "make install -- install dependencies"
 	@echo "make test -- runs tests"
 	@echo "make lint -- perfom linting"
-	@echo "make validate-d4d-examples -- validate D4D example YAML files against Full schema"
-	@echo "make render-d4d-examples -- generate HTML rendering of D4D example YAML files"
 	@echo "make testdoc -- builds docs and runs local test server"
 	@echo "make deploy -- deploys site"
 	@echo "make update -- updates linkml version"
@@ -119,17 +117,6 @@ $(SOURCE_SCHEMA_ALL):
 gen-project: $(PYMODEL) $(SOURCE_SCHEMA_ALL)
 	$(RUN) gen-project -I python -I jsonschema -I jsonld -I owl ${GEN_PARGS} -d $(DEST) $(SOURCE_SCHEMA_PATH) && mv $(DEST)/*.py $(PYMODEL)
 
-validate-d4d-examples:
-	@echo "Validating D4D example YAML files against Full schema..."
-	$(RUN) python scripts/validate_d4d_examples.py
-
-render-d4d-examples:
-	@echo "Generating HTML rendering of D4D example YAML files..."
-	$(RUN) python scripts/render_yaml_to_html.py \
-		data/sheets/html_output/D4D_-_AI-READI_FAIRHub_v3_data.yaml \
-		data/sheets/html_output/D4D_-_CM4AI_Dataverse_v3_data.yaml \
-		data/sheets/html_output/D4D_-_VOICE_PhysioNet_v3_data.yaml
-	@echo "✅ HTML rendering complete. Files saved to data/sheets/html_output/"
 
 test: test-schema test-python test-examples
 
