@@ -15,7 +15,7 @@ see_also:
 
 imports:
   # Import the main schema so that we can reference DatasetProperty, etc.
-  - data_sheets_schema
+  - D4D_Base_import
 
 
 # Subsets are defined in the main schema

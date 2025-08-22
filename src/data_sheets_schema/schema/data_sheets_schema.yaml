@@ -32,6 +32,8 @@ default_range: string
 
 imports:
   - linkml:types
+  # Base schema with shared definitions
+  - D4D_Base_import
   # D4D Modules in original paper order
   - D4D_Motivation
   - D4D_Composition
@@ -48,156 +50,13 @@ imports:
 ## TYPES ##
 
 
-## SUBSETS ##
-subsets:
-  Motivation:
-    description: >-
-      The questions in this section are primarily intended to encourage dataset
-      creators to clearly articulate their reasons for creating the dataset and
-      to promote transparency about funding interests. The latter may be
-      particularly relevant for datasets created for research purposes.
-  Composition:
-    description: >-
-      The questions in this section are intended to provide dataset consumers
-      with the information they need to make informed decisions about using the
-      dataset for their chosen tasks. Some of the questions are designed to
-      elicit information about compliance with the EU's General Data Protection
-      Regulation (GDPR) or comparable regulations in other jurisdictions.
-  Collection:
-    description: >-
-      The questions in this section are designed to elicit information that may
-      help researchers and practitioners to create alternative datasets with
-      similar characteristics.
-  Preprocessing-Cleaning-Labeling:
-    description: >-
-      The questions in this section are intended to provide dataset consumers
-      with the information they need to determine whether the "raw" data has
-      been processed in ways that are compatible with their chosen tasks.
-  Uses:
-    description: >-
-      The questions in this section are intended to encourage dataset creators
-      to reflect on the tasks for which the dataset should and should not be
-      used.
-  Distribution:
-    description: >-
-      The questions in this section pertain to dataset distribution.
-  Maintenance:
-    description: >-
-      The questions in this section are intended to encourage dataset creators
-      to plan for dataset maintenance and communicate this plan to dataset
-      consumers.
-  Ethics:
-    description: >-
-      The questions in this section address ethical and data-protection concerns,
-      including review by institutional bodies, consent and notification to data
-      subjects, and potential impacts on data-protection rights.
-  DataGovernance:
-    description: >-
-      The questions in this section relate to how the dataset is governed:
-      how it is distributed, licensed, and maintained over time, plus
-      third-party restrictions and update policies.
+# SUBSETS are now defined in D4D_Base_import.yaml
 
 ## CLASSES ##
 classes:
 
-  # NamedThing is imported from Bridge2AI standards schema
-  NamedThing:
-    description: >-
-      A generic grouping for any identifiable entity.
-    attributes:
-      id:
-        identifier: true
-        slot_uri: schema:identifier
-        range: uriorcurie
-        description: A unique identifier for a thing.
-        required: true
-      name:
-        slot_uri: schema:name
-        description: A human-readable name for a thing.
-        range: string
-      description:
-        slot_uri: schema:description
-        description: A human-readable description for a thing.
-        range: string
-    class_uri: schema:Thing
-
-  Organization:
-    is_a: NamedThing
-    description: >-
-      Represents a group or organization.
-
-  # Base classes for D4D modules (moved from D4D_Base)
-  DatasetProperty:
-    description: "Represents a single property of a dataset, or a set of related properties."
-    is_a: NamedThing
-    attributes:
-      used_software:
-        description: "What software was used as part of this dataset property?"
-        range: Software
-        multivalued: true
-
-  Software:
-    description: "A software program or library."
-    is_a: NamedThing
-    attributes:
-      version:
-        range: string
-      license:
-        range: string
-      url:
-        range: string
-
-  Person:
-    description: "An individual human being."
-    is_a: NamedThing
-    attributes:
-      affiliation:
-        description: "The organization(s) to which the person belongs."
-        range: Organization
-        multivalued: true
-      email:
-        description: "The email address of the person."
-        range: string
-
-  Information:
-    description: "Grouping for datasets and data files"
-    close_mappings:
-      - schema:CreativeWork
-    is_a: NamedThing
-    slots:
-      - compression
-      - conforms_to
-      - conforms_to_class
-      - conforms_to_schema
-      - created_by
-      - created_on
-      - doi
-      - download_url
-      - issued
-      - keywords
-      - language
-      - last_updated_on
-      - license
-      - modified_by
-      - page
-      - publisher
-      - status
-      - title
-      - version
-      - was_derived_from
-
-  # From linkml Datasets schema - see
-  # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-  FormatDialect:
-    description: Additional format information for a file
-    attributes:
-      comment_prefix:
-      delimiter:
-      double_quote:
-      header:
-      quote_char:
-
-  # Person, DatasetProperty, Software are defined above as base classes
+  # Base classes (NamedThing, Organization, DatasetProperty, Software, Person, 
+  # Information, FormatDialect) are now imported from D4D_Base_import.yaml
 
   DatasetCollection:
     aliases:
@@ -406,156 +265,17 @@ classes:
   # Maintenance: Maintainer, Erratum, UpdatePlan, RetentionLimits, VersionAccess, ExtensionMechanism
 
 ## SLOTS ##
+# Most shared slots are now imported from D4D_Base_import.yaml
+
 slots:
 
-  # The majority of these slots are adapted from
-  # the linkml Datasets schema - see
-  # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
-
-  title:
-    description: the official title of the element
-    slot_uri: dcterms:title
-
-  language:
-    description: language in which the information is expressed
-
-  publisher:
-    slot_uri: dcterms:publisher
-    range: uriorcurie
-
-  issued:
-    slot_uri: dcterms:issued
-    range: datetime
-
-  page:
-    slot_uri: dcat:landingPage
-
-  dialect:
-    slot_uri: csvw:dialect
-
-  bytes:
-    description: Size of the data in bytes.
-    range: integer
-    slot_uri: dcat:byteSize
-
-  path:
-    close_mappings:
-      - frictionless:path
-
-  download_url:
-    description: >-
-      URL from which the data can be downloaded. This is not the same as the
-      landing page, which is a page that describes the dataset. Rather, this
-      URL points directly to the data itself.
-    range: uri
-    slot_uri: dcat:downloadURL
-    exact_mappings:
-      - schema:url
-    close_mappings:
-      - frictionless:path
-
-  format:
-    description: >-
-      The format of the data. This is not the same as the media type.
-      Rather, this is the format of the data in a more specific sense,
-      e.g., CSV, JSON, etc.
-    range: FormatEnum
-    slot_uri: dcterms:format
-
-  compression:
-    description: >-
-      The compression format of the data. This is not the same as the media
-      type. Rather, this is the compression format of the data in a more
-      specific sense, e.g., zip, gzip, etc.
-    range: CompressionEnum
-
-  encoding:
-    description: >-
-      The encoding of the data. This is not the same as the media type.
-      Rather, this is the encoding of the data in a more specific sense,
-      e.g., UTF-8, ASCII, etc.
-    range: EncodingEnum
-
-  hash:
-    description: >-
-      The hash representation of the data, e.g., sha256, md5, etc.
-      Subtypes have their own slots.
-    range: string
-  sha256:
-    description: >-
-      The sha256 hash representation of the data.
-    is_a: hash
-  md5:
-    description: >-
-      The md5 hash representation of the data.
-    is_a: hash
-
-  media_type:
-    description: >-
-      The media type of the data. This is not the same as the format.
-      Rather, this is the media type of the data in a more general sense,
-      e.g., text/csv, application/json, etc., though as it is defined here
-      the media type can be any string.
-    range: string
-    examples:
-      - value: text/csv
-      - value: application/json
-    slot_uri: dcat:mediaType
-    exact_mappings:
-      - frictionless:mediatype
-      - schema:encodingFormat
-
-  conforms_to:
-    description: >-
-      The standard to which the data conforms. This is not the same as the
-      media type. Rather, this is the standard to which the data conforms
-      in a more specific sense, e.g., frictionless, schema.org, etc.
-      This should be a standard from the Bridge2AI standards registry.
-    slot_uri: dcterms:conformsTo
-    range: uriorcurie
-    values_from:
-      - B2AI_STANDARD
-
-  conforms_to_schema:
-    description: >-
-      The schema to which the data conforms. This is not the same as the
-      media type. Rather, this is the schema to which the data conforms
-      in a more specific sense, and even more specific than the general
-      set of standards it conforms to.
-    is_a: conforms_to
-    exact_mappings:
-      - frictionless:schema
-
-  conforms_to_class:
-    description: >-
-      The class in the schema to which the data object instantiates.
-    is_a: conforms_to
-
-  doi:
-    description: >-
-      The Digital Object Identifier of the data, with the doi prefix.
-    range: uriorcurie
-    examples:
-      - value: "doi:10.48550/arXiv.2310.03666"
-
+  # Additional main schema specific slots
   profile:
     description: >-
       The frictionless data profile to which the data conforms.
     range: uriorcurie
     exact_mappings:
       - frictionless:profiles
-
-  keywords:
-    description: >-
-      Keywords associated with the data. These may be provided by
-      the data creator or assigned later in a manual or automated
-      manner.
-    singular_name: keyword
-    multivalued: true
-    range: string
-    slot_uri: dcat:keyword
-    exact_mappings:
-      - schema:keywords
 
   themes:
     description: >-
@@ -566,54 +286,6 @@ slots:
     multivalued: true
     range: uriorcurie
     slot_uri: dcat:theme
-
-  created_by:
-    range: CreatorOrMaintainerEnum
-    description: Agent that created the element
-    slot_uri: pav:createdBy
-    multivalued: true
-
-  created_on:
-    range: datetime
-    description: Date and Time at which the element was created
-    slot_uri: pav:createdOn
-
-  last_updated_on:
-    range: datetime
-    description: Date and Time at which the element was last updated
-    slot_uri: pav:lastUpdatedOn
-
-  modified_by:
-    range: CreatorOrMaintainerEnum
-    description: agent that modified the element
-    slot_uri: oslc:modifiedBy
-
-  status:
-    range: uriorcurie
-    description: Status of the element in terms of its maturity or life cycle
-    slot_uri: bibo:status
-    examples:
-      - value: "bibo:draft"
-
-  license:
-    description: license for the data
-    slot_uri: dcterms:license
-    exact_mappings:
-      - frictionless:licenses
-
-  version:
-    description: particular version of schema
-    slot_uri: pav:version
-    exact_mappings:
-      - schema:version
-      - dcterms:hasVersion
-
-  was_derived_from:
-    slot_uri: prov:wasDerivedFrom
-    description: >-
-      A derivation is a transformation of an entity into another, an update
-      of an entity resulting in a new one, or the construction of a new entity
-      based on a pre-existing entity.@en
 
 ## ENUMS ##
 enums:

@@ -1,0 +1,446 @@
+---
+id: "https://w3id.org/bridge2ai/data-sheets-schema/base"
+name: "data-sheets-schema-base"
+title: "Datasheets for Datasets – Base Schema"
+description: >
+  Base schema containing reusable classes, slots, types, and enums shared
+  across all D4D modules. This provides common definitions for DatasetProperty,
+  Person, Organization, Software, and other foundational elements.
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+prefixes:
+  biolink: https://w3id.org/biolink/vocab/
+  csvw: http://www.w3.org/ns/csvw#
+  data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
+  datasets: https://w3id.org/linkml/report
+  dcat: http://www.w3.org/ns/dcat#
+  dcterms: http://purl.org/dc/terms/
+  example: https://example.org/
+  formats: http://www.w3.org/ns/formats/
+  frictionless: https://specs.frictionlessdata.io/
+  linkml: https://w3id.org/linkml/
+  mediatypes: https://www.iana.org/assignments/media-types/
+  pav: http://purl.org/pav/
+  schema: http://schema.org/
+  sh: https://w3id.org/shacl/
+  skos: http://www.w3.org/2004/02/skos/core#
+  void: http://rdfs.org/ns/void#
+
+default_prefix: data_sheets_schema
+default_range: string
+
+imports:
+  - linkml:types
+
+## SUBSETS ##
+subsets:
+  Motivation:
+    description: >-
+      The questions in this section are primarily intended to encourage dataset
+      creators to clearly articulate their reasons for creating the dataset and
+      to promote transparency about funding interests. The latter may be
+      particularly relevant for datasets created for research purposes.
+  Composition:
+    description: >-
+      The questions in this section are intended to provide dataset consumers
+      with the information they need to make informed decisions about using the
+      dataset for their chosen tasks. Some of the questions are designed to
+      elicit information about compliance with the EU's General Data Protection
+      Regulation (GDPR) or comparable regulations in other jurisdictions.
+  Collection:
+    description: >-
+      The questions in this section are designed to elicit information that may
+      help researchers and practitioners to create alternative datasets with
+      similar characteristics.
+  Preprocessing-Cleaning-Labeling:
+    description: >-
+      The questions in this section are intended to provide dataset consumers
+      with the information they need to determine whether the "raw" data has
+      been processed in ways that are compatible with their chosen tasks.
+  Uses:
+    description: >-
+      The questions in this section are intended to encourage dataset creators
+      to reflect on the tasks for which the dataset should and should not be
+      used.
+  Distribution:
+    description: >-
+      The questions in this section pertain to dataset distribution.
+  Maintenance:
+    description: >-
+      The questions in this section are intended to encourage dataset creators
+      to plan for dataset maintenance and communicate this plan to dataset
+      consumers.
+  Ethics:
+    description: >-
+      The questions in this section address ethical and data-protection concerns,
+      including review by institutional bodies, consent and notification to data
+      subjects, and potential impacts on data-protection rights.
+  DataGovernance:
+    description: >-
+      The questions in this section relate to how the dataset is governed:
+      how it is distributed, licensed, and maintained over time, plus
+      third-party restrictions and update policies.
+
+## BASE CLASSES ##
+classes:
+
+  # Core base class for all identifiable entities
+  NamedThing:
+    description: >-
+      A generic grouping for any identifiable entity.
+    attributes:
+      id:
+        identifier: true
+        slot_uri: schema:identifier
+        range: uriorcurie
+        description: A unique identifier for a thing.
+        required: true
+      name:
+        slot_uri: schema:name
+        description: A human-readable name for a thing.
+        range: string
+      description:
+        slot_uri: schema:description
+        description: A human-readable description for a thing.
+        range: string
+    class_uri: schema:Thing
+
+  Organization:
+    is_a: NamedThing
+    description: >-
+      Represents a group or organization.
+
+  # Base class for all dataset properties and components
+  DatasetProperty:
+    description: "Represents a single property of a dataset, or a set of related properties."
+    is_a: NamedThing
+    attributes:
+      used_software:
+        description: "What software was used as part of this dataset property?"
+        range: Software
+        multivalued: true
+
+  Software:
+    description: "A software program or library."
+    is_a: NamedThing
+    attributes:
+      version:
+        range: string
+      license:
+        range: string
+      url:
+        range: string
+
+  Person:
+    description: "An individual human being."
+    is_a: NamedThing
+    attributes:
+      affiliation:
+        description: "The organization(s) to which the person belongs."
+        range: Organization
+        multivalued: true
+      email:
+        description: "The email address of the person."
+        range: string
+
+  Information:
+    description: "Grouping for datasets and data files"
+    close_mappings:
+      - schema:CreativeWork
+    is_a: NamedThing
+    slots:
+      - compression
+      - conforms_to
+      - conforms_to_class
+      - conforms_to_schema
+      - created_by
+      - created_on
+      - doi
+      - download_url
+      - issued
+      - keywords
+      - language
+      - last_updated_on
+      - license
+      - modified_by
+      - page
+      - publisher
+      - status
+      - title
+      - version
+      - was_derived_from
+
+  # From linkml Datasets schema
+  FormatDialect:
+    description: Additional format information for a file
+    attributes:
+      comment_prefix:
+      delimiter:
+      double_quote:
+      header:
+      quote_char:
+
+## SHARED SLOTS ##
+slots:
+
+  # The majority of these slots are adapted from
+  # the linkml Datasets schema - see
+  # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
+
+  title:
+    description: the official title of the element
+    slot_uri: dcterms:title
+
+  language:
+    description: language in which the information is expressed
+
+  publisher:
+    slot_uri: dcterms:publisher
+    range: uriorcurie
+
+  issued:
+    slot_uri: dcterms:issued
+    range: datetime
+
+  page:
+    slot_uri: dcat:landingPage
+
+  dialect:
+    slot_uri: csvw:dialect
+
+  bytes:
+    description: Size of the data in bytes.
+    range: integer
+    slot_uri: dcat:byteSize
+
+  path:
+    close_mappings:
+      - frictionless:path
+
+  download_url:
+    description: >-
+      URL from which the data can be downloaded. This is not the same as the
+      landing page, which is a page that describes the dataset. Rather, this
+      URL points directly to the data itself.
+    range: uri
+    slot_uri: dcat:downloadURL
+    exact_mappings:
+      - schema:url
+    close_mappings:
+      - frictionless:path
+
+  format:
+    description: >-
+      The file format, physical medium, or dimensions of a resource. This should
+      be a file extension or MIME type.
+    range: FormatEnum
+    slot_uri: dcterms:format
+
+  encoding:
+    description: the character encoding of the data
+    range: EncodingEnum
+    slot_uri: dcat:mediaType
+
+  compression:
+    description: >-
+      compression format used, if any. e.g., gzip, bzip2, zip
+    range: CompressionEnum
+
+  media_type:
+    description: >-
+      The media type of the data. This should be a MIME type.
+    range: MediaTypeEnum
+
+  hash:
+    description: hash of the data
+
+  md5:
+    description: md5 hash of the data
+
+  sha256:
+    description: sha256 hash of the data
+
+  conforms_to:
+    slot_uri: dcterms:conformsTo
+
+  conforms_to_schema:
+    slot_uri: dcterms:conformsTo
+
+  conforms_to_class:
+    slot_uri: dcterms:conformsTo
+
+  license:
+    slot_uri: dcterms:license
+
+  keywords:
+    multivalued: true
+    slot_uri: dcat:keyword
+
+  version:
+    slot_uri: pav:version
+
+  issued:
+    slot_uri: dcterms:issued
+    range: datetime
+
+  created_by:
+    slot_uri: pav:createdBy
+
+  created_on:
+    slot_uri: pav:createdOn
+    range: datetime
+
+  last_updated_on:
+    slot_uri: pav:lastUpdatedOn
+    range: datetime
+
+  modified_by:
+    slot_uri: pav:lastUpdateBy
+
+  status:
+
+  was_derived_from:
+    slot_uri: pav:derivedFrom
+
+  doi:
+    description: digital object identifier
+    slot_uri: void:uriRegexPattern
+    pattern: "10\\.\\d{4,}\\/.+"
+
+## SHARED ENUMS ##
+enums:
+
+  FormatEnum:
+    permissible_values:
+      CSV:
+      TSV:
+      XML:
+      JSON:
+      JSONL:
+      YAML:
+      HTML:
+      PDF:
+      DOCX:
+      XLSX:
+      PPTX:
+      TXT:
+      MD:
+      ZIP:
+      TAR:
+      GZ:
+      BZ2:
+      XZ:
+
+  MediaTypeEnum:
+    permissible_values:
+      text/csv:
+      text/tab-separated-values:
+      application/json:
+      application/xml:
+      text/xml:
+      application/yaml:
+      text/yaml:
+      text/html:
+      application/pdf:
+      application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+      application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+      application/vnd.openxmlformats-officedocument.presentationml.presentation:
+      text/plain:
+      text/markdown:
+      application/zip:
+      application/x-tar:
+      application/gzip:
+      application/x-bzip2:
+      application/x-xz:
+
+  CompressionEnum:
+    permissible_values:
+      gzip:
+      bzip2:
+      zip:
+      tar:
+      xz:
+      lzma:
+      compress:
+
+  EncodingEnum:
+    permissible_values:
+      ASCII:
+      Big5:
+      EUC-JP:
+      EUC-KR:
+      EUC-TW:
+      GB2312:
+      HZ-GB-2312:
+      ISO-2022-CN-EXT:
+      ISO-2022-CN:
+      ISO-2022-JP-2:
+      ISO-2022-JP:
+      ISO-2022-KR:
+      ISO-8859-10:
+      ISO-8859-11:
+      ISO-8859-13:
+      ISO-8859-14:
+      ISO-8859-15:
+      ISO-8859-16:
+      ISO-8859-1:
+      ISO-8859-2:
+      ISO-8859-3:
+      ISO-8859-4:
+      ISO-8859-5:
+      ISO-8859-6:
+      ISO-8859-7:
+      ISO-8859-8:
+      ISO-8859-9:
+      KOI8-R:
+      KOI8-U:
+      Shift_JIS:
+      UTF-16:
+      UTF-32:
+      UTF-7:
+      UTF-8:
+      Windows-1250:
+      Windows-1251:
+      Windows-1252:
+      Windows-1253:
+      Windows-1254:
+      Windows-1255:
+      Windows-1256:
+      Windows-1257:
+      Windows-1258:
+
+  CreatorOrMaintainerEnum:
+    permissible_values:
+      data_subject:
+        description: A person whose information is recorded in the dataset.
+      third_party:
+        description: A third party not involved in the direct creation or maintenance.
+      researcher:
+        description: A researcher involved in dataset creation or maintenance.
+      industry:
+        description: Industry professional involved in dataset creation or maintenance.
+      academic_institution:
+        description: Academic institution responsible for dataset.
+      government_agency:
+        description: Government agency responsible for dataset.
+      commercial_entity:
+        description: Commercial entity responsible for dataset.
+      non_profit_organization:
+        description: Non-profit organization responsible for dataset.
+      crowdsourced:
+        description: Dataset created through crowdsourcing efforts.
+      automated_system:
+        description: Automated system or process responsible for dataset.
+      other:
+        description: Other type of creator or maintainer not listed.
+
+  Boolean:
+    permissible_values:
+      "true":
+        title: "True"
+      "false":
+        title: "False"
+      "unknown":
+        title: "Unknown"

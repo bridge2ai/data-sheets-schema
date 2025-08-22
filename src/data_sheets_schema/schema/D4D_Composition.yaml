@@ -14,8 +14,8 @@ see_also:
 
 
 imports:
-  # Import the main data-sheets-schema so we can reference DatasetProperty, Dataset, etc.
-  - data_sheets_schema
+  # Import the base schema for shared classes like DatasetProperty, Person, Organization, etc.
+  - D4D_Base_import
 
 
 # Subsets are defined in the main schema
