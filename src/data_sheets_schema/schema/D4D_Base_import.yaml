@@ -281,10 +281,6 @@ slots:
   version:
     slot_uri: pav:version
 
-  issued:
-    slot_uri: dcterms:issued
-    range: datetime
-
   created_by:
     slot_uri: pav:createdBy
 
