@@ -7,7 +7,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <link href="https://bridge2ai.github.io/data-sheets-schema/Grantor/" rel="canonical"/>
 <link href="../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.5.3, mkdocs-material-8.5.10" name="generator"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-8.5.10" name="generator"/>
 <title>Class: Grantor - data-sheets-schema</title>
 <link href="../assets/stylesheets/main.975780f9.min.css" rel="stylesheet"/>
 <link href="../assets/stylesheets/palette.2505c338.min.css" rel="stylesheet"/>
@@ -205,41 +205,20 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-grantor">Class: Grantor</h1>
-<p><em>What is the name and/or identifier of the organization providing monetary support or other resources supporting creation of the dataset?</em></p>
+<p><em>The name and/or identifier of the organization providing monetary support  or other resources supporting creation of the dataset.</em></p>
+<p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/Grantor">data_sheets_schema:Grantor</a></p>
 <div class="mermaid"> classDiagram
     class Grantor
+    click Grantor href "../Grantor/"
       Organization &lt;|-- Grantor
-
-      Grantor : category
-
-      Grantor : contribution_date
-
-      Grantor : contributor_github_name
-
-      Grantor : contributor_name
-
-      Grantor : contributor_orcid
+        click Organization href "../Organization/"
 
       Grantor : description
 
       Grantor : id
 
       Grantor : name
-
-      Grantor : related_to
-
-          Grantor --|&gt; NamedThing : related_to
-
-      Grantor : ror_id
-
-      Grantor : subclass_of
-
-          Grantor --|&gt; NamedThing : subclass_of
-
-      Grantor : url
-
-      Grantor : wikidata_id
 
 
 </div>
@@ -265,39 +244,9 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../ror_id/">ror_id</a></td>
-<td>0..1 <br/> <a href="../RorIdentifier/">RorIdentifier</a></td>
-<td>Unique ROR identifier</td>
-<td><a href="../Organization/">Organization</a></td>
-</tr>
-<tr>
-<td><a href="../wikidata_id/">wikidata_id</a></td>
-<td>0..1 <br/> <a href="../WikidataIdentifier/">WikidataIdentifier</a></td>
-<td>Unique Wikidata identifier</td>
-<td><a href="../Organization/">Organization</a></td>
-</tr>
-<tr>
-<td><a href="../url/">url</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>URL for basic documentation of the standard or tool</td>
-<td><a href="../Organization/">Organization</a></td>
-</tr>
-<tr>
-<td><a href="../related_to/">related_to</a></td>
-<td>0..* <br/> <a href="../NamedThing/">NamedThing</a></td>
-<td>A relationship that is asserted between two named things</td>
-<td><a href="../NamedThing/">NamedThing</a>, <a href="../Organization/">Organization</a></td>
-</tr>
-<tr>
 <td><a href="../id/">id</a></td>
-<td>1..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
 <td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../category/">category</a></td>
-<td>0..1 <br/> <a href="../CategoryType/">CategoryType</a></td>
-<td>Name of the high level ontology class in which this entity is categorized</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 <tr>
@@ -310,36 +259,6 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../subclass_of/">subclass_of</a></td>
-<td>0..* <br/> <a href="../NamedThing/">NamedThing</a></td>
-<td>Holds between two classes where the domain class is a specialization of the r...</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_name/">contributor_name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The name of the person who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_github_name/">contributor_github_name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The name of the github user who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_orcid/">contributor_orcid</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>The ORCiD of the person who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contribution_date/">contribution_date</a></td>
-<td>0..1 <br/> <a href="../Date/">Date</a></td>
-<td>The date on which the node was added</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
@@ -392,8 +311,10 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: Grantor
-description: What is the name and/or identifier of the organization providing monetary
-  support or other resources supporting creation of the dataset?
+description: 'The name and/or identifier of the organization providing monetary support  or
+  other resources supporting creation of the dataset.
+
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: Organization
 
@@ -402,100 +323,30 @@ is_a: Organization
 <h3 id="induced">Induced</h3>
 <details>
 <pre><code class="language-yaml">name: Grantor
-description: What is the name and/or identifier of the organization providing monetary
-  support or other resources supporting creation of the dataset?
+description: 'The name and/or identifier of the organization providing monetary support  or
+  other resources supporting creation of the dataset.
+
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: Organization
 attributes:
-  ror_id:
-    name: ror_id
-    description: Unique ROR identifier.
-    examples:
-    - value: ROR:02mp31p96
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    values_from:
-    - ROR
-    alias: ror_id
-    owner: Grantor
-    domain_of:
-    - Organization
-    range: ror_identifier
-  wikidata_id:
-    name: wikidata_id
-    description: Unique Wikidata identifier.
-    examples:
-    - value: WIKIDATA:Q282186
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    values_from:
-    - WIKIDATA
-    alias: wikidata_id
-    owner: Grantor
-    domain_of:
-    - Organization
-    range: wikidata_identifier
-  url:
-    name: url
-    description: URL for basic documentation of the standard or tool.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: url
-    owner: Grantor
-    domain_of:
-    - Software
-    - Organization
-    range: uriorcurie
-  related_to:
-    name: related_to
-    description: A relationship that is asserted between two named things.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    domain: NamedThing
-    multivalued: true
-    inherited: true
-    alias: related_to
-    owner: Grantor
-    domain_of:
-    - Organization
-    - NamedThing
-    symmetric: true
-    range: NamedThing
   id:
     name: id
     description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:identifier
     identifier: true
     alias: id
     owner: Grantor
     domain_of:
-    - Information
-    - FormatDialect
     - NamedThing
     range: uriorcurie
     required: true
-  category:
-    name: category
-    description: Name of the high level ontology class in which this entity is categorized.
-      Corresponds to the label for the entity type class, e.g., "BiomedicalStandard".
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: type
-    domain: NamedThing
-    designates_type: true
-    alias: category
-    owner: Grantor
-    domain_of:
-    - NamedThing
-    range: category_type
   name:
     name: name
     description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:name
     alias: name
@@ -506,13 +357,13 @@ attributes:
   description:
     name: description
     description: A human-readable description for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:description
     alias: description
     owner: Grantor
     domain_of:
-    - Information
+    - NamedThing
     - Relationships
     - Splits
     - DataAnomaly
@@ -523,12 +374,7 @@ attributes:
     - CollectionMechanism
     - DataCollector
     - CollectionTimeframe
-    - EthicalReview
     - DirectCollection
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - DataProtectionImpact
     - PreprocessingStrategy
     - CleaningStrategy
     - LabelingStrategy
@@ -541,89 +387,21 @@ attributes:
     - ThirdPartySharing
     - DistributionFormat
     - DistributionDate
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     - Maintainer
     - Erratum
     - UpdatePlan
     - RetentionLimits
     - VersionAccess
     - ExtensionMechanism
-    - NamedThing
+    - EthicalReview
+    - DataProtectionImpact
+    - CollectionNotification
+    - CollectionConsent
+    - ConsentRevocation
+    - LicenseAndUseTerms
+    - IPRestrictions
+    - ExportControlRegulatoryRestrictions
     range: string
-  subclass_of:
-    name: subclass_of
-    description: Holds between two classes where the domain class is a specialization
-      of the range class.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - rdfs:subClassOf
-    - MESH:isa
-    narrow_mappings:
-    - rdfs:subPropertyOf
-    rank: 1000
-    is_a: related_to
-    domain: NamedThing
-    multivalued: true
-    inherited: true
-    alias: subclass_of
-    owner: Grantor
-    domain_of:
-    - NamedThing
-    range: NamedThing
-  contributor_name:
-    name: contributor_name
-    description: The name of the person who added this node.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_name
-    owner: Grantor
-    domain_of:
-    - NamedThing
-    range: string
-  contributor_github_name:
-    name: contributor_github_name
-    description: The name of the github user who added this node.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_github_name
-    owner: Grantor
-    domain_of:
-    - NamedThing
-    range: string
-  contributor_orcid:
-    name: contributor_orcid
-    description: The ORCiD of the person who added this node.
-    examples:
-    - value: ORCID:0000-0001-1234-5678
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_orcid
-    owner: Grantor
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-  contribution_date:
-    name: contribution_date
-    description: The date on which the node was added.
-    examples:
-    - value: '2023-03-20'
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contribution_date
-    owner: Grantor
-    domain_of:
-    - NamedThing
-    range: date
 
 </code></pre>
 </details>

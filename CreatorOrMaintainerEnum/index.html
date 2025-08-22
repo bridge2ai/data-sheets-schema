@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/CreatorOrMaintainerEnum/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -263,13 +263,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#slots" class="md-nav__link">
-    Slots
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#identifier-and-mapping-information" class="md-nav__link">
     Identifier and Mapping Information
   </a>
@@ -317,8 +310,7 @@
 
 
 <h1 id="enum-creatorormaintainerenum">Enum: CreatorOrMaintainerEnum</h1>
-<p><em>The entity responsible for maintaining a dataset.</em></p>
-<p>URI: <a href="./">CreatorOrMaintainerEnum</a></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/CreatorOrMaintainerEnum">data_sheets_schema:CreatorOrMaintainerEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
 <thead>
@@ -330,33 +322,59 @@
 </thead>
 <tbody>
 <tr>
-<td>Person</td>
+<td>data_subject</td>
 <td>None</td>
-<td></td>
+<td>A person whose information is recorded in the dataset</td>
 </tr>
 <tr>
-<td>Organization</td>
+<td>third_party</td>
 <td>None</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h2 id="slots">Slots</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../created_by/">created_by</a></td>
-<td>Agent that created the element</td>
+<td>A third party not involved in the direct creation or maintenance</td>
 </tr>
 <tr>
-<td><a href="../modified_by/">modified_by</a></td>
-<td>agent that modified the element</td>
+<td>researcher</td>
+<td>None</td>
+<td>A researcher involved in dataset creation or maintenance</td>
+</tr>
+<tr>
+<td>industry</td>
+<td>None</td>
+<td>Industry professional involved in dataset creation or maintenance</td>
+</tr>
+<tr>
+<td>academic_institution</td>
+<td>None</td>
+<td>Academic institution responsible for dataset</td>
+</tr>
+<tr>
+<td>government_agency</td>
+<td>None</td>
+<td>Government agency responsible for dataset</td>
+</tr>
+<tr>
+<td>commercial_entity</td>
+<td>None</td>
+<td>Commercial entity responsible for dataset</td>
+</tr>
+<tr>
+<td>non_profit_organization</td>
+<td>None</td>
+<td>Non-profit organization responsible for dataset</td>
+</tr>
+<tr>
+<td>crowdsourced</td>
+<td>None</td>
+<td>Dataset created through crowdsourcing efforts</td>
+</tr>
+<tr>
+<td>automated_system</td>
+<td>None</td>
+<td>Automated system or process responsible for dataset</td>
+</tr>
+<tr>
+<td>other</td>
+<td>None</td>
+<td>Other type of creator or maintainer not listed</td>
 </tr>
 </tbody>
 </table>
@@ -369,14 +387,42 @@
 <details>
 
 <pre><code class="language-yaml">name: CreatorOrMaintainerEnum
-description: The entity responsible for maintaining a dataset.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 permissible_values:
-  Person:
-    text: Person
-  Organization:
-    text: Organization
+  data_subject:
+    text: data_subject
+    description: A person whose information is recorded in the dataset.
+  third_party:
+    text: third_party
+    description: A third party not involved in the direct creation or maintenance.
+  researcher:
+    text: researcher
+    description: A researcher involved in dataset creation or maintenance.
+  industry:
+    text: industry
+    description: Industry professional involved in dataset creation or maintenance.
+  academic_institution:
+    text: academic_institution
+    description: Academic institution responsible for dataset.
+  government_agency:
+    text: government_agency
+    description: Government agency responsible for dataset.
+  commercial_entity:
+    text: commercial_entity
+    description: Commercial entity responsible for dataset.
+  non_profit_organization:
+    text: non_profit_organization
+    description: Non-profit organization responsible for dataset.
+  crowdsourced:
+    text: crowdsourced
+    description: Dataset created through crowdsourcing efforts.
+  automated_system:
+    text: automated_system
+    description: Automated system or process responsible for dataset.
+  other:
+    text: other
+    description: Other type of creator or maintainer not listed.
 
 </code></pre>
 

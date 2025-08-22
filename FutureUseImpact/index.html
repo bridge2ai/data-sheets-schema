@@ -7,7 +7,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <link href="https://bridge2ai.github.io/data-sheets-schema/FutureUseImpact/" rel="canonical"/>
 <link href="../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.5.3, mkdocs-material-8.5.10" name="generator"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-8.5.10" name="generator"/>
 <title>Class: FutureUseImpact - data-sheets-schema</title>
 <link href="../assets/stylesheets/main.975780f9.min.css" rel="stylesheet"/>
 <link href="../assets/stylesheets/palette.2505c338.min.css" rel="stylesheet"/>
@@ -205,21 +205,14 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-futureuseimpact">Class: FutureUseImpact</h1>
-<p><em>Is there anything about the composition of the dataset or the way it was collected and preprocessed/cleaned/labeled that might impact future uses? For example, is there anything that a dataset consumer might need to know to avoid uses that could result in unfair treatment of individuals or groups (e.g., stereotyping, quality of service issues) or other risks or harms (e.g., legal risks, financial harms)? If so, please provide a description. Is there anything a dataset consumer could do to mitigate these risks or harms?</em></p>
+<p><em>Is there anything about the dataset's composition or collection that might impact future uses or create risks/harm (e.g., unfair treatment, legal or financial risks)? If so, describe these impacts and any mitigation strategies.</em></p>
+<p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/FutureUseImpact">data_sheets_schema:FutureUseImpact</a></p>
 <div class="mermaid"> classDiagram
     class FutureUseImpact
+    click FutureUseImpact href "../FutureUseImpact/"
       DatasetProperty &lt;|-- FutureUseImpact
-
-      FutureUseImpact : category
-
-      FutureUseImpact : contribution_date
-
-      FutureUseImpact : contributor_github_name
-
-      FutureUseImpact : contributor_name
-
-      FutureUseImpact : contributor_orcid
+        click DatasetProperty href "../DatasetProperty/"
 
       FutureUseImpact : description
 
@@ -227,17 +220,16 @@
 
       FutureUseImpact : name
 
-      FutureUseImpact : related_to
-
-          FutureUseImpact --|&gt; NamedThing : related_to
-
-      FutureUseImpact : subclass_of
-
-          FutureUseImpact --|&gt; NamedThing : subclass_of
-
       FutureUseImpact : used_software
 
-          FutureUseImpact --|&gt; Software : used_software
+
+
+
+
+        FutureUseImpact --&gt; "*" Software : used_software
+        click Software href "../Software/"
+
+
 
 
 </div>
@@ -264,68 +256,26 @@
 <tbody>
 <tr>
 <td><a href="../description/">description</a></td>
-<td>0..* <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>Details regarding the possible future impacts or risks of use</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../used_software/">used_software</a></td>
-<td>0..* <br/> <a href="../Software/">Software</a></td>
+<td>* <br/> <a href="../Software/">Software</a></td>
 <td>What software was used as part of this dataset property?</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
 <td><a href="../id/">id</a></td>
-<td>1..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
 <td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../category/">category</a></td>
-<td>0..1 <br/> <a href="../CategoryType/">CategoryType</a></td>
-<td>Name of the high level ontology class in which this entity is categorized</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 <tr>
 <td><a href="../name/">name</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable name for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../subclass_of/">subclass_of</a></td>
-<td>0..* <br/> <a href="../NamedThing/">NamedThing</a></td>
-<td>Holds between two classes where the domain class is a specialization of the r...</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../related_to/">related_to</a></td>
-<td>0..* <br/> <a href="../NamedThing/">NamedThing</a></td>
-<td>A relationship that is asserted between two named things</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_name/">contributor_name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The name of the person who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_github_name/">contributor_github_name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The name of the github user who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_orcid/">contributor_orcid</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>The ORCiD of the person who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contribution_date/">contribution_date</a></td>
-<td>0..1 <br/> <a href="../Date/">Date</a></td>
-<td>The date on which the node was added</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
@@ -384,49 +334,20 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: FutureUseImpact
-description: Is there anything about the composition of the dataset or the way it
-  was collected and preprocessed/cleaned/labeled that might impact future uses? For
-  example, is there anything that a dataset consumer might need to know to avoid uses
-  that could result in unfair treatment of individuals or groups (e.g., stereotyping,
-  quality of service issues) or other risks or harms (e.g., legal risks, financial
-  harms)? If so, please provide a description. Is there anything a dataset consumer
-  could do to mitigate these risks or harms?
-in_subset:
-- Uses
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-is_a: DatasetProperty
-attributes:
-  description:
-    name: description
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    multivalued: true
-    range: string
+description: 'Is there anything about the dataset''s composition or collection that
+  might impact future uses or create risks/harm (e.g., unfair treatment, legal or
+  financial risks)? If so, describe these impacts and any mitigation strategies.
 
-</code></pre>
-</details>
-<h3 id="induced">Induced</h3>
-<details>
-<pre><code class="language-yaml">name: FutureUseImpact
-description: Is there anything about the composition of the dataset or the way it
-  was collected and preprocessed/cleaned/labeled that might impact future uses? For
-  example, is there anything that a dataset consumer might need to know to avoid uses
-  that could result in unfair treatment of individuals or groups (e.g., stereotyping,
-  quality of service issues) or other risks or harms (e.g., legal risks, financial
-  harms)? If so, please provide a description. Is there anything a dataset consumer
-  could do to mitigate these risks or harms?
-in_subset:
-- Uses
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
   description:
     name: description
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    multivalued: true
-    alias: description
-    owner: FutureUseImpact
+    description: Details regarding the possible future impacts or risks of use.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     domain_of:
-    - Information
+    - NamedThing
     - Relationships
     - Splits
     - DataAnomaly
@@ -437,12 +358,7 @@ attributes:
     - CollectionMechanism
     - DataCollector
     - CollectionTimeframe
-    - EthicalReview
     - DirectCollection
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - DataProtectionImpact
     - PreprocessingStrategy
     - CleaningStrategy
     - LabelingStrategy
@@ -455,61 +371,111 @@ attributes:
     - ThirdPartySharing
     - DistributionFormat
     - DistributionDate
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     - Maintainer
     - Erratum
     - UpdatePlan
     - RetentionLimits
     - VersionAccess
     - ExtensionMechanism
-    - NamedThing
+    - EthicalReview
+    - DataProtectionImpact
+    - CollectionNotification
+    - CollectionConsent
+    - ConsentRevocation
+    - LicenseAndUseTerms
+    - IPRestrictions
+    - ExportControlRegulatoryRestrictions
     range: string
+    multivalued: true
+
+</code></pre>
+</details>
+<h3 id="induced">Induced</h3>
+<details>
+<pre><code class="language-yaml">name: FutureUseImpact
+description: 'Is there anything about the dataset''s composition or collection that
+  might impact future uses or create risks/harm (e.g., unfair treatment, legal or
+  financial risks)? If so, describe these impacts and any mitigation strategies.
+
+  '
+from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+is_a: DatasetProperty
+attributes:
+  description:
+    name: description
+    description: Details regarding the possible future impacts or risks of use.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
+    alias: description
+    owner: FutureUseImpact
+    domain_of:
+    - NamedThing
+    - Relationships
+    - Splits
+    - DataAnomaly
+    - Confidentiality
+    - Deidentification
+    - SensitiveElement
+    - InstanceAcquisition
+    - CollectionMechanism
+    - DataCollector
+    - CollectionTimeframe
+    - DirectCollection
+    - PreprocessingStrategy
+    - CleaningStrategy
+    - LabelingStrategy
+    - RawData
+    - ExistingUse
+    - UseRepository
+    - OtherTask
+    - FutureUseImpact
+    - DiscouragedUse
+    - ThirdPartySharing
+    - DistributionFormat
+    - DistributionDate
+    - Maintainer
+    - Erratum
+    - UpdatePlan
+    - RetentionLimits
+    - VersionAccess
+    - ExtensionMechanism
+    - EthicalReview
+    - DataProtectionImpact
+    - CollectionNotification
+    - CollectionConsent
+    - ConsentRevocation
+    - LicenseAndUseTerms
+    - IPRestrictions
+    - ExportControlRegulatoryRestrictions
+    range: string
+    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    multivalued: true
     alias: used_software
     owner: FutureUseImpact
     domain_of:
     - DatasetProperty
     range: Software
+    multivalued: true
   id:
     name: id
     description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:identifier
     identifier: true
     alias: id
     owner: FutureUseImpact
     domain_of:
-    - Information
-    - FormatDialect
     - NamedThing
     range: uriorcurie
     required: true
-  category:
-    name: category
-    description: Name of the high level ontology class in which this entity is categorized.
-      Corresponds to the label for the entity type class, e.g., "BiomedicalStandard".
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: type
-    domain: NamedThing
-    designates_type: true
-    alias: category
-    owner: FutureUseImpact
-    domain_of:
-    - NamedThing
-    range: category_type
   name:
     name: name
     description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:name
     alias: name
@@ -517,93 +483,6 @@ attributes:
     domain_of:
     - NamedThing
     range: string
-  subclass_of:
-    name: subclass_of
-    description: Holds between two classes where the domain class is a specialization
-      of the range class.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - rdfs:subClassOf
-    - MESH:isa
-    narrow_mappings:
-    - rdfs:subPropertyOf
-    rank: 1000
-    is_a: related_to
-    domain: NamedThing
-    multivalued: true
-    inherited: true
-    alias: subclass_of
-    owner: FutureUseImpact
-    domain_of:
-    - NamedThing
-    range: NamedThing
-  related_to:
-    name: related_to
-    description: A relationship that is asserted between two named things.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    domain: NamedThing
-    multivalued: true
-    inherited: true
-    alias: related_to
-    owner: FutureUseImpact
-    domain_of:
-    - Organization
-    - NamedThing
-    symmetric: true
-    range: NamedThing
-  contributor_name:
-    name: contributor_name
-    description: The name of the person who added this node.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_name
-    owner: FutureUseImpact
-    domain_of:
-    - NamedThing
-    range: string
-  contributor_github_name:
-    name: contributor_github_name
-    description: The name of the github user who added this node.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_github_name
-    owner: FutureUseImpact
-    domain_of:
-    - NamedThing
-    range: string
-  contributor_orcid:
-    name: contributor_orcid
-    description: The ORCiD of the person who added this node.
-    examples:
-    - value: ORCID:0000-0001-1234-5678
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_orcid
-    owner: FutureUseImpact
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-  contribution_date:
-    name: contribution_date
-    description: The date on which the node was added.
-    examples:
-    - value: '2023-03-20'
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contribution_date
-    owner: FutureUseImpact
-    domain_of:
-    - NamedThing
-    range: date
 
 </code></pre>
 </details>

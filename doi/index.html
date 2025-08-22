@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/doi/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -270,13 +270,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#examples" class="md-nav__link">
-    Examples
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#identifier-and-mapping-information" class="md-nav__link">
     Identifier and Mapping Information
   </a>
@@ -293,6 +286,13 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mappings" class="md-nav__link">
+    Mappings
+  </a>
   
 </li>
       
@@ -324,8 +324,9 @@
 
 
 <h1 id="slot-doi">Slot: doi</h1>
-<p><em>The Digital Object Identifier of the data, with the doi prefix.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/doi">data_sheets_schema:doi</a></p>
+<p><em>digital object identifier</em></p>
+<p>URI: <a href="http://rdfs.org/ns/void#uriRegexPattern">void:uriRegexPattern</a>
+Alias: doi</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -339,18 +340,13 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../Dataset/">Dataset</a></td>
 <td>A single component of related observations and/or information that can be rea...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Information/">Information</a></td>
+<td>Grouping for datasets and data files</td>
 <td>no</td>
 </tr>
 <tr>
@@ -358,43 +354,59 @@
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
+<tr>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
 </tbody>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../Uriorcurie/">Uriorcurie</a></li>
+<li>
+<p>Range: <a href="../String/">String</a></p>
+</li>
+<li>
+<p>Regex pattern: <code>10\.\d{4,}\/.+</code></p>
+</li>
 </ul>
-<h2 id="examples">Examples</h2>
-<table>
-<thead>
-<tr>
-<th>Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>doi:10.48550/arXiv.2310.03666</td>
-</tr>
-</tbody>
-</table>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
 </ul>
+<h2 id="mappings">Mappings</h2>
+<table>
+<thead>
+<tr>
+<th>Mapping Type</th>
+<th>Mapped Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>self</td>
+<td>void:uriRegexPattern</td>
+</tr>
+<tr>
+<td>native</td>
+<td>data_sheets_schema:doi</td>
+</tr>
+</tbody>
+</table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
 <pre><code class="language-yaml">name: doi
-description: The Digital Object Identifier of the data, with the doi prefix.
-examples:
-- value: doi:10.48550/arXiv.2310.03666
+description: digital object identifier
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: void:uriRegexPattern
 alias: doi
 domain_of:
 - Information
-range: uriorcurie
+range: string
+pattern: 10\.\d{4,}\/.+
 
 </code></pre>
 

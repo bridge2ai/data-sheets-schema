@@ -7,7 +7,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <link href="https://bridge2ai.github.io/data-sheets-schema/FormatDialect/" rel="canonical"/>
 <link href="../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.5.3, mkdocs-material-8.5.10" name="generator"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-8.5.10" name="generator"/>
 <title>Class: FormatDialect - data-sheets-schema</title>
 <link href="../assets/stylesheets/main.975780f9.min.css" rel="stylesheet"/>
 <link href="../assets/stylesheets/palette.2505c338.min.css" rel="stylesheet"/>
@@ -199,6 +199,7 @@
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect">data_sheets_schema:FormatDialect</a></p>
 <div class="mermaid"> classDiagram
     class FormatDialect
+    click FormatDialect href "../FormatDialect/"
       FormatDialect : comment_prefix
 
       FormatDialect : delimiter
@@ -206,8 +207,6 @@
       FormatDialect : double_quote
 
       FormatDialect : header
-
-      FormatDialect : id
 
       FormatDialect : quote_char
 
@@ -225,12 +224,6 @@
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><a href="../id/">id</a></td>
-<td>1..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>A unique identifier for a thing</td>
-<td>direct</td>
-</tr>
 <tr>
 <td><a href="../comment_prefix/">comment_prefix</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
@@ -294,29 +287,37 @@
 <pre><code class="language-yaml">name: FormatDialect
 description: Additional format information for a file
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-slots:
-- id
 attributes:
   comment_prefix:
     name: comment_prefix
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    domain_of:
+    - FormatDialect
   delimiter:
     name: delimiter
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    domain_of:
+    - FormatDialect
   double_quote:
     name: double_quote
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    domain_of:
+    - FormatDialect
   header:
     name: header
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    domain_of:
+    - FormatDialect
   quote_char:
     name: quote_char
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    domain_of:
+    - FormatDialect
 
 </code></pre>
 </details>
@@ -328,7 +329,7 @@ from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 attributes:
   comment_prefix:
     name: comment_prefix
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: comment_prefix
     owner: FormatDialect
@@ -337,7 +338,7 @@ attributes:
     range: string
   delimiter:
     name: delimiter
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: delimiter
     owner: FormatDialect
@@ -346,7 +347,7 @@ attributes:
     range: string
   double_quote:
     name: double_quote
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: double_quote
     owner: FormatDialect
@@ -355,7 +356,7 @@ attributes:
     range: string
   header:
     name: header
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: header
     owner: FormatDialect
@@ -364,28 +365,13 @@ attributes:
     range: string
   quote_char:
     name: quote_char
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     alias: quote_char
     owner: FormatDialect
     domain_of:
     - FormatDialect
     range: string
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: FormatDialect
-    domain_of:
-    - Information
-    - FormatDialect
-    - NamedThing
-    range: uriorcurie
-    required: true
 
 </code></pre>
 </details>

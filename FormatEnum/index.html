@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/FormatEnum/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -317,7 +317,7 @@
 
 
 <h1 id="enum-formatenum">Enum: FormatEnum</h1>
-<p>URI: <a href="./">FormatEnum</a></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/FormatEnum">data_sheets_schema:FormatEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
 <thead>
@@ -329,118 +329,28 @@
 </thead>
 <tbody>
 <tr>
-<td>JSON-LD</td>
-<td>formats:JSON-LD</td>
+<td>CSV</td>
+<td>None</td>
 <td></td>
 </tr>
 <tr>
-<td>N3</td>
-<td>formats:N3</td>
+<td>TSV</td>
+<td>None</td>
 <td></td>
 </tr>
 <tr>
-<td>N-Triples</td>
-<td>formats:N-Triples</td>
+<td>XML</td>
+<td>None</td>
 <td></td>
 </tr>
 <tr>
-<td>N-Quads</td>
-<td>formats:N-Quads</td>
+<td>JSON</td>
+<td>None</td>
 <td></td>
 </tr>
 <tr>
-<td>LD Patch</td>
-<td>formats:LD_Patch</td>
-<td></td>
-</tr>
-<tr>
-<td>Microdata</td>
-<td>formats:microdata</td>
-<td></td>
-</tr>
-<tr>
-<td>OWL XML Serialization</td>
-<td>formats:OWL_XML</td>
-<td></td>
-</tr>
-<tr>
-<td>OWL Functional Syntax</td>
-<td>formats:OWL_Functional</td>
-<td></td>
-</tr>
-<tr>
-<td>OWL Manchester Syntax</td>
-<td>formats:OWL_Manchester</td>
-<td></td>
-</tr>
-<tr>
-<td>POWDER</td>
-<td>formats:POWDER</td>
-<td></td>
-</tr>
-<tr>
-<td>POWDER-S</td>
-<td>formats:POWDER-S</td>
-<td></td>
-</tr>
-<tr>
-<td>PROV-N</td>
-<td>formats:PROV-N</td>
-<td></td>
-</tr>
-<tr>
-<td>PROV-XML</td>
-<td>formats:PROV-XML</td>
-<td></td>
-</tr>
-<tr>
-<td>RDFa</td>
-<td>formats:RDFa</td>
-<td></td>
-</tr>
-<tr>
-<td>RDF/JSON</td>
-<td>formats:RDF_JSON</td>
-<td></td>
-</tr>
-<tr>
-<td>RDF/XML</td>
-<td>formats:RDF_XML</td>
-<td></td>
-</tr>
-<tr>
-<td>RIF XML Syntax</td>
-<td>formats:RIF_XML</td>
-<td></td>
-</tr>
-<tr>
-<td>SPARQL Results in XML</td>
-<td>formats:SPARQL_Results_XML</td>
-<td></td>
-</tr>
-<tr>
-<td>SPARQL Results in JSON</td>
-<td>formats:SPARQL_Results_JSON</td>
-<td></td>
-</tr>
-<tr>
-<td>SPARQL Results in CSV</td>
-<td>formats:SPARQL_Results_CSV</td>
-<td></td>
-</tr>
-<tr>
-<td>SPARQL Results in TSV</td>
-<td>formats:SPARQL_Results_TSV</td>
-<td></td>
-</tr>
-<tr>
-<td>Turtle</td>
-<td>formats:Turtle</td>
-<td></td>
-</tr>
-<tr>
-<td>TriG</td>
-<td>formats:TriG</td>
+<td>JSONL</td>
+<td>None</td>
 <td></td>
 </tr>
 <tr>
@@ -449,7 +359,62 @@
 <td></td>
 </tr>
 <tr>
-<td>JSON</td>
+<td>HTML</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>PDF</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>DOCX</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>XLSX</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>PPTX</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>TXT</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>MD</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>ZIP</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>TAR</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>GZ</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>BZ2</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>XZ</td>
 <td>None</td>
 <td></td>
 </tr>
@@ -466,7 +431,7 @@
 <tbody>
 <tr>
 <td><a href="../format/">format</a></td>
-<td>The format of the data</td>
+<td>The file format, physical medium, or dimensions of a resource</td>
 </tr>
 </tbody>
 </table>
@@ -482,79 +447,42 @@
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 permissible_values:
-  JSON-LD:
-    text: JSON-LD
-    meaning: formats:JSON-LD
-  N3:
-    text: N3
-    meaning: formats:N3
-  N-Triples:
-    text: N-Triples
-    meaning: formats:N-Triples
-  N-Quads:
-    text: N-Quads
-    meaning: formats:N-Quads
-  LD Patch:
-    text: LD Patch
-    meaning: formats:LD_Patch
-  Microdata:
-    text: Microdata
-    meaning: formats:microdata
-  OWL XML Serialization:
-    text: OWL XML Serialization
-    meaning: formats:OWL_XML
-  OWL Functional Syntax:
-    text: OWL Functional Syntax
-    meaning: formats:OWL_Functional
-  OWL Manchester Syntax:
-    text: OWL Manchester Syntax
-    meaning: formats:OWL_Manchester
-  POWDER:
-    text: POWDER
-    meaning: formats:POWDER
-  POWDER-S:
-    text: POWDER-S
-    meaning: formats:POWDER-S
-  PROV-N:
-    text: PROV-N
-    meaning: formats:PROV-N
-  PROV-XML:
-    text: PROV-XML
-    meaning: formats:PROV-XML
-  RDFa:
-    text: RDFa
-    meaning: formats:RDFa
-  RDF/JSON:
-    text: RDF/JSON
-    meaning: formats:RDF_JSON
-  RDF/XML:
-    text: RDF/XML
-    meaning: formats:RDF_XML
-  RIF XML Syntax:
-    text: RIF XML Syntax
-    meaning: formats:RIF_XML
-  SPARQL Results in XML:
-    text: SPARQL Results in XML
-    meaning: formats:SPARQL_Results_XML
-  SPARQL Results in JSON:
-    text: SPARQL Results in JSON
-    meaning: formats:SPARQL_Results_JSON
-  SPARQL Results in CSV:
-    text: SPARQL Results in CSV
-    meaning: formats:SPARQL_Results_CSV
-  SPARQL Results in TSV:
-    text: SPARQL Results in TSV
-    meaning: formats:SPARQL_Results_TSV
-  Turtle:
-    text: Turtle
-    meaning: formats:Turtle
-  TriG:
-    text: TriG
-    meaning: formats:TriG
-  YAML:
-    text: YAML
+  CSV:
+    text: CSV
+  TSV:
+    text: TSV
+  XML:
+    text: XML
   JSON:
     text: JSON
+  JSONL:
+    text: JSONL
+  YAML:
+    text: YAML
+  HTML:
+    text: HTML
+  PDF:
+    text: PDF
+  DOCX:
+    text: DOCX
+  XLSX:
+    text: XLSX
+  PPTX:
+    text: PPTX
+  TXT:
+    text: TXT
+  MD:
+    text: MD
+  ZIP:
+    text: ZIP
+  TAR:
+    text: TAR
+  GZ:
+    text: GZ
+  BZ2:
+    text: BZ2
+  XZ:
+    text: XZ
 
 </code></pre>
 

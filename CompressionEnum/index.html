@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/CompressionEnum/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -317,7 +317,7 @@
 
 
 <h1 id="enum-compressionenum">Enum: CompressionEnum</h1>
-<p>URI: <a href="./">CompressionEnum</a></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/CompressionEnum">data_sheets_schema:CompressionEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
 <thead>
@@ -329,22 +329,37 @@
 </thead>
 <tbody>
 <tr>
-<td>GZIP</td>
+<td>gzip</td>
 <td>None</td>
 <td></td>
 </tr>
 <tr>
-<td>TAR</td>
+<td>bzip2</td>
 <td>None</td>
 <td></td>
 </tr>
 <tr>
-<td>TARGZIP</td>
+<td>zip</td>
 <td>None</td>
 <td></td>
 </tr>
 <tr>
-<td>ZIP</td>
+<td>tar</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>xz</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>lzma</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>compress</td>
 <td>None</td>
 <td></td>
 </tr>
@@ -361,7 +376,7 @@
 <tbody>
 <tr>
 <td><a href="../compression/">compression</a></td>
-<td>The compression format of the data</td>
+<td>compression format used, if any</td>
 </tr>
 </tbody>
 </table>
@@ -377,14 +392,20 @@
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 permissible_values:
-  GZIP:
-    text: GZIP
-  TAR:
-    text: TAR
-  TARGZIP:
-    text: TARGZIP
-  ZIP:
-    text: ZIP
+  gzip:
+    text: gzip
+  bzip2:
+    text: bzip2
+  zip:
+    text: zip
+  tar:
+    text: tar
+  xz:
+    text: xz
+  lzma:
+    text: lzma
+  compress:
+    text: compress
 
 </code></pre>
 

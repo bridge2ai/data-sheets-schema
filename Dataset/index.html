@@ -7,7 +7,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <link href="https://bridge2ai.github.io/data-sheets-schema/Dataset/" rel="canonical"/>
 <link href="../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.5.3, mkdocs-material-8.5.10" name="generator"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-8.5.10" name="generator"/>
 <title>Class: Dataset - data-sheets-schema</title>
 <link href="../assets/stylesheets/main.975780f9.min.css" rel="stylesheet"/>
 <link href="../assets/stylesheets/palette.2505c338.min.css" rel="stylesheet"/>
@@ -219,45 +219,104 @@
 <p>URI: <a href="http://www.w3.org/ns/dcat#Distribution">dcat:Distribution</a></p>
 <div class="mermaid"> classDiagram
     class Dataset
+    click Dataset href "../Dataset/"
       Information &lt;|-- Dataset
+        click Information href "../Information/"
 
 
       Dataset &lt;|-- DataSubset
+        click DataSubset href "../DataSubset/"
 
 
       Dataset : acquisition_methods
 
-          Dataset --|&gt; InstanceAcquisition : acquisition_methods
+
+
+
+
+        Dataset --&gt; "*" InstanceAcquisition : acquisition_methods
+        click InstanceAcquisition href "../InstanceAcquisition/"
+
+
 
       Dataset : addressing_gaps
 
-          Dataset --|&gt; AddressingGap : addressing_gaps
+
+
+
+
+        Dataset --&gt; "*" AddressingGap : addressing_gaps
+        click AddressingGap href "../AddressingGap/"
+
+
 
       Dataset : anomalies
 
-          Dataset --|&gt; DataAnomaly : anomalies
+
+
+
+
+        Dataset --&gt; "*" DataAnomaly : anomalies
+        click DataAnomaly href "../DataAnomaly/"
+
+
 
       Dataset : bytes
 
       Dataset : cleaning_strategies
 
-          Dataset --|&gt; CleaningStrategy : cleaning_strategies
+
+
+
+
+        Dataset --&gt; "*" CleaningStrategy : cleaning_strategies
+        click CleaningStrategy href "../CleaningStrategy/"
+
+
 
       Dataset : collection_mechanisms
 
-          Dataset --|&gt; CollectionMechanism : collection_mechanisms
+
+
+
+
+        Dataset --&gt; "*" CollectionMechanism : collection_mechanisms
+        click CollectionMechanism href "../CollectionMechanism/"
+
+
 
       Dataset : collection_timeframes
 
-          Dataset --|&gt; CollectionTimeframe : collection_timeframes
+
+
+
+
+        Dataset --&gt; "*" CollectionTimeframe : collection_timeframes
+        click CollectionTimeframe href "../CollectionTimeframe/"
+
+
 
       Dataset : compression
 
-          Dataset --|&gt; CompressionEnum : compression
+
+
+
+
+        Dataset --&gt; "0..1" CompressionEnum : compression
+        click CompressionEnum href "../CompressionEnum/"
+
+
 
       Dataset : confidential_elements
 
-          Dataset --|&gt; Confidentiality : confidential_elements
+
+
+
+
+        Dataset --&gt; "*" Confidentiality : confidential_elements
+        click Confidentiality href "../Confidentiality/"
+
+
 
       Dataset : conforms_to
 
@@ -267,25 +326,51 @@
 
       Dataset : content_warnings
 
-          Dataset --|&gt; ContentWarning : content_warnings
+
+
+
+
+        Dataset --&gt; "*" ContentWarning : content_warnings
+        click ContentWarning href "../ContentWarning/"
+
+
 
       Dataset : created_by
-
-          Dataset --|&gt; CreatorOrMaintainerEnum : created_by
 
       Dataset : created_on
 
       Dataset : creators
 
-          Dataset --|&gt; Creator : creators
+
+
+
+
+        Dataset --&gt; "*" Creator : creators
+        click Creator href "../Creator/"
+
+
 
       Dataset : data_collectors
 
-          Dataset --|&gt; DataCollector : data_collectors
+
+
+
+
+        Dataset --&gt; "*" DataCollector : data_collectors
+        click DataCollector href "../DataCollector/"
+
+
 
       Dataset : data_protection_impacts
 
-          Dataset --|&gt; DataProtectionImpact : data_protection_impacts
+
+
+
+
+        Dataset --&gt; "*" DataProtectionImpact : data_protection_impacts
+        click DataProtectionImpact href "../DataProtectionImpact/"
+
+
 
       Dataset : description
 
@@ -293,15 +378,36 @@
 
       Dataset : discouraged_uses
 
-          Dataset --|&gt; DiscouragedUse : discouraged_uses
+
+
+
+
+        Dataset --&gt; "*" DiscouragedUse : discouraged_uses
+        click DiscouragedUse href "../DiscouragedUse/"
+
+
 
       Dataset : distribution_dates
 
-          Dataset --|&gt; DistributionDate : distribution_dates
+
+
+
+
+        Dataset --&gt; "*" DistributionDate : distribution_dates
+        click DistributionDate href "../DistributionDate/"
+
+
 
       Dataset : distribution_formats
 
-          Dataset --|&gt; DistributionFormat : distribution_formats
+
+
+
+
+        Dataset --&gt; "*" DistributionFormat : distribution_formats
+        click DistributionFormat href "../DistributionFormat/"
+
+
 
       Dataset : doi
 
@@ -309,39 +415,102 @@
 
       Dataset : encoding
 
-          Dataset --|&gt; EncodingEnum : encoding
+
+
+
+
+        Dataset --&gt; "0..1" EncodingEnum : encoding
+        click EncodingEnum href "../EncodingEnum/"
+
+
 
       Dataset : errata
 
-          Dataset --|&gt; Erratum : errata
+
+
+
+
+        Dataset --&gt; "*" Erratum : errata
+        click Erratum href "../Erratum/"
+
+
 
       Dataset : ethical_reviews
 
-          Dataset --|&gt; EthicalReview : ethical_reviews
+
+
+
+
+        Dataset --&gt; "*" EthicalReview : ethical_reviews
+        click EthicalReview href "../EthicalReview/"
+
+
 
       Dataset : existing_uses
 
-          Dataset --|&gt; ExistingUse : existing_uses
+
+
+
+
+        Dataset --&gt; "*" ExistingUse : existing_uses
+        click ExistingUse href "../ExistingUse/"
+
+
 
       Dataset : extension_mechanism
 
-          Dataset --|&gt; ExtensionMechanism : extension_mechanism
+
+
+
+
+        Dataset --&gt; "0..1" ExtensionMechanism : extension_mechanism
+        click ExtensionMechanism href "../ExtensionMechanism/"
+
+
 
       Dataset : external_resources
 
-          Dataset --|&gt; ExternalResource : external_resources
+
+
+
+
+        Dataset --&gt; "*" ExternalResource : external_resources
+        click ExternalResource href "../ExternalResource/"
+
+
 
       Dataset : format
 
-          Dataset --|&gt; FormatEnum : format
+
+
+
+
+        Dataset --&gt; "0..1" FormatEnum : format
+        click FormatEnum href "../FormatEnum/"
+
+
 
       Dataset : funders
 
-          Dataset --|&gt; FundingMechanism : funders
+
+
+
+
+        Dataset --&gt; "*" FundingMechanism : funders
+        click FundingMechanism href "../FundingMechanism/"
+
+
 
       Dataset : future_use_impacts
 
-          Dataset --|&gt; FutureUseImpact : future_use_impacts
+
+
+
+
+        Dataset --&gt; "*" FutureUseImpact : future_use_impacts
+        click FutureUseImpact href "../FutureUseImpact/"
+
+
 
       Dataset : hash
 
@@ -349,15 +518,36 @@
 
       Dataset : instances
 
-          Dataset --|&gt; Instance : instances
+
+
+
+
+        Dataset --&gt; "*" Instance : instances
+        click Instance href "../Instance/"
+
+
 
       Dataset : ip_restrictions
 
-          Dataset --|&gt; IPRestrictions : ip_restrictions
+
+
+
+
+        Dataset --&gt; "0..1" IPRestrictions : ip_restrictions
+        click IPRestrictions href "../IPRestrictions/"
+
+
 
       Dataset : is_deidentified
 
-          Dataset --|&gt; Deidentification : is_deidentified
+
+
+
+
+        Dataset --&gt; "0..1" Deidentification : is_deidentified
+        click Deidentification href "../Deidentification/"
+
+
 
       Dataset : is_tabular
 
@@ -367,7 +557,14 @@
 
       Dataset : labeling_strategies
 
-          Dataset --|&gt; LabelingStrategy : labeling_strategies
+
+
+
+
+        Dataset --&gt; "*" LabelingStrategy : labeling_strategies
+        click LabelingStrategy href "../LabelingStrategy/"
+
+
 
       Dataset : language
 
@@ -377,23 +574,53 @@
 
       Dataset : license_and_use_terms
 
-          Dataset --|&gt; LicenseAndUseTerms : license_and_use_terms
+
+
+
+
+        Dataset --&gt; "0..1" LicenseAndUseTerms : license_and_use_terms
+        click LicenseAndUseTerms href "../LicenseAndUseTerms/"
+
+
 
       Dataset : maintainers
 
-          Dataset --|&gt; Maintainer : maintainers
+
+
+
+
+        Dataset --&gt; "*" Maintainer : maintainers
+        click Maintainer href "../Maintainer/"
+
+
 
       Dataset : md5
 
       Dataset : media_type
 
+
+
+
+
+        Dataset --&gt; "0..1" MediaTypeEnum : media_type
+        click MediaTypeEnum href "../MediaTypeEnum/"
+
+
+
       Dataset : modified_by
 
-          Dataset --|&gt; CreatorOrMaintainerEnum : modified_by
+      Dataset : name
 
       Dataset : other_tasks
 
-          Dataset --|&gt; OtherTask : other_tasks
+
+
+
+
+        Dataset --&gt; "*" OtherTask : other_tasks
+        click OtherTask href "../OtherTask/"
+
+
 
       Dataset : page
 
@@ -401,33 +628,82 @@
 
       Dataset : preprocessing_strategies
 
-          Dataset --|&gt; PreprocessingStrategy : preprocessing_strategies
+
+
+
+
+        Dataset --&gt; "*" PreprocessingStrategy : preprocessing_strategies
+        click PreprocessingStrategy href "../PreprocessingStrategy/"
+
+
 
       Dataset : publisher
 
       Dataset : purposes
 
-          Dataset --|&gt; Purpose : purposes
+
+
+
+
+        Dataset --&gt; "*" Purpose : purposes
+        click Purpose href "../Purpose/"
+
+
 
       Dataset : raw_sources
 
-          Dataset --|&gt; RawData : raw_sources
+
+
+
+
+        Dataset --&gt; "*" RawData : raw_sources
+        click RawData href "../RawData/"
+
+
 
       Dataset : regulatory_restrictions
 
-          Dataset --|&gt; ExportControlRegulatoryRestrictions : regulatory_restrictions
+
+
+
+
+        Dataset --&gt; "0..1" ExportControlRegulatoryRestrictions : regulatory_restrictions
+        click ExportControlRegulatoryRestrictions href "../ExportControlRegulatoryRestrictions/"
+
+
 
       Dataset : retention_limit
 
-          Dataset --|&gt; RetentionLimits : retention_limit
+
+
+
+
+        Dataset --&gt; "0..1" RetentionLimits : retention_limit
+        click RetentionLimits href "../RetentionLimits/"
+
+
 
       Dataset : sampling_strategies
 
-          Dataset --|&gt; SamplingStrategy : sampling_strategies
+
+
+
+
+        Dataset --&gt; "*" SamplingStrategy : sampling_strategies
+        click SamplingStrategy href "../SamplingStrategy/"
+
+
 
       Dataset : sensitive_elements
 
-          Dataset --|&gt; SensitiveElement : sensitive_elements
+
+
+
+
+        Dataset --&gt; "*" SensitiveElement : sensitive_elements
+        click SensitiveElement href "../SensitiveElement/"
+
+
 
       Dataset : sha256
 
@@ -435,31 +711,73 @@
 
       Dataset : subpopulations
 
-          Dataset --|&gt; Subpopulation : subpopulations
+
+
+
+
+        Dataset --&gt; "*" Subpopulation : subpopulations
+        click Subpopulation href "../Subpopulation/"
+
+
 
       Dataset : subsets
 
-          Dataset --|&gt; DataSubset : subsets
+
+
+
+
+        Dataset --&gt; "*" DataSubset : subsets
+        click DataSubset href "../DataSubset/"
+
+
 
       Dataset : tasks
 
-          Dataset --|&gt; Task : tasks
+
+
+
+
+        Dataset --&gt; "*" Task : tasks
+        click Task href "../Task/"
+
+
 
       Dataset : title
 
       Dataset : updates
 
-          Dataset --|&gt; UpdatePlan : updates
+
+
+
+
+        Dataset --&gt; "0..1" UpdatePlan : updates
+        click UpdatePlan href "../UpdatePlan/"
+
+
 
       Dataset : use_repository
 
-          Dataset --|&gt; UseRepository : use_repository
+
+
+
+
+        Dataset --&gt; "*" UseRepository : use_repository
+        click UseRepository href "../UseRepository/"
+
+
 
       Dataset : version
 
       Dataset : version_access
 
-          Dataset --|&gt; VersionAccess : version_access
+
+
+
+
+        Dataset --&gt; "0..1" VersionAccess : version_access
+        click VersionAccess href "../VersionAccess/"
+
+
 
       Dataset : was_derived_from
 
@@ -467,9 +785,12 @@
 </div>
 <h2 id="inheritance">Inheritance</h2>
 <ul>
+<li><a href="../NamedThing/">NamedThing</a><ul>
 <li><a href="../Information/">Information</a><ul>
 <li><strong>Dataset</strong><ul>
 <li><a href="../DataSubset/">DataSubset</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -501,30 +822,30 @@
 <tr>
 <td><a href="../encoding/">encoding</a></td>
 <td>0..1 <br/> <a href="../EncodingEnum/">EncodingEnum</a></td>
-<td>The encoding of the data</td>
+<td>the character encoding of the data</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../format/">format</a></td>
 <td>0..1 <br/> <a href="../FormatEnum/">FormatEnum</a></td>
-<td>The format of the data</td>
+<td>The file format, physical medium, or dimensions of a resource</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../hash/">hash</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The hash representation of the data, e</td>
+<td>hash of the data</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../md5/">md5</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The md5 hash representation of the data</td>
+<td>md5 hash of the data</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../media_type/">media_type</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>0..1 <br/> <a href="../MediaTypeEnum/">MediaTypeEnum</a></td>
 <td>The media type of the data</td>
 <td>direct</td>
 </tr>
@@ -537,192 +858,192 @@
 <tr>
 <td><a href="../sha256/">sha256</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The sha256 hash representation of the data</td>
+<td>sha256 hash of the data</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../purposes/">purposes</a></td>
-<td>0..* <br/> <a href="../Purpose/">Purpose</a></td>
+<td>* <br/> <a href="../Purpose/">Purpose</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../tasks/">tasks</a></td>
-<td>0..* <br/> <a href="../Task/">Task</a></td>
+<td>* <br/> <a href="../Task/">Task</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../addressing_gaps/">addressing_gaps</a></td>
-<td>0..* <br/> <a href="../AddressingGap/">AddressingGap</a></td>
+<td>* <br/> <a href="../AddressingGap/">AddressingGap</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../creators/">creators</a></td>
-<td>0..* <br/> <a href="../Creator/">Creator</a></td>
+<td>* <br/> <a href="../Creator/">Creator</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../funders/">funders</a></td>
-<td>0..* <br/> <a href="../FundingMechanism/">FundingMechanism</a></td>
+<td>* <br/> <a href="../FundingMechanism/">FundingMechanism</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../subsets/">subsets</a></td>
-<td>0..* <br/> <a href="../DataSubset/">DataSubset</a></td>
+<td>* <br/> <a href="../DataSubset/">DataSubset</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../instances/">instances</a></td>
-<td>0..* <br/> <a href="../Instance/">Instance</a></td>
+<td>* <br/> <a href="../Instance/">Instance</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../anomalies/">anomalies</a></td>
-<td>0..* <br/> <a href="../DataAnomaly/">DataAnomaly</a></td>
+<td>* <br/> <a href="../DataAnomaly/">DataAnomaly</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../external_resources/">external_resources</a></td>
-<td>0..* <br/> <a href="../ExternalResource/">ExternalResource</a></td>
+<td>* <br/> <a href="../ExternalResource/">ExternalResource</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../confidential_elements/">confidential_elements</a></td>
-<td>0..* <br/> <a href="../Confidentiality/">Confidentiality</a></td>
+<td>* <br/> <a href="../Confidentiality/">Confidentiality</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../content_warnings/">content_warnings</a></td>
-<td>0..* <br/> <a href="../ContentWarning/">ContentWarning</a></td>
+<td>* <br/> <a href="../ContentWarning/">ContentWarning</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../subpopulations/">subpopulations</a></td>
-<td>0..* <br/> <a href="../Subpopulation/">Subpopulation</a></td>
+<td>* <br/> <a href="../Subpopulation/">Subpopulation</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../sensitive_elements/">sensitive_elements</a></td>
-<td>0..* <br/> <a href="../SensitiveElement/">SensitiveElement</a></td>
+<td>* <br/> <a href="../SensitiveElement/">SensitiveElement</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../acquisition_methods/">acquisition_methods</a></td>
-<td>0..* <br/> <a href="../InstanceAcquisition/">InstanceAcquisition</a></td>
+<td>* <br/> <a href="../InstanceAcquisition/">InstanceAcquisition</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../collection_mechanisms/">collection_mechanisms</a></td>
-<td>0..* <br/> <a href="../CollectionMechanism/">CollectionMechanism</a></td>
+<td>* <br/> <a href="../CollectionMechanism/">CollectionMechanism</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../sampling_strategies/">sampling_strategies</a></td>
-<td>0..* <br/> <a href="../SamplingStrategy/">SamplingStrategy</a></td>
+<td>* <br/> <a href="../SamplingStrategy/">SamplingStrategy</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../data_collectors/">data_collectors</a></td>
-<td>0..* <br/> <a href="../DataCollector/">DataCollector</a></td>
+<td>* <br/> <a href="../DataCollector/">DataCollector</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../collection_timeframes/">collection_timeframes</a></td>
-<td>0..* <br/> <a href="../CollectionTimeframe/">CollectionTimeframe</a></td>
+<td>* <br/> <a href="../CollectionTimeframe/">CollectionTimeframe</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../ethical_reviews/">ethical_reviews</a></td>
-<td>0..* <br/> <a href="../EthicalReview/">EthicalReview</a></td>
+<td>* <br/> <a href="../EthicalReview/">EthicalReview</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../data_protection_impacts/">data_protection_impacts</a></td>
-<td>0..* <br/> <a href="../DataProtectionImpact/">DataProtectionImpact</a></td>
+<td>* <br/> <a href="../DataProtectionImpact/">DataProtectionImpact</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../preprocessing_strategies/">preprocessing_strategies</a></td>
-<td>0..* <br/> <a href="../PreprocessingStrategy/">PreprocessingStrategy</a></td>
+<td>* <br/> <a href="../PreprocessingStrategy/">PreprocessingStrategy</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../cleaning_strategies/">cleaning_strategies</a></td>
-<td>0..* <br/> <a href="../CleaningStrategy/">CleaningStrategy</a></td>
+<td>* <br/> <a href="../CleaningStrategy/">CleaningStrategy</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../labeling_strategies/">labeling_strategies</a></td>
-<td>0..* <br/> <a href="../LabelingStrategy/">LabelingStrategy</a></td>
+<td>* <br/> <a href="../LabelingStrategy/">LabelingStrategy</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../raw_sources/">raw_sources</a></td>
-<td>0..* <br/> <a href="../RawData/">RawData</a></td>
+<td>* <br/> <a href="../RawData/">RawData</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../existing_uses/">existing_uses</a></td>
-<td>0..* <br/> <a href="../ExistingUse/">ExistingUse</a></td>
+<td>* <br/> <a href="../ExistingUse/">ExistingUse</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../use_repository/">use_repository</a></td>
-<td>0..* <br/> <a href="../UseRepository/">UseRepository</a></td>
+<td>* <br/> <a href="../UseRepository/">UseRepository</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../other_tasks/">other_tasks</a></td>
-<td>0..* <br/> <a href="../OtherTask/">OtherTask</a></td>
+<td>* <br/> <a href="../OtherTask/">OtherTask</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../future_use_impacts/">future_use_impacts</a></td>
-<td>0..* <br/> <a href="../FutureUseImpact/">FutureUseImpact</a></td>
+<td>* <br/> <a href="../FutureUseImpact/">FutureUseImpact</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../discouraged_uses/">discouraged_uses</a></td>
-<td>0..* <br/> <a href="../DiscouragedUse/">DiscouragedUse</a></td>
+<td>* <br/> <a href="../DiscouragedUse/">DiscouragedUse</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../distribution_formats/">distribution_formats</a></td>
-<td>0..* <br/> <a href="../DistributionFormat/">DistributionFormat</a></td>
+<td>* <br/> <a href="../DistributionFormat/">DistributionFormat</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../distribution_dates/">distribution_dates</a></td>
-<td>0..* <br/> <a href="../DistributionDate/">DistributionDate</a></td>
+<td>* <br/> <a href="../DistributionDate/">DistributionDate</a></td>
 <td></td>
 <td>direct</td>
 </tr>
@@ -746,13 +1067,13 @@
 </tr>
 <tr>
 <td><a href="../maintainers/">maintainers</a></td>
-<td>0..* <br/> <a href="../Maintainer/">Maintainer</a></td>
+<td>* <br/> <a href="../Maintainer/">Maintainer</a></td>
 <td></td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../errata/">errata</a></td>
-<td>0..* <br/> <a href="../Erratum/">Erratum</a></td>
+<td>* <br/> <a href="../Erratum/">Erratum</a></td>
 <td></td>
 <td>direct</td>
 </tr>
@@ -795,61 +1116,49 @@
 <tr>
 <td><a href="../compression/">compression</a></td>
 <td>0..1 <br/> <a href="../CompressionEnum/">CompressionEnum</a></td>
-<td>The compression format of the data</td>
+<td>compression format used, if any</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to/">conforms_to</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>The standard to which the data conforms</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to_class/">conforms_to_class</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>The class in the schema to which the data object instantiates</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to_schema/">conforms_to_schema</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>The schema to which the data conforms</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../created_by/">created_by</a></td>
-<td>0..* <br/> <a href="../CreatorOrMaintainerEnum/">CreatorOrMaintainerEnum</a></td>
-<td>Agent that created the element</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../created_on/">created_on</a></td>
 <td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
-<td>Date and Time at which the element was created</td>
-<td><a href="../Information/">Information</a></td>
-</tr>
-<tr>
-<td><a href="../description/">description</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable description for a thing</td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../doi/">doi</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>The Digital Object Identifier of the data, with the doi prefix</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>digital object identifier</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../download_url/">download_url</a></td>
 <td>0..1 <br/> <a href="../Uri/">Uri</a></td>
 <td>URL from which the data can be downloaded</td>
-<td><a href="../Information/">Information</a></td>
-</tr>
-<tr>
-<td><a href="../id/">id</a></td>
-<td>1..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>A unique identifier for a thing</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -860,8 +1169,8 @@
 </tr>
 <tr>
 <td><a href="../keywords/">keywords</a></td>
-<td>0..* <br/> <a href="../String/">String</a></td>
-<td>Keywords associated with the data</td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -873,19 +1182,19 @@
 <tr>
 <td><a href="../last_updated_on/">last_updated_on</a></td>
 <td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
-<td>Date and Time at which the element was last updated</td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../license/">license</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>license for the data</td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../modified_by/">modified_by</a></td>
-<td>0..1 <br/> <a href="../CreatorOrMaintainerEnum/">CreatorOrMaintainerEnum</a></td>
-<td>agent that modified the element</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -902,8 +1211,8 @@
 </tr>
 <tr>
 <td><a href="../status/">status</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>Status of the element in terms of its maturity or life cycle</td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -915,14 +1224,32 @@
 <tr>
 <td><a href="../version/">version</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>particular version of schema</td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../was_derived_from/">was_derived_from</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A derivation is a transformation of an entity into another, an update of an e...</td>
+<td></td>
 <td><a href="../Information/">Information</a></td>
+</tr>
+<tr>
+<td><a href="../id/">id</a></td>
+<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>A unique identifier for a thing</td>
+<td><a href="../NamedThing/">NamedThing</a></td>
+</tr>
+<tr>
+<td><a href="../name/">name</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable name for a thing</td>
+<td><a href="../NamedThing/">NamedThing</a></td>
+</tr>
+<tr>
+<td><a href="../description/">description</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable description for a thing</td>
+<td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
 </table>
@@ -1015,32 +1342,42 @@ attributes:
     name: purposes
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: Purpose
+    multivalued: true
   tasks:
     name: tasks
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: Task
+    multivalued: true
   addressing_gaps:
     name: addressing_gaps
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: AddressingGap
+    multivalued: true
   creators:
     name: creators
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: Creator
+    multivalued: true
   funders:
     name: funders
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: FundingMechanism
+    multivalued: true
   subsets:
     name: subsets
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1048,214 +1385,290 @@ attributes:
     - schema:distribution
     rank: 1000
     slot_uri: dcat:distribution
-    multivalued: true
+    domain_of:
+    - Dataset
     range: DataSubset
+    multivalued: true
   instances:
     name: instances
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: Instance
+    multivalued: true
   anomalies:
     name: anomalies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: DataAnomaly
+    multivalued: true
   external_resources:
     name: external_resources
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
+    - ExternalResource
     range: ExternalResource
+    multivalued: true
   confidential_elements:
     name: confidential_elements
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: Confidentiality
+    multivalued: true
   content_warnings:
     name: content_warnings
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: ContentWarning
+    multivalued: true
   subpopulations:
     name: subpopulations
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: Subpopulation
+    multivalued: true
   sensitive_elements:
     name: sensitive_elements
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: SensitiveElement
+    multivalued: true
   acquisition_methods:
     name: acquisition_methods
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: InstanceAcquisition
+    multivalued: true
   collection_mechanisms:
     name: collection_mechanisms
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: CollectionMechanism
+    multivalued: true
   sampling_strategies:
     name: sampling_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
+    - Instance
     range: SamplingStrategy
+    multivalued: true
   data_collectors:
     name: data_collectors
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: DataCollector
+    multivalued: true
   collection_timeframes:
     name: collection_timeframes
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: CollectionTimeframe
+    multivalued: true
   ethical_reviews:
     name: ethical_reviews
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: EthicalReview
+    multivalued: true
   data_protection_impacts:
     name: data_protection_impacts
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: DataProtectionImpact
+    multivalued: true
   preprocessing_strategies:
     name: preprocessing_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: PreprocessingStrategy
+    multivalued: true
   cleaning_strategies:
     name: cleaning_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: CleaningStrategy
+    multivalued: true
   labeling_strategies:
     name: labeling_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: LabelingStrategy
+    multivalued: true
   raw_sources:
     name: raw_sources
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: RawData
+    multivalued: true
   existing_uses:
     name: existing_uses
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: ExistingUse
+    multivalued: true
   use_repository:
     name: use_repository
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: UseRepository
+    multivalued: true
   other_tasks:
     name: other_tasks
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: OtherTask
+    multivalued: true
   future_use_impacts:
     name: future_use_impacts
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: FutureUseImpact
+    multivalued: true
   discouraged_uses:
     name: discouraged_uses
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: DiscouragedUse
+    multivalued: true
   distribution_formats:
     name: distribution_formats
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: DistributionFormat
+    multivalued: true
   distribution_dates:
     name: distribution_dates
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: DistributionDate
+    multivalued: true
   license_and_use_terms:
     name: license_and_use_terms
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: LicenseAndUseTerms
   ip_restrictions:
     name: ip_restrictions
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: IPRestrictions
   regulatory_restrictions:
     name: regulatory_restrictions
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: ExportControlRegulatoryRestrictions
   maintainers:
     name: maintainers
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: Maintainer
+    multivalued: true
   errata:
     name: errata
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
+    domain_of:
+    - Dataset
     range: Erratum
+    multivalued: true
   updates:
     name: updates
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: UpdatePlan
   retention_limit:
     name: retention_limit
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: RetentionLimits
   version_access:
     name: version_access
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: VersionAccess
   extension_mechanism:
     name: extension_mechanism
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: ExtensionMechanism
   is_deidentified:
     name: is_deidentified
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: Deidentification
   is_tabular:
     name: is_tabular
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    domain_of:
+    - Dataset
     range: boolean
 class_uri: dcat:Distribution
 
@@ -1281,52 +1694,52 @@ attributes:
     name: purposes
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: purposes
     owner: Dataset
     domain_of:
     - Dataset
     range: Purpose
+    multivalued: true
   tasks:
     name: tasks
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: tasks
     owner: Dataset
     domain_of:
     - Dataset
     range: Task
+    multivalued: true
   addressing_gaps:
     name: addressing_gaps
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: addressing_gaps
     owner: Dataset
     domain_of:
     - Dataset
     range: AddressingGap
+    multivalued: true
   creators:
     name: creators
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: creators
     owner: Dataset
     domain_of:
     - Dataset
     range: Creator
+    multivalued: true
   funders:
     name: funders
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: funders
     owner: Dataset
     domain_of:
     - Dataset
     range: FundingMechanism
+    multivalued: true
   subsets:
     name: subsets
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1334,264 +1747,264 @@ attributes:
     - schema:distribution
     rank: 1000
     slot_uri: dcat:distribution
-    multivalued: true
     alias: subsets
     owner: Dataset
     domain_of:
     - Dataset
     range: DataSubset
+    multivalued: true
   instances:
     name: instances
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: instances
     owner: Dataset
     domain_of:
     - Dataset
     range: Instance
+    multivalued: true
   anomalies:
     name: anomalies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: anomalies
     owner: Dataset
     domain_of:
     - Dataset
     range: DataAnomaly
+    multivalued: true
   external_resources:
     name: external_resources
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: external_resources
     owner: Dataset
     domain_of:
     - Dataset
     - ExternalResource
     range: ExternalResource
+    multivalued: true
   confidential_elements:
     name: confidential_elements
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: confidential_elements
     owner: Dataset
     domain_of:
     - Dataset
     range: Confidentiality
+    multivalued: true
   content_warnings:
     name: content_warnings
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: content_warnings
     owner: Dataset
     domain_of:
     - Dataset
     range: ContentWarning
+    multivalued: true
   subpopulations:
     name: subpopulations
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: subpopulations
     owner: Dataset
     domain_of:
     - Dataset
     range: Subpopulation
+    multivalued: true
   sensitive_elements:
     name: sensitive_elements
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: sensitive_elements
     owner: Dataset
     domain_of:
     - Dataset
     range: SensitiveElement
+    multivalued: true
   acquisition_methods:
     name: acquisition_methods
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: acquisition_methods
     owner: Dataset
     domain_of:
     - Dataset
     range: InstanceAcquisition
+    multivalued: true
   collection_mechanisms:
     name: collection_mechanisms
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: collection_mechanisms
     owner: Dataset
     domain_of:
     - Dataset
     range: CollectionMechanism
+    multivalued: true
   sampling_strategies:
     name: sampling_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: sampling_strategies
     owner: Dataset
     domain_of:
     - Dataset
     - Instance
     range: SamplingStrategy
+    multivalued: true
   data_collectors:
     name: data_collectors
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: data_collectors
     owner: Dataset
     domain_of:
     - Dataset
     range: DataCollector
+    multivalued: true
   collection_timeframes:
     name: collection_timeframes
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: collection_timeframes
     owner: Dataset
     domain_of:
     - Dataset
     range: CollectionTimeframe
+    multivalued: true
   ethical_reviews:
     name: ethical_reviews
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: ethical_reviews
     owner: Dataset
     domain_of:
     - Dataset
     range: EthicalReview
+    multivalued: true
   data_protection_impacts:
     name: data_protection_impacts
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: data_protection_impacts
     owner: Dataset
     domain_of:
     - Dataset
     range: DataProtectionImpact
+    multivalued: true
   preprocessing_strategies:
     name: preprocessing_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: preprocessing_strategies
     owner: Dataset
     domain_of:
     - Dataset
     range: PreprocessingStrategy
+    multivalued: true
   cleaning_strategies:
     name: cleaning_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: cleaning_strategies
     owner: Dataset
     domain_of:
     - Dataset
     range: CleaningStrategy
+    multivalued: true
   labeling_strategies:
     name: labeling_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: labeling_strategies
     owner: Dataset
     domain_of:
     - Dataset
     range: LabelingStrategy
+    multivalued: true
   raw_sources:
     name: raw_sources
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: raw_sources
     owner: Dataset
     domain_of:
     - Dataset
     range: RawData
+    multivalued: true
   existing_uses:
     name: existing_uses
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: existing_uses
     owner: Dataset
     domain_of:
     - Dataset
     range: ExistingUse
+    multivalued: true
   use_repository:
     name: use_repository
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: use_repository
     owner: Dataset
     domain_of:
     - Dataset
     range: UseRepository
+    multivalued: true
   other_tasks:
     name: other_tasks
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: other_tasks
     owner: Dataset
     domain_of:
     - Dataset
     range: OtherTask
+    multivalued: true
   future_use_impacts:
     name: future_use_impacts
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: future_use_impacts
     owner: Dataset
     domain_of:
     - Dataset
     range: FutureUseImpact
+    multivalued: true
   discouraged_uses:
     name: discouraged_uses
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: discouraged_uses
     owner: Dataset
     domain_of:
     - Dataset
     range: DiscouragedUse
+    multivalued: true
   distribution_formats:
     name: distribution_formats
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: distribution_formats
     owner: Dataset
     domain_of:
     - Dataset
     range: DistributionFormat
+    multivalued: true
   distribution_dates:
     name: distribution_dates
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: distribution_dates
     owner: Dataset
     domain_of:
     - Dataset
     range: DistributionDate
+    multivalued: true
   license_and_use_terms:
     name: license_and_use_terms
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1623,22 +2036,22 @@ attributes:
     name: maintainers
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: maintainers
     owner: Dataset
     domain_of:
     - Dataset
     range: Maintainer
+    multivalued: true
   errata:
     name: errata
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    multivalued: true
     alias: errata
     owner: Dataset
     domain_of:
     - Dataset
     range: Erratum
+    multivalued: true
   updates:
     name: updates
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1716,11 +2129,10 @@ attributes:
     range: string
   encoding:
     name: encoding
-    description: The encoding of the data. This is not the same as the media type.
-      Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8,
-      ASCII, etc.
+    description: the character encoding of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcat:mediaType
     alias: encoding
     owner: Dataset
     domain_of:
@@ -1728,8 +2140,8 @@ attributes:
     range: EncodingEnum
   format:
     name: format
-    description: The format of the data. This is not the same as the media type. Rather,
-      this is the format of the data in a more specific sense, e.g., CSV, JSON, etc.
+    description: The file format, physical medium, or dimensions of a resource. This
+      should be a file extension or MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:format
@@ -1740,8 +2152,7 @@ attributes:
     range: FormatEnum
   hash:
     name: hash
-    description: The hash representation of the data, e.g., sha256, md5, etc. Subtypes
-      have their own slots.
+    description: hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     alias: hash
@@ -1751,10 +2162,9 @@ attributes:
     range: string
   md5:
     name: md5
-    description: The md5 hash representation of the data.
+    description: md5 hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    is_a: hash
     alias: md5
     owner: Dataset
     domain_of:
@@ -1762,24 +2172,14 @@ attributes:
     range: string
   media_type:
     name: media_type
-    description: The media type of the data. This is not the same as the format. Rather,
-      this is the media type of the data in a more general sense, e.g., text/csv,
-      application/json, etc., though as it is defined here the media type can be any
-      string.
-    examples:
-    - value: text/csv
-    - value: application/json
+    description: The media type of the data. This should be a MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - frictionless:mediatype
-    - schema:encodingFormat
     rank: 1000
-    slot_uri: dcat:mediaType
     alias: media_type
     owner: Dataset
     domain_of:
     - Dataset
-    range: string
+    range: MediaTypeEnum
   path:
     name: path
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1793,10 +2193,9 @@ attributes:
     range: string
   sha256:
     name: sha256
-    description: The sha256 hash representation of the data.
+    description: sha256 hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    is_a: hash
     alias: sha256
     owner: Dataset
     domain_of:
@@ -1804,9 +2203,7 @@ attributes:
     range: string
   compression:
     name: compression
-    description: The compression format of the data. This is not the same as the media
-      type. Rather, this is the compression format of the data in a more specific
-      sense, e.g., zip, gzip, etc.
+    description: compression format used, if any. e.g., gzip, bzip2, zip
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     alias: compression
@@ -1816,62 +2213,46 @@ attributes:
     range: CompressionEnum
   conforms_to:
     name: conforms_to
-    description: The standard to which the data conforms. This is not the same as
-      the media type. Rather, this is the standard to which the data conforms in a
-      more specific sense, e.g., frictionless, schema.org, etc. This should be a standard
-      from the Bridge2AI standards registry.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    values_from:
-    - B2AI_STANDARD
     slot_uri: dcterms:conformsTo
     alias: conforms_to
     owner: Dataset
     domain_of:
     - Information
-    range: uriorcurie
+    range: string
   conforms_to_class:
     name: conforms_to_class
-    description: The class in the schema to which the data object instantiates.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    is_a: conforms_to
+    slot_uri: dcterms:conformsTo
     alias: conforms_to_class
     owner: Dataset
     domain_of:
     - Information
-    range: uriorcurie
+    range: string
   conforms_to_schema:
     name: conforms_to_schema
-    description: The schema to which the data conforms. This is not the same as the
-      media type. Rather, this is the schema to which the data conforms in a more
-      specific sense, and even more specific than the general set of standards it
-      conforms to.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - frictionless:schema
     rank: 1000
-    is_a: conforms_to
+    slot_uri: dcterms:conformsTo
     alias: conforms_to_schema
     owner: Dataset
     domain_of:
     - Information
-    range: uriorcurie
+    range: string
   created_by:
     name: created_by
-    description: Agent that created the element
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: pav:createdBy
-    multivalued: true
     alias: created_by
     owner: Dataset
     domain_of:
     - Information
-    range: CreatorOrMaintainerEnum
+    range: string
   created_on:
     name: created_on
-    description: Date and Time at which the element was created
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: pav:createdOn
@@ -1880,67 +2261,18 @@ attributes:
     domain_of:
     - Information
     range: datetime
-  description:
-    name: description
-    description: A human-readable description for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: schema:description
-    alias: description
-    owner: Dataset
-    domain_of:
-    - Information
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - EthicalReview
-    - DirectCollection
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - DataProtectionImpact
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - NamedThing
-    range: string
   doi:
     name: doi
-    description: The Digital Object Identifier of the data, with the doi prefix.
-    examples:
-    - value: doi:10.48550/arXiv.2310.03666
+    description: digital object identifier
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: void:uriRegexPattern
     alias: doi
     owner: Dataset
     domain_of:
     - Information
-    range: uriorcurie
+    range: string
+    pattern: 10\.\d{4,}\/.+
   download_url:
     name: download_url
     description: URL from which the data can be downloaded. This is not the same as
@@ -1958,21 +2290,6 @@ attributes:
     domain_of:
     - Information
     range: uri
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: Dataset
-    domain_of:
-    - Information
-    - FormatDialect
-    - NamedThing
-    range: uriorcurie
-    required: true
   issued:
     name: issued
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1985,20 +2302,15 @@ attributes:
     range: datetime
   keywords:
     name: keywords
-    description: Keywords associated with the data. These may be provided by the data
-      creator or assigned later in a manual or automated manner.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - schema:keywords
     rank: 1000
-    singular_name: keyword
     slot_uri: dcat:keyword
-    multivalued: true
     alias: keywords
     owner: Dataset
     domain_of:
     - Information
     range: string
+    multivalued: true
   language:
     name: language
     description: language in which the information is expressed
@@ -2011,7 +2323,6 @@ attributes:
     range: string
   last_updated_on:
     name: last_updated_on
-    description: Date and Time at which the element was last updated
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: pav:lastUpdatedOn
@@ -2022,29 +2333,25 @@ attributes:
     range: datetime
   license:
     name: license
-    description: license for the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - frictionless:licenses
     rank: 1000
     slot_uri: dcterms:license
     alias: license
     owner: Dataset
     domain_of:
-    - Information
     - Software
+    - Information
     range: string
   modified_by:
     name: modified_by
-    description: agent that modified the element
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: oslc:modifiedBy
+    slot_uri: pav:lastUpdateBy
     alias: modified_by
     owner: Dataset
     domain_of:
     - Information
-    range: CreatorOrMaintainerEnum
+    range: string
   page:
     name: page
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2067,17 +2374,13 @@ attributes:
     range: uriorcurie
   status:
     name: status
-    description: Status of the element in terms of its maturity or life cycle
-    examples:
-    - value: bibo:draft
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: bibo:status
     alias: status
     owner: Dataset
     domain_of:
     - Information
-    range: uriorcurie
+    range: string
   title:
     name: title
     description: the official title of the element
@@ -2091,31 +2394,96 @@ attributes:
     range: string
   version:
     name: version
-    description: particular version of schema
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - schema:version
-    - dcterms:hasVersion
     rank: 1000
     slot_uri: pav:version
     alias: version
     owner: Dataset
     domain_of:
-    - Information
     - Software
+    - Information
     range: string
   was_derived_from:
     name: was_derived_from
-    description: A derivation is a transformation of an entity into another, an update
-      of an entity resulting in a new one, or the construction of a new entity based
-      on a pre-existing entity.@en
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: prov:wasDerivedFrom
+    slot_uri: pav:derivedFrom
     alias: was_derived_from
     owner: Dataset
     domain_of:
     - Information
+    range: string
+  id:
+    name: id
+    description: A unique identifier for a thing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    rank: 1000
+    slot_uri: schema:identifier
+    identifier: true
+    alias: id
+    owner: Dataset
+    domain_of:
+    - NamedThing
+    range: uriorcurie
+    required: true
+  name:
+    name: name
+    description: A human-readable name for a thing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    rank: 1000
+    slot_uri: schema:name
+    alias: name
+    owner: Dataset
+    domain_of:
+    - NamedThing
+    range: string
+  description:
+    name: description
+    description: A human-readable description for a thing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    rank: 1000
+    slot_uri: schema:description
+    alias: description
+    owner: Dataset
+    domain_of:
+    - NamedThing
+    - Relationships
+    - Splits
+    - DataAnomaly
+    - Confidentiality
+    - Deidentification
+    - SensitiveElement
+    - InstanceAcquisition
+    - CollectionMechanism
+    - DataCollector
+    - CollectionTimeframe
+    - DirectCollection
+    - PreprocessingStrategy
+    - CleaningStrategy
+    - LabelingStrategy
+    - RawData
+    - ExistingUse
+    - UseRepository
+    - OtherTask
+    - FutureUseImpact
+    - DiscouragedUse
+    - ThirdPartySharing
+    - DistributionFormat
+    - DistributionDate
+    - Maintainer
+    - Erratum
+    - UpdatePlan
+    - RetentionLimits
+    - VersionAccess
+    - ExtensionMechanism
+    - EthicalReview
+    - DataProtectionImpact
+    - CollectionNotification
+    - CollectionConsent
+    - ConsentRevocation
+    - LicenseAndUseTerms
+    - IPRestrictions
+    - ExportControlRegulatoryRestrictions
     range: string
 class_uri: dcat:Distribution
 

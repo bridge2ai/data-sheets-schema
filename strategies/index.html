@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/strategies/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -290,6 +290,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mappings" class="md-nav__link">
+    Mappings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#linkml-source" class="md-nav__link">
     LinkML Source
   </a>
@@ -317,8 +324,10 @@
 
 
 <h1 id="slot-strategies">Slot: strategies</h1>
-<p><em>If the dataset is a sample from a larger set, what was the sampling strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/strategies">data_sheets_schema:strategies</a></p>
+<p><em>Description of the sampling strategy (deterministic, probabilistic, etc.).</em></p>
+<p>__</p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/strategies">data_sheets_schema:strategies</a>
+Alias: strategies</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -333,7 +342,7 @@
 <tbody>
 <tr>
 <td><a href="../SamplingStrategy/">SamplingStrategy</a></td>
-<td>Does the dataset contain all possible instances or is it a sample (not necess...</td>
+<td>Does the dataset contain all possible instances, or is it a sample (not neces...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -352,20 +361,41 @@
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
 </ul>
+<h2 id="mappings">Mappings</h2>
+<table>
+<thead>
+<tr>
+<th>Mapping Type</th>
+<th>Mapped Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>self</td>
+<td>data_sheets_schema:strategies</td>
+</tr>
+<tr>
+<td>native</td>
+<td>data_sheets_schema:strategies</td>
+</tr>
+</tbody>
+</table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
 <pre><code class="language-yaml">name: strategies
-description: If the dataset is a sample from a larger set, what was the sampling strategy
-  (e.g., deterministic, probabilistic with specific sampling probabilities)?
+description: 'Description of the sampling strategy (deterministic, probabilistic,
+  etc.).
+
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-multivalued: true
 alias: strategies
 owner: SamplingStrategy
 domain_of:
 - SamplingStrategy
 range: string
+multivalued: true
 
 </code></pre>
 

@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/modified_by/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -290,6 +290,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mappings" class="md-nav__link">
+    Mappings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#linkml-source" class="md-nav__link">
     LinkML Source
   </a>
@@ -317,8 +324,8 @@
 
 
 <h1 id="slot-modified_by">Slot: modified_by</h1>
-<p><em>agent that modified the element</em></p>
-<p>URI: <a href="oslc:modifiedBy">oslc:modifiedBy</a></p>
+<p>URI: <a href="http://purl.org/pav/lastUpdateBy">pav:lastUpdateBy</a>
+Alias: modified_by</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -332,18 +339,13 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../Dataset/">Dataset</a></td>
 <td>A single component of related observations and/or information that can be rea...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Information/">Information</a></td>
+<td>Grouping for datasets and data files</td>
 <td>no</td>
 </tr>
 <tr>
@@ -351,29 +353,52 @@
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
+<tr>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
 </tbody>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../CreatorOrMaintainerEnum/">CreatorOrMaintainerEnum</a></li>
+<li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
 </ul>
+<h2 id="mappings">Mappings</h2>
+<table>
+<thead>
+<tr>
+<th>Mapping Type</th>
+<th>Mapped Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>self</td>
+<td>pav:lastUpdateBy</td>
+</tr>
+<tr>
+<td>native</td>
+<td>data_sheets_schema:modified_by</td>
+</tr>
+</tbody>
+</table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
 <pre><code class="language-yaml">name: modified_by
-description: agent that modified the element
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: oslc:modifiedBy
+slot_uri: pav:lastUpdateBy
 alias: modified_by
 domain_of:
 - Information
-range: CreatorOrMaintainerEnum
+range: string
 
 </code></pre>
 

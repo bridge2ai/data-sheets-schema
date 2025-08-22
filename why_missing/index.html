@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/why_missing/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -290,6 +290,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mappings" class="md-nav__link">
+    Mappings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#linkml-source" class="md-nav__link">
     LinkML Source
   </a>
@@ -317,7 +324,10 @@
 
 
 <h1 id="slot-why_missing">Slot: why_missing</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/why_missing">data_sheets_schema:why_missing</a></p>
+<p><em>Explanation of why each piece of data is missing.</em></p>
+<p>__</p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/why_missing">data_sheets_schema:why_missing</a>
+Alias: why_missing</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -332,7 +342,7 @@
 <tbody>
 <tr>
 <td><a href="../MissingInfo/">MissingInfo</a></td>
-<td>Is any information missing from individual instances? If so, please provide a...</td>
+<td>Is any information missing from individual instances? (e</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -351,18 +361,40 @@
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
 </ul>
+<h2 id="mappings">Mappings</h2>
+<table>
+<thead>
+<tr>
+<th>Mapping Type</th>
+<th>Mapped Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>self</td>
+<td>data_sheets_schema:why_missing</td>
+</tr>
+<tr>
+<td>native</td>
+<td>data_sheets_schema:why_missing</td>
+</tr>
+</tbody>
+</table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
 <pre><code class="language-yaml">name: why_missing
+description: 'Explanation of why each piece of data is missing.
+
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-multivalued: true
 alias: why_missing
 owner: MissingInfo
 domain_of:
 - MissingInfo
 range: string
+multivalued: true
 
 </code></pre>
 

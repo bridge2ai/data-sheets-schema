@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/MediaTypeEnum/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -263,6 +263,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#slots" class="md-nav__link">
+    Slots
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#identifier-and-mapping-information" class="md-nav__link">
     Identifier and Mapping Information
   </a>
@@ -310,7 +317,7 @@
 
 
 <h1 id="enum-mediatypeenum">Enum: MediaTypeEnum</h1>
-<p>URI: <a href="./">MediaTypeEnum</a></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/MediaTypeEnum">data_sheets_schema:MediaTypeEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
 <thead>
@@ -322,14 +329,114 @@
 </thead>
 <tbody>
 <tr>
-<td>csv</td>
-<td>mediatypes:text/csv</td>
+<td>text/csv</td>
+<td>None</td>
 <td></td>
 </tr>
 <tr>
-<td>rdf-xml</td>
-<td>mediatypes:application/rdf+xml</td>
+<td>text/tab-separated-values</td>
+<td>None</td>
 <td></td>
+</tr>
+<tr>
+<td>application/json</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/xml</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>text/xml</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/yaml</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>text/yaml</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>text/html</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/pdf</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/vnd.openxmlformats-officedocument.wordprocessingml.document</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/vnd.openxmlformats-officedocument.presentationml.presentation</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>text/plain</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>text/markdown</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/zip</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/x-tar</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/gzip</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/x-bzip2</td>
+<td>None</td>
+<td></td>
+</tr>
+<tr>
+<td>application/x-xz</td>
+<td>None</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="slots">Slots</h2>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="../media_type/">media_type</a></td>
+<td>The media type of the data</td>
 </tr>
 </tbody>
 </table>
@@ -343,16 +450,46 @@
 
 <pre><code class="language-yaml">name: MediaTypeEnum
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- dcterms:MediaType
 rank: 1000
 permissible_values:
-  csv:
-    text: csv
-    meaning: mediatypes:text/csv
-  rdf-xml:
-    text: rdf-xml
-    meaning: mediatypes:application/rdf+xml
+  text/csv:
+    text: text/csv
+  text/tab-separated-values:
+    text: text/tab-separated-values
+  application/json:
+    text: application/json
+  application/xml:
+    text: application/xml
+  text/xml:
+    text: text/xml
+  application/yaml:
+    text: application/yaml
+  text/yaml:
+    text: text/yaml
+  text/html:
+    text: text/html
+  application/pdf:
+    text: application/pdf
+  application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+    text: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+  application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+    text: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+  application/vnd.openxmlformats-officedocument.presentationml.presentation:
+    text: application/vnd.openxmlformats-officedocument.presentationml.presentation
+  text/plain:
+    text: text/plain
+  text/markdown:
+    text: text/markdown
+  application/zip:
+    text: application/zip
+  application/x-tar:
+    text: application/x-tar
+  application/gzip:
+    text: application/gzip
+  application/x-bzip2:
+    text: application/x-bzip2
+  application/x-xz:
+    text: application/x-xz
 
 </code></pre>
 

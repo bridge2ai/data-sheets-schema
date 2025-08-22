@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/why_not_representative/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -290,6 +290,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mappings" class="md-nav__link">
+    Mappings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#linkml-source" class="md-nav__link">
     LinkML Source
   </a>
@@ -317,7 +324,10 @@
 
 
 <h1 id="slot-why_not_representative">Slot: why_not_representative</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/why_not_representative">data_sheets_schema:why_not_representative</a></p>
+<p><em>Explanation of why the sample is not representative, if applicable.</em></p>
+<p>__</p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/why_not_representative">data_sheets_schema:why_not_representative</a>
+Alias: why_not_representative</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -332,7 +342,7 @@
 <tbody>
 <tr>
 <td><a href="../SamplingStrategy/">SamplingStrategy</a></td>
-<td>Does the dataset contain all possible instances or is it a sample (not necess...</td>
+<td>Does the dataset contain all possible instances, or is it a sample (not neces...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -351,18 +361,40 @@
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
 </ul>
+<h2 id="mappings">Mappings</h2>
+<table>
+<thead>
+<tr>
+<th>Mapping Type</th>
+<th>Mapped Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>self</td>
+<td>data_sheets_schema:why_not_representative</td>
+</tr>
+<tr>
+<td>native</td>
+<td>data_sheets_schema:why_not_representative</td>
+</tr>
+</tbody>
+</table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
 <pre><code class="language-yaml">name: why_not_representative
+description: 'Explanation of why the sample is not representative, if applicable.
+
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-multivalued: true
 alias: why_not_representative
 owner: SamplingStrategy
 domain_of:
 - SamplingStrategy
 range: string
+multivalued: true
 
 </code></pre>
 

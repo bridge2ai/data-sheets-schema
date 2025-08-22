@@ -7,7 +7,7 @@
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <link href="https://bridge2ai.github.io/data-sheets-schema/SamplingStrategy/" rel="canonical"/>
 <link href="../assets/images/favicon.png" rel="icon"/>
-<meta content="mkdocs-1.5.3, mkdocs-material-8.5.10" name="generator"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-8.5.10" name="generator"/>
 <title>Class: SamplingStrategy - data-sheets-schema</title>
 <link href="../assets/stylesheets/main.975780f9.min.css" rel="stylesheet"/>
 <link href="../assets/stylesheets/palette.2505c338.min.css" rel="stylesheet"/>
@@ -205,21 +205,14 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-samplingstrategy">Class: SamplingStrategy</h1>
-<p><em>Does the dataset contain all possible instances or is it a sample (not necessarily random) of instances from a larger set? If the dataset is a sample, then what is the larger set? Is the sample representative of the larger set (e.g., geographic coverage)? If so, please describe how this representativeness was validated/verified. If it is not representative of the larger set, please describe why not (e.g., to cover a more diverse range of instances, because instances were withheld or unavailable).</em></p>
+<p><em>Does the dataset contain all possible instances, or is it a sample (not necessarily random) of instances from a larger set? If so, how representative is it?</em></p>
+<p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/SamplingStrategy">data_sheets_schema:SamplingStrategy</a></p>
 <div class="mermaid"> classDiagram
     class SamplingStrategy
+    click SamplingStrategy href "../SamplingStrategy/"
       DatasetProperty &lt;|-- SamplingStrategy
-
-      SamplingStrategy : category
-
-      SamplingStrategy : contribution_date
-
-      SamplingStrategy : contributor_github_name
-
-      SamplingStrategy : contributor_name
-
-      SamplingStrategy : contributor_orcid
+        click DatasetProperty href "../DatasetProperty/"
 
       SamplingStrategy : description
 
@@ -233,23 +226,22 @@
 
       SamplingStrategy : name
 
-      SamplingStrategy : related_to
-
-          SamplingStrategy --|&gt; NamedThing : related_to
-
       SamplingStrategy : representative_verification
 
       SamplingStrategy : source_data
 
       SamplingStrategy : strategies
 
-      SamplingStrategy : subclass_of
-
-          SamplingStrategy --|&gt; NamedThing : subclass_of
-
       SamplingStrategy : used_software
 
-          SamplingStrategy --|&gt; Software : used_software
+
+
+
+
+        SamplingStrategy --&gt; "*" Software : used_software
+        click Software href "../Software/"
+
+
 
       SamplingStrategy : why_not_representative
 
@@ -278,62 +270,56 @@
 <tbody>
 <tr>
 <td><a href="../is_sample/">is_sample</a></td>
-<td>0..* <br/> <a href="../Boolean/">Boolean</a></td>
-<td></td>
+<td>* <br/> <a href="../Boolean/">Boolean</a></td>
+<td>Indicates whether it is a sample of a larger set</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../is_random/">is_random</a></td>
-<td>0..* <br/> <a href="../Boolean/">Boolean</a></td>
-<td></td>
+<td>* <br/> <a href="../Boolean/">Boolean</a></td>
+<td>Indicates whether the sample is random</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../source_data/">source_data</a></td>
-<td>0..* <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>Description of the larger set from which the sample was drawn, if any</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../is_representative/">is_representative</a></td>
-<td>0..* <br/> <a href="../Boolean/">Boolean</a></td>
-<td></td>
+<td>* <br/> <a href="../Boolean/">Boolean</a></td>
+<td>Indicates whether the sample is representative of the larger set</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../representative_verification/">representative_verification</a></td>
-<td>0..* <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>Explanation of how representativeness was validated or verified</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../why_not_representative/">why_not_representative</a></td>
-<td>0..* <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>Explanation of why the sample is not representative, if applicable</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../strategies/">strategies</a></td>
-<td>0..* <br/> <a href="../String/">String</a></td>
-<td>If the dataset is a sample from a larger set, what was the sampling strategy ...</td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>Description of the sampling strategy (deterministic, probabilistic, etc</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../used_software/">used_software</a></td>
-<td>0..* <br/> <a href="../Software/">Software</a></td>
+<td>* <br/> <a href="../Software/">Software</a></td>
 <td>What software was used as part of this dataset property?</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
 <td><a href="../id/">id</a></td>
-<td>1..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
 <td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../category/">category</a></td>
-<td>0..1 <br/> <a href="../CategoryType/">CategoryType</a></td>
-<td>Name of the high level ontology class in which this entity is categorized</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 <tr>
@@ -346,42 +332,6 @@
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>A human-readable description for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../subclass_of/">subclass_of</a></td>
-<td>0..* <br/> <a href="../NamedThing/">NamedThing</a></td>
-<td>Holds between two classes where the domain class is a specialization of the r...</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../related_to/">related_to</a></td>
-<td>0..* <br/> <a href="../NamedThing/">NamedThing</a></td>
-<td>A relationship that is asserted between two named things</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_name/">contributor_name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The name of the person who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_github_name/">contributor_github_name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>The name of the github user who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contributor_orcid/">contributor_orcid</a></td>
-<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>The ORCiD of the person who added this node</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../contribution_date/">contribution_date</a></td>
-<td>0..1 <br/> <a href="../Date/">Date</a></td>
-<td>The date on which the node was added</td>
 <td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
@@ -446,196 +396,220 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: SamplingStrategy
-description: Does the dataset contain all possible instances or is it a sample (not
-  necessarily random) of instances from a larger set? If the dataset is a sample,
-  then what is the larger set? Is the sample representative of the larger set (e.g.,
-  geographic coverage)? If so, please describe how this representativeness was validated/verified.
-  If it is not representative of the larger set, please describe why not (e.g., to
-  cover a more diverse range of instances, because instances were withheld or unavailable).
-in_subset:
-- Composition
-- Collection
+description: 'Does the dataset contain all possible instances, or is it a sample (not
+  necessarily random) of instances from a larger set? If so, how representative is
+  it?
+
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
   is_sample:
     name: is_sample
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: Indicates whether it is a sample of a larger set.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
+    domain_of:
+    - SamplingStrategy
     range: boolean
+    multivalued: true
   is_random:
     name: is_random
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: Indicates whether the sample is random.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
+    domain_of:
+    - SamplingStrategy
     range: boolean
+    multivalued: true
   source_data:
     name: source_data
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Description of the larger set from which the sample was drawn, if
+      any.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
+    domain_of:
+    - SamplingStrategy
     range: string
+    multivalued: true
   is_representative:
     name: is_representative
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Indicates whether the sample is representative of the larger set.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
+    domain_of:
+    - SamplingStrategy
     range: boolean
+    multivalued: true
   representative_verification:
     name: representative_verification
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Explanation of how representativeness was validated or verified.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
+    domain_of:
+    - SamplingStrategy
     range: string
+    multivalued: true
   why_not_representative:
     name: why_not_representative
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Explanation of why the sample is not representative, if applicable.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
+    domain_of:
+    - SamplingStrategy
     range: string
+    multivalued: true
   strategies:
     name: strategies
-    description: If the dataset is a sample from a larger set, what was the sampling
-      strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Description of the sampling strategy (deterministic, probabilistic,
+      etc.).
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
+    domain_of:
+    - SamplingStrategy
     range: string
+    multivalued: true
 
 </code></pre>
 </details>
 <h3 id="induced">Induced</h3>
 <details>
 <pre><code class="language-yaml">name: SamplingStrategy
-description: Does the dataset contain all possible instances or is it a sample (not
-  necessarily random) of instances from a larger set? If the dataset is a sample,
-  then what is the larger set? Is the sample representative of the larger set (e.g.,
-  geographic coverage)? If so, please describe how this representativeness was validated/verified.
-  If it is not representative of the larger set, please describe why not (e.g., to
-  cover a more diverse range of instances, because instances were withheld or unavailable).
-in_subset:
-- Composition
-- Collection
+description: 'Does the dataset contain all possible instances, or is it a sample (not
+  necessarily random) of instances from a larger set? If so, how representative is
+  it?
+
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
   is_sample:
     name: is_sample
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: Indicates whether it is a sample of a larger set.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
     alias: is_sample
     owner: SamplingStrategy
     domain_of:
     - SamplingStrategy
     range: boolean
+    multivalued: true
   is_random:
     name: is_random
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: Indicates whether the sample is random.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
     alias: is_random
     owner: SamplingStrategy
     domain_of:
     - SamplingStrategy
     range: boolean
+    multivalued: true
   source_data:
     name: source_data
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Description of the larger set from which the sample was drawn, if
+      any.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
     alias: source_data
     owner: SamplingStrategy
     domain_of:
     - SamplingStrategy
     range: string
+    multivalued: true
   is_representative:
     name: is_representative
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Indicates whether the sample is representative of the larger set.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
     alias: is_representative
     owner: SamplingStrategy
     domain_of:
     - SamplingStrategy
     range: boolean
+    multivalued: true
   representative_verification:
     name: representative_verification
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Explanation of how representativeness was validated or verified.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
     alias: representative_verification
     owner: SamplingStrategy
     domain_of:
     - SamplingStrategy
     range: string
+    multivalued: true
   why_not_representative:
     name: why_not_representative
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Explanation of why the sample is not representative, if applicable.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
     alias: why_not_representative
     owner: SamplingStrategy
     domain_of:
     - SamplingStrategy
     range: string
+    multivalued: true
   strategies:
     name: strategies
-    description: If the dataset is a sample from a larger set, what was the sampling
-      strategy (e.g., deterministic, probabilistic with specific sampling probabilities)?
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    description: 'Description of the sampling strategy (deterministic, probabilistic,
+      etc.).
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    multivalued: true
     alias: strategies
     owner: SamplingStrategy
     domain_of:
     - SamplingStrategy
     range: string
+    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
-    multivalued: true
     alias: used_software
     owner: SamplingStrategy
     domain_of:
     - DatasetProperty
     range: Software
+    multivalued: true
   id:
     name: id
     description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:identifier
     identifier: true
     alias: id
     owner: SamplingStrategy
     domain_of:
-    - Information
-    - FormatDialect
     - NamedThing
     range: uriorcurie
     required: true
-  category:
-    name: category
-    description: Name of the high level ontology class in which this entity is categorized.
-      Corresponds to the label for the entity type class, e.g., "BiomedicalStandard".
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: type
-    domain: NamedThing
-    designates_type: true
-    alias: category
-    owner: SamplingStrategy
-    domain_of:
-    - NamedThing
-    range: category_type
   name:
     name: name
     description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:name
     alias: name
@@ -646,13 +620,13 @@ attributes:
   description:
     name: description
     description: A human-readable description for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:description
     alias: description
     owner: SamplingStrategy
     domain_of:
-    - Information
+    - NamedThing
     - Relationships
     - Splits
     - DataAnomaly
@@ -663,12 +637,7 @@ attributes:
     - CollectionMechanism
     - DataCollector
     - CollectionTimeframe
-    - EthicalReview
     - DirectCollection
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - DataProtectionImpact
     - PreprocessingStrategy
     - CleaningStrategy
     - LabelingStrategy
@@ -681,104 +650,21 @@ attributes:
     - ThirdPartySharing
     - DistributionFormat
     - DistributionDate
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     - Maintainer
     - Erratum
     - UpdatePlan
     - RetentionLimits
     - VersionAccess
     - ExtensionMechanism
-    - NamedThing
+    - EthicalReview
+    - DataProtectionImpact
+    - CollectionNotification
+    - CollectionConsent
+    - ConsentRevocation
+    - LicenseAndUseTerms
+    - IPRestrictions
+    - ExportControlRegulatoryRestrictions
     range: string
-  subclass_of:
-    name: subclass_of
-    description: Holds between two classes where the domain class is a specialization
-      of the range class.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - rdfs:subClassOf
-    - MESH:isa
-    narrow_mappings:
-    - rdfs:subPropertyOf
-    rank: 1000
-    is_a: related_to
-    domain: NamedThing
-    multivalued: true
-    inherited: true
-    alias: subclass_of
-    owner: SamplingStrategy
-    domain_of:
-    - NamedThing
-    range: NamedThing
-  related_to:
-    name: related_to
-    description: A relationship that is asserted between two named things.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    domain: NamedThing
-    multivalued: true
-    inherited: true
-    alias: related_to
-    owner: SamplingStrategy
-    domain_of:
-    - Organization
-    - NamedThing
-    symmetric: true
-    range: NamedThing
-  contributor_name:
-    name: contributor_name
-    description: The name of the person who added this node.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_name
-    owner: SamplingStrategy
-    domain_of:
-    - NamedThing
-    range: string
-  contributor_github_name:
-    name: contributor_github_name
-    description: The name of the github user who added this node.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_github_name
-    owner: SamplingStrategy
-    domain_of:
-    - NamedThing
-    range: string
-  contributor_orcid:
-    name: contributor_orcid
-    description: The ORCiD of the person who added this node.
-    examples:
-    - value: ORCID:0000-0001-1234-5678
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contributor_orcid
-    owner: SamplingStrategy
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-  contribution_date:
-    name: contribution_date
-    description: The date on which the node was added.
-    examples:
-    - value: '2023-03-20'
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    is_a: node_property
-    domain: NamedThing
-    alias: contribution_date
-    owner: SamplingStrategy
-    domain_of:
-    - NamedThing
-    range: date
 
 </code></pre>
 </details>

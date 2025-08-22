@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/anomalies/">
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-8.5.10">
     
     
       
@@ -290,6 +290,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mappings" class="md-nav__link">
+    Mappings
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#linkml-source" class="md-nav__link">
     LinkML Source
   </a>
@@ -317,7 +324,8 @@
 
 
 <h1 id="slot-anomalies">Slot: anomalies</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/anomalies">data_sheets_schema:anomalies</a></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/anomalies">data_sheets_schema:anomalies</a>
+Alias: anomalies</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -356,18 +364,37 @@
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
 </ul>
+<h2 id="mappings">Mappings</h2>
+<table>
+<thead>
+<tr>
+<th>Mapping Type</th>
+<th>Mapped Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>self</td>
+<td>data_sheets_schema:anomalies</td>
+</tr>
+<tr>
+<td>native</td>
+<td>data_sheets_schema:anomalies</td>
+</tr>
+</tbody>
+</table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
 <pre><code class="language-yaml">name: anomalies
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-multivalued: true
 alias: anomalies
 owner: Dataset
 domain_of:
 - Dataset
 range: DataAnomaly
+multivalued: true
 
 </code></pre>
 
