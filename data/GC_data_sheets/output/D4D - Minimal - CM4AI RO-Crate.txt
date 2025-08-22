@@ -1,0 +1,207 @@
+D4D - MINIMAL - CM4AI RO-CRATE REPORT
+================================================================================
+
+COLLECTION: Metadata
+--------------------------------------------------------------------------------
+  Item_0:
+    @type: Dataset
+    id: doi:10.18130/V3/B35XWX#crispr-cell-atlas
+    title: ro-crate-metadata.json (CRISPR Perturbation Cell Atlas)
+    description: This dataset represents an expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) Functional Genomics Grand Challenge.
+    keywords: [
+  "CRISPR Perturbation Cell Atlas",
+  "CRISPRi",
+  "perturbation sequencing",
+  "hiPSCs",
+  "CM4AI"
+]
+    language: [
+  "en"
+]
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    version: 1.4 (Beta)
+    created_on: 2025-03-03
+    created_by: []
+    last_updated_on: None
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: CRISPR Perturbation Cell Atlas/ro-crate-metadata.json
+    format: JSON
+    encoding: None
+    compression: None
+    media_type: application/json
+    bytes: None
+    hash: None
+    md5: cbd...818
+    sha256: None
+
+  Item_1:
+    @type: Dataset
+    id: doi:10.18130/V3/B35XWX#crispr-rna-sequences
+    title: ro-crate-metadata.json (CRISPR Perturbation RNA Sequences - Raw Sequences)
+    description: Raw sequence data from an expressed genome-scale CRISPRi Perturbation Cell Atlas in KOLF2.1J hiPSCs mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes, part of the CM4AI Functional Genomics Grand Challenge.
+    keywords: [
+  "CRISPR Perturbation Cell Atlas",
+  "CRISPRi",
+  "raw sequences",
+  "CM4AI"
+]
+    language: [
+  "en"
+]
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    version: 1.4 (Beta)
+    created_on: 2025-03-03
+    created_by: []
+    last_updated_on: None
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: CRISPR Perturbation RNA Sequences - Raw Sequences/ro-crate-metadata.json
+    format: JSON
+    encoding: None
+    compression: None
+    media_type: application/json
+    bytes: None
+    hash: None
+    md5: 1ca...f5c
+    sha256: None
+
+  Item_2:
+    @type: Dataset
+    id: doi:10.18130/V3/B35XWX#if-paclitaxel
+    title: cm4ai-v0.6-beta-if-images-paclitaxel.zip
+    description: This data set displays the spatial localization of 563 proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy, as part of CM4AI.
+    keywords: [
+  "immunofluorescence",
+  "paclitaxel",
+  "MDA-MB-468",
+  "protein localization",
+  "CM4AI"
+]
+    language: [
+  "en"
+]
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    version: 1.4 (Beta)
+    created_on: 2025-03-03
+    created_by: []
+    last_updated_on: None
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-paclitaxel.zip
+    format: ZIP
+    encoding: None
+    compression: zip
+    media_type: application/zip
+    bytes: None
+    hash: None
+    md5: 942...043
+    sha256: None
+
+  Item_3:
+    @type: Dataset
+    id: doi:10.18130/V3/B35XWX#if-untreated
+    title: cm4ai-v0.6-beta-if-images-untreated.zip
+    description: This data set displays the spatial localization of 563 proteins of interest in untreated MDA-MB-468 cells by immunofluorescence-based staining (ICC-IF) and confocal microscopy, as part of CM4AI.
+    keywords: [
+  "immunofluorescence",
+  "untreated",
+  "MDA-MB-468",
+  "protein localization",
+  "CM4AI"
+]
+    language: [
+  "en"
+]
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    version: 1.4 (Beta)
+    created_on: 2025-03-03
+    created_by: []
+    last_updated_on: None
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-untreated.zip
+    format: ZIP
+    encoding: None
+    compression: zip
+    media_type: application/zip
+    bytes: None
+    hash: None
+    md5: 0b4...ef7
+    sha256: None
+
+  Item_4:
+    @type: Dataset
+    id: doi:10.18130/V3/B35XWX#if-vorinostat
+    title: cm4ai-v0.6-beta-if-images-vorinostat.zip
+    description: This data set displays the spatial localization of 563 proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated with vorinostat as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy, as part of CM4AI.
+    keywords: [
+  "immunofluorescence",
+  "vorinostat",
+  "MDA-MB-468",
+  "protein localization",
+  "CM4AI"
+]
+    language: [
+  "en"
+]
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    version: 1.4 (Beta)
+    created_on: 2025-03-03
+    created_by: []
+    last_updated_on: None
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-vorinostat.zip
+    format: ZIP
+    encoding: None
+    compression: zip
+    media_type: application/zip
+    bytes: None
+    hash: None
+    md5: ac5...d52
+    sha256: None
+
+  Item_5:
+    @type: Dataset
+    id: doi:10.18130/V3/B35XWX#sec-ms
+    title: ro-crate-metadata.json (Protein-protein Interaction SEC-MS)
+    description: This dataset was generated by size exclusion chromatography-mass spectroscopy (SEC-MS) on undifferentiated KOLF2.1J human iPSCs, in the Nevan Krogan laboratory at UCSF, as part of the CM4AI Functional Genomics Grand Challenge.
+    keywords: [
+  "protein-protein interaction",
+  "SEC-MS",
+  "KOLF2.1J",
+  "CM4AI"
+]
+    language: [
+  "en"
+]
+    license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    version: 1.4 (Beta)
+    created_on: 2025-03-03
+    created_by: []
+    last_updated_on: None
+    modified_by: []
+    doi: None
+    conforms_to: None
+    download_url: None
+    path: Protein-protein Interaction SEC-MS/ro-crate-metadata.json
+    format: JSON
+    encoding: None
+    compression: None
+    media_type: application/json
+    bytes: None
+    hash: None
+    md5: cb6...032
+    sha256: None
+

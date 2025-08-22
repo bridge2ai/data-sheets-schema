@@ -11,6 +11,7 @@ RUN = poetry run
 SCHEMA_NAME = $(shell ${SHELL} ./utils/get-value.sh name)
 SOURCE_SCHEMA_PATH = $(shell ${SHELL} ./utils/get-value.sh source_schema_path)
 SOURCE_SCHEMA_DIR = $(dir $(SOURCE_SCHEMA_PATH))
+SOURCE_SCHEMA_ALL = $(SOURCE_SCHEMA_DIR)$(patsubst %.yaml,%_all.yaml,$(notdir $(SOURCE_SCHEMA_PATH)))
 SRC = src
 DEST = project
 PYMODEL = $(SRC)/$(SCHEMA_NAME)/datamodel
@@ -101,16 +102,27 @@ compile-sheets:
 gen-examples:
 	cp src/data/examples/* $(EXAMPLEDIR)
 
+# Build the combined schema
+# Also write proper yaml header to it
+.PHONY: full-schema
+full-schema: $(SOURCE_SCHEMA_ALL)
+
+$(SOURCE_SCHEMA_ALL):
+	@echo "Generating D4D-Full schema with merged imports..."
+	$(RUN) gen-linkml -o $@ -f 'yaml' $(SOURCE_SCHEMA_PATH)
+	@echo '---' | cat - $@ > $@.tmp && mv $@.tmp $@
+
 # generates all project files
 
-gen-project: $(PYMODEL)
-	$(RUN) gen-project ${GEN_PARGS} -d $(DEST) $(SOURCE_SCHEMA_PATH) && mv $(DEST)/*.py $(PYMODEL)
+gen-project: $(PYMODEL) $(SOURCE_SCHEMA_ALL)
+	$(RUN) gen-project -I python -I jsonschema -I jsonld -I owl ${GEN_PARGS} -d $(DEST) $(SOURCE_SCHEMA_PATH) && mv $(DEST)/*.py $(PYMODEL)
 
 
 test: test-schema test-python test-examples
 
-test-schema:
-	$(RUN) gen-project ${GEN_PARGS} -d tmp $(SOURCE_SCHEMA_PATH)
+# Test the schema - use the full materialized version
+test-schema: $(SOURCE_SCHEMA_ALL)
+	$(RUN) gen-project ${GEN_PARGS} -d tmp $(SOURCE_SCHEMA_ALL)
 
 test-python:
 	$(RUN) python -m unittest discover

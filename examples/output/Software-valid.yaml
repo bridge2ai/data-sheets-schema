@@ -1,2 +1,6 @@
-id: data_sheets_schema:123
-category: data_sheets_schema:Software
+id: my_software
+name: My Software
+description: This is an example of a software program.
+version: 1.0.0
+license: MIT License
+url: https://www.example.com/my_software

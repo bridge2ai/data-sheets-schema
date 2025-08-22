@@ -1,0 +1,78 @@
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/distribution"
+name: "data-sheets-schema-distribution"
+title: "Datasheets for Datasets – Distribution Module"
+description: >
+  Subschema for distribution-related information in Datasheets for Datasets.
+  The questions in this section pertain to how the dataset is distributed,
+  including whether it will be shared with third parties, under what license,
+  and any regulatory restrictions.
+
+
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+
+imports:
+  # Import the main schema so that we can reference DatasetProperty, etc.
+  - D4D_Base_import
+
+
+# Subsets are defined in the main schema
+
+
+prefixes:
+  linkml: "https://w3id.org/linkml/"
+  d4ddistribution: "https://w3id.org/bridge2ai/data-sheets-schema/distribution#"
+
+
+default_prefix: "d4ddistribution"
+
+
+# ------------------------------------------------------------------------------
+# Classes
+# ------------------------------------------------------------------------------
+
+
+classes:
+
+
+  ThirdPartySharing:
+    description: >
+      Will the dataset be distributed to third parties outside of the entity
+      (e.g., company, institution, organization) on behalf of which the dataset
+      was created?
+    is_a: DatasetProperty
+    attributes:
+      description:
+        description: >
+          Boolean or textual explanation regarding distribution to 
+          parties external to the dataset-creating entity.
+        range: boolean
+
+
+  DistributionFormat:
+    description: >
+      How will the dataset be distributed (e.g., tarball on a website,
+      API, GitHub)?
+    is_a: DatasetProperty
+    attributes:
+      description:
+        description: "Details of the distribution channel(s) or format(s)."
+        range: string
+        multivalued: true
+
+
+  DistributionDate:
+    description: >
+      When will the dataset be distributed?
+    is_a: DatasetProperty
+    attributes:
+      description:
+        description: >
+          Dates or timeframe for dataset release. Could be a one-time release date
+          or multiple scheduled releases.
+        range: string
+        multivalued: true
+
+

@@ -1,0 +1,195 @@
+id: "https://w3id.org/bridge2ai/data-sheets-schema/human"
+name: "data-sheets-schema-human"
+title: "Datasheets for Datasets – Human Subjects Module"
+description: >
+  Subschema for human subjects research information in Datasheets for Datasets.
+  This module covers classes, attributes, and properties specific to datasets
+  involving human participants, focusing on ethical considerations, consent,
+  privacy protections, and regulatory compliance unique to human subjects research.
+
+
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+
+imports:
+  - D4D_Base_import
+
+
+# Subsets are defined in the main schema
+
+
+prefixes:
+  linkml: "https://w3id.org/linkml/"
+  d4dhuman: "https://w3id.org/bridge2ai/data-sheets-schema/human#"
+
+
+default_prefix: "d4dhuman"
+
+
+# ------------------------------------------------------------------------------
+# Classes for Human Subjects Research
+# ------------------------------------------------------------------------------
+
+
+classes:
+
+
+  HumanSubjectResearch:
+    description: >
+      Information about whether the dataset involves human subjects research
+      and what regulatory or ethical review processes were followed.
+    is_a: DatasetProperty
+    attributes:
+      involves_human_subjects:
+        description: "Does this dataset involve human subjects research?"
+        range: boolean
+      irb_approval:
+        description: >
+          Was Institutional Review Board (IRB) approval obtained?
+          Include approval number and institution if applicable.
+        range: string
+        multivalued: true
+      ethics_review_board:
+        description: >
+          What ethics review board(s) reviewed this research?
+          Include institution names and approval details.
+        range: string
+        multivalued: true
+      special_populations:
+        description: >
+          Does the research involve any special populations that require
+          additional protections (e.g., minors, pregnant women, prisoners)?
+        range: string
+        multivalued: true
+      regulatory_compliance:
+        description: >
+          What regulatory frameworks govern this human subjects research
+          (e.g., 45 CFR 46, GDPR, HIPAA)?
+        range: string
+        multivalued: true
+
+
+  InformedConsent:
+    description: >
+      Details about informed consent procedures used in human subjects research.
+    is_a: DatasetProperty
+    attributes:
+      consent_obtained:
+        description: "Was informed consent obtained from all participants?"
+        range: boolean
+      consent_type:
+        description: >
+          What type of consent was obtained (e.g., written, verbal, electronic,
+          implied through participation)?
+        range: string
+        multivalued: true
+      consent_documentation:
+        description: >
+          How is consent documented? Include references to consent forms
+          or procedures used.
+        range: string
+        multivalued: true
+      withdrawal_mechanism:
+        description: >
+          How can participants withdraw their consent? What procedures
+          are in place for data deletion upon withdrawal?
+        range: string
+        multivalued: true
+      consent_scope:
+        description: >
+          What specific uses did participants consent to? Are there
+          limitations on data use based on consent?
+        range: string
+        multivalued: true
+
+
+  ParticipantPrivacy:
+    description: >
+      Information about privacy protections and anonymization procedures
+      for human research participants.
+    is_a: DatasetProperty
+    attributes:
+      anonymization_method:
+        description: >
+          What methods were used to anonymize or de-identify participant data?
+          Include technical details of privacy-preserving techniques.
+        range: string
+        multivalued: true
+      reidentification_risk:
+        description: >
+          What is the assessed risk of re-identification? What measures
+          were taken to minimize this risk?
+        range: string
+        multivalued: true
+      privacy_techniques:
+        description: >
+          What privacy-preserving techniques were applied (e.g., differential
+          privacy, k-anonymity, data masking)?
+        range: string
+        multivalued: true
+      data_linkage:
+        description: >
+          Can this dataset be linked to other datasets in ways that might
+          compromise participant privacy?
+        range: string
+        multivalued: true
+
+
+  HumanSubjectCompensation:
+    description: >
+      Information about compensation or incentives provided to human research participants.
+    is_a: DatasetProperty
+    attributes:
+      compensation_provided:
+        description: "Were participants compensated for their participation?"
+        range: boolean
+      compensation_type:
+        description: >
+          What type of compensation was provided (e.g., monetary payment,
+          gift cards, course credit, other incentives)?
+        range: string
+        multivalued: true
+      compensation_amount:
+        description: >
+          What was the amount or value of compensation provided?
+          Include currency or equivalent value.
+        range: string
+        multivalued: true
+      compensation_rationale:
+        description: >
+          What was the rationale for the compensation structure?
+          How was the amount determined to be appropriate?
+        range: string
+        multivalued: true
+
+
+  VulnerablePopulations:
+    description: >
+      Information about protections for vulnerable populations in human subjects research.
+    is_a: DatasetProperty
+    attributes:
+      vulnerable_groups_included:
+        description: >
+          Are any vulnerable populations included (e.g., children, pregnant women,
+          prisoners, cognitively impaired individuals)?
+        range: boolean
+      special_protections:
+        description: >
+          What additional protections were implemented for vulnerable populations?
+          Include safeguards, modified procedures, or additional oversight.
+        range: string
+        multivalued: true
+      assent_procedures:
+        description: >
+          For research involving minors, what assent procedures were used?
+          How was developmentally appropriate assent obtained?
+        range: string
+        multivalued: true
+      guardian_consent:
+        description: >
+          For participants unable to provide their own consent, how was
+          guardian or surrogate consent obtained?
+        range: string
+        multivalued: true

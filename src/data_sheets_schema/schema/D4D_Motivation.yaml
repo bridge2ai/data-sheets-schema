@@ -1,0 +1,113 @@
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/motivation"
+name: "data-sheets-schema-motivation"
+title: "Datasheets for Datasets – Motivation Module"
+description: >
+  Subschema for Motivation-related information in Datasheets for Datasets.
+  The questions in this section are primarily intended to encourage dataset 
+  creators to articulate their reasons for creating the dataset and to 
+  promote transparency about funding interests.
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+
+imports:
+  # Import the base schema for shared classes like DatasetProperty, Person, Organization, etc.
+  - D4D_Base_import
+
+
+# Subsets are defined in the main schema
+
+
+prefixes:
+  # Common LinkML prefixes and any that your environment requires
+  linkml: "https://w3id.org/linkml/"
+  d4dmotivation: "https://w3id.org/bridge2ai/data-sheets-schema/motivation#"
+  # You can add or customize additional prefixes as needed:
+  # ex: "http://example.org/"
+
+
+default_prefix: "d4dmotivation"
+
+
+# ------------------------------------------------------------------------------
+# Classes
+# ------------------------------------------------------------------------------
+
+
+classes:
+
+
+  Purpose:
+    description: "For what purpose was the dataset created?"
+    is_a: DatasetProperty
+    attributes:
+      response:
+        description: "Short explanation describing the primary purpose of creating the dataset."
+        range: string
+
+
+  Task:
+    description: "Was there a specific task in mind for the dataset's application?"
+    is_a: DatasetProperty
+    attributes:
+      response:
+        description: "Short explanation describing the specific task or tasks for which this dataset was created."
+        range: string
+
+
+  AddressingGap:
+    description: "Was there a specific gap that needed to be filled by creation of the dataset?"
+    is_a: DatasetProperty
+    attributes:
+      response:
+        description: "Short explanation of the knowledge or resource gap that this dataset was intended to address."
+        range: string
+
+
+  Creator:
+    description: >
+      Who created the dataset (e.g., which team, research group) and on behalf of which 
+      entity (e.g., company, institution, organization)? This may also be considered a team.
+    is_a: DatasetProperty
+    attributes:
+      principal_investigator:
+        description: "A key individual (Principal Investigator) responsible for or overseeing dataset creation."
+        range: Person
+      affiliation:
+        description: "Organization(s) with which the creator or team is affiliated."
+        range: Organization
+
+
+  FundingMechanism:
+    description: >
+      Who funded the creation of the dataset? If there is an associated grant, please provide
+      the name of the grantor and the grant name and number.
+    is_a: DatasetProperty
+    attributes:
+      grantor:
+        description: "Name/identifier of the organization providing monetary or resource support."
+        range: Grantor
+      grant:
+        description: "Name/identifier of the specific grant mechanism supporting dataset creation."
+        range: Grant
+
+
+  Grantor:
+    description: >
+      The name and/or identifier of the organization providing monetary support 
+      or other resources supporting creation of the dataset.
+    is_a: Organization
+    # The Organization class is inherited from the main schema (import).
+    # Additional attributes or specialized properties can be placed here if needed.
+
+
+  Grant:
+    description: >
+      The name and/or identifier of the specific mechanism providing monetary support
+      or other resources supporting creation of the dataset.
+    is_a: NamedThing
+    attributes:
+      grant_number:
+        description: "The alphanumeric identifier for the grant."
+        range: string

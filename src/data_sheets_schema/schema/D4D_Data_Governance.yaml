@@ -1,0 +1,76 @@
+﻿id: "https://w3id.org/bridge2ai/data-sheets-schema/data-governance"
+name: "data-sheets-schema-data-governance"
+title: "Datasheets for Datasets – Data Governance Module"
+description: >
+  Subschema for data governance–related information in Datasheets for Datasets.
+  Encompasses dataset distribution, licensing, IP and regulatory restrictions,
+  as well as maintenance and versioning plans. 
+
+
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+
+imports:
+  - D4D_Base_import
+
+
+# Subsets are defined in the main schema
+
+
+prefixes:
+  linkml: "https://w3id.org/linkml/"
+  d4ddatagovernance: "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#"
+
+
+default_prefix: "d4ddatagovernance"
+
+
+# ------------------------------------------------------------------------------
+# Classes
+# ------------------------------------------------------------------------------
+
+
+classes:
+
+
+  LicenseAndUseTerms:
+    description: >
+      Will the dataset be distributed under a copyright or other IP license,
+      and/or under applicable terms of use? Provide a link or copy of relevant
+      licensing terms and any fees.
+    is_a: DatasetProperty
+    attributes:
+      description:
+        description: >
+          Description of the dataset's license and terms of use (including 
+          links, costs, or usage constraints).
+        range: string
+        multivalued: true
+
+
+  IPRestrictions:
+    description: >
+      Have any third parties imposed IP-based or other restrictions on the data
+      associated with the instances? If so, describe them and note any relevant
+      fees or licensing terms.
+    is_a: DatasetProperty
+    attributes:
+      description:
+        description: "Explanation of third-party IP restrictions."
+        range: string
+        multivalued: true
+
+
+  ExportControlRegulatoryRestrictions:
+    description: >
+      Do any export controls or other regulatory restrictions apply to the dataset
+      or to individual instances? If so, please describe these restrictions and
+      provide a link or copy of any supporting documentation.
+    is_a: DatasetProperty
+    attributes:
+      description:
+        description: "Export or regulatory restrictions on the dataset."
+        range: string
+        multivalued: true
