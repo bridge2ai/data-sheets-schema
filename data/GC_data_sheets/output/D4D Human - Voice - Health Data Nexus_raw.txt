@@ -1,0 +1,156 @@
+{
+  "Person": {
+    "description": "An individual human being.",
+    "is_a": "NamedThing",
+    "attributes": {
+      "affiliation": [
+        "University of South Florida",
+        "University of Toronto"
+      ],
+      "email": "alistair.johnson@example.org"
+    }
+  },
+  "DirectCollection": {
+    "description": "Did you collect the data from the individuals in question directly, or obtain it via third parties or other sources?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "description": [
+        "Participants were enrolled at specialty clinics and data was collected directly from them using standardized protocols."
+      ],
+      "in_subset": [
+        "Collection"
+      ]
+    }
+  },
+  "CollectionNotification": {
+    "description": "Were the individuals in question notified about the data collection?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "description": [
+        "Participants were informed about the data collection and the study’s objectives through an IRB-approved consent process."
+      ],
+      "in_subset": [
+        "Collection"
+      ]
+    }
+  },
+  "CollectionConsent": {
+    "description": "Did the individuals in question consent to the collection and use of their data?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "description": [
+        "All participants explicitly provided informed consent for the collection and use of their data for research."
+      ],
+      "in_subset": [
+        "Collection"
+      ]
+    }
+  },
+  "ConsentRevocation": {
+    "description": "If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "description": [
+        "Participants were informed they could withdraw or revoke consent at any time, in accordance with standard IRB protocols."
+      ],
+      "in_subset": [
+        "Collection"
+      ]
+    }
+  },
+  "EthicalReview": {
+    "description": "Were any ethical review processes conducted (e.g., by an institutional review board)?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "description": [
+        "Data collection and sharing was approved by the University of South Florida IRB and submitted for review to the University of Toronto Research Ethics Board."
+      ],
+      "in_subset": [
+        "Collection"
+      ]
+    }
+  },
+  "DataProtectionImpact": {
+    "description": "Has an analysis of the potential impact of the dataset and its use on data subjects been conducted?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "description": [
+        "A thorough ethical and data security assessment was performed to minimize risks associated with collecting and sharing voice and health data."
+      ],
+      "in_subset": [
+        "Collection"
+      ]
+    }
+  },
+  "Deidentification": {
+    "description": "Is it possible to identify individuals (natural persons), either directly or indirectly …?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "identifiable_elements_present": false,
+      "description": [
+        "All HIPAA Safe Harbor identifiers were removed. Only derived spectrograms and features are released, reducing re-identification risk."
+      ],
+      "in_subset": [
+        "Composition"
+      ]
+    }
+  },
+  "Confidentiality": {
+    "description": "Does the dataset contain data that might be considered confidential (e.g., doctor‐patient confidentiality)?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "confidential_elements_present": true,
+      "description": [
+        "The dataset includes clinical and demographic data subject to confidentiality obligations. Appropriate safeguards have been implemented."
+      ],
+      "in_subset": [
+        "Composition"
+      ]
+    }
+  },
+  "SensitiveElement": {
+    "description": "Does the dataset contain data that might be considered sensitive in any way (e.g., race, ethnicity, etc.)?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "sensitive_elements_present": true,
+      "description": [
+        "Demographic and clinical data in the dataset may include elements considered sensitive, such as race, ethnicity, or health conditions."
+      ],
+      "in_subset": [
+        "Composition"
+      ]
+    }
+  },
+  "Subpopulation": {
+    "description": "Does the dataset identify any subpopulations (e.g., by age, gender)?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "subpopulation_elements_present": true,
+      "identification": [
+        "Adults with voice disorders",
+        "Adults with neurological disorders",
+        "Adults with mood disorders",
+        "Adults with respiratory disorders"
+      ],
+      "distribution": [
+        "306 participants across five sites in North America"
+      ],
+      "in_subset": [
+        "Composition"
+      ]
+    }
+  },
+  "RetentionLimits": {
+    "description": "If the dataset relates to people, are there applicable limits on the retention of the data …?",
+    "is_a": "DatasetProperty",
+    "attributes": {
+      "description": [
+        "Data retention adheres to IRB and NIH guidelines. Long-term storage is permitted for approved research, with periodic ethical review."
+      ],
+      "in_subset": [
+        "Maintenance"
+      ]
+    }
+  }
+}
+

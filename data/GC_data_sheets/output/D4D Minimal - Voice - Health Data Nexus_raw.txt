@@ -1,0 +1,215 @@
+{
+  "id": "b2ai-voice-collection",
+  "title": "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information",
+  "description": "A comprehensive collection of data derived from voice recordings with corresponding clinical information. The initial release (v1.0) provides derived audio features, such as spectrograms, but excludes raw audio waveforms. Detailed demographic, clinical, and validated questionnaire data are also included.",
+  "keywords": [
+    "voice",
+    "bridge2ai",
+    "audio",
+    "health",
+    "biomarker"
+  ],
+  "language": [
+    "en"
+  ],
+  "license": "Bridge2AI Voice Registered Access License",
+  "version": "1.0",
+  "created_on": "2024-11-27T00:00:00Z",
+  "created_by": [
+    "Alistair Johnson",
+    "Jean-Christophe Bélisle-Pipon",
+    "David Dorr",
+    "Satrajit Ghosh",
+    "Philip Payne",
+    "Maria Powell",
+    "Anaïs Rameau",
+    "Vardit Ravitsky",
+    "Alexandros Sigaras",
+    "Olivier Elemento",
+    "Yael Bensoussan"
+  ],
+  "last_updated_on": "2024-11-27T18:11:00Z",
+  "modified_by": [
+    "Bridge2AI-Voice Team"
+  ],
+  "doi": "https://doi.org/10.57764/qb6h-em84",
+  "conforms_to": "https://bridge2ai.github.io/data-sheets-schema",
+  "resources": [
+    {
+      "id": "b2ai-voice-spectrograms",
+      "title": "Spectrograms Parquet File",
+      "description": "A Parquet file storing dense spectrogram data derived from 12,523 voice recordings across 306 participants.",
+      "keywords": [
+        "spectrograms",
+        "voice",
+        "audio"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.0",
+      "created_on": "2024-11-27T00:00:00Z",
+      "created_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "last_updated_on": "2024-11-27T18:11:00Z",
+      "modified_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": null,
+      "path": "spectrograms.parquet",
+      "format": "Parquet",
+      "encoding": "binary",
+      "compression": null,
+      "media_type": "application/x-parquet",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "b2ai-voice-phenotype-tsv",
+      "title": "Phenotype Tab-Delimited File",
+      "description": "Tab-delimited file containing demographic, clinical, and validated questionnaire data (one row per participant).",
+      "keywords": [
+        "phenotype",
+        "voice",
+        "audio"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.0",
+      "created_on": "2024-11-27T00:00:00Z",
+      "created_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "last_updated_on": "2024-11-27T18:11:00Z",
+      "modified_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": null,
+      "path": "phenotype.tsv",
+      "format": "TSV",
+      "encoding": "UTF-8",
+      "compression": null,
+      "media_type": "text/tab-separated-values",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "b2ai-voice-phenotype-json",
+      "title": "Phenotype Data Dictionary",
+      "description": "JSON data dictionary describing each column in the phenotype TSV file.",
+      "keywords": [
+        "phenotype",
+        "dictionary",
+        "metadata"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.0",
+      "created_on": "2024-11-27T00:00:00Z",
+      "created_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "last_updated_on": "2024-11-27T18:11:00Z",
+      "modified_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": null,
+      "path": "phenotype.json",
+      "format": "JSON",
+      "encoding": "UTF-8",
+      "compression": null,
+      "media_type": "application/json",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "b2ai-voice-static-features-tsv",
+      "title": "Static Features Tab-Delimited File",
+      "description": "Tab-delimited file with derived acoustic features (e.g., openSMILE, Praat) for each recorded sample.",
+      "keywords": [
+        "static features",
+        "acoustic",
+        "voice"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.0",
+      "created_on": "2024-11-27T00:00:00Z",
+      "created_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "last_updated_on": "2024-11-27T18:11:00Z",
+      "modified_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": null,
+      "path": "static_features.tsv",
+      "format": "TSV",
+      "encoding": "UTF-8",
+      "compression": null,
+      "media_type": "text/tab-separated-values",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    },
+    {
+      "id": "b2ai-voice-static-features-json",
+      "title": "Static Features Data Dictionary",
+      "description": "JSON data dictionary describing each column in the static features TSV file.",
+      "keywords": [
+        "static features",
+        "dictionary",
+        "metadata"
+      ],
+      "language": [
+        "en"
+      ],
+      "license": "Bridge2AI Voice Registered Access License",
+      "version": "1.0",
+      "created_on": "2024-11-27T00:00:00Z",
+      "created_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "last_updated_on": "2024-11-27T18:11:00Z",
+      "modified_by": [
+        "Bridge2AI-Voice Team"
+      ],
+      "doi": null,
+      "conforms_to": null,
+      "download_url": null,
+      "path": "static_features.json",
+      "format": "JSON",
+      "encoding": "UTF-8",
+      "compression": null,
+      "media_type": "application/json",
+      "bytes": null,
+      "hash": null,
+      "md5": null,
+      "sha256": null
+    }
+  ]
+}
+
