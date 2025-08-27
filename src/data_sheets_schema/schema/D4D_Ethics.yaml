@@ -13,23 +13,18 @@ see_also:
 
 
 imports:
-  - "https://w3id.org/bridge2ai/data-sheets-schema"
+  - D4D_Base_import
 
 
-subsets:
-  Ethics:
-    description: >
-      The questions in this section address ethical and data-protection concerns,
-      including review by institutional bodies, consent and notification to data
-      subjects, and potential impacts on data-protection rights.
+# Subsets are defined in the main schema
 
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-ethics: "https://w3id.org/bridge2ai/data-sheets-schema/ethics#"
+  d4dethics: "https://w3id.org/bridge2ai/data-sheets-schema/ethics#"
 
 
-default_prefix: "d4d-ethics"
+default_prefix: "d4dethics"
 
 
 # ------------------------------------------------------------------------------
@@ -47,8 +42,6 @@ classes:
       including the frequency of review and documentation of outcomes, as well as a link or other access point to any
       supporting documentation.
     is_a: DatasetProperty
-    in_subset:
-      - Ethics
     attributes:
       description:
         description: "Short summary or details about the ethical review process(es)."
@@ -62,25 +55,9 @@ classes:
       (e.g., a data protection impact analysis) been conducted? If so, please provide a
       description of this analysis, including the outcomes, and any supporting documentation.
     is_a: DatasetProperty
-    in_subset:
-      - Ethics
     attributes:
       description:
         description: "Details of the data protection impact analysis, if conducted."
-        range: string
-        multivalued: true
-
-
-  DirectCollection:
-    description: >
-      Did you collect the data from the individuals in question directly, or obtain it via
-      third parties or other sources (e.g., websites)?
-    is_a: DatasetProperty
-    in_subset:
-      - Ethics
-    attributes:
-      description:
-        description: "Explanation of how data were obtained, e.g., from the subjects or elsewhere."
         range: string
         multivalued: true
 
@@ -91,8 +68,6 @@ classes:
       describe (or show with screenshots, etc.) how notice was provided, and reproduce the
       language of the notification itself if possible.
     is_a: DatasetProperty
-    in_subset:
-      - Ethics
     attributes:
       description:
         description: "Details about any notification provided to individuals whose data was collected."
@@ -106,8 +81,6 @@ classes:
       If so, how was consent requested and provided, and what language did individuals
       consent to?
     is_a: DatasetProperty
-    in_subset:
-      - Ethics
     attributes:
       description:
         description: "Details about how consent was sought, provided, and documented."
@@ -120,8 +93,6 @@ classes:
       If consent was obtained, were the consenting individuals provided with a mechanism
       to revoke their consent in the future or for certain uses? If so, please describe.
     is_a: DatasetProperty
-    in_subset:
-      - Ethics
     attributes:
       description:
         description: "Information about any consent-revocation mechanism offered to data subjects."

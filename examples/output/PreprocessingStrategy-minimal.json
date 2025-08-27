@@ -1,6 +1,5 @@
 {
   "id": "data_sheets_schema:123",
-  "category": "data_sheets_schema:PreprocessingStrategy",
   "description": "[]",
   "@type": "PreprocessingStrategy"
 }

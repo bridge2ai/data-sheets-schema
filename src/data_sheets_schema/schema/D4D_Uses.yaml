@@ -13,23 +13,18 @@ see_also:
 
 
 imports:
-  - "https://w3id.org/bridge2ai/data-sheets-schema"
+  - D4D_Base_import
 
 
-subsets:
-  Uses:
-    description: >
-      The questions in this section are intended to encourage dataset creators
-      to reflect on the tasks for which the dataset should and should not be
-      used, as well as future or previously established uses.
+# Subsets are defined in the main schema
 
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-uses: "https://w3id.org/bridge2ai/data-sheets-schema/uses#"
+  d4duses: "https://w3id.org/bridge2ai/data-sheets-schema/uses#"
 
 
-default_prefix: "d4d-uses"
+default_prefix: "d4duses"
 
 
 # ------------------------------------------------------------------------------
@@ -44,8 +39,6 @@ classes:
     description: >
       Has the dataset been used for any tasks already?
     is_a: DatasetProperty
-    in_subset:
-      - Uses
     attributes:
       description:
         description: "List or summary of known/previous uses of the dataset."
@@ -58,8 +51,6 @@ classes:
       Is there a repository that links to any or all papers or systems
       that use the dataset? If so, provide a link or other access point.
     is_a: DatasetProperty
-    in_subset:
-      - Uses
     attributes:
       description:
         description: "Reference(s) to a repository of known dataset uses."
@@ -71,8 +62,6 @@ classes:
     description: >
       What other tasks could the dataset be used for?
     is_a: DatasetProperty
-    in_subset:
-      - Uses
     attributes:
       description:
         description: "Potential additional tasks or domains for dataset usage."
@@ -87,8 +76,6 @@ classes:
       treatment, legal or financial risks)? If so, describe these
       impacts and any mitigation strategies.
     is_a: DatasetProperty
-    in_subset:
-      - Uses
     attributes:
       description:
         description: "Details regarding the possible future impacts or risks of use."
@@ -100,8 +87,6 @@ classes:
     description: >
       Are there tasks for which the dataset should not be used?
     is_a: DatasetProperty
-    in_subset:
-      - Uses
     attributes:
       description:
         description: "Description of tasks or contexts in which dataset use is discouraged."

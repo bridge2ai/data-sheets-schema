@@ -14,17 +14,11 @@ prefixes:
   # You can add other prefixes as needed, e.g., schema, dcterms, etc.
 
 
-# If you have a "core" module or a "D4D-Metadata" module that defines NamedThing or DatasetProperty,
-# you can import it here instead of redefining them:
-# imports:
-#   - https://w3id.org/bridge2ai/data-sheets-schema/core
+imports:
+  - D4D_Base_import
 
 
-subsets:
-  Collection:
-    description: >
-      The "Collection" subset focuses on who collected the data, how and when it was collected, 
-      whether participants were notified or gave consent, and related ethical considerations.
+# Subsets are defined in the main schema
 
 
 #------------------------------------------------------------------------------
@@ -33,29 +27,12 @@ subsets:
 
 
 classes:
-  NamedThing:
-    description: "A generic superclass for all identifiable entities."
-
-
-  DatasetProperty:
-    is_a: NamedThing
-    description: >
-      Represents a single property or aspect of a dataset.
-      Many specialized dataset elements will subclass DatasetProperty.
-
-
-#------------------------------------------------------------------------------
-# Collection-Related Classes
-#------------------------------------------------------------------------------
-
 
   InstanceAcquisition:
     is_a: DatasetProperty
     description: >
       Describes how data associated with each instance was acquired 
       (e.g., directly observed, reported by subjects, inferred).
-    in_subset:
-      - Collection
     attributes:
       description:
         description: Free-text description of the acquisition process
@@ -80,8 +57,6 @@ classes:
     description: >
       What mechanisms or procedures were used to collect the data (e.g., hardware, 
       manual curation, software APIs)? Also covers how these mechanisms were validated.
-    in_subset:
-      - Collection
     attributes:
       description:
         description: Free-text description of the collection mechanism(s)
@@ -94,8 +69,6 @@ classes:
     description: >
       Who was involved in the data collection (e.g., students, crowdworkers, contractors), 
       and how they were compensated.
-    in_subset:
-      - Collection
     attributes:
       description:
         description: Free-text details about the data collectors and compensation
@@ -108,8 +81,6 @@ classes:
     description: >
       Over what timeframe was the data collected, and does this timeframe match the 
       creation timeframe of the underlying data?
-    in_subset:
-      - Collection
     attributes:
       description:
         description: Free-text description of the data collection timeframe
@@ -122,8 +93,6 @@ classes:
     description: >
       Indicates whether the data was collected directly from the individuals in question 
       or obtained via third parties/other sources.
-    in_subset:
-      - Collection
     attributes:
       description:
         description: Free-text description of data collection source(s)
@@ -131,68 +100,7 @@ classes:
         multivalued: true
 
 
-  CollectionNotification:
-    is_a: DatasetProperty
-    description: >
-      Whether individuals were notified about data collection, and if so, how they were notified.
-    in_subset:
-      - Collection
-    attributes:
-      description:
-        description: Details of the notification method and language
-        range: string
-        multivalued: true
 
 
-  CollectionConsent:
-    is_a: DatasetProperty
-    description: >
-      Whether individuals consented to the collection and use of their data, and how consent 
-      was requested/provided.
-    in_subset:
-      - Collection
-    attributes:
-      description:
-        description: Details of the consent process and exact language
-        range: string
-        multivalued: true
 
 
-  ConsentRevocation:
-    is_a: DatasetProperty
-    description: >
-      If consent was obtained, was there a mechanism to revoke that consent in the future?
-    in_subset:
-      - Collection
-    attributes:
-      description:
-        description: Details or evidence of how consent can be revoked
-        range: string
-        multivalued: true
-
-
-  EthicalReview:
-    is_a: DatasetProperty
-    description: >
-      Whether any ethical review or IRB process was conducted, and what the outcomes were.
-    in_subset:
-      - Collection
-    attributes:
-      description:
-        description: Details or references for ethical review, outcomes, or documentation
-        range: string
-        multivalued: true
-
-
-  DataProtectionImpact:
-    is_a: DatasetProperty
-    description: >
-      Whether a data protection impact assessment (or similar) was conducted to evaluate risks 
-      to the data subjects, including outcomes or references to documentation.
-    in_subset:
-      - Collection
-    attributes:
-      description:
-        description: Free-text description of the impact assessment
-        range: string
-        multivalued: true

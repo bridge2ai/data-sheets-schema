@@ -1,0 +1,22 @@
+id: https://w3id.org/bridge2ai/data-sheets-schema/metadata
+name: d4d-metadata
+title: "D4D Metadata Module"
+description: >
+  A LinkML schema subset for high-level, generic dataset metadata from 
+  the Bridge2AI "Datasheets for Datasets" schema. This module imports
+  all core metadata definitions from the base schema.
+
+license: MIT
+
+prefixes:
+  linkml: https://w3id.org/linkml/
+
+default_prefix: https://example.org/d4d/metadata#
+
+imports:
+  - linkml:types
+  - D4D_Base_import
+
+# All core metadata classes (Information, NamedThing, FormatDialect, etc.)
+# and slots (title, description, keywords, etc.) are imported from D4D_Base_import.yaml
+# This module serves as a convenient import point for basic metadata functionality.

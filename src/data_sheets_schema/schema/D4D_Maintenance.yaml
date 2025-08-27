@@ -13,23 +13,18 @@ see_also:
 
 
 imports:
-  - "https://w3id.org/bridge2ai/data-sheets-schema"
+  - D4D_Base_import
 
 
-subsets:
-  Maintenance:
-    description: >
-      The questions in this section are intended to encourage dataset creators
-      to plan for dataset maintenance (including updates, versioning, error
-      corrections, etc.) and communicate this plan to dataset consumers.
+# Subsets are defined in the main schema
 
 
 prefixes:
   linkml: "https://w3id.org/linkml/"
-  d4d-maintenance: "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#"
+  d4dmaintenance: "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#"
 
 
-default_prefix: "d4d-maintenance"
+default_prefix: "d4dmaintenance"
 
 
 # ------------------------------------------------------------------------------
@@ -44,8 +39,6 @@ classes:
     description: >
       Who will be supporting/hosting/maintaining the dataset?
     is_a: DatasetProperty
-    in_subset:
-      - Maintenance
     attributes:
       description:
         description: >
@@ -59,8 +52,6 @@ classes:
     description: >
       Is there an erratum? If so, please provide a link or other access point.
     is_a: DatasetProperty
-    in_subset:
-      - Maintenance
     attributes:
       description:
         description: >
@@ -76,8 +67,6 @@ classes:
       instances, delete instances)? If so, how often, by whom, and how will 
       these updates be communicated?
     is_a: DatasetProperty
-    in_subset:
-      - Maintenance
     attributes:
       description:
         description: >
@@ -94,8 +83,6 @@ classes:
       be deleted after a certain time)? If so, please describe these limits
       and how they will be enforced.
     is_a: DatasetProperty
-    in_subset:
-      - Maintenance
     attributes:
       description:
         description: >
@@ -110,8 +97,6 @@ classes:
       Will older versions of the dataset continue to be supported/hosted/maintained?
       If so, how? If not, how will obsolescence be communicated to dataset consumers?
     is_a: DatasetProperty
-    in_subset:
-      - Maintenance
     attributes:
       description:
         description: >
@@ -127,8 +112,6 @@ classes:
       is there a mechanism for them to do so? If so, please describe how
       those contributions are validated and communicated.
     is_a: DatasetProperty
-    in_subset:
-      - Maintenance
     attributes:
       description:
         description: >
