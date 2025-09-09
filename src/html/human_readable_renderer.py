@@ -157,11 +157,19 @@ class HumanReadableRenderer:
         return f"<dl class='nested-dict'>{''.join(items)}</dl>"
     
     def _format_list(self, lst):
-        """Format list as bulleted or numbered list"""
+        """Format list as bulleted or numbered list, or as table for structured data"""
         if not lst:
             return "<em>No items</em>"
         
-        # Determine if this should be an ordered or unordered list
+        # Check if this is author/creator/contributor data that should be formatted as a table
+        if self._is_author_list(lst):
+            return self._format_author_table(lst)
+        
+        # Check if this is other structured data suitable for table format
+        if self._is_tabular_data(lst):
+            return self._format_data_table(lst)
+        
+        # Default list formatting
         is_ordered = all(isinstance(item, dict) and len(item) > 3 for item in lst) if lst else False
         
         list_tag = "ol" if is_ordered else "ul"
@@ -172,6 +180,165 @@ class HumanReadableRenderer:
             items.append(f"<li>{formatted_item}</li>")
         
         return f"<{list_tag} class='formatted-list'>{''.join(items)}</{list_tag}>"
+    
+    def _is_author_list(self, lst):
+        """Check if list contains author/creator/contributor data"""
+        if not lst or not isinstance(lst, list):
+            return False
+        
+        # Check if items have author-related keys
+        author_indicators = ['author', 'principal_investigator', 'creator', 'contributor', 'affiliation']
+        return any(
+            isinstance(item, dict) and 
+            any(key in str(item).lower() for key in author_indicators)
+            for item in lst
+        )
+    
+    def _is_tabular_data(self, lst):
+        """Check if list contains structured data suitable for table format"""
+        if not lst or not isinstance(lst, list) or len(lst) < 2:
+            return False
+        
+        # Check if most items are dictionaries with similar keys
+        dict_items = [item for item in lst if isinstance(item, dict)]
+        if len(dict_items) < len(lst) * 0.7:  # At least 70% should be dicts
+            return False
+        
+        # Check if items have similar structure (common keys)
+        if dict_items:
+            first_keys = set(dict_items[0].keys())
+            similar_structure = sum(
+                len(set(item.keys()) & first_keys) >= len(first_keys) * 0.5
+                for item in dict_items
+            )
+            return similar_structure >= len(dict_items) * 0.7
+        
+        return False
+    
+    def _format_author_table(self, lst):
+        """Format author/contributor data as a compact table"""
+        if not lst:
+            return "<em>No authors</em>"
+        
+        rows = []
+        for item in lst:
+            if isinstance(item, dict):
+                role = ""
+                name = ""
+                orcid = ""
+                affiliation = ""
+                
+                # Extract role and person info
+                if 'principal_investigator' in item:
+                    role = "Principal Investigator"
+                    person_info = item['principal_investigator']
+                elif 'author' in item:
+                    role = "Author"
+                    person_info = item['author']
+                elif 'creator' in item:
+                    role = "Creator"
+                    person_info = item['creator']
+                else:
+                    # Try to extract directly from item
+                    person_info = item
+                    role = "Contributor"
+                
+                # Extract name and ID
+                if isinstance(person_info, dict):
+                    name = person_info.get('name', '')
+                    person_id = person_info.get('id', '')
+                    if person_id and 'orcid.org' in str(person_id):
+                        orcid_id = person_id.split('/')[-1] if '/' in person_id else person_id
+                        orcid = f'<a href="{person_id}" target="_blank">{orcid_id}</a>'
+                    elif person_id:
+                        orcid = person_id
+                elif isinstance(person_info, str):
+                    name = person_info
+                
+                # Extract affiliation
+                if 'affiliation' in item and isinstance(item['affiliation'], dict):
+                    affiliation = item['affiliation'].get('name', item['affiliation'].get('id', ''))
+                
+                rows.append([role, name, orcid or "-", affiliation or "-"])
+        
+        if not rows:
+            return "<em>No author information available</em>"
+        
+        # Generate table HTML
+        table_html = '<table class="data-table"><thead><tr>'
+        table_html += '<th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th>'
+        table_html += '</tr></thead><tbody>'
+        
+        for row in rows:
+            table_html += '<tr>'
+            for cell in row:
+                table_html += f'<td>{cell}</td>'
+            table_html += '</tr>'
+        
+        table_html += '</tbody></table>'
+        return table_html
+    
+    def _format_data_table(self, lst):
+        """Format structured data as a compact table"""
+        if not lst:
+            return "<em>No data</em>"
+        
+        dict_items = [item for item in lst if isinstance(item, dict)]
+        if not dict_items:
+            return self._format_list_fallback(lst)
+        
+        # Get all unique keys
+        all_keys = set()
+        for item in dict_items:
+            all_keys.update(item.keys())
+        
+        # Sort keys for consistent column order
+        keys = sorted(all_keys)
+        
+        # Generate table HTML
+        table_html = '<table class="data-table"><thead><tr>'
+        for key in keys:
+            table_html += f'<th>{self._humanize_key(key)}</th>'
+        table_html += '</tr></thead><tbody>'
+        
+        for item in dict_items:
+            table_html += '<tr>'
+            for key in keys:
+                value = item.get(key, '')
+                formatted_value = self._format_table_cell(value)
+                table_html += f'<td>{formatted_value}</td>'
+            table_html += '</tr>'
+        
+        table_html += '</tbody></table>'
+        return table_html
+    
+    def _format_table_cell(self, value):
+        """Format a single table cell value"""
+        if isinstance(value, dict):
+            # For nested dicts, show key-value pairs compactly
+            items = [f"{k}: {v}" for k, v in value.items()]
+            return "<br>".join(items[:3])  # Limit to 3 items for readability
+        elif isinstance(value, list):
+            if len(value) <= 3:
+                return ", ".join(str(v) for v in value)
+            else:
+                return f"{', '.join(str(v) for v in value[:2])}, ... (+{len(value)-2} more)"
+        elif isinstance(value, str):
+            if len(value) > 100:
+                return f"{value[:100]}..."
+            return value or "-"
+        elif value is None:
+            return "-"
+        else:
+            return str(value)
+    
+    def _format_list_fallback(self, lst):
+        """Fallback formatting for non-tabular lists"""
+        items = []
+        for item in lst:
+            formatted_item = self.format_value(item)
+            items.append(f"<li>{formatted_item}</li>")
+        return f"<ul class='formatted-list'>{''.join(items)}</ul>"
     
     def _format_string(self, s):
         """Format string with proper emphasis and links"""
