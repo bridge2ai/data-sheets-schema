@@ -1,0 +1,71 @@
+# D4D Metadata extracted from: dataverse_10.18130_V3_B35XWX_row13.html
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:06:59
+
+id: "doi:10.18130/V3/B35XWX"
+name: "cm4ai-march-2025-release"
+title: "Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)"
+description: "This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework."
+
+creators:
+  - name: "Clark T" 
+    affiliation:
+      name: "University of Virginia"
+  - name: "Parker J"
+    affiliation: 
+      name: "University of California, San Diego"
+  - name: "Ideker T"
+    affiliation:
+      name: "University of California San Diego"
+
+purposes:
+  - response: "To create AI-ready maps of human cell architecture from disease-relevant cell lines"
+
+tasks:
+  - response: "Functional genomics and cellular mapping for artificial intelligence applications"
+
+instances:
+  - representation: "Cell imaging data"
+    instance_type: "Microscopy images" 
+    data_type: "Immunofluorescence images of protein localization"
+
+collection_mechanisms:
+  - description: "Perturb-seq, SEC-MS, and immunofluorescence imaging techniques"
+
+distribution_formats:
+  - description: "RO-Crate format using FAIRSCAPE framework"
+
+license_and_use_terms:
+  description: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (CC BY-NC-SA 4.0)"
+
+maintainers:
+  - description: "Collaboration between UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center"
+
+collection_timeframe:
+  description: "March 2025 Data Release (Beta)"
+
+preprocessing_strategies:
+  description: "Data packaged with provenance graphs and rich metadata as AI-ready datasets"
+
+keywords:
+  - "AI"
+  - "artificial intelligence"
+  - "breast cancer"
+  - "Bridge2AI"
+  - "cardiomyocyte"
+  - "CM4AI"
+  - "CRISPR/Cas9"
+  - "induced pluripotent stem cell"
+  - "machine learning"
+  - "mass spectroscopy"
+  - "protein localization"
+  - "single-cell RNA sequencing"
+
+publisher: "University of Virginia Dataverse"
+issued: "2025-03-20"
+version: "Beta"
+status: "beta"
+
+was_derived_from: "NIH Bridge2AI program"

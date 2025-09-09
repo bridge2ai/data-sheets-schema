@@ -1,0 +1,13 @@
+# D4D Metadata extracted from: doi_row3.json
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-09-08 23:06:23
+
+id: doi_10.1101_2024.05.21.589311
+name: CM4AI Dataset
+description: A dataset associated with the CM4AI project
+doi: doi:10.1101/2024.05.21.589311
+download_url: https://doi.org/10.1101/2024.05.21.589311
+keywords:
+  - CM4AI

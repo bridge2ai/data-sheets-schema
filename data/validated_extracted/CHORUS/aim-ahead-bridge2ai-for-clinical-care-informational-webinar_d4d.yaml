@@ -1,0 +1,38 @@
+# D4D Metadata extracted from: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf
+# Column: CHORUS
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:06:18
+
+id: aim-ahead-bridge2ai-clinical-care-webinar
+name: AIM-AHEAD Bridge2AI Clinical Care Webinar Dataset
+title: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar
+description: Materials and information from an informational webinar about AIM-AHEAD Bridge2AI initiatives focused on clinical care.
+
+purposes:
+  - response: Educational and informational resource about AIM-AHEAD Bridge2AI clinical care initiatives
+
+keywords:
+  - AIM-AHEAD
+  - Bridge2AI 
+  - clinical care
+  - webinar
+  - informational
+
+format: PDF
+
+distribution_formats:
+  - description: PDF document
+
+version_access:
+  description: Single version PDF document
+
+created_by:
+  - AIM-AHEAD
+
+status: bibo:published
+
+# Note: Limited metadata could be extracted from the provided source information.
+# Additional fields from the schema are omitted since specific details about 
+# content, maintenance, licensing, etc. could not be reliably determined from
+# the filename alone.

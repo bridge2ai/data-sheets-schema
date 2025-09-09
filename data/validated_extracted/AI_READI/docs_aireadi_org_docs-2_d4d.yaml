@@ -1,0 +1,78 @@
+# D4D Metadata extracted from: docs_aireadi_org_docs-2_row8.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:05:56
+
+id: ai-readi-flagship-t2dm-dataset
+name: AI-READI Dataset
+title: "Flagship Dataset of Type 2 Diabetes from the AI-READI Project"
+description: >-
+  A dataset consisting of data collected from individuals with and without Type 2 Diabetes 
+  Mellitus (T2DM) and harmonized across 3 data collection sites. The dataset was designed 
+  with AI/Machine Learning applications in mind, including balanced recruitment sampling 
+  procedures and multi-domain data acquisition protocols.
+version: "2.0.0"
+
+purposes:
+  - response: "To better understand salutogenesis (the pathway from disease to health) in T2DM"
+
+tasks:
+  - response: "AI/ML analyses across multiple health data domains"
+
+instances:
+  - representation: "Healthcare data across multiple domains"
+    data_type: >-
+      Survey data, physical measurements, clinical data, imaging data, wearable device data,
+      blood and urine lab results, fitness activity levels, clinical measurements, retinal
+      images, ECG, blood sugar levels, environmental variables
+    instance_type: "Multiple data types per participant"
+    sampling_strategies:
+      strategies:
+        - "Recruitment sampling procedures aimed at achieving approximately equal distribution of participants across diabetes severity"
+      is_representative: "Distribution may not be balanced across groups in pilot/early releases as enrollment is ongoing"
+
+confidential_elements:
+  description:
+    - >-
+      Some data considered sensitive personal health data requires controlled access via
+      data use agreement
+
+sensitive_elements:
+  description:
+    - "5-digit zip code"
+    - "sex"
+    - "race"
+    - "ethnicity" 
+    - "genetic sequencing data"
+    - "past health records"
+    - "medications"
+    - "traffic and accident reports"
+
+license_and_use_terms:
+  description:
+    - "Public data available upon agreement with usage license"
+    - "Full dataset accessible through data use agreement"
+
+distribution_formats:
+  description:
+    - "Split into public and controlled access components"
+    - "Public dataset includes non-sensitive clinical and environmental data"
+
+errata:
+  description:
+    - "Documentation maintained alongside dataset versions"
+    - "Version tracking available through documentation versioning"
+
+version_access:
+  description:
+    - "Multiple versions available with associated documentation" 
+    - "Version navigation provided through documentation interface"
+
+is_deidentified:
+  description: "Sensitive personal health information requires controlled access"
+
+collection_mechanisms:
+  description:
+    - "Data collected across 3 data collection sites"
+    - "Multi-domain data acquisition protocol"

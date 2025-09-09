@@ -1,0 +1,20 @@
+# D4D Metadata extracted from: healthnexus_row13.json
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:32:05
+
+id: healthnexus_row13
+name: "Health Data Nexus - VOICE"
+title: "Health Data Nexus Dataset for VOICE Project"
+description: >
+  This dataset was extracted from the source file healthnexus_row13.json. It represents content originating from the Health Data Nexus with a focus on the VOICE project. The provided JSON indicates a type "Health Data Nexus", a reference URL to the dataset content, and the record relates to row 13.
+download_url: "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
+keywords:
+  - "VOICE"
+  - "Health Data Nexus"
+purposes:
+  - response: "Intended to support analysis and applications within the VOICE project framework."
+  
+# No explicit creator, contributor, collection, preprocessing, distribution format,
+# licensing, maintenance, or access restriction details were provided.

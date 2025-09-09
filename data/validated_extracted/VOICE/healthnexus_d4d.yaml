@@ -1,0 +1,28 @@
+# D4D Metadata extracted from: healthnexus_row13.json
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:07:06
+
+id: b2ai-voice-1.0
+name: "Health Data Nexus VOICE Dataset"
+title: "B2AI VOICE Dataset 1.0"
+description: "A dataset from the Health Data Nexus platform related to the VOICE project"
+
+download_url: "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
+version: "1.0"
+
+purposes:
+  - response: "Collection and analysis of voice-related health data"
+
+distribution_formats:
+  - description: "Available through Health Data Nexus platform"
+
+maintainers:
+  - description: "Health Data Nexus"
+
+retention_limit:
+  description: "Managed through Health Data Nexus platform"
+
+version_access:
+  description: "Version 1.0 accessible through Health Data Nexus platform"

@@ -1,0 +1,26 @@
+# D4D Metadata extracted from: fairhub_row13.json
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:06:03
+
+id: fairhub-dataset-2
+name: FAIRhub Dataset 2
+title: FAIRhub Dataset 2
+description: Dataset from the AI-READI project available on FAIRhub
+download_url: https://fairhub.io/datasets/2
+
+resources:
+  - id: fairhub-dataset-2-main
+    path: https://fairhub.io/datasets/2
+    download_url: https://fairhub.io/datasets/2
+
+maintainers:
+  - name: FAIRhub
+    description: Dataset hosted and maintained on the FAIRhub platform
+
+version_access:
+  description: Dataset available through FAIRhub platform interface
+
+# Note: The source content provides minimal metadata.
+# Additional fields are omitted since they cannot be reliably extracted from the limited information available.
