@@ -385,6 +385,95 @@ a:hover {
     }
 }
 
+/* Required Field Indicators */
+.required-field {
+    position: relative;
+}
+
+.required-indicator {
+    color: #dc3545;
+    font-weight: bold;
+    margin-left: 0.25rem;
+    cursor: help;
+}
+
+.required-field .required-indicator {
+    animation: none; /* No animation by default */
+}
+
+/* Subtle visual emphasis for required fields */
+.required-field {
+    border-left: 3px solid #dc3545;
+    padding-left: 0.75rem;
+    font-weight: 600;
+}
+
+.optional-field {
+    border-left: 3px solid transparent;
+    padding-left: 0.75rem;
+    font-weight: 500;
+}
+
+/* Tooltip styling for required indicator */
+.required-indicator:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 1;
+    pointer-events: none;
+}
+
+.required-indicator:hover::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #333;
+    z-index: 1000;
+}
+
+/* Dark mode support for required indicators */
+@media (prefers-color-scheme: dark) {
+    .required-field {
+        border-left-color: #ff6b6b;
+    }
+    
+    .required-indicator {
+        color: #ff6b6b;
+    }
+    
+    .required-indicator:hover::after {
+        background-color: #555;
+        color: #f0f0f0;
+    }
+    
+    .required-indicator:hover::before {
+        border-top-color: #555;
+    }
+}
+
+/* Print styles for required indicators */
+@media print {
+    .required-indicator {
+        color: #000 !important;
+    }
+    
+    .required-field {
+        border-left-color: #000 !important;
+    }
+}
+
 /* Accessibility Improvements */
 @media (prefers-reduced-motion: reduce) {
     * {
