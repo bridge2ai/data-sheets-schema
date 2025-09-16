@@ -86,9 +86,9 @@ def main():
 		}
     
 	org_id_map = {  # define relationships between GC labels and ORG_IDs
-		"AI-READI_FAIRHub": "B2AI_ORG_114",
-		"CM4AI_Dataverse": "B2AI_ORG_116",
-		"VOICE_PhysioNet": "B2AI_ORG_117"
+		"AI-READI_FAIRHub": "B2AI_ORG:114",
+		"CM4AI_Dataverse": "B2AI_ORG:116",
+		"VOICE_PhysioNet": "B2AI_ORG:117"
 	}
 
 	updated_d4d_dict = add_css(css_name, source_folder, d4d_dict)
