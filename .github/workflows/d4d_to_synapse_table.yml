@@ -9,7 +9,7 @@ on:
       - 'src/html/output/*'
 
 env:
-  IGNORE_UNCHANGED: True
+  IGNORE_UNCHANGED: true
 
 jobs:
   update_d4d_table:
@@ -44,6 +44,7 @@ jobs:
           CHANGED_FILES=$(echo "$CHANGED_FILES" | tr '\n' ' ')
           echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
           echo "Files changed: $CHANGED_FILES"
+        continue-on-error: true
 
       - name: Run script to update synapse tables
         run: |
