@@ -8,6 +8,9 @@ on:
     paths:
       - 'src/html/output/*'
 
+env:
+  IGNORE_UNCHANGED: True
+
 jobs:
   update_d4d_table:
     name: Run script to update synapse tables with data changes
@@ -45,6 +48,8 @@ jobs:
       - name: Run script to update synapse tables
         run: |
           if [ -n "${{ env.CHANGED_FILES }}" ]; then
+            poetry run python utils/d4d_to_synapse_table.py
+          elif ${{ env.IGNORE_UNCHANGED }}; then
             poetry run python utils/d4d_to_synapse_table.py
           else
             echo "No updated files found. Exiting."
