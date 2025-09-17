@@ -1,14 +1,15 @@
 {
-  "timestamp": "2025-09-08 23:30:15",
-  "input_dir": "downloads_by_column",
-  "output_dir": "data/extracted_by_column",
+  "timestamp": "2025-09-16 18:03:53",
+  "input_dir": "../downloads_by_column",
+  "output_dir": "../data/extracted_by_column",
   "columns": [
     {
       "column": "AI_READI",
       "processed": [
         {
-          "input_file": "downloads_by_column/AI_READI/docs_aireadi_org_docs-2_row8.txt",
-          "output_file": "data/extracted_by_column/AI_READI/docs_aireadi_org_docs-2_d4d.yaml",
+          "input_file": "../downloads_by_column/AI_READI/docs_aireadi_org_docs-2_row8.txt",
+          "output_file": "../data/extracted_by_column/AI_READI/docs_aireadi_org_docs-2_d4d.yaml",
+          "metadata_file": "../data/extracted_by_column/AI_READI/docs_aireadi_org_docs-2_d4d_metadata.yaml",
           "status": "success",
           "validation": {
             "download": {
@@ -48,44 +49,9 @@
           }
         },
         {
-          "input_file": "downloads_by_column/AI_READI/fairhub_row13.json",
-          "output_file": "data/extracted_by_column/AI_READI/fairhub_d4d.yaml",
-          "status": "success",
-          "validation": {
-            "download": {
-              "success": true,
-              "details": {
-                "file_exists": true,
-                "file_size": 107,
-                "content_length": 107,
-                "file_type": ".json",
-                "has_meaningful_content": true,
-                "validation_details": [
-                  "File size: 107 bytes",
-                  "Valid JSON with 4 fields"
-                ]
-              }
-            },
-            "relevance": {
-              "success": true,
-              "details": {
-                "column": "AI_READI",
-                "keywords_found": [
-                  "fairhub"
-                ],
-                "relevance_score": 4,
-                "relevance_details": [
-                  "Filename contains 'fairhub'",
-                  "Found keywords: fairhub"
-                ],
-                "content_indicators": []
-              }
-            }
-          }
-        },
-        {
-          "input_file": "downloads_by_column/AI_READI/doi_row2.json",
-          "output_file": "data/extracted_by_column/AI_READI/doi_d4d.yaml",
+          "input_file": "../downloads_by_column/AI_READI/doi_row2.json",
+          "output_file": "../data/extracted_by_column/AI_READI/doi_d4d.yaml",
+          "metadata_file": "../data/extracted_by_column/AI_READI/doi_d4d_metadata.yaml",
           "status": "success",
           "validation": {
             "download": {
@@ -122,7 +88,43 @@
       "skipped": [],
       "errors": [
         {
-          "file": "downloads_by_column/AI_READI/docs_google_com_document-d_row11.txt",
+          "file": "../downloads_by_column/AI_READI/fairhub_row13.json",
+          "stage": "d4d_processing",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 71:\n     ... h identifier 2. Project category: AI_READI.\n                                         ^",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 107,
+                "content_length": 107,
+                "file_type": ".json",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 107 bytes",
+                  "Valid JSON with 4 fields"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "AI_READI",
+                "keywords_found": [
+                  "fairhub"
+                ],
+                "relevance_score": 4,
+                "relevance_details": [
+                  "Filename contains 'fairhub'",
+                  "Found keywords: fairhub"
+                ],
+                "content_indicators": []
+              }
+            }
+          }
+        },
+        {
+          "file": "../downloads_by_column/AI_READI/docs_google_com_document-d_row11.txt",
           "stage": "download_validation",
           "error": "Content appears to be incomplete or invalid",
           "details": {
@@ -148,8 +150,9 @@
       "column": "CHORUS",
       "processed": [
         {
-          "input_file": "downloads_by_column/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf",
-          "output_file": "data/extracted_by_column/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d.yaml",
+          "input_file": "../downloads_by_column/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf",
+          "output_file": "../data/extracted_by_column/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d.yaml",
+          "metadata_file": "../data/extracted_by_column/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d_metadata.yaml",
           "status": "success",
           "validation": {
             "download": {
@@ -197,8 +200,9 @@
       "column": "CM4AI",
       "processed": [
         {
-          "input_file": "downloads_by_column/CM4AI/doi_row3.json",
-          "output_file": "data/extracted_by_column/CM4AI/doi_d4d.yaml",
+          "input_file": "../downloads_by_column/CM4AI/doi_row3.json",
+          "output_file": "../data/extracted_by_column/CM4AI/doi_d4d.yaml",
+          "metadata_file": "../data/extracted_by_column/CM4AI/doi_d4d_metadata.yaml",
           "status": "success",
           "validation": {
             "download": {
@@ -228,8 +232,9 @@
           }
         },
         {
-          "input_file": "downloads_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_row16.txt",
-          "output_file": "data/extracted_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_d4d.yaml",
+          "input_file": "../downloads_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_row16.txt",
+          "output_file": "../data/extracted_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_d4d.yaml",
+          "metadata_file": "../data/extracted_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_d4d_metadata.yaml",
           "status": "success",
           "validation": {
             "download": {
@@ -270,7 +275,7 @@
       "skipped": [],
       "errors": [
         {
-          "file": "downloads_by_column/CM4AI/dataverse_10.18130_V3_B35XWX_row13.txt",
+          "file": "../downloads_by_column/CM4AI/dataverse_10.18130_V3_B35XWX_row13.txt",
           "stage": "download_validation",
           "error": "Content contains error: not found",
           "details": {
@@ -296,9 +301,51 @@
       "column": "VOICE",
       "processed": [
         {
-          "input_file": "downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt",
-          "output_file": "data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml",
+          "input_file": "../downloads_by_column/VOICE/healthnexus_row13.json",
+          "output_file": "../data/extracted_by_column/VOICE/healthnexus_d4d.yaml",
+          "metadata_file": "../data/extracted_by_column/VOICE/healthnexus_d4d_metadata.yaml",
           "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 109,
+                "content_length": 109,
+                "file_type": ".json",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 109 bytes",
+                  "Valid JSON with 3 fields"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "VOICE",
+                "keywords_found": [
+                  "voice",
+                  "b2ai-voice",
+                  "health data nexus"
+                ],
+                "relevance_score": 6,
+                "relevance_details": [
+                  "Filename contains 'healthnexus'",
+                  "Found keywords: voice, b2ai-voice, health data nexus"
+                ],
+                "content_indicators": []
+              }
+            }
+          }
+        }
+      ],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt",
+          "stage": "d4d_processing",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^",
           "validation": {
             "download": {
               "success": true,
@@ -346,48 +393,8 @@
               }
             }
           }
-        },
-        {
-          "input_file": "downloads_by_column/VOICE/healthnexus_row13.json",
-          "output_file": "data/extracted_by_column/VOICE/healthnexus_d4d.yaml",
-          "status": "success",
-          "validation": {
-            "download": {
-              "success": true,
-              "details": {
-                "file_exists": true,
-                "file_size": 109,
-                "content_length": 109,
-                "file_type": ".json",
-                "has_meaningful_content": true,
-                "validation_details": [
-                  "File size: 109 bytes",
-                  "Valid JSON with 3 fields"
-                ]
-              }
-            },
-            "relevance": {
-              "success": true,
-              "details": {
-                "column": "VOICE",
-                "keywords_found": [
-                  "voice",
-                  "b2ai-voice",
-                  "health data nexus"
-                ],
-                "relevance_score": 6,
-                "relevance_details": [
-                  "Filename contains 'healthnexus'",
-                  "Found keywords: voice, b2ai-voice, health data nexus"
-                ],
-                "content_indicators": []
-              }
-            }
-          }
         }
       ],
-      "skipped": [],
-      "errors": [],
       "validation_summary": {
         "download_successful": 2,
         "download_failed": 0,
@@ -397,8 +404,8 @@
     }
   ],
   "summary": {
-    "total_processed": 8,
-    "total_errors": 2,
+    "total_processed": 6,
+    "total_errors": 4,
     "total_skipped": 0,
     "validation_summary": {
       "download_successful": 8,

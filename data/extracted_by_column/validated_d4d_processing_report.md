@@ -1,11 +1,11 @@
 # Validated D4D Agent Processing Report
 
-Generated: 2025-09-08 23:30:15
+Generated: 2025-09-16 18:03:53
 
 ## Overall Summary
 
-- **Files processed**: 8
-- **Errors**: 2
+- **Files processed**: 6
+- **Errors**: 4
 - **Skipped**: 0
 
 ## Validation Summary
@@ -28,15 +28,16 @@ Generated: 2025-09-08 23:30:15
 - ✅ `docs_aireadi_org_docs-2_row8.txt` → `docs_aireadi_org_docs-2_d4d.yaml`
   - Download: ✅ Success
   - Relevance: ✅ Score 8 (found: ai-readi, diabetes, fairhub)
-- ✅ `fairhub_row13.json` → `fairhub_d4d.yaml`
-  - Download: ✅ Success
-  - Relevance: ✅ Score 4 (found: fairhub)
 - ✅ `doi_row2.json` → `doi_d4d.yaml`
   - Download: ✅ Success
   - Relevance: ✅ Score 1 (found: aireadi)
 
 #### Errors
 
+- ❌ `fairhub_row13.json` (stage: d4d_processing): Invalid YAML generated: mapping values are not allowed here
+  in "<unicode string>", line 3, column 71:
+     ... h identifier 2. Project category: AI_READI.
+                                         ^
 - ❌ `docs_google_com_document-d_row11.txt` (stage: download_validation): Content appears to be incomplete or invalid
 
 ### CHORUS
@@ -78,10 +79,14 @@ Generated: 2025-09-08 23:30:15
 
 #### Successfully Processed
 
-- ✅ `physionet_b2ai-voice_1.1_row14.txt` → `physionet_b2ai-voice_1.1_d4d.yaml`
-  - Download: ✅ Success
-  - Relevance: ✅ Score 28 (found: voice, b2ai-voice, bridge2ai voice, vocal, speech, physionet, health data nexus)
 - ✅ `healthnexus_row13.json` → `healthnexus_d4d.yaml`
   - Download: ✅ Success
   - Relevance: ✅ Score 6 (found: voice, b2ai-voice, health data nexus)
+
+#### Errors
+
+- ❌ `physionet_b2ai-voice_1.1_row14.txt` (stage: d4d_processing): Invalid YAML generated: mapping values are not allowed here
+  in "<unicode string>", line 3, column 23:
+    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... 
+                          ^
 

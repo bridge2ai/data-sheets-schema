@@ -52,9 +52,9 @@ class ValidatedD4DWrapper:
         # Load D4D schema
         self.schema = self.load_d4d_schema()
         
-        # Create OpenAI-based D4D agent
+        # Create GPT-5-based D4D agent
         self.d4d_agent = Agent(
-            model="openai:o3-mini",
+            model="openai:gpt-5",
             deps_type=SimpleD4DConfig,
             system_prompt=f"""
 You are an expert data scientist specializing in extracting metadata from datasets following the "Datasheets for Datasets" schema.

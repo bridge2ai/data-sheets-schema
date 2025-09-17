@@ -2,17 +2,11 @@
 # Column: CM4AI
 # Validation: Download ✅ success
 # Relevance: ⚠️  limited relevance
-# Generated: 2025-09-08 23:31:16
+# Generated: 2025-09-16 18:08:03
 
-id: "doi:10.1101/2024.05.21.589311"
-name: "DOI:10.1101/2024.05.21.589311"
-title: "CM4AI Metadata Record for DOI 10.1101/2024.05.21.589311"
-description: "This dataset metadata record was extracted from the source file doi_row3.json. It provides DOI information (10.1101/2024.05.21.589311) along with its URL, and is associated with the CM4AI project. The record corresponds to row 3 of the input file."
-doi: "doi:10.1101/2024.05.21.589311"
-download_url: "https://doi.org/10.1101/2024.05.21.589311"
+id: doi:10.1101/2024.05.21.589311
+name: 10.1101/2024.05.21.589311
+doi: doi:10.1101/2024.05.21.589311
+page: https://doi.org/10.1101/2024.05.21.589311
 keywords:
-  - "CM4AI"
-created_by:
-  - "CM4AI Project"
-purposes:
-  - response: "The dataset is provided for research and analysis within the CM4AI project framework."
+  - CM4AI

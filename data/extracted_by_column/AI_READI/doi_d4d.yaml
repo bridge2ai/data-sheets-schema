@@ -2,16 +2,25 @@
 # Column: AI_READI
 # Validation: Download ✅ success
 # Relevance: ✅ relevant
-# Generated: 2025-09-08 23:30:51
+# Generated: 2025-09-16 18:06:24
 
-id: doi_row2.json
-name: AI_READI Publication DOI Metadata
-title: AI_READI Publication Metadata Extracted from doi_row2.json
-description: >
-  This dataset contains DOI publication metadata associated with the AI_READI project.
-  The metadata includes concatenated DOI values ("10.1038/s42255-024-01165-x" and "10.1136/bmjopen-2024-097449")
-  along with a URL that appears to combine the AI_READI publication URL and DOI links.
-doi: "10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449"
-download_url: "https://aireadi.org/publicationshttps://doi.org/10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449"
+id: https://aireadi.org/publications
+page: https://aireadi.org/publications
 keywords:
   - AI_READI
+  - publications
+resources:
+  - id: doi:10.1038/s42255-024-01165-x
+    doi: doi:10.1038/s42255-024-01165-x
+    page: https://doi.org/10.1038/s42255-024-01165-x
+    keywords:
+      - AI_READI
+      - publications
+      - DOI
+  - id: doi:10.1136/bmjopen-2024-097449
+    doi: doi:10.1136/bmjopen-2024-097449
+    page: https://doi.org/10.1136/bmjopen-2024-097449
+    keywords:
+      - AI_READI
+      - publications
+      - DOI

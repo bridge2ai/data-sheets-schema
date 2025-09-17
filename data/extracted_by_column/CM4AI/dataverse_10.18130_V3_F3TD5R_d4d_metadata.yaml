@@ -1,0 +1,56 @@
+extraction_metadata:
+  timestamp: '2025-09-17T01:09:00.686820Z'
+  extraction_id: 91825473ce2a
+input_document:
+  filename: dataverse_10.18130_V3_F3TD5R_row16.txt
+  relative_path: dataverse_10.18130_V3_F3TD5R_row16.txt
+  format: txt
+  size_bytes: 1339
+  sha256_hash: 17a0deabef43d1de4ced7a18a9a37df0e89bd9f1ab1df3fdace0d2a089baf764
+  project_column: CM4AI
+output_document:
+  filename: dataverse_10.18130_V3_F3TD5R_d4d.yaml
+  relative_path: dataverse_10.18130_V3_F3TD5R_d4d.yaml
+  format: yaml
+datasheets_schema:
+  version: 1.0.0
+  url: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+  retrieved_at: '2025-09-17T01:09:00.687201Z'
+d4d_agent:
+  version: 1.0.0
+  implementation: pydantic_ai
+  wrapper: validated_d4d_wrapper.py
+  wrapper_version: 2.0.0
+llm_model:
+  provider: openai
+  model_name: openai:gpt-5
+  model_version: gpt-5
+  temperature: null
+  max_tokens: null
+validation_results:
+  download_validation:
+    success: true
+    file_size: 1339
+    content_type: .txt
+  relevance_validation:
+    success: true
+    score: 6
+    keywords_found:
+    - dataverse
+    project_indicators:
+    - virginia
+processing_environment:
+  platform: Darwin
+  python_version: 3.13.4
+  processor_architecture: arm64
+reproducibility:
+  command: python validated_d4d_wrapper.py -i ../downloads_by_column -o ../data/extracted_by_column
+  environment_variables:
+    OPENAI_API_KEY: required
+    ANTHROPIC_API_KEY: not_set
+  random_seed: null
+provenance:
+  extraction_performed_by: validated_d4d_wrapper
+  extraction_requested_at: '2025-09-17T01:09:00.687245Z'
+  git_commit: null
+  notes: D4D extraction using GPT-5 model with validation checks

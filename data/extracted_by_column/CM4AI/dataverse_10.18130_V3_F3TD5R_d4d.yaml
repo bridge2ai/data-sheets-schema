@@ -2,30 +2,32 @@
 # Column: CM4AI
 # Validation: Download ✅ success
 # Relevance: ✅ relevant
-# Generated: 2025-09-08 23:31:30
+# Generated: 2025-09-16 18:09:00
 
-id: "dataverse_10.18130_V3_F3TD5R_row16"
-name: "dataverse_10.18130_V3_F3TD5R_row16"
-title: "University of Virginia Dataverse Login Page"
-description: "This file contains text extracted from the University of Virginia Dataverse login page. It includes navigation options, login instructions, a maintenance announcement (LibraData Dataverse will be down for maintenance on Tuesday 9/09 from 8am to 10am), and contact information for University of Virginia Dataverse Support. The content is related to the CM4AI project."
-creators:
-  - name: "University of Virginia Dataverse"
-    principal_investigator:
-      name: "University of Virginia"
-      affiliation: "Rector and Visitors of the University of Virginia"
-    affiliation:
-      name: "University of Virginia"
-publisher: "University of Virginia"
+id: dataverse_10.18130_V3_F3TD5R_row16
+title: University of Virginia Dataverse Login Page
+description: This record captures the University of Virginia Dataverse login page content. It provides institutional login options, contact information for University of Virginia Dataverse Support, and a maintenance notice. No dataset-specific metadata is present in this source.
+language: en
 keywords:
-  - "CM4AI"
-  - "Dataverse"
-  - "University of Virginia"
-purpose:
-  - response: "Provides an authentication interface and gateway for users to access the University of Virginia Dataverse, supporting data discovery and access for the CM4AI project."
+  - CM4AI
+  - Dataverse
+  - University of Virginia
+  - Login
+path: dataverse_10.18130_V3_F3TD5R_row16.txt
+media_type: text/plain
 distribution_formats:
-  - description: "HTML login page content presented as text."
-license: "Terms of Use | Privacy Policy"
-version: "v6.6 build 1829-192cdc4"
-maintenance:
-  updates:
-    description: "LibraData Dataverse will be down for maintenance on Tuesday 9/09 from 8am to 10am."
+  - description:
+      - Hosted and accessed via the University of Virginia Dataverse web portal (login required).
+    used_software:
+      - name: Dataverse
+        version: 6.6 build 1829-192cdc4
+maintainers:
+  - description:
+      - University of Virginia Dataverse Support
+license_and_use_terms:
+  description:
+    - The site references Terms of Use and a Privacy Policy; no specific dataset license information is present in the source.
+external_resources:
+  - external_resources:
+      - Terms of Use
+      - Privacy Policy
