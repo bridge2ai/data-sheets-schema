@@ -57,12 +57,13 @@ def generate_table(syn, table_name: str, table_id: str|None, project_id: str, d4
 	table_schema = Schema(name=table_name, columns=table_cols, parent=project_id)
 
 	if table_id is not None:
-		syn.create_snapshot_version(table_id)
 		csv.field_size_limit(sys.maxsize)
 		existing_rows = syn.tableQuery(f"select * from {table_id}")
 		syn.delete(existing_rows)
 
 	d4d_table = Table(schema=table_schema, values=d4d_df)
+	syn.store(d4d_table)
+	syn.create_snapshot_version(table_id)
 
 	return d4d_table
 
@@ -94,9 +95,7 @@ def main():
 	updated_d4d_dict = add_css(css_name, source_folder, d4d_dict)
 	final_d4d_dict = add_html(org_id_map, source_folder, html_name_parts, updated_d4d_dict)
 	d4d_df = create_d4d_df(final_d4d_dict)
-	d4d_table = generate_table(syn, table_name, table_id, project_id, d4d_df)
+	generate_table(syn, table_name, table_id, project_id, d4d_df)
 	
-	syn.store(d4d_table)
-
 if __name__ == "__main__":
     main() 
