@@ -23,6 +23,56 @@ We are also tracking related developments, such as augmented Datasheets for Data
       Python datamodel
 * [tests/](tests/) - Python tests
 
+## D4D Agent Scripts
+
+This repository includes scripts to extract D4D (Datasheets for Datasets) metadata from dataset documentation using AI agents.
+
+### Main Scripts
+
+#### 1. Validated D4D Wrapper (Recommended)
+
+```bash
+python src/download/validated_d4d_wrapper.py -i downloads_by_column -o data/extracted_by_column
+```
+
+This script:
+- Validates downloads succeeded
+- Checks content relevance to projects
+- Generates D4D YAML metadata
+- Creates detailed validation reports
+
+#### 2. Basic D4D Wrapper
+
+```bash
+python src/download/d4d_agent_wrapper.py -i downloads_by_column -o data/extracted_by_column
+```
+
+Simpler version without validation steps.
+
+#### 3. Test Script (for single URLs)
+
+```bash
+cd aurelian
+python test_d4d.py
+```
+
+Tests the D4D agent with a sample dataset URL.
+
+### Requirements
+
+- Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable
+- The validated wrapper uses GPT-5 by default
+- Processes files in column-organized directories
+
+### Script Locations
+
+- **This repo**: https://github.com/bridge2ai/data-sheets-schema
+- **Scripts location**: [src/download/](src/download/)
+  - Validated wrapper: `src/download/validated_d4d_wrapper.py`
+  - Basic wrapper: `src/download/d4d_agent_wrapper.py`
+
+The scripts are designed to batch-process downloaded dataset documentation files and generate D4D-compliant YAML metadata.
+
 ## Developer Documentation
 
 <details>
