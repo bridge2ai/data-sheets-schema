@@ -47,7 +47,9 @@ help: status
 	@echo "make site -- makes site locally"
 	@echo "make install -- install dependencies"
 	@echo "make test -- runs tests"
+	@echo "make test-modules -- validate all D4D module schemas"
 	@echo "make lint -- perfom linting"
+	@echo "make lint-modules -- lint all D4D module schemas"
 	@echo "make testdoc -- builds docs and runs local test server"
 	@echo "make deploy -- deploys site"
 	@echo "make update -- updates linkml version"
@@ -124,11 +126,29 @@ test: test-schema test-python test-examples
 test-schema: $(SOURCE_SCHEMA_ALL)
 	$(RUN) gen-project ${GEN_PARGS} -d tmp $(SOURCE_SCHEMA_ALL)
 
+# Test individual D4D module schemas
+test-modules:
+	@echo "Validating all D4D module schemas..."
+	@for module in $(SOURCE_SCHEMA_DIR)D4D_*.yaml; do \
+		echo "Validating $$module..."; \
+		$(RUN) gen-project -d tmp $$module || exit 1; \
+	done
+	@echo "All D4D module schemas validated successfully!"
+
 test-python:
 	$(RUN) python -m unittest discover
 
 lint:
 	$(RUN) linkml-lint $(SOURCE_SCHEMA_PATH)
+
+# Lint all D4D module schemas
+lint-modules:
+	@echo "Linting all D4D module schemas..."
+	@for module in $(SOURCE_SCHEMA_DIR)D4D_*.yaml; do \
+		echo "Linting $$module..."; \
+		$(RUN) linkml-lint $$module || exit 1; \
+	done
+	@echo "All D4D module schemas linted successfully!"
 
 check-config:
 	@(grep my-datamodel about.yaml > /dev/null && printf "\n**Project not configured**:\n\n  - Remember to edit 'about.yaml'\n\n" || exit 0)

@@ -20,10 +20,12 @@ poetry install      # Alternative direct poetry install
 ### Testing and Validation
 ```bash
 make test           # Run all tests (schema validation, Python tests, examples)
-make test-schema    # Test schema validation only
+make test-schema    # Test schema validation only (full merged schema)
+make test-modules   # Validate all individual D4D module schemas
 make test-python    # Run Python unit tests only
 make test-examples  # Test example data validation
-make lint           # Run LinkML schema linting
+make lint           # Run LinkML schema linting (main schema only)
+make lint-modules   # Lint all individual D4D module schemas
 ```
 
 ### Building and Generation
@@ -83,10 +85,16 @@ make deploy         # Deploy site to GitHub Pages
 ## Schema Development Workflow
 
 1. Edit schema files in `src/data_sheets_schema/schema/`
-2. Run `make test-schema` to validate changes
-3. Run `make gen-project` to regenerate Python datamodel and other artifacts
-4. Run `make test` to validate everything works
-5. Run `make gendoc` to update documentation
+2. Run `make lint-modules` to lint individual module changes (faster for module-only edits)
+3. Run `make test-modules` to validate individual modules
+4. Run `make test-schema` to validate the full merged schema
+5. Run `make gen-project` to regenerate Python datamodel and other artifacts
+6. Run `make test` to validate everything works
+7. Run `make gendoc` to update documentation
+
+**Quick validation during module development:**
+- `make lint-modules && make test-modules` - Fast validation of D4D modules only
+- `make test-schema` - Full schema validation (includes all modules merged)
 
 ## Working with Modules
 
@@ -162,16 +170,72 @@ poetry run gen-doc -d docs <schema.yaml>
 
 ### Modifying Existing Schema
 1. Edit the relevant module file or main schema
-2. Run `make test-schema` to validate syntax
-3. Run `make gen-project` to regenerate artifacts
-4. Run `make test` to ensure all tests pass
-5. Check generated Python in `src/data_sheets_schema/datamodel/` to verify changes
+2. Run `make lint-modules` to validate module syntax (if editing D4D modules)
+3. Run `make test-modules` to validate module schemas (if editing D4D modules)
+4. Run `make test-schema` to validate the full merged schema
+5. Run `make gen-project` to regenerate artifacts
+6. Run `make test` to ensure all tests pass
+7. Check generated Python in `src/data_sheets_schema/datamodel/` to verify changes
 
 ### Working with Example Data
 1. Add valid examples to `src/data/examples/valid/`
 2. Add invalid examples (for negative testing) to `src/data/examples/invalid/`
 3. Run `make test-examples` to validate
 4. Check output in `examples/output/` for validation results
+
+## D4D Agent Scripts
+
+This repository includes AI-powered scripts to extract D4D metadata from dataset documentation.
+
+### Running D4D Extraction
+
+#### Validated D4D Wrapper (Recommended)
+```bash
+python src/download/validated_d4d_wrapper.py -i downloads_by_column -o data/extracted_by_column
+```
+Features:
+- Validates download success
+- Checks content relevance to project categories (AI_READI, CHORUS, CM4AI, VOICE)
+- Generates D4D YAML metadata
+- Creates detailed validation reports
+
+#### Basic D4D Wrapper
+```bash
+python src/download/d4d_agent_wrapper.py -i downloads_by_column -o data/extracted_by_column
+```
+Simpler version without validation steps.
+
+#### Test Script (Single URLs)
+```bash
+cd aurelian
+python test_d4d.py
+```
+
+### D4D Agent Requirements
+- Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable
+- Validated wrapper uses GPT-5 by default
+- Expects column-organized input directories (by project category)
+- Outputs YAML files conforming to the D4D schema
+
+### D4D Agent Architecture
+The D4D agents use the `aurelian` framework:
+- Located in `aurelian/src/aurelian/agents/d4d/`
+- Uses pydantic-ai for agent orchestration
+- Loads full schema from GitHub or local file
+- Processes HTML, PDF, JSON, and text documents
+- Can be run via CLI: `aurelian datasheets <URL>` or `aurelian datasheets --ui`
+
+## Custom Makefile Targets
+
+Beyond standard LinkML targets, this project adds:
+
+```bash
+make gen-minimal-examples  # Generate minimal example files for all classes
+make gen-html             # Generate HTML from D4D YAML files using human_readable_renderer.py
+make full-schema          # Generate data_sheets_schema_all.yaml (merged schema)
+make test-modules         # Validate all individual D4D module schemas
+make lint-modules         # Lint all individual D4D module schemas
+```
 
 ## Important Notes
 
