@@ -193,7 +193,11 @@ $(DOCDIR):
 
 gendoc: $(DOCDIR)
 	cp $(SRC)/docs/*md $(DOCDIR) ; \
-	$(RUN) gen-doc ${GEN_DARGS} -d $(DOCDIR) $(SOURCE_SCHEMA_PATH)
+	$(RUN) gen-doc ${GEN_DARGS} -d $(DOCDIR) $(SOURCE_SCHEMA_PATH) ; \
+	mkdir -p $(DOCDIR)/html_output/concatenated ; \
+	cp -r $(SRC)/html/output/*.html $(DOCDIR)/html_output/ 2>/dev/null || true ; \
+	cp -r $(SRC)/html/output/concatenated/*.html $(DOCDIR)/html_output/concatenated/ 2>/dev/null || true ; \
+	cp $(SRC)/html/output/*.css $(DOCDIR)/html_output/ 2>/dev/null || true
 
 testdoc: gendoc serve
 

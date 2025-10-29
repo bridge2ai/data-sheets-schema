@@ -13,6 +13,7 @@ plugins:
 nav:
   # - Home: home.md
   - Index: index.md
+  - D4D Examples: d4d_examples.md
   - About: about.md
 site_url: https://bridge2ai.github.io/data-sheets-schema
 repo_url: https://github.com/bridge2ai/data-sheets-schema
