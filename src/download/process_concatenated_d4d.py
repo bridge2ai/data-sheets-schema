@@ -198,7 +198,10 @@ Generate a single, comprehensive D4D YAML document that synthesizes all the info
             print(f"   ⏱️  Agent completed in {elapsed:.1f}s")
 
             # Extract YAML from result
+            print(f"   📝 Extracting YAML from result...")
             yaml_content = result.output.strip()
+
+            print(f"   📏 Response length: {len(yaml_content)} characters")
 
             # Clean up the output - remove any markdown formatting
             if yaml_content.startswith('```yaml'):
@@ -209,24 +212,64 @@ Generate a single, comprehensive D4D YAML document that synthesizes all the info
                 yaml_content = yaml_content[:-3]
             yaml_content = yaml_content.strip()
 
+            # Fix common YAML issues: unquoted strings with colons
+            # This handles fields like "title: Bridge2AI-Voice: An ethically..."
+            # where the value contains a colon
+            import re
+            lines = yaml_content.split('\n')
+            fixed_lines = []
+            for line in lines:
+                # Match lines like "    title: Some text: with colon"
+                # where the value after first colon contains another colon
+                match = re.match(r'^(\s*\w+:\s*)([^"\'\n]+:.+)$', line)
+                if match and not line.strip().startswith('-'):
+                    # Check if value already quoted
+                    value = match.group(2)
+                    if not (value.startswith('"') or value.startswith("'")):
+                        # Quote the value
+                        line = match.group(1) + '"' + value + '"'
+                fixed_lines.append(line)
+            yaml_content = '\n'.join(fixed_lines)
+
+            # Check if content is empty
+            if not yaml_content:
+                error_msg = "Agent returned empty response"
+                print(f"   ❌ {error_msg}")
+                return False, error_msg
+
+            print(f"   🔍 Validating YAML...")
             # Validate YAML
             try:
                 parsed = yaml.safe_load(yaml_content)
+                if parsed is None:
+                    error_msg = "YAML parsing returned None"
+                    print(f"   ❌ {error_msg}")
+                    return False, error_msg
                 print(f"   ✅ Generated valid YAML")
             except yaml.YAMLError as e:
-                return False, f"Invalid YAML generated: {e}"
+                error_msg = f"Invalid YAML generated: {e}"
+                print(f"   ❌ {error_msg}")
+                # Save the invalid YAML for debugging
+                debug_file = output_file.parent / f"{output_file.stem}_debug.txt"
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write(yaml_content)
+                print(f"   🐛 Saved invalid YAML to: {debug_file}")
+                return False, error_msg
 
             # Save YAML file
+            print(f"   💾 Saving YAML file...")
             output_file.parent.mkdir(parents=True, exist_ok=True)
             with open(output_file, 'w', encoding='utf-8') as f:
                 f.write(yaml_content)
 
-            print(f"   💾 Saved to: {output_file}")
+            print(f"   ✅ Saved to: {output_file}")
             return True, "Success"
 
         except Exception as e:
             error_msg = str(e)
-            print(f"   ❌ Failed: {error_msg}")
+            print(f"   ❌ Failed with exception: {error_msg}")
+            import traceback
+            traceback.print_exc()
             return False, error_msg
 
     async def process_directory(
