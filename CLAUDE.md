@@ -225,6 +225,51 @@ The D4D agents use the `aurelian` framework:
 - Processes HTML, PDF, JSON, and text documents
 - Can be run via CLI: `aurelian datasheets <URL>` or `aurelian datasheets --ui`
 
+## Document Concatenation
+
+This project includes tools to concatenate multiple documents from a directory into a single document in reproducible order.
+
+### Concatenation Commands
+
+```bash
+# Concatenate documents from a specific directory
+make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=path/to/output.txt
+
+# Optional parameters:
+make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=output.txt EXTENSIONS=".txt .md" RECURSIVE=true
+
+# Concatenate extracted D4D documents by column (from data/extracted_by_column)
+make concat-extracted
+
+# Concatenate raw downloads by column (from downloads_by_column)
+make concat-downloads
+
+# Direct script usage with more options:
+python src/download/concatenate_documents.py -i input_dir -o output.txt [OPTIONS]
+
+# Script options:
+#   -e, --extensions .txt .md    # Filter by file extensions
+#   -r, --recursive             # Search subdirectories
+#   --no-headers                # Exclude file headers
+#   --no-summary                # Exclude table of contents
+#   -s "separator"              # Custom separator between files
+```
+
+### Features
+
+- **Reproducible ordering**: Files are sorted alphabetically for consistent results
+- **Multiple formats**: Handles text, HTML, YAML, and other text-based formats
+- **File metadata**: Includes headers with filename, path, and size
+- **Table of contents**: Summary section lists all concatenated files
+- **Error handling**: Gracefully handles encoding issues and read errors
+
+### Use Cases
+
+- Combine all downloaded dataset documentation for a project
+- Create single input documents for LLM processing
+- Merge documentation fragments into complete documents
+- Aggregate logs or reports from multiple files
+
 ## Custom Makefile Targets
 
 Beyond standard LinkML targets, this project adds:
@@ -235,6 +280,9 @@ make gen-html             # Generate HTML from D4D YAML files using human_readab
 make full-schema          # Generate data_sheets_schema_all.yaml (merged schema)
 make test-modules         # Validate all individual D4D module schemas
 make lint-modules         # Lint all individual D4D module schemas
+make concat-docs          # Concatenate documents from a directory
+make concat-extracted     # Concatenate extracted D4D documents by column
+make concat-downloads     # Concatenate raw downloads by column
 ```
 
 ## Null/Empty Value Handling
