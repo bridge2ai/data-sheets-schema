@@ -189,7 +189,9 @@ This repository includes AI-powered scripts to extract D4D metadata from dataset
 
 ### Running D4D Extraction
 
-#### Validated D4D Wrapper (Recommended)
+#### 1. Process Individual Downloaded Files
+
+**Validated D4D Wrapper (Recommended)**
 ```bash
 python src/download/validated_d4d_wrapper.py -i downloads_by_column -o data/extracted_by_column
 ```
@@ -199,13 +201,52 @@ Features:
 - Generates D4D YAML metadata
 - Creates detailed validation reports
 
-#### Basic D4D Wrapper
+**Basic D4D Wrapper**
 ```bash
 python src/download/d4d_agent_wrapper.py -i downloads_by_column -o data/extracted_by_column
 ```
 Simpler version without validation steps.
 
-#### Test Script (Single URLs)
+#### 2. Process Concatenated Documents (New!)
+
+Process concatenated documents created by `make concat-extracted`:
+
+```bash
+# Process a single concatenated file
+make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt
+
+# Process with custom output
+make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt OUTPUT_FILE=output.yaml
+
+# Process all concatenated files in data/concatenated/
+make process-all-concat
+
+# Direct script usage with more options
+cd aurelian
+uv run python ../src/download/process_concatenated_d4d.py -i ../data/concatenated/AI_READI_d4d.txt
+
+# Use a different model
+uv run python ../src/download/process_concatenated_d4d.py -i ../data/concatenated/AI_READI_d4d.txt \
+  -m "anthropic:claude-3-opus-20240229"
+
+# Process all files in a directory
+uv run python ../src/download/process_concatenated_d4d.py -d ../data/concatenated --output-dir ../data/synthesized
+```
+
+**Features of concatenated processing:**
+- Synthesizes multiple D4D YAML files into a single comprehensive document
+- Merges complementary information from all concatenated sources
+- Prefers more detailed/specific information over generic
+- Keeps the most comprehensive descriptions
+- Combines all relevant metadata sections
+- Uses aurelian's D4D agent for intelligent synthesis
+
+**Typical workflow:**
+1. `make concat-extracted` - Concatenate all D4D files per project column
+2. `make process-all-concat` - Synthesize concatenated files into comprehensive D4D YAML
+3. Output: `data/synthesized/{PROJECT}_synthesized.yaml`
+
+#### 3. Test Script (Single URLs)
 ```bash
 cd aurelian
 python test_d4d.py
@@ -214,6 +255,8 @@ python test_d4d.py
 ### D4D Agent Requirements
 - Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable
 - Validated wrapper uses GPT-5 by default
+- Concatenated processor uses Claude 3.5 Sonnet by default
+- Run from `aurelian/` directory using `uv run` for dependency management
 - Expects column-organized input directories (by project category)
 - Outputs YAML files conforming to the D4D schema
 
@@ -223,6 +266,7 @@ The D4D agents use the `aurelian` framework:
 - Uses pydantic-ai for agent orchestration
 - Loads full schema from GitHub or local file
 - Processes HTML, PDF, JSON, and text documents
+- Can synthesize multiple documents into comprehensive metadata
 - Can be run via CLI: `aurelian datasheets <URL>` or `aurelian datasheets --ui`
 
 ## Document Concatenation
@@ -283,6 +327,8 @@ make lint-modules         # Lint all individual D4D module schemas
 make concat-docs          # Concatenate documents from a directory
 make concat-extracted     # Concatenate extracted D4D documents by column
 make concat-downloads     # Concatenate raw downloads by column
+make process-concat       # Process concatenated doc with D4D agent
+make process-all-concat   # Process all concatenated docs with D4D agent
 ```
 
 ## Null/Empty Value Handling

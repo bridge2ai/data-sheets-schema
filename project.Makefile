@@ -60,3 +60,22 @@ concat-downloads:
 		fi \
 	done
 	@echo "✅ All downloads concatenated to data/concatenated/"
+
+# Process concatenated D4D documents with D4D agent
+# Usage: make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt
+process-concat:
+ifndef INPUT_FILE
+	$(error INPUT_FILE is not defined. Usage: make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt)
+endif
+	@echo "Processing concatenated document: $(INPUT_FILE)"
+	$(RUN) python src/download/process_concatenated_d4d.py -i $(INPUT_FILE) \
+		$(if $(OUTPUT_FILE),-o $(OUTPUT_FILE),) \
+		$(if $(MODEL),-m $(MODEL),)
+
+# Process all concatenated D4D documents in data/concatenated/
+# This creates synthesized D4D YAML files for each column
+process-all-concat:
+	@echo "Processing all concatenated D4D documents..."
+	@mkdir -p data/synthesized
+	$(RUN) python src/download/process_concatenated_d4d.py -d data/concatenated --output-dir data/synthesized
+	@echo "✅ All concatenated files processed to data/synthesized/"

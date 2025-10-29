@@ -53,6 +53,8 @@ help: status
 	@echo "make concat-docs INPUT_DIR=dir OUTPUT_FILE=file -- concatenate documents from directory"
 	@echo "make concat-extracted -- concatenate extracted D4D documents by column"
 	@echo "make concat-downloads -- concatenate raw downloads by column"
+	@echo "make process-concat INPUT_FILE=file -- process concatenated doc with D4D agent"
+	@echo "make process-all-concat -- process all concatenated docs with D4D agent"
 	@echo "make testdoc -- builds docs and runs local test server"
 	@echo "make deploy -- deploys site"
 	@echo "make update -- updates linkml version"
