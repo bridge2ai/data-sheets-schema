@@ -253,9 +253,9 @@ python test_d4d.py
 ```
 
 ### D4D Agent Requirements
-- Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable
+- Set `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable
 - Validated wrapper uses GPT-5 by default
-- Concatenated processor uses Claude 3.5 Sonnet by default
+- Concatenated processor uses GPT-5 by default
 - Run from `aurelian/` directory using `uv run` for dependency management
 - Expects column-organized input directories (by project category)
 - Outputs YAML files conforming to the D4D schema

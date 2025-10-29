@@ -31,21 +31,37 @@ except ImportError as e:
 class ConcatenatedD4DProcessor:
     """Process concatenated documents with D4D agent."""
 
-    def __init__(self, model: str = "anthropic:claude-3-5-sonnet-20241022"):
+    def __init__(self, model: str = "openai:gpt-5"):
         """
         Initialize the processor.
 
         Args:
-            model: Model to use for D4D agent (default: claude-3-5-sonnet-20241022)
+            model: Model to use for D4D agent (default: gpt-5)
         """
         self.model = model
 
-        # Check for API key
-        if not os.getenv("ANTHROPIC_API_KEY"):
-            print("❌ Error: ANTHROPIC_API_KEY environment variable not set")
-            print("Please set your Anthropic API key:")
-            print("export ANTHROPIC_API_KEY='your-api-key-here'")
-            sys.exit(1)
+        # Check for API key based on model
+        if model.startswith("openai:"):
+            if not os.getenv("OPENAI_API_KEY"):
+                print("❌ Error: OPENAI_API_KEY environment variable not set")
+                print("Please set your OpenAI API key:")
+                print("export OPENAI_API_KEY='your-api-key-here'")
+                sys.exit(1)
+        elif model.startswith("anthropic:"):
+            if not os.getenv("ANTHROPIC_API_KEY"):
+                print("❌ Error: ANTHROPIC_API_KEY environment variable not set")
+                print("Please set your Anthropic API key:")
+                print("export ANTHROPIC_API_KEY='your-api-key-here'")
+                sys.exit(1)
+        else:
+            # Default check for both
+            if not os.getenv("OPENAI_API_KEY") and not os.getenv("ANTHROPIC_API_KEY"):
+                print("❌ Error: Neither OPENAI_API_KEY nor ANTHROPIC_API_KEY environment variable set")
+                print("Please set your API key:")
+                print("export OPENAI_API_KEY='your-api-key-here'")
+                print("or")
+                print("export ANTHROPIC_API_KEY='your-api-key-here'")
+                sys.exit(1)
 
         # Create Claude-based D4D agent
         self.d4d_agent = Agent(
@@ -370,8 +386,8 @@ Examples:
 
     parser.add_argument(
         '-m', '--model',
-        default='anthropic:claude-3-5-sonnet-20241022',
-        help='Model to use for D4D agent (default: claude-3-5-sonnet-20241022)'
+        default='openai:gpt-5',
+        help='Model to use for D4D agent (default: openai:gpt-5)'
     )
 
     parser.add_argument(
