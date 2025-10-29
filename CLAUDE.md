@@ -237,6 +237,37 @@ make test-modules         # Validate all individual D4D module schemas
 make lint-modules         # Lint all individual D4D module schemas
 ```
 
+## Null/Empty Value Handling
+
+The codebase follows a consistent pattern for handling empty/missing values:
+
+### Schema and Python Code
+- **Default for empty values**: `null`/`None`
+- Python datamodel uses `Optional[type] = None` for all optional fields
+- Schema uses `default_range: string` but does NOT use `ifabsent` rules that would force empty strings
+- YAML data files should use `null` or omit fields entirely for missing values
+
+### HTML Rendering
+- **HTML output**: All `None`/`null` values are converted to empty strings `""`
+- This applies to:
+  - `src/html/human_readable_renderer.py` - Human-readable HTML output
+  - `src/renderer/yaml_renderer.py` - YAML to HTML/PDF rendering
+- Empty strings in HTML provide cleaner display without "Not specified" or placeholder text
+- Tables display empty cells rather than "-" or "N/A" for null values
+
+**Example:**
+```yaml
+# In YAML data file
+field1: "value"     # Has value
+field2: null        # No value (or omit entirely)
+```
+
+```html
+<!-- In HTML rendering -->
+<td>value</td>      <!-- field1 displays value -->
+<td></td>           <!-- field2 displays as empty -->
+```
+
 ## Important Notes
 
 - **DO NOT EDIT** files in `project/` or `src/data_sheets_schema/datamodel/` - these are auto-generated

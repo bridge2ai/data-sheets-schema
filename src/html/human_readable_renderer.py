@@ -177,7 +177,10 @@ class HumanReadableRenderer:
     
     def format_value(self, value, context=""):
         """Format a value for human-readable display"""
-        if isinstance(value, dict):
+        # Convert None to empty string for HTML display
+        if value is None:
+            return ""
+        elif isinstance(value, dict):
             return self._format_dict(value)
         elif isinstance(value, list):
             return self._format_list(value)
@@ -193,20 +196,20 @@ class HumanReadableRenderer:
     def _format_dict(self, d):
         """Format dictionary as nested definition list"""
         if not d:
-            return "<em>No information provided</em>"
-        
+            return ""
+
         items = []
         for key, value in d.items():
             formatted_key = self._humanize_key(key)
             formatted_value = self.format_value(value)
             items.append(f"<dt>{formatted_key}</dt><dd>{formatted_value}</dd>")
-        
+
         return f"<dl class='nested-dict'>{''.join(items)}</dl>"
     
     def _format_list(self, lst):
         """Format list as bulleted or numbered list, or as table for structured data"""
         if not lst:
-            return "<em>No items</em>"
+            return ""
         
         # Check if this is author/creator/contributor data that should be formatted as a table
         if self._is_author_list(lst):
@@ -289,7 +292,7 @@ class HumanReadableRenderer:
     def _format_distribution_table(self, lst):
         """Format demographic distribution data as a compact table"""
         if not lst:
-            return "<em>No distribution data</em>"
+            return ""
         
         # Parse the distribution data
         rows = []
@@ -418,7 +421,7 @@ class HumanReadableRenderer:
     def _format_funding_table(self, lst):
         """Format funding/grant data as a compact table"""
         if not lst:
-            return "<em>No funding data</em>"
+            return ""
         
         rows = []
         for item in lst:
@@ -473,7 +476,7 @@ class HumanReadableRenderer:
     def _format_author_table(self, lst):
         """Format author/contributor data as a compact table"""
         if not lst:
-            return "<em>No authors</em>"
+            return ""
         
         rows = []
         for item in lst:
@@ -517,7 +520,7 @@ class HumanReadableRenderer:
                 rows.append([role, name, orcid or "-", affiliation or "-"])
         
         if not rows:
-            return "<em>No author information available</em>"
+            return ""
         
         # Generate table HTML
         table_html = '<table class="data-table"><thead><tr>'
@@ -536,7 +539,7 @@ class HumanReadableRenderer:
     def _format_data_table(self, lst):
         """Format structured data as a compact table"""
         if not lst:
-            return "<em>No data</em>"
+            return ""
         
         dict_items = [item for item in lst if isinstance(item, dict)]
         if not dict_items:
@@ -569,7 +572,10 @@ class HumanReadableRenderer:
     
     def _format_table_cell(self, value):
         """Format a single table cell value"""
-        if isinstance(value, dict):
+        # Convert None to empty string for HTML table cells
+        if value is None:
+            return ""
+        elif isinstance(value, dict):
             # For nested dicts, show key-value pairs compactly
             items = [f"{k}: {v}" for k, v in value.items()]
             return "<br>".join(items[:3])  # Limit to 3 items for readability
@@ -581,9 +587,7 @@ class HumanReadableRenderer:
         elif isinstance(value, str):
             if len(value) > 100:
                 return f"{value[:100]}..."
-            return value or "-"
-        elif value is None:
-            return "-"
+            return value or ""
         else:
             return str(value)
     
@@ -597,9 +601,10 @@ class HumanReadableRenderer:
     
     def _format_string(self, s):
         """Format string with proper emphasis and links"""
-        if not s:
-            return "<em>Not specified</em>"
-        
+        # Return empty string for None or empty string (no "Not specified" message)
+        if not s or s is None:
+            return ""
+
         # Handle URLs
         if s.startswith(('http://', 'https://', 'doi:')):
             if s.startswith('doi:'):
@@ -607,11 +612,11 @@ class HumanReadableRenderer:
                 return f'<a href="{url}" target="_blank">{s}</a>'
             else:
                 return f'<a href="{s}" target="_blank">{s}</a>'
-        
+
         # Handle long descriptions
         if len(s) > 200:
             return f'<div class="long-description">{s}</div>'
-        
+
         return s
     
     def _format_number(self, n):
