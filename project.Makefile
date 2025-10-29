@@ -68,8 +68,13 @@ ifndef INPUT_FILE
 	$(error INPUT_FILE is not defined. Usage: make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt)
 endif
 	@echo "Processing concatenated document: $(INPUT_FILE)"
-	$(RUN) python src/download/process_concatenated_d4d.py -i $(INPUT_FILE) \
-		$(if $(OUTPUT_FILE),-o $(OUTPUT_FILE),) \
+	@if [ ! -d "aurelian" ]; then \
+		echo "❌ Error: aurelian directory not found"; \
+		echo "Please ensure the aurelian submodule is initialized"; \
+		exit 1; \
+	fi
+	cd aurelian && uv run python ../src/download/process_concatenated_d4d.py -i ../$(INPUT_FILE) \
+		$(if $(OUTPUT_FILE),-o ../$(OUTPUT_FILE),) \
 		$(if $(MODEL),-m $(MODEL),)
 
 # Process all concatenated D4D documents in data/concatenated/
@@ -77,5 +82,10 @@ endif
 process-all-concat:
 	@echo "Processing all concatenated D4D documents..."
 	@mkdir -p data/synthesized
-	$(RUN) python src/download/process_concatenated_d4d.py -d data/concatenated --output-dir data/synthesized
+	@if [ ! -d "aurelian" ]; then \
+		echo "❌ Error: aurelian directory not found"; \
+		echo "Please ensure the aurelian submodule is initialized"; \
+		exit 1; \
+	fi
+	cd aurelian && uv run python ../src/download/process_concatenated_d4d.py -d ../data/concatenated --output-dir ../data/synthesized
 	@echo "✅ All concatenated files processed to data/synthesized/"
