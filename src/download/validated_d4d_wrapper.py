@@ -129,16 +129,26 @@ The output must be a valid YAML document that starts with the dataset metadata, 
                 return False, "Content too short", validation_result
             
             # Check for error indicators in content
+            # More specific checks to avoid false positives on documentation mentioning errors
             error_indicators = [
-                'error 404', 'not found', 'page not found', 'access denied', 
+                'error 404', 'access denied',
                 'error 403', 'forbidden', 'error 500', 'internal server error',
                 'error reading file', 'failed to retrieve'
             ]
-            
+
             content_lower = content.lower()
+
+            # Check for actual error indicators (not just mentions in documentation)
             for error in error_indicators:
                 if error in content_lower:
                     return False, f"Content contains error: {error}", validation_result
+
+            # Special check for "not found" - only flag if it's likely an actual error page
+            # (avoid false positives from documentation that mentions "not found" in context)
+            if 'not found' in content_lower or 'page not found' in content_lower:
+                # Check if this appears to be an error page (short content, or in title)
+                if len(content) < 500 or ('<title>' in content_lower and 'not found' in content_lower[:1000]):
+                    return False, f"Content contains error: not found", validation_result
             
             # File type specific validation
             if file_path.suffix == '.html':
@@ -389,13 +399,55 @@ Generate a complete D4D YAML document based on this content. Include as much rel
             if yaml_content.endswith('```'):
                 yaml_content = yaml_content[:-3]
             yaml_content = yaml_content.strip()
-            
+
+            # Fix common YAML issues: unquoted strings with colons
+            # This handles fields like "title: Bridge2AI-Voice: An ethically..."
+            # where the value contains a colon
+            lines = yaml_content.split('\n')
+            fixed_lines = []
+            for line in lines:
+                # Skip list items, comments, and already-quoted values
+                stripped = line.strip()
+                if stripped.startswith('-') or stripped.startswith('#') or not ':' in line:
+                    fixed_lines.append(line)
+                    continue
+
+                # Match lines like "    field: value with: colon" or "    field: http://url"
+                match = re.match(r'^(\s*)(\w+):\s*(.+)$', line)
+                if match:
+                    indent = match.group(1)
+                    key = match.group(2)
+                    value = match.group(3).strip()
+
+                    # Skip if already quoted
+                    if value.startswith('"') or value.startswith("'"):
+                        fixed_lines.append(line)
+                        continue
+
+                    # Quote if value contains colon (but not just URLs)
+                    # This handles both "text: with colon" and "http://url" cases
+                    if ':' in value:
+                        # Quote the value to avoid YAML parsing issues
+                        fixed_line = f'{indent}{key}: "{value}"'
+                        fixed_lines.append(fixed_line)
+                    else:
+                        fixed_lines.append(line)
+                else:
+                    fixed_lines.append(line)
+            yaml_content = '\n'.join(fixed_lines)
+
             # Validate YAML
             try:
                 parsed_yaml = yaml.safe_load(yaml_content)
                 if not isinstance(parsed_yaml, dict):
                     return False, "Generated content is not a valid YAML document"
             except yaml.YAMLError as e:
+                # Save the invalid YAML for debugging
+                debug_file = output_path.parent / f"{output_path.stem}_debug.txt"
+                with open(debug_file, 'w', encoding='utf-8') as f:
+                    f.write("=== YAML Fixing Applied ===\n")
+                    f.write(yaml_content)
+                print(f"      🐛 Saved invalid YAML to: {debug_file.name}")
                 return False, f"Invalid YAML generated: {e}"
             
             # Add validation metadata as comments at the top
