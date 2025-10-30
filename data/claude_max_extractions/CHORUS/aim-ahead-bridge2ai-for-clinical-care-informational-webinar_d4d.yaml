@@ -1,0 +1,19 @@
+# CLAUDE MAX PROCESSING TEMPLATE
+# Source: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf
+# Column: CHORUS
+# Generated: Please replace this with Claude Max output
+
+# Instructions:
+# 1. Copy the prompt from aim-ahead-bridge2ai-for-clinical-care-informational-webinar_prompt.txt
+# 2. Paste it into Claude Pro/Max
+# 3. Copy Claude's YAML response
+# 4. Replace this template with the response
+# 5. Save this file
+
+# Template structure (remove this section after processing):
+id: your-dataset-id
+name: Dataset Name
+title: "Full Dataset Title"
+description: "Dataset description..."
+
+# Add the complete D4D metadata here...

@@ -1,0 +1,24 @@
+{
+  "type": "Dataverse Dataset",
+  "url": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX",
+  "files": [
+    {
+      "name": "dataverse_10.18130_V3_B35XWX.html",
+      "path": "extracted_datasets_v2/dataverse_10.18130_V3_B35XWX.html",
+      "size": 272281,
+      "type": "HTML",
+      "description": "Dataverse dataset landing page"
+    },
+    {
+      "name": "dataverse_10.18130_V3_B35XWX.txt",
+      "path": "extracted_datasets_v2/dataverse_10.18130_V3_B35XWX.txt",
+      "size": 37397,
+      "type": "TEXT"
+    }
+  ],
+  "metadata": {
+    "doi": "doi:10.18130/V3/B35XWX",
+    "access_instructions": "Visit the Dataverse URL and use the 'Download' button for files",
+    "title": "Cell Maps for Artificial Intelligence"
+  }
+}

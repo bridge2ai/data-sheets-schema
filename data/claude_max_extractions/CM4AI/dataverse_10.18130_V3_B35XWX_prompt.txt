@@ -1,0 +1,762 @@
+I need you to analyze the following content and extract dataset metadata following the "Datasheets for Datasets" (D4D) schema.
+
+**Source Information:**
+- File: dataverse_10.18130_V3_B35XWX_row13.txt
+- Project Column: CM4AI
+- File Type: .txt
+- Validation: ✅ Relevant
+
+**Instructions:**
+1. Analyze the content below and extract all available dataset metadata
+2. Format the output as valid YAML following the D4D schema structure
+3. Include these key sections if information is available:
+   - id, name, title, description
+   - creators (with names, affiliations, roles)
+   - purposes and intended uses
+   - instances (data types, counts, representations)
+   - collection_mechanisms and timeframes
+   - preprocessing_strategies and cleaning
+   - distribution_formats and access
+   - ethical_reviews and consent
+   - license_and_use_terms
+   - maintainers and funding
+
+**D4D Schema Reference:**
+```yaml
+# Key D4D fields (use as template):
+id: dataset-identifier
+name: Dataset Name
+title: "Full Dataset Title"
+description: "Detailed description..."
+
+creators:
+  - name: "Author Name"
+    affiliation: "Institution"
+    role: "Principal Investigator"
+
+purposes:
+  response: "Why was this dataset created..."
+
+instances:
+  representation: "What the data represents"
+  data_type: "Type of data (text, images, etc.)"
+  counts: 1000
+
+collection_mechanisms:
+  description: "How data was collected..."
+
+# Add other relevant sections...
+```
+
+**Content to Analyze:**
+```
+
+
+
+
+
+Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta) - Cell Maps for Artificial Intelligence
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Skip to main content
+
+
+
+
+Toggle navigation
+
+
+
+
+
+
+
+
+
+
+Search 
+
+
+
+Search
+
+
+
+
+
+
+
+
+
+
+
+About
+User Guide
+
+
+
+
+Support
+
+
+
+
+
+                                    Log In
+                                
+
+
+
+
+
+
+Please enable JavaScript in your browser. It is required to use most of the features of Dataverse.
+                
+
+
+
+
+
+× LibraData Dataverse will be down for maintenance on Tuesday 9/09 from 8am to 10am.
+                        
+
+
+
+Cell Maps for Artificial IntelligenceThis collection is under review for potential modification in compliance with Administration directives.
+
+
+University of Virginia Dataverse
+                            
+ > 
+
+LibraData: UVa's Scholarly Research
+                            
+ > 
+
+School of Medicine
+                            
+ > 
+
+Cell Maps for Artificial Intelligence
+                            
+ > 
+
+
+
+
+
+
+
+
+
+
+
+Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+Version 1.4
+
+
+
+
+
+
+
+
+
+Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; Bélisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T, 2025, "Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)", https://doi.org/10.18130/V3/B35XWX, University of Virginia Dataverse, V1
+                
+
+
+                        Cite Dataset 
+
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+                                View Styled Citation
+                            
+
+Learn about Data Citation Standards.
+
+
+
+
+
+
+                                                        Access Dataset 
+
+The dataset is too large to download. Please select the files you need from the files table.
+                                                        
+                                                    
+
+
+                                                    Contact Owner
+                                                
+                                                    Share
+                                                
+
+
+
+
+                                                Dataset Metrics
+                                                
+                                                    
+
+279 Downloads
+                                                    
+
+
+
+
+
+
+
+                                                            Dataset Description
+                                                            
+
+This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center. This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection (2025-03-04). (2025-03-07)
+                                                                    
+
+                                                            Subject
+                                                            
+Medicine, Health and Life Sciences
+
+                                                            Keyword
+                                                            
+
+AI, affinity purification, AP-MS, artificial intelligence, breast cancer, Bridge2AI, cardiomyocyte, CM4AI, CRISPR/Cas9, induced pluripotent stem cell, iPSC, KOLF2.1J, machine learning, mass spectroscopy, MDA-MB-468, neural progenitor cell, NPC, neuron, paclitaxel, perturb-seq, perturbation sequencing, protein-protein interaction, protein localization, single-cell RNA sequencing, scRNAseq, SEC-MS, size exclusion chromatography, subcellular imaging, vorinostat
+
+                                                            Related Publication
+                                                            
+References: Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. 2024.doi: http://doi.org/10.1101/2024.05.21.589311
+
+
+                                                        License/Data Use Agreement
+                                                    
+
+
+
+CC BY-NC-SA 4.0
+
+
+
+
+
+
+
+ui-button
+FilesMetadataTermsVersions
+
+
+                Change View
+            
+TableTree
+
+
+Search
+
+
+
+
+
+Filter by
+
+                            File Type: All 
+
+
+All
+
+Archive (3)
+Data (3)
+
+
+                            Access: All 
+
+
+All
+
+Public (6)
+
+
+
+
+ Sort 
+
+
+Name (A-Z)
+Name (Z-A)
+Newest
+Oldest
+Size
+Type
+
+
+1 to 6 of 6 Files
+
+ Download
+                    
+
+
+
+
+
+
+
+                        ro-crate-metadata.json
+                    
+
+CRISPR Perturbation Cell Atlas/JSON - 31.1 KB
+Published Mar 3, 2025
+31 Downloads
+MD5: cbdb263b1c099396d75e16f00a79a818
+
+This dataset represents an expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) Functional Genomics Grand Challenge, a component of the U.S. National Institute of Health’s (NIH) Bridge2AI program. We validated these findings via phenotypic, protein-interaction, and metabolic tracing assays. 
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                JSON
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        ro-crate-metadata.json
+                    
+
+CRISPR Perturbation RNA Sequences - Raw Sequences/JSON - 1000.1 KB
+Published Mar 3, 2025
+17 Downloads
+MD5: 1cafefa32a897998e3e2ba0a29a3ef5c
+
+This dataset represents raw sequence data from an expressed genome-scale CRISPRi Perturbation Cell Atlas in KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) Functional Genomics Grand Challenge, a component of the U.S. National Institute of Health’s (NIH) Bridge2AI program. 
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                JSON
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        cm4ai-v0.6-beta-if-images-paclitaxel.zip
+                    
+
+Protein Localization Subcellular Images/ZIP Archive - 2.6 GB
+Published Mar 3, 2025
+87 Downloads
+MD5: 9422486c80bc9e1d35b2fbbc72a5f043
+
+This data set displays the spatial localization of 563 proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel); endoplasmic reticulum with a calreticulin antibody (yellow channel); microtubules with tubulin antibody (red channel); and antibody against protein of interest (green channel). 
+
+
+Preview "Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-paclitaxel.zip"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                ZIP Archive
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        cm4ai-v0.6-beta-if-images-untreated.zip
+                    
+
+Protein Localization Subcellular Images/ZIP Archive - 3.2 GB
+Published Mar 3, 2025
+67 Downloads
+MD5: 0b4d129f5fbc3bb7f7ea564cd032cef7
+
+This data set displays the spatial localization of 563 proteins of interest in untreated cells of the breast cancer cell line MDA-MB-468 as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel); endoplasmic reticulum with a calreticulin antibody (yellow channel); microtubules with tubulin antibody (red channel); and antibody against protein of interest (green channel). 
+
+
+Preview "Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-untreated.zip"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                ZIP Archive
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        cm4ai-v0.6-beta-if-images-vorinostat.zip
+                    
+
+Protein Localization Subcellular Images/ZIP Archive - 2.8 GB
+Published Mar 3, 2025
+57 Downloads
+MD5: ac577109a41a9806978461157b777d52
+
+This data set displays the spatial localization of 563 proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated with vorinostat as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel); endoplasmic reticulum with a calreticulin antibody (yellow channel); microtubules with tubulin antibody (red channel); and antibody against protein of interest (green channel). 
+
+
+Preview "Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-vorinostat.zip"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                ZIP Archive
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        ro-crate-metadata.json
+                    
+
+Protein-protein Interaction SEC-MS/JSON - 2.9 KB
+Published Mar 3, 2025
+20 Downloads
+MD5: cb67e7749b15ce87b9042a9feba9d032
+
+This dataset was generated by size exclusion chromatography-mass spectroscopy (SEC-MS) on undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs), in the Nevan Krogan laboratory at the University of California San Francisco, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) Functional Genomics Grand Challenge, a component of the U.S. National Institute of Health’s (NIH) Bridge2AI program. The data will be uploaded to Pride when available.
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                JSON
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+ Export Metadata 
+
+
+OAI_ORE
+
+DataCite
+
+OpenAIRE
+
+Schema.org JSON-LD
+
+DDI Codebook v2
+
+Dublin Core
+
+DDI HTML Codebook
+
+JSON
+
+
+
+
+
+
+                    Citation Metadata  
+
+
+
+
+
+
+
+                                            Persistent Identifier
+                                            
+
+doi:10.18130/V3/B35XWX
+
+
+                                            Publication Date
+                                            
+
+2025-03-03
+
+
+                                            Title
+                                            
+Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+
+
+
+                                            Author
+                                            
+Clark T (University of Virginia) - ORCID: https://orcid.org/0000-0003-4060-7360
+Parker J (University of California, San Diego) - ORCID: https://orcid.org/0000-0003-4535-3486
+Al Manir S (University of Virginia) - ORCID: https://orcid.org/0000-0003-4647-3877
+Axelsson U (KTH Royal Institute of Technology,)
+                                                        Ballllosero Navarro F (Stanford University) - ORCID: https://orcid.org/0000-0002-4180-422X
+Chinn B (University of California San Diego)
+                                                        Churas CP (University of California San Diego) https://orcid.org/0000-0001-9998-705X
+                                                        Dailamy A (University of California, San Diego) - ORCID: https://orcid.org/0000-0002-6711-8260
+Doctor Y (University of California, San Diego) - ORCID: https://orcid.org/0009-0009-0483-7506
+Fall J (KTH - Royal Institute of Technology)
+                                                        Forget A (University of California San Francisco) - ORCID: https://orcid.org/0000-0003-0223-0312
+Gao J (University of California San Diego) - ORCID: https://orcid.org/0000-0002-6311-3526
+Hansen JN (Stanford University) - ORCID: https://orcid.org/0000-0002-4650-9094
+Hu M (University of California San Diego) https://orcid.org/0000-0002-1571-8029
+                                                        Johannesson A (KTH - Royal Institute of Technology)
+                                                        Khaliq H (University of California San Diego)
+                                                        Lee YH (University of California San Diego) - ORCID: https://orcid.org/0000-0003-0917-355X
+Lenkiewicz J (University of California San Diego) https://orcid.org/0000-0001-7252-8638
+                                                        Levinson MA \n\n... [Content truncated for length] ...
+```
+
+**Output Instructions:**
+- Provide ONLY valid YAML output (no explanations or markdown formatting)
+- Start directly with the YAML content
+- If specific information isn't available, omit those fields rather than guessing
+- Focus on extracting concrete, factual information from the source material

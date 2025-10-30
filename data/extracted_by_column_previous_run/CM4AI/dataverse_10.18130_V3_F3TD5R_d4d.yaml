@@ -1,0 +1,31 @@
+# D4D Metadata extracted from: dataverse_10.18130_V3_F3TD5R_row16.txt
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:31:30
+
+id: "dataverse_10.18130_V3_F3TD5R_row16"
+name: "dataverse_10.18130_V3_F3TD5R_row16"
+title: "University of Virginia Dataverse Login Page"
+description: "This file contains text extracted from the University of Virginia Dataverse login page. It includes navigation options, login instructions, a maintenance announcement (LibraData Dataverse will be down for maintenance on Tuesday 9/09 from 8am to 10am), and contact information for University of Virginia Dataverse Support. The content is related to the CM4AI project."
+creators:
+  - name: "University of Virginia Dataverse"
+    principal_investigator:
+      name: "University of Virginia"
+      affiliation: "Rector and Visitors of the University of Virginia"
+    affiliation:
+      name: "University of Virginia"
+publisher: "University of Virginia"
+keywords:
+  - "CM4AI"
+  - "Dataverse"
+  - "University of Virginia"
+purpose:
+  - response: "Provides an authentication interface and gateway for users to access the University of Virginia Dataverse, supporting data discovery and access for the CM4AI project."
+distribution_formats:
+  - description: "HTML login page content presented as text."
+license: "Terms of Use | Privacy Policy"
+version: "v6.6 build 1829-192cdc4"
+maintenance:
+  updates:
+    description: "LibraData Dataverse will be down for maintenance on Tuesday 9/09 from 8am to 10am."

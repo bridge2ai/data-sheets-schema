@@ -18,21 +18,21 @@ These datasheets were created from specific dataset metadata sources:
 - [Human Readable](html_output/D4D_-_VOICE_PhysioNet_v3_human_readable.html)
 - [LinkML Format](html_output/D4D_-_VOICE_PhysioNet_v3_linkml.html)
 
-## Synthesized Project Datasheets
+## All-Documents Project Datasheets
 
-These datasheets were synthesized from multiple documents using GPT-5 to provide comprehensive project-level metadata:
+These datasheets were synthesized from all available project documents using GPT-5 to provide comprehensive project-level metadata:
 
-- [AI-READI Synthesized](html_output/concatenated/AI_READI_d4d_synthesized.html)
-- [CHORUS Synthesized](html_output/concatenated/CHORUS_d4d_synthesized.html)
-- [CM4AI Synthesized](html_output/concatenated/CM4AI_d4d_synthesized.html)
-- [VOICE Synthesized](html_output/concatenated/VOICE_d4d_synthesized.html)
+- [AI-READI All-Docs](html_output/concatenated/AI_READI_d4d_alldocs.html)
+- [CHORUS All-Docs](html_output/concatenated/CHORUS_d4d_alldocs.html)
+- [CM4AI All-Docs](html_output/concatenated/CM4AI_d4d_alldocs.html)
+- [VOICE All-Docs](html_output/concatenated/VOICE_d4d_alldocs.html)
 
 ## About the Datasheets
 
 The **Individual Dataset Datasheets** provide detailed metadata for specific datasets from each project's primary data repository.
 
-The **Synthesized Project Datasheets** were created by:
-1. Concatenating multiple project-related documents in reproducible order
+The **All-Documents Project Datasheets** were created by:
+1. Concatenating all available project-related documents in reproducible order
 2. Processing with GPT-5 to extract and synthesize D4D metadata
 3. Rendering to human-readable HTML format
 

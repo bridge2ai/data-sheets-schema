@@ -165,7 +165,7 @@ Generate only valid YAML output without any additional commentary. Ensure all re
 
             # Determine output file
             if output_file is None:
-                output_file = input_file.parent / f"{input_file.stem}_synthesized.yaml"
+                output_file = input_file.parent / f"{input_file.stem}_alldocs.yaml"
 
             # Prepare prompt for D4D agent
             prompt = f"""
@@ -328,7 +328,7 @@ Generate a single, comprehensive D4D YAML document that synthesizes all the info
             project_name = input_file.stem.replace('_d4d', '')
 
             # Generate output filename
-            output_file = output_dir / f"{project_name}_synthesized.yaml"
+            output_file = output_dir / f"{project_name}_alldocs.yaml"
 
             # Skip if already exists
             if output_file.exists():
@@ -384,16 +384,16 @@ async def main():
         epilog="""
 Examples:
   # Process a single concatenated file
-  python process_concatenated_d4d.py -i data/concatenated/AI_READI_d4d.txt
+  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_d4d_concatenated.txt
 
   # Process with custom output location
-  python process_concatenated_d4d.py -i data/concatenated/AI_READI_d4d.txt -o output/ai_readi.yaml
+  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_d4d_concatenated.txt -o output/ai_readi.yaml
 
   # Process all concatenated files in a directory
-  python process_concatenated_d4d.py -d data/concatenated
+  python process_concatenated_d4d.py -d data/sheets_concatenated
 
   # Use a different model
-  python process_concatenated_d4d.py -i data/concatenated/AI_READI_d4d.txt -m "anthropic:claude-3-opus-20240229"
+  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_d4d_concatenated.txt -m "anthropic:claude-3-opus-20240229"
         """
     )
 
@@ -406,7 +406,7 @@ Examples:
     parser.add_argument(
         '-o', '--output',
         type=Path,
-        help='Output D4D YAML file (default: input_file_synthesized.yaml)'
+        help='Output D4D YAML file (default: input_file_alldocs.yaml)'
     )
 
     parser.add_argument(

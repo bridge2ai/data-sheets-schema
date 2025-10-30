@@ -1,0 +1,178 @@
+{
+  "timestamp": "2025-09-08 22:05:44",
+  "statistics": {
+    "DOI": 3,
+    "Web Page": 2,
+    "FAIRhub Dataset": 2,
+    "Dataverse Dataset": 2,
+    "PDF": 1,
+    "GitHub Repository": 1,
+    "Health Data Nexus": 1,
+    "PhysioNet Dataset": 1
+  },
+  "by_column": {
+    "AI-READI": [
+      {
+        "type": "DOI",
+        "url": "https://aireadi.org/publicationshttps://doi.org/10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449",
+        "row": 2,
+        "doi": "10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449",
+        "filename": "doi_row2.json",
+        "path": "organized_by_column/AI_READI/doi_row2.json",
+        "downloaded": true,
+        "column": "AI-READI",
+        "context": "https://aireadi.org/publicationshttps://doi.org/10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bm..."
+      },
+      {
+        "type": "Web Page",
+        "url": "https://docs.aireadi.org/docs/2/about",
+        "row": 8,
+        "filename": "docs_aireadi_org_docs-2_row8.html",
+        "path": "organized_by_column/AI_READI/docs_aireadi_org_docs-2_row8.html",
+        "size": 20070,
+        "text_file": "docs_aireadi_org_docs-2_row8.txt",
+        "text_size": 4215,
+        "title": "About | Documentation for the AI-READI Dataset",
+        "downloaded": true,
+        "column": "AI-READI",
+        "context": "https://docs.aireadi.org/docs/2/about"
+      },
+      {
+        "type": "DOI",
+        "url": "https://doi.org/10.5281/zenodo.10642459",
+        "row": 9,
+        "doi": "10.5281/zenodo.10642459",
+        "filename": "doi_row9.json",
+        "path": "organized_by_column/AI_READI/doi_row9.json",
+        "downloaded": true,
+        "column": "AI-READI",
+        "context": "License: https://doi.org/10.5281/zenodo.10642459"
+      },
+      {
+        "type": "FAIRhub Dataset",
+        "url": "https://fairhub.io/datasets/2",
+        "row": 10,
+        "dataset_id": "2",
+        "filename": "fairhub_row10.json",
+        "path": "organized_by_column/AI_READI/fairhub_row10.json",
+        "downloaded": true,
+        "column": "AI-READI",
+        "context": "Uses: https://fairhub.io/datasets/2"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit",
+        "row": 11,
+        "filename": "docs_google_com_document-d_row11.html",
+        "path": "organized_by_column/AI_READI/docs_google_com_document-d_row11.html",
+        "size": 2194812,
+        "text_file": "docs_google_com_document-d_row11.txt",
+        "text_size": 337,
+        "title": "APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025.docx - Google Docs",
+        "downloaded": true,
+        "column": "AI-READI",
+        "context": "https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit"
+      },
+      {
+        "type": "FAIRhub Dataset",
+        "url": "https://fairhub.io/datasets/2",
+        "row": 13,
+        "dataset_id": "2",
+        "filename": "fairhub_row13.json",
+        "path": "organized_by_column/AI_READI/fairhub_row13.json",
+        "downloaded": true,
+        "column": "AI-READI",
+        "context": "https://fairhub.io/datasets/2"
+      }
+    ],
+    "CM4AI": [
+      {
+        "type": "DOI",
+        "url": "https://doi.org/10.1101/2024.05.21.589311",
+        "row": 3,
+        "doi": "10.1101/2024.05.21.589311",
+        "filename": "doi_row3.json",
+        "path": "organized_by_column/CM4AI/doi_row3.json",
+        "downloaded": true,
+        "column": "CM4AI",
+        "context": "https://doi.org/10.1101/2024.05.21.589311"
+      },
+      {
+        "type": "Dataverse Dataset",
+        "url": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX",
+        "row": 13,
+        "doi": "doi:10.18130/V3/B35XWX",
+        "filename": "dataverse_10.18130_V3_B35XWX_row13.html",
+        "path": "organized_by_column/CM4AI/dataverse_10.18130_V3_B35XWX_row13.html",
+        "size": 272285,
+        "text_file": "dataverse_10.18130_V3_B35XWX_row13.txt",
+        "title": "Cell Maps for Artificial Intelligence",
+        "downloaded": true,
+        "column": "CM4AI",
+        "context": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX"
+      },
+      {
+        "type": "Dataverse Dataset",
+        "url": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R&version=DRAFT",
+        "row": 16,
+        "doi": "doi:10.18130/V3/F3TD5R",
+        "filename": "dataverse_10.18130_V3_F3TD5R_row16.html",
+        "path": "organized_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_row16.html",
+        "size": 25211,
+        "text_file": "dataverse_10.18130_V3_F3TD5R_row16.txt",
+        "title": "Log In",
+        "downloaded": true,
+        "column": "CM4AI",
+        "context": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R&version=DRAFT"
+      }
+    ],
+    "CHORUS": [
+      {
+        "type": "PDF",
+        "url": "https://www.aim-ahead.net/media/raekwjgs/aim-ahead-bridge2ai-for-clinical-care-informational-webinar.pdf",
+        "row": 7,
+        "filename": "aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf",
+        "path": "organized_by_column/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf",
+        "size": 3352117,
+        "downloaded": true,
+        "column": "CHORUS",
+        "context": "https://www.aim-ahead.net/media/raekwjgs/aim-ahead-bridge2ai-for-clinical-care-informational-webinar..."
+      },
+      {
+        "type": "GitHub Repository",
+        "url": "https://github.com/chorus-ai#table-of-contents",
+        "row": 8,
+        "column": "CHORUS",
+        "context": "https://github.com/chorus-ai#table-of-contents"
+      }
+    ],
+    "VOICE": [
+      {
+        "type": "Health Data Nexus",
+        "url": "https://healthdatanexus.ai/content/b2ai-voice/1.0/",
+        "row": 13,
+        "filename": "healthnexus_row13.json",
+        "path": "organized_by_column/VOICE/healthnexus_row13.json",
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
+      },
+      {
+        "type": "PhysioNet Dataset",
+        "url": "https://physionet.org/content/b2ai-voice/1.1/",
+        "row": 14,
+        "dataset_id": "b2ai-voice",
+        "version": "1.1",
+        "filename": "physionet_b2ai-voice_1.1_row14.html",
+        "path": "organized_by_column/VOICE/physionet_b2ai-voice_1.1_row14.html",
+        "size": 51495,
+        "text_file": "physionet_b2ai-voice_1.1_row14.txt",
+        "access_note": "PhysioNet credentialed access required",
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "https://physionet.org/content/b2ai-voice/1.1/"
+      }
+    ]
+  },
+  "errors": []
+}

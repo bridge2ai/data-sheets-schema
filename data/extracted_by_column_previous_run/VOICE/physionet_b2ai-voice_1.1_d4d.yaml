@@ -1,0 +1,75 @@
+# D4D Metadata extracted from: physionet_b2ai-voice_1.1_row14.txt
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:31:54
+
+id: bridge2ai-voice_v1.1
+name: Bridge2AI-Voice
+title: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
+description: >
+  Bridge2AI-Voice is an ethically-sourced dataset designed to support research on voice as a biomarker of health.
+  It comprises derived acoustic features including spectrograms, MFCCs, and additional audio features extracted from voice recordings.
+  The dataset includes clinical and demographic metadata collected from 306 adult participants across five sites in North America,
+  with recordings captured using a standardized protocol via a custom tablet application and headset. Data de-identification was performed,
+  and only derived data (not raw audio) is provided in this release.
+
+creators:
+  - name: Alistair Johnson
+  - name: Jean-Christophe Bélisle-Pipon
+  - name: David Dorr
+  - name: Satrajit Ghosh
+  - name: Philip Payne
+  - name: Maria Powell
+  - name: Anais Rameau
+  - name: Vardit Ravitsky
+  - name: Alexandros Sigaras
+  - name: Olivier Elemento
+  - name: Yael Bensoussan
+
+publisher: PhysioNet
+issued: "2025-01-17"
+version: "1.1"
+doi: "doi:10.13026/249v-w155"
+keywords:
+  - voice
+  - bridge2ai
+
+data_composition: >
+  The dataset (initially released as v1.0 and updated in v1.1) contains 12,523 recordings from 306 participants.
+  It provides derived data in the form of spectrograms, MFCCs, and static features, along with clinical and demographic information
+  stored in associated phenotype files (TSV and JSON formats).
+
+collection_methods: >
+  Participants were recruited from specialty clinics and screened for eligibility based on voice-related conditions.
+  Data were collected using a custom tablet application paired with a headset. Clinical, demographic, and questionnaire data were gathered,
+  and recordings were performed in a controlled environment following a standardized protocol.
+
+preprocessing_strategies: >
+  Raw audio recordings were processed by converting them to monaural format and resampling to 16 kHz using a Butterworth anti-aliasing filter.
+  Derived features include spectrograms (using a 25ms window, 10ms hop length, and 512-point FFT), 60 MFCCs, acoustic features from OpenSMILE,
+  phonetic and prosodic features from Parselmouth and Praat, and transcriptions generated via OpenAI's Whisper Large model.
+  Additionally, HIPAA Safe Harbor de-identification procedures were applied to remove sensitive identifiers.
+
+distribution_formats:
+  - spectrograms.parquet
+  - mfcc.parquet
+  - phenotype.tsv
+  - phenotype.json
+  - static_features.tsv
+  - static_features.json
+
+access_policy: >
+  Restricted Access – Only registered users who sign the Bridge2AI Voice Registered Access Agreement may access the files.
+  
+license_and_use_terms: >
+  Bridge2AI Voice Registered Access License.
+  Data use is governed by a specific data use agreement that users must sign.
+
+ethical_reviews: >
+  Data collection and sharing for this dataset was reviewed and approved by the University of South Florida Institutional Review Board.
+
+funding: >
+  Funded by NIH project number 3OT2OD032720-01S1: "Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before."
+
+project_website: "https://docs.b2ai-voice.org"

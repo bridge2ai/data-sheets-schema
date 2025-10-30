@@ -213,24 +213,24 @@ Process concatenated documents created by `make concat-extracted`:
 
 ```bash
 # Process a single concatenated file
-make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt
+make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_d4d_concatenated.txt
 
 # Process with custom output
-make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt OUTPUT_FILE=output.yaml
+make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_d4d_concatenated.txt OUTPUT_FILE=output.yaml
 
-# Process all concatenated files in data/concatenated/
+# Process all concatenated files in data/sheets_concatenated/
 make process-all-concat
 
 # Direct script usage with more options
 cd aurelian
-uv run python ../src/download/process_concatenated_d4d.py -i ../data/concatenated/AI_READI_d4d.txt
+uv run python ../src/download/process_concatenated_d4d.py -i ../data/sheets_concatenated/AI_READI_d4d_concatenated.txt
 
 # Use a different model
-uv run python ../src/download/process_concatenated_d4d.py -i ../data/concatenated/AI_READI_d4d.txt \
+uv run python ../src/download/process_concatenated_d4d.py -i ../data/sheets_concatenated/AI_READI_d4d_concatenated.txt \
   -m "anthropic:claude-3-opus-20240229"
 
 # Process all files in a directory
-uv run python ../src/download/process_concatenated_d4d.py -d ../data/concatenated --output-dir ../data/synthesized
+uv run python ../src/download/process_concatenated_d4d.py -d ../data/sheets_concatenated --output-dir ../data/sheets_concatenated
 ```
 
 **Features of concatenated processing:**
@@ -244,7 +244,7 @@ uv run python ../src/download/process_concatenated_d4d.py -d ../data/concatenate
 **Typical workflow:**
 1. `make concat-extracted` - Concatenate all D4D files per project column
 2. `make process-all-concat` - Synthesize concatenated files into comprehensive D4D YAML
-3. Output: `data/synthesized/{PROJECT}_synthesized.yaml`
+3. Output: `data/sheets_concatenated/{PROJECT}_d4d_alldocs.yaml`
 
 #### 3. Test Script (Single URLs)
 ```bash

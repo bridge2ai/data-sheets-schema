@@ -1,0 +1,10 @@
+{
+  "type": "Health Data Nexus Dataset",
+  "url": "https://healthdatanexus.ai/content/b2ai-voice/1.0/",
+  "files": [],
+  "metadata": {
+    "dataset_id": "b2ai-voice",
+    "version": "1.0",
+    "access_instructions": "Visit Health Data Nexus for access requirements"
+  }
+}

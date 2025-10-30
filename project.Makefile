@@ -35,37 +35,37 @@ endif
 # This creates a single file per project column from data/extracted_by_column
 concat-extracted:
 	@echo "Concatenating extracted D4D documents by column..."
-	@mkdir -p data/concatenated
+	@mkdir -p data/sheets_concatenated
 	@for column_dir in data/extracted_by_column/*/; do \
 		if [ -d "$$column_dir" ]; then \
 			column_name=$$(basename "$$column_dir"); \
-			output_file="data/concatenated/$${column_name}_d4d.txt"; \
+			output_file="data/sheets_concatenated/$${column_name}_d4d_concatenated.txt"; \
 			echo "Processing $$column_name..."; \
 			$(RUN) python src/download/concatenate_documents.py -i "$$column_dir" -o "$$output_file" || exit 1; \
 		fi \
 	done
-	@echo "✅ All columns concatenated to data/concatenated/"
+	@echo "✅ All columns concatenated to data/sheets_concatenated/"
 
 # Concatenate documents from downloads_by_column subdirectories
 # This creates a single file per project column from raw downloads
 concat-downloads:
 	@echo "Concatenating downloaded documents by column..."
-	@mkdir -p data/concatenated
+	@mkdir -p data/sheets_concatenated
 	@for column_dir in downloads_by_column/*/; do \
 		if [ -d "$$column_dir" ]; then \
 			column_name=$$(basename "$$column_dir"); \
-			output_file="data/concatenated/$${column_name}_raw.txt"; \
+			output_file="data/sheets_concatenated/$${column_name}_raw_concatenated.txt"; \
 			echo "Processing $$column_name..."; \
 			$(RUN) python src/download/concatenate_documents.py -i "$$column_dir" -o "$$output_file" || exit 1; \
 		fi \
 	done
-	@echo "✅ All downloads concatenated to data/concatenated/"
+	@echo "✅ All downloads concatenated to data/sheets_concatenated/"
 
 # Process concatenated D4D documents with D4D agent
-# Usage: make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt
+# Usage: make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_d4d_concatenated.txt
 process-concat:
 ifndef INPUT_FILE
-	$(error INPUT_FILE is not defined. Usage: make process-concat INPUT_FILE=data/concatenated/AI_READI_d4d.txt)
+	$(error INPUT_FILE is not defined. Usage: make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_d4d_concatenated.txt)
 endif
 	@echo "Processing concatenated document: $(INPUT_FILE)"
 	@if [ ! -d "aurelian" ]; then \
@@ -77,15 +77,15 @@ endif
 		$(if $(OUTPUT_FILE),-o ../$(OUTPUT_FILE),) \
 		$(if $(MODEL),-m $(MODEL),)
 
-# Process all concatenated D4D documents in data/concatenated/
-# This creates synthesized D4D YAML files for each column
+# Process all concatenated D4D documents in data/sheets_concatenated/
+# This creates alldocs D4D YAML files for each column
 process-all-concat:
 	@echo "Processing all concatenated D4D documents..."
-	@mkdir -p data/synthesized
+	@mkdir -p data/sheets_concatenated
 	@if [ ! -d "aurelian" ]; then \
 		echo "❌ Error: aurelian directory not found"; \
 		echo "Please ensure the aurelian submodule is initialized"; \
 		exit 1; \
 	fi
-	cd aurelian && uv run python ../src/download/process_concatenated_d4d.py -d ../data/concatenated --output-dir ../data/synthesized
-	@echo "✅ All concatenated files processed to data/synthesized/"
+	cd aurelian && uv run python ../src/download/process_concatenated_d4d.py -d ../data/sheets_concatenated --output-dir ../data/sheets_concatenated
+	@echo "✅ All concatenated files processed to data/sheets_concatenated/"

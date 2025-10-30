@@ -16,20 +16,20 @@ import yaml
 def main():
     """Process concatenated YAML files and generate human-readable HTML versions"""
 
-    input_dir = "data/concatenated"
+    input_dir = "data/sheets_concatenated"
     output_dir = "src/html/output/concatenated"
 
     # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
 
-    # Find all synthesized YAML files
-    yaml_files = list(Path(input_dir).glob("*_synthesized.yaml"))
+    # Find all alldocs YAML files
+    yaml_files = list(Path(input_dir).glob("*_alldocs.yaml"))
 
     if not yaml_files:
-        print(f"No synthesized YAML files found in {input_dir}")
+        print(f"No alldocs YAML files found in {input_dir}")
         return
 
-    print(f"Found {len(yaml_files)} synthesized YAML files to render")
+    print(f"Found {len(yaml_files)} alldocs YAML files to render")
     print(f"Output directory: {output_dir}\n")
 
     renderer = HumanReadableRenderer()
@@ -48,8 +48,8 @@ def main():
                 continue
 
             # Generate output filename
-            base_name = yaml_file.stem.replace('_synthesized', '')
-            output_path = os.path.join(output_dir, f"{base_name}_synthesized.html")
+            base_name = yaml_file.stem.replace('_alldocs', '')
+            output_path = os.path.join(output_dir, f"{base_name}_alldocs.html")
 
             # Generate HTML with external CSS
             html_content = renderer.render_to_html(data, f"{base_name} (Synthesized)")

@@ -1,0 +1,26 @@
+{
+  "type": "PhysioNet Dataset",
+  "url": "https://physionet.org/content/b2ai-voice/1.1/",
+  "files": [
+    {
+      "name": "physionet_b2ai-voice_1.1.html",
+      "path": "extracted_datasets_v2/physionet_b2ai-voice_1.1.html",
+      "size": 51495,
+      "type": "HTML",
+      "description": "PhysioNet dataset landing page"
+    },
+    {
+      "name": "physionet_b2ai-voice_1.1.txt",
+      "path": "extracted_datasets_v2/physionet_b2ai-voice_1.1.txt",
+      "size": 21763,
+      "type": "TEXT"
+    }
+  ],
+  "metadata": {
+    "dataset_id": "b2ai-voice",
+    "version": "1.1",
+    "access_requirements": "PhysioNet credentialed access required",
+    "access_instructions": "1. Create a PhysioNet account\n2. Complete required training (CITI Data or Specimens Only)\n3. Request access to this specific dataset\n4. Use wget with credentials to download files",
+    "files_url": "https://physionet.org/content/b2ai-voice/1.1/files/"
+  }
+}
