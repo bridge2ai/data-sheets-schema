@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Process text files in data/sheets/ containing D4D data and convert to HTML using LinkML approach
+Process YAML files in data/sheets/ containing D4D data and convert to HTML using LinkML approach
 """
 
 import os
@@ -273,24 +273,24 @@ def main():
     # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Find text files
-    text_files = [
-        "D4D_-_AI-READI_FAIRHub_v3.txt",
-        "D4D_-_CM4AI_Dataverse_v3.txt", 
-        "D4D_-_VOICE_PhysioNet_v3.txt"
+    # Find YAML files
+    yaml_files = [
+        "D4D_-_AI-READI_FAIRHub_v3.yaml",
+        "D4D_-_CM4AI_Dataverse_v3.yaml",
+        "D4D_-_VOICE_PhysioNet_v3.yaml"
     ]
     
     processed_count = 0
-    
-    for txt_file in text_files:
-        txt_path = os.path.join(input_dir, txt_file)
-        if os.path.exists(txt_path):
-            if process_text_file(txt_path, output_dir):
+
+    for yaml_file in yaml_files:
+        yaml_path = os.path.join(input_dir, yaml_file)
+        if os.path.exists(yaml_path):
+            if process_text_file(yaml_path, output_dir):
                 processed_count += 1
         else:
-            print(f"File not found: {txt_path}")
-    
-    print(f"\nProcessing complete! Processed {processed_count} text files.")
+            print(f"File not found: {yaml_path}")
+
+    print(f"\nProcessing complete! Processed {processed_count} YAML files.")
     print(f"HTML files saved in: {output_dir}")
 
 if __name__ == "__main__":
