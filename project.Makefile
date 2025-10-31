@@ -39,7 +39,7 @@ concat-extracted:
 	@for column_dir in data/extracted_by_column/*/; do \
 		if [ -d "$$column_dir" ]; then \
 			column_name=$$(basename "$$column_dir"); \
-			output_file="data/sheets_concatenated/$${column_name}_d4d_concatenated.txt"; \
+			output_file="data/sheets_concatenated/$${column_name}_concatenated.txt"; \
 			echo "Processing $$column_name..."; \
 			$(RUN) python src/download/concatenate_documents.py -i "$$column_dir" -o "$$output_file" || exit 1; \
 		fi \
@@ -62,10 +62,10 @@ concat-downloads:
 	@echo "✅ All downloads concatenated to data/sheets_concatenated/"
 
 # Process concatenated D4D documents with D4D agent
-# Usage: make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_d4d_concatenated.txt
+# Usage: make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_concatenated.txt
 process-concat:
 ifndef INPUT_FILE
-	$(error INPUT_FILE is not defined. Usage: make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_d4d_concatenated.txt)
+	$(error INPUT_FILE is not defined. Usage: make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_concatenated.txt)
 endif
 	@echo "Processing concatenated document: $(INPUT_FILE)"
 	@if [ ! -d "aurelian" ]; then \

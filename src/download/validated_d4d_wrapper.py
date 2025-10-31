@@ -318,13 +318,14 @@ The output must be a valid YAML document that starts with the dataset metadata, 
         """Select preferred file formats: txt > html > pdf for the same base content."""
         # Group files by base name (removing row suffix and extension)
         file_groups = {}
-        
+
         for file_path in files_list:
             base_name = file_path.stem
-            # Remove row suffix if present
-            if '_row' in base_name:
+            # Remove row suffix if present, BUT keep it for JSON files
+            # (JSON files typically contain different data per row)
+            if '_row' in base_name and file_path.suffix != '.json':
                 base_name = base_name.split('_row')[0]
-            
+
             if base_name not in file_groups:
                 file_groups[base_name] = []
             file_groups[base_name].append(file_path)
@@ -536,9 +537,10 @@ Generate a complete D4D YAML document based on this content. Include as much rel
             
             # Generate output filename
             base_name = file_path.stem
-            if '_row' in base_name:
+            # Keep row suffix for JSON files (they contain different data per row)
+            if '_row' in base_name and file_path.suffix != '.json':
                 base_name = base_name.split('_row')[0]
-            
+
             output_filename = f"{base_name}_d4d.yaml"
             output_path = column_output_dir / output_filename
             

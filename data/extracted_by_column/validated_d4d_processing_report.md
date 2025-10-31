@@ -1,27 +1,39 @@
 # Validated D4D Agent Processing Report
 
-Generated: 2025-10-30 12:35:32
+Generated: 2025-10-30 19:45:06
 
 ## Overall Summary
 
-- **Files processed**: 1
+- **Files processed**: 5
 - **Errors**: 1
-- **Skipped**: 8
+- **Skipped**: 6
 
 ## Validation Summary
 
-- **Downloads successful**: 9
+- **Downloads successful**: 11
 - **Downloads failed**: 1
-- **Content relevant to project**: 8
-- **Content with limited relevance**: 1
+- **Content relevant to project**: 9
+- **Content with limited relevance**: 2
 
 ## Results by Column
 
 ### AI_READI
 
 **Validation Results:**
-- Downloads: 3 successful, 1 failed
-- Relevance: 3 relevant, 0 limited
+- Downloads: 5 successful, 1 failed
+- Relevance: 4 relevant, 1 limited
+
+#### Successfully Processed
+
+- ✅ `fairhub_row13.json` → `fairhub_row13_d4d.yaml`
+  - Download: ✅ Success
+  - Relevance: ✅ Score 4 (found: fairhub)
+- ✅ `doi_row9.json` → `doi_row9_d4d.yaml`
+  - Download: ✅ Success
+  - Relevance: ⚠️ Limited relevance to AI_READI
+- ✅ `fairhub_row10.json` → `fairhub_row10_d4d.yaml`
+  - Download: ✅ Success
+  - Relevance: ✅ Score 4 (found: fairhub)
 
 #### Errors
 
@@ -30,7 +42,6 @@ Generated: 2025-10-30 12:35:32
 #### Skipped
 
 - ⏭️  `docs_aireadi_org_docs-2_row8.txt`: Already exists
-- ⏭️  `fairhub_row13.json`: Already exists
 - ⏭️  `doi_row2.json`: Already exists
 
 ### CHORUS
@@ -51,14 +62,14 @@ Generated: 2025-10-30 12:35:32
 
 #### Successfully Processed
 
-- ✅ `dataverse_10.18130_V3_B35XWX_row13.txt` → `dataverse_10.18130_V3_B35XWX_d4d.yaml`
+- ✅ `doi_row3.json` → `doi_row3_d4d.yaml`
   - Download: ✅ Success
-  - Relevance: ✅ Score 16 (found: cm4ai, microscopy, imaging, cellular, dataverse)
+  - Relevance: ⚠️ Limited relevance to CM4AI
 
 #### Skipped
 
-- ⏭️  `doi_row3.json`: Already exists
 - ⏭️  `dataverse_10.18130_V3_F3TD5R_row16.txt`: Already exists
+- ⏭️  `dataverse_10.18130_V3_B35XWX_row13.txt`: Already exists
 
 ### VOICE
 
@@ -66,8 +77,13 @@ Generated: 2025-10-30 12:35:32
 - Downloads: 2 successful, 0 failed
 - Relevance: 2 relevant, 0 limited
 
+#### Successfully Processed
+
+- ✅ `healthnexus_row13.json` → `healthnexus_row13_d4d.yaml`
+  - Download: ✅ Success
+  - Relevance: ✅ Score 6 (found: voice, b2ai-voice, health data nexus)
+
 #### Skipped
 
 - ⏭️  `physionet_b2ai-voice_1.1_row14.txt`: Already exists
-- ⏭️  `healthnexus_row13.json`: Already exists
 

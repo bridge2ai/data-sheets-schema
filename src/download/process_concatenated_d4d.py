@@ -276,7 +276,7 @@ Generate a single, comprehensive D4D YAML document that synthesizes all the info
         self,
         input_dir: Path,
         output_dir: Optional[Path] = None,
-        pattern: str = "*_d4d.txt"
+        pattern: str = "*_concatenated.txt"
     ) -> dict:
         """
         Process all concatenated files in a directory.
@@ -324,8 +324,8 @@ Generate a single, comprehensive D4D YAML document that synthesizes all the info
         for i, input_file in enumerate(files, 1):
             print(f"[{i}/{len(files)}] {input_file.name}")
 
-            # Extract project name from filename (e.g., AI_READI from AI_READI_d4d.txt)
-            project_name = input_file.stem.replace('_d4d', '')
+            # Extract project name from filename (e.g., AI_READI from AI_READI_concatenated.txt)
+            project_name = input_file.stem.replace('_concatenated', '')
 
             # Generate output filename
             output_file = output_dir / f"{project_name}_alldocs.yaml"
@@ -384,16 +384,16 @@ async def main():
         epilog="""
 Examples:
   # Process a single concatenated file
-  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_d4d_concatenated.txt
+  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_concatenated.txt
 
   # Process with custom output location
-  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_d4d_concatenated.txt -o output/ai_readi.yaml
+  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_concatenated.txt -o output/ai_readi.yaml
 
   # Process all concatenated files in a directory
   python process_concatenated_d4d.py -d data/sheets_concatenated
 
   # Use a different model
-  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_d4d_concatenated.txt -m "anthropic:claude-3-opus-20240229"
+  python process_concatenated_d4d.py -i data/sheets_concatenated/AI_READI_concatenated.txt -m "anthropic:claude-3-opus-20240229"
         """
     )
 
@@ -423,8 +423,8 @@ Examples:
 
     parser.add_argument(
         '-p', '--pattern',
-        default='*_d4d.txt',
-        help='Glob pattern for files when using --directory (default: *_d4d.txt)'
+        default='*_concatenated.txt',
+        help='Glob pattern for files when using --directory (default: *_concatenated.txt)'
     )
 
     parser.add_argument(
