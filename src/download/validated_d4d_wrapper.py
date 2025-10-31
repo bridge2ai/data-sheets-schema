@@ -453,10 +453,14 @@ Generate a complete D4D YAML document based on this content. Include as much rel
             
             # Add validation metadata as comments at the top
             validation_header = f"""# D4D Metadata extracted from: {file_path.name}
+# Source: {file_path}
 # Column: {column}
 # Validation: Download {'✅ success' if validation_info.get('download', {}).get('success', False) else '❌ failed'}
 # Relevance: {'✅ relevant' if validation_info.get('relevance', {}).get('success', False) else '⚠️  limited relevance'}
-# Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}
+# Generated: {time.strftime('%Y-%m-%dT%H:%M:%S')}
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: {SimpleD4DConfig().schema_url}
 
 """
             
