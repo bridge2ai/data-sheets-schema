@@ -1,0 +1,611 @@
+{
+  "timestamp": "2025-09-08 23:05:42",
+  "input_dir": "downloads_by_column",
+  "output_dir": "data/validated_extracted",
+  "columns": [
+    {
+      "column": "AI_READI",
+      "processed": [
+        {
+          "input_file": "downloads_by_column/AI_READI/docs_aireadi_org_docs-2_row8.txt",
+          "output_file": "data/validated_extracted/AI_READI/docs_aireadi_org_docs-2_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 4226,
+                "content_length": 4215,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 4226 bytes",
+                  "Text file with 15 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "AI_READI",
+                "keywords_found": [
+                  "ai-readi",
+                  "diabetes",
+                  "fairhub"
+                ],
+                "relevance_score": 8,
+                "relevance_details": [
+                  "Filename contains 'aireadi'",
+                  "Found keywords: ai-readi, diabetes, fairhub",
+                  "Found project indicators: type 2 diabetes"
+                ],
+                "content_indicators": [
+                  "type 2 diabetes"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "input_file": "downloads_by_column/AI_READI/fairhub_row13.json",
+          "output_file": "data/validated_extracted/AI_READI/fairhub_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 107,
+                "content_length": 107,
+                "file_type": ".json",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 107 bytes",
+                  "Valid JSON with 4 fields"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "AI_READI",
+                "keywords_found": [
+                  "fairhub"
+                ],
+                "relevance_score": 4,
+                "relevance_details": [
+                  "Filename contains 'fairhub'",
+                  "Found keywords: fairhub"
+                ],
+                "content_indicators": []
+              }
+            }
+          }
+        },
+        {
+          "input_file": "downloads_by_column/AI_READI/doi_row2.json",
+          "output_file": "data/validated_extracted/AI_READI/doi_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 243,
+                "content_length": 243,
+                "file_type": ".json",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 243 bytes",
+                  "Valid JSON with 4 fields"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "AI_READI",
+                "keywords_found": [
+                  "aireadi"
+                ],
+                "relevance_score": 1,
+                "relevance_details": [
+                  "Found keywords: aireadi"
+                ],
+                "content_indicators": []
+              }
+            }
+          }
+        }
+      ],
+      "skipped": [
+        {
+          "file": "downloads_by_column/AI_READI/doi_row9.json",
+          "reason": "Already exists",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 119,
+                "content_length": 119,
+                "file_type": ".json",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 119 bytes",
+                  "Valid JSON with 4 fields"
+                ]
+              }
+            },
+            "relevance": {
+              "success": false,
+              "details": {
+                "column": "AI_READI",
+                "keywords_found": [],
+                "relevance_score": 0,
+                "relevance_details": [],
+                "content_indicators": []
+              }
+            }
+          }
+        },
+        {
+          "file": "downloads_by_column/AI_READI/fairhub_row10.json",
+          "reason": "Already exists",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 107,
+                "content_length": 107,
+                "file_type": ".json",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 107 bytes",
+                  "Valid JSON with 4 fields"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "AI_READI",
+                "keywords_found": [
+                  "fairhub"
+                ],
+                "relevance_score": 4,
+                "relevance_details": [
+                  "Filename contains 'fairhub'",
+                  "Found keywords: fairhub"
+                ],
+                "content_indicators": []
+              }
+            }
+          }
+        }
+      ],
+      "errors": [
+        {
+          "file": "downloads_by_column/AI_READI/docs_google_com_document-d_row11.html",
+          "stage": "download_validation",
+          "error": "Content appears to be incomplete or invalid",
+          "details": {
+            "file_exists": true,
+            "file_size": 2196334,
+            "content_length": 50040,
+            "file_type": ".html",
+            "has_meaningful_content": false,
+            "validation_details": [
+              "File size: 2196334 bytes",
+              "HTML title: APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025.docx - Google Docs"
+            ]
+          }
+        },
+        {
+          "file": "downloads_by_column/AI_READI/docs_aireadi_org_docs-2_row8.html",
+          "stage": "download_validation",
+          "error": "Content appears to be incomplete or invalid",
+          "details": {
+            "file_exists": true,
+            "file_size": 20081,
+            "content_length": 20070,
+            "file_type": ".html",
+            "has_meaningful_content": false,
+            "validation_details": [
+              "File size: 20081 bytes"
+            ]
+          }
+        },
+        {
+          "file": "downloads_by_column/AI_READI/docs_google_com_document-d_row11.txt",
+          "stage": "download_validation",
+          "error": "Content appears to be incomplete or invalid",
+          "details": {
+            "file_exists": true,
+            "file_size": 350,
+            "content_length": 337,
+            "file_type": ".txt",
+            "has_meaningful_content": false,
+            "validation_details": [
+              "File size: 350 bytes"
+            ]
+          }
+        }
+      ],
+      "validation_summary": {
+        "download_successful": 5,
+        "download_failed": 3,
+        "relevant_content": 4,
+        "irrelevant_content": 1
+      }
+    },
+    {
+      "column": "CHORUS",
+      "processed": [
+        {
+          "input_file": "downloads_by_column/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf",
+          "output_file": "data/validated_extracted/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 3352117,
+                "content_length": 282,
+                "file_type": ".pdf",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 3352117 bytes",
+                  "PDF file with reasonable size"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "CHORUS",
+                "keywords_found": [
+                  "bridge2ai"
+                ],
+                "relevance_score": 4,
+                "relevance_details": [
+                  "Filename contains 'aim-ahead'",
+                  "Found keywords: bridge2ai"
+                ],
+                "content_indicators": []
+              }
+            }
+          }
+        }
+      ],
+      "skipped": [],
+      "errors": [],
+      "validation_summary": {
+        "download_successful": 1,
+        "download_failed": 0,
+        "relevant_content": 1,
+        "irrelevant_content": 0
+      }
+    },
+    {
+      "column": "CM4AI",
+      "processed": [
+        {
+          "input_file": "downloads_by_column/CM4AI/doi_row3.json",
+          "output_file": "data/validated_extracted/CM4AI/doi_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 123,
+                "content_length": 123,
+                "file_type": ".json",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 123 bytes",
+                  "Valid JSON with 4 fields"
+                ]
+              }
+            },
+            "relevance": {
+              "success": false,
+              "details": {
+                "column": "CM4AI",
+                "keywords_found": [],
+                "relevance_score": 0,
+                "relevance_details": [],
+                "content_indicators": []
+              }
+            }
+          }
+        },
+        {
+          "input_file": "downloads_by_column/CM4AI/dataverse_10.18130_V3_B35XWX_row13.html",
+          "output_file": "data/validated_extracted/CM4AI/dataverse_10.18130_V3_B35XWX_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 272313,
+                "content_length": 50040,
+                "file_type": ".html",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 272313 bytes",
+                  "HTML title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta) - Cell Maps for Artificial Intelligence",
+                  "Has substantial HTML body content"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "CM4AI",
+                "keywords_found": [
+                  "cm4ai",
+                  "microscopy",
+                  "imaging",
+                  "cellular",
+                  "dataverse"
+                ],
+                "relevance_score": 16,
+                "relevance_details": [
+                  "Filename contains 'dataverse'",
+                  "Found keywords: cm4ai, microscopy, imaging, cellular, dataverse",
+                  "Found project indicators: microscopy, imaging, cellular, virginia"
+                ],
+                "content_indicators": [
+                  "microscopy",
+                  "imaging",
+                  "cellular",
+                  "virginia"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "downloads_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_row16.txt",
+          "stage": "d4d_processing",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 49:\n     ... ive information I can extract is:\n                                         ^",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 1339,
+                "content_length": 1332,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 1339 bytes",
+                  "Text file with 29 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "CM4AI",
+                "keywords_found": [
+                  "dataverse"
+                ],
+                "relevance_score": 6,
+                "relevance_details": [
+                  "Filename contains 'dataverse'",
+                  "Found keywords: dataverse",
+                  "Found project indicators: virginia"
+                ],
+                "content_indicators": [
+                  "virginia"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "file": "downloads_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_row16.html",
+          "stage": "d4d_processing",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 75:\n     ... le is a DOI in the URL parameter: doi:10.18130/V3/F3TD5R, but th ... \n                                         ^",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 25215,
+                "content_length": 25211,
+                "file_type": ".html",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 25215 bytes",
+                  "HTML title: Log In - University of Virginia Dataverse",
+                  "Has substantial HTML body content"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "CM4AI",
+                "keywords_found": [
+                  "dataverse"
+                ],
+                "relevance_score": 6,
+                "relevance_details": [
+                  "Filename contains 'dataverse'",
+                  "Found keywords: dataverse",
+                  "Found project indicators: virginia"
+                ],
+                "content_indicators": [
+                  "virginia"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "file": "downloads_by_column/CM4AI/dataverse_10.18130_V3_B35XWX_row13.txt",
+          "stage": "download_validation",
+          "error": "Content contains error: not found",
+          "details": {
+            "file_exists": true,
+            "file_size": 37416,
+            "content_length": 37397,
+            "file_type": ".txt",
+            "has_meaningful_content": false,
+            "validation_details": [
+              "File size: 37416 bytes"
+            ]
+          }
+        }
+      ],
+      "validation_summary": {
+        "download_successful": 4,
+        "download_failed": 1,
+        "relevant_content": 3,
+        "irrelevant_content": 1
+      }
+    },
+    {
+      "column": "VOICE",
+      "processed": [
+        {
+          "input_file": "downloads_by_column/VOICE/healthnexus_row13.json",
+          "output_file": "data/validated_extracted/VOICE/healthnexus_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 109,
+                "content_length": 109,
+                "file_type": ".json",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 109 bytes",
+                  "Valid JSON with 3 fields"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "VOICE",
+                "keywords_found": [
+                  "voice",
+                  "b2ai-voice",
+                  "health data nexus"
+                ],
+                "relevance_score": 6,
+                "relevance_details": [
+                  "Filename contains 'healthnexus'",
+                  "Found keywords: voice, b2ai-voice, health data nexus"
+                ],
+                "content_indicators": []
+              }
+            }
+          }
+        },
+        {
+          "input_file": "downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt",
+          "output_file": "data/validated_extracted/VOICE/physionet_b2ai-voice_1.1_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 21806,
+                "content_length": 21763,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 21806 bytes",
+                  "Text file with 218 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "VOICE",
+                "keywords_found": [
+                  "voice",
+                  "b2ai-voice",
+                  "bridge2ai voice",
+                  "vocal",
+                  "speech",
+                  "physionet",
+                  "health data nexus"
+                ],
+                "relevance_score": 28,
+                "relevance_details": [
+                  "Filename contains 'physionet'",
+                  "Filename contains 'voice'",
+                  "Filename contains 'b2ai-voice'",
+                  "Found keywords: voice, b2ai-voice, bridge2ai voice, vocal, speech, physionet, health data nexus",
+                  "Found project indicators: voice recording, speech, vocal, acoustic, biomarker, mit"
+                ],
+                "content_indicators": [
+                  "voice recording",
+                  "speech",
+                  "vocal",
+                  "acoustic",
+                  "biomarker",
+                  "mit"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.html",
+          "stage": "download_validation",
+          "error": "Content appears to be incomplete or invalid",
+          "details": {
+            "file_exists": true,
+            "file_size": 51521,
+            "content_length": 50040,
+            "file_type": ".html",
+            "has_meaningful_content": false,
+            "validation_details": [
+              "File size: 51521 bytes",
+              "HTML title: Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v1.1"
+            ]
+          }
+        }
+      ],
+      "validation_summary": {
+        "download_successful": 2,
+        "download_failed": 1,
+        "relevant_content": 2,
+        "irrelevant_content": 0
+      }
+    }
+  ],
+  "summary": {
+    "total_processed": 8,
+    "total_errors": 7,
+    "total_skipped": 2,
+    "validation_summary": {
+      "download_successful": 12,
+      "download_failed": 5,
+      "relevant_content": 10,
+      "irrelevant_content": 2
+    }
+  }
+}

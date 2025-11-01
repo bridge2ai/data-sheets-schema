@@ -1,0 +1,55 @@
+extraction_metadata:
+  timestamp: '2025-09-17T01:07:10.880233Z'
+  extraction_id: 53e5504279ed
+input_document:
+  filename: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf
+  relative_path: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf
+  format: pdf
+  size_bytes: 3352117
+  sha256_hash: bbb1b519178a62593e6d8eac372dc7e33632e31eb8be9aff6a5ef9584e267a55
+  project_column: CHORUS
+output_document:
+  filename: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d.yaml
+  relative_path: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d.yaml
+  format: yaml
+datasheets_schema:
+  version: 1.0.0
+  url: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+  retrieved_at: '2025-09-17T01:07:10.883429Z'
+d4d_agent:
+  version: 1.0.0
+  implementation: pydantic_ai
+  wrapper: validated_d4d_wrapper.py
+  wrapper_version: 2.0.0
+llm_model:
+  provider: openai
+  model_name: openai:gpt-5
+  model_version: gpt-5
+  temperature: null
+  max_tokens: null
+validation_results:
+  download_validation:
+    success: true
+    file_size: 3352117
+    content_type: .pdf
+  relevance_validation:
+    success: true
+    score: 4
+    keywords_found:
+    - bridge2ai
+    project_indicators: []
+processing_environment:
+  platform: Darwin
+  python_version: 3.13.4
+  processor_architecture: arm64
+reproducibility:
+  command: python validated_d4d_wrapper.py -i ../downloads_by_column -o ../data/extracted_by_column
+  environment_variables:
+    OPENAI_API_KEY: required
+    ANTHROPIC_API_KEY: not_set
+  random_seed: null
+provenance:
+  extraction_performed_by: validated_d4d_wrapper
+  extraction_requested_at: '2025-09-17T01:07:10.883468Z'
+  git_commit: null
+  notes: D4D extraction using GPT-5 model with validation checks

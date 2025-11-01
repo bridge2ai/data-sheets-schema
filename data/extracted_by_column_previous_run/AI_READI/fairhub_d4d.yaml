@@ -1,0 +1,15 @@
+# D4D Metadata extracted from: fairhub_row13.json
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:30:40
+
+id: "2"
+name: "FAIRhub Dataset"
+title: "FAIRhub Dataset Row 13"
+description: "Dataset extracted from FAIRhub.io corresponding to row 13 (dataset_id 2). It is associated with the AI_READI project and is provided as part of FAIRhub's offerings."
+download_url: "https://fairhub.io/datasets/2"
+keywords:
+  - "AI_READI"
+purposes:
+  - response: "This dataset supports the AI_READI project by providing data for AI research and development."

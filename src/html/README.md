@@ -34,9 +34,9 @@ python src/html/process_text_files.py
 ### Input Data
 
 The renderers process YAML files from `data/sheets/`:
-- `D4D_-_AI-READI_FAIRHub_v3.txt`
-- `D4D_-_CM4AI_Dataverse_v3.txt` 
-- `D4D_-_VOICE_PhysioNet_v3.txt`
+- `D4D_-_AI-READI_FAIRHub_v3.yaml`
+- `D4D_-_CM4AI_Dataverse_v3.yaml`
+- `D4D_-_VOICE_PhysioNet_v3.yaml`
 
 ### Output
 

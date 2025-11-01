@@ -1,0 +1,23 @@
+{
+  "type": "Web Page",
+  "url": "https://docs.aireadi.org/docs/2/about",
+  "files": [
+    {
+      "name": "docs_aireadi_org_docs-2-about.html",
+      "path": "extracted_datasets_v2/docs_aireadi_org_docs-2-about.html",
+      "size": 20070,
+      "type": "HTML"
+    },
+    {
+      "name": "docs_aireadi_org_docs-2-about.txt",
+      "path": "extracted_datasets_v2/docs_aireadi_org_docs-2-about.txt",
+      "size": 4215,
+      "type": "TEXT"
+    }
+  ],
+  "metadata": {
+    "note": "Generic web page - content downloaded",
+    "title": "About | Documentation for the AI-READI Dataset",
+    "status": "Downloaded"
+  }
+}

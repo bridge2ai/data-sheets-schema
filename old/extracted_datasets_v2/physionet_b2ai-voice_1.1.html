@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v1.1</title>
+    
+  <!-- wfdb-python: <p>Version: 1.1</p> -->
+  
+    <meta name="description" content="A dataset of voice recordings and metadata to enable the development, benchmarking, and validation of clinically applicable machine-learning models for diagnosing a wide range of health conditions.">
+  
+
+    
+<link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.css"/>
+<link rel="stylesheet" type="text/css" href="/static/font-awesome/css/all.css"/>
+<link rel="stylesheet" type="text/css" href="/static/custom/css/physionet.css"/>
+    
+  <link rel="stylesheet" type="text/css" href="/static/project/css/project-content.css"/>
+  <link rel="stylesheet" type="text/css" href="/static/highlight/css/default.min.css"/>
+
+    
+<script src="/static/jquery/jquery.min.js"></script>
+<script src="/static/popper/popper.min.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-87592301-7"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-87592301-7');
+</script>
+    
+  <script src="/static/mathjax/MathJax.js?config=MML_HTMLorMML"></script>
+  <script src="/static/highlight/js/highlight.min.js"></script>
+
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.ico"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/bootstrap/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/static/fonts/inter-local.css">
+    <link rel="stylesheet" href="/static/swiper/swiper-bundle.min.css" />
+    <link rel="stylesheet" type="text/css" href="/static/custom/css/style.css"/>
+    <script src="/static/swiper/swiper-bundle.min.js"></script>
+  </head>
+
+  
+  <body class="flexbody">
+    
+
+
+
+
+<div class="modern-ui nav-wrapper">
+  <nav class="nav">
+    <div class="container my-0 h-100 d-flex justify-content-between align-items-center">
+      <button type="button" class="nav__hamburger circle-button mr-2">
+        <i class="nav__hamburger__list bi bi-list"></i>
+        <i class="nav__hamburger__x bi bi-x"></i>
+      </button>
+      <a href="/">
+        
+          <img src="/static/images/physionet-logo.svg" width="200px" alt="PhysioNet">
+        
+      </a>
+      <div class="nav__links align-items-center">
+        
+          
+            <a href="/about/publish/" class="nav-link">Share</a>
+          
+        
+          
+            <a href="/about/" class="nav-link">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+
+        <button type="button" class="nav-link nav-link--expandable">
+          Explore <i class="bi bi-chevron-down ml-2"></i>
+          <div class="nav-link__expand">
+            
+              <a class="nav-sublink" href="/about/database/">
+                <div class="nav-sublink__icon">
+                  
+                </div>
+                <div class="nav-sublink__text">
+                  <span class="nav-sublink__title">Data</span>
+                   <span class="nav-sublink__description">View datasets</span>
+                </div>
+              </a>
+            
+              <a class="nav-sublink" href="/about/software/">
+                <div class="nav-sublink__icon">
+                  
+                </div>
+                <div class="nav-sublink__text">
+                  <span class="nav-sublink__title">Software</span>
+                   <span class="nav-sublink__description">View software</span>
+                </div>
+              </a>
+            
+              <a class="nav-sublink" href="/about/tutorial/">
+                <div class="nav-sublink__icon">
+                  
+                </div>
+                <div class="nav-sublink__text">
+                  <span class="nav-sublink__title">Tutorials</span>
+                   <span class="nav-sublink__description">View tutorials</span>
+                </div>
+              </a>
+            
+              <a class="nav-sublink" href="/about/challenge/">
+                <div class="nav-sublink__icon">
+                  
+                </div>
+                <div class="nav-sublink__text">
+                  <span class="nav-sublink__title">Challenges</span>
+                   <span class="nav-sublink__description">View challenges</span>
+                </div>
+              </a>
+            
+          </div>
+        </button>
+      </div>
+      <div class="nav__actions d-flex ml-md-4">
+        <form action="/content/" class="mr-2">
+          <div class="nav__search">
+            <input type="text" name="topic" placeholder="Search for anything...">
+            <div class="nav__search__actions">
+              <button type="button" class="nav__search__close mr-2"><i class="bi bi-x"></i></button>
+              <button type="submit" class="circle-button">Search</button>
+            </div>
+          </div>
+        </form>
+        <button type="button" class="nav__search__open circle-button mr-md-2"><i class="bi bi-search"></i></button>
+        
+          <a class="nav__user circle-button" href="/login/">
+            <i class="bi bi-person"></i>
+          </a>
+        
+      </div>
+    </div>
+  </nav>
+  <div class="nav__mobile">
+    
+      
+        <a href="/about/publish/" class="nav-link">Share</a>
+      
+    
+      
+        <a href="/about/" class="nav-link">About</a>
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+
+    <button type="button" class="nav-link nav-link--expandable mt-2">
+      Explore <i class="bi bi-chevron-down ml-2"></i>
+      <div class="nav-link__expand">
+        
+          <a class="nav-sublink" href="/about/database/">
+            <div class="nav-sublink__icon">
+              
+            </div>
+            <div class="nav-sublink__text">
+              <span class="nav-sublink__title">Data</span>
+                <span class="nav-sublink__description">View datasets</span>
+            </div>
+          </a>
+        
+          <a class="nav-sublink" href="/about/software/">
+            <div class="nav-sublink__icon">
+              
+            </div>
+            <div class="nav-sublink__text">
+              <span class="nav-sublink__title">Software</span>
+                <span class="nav-sublink__description">View software</span>
+            </div>
+          </a>
+        
+          <a class="nav-sublink" href="/about/tutorial/">
+            <div class="nav-sublink__icon">
+              
+            </div>
+            <div class="nav-sublink__text">
+              <span class="nav-sublink__title">Tutorials</span>
+                <span class="nav-sublink__description">View tutorials</span>
+            </div>
+          </a>
+        
+          <a class="nav-sublink" href="/about/challenge/">
+            <div class="nav-sublink__icon">
+              
+            </div>
+            <div class="nav-sublink__text">
+              <span class="nav-sublink__title">Challenges</span>
+                <span class="nav-sublink__description">View challenges</span>
+            </div>
+          </a>
+        
+      </div>
+    </button>
+  </div>
+</div>
+
+<script>
+const dom = {
+  nav: document.querySelector('.nav'),
+  hamburger: document.querySelector('.nav__hamburger'),
+  navWrapper: document.querySelector('.nav-wrapper'),
+  expandableLinks: document.querySelectorAll('.nav-link--expandable'),
+  searchOpenButton: document.querySelector('.nav__search__open'),
+  searchCloseButton: document.querySelector('.nav__search__close')
+};
+let searchOpen = false;
+
+dom.expandableLinks.forEach((link) => {
+  link.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    ev.target.classList.toggle('nav-link--expanded');
+  });
+});
+
+// clickaway
+document.addEventListener('click', (ev) => {
+  dom.expandableLinks.forEach((link) => {
+    link.classList.remove('nav-link--expanded');
+  });
+  dom.navWrapper.classList.remove('nav-wrapper--mobile-open');
+});
+
+dom.searchOpenButton.addEventListener('click', () => {
+  dom.nav.classList.add('nav--search');
+});
+dom.searchCloseButton.addEventListener('click', () => {
+  dom.nav.classList.remove('nav--search');
+});
+
+dom.hamburger.addEventListener('click', (ev) => {
+  ev.stopPropagation();
+  dom.navWrapper.classList.toggle('nav-wrapper--mobile-open');
+});
+</script>
+
+    <div class="nav-spacer"></div>
+
+    <main>
+  <div class="container">
+    
+
+    <p>
+      <span class="badge badge-dark"><i class="fa fa-database"></i> Database</span>
+      <span class="badge badge-warning"><i class="fas fa-unlock-alt"></i> Restricted Access</span>
+    </p>
+    <h1 class="form-signin-heading">Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information</h1>
+    <p>
+      <strong>
+      
+        <a class="author">Alistair Johnson</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Massachusetts Institute of Technology&lt;/p&gt;<p><b>Profile</b><br><a href=/users/alistairewj target=_blank>alistairewj</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Jean-Christophe Bélisle-Pipon</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Simon Fraser University&lt;/p&gt;<p><b>Profile</b><br><a href=/users/jcbp target=_blank>jcbp</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">David Dorr</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;OHSU&lt;/p&gt;<p><b>Profile</b><br><a href=/users/davedorr9 target=_blank>davedorr9</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Satrajit Ghosh</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Massachusetts Institute of Technology&lt;/p&gt;<p><b>Profile</b><br><a href=/users/satra target=_blank>satra</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Philip Payne</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Washington University in St. Louis, School of Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/prpayne5 target=_blank>prpayne5</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Maria Powell</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Vanderbilt University Medical Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/mepowell target=_blank>mepowell</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Anais Rameau</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/anaisrameau target=_blank>anaisrameau</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Vardit Ravitsky</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;The Hastings Center&lt;/p&gt;<p><b>Profile</b><br><a href=/users/vardit target=_blank>vardit</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Alexandros Sigaras</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;br&gt;Englander Institute for Precision Medicine - Weill Cornell Medicine&lt;br&gt;Institute for Computational Biomedicine - Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/alexsigaras target=_blank>alexsigaras</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Olivier Elemento</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;Weill Cornell Medicine&lt;/p&gt;<p><b>Profile</b><br><a href=/users/oelemento target=_blank>oelemento</a></p>" data-html="true" style="cursor: pointer;"></i>
+        ,&nbsp;
+      
+        <a class="author">Yael Bensoussan</a> <i class="fas fa-info-circle" data-toggle="popover" data-original-title="<strong>Author Info</strong>" data-placement="bottom" data-content="&lt;b&gt;Affiliations&lt;/b&gt;&lt;p&gt;University of South Florida&lt;/p&gt;<p><b>Profile</b><br><a href=/users/yaelbensoussan target=_blank>yaelbensoussan</a></p>" data-html="true" style="cursor: pointer;"></i>
+        
+      
+      </strong>
+    </p>
+
+    <p>Published: Jan. 17, 2025. Version:
+      1.1
+      <a href="/content/b2ai-voice/">&lt;View latest version&gt;</a>
+    </p>
+
+    
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      This is <strong>not</strong> the latest version. Click <a
+        href="/content/b2ai-voice/">here</a> for the latest version.
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    
+    <hr>
+
+    <!-- Latest news and announcements -->
+    
+
+    <div class="row">
+      <!-- Main column -->
+      <div class="col-md-8">
+        
+          <div class="alert alert-secondary">
+
+  
+    
+      <p>
+        <strong>When using this resource, please cite: </strong>
+        <a href="#citationModal" data-toggle="modal">(show more options)</a>
+        <br><span>Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., &amp; Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). <i>PhysioNet</i>. RRID:SCR_007345. <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></span>
+      </p>
+
+      <div class="modal fade" id="citationModal">
+  <div class="modal-dialog citation" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+      <table><tbody>
+        
+          <tr>
+            <th>MLA</th>
+            <td>Johnson, Alistair, et al. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 1.1). <i>PhysioNet</i> (2025). RRID:SCR_007345. <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></td>
+          </tr>
+        
+          <tr>
+            <th>APA</th>
+            <td>Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., &amp; Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). <i>PhysioNet</i>. RRID:SCR_007345. <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></td>
+          </tr>
+        
+          <tr>
+            <th>Chicago</th>
+            <td>Johnson, Alistair, Bélisle-Pipon, Jean-Christophe, Dorr, David, Ghosh, Satrajit, Payne, Philip, Powell, Maria, Rameau, Anais, Ravitsky, Vardit, Sigaras, Alexandros, Elemento, Olivier, and Yael Bensoussan. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 1.1). <i>PhysioNet</i> (2025). RRID:SCR_007345. <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></td>
+          </tr>
+        
+          <tr>
+            <th>Harvard</th>
+            <td>Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., and Bensoussan, Y. (2025) 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information' (version 1.1), <i>PhysioNet</i>. RRID:SCR_007345. Available at: <a href='https://doi.org/10.13026/249v-w155'>https://doi.org/10.13026/249v-w155</a></td>
+          </tr>
+        
+          <tr>
+            <th>Vancouver</th>
+            <td>Johnson A, Bélisle-Pipon J, Dorr D, Ghosh S, Payne P, Powell M, Rameau A, Ravitsky V, Sigaras A, Elemento O, Bensoussan Y. Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. 2025. RRID:SCR_007345. Available from: <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a></td>
+          </tr>
+        
+      </tbody></table>
+            </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  
+    
+      <p>
+        <strong>Please include the standard citation for PhysioNet:</strong>
+        <a href="#citationModalPlatform" data-toggle="modal">(show more options)</a>
+          <br><span>Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... &amp; Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</span>
+      </p>
+    
+
+  <div class="modal fade" id="citationModalPlatform">
+  <div class="modal-dialog citation" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+
+  <table><tbody>
+    
+        
+          <tr>
+            <th>APA</th>
+            <td>Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... &amp; Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</td>
+          </tr>
+        
+    
+        
+          <tr>
+            <th>MLA</th>
+            <td>Goldberger, A., et al. &quot;PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220.&quot; (2000). RRID:SCR_007345.</td>
+          </tr>
+        
+    
+        
+          <tr>
+            <th>CHICAGO</th>
+            <td>Goldberger, A., L. Amaral, L. Glass, J. Hausdorff, P. C. Ivanov, R. Mark, J. E. Mietus, G. B. Moody, C. K. Peng, and H. E. Stanley. &quot;PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220.&quot; (2000). RRID:SCR_007345.</td>
+          </tr>
+        
+    
+        
+          <tr>
+            <th>HARVARD</th>
+            <td>Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P.C., Mark, R., Mietus, J.E., Moody, G.B., Peng, C.K. and Stanley, H.E., 2000. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</td>
+          </tr>
+        
+    
+        
+          <tr>
+            <th>VANCOUVER</th>
+            <td>Goldberger A, Amaral L, Glass L, Hausdorff J, Ivanov PC, Mark R, Mietus JE, Moody GB, Peng CK, Stanley HE. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.</td>
+          </tr>
+        
+    
+  </tbody></table>
+        </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</div>
+        
+
+        
+          
+  
+    <h2 id="abstract">Abstract</h2>
+    <p>The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information. Bridge2AI-Voice v1.0, the initial release, provides 12,523 recordings for 306 participants collected across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The initial release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.</p>
+    <hr>
+  
+
+  
+    <h2 id="background">Background</h2>
+    <p>The production of human voice involves the complex interaction among respiration, phonation, resonation, and articulation. The respiratory system provides the air flow and pressure to initiate and maintain vocal fold vibration. The vocal folds generate the sound source which is then modified within the vocal tract by the oral and nasal cavities and the articulators involved in speech production. Each of these processes is influenced by the speaker&rsquo;s ability to adjust and shape these interacting systems.</p>
+
+<p>Although many use the terms voice and speech interchangeably, it is important to understand the distinction between the different terms used to describe human sounds:</p>
+
+<p><strong>Voice:</strong> In the voice research field, refers to sound production and is the phonatory aspect of speech. In other words, it is the sound produced by the larynx and the resonators. For example, voice can be assessed by asking someone to do a prolonged vowel sound like /e/.</p>
+
+<p><strong>Speech:</strong> Speech is the result of the voice being modified by the articulators and is produced with intonation and prosody. For example, a patient having a stroke can have abnormal speech production due to difficulty with articulating words but have a normal voice. For this project, the term Voice as a Biomarker of Health will include speech in its definition.</p>
+
+<p>For voice to emerge as a <strong><em>biomarker of health</em></strong>, there is a pressing need for large, high quality, multi-institutional and diverse voice database linked to other health biomarkers from various data of different modality (demographics, imaging, genomics, risk factors, etc.) to fuel voice AI research and answer tangible clinical questions. Such an endeavor is only achievable through multi-institutional collaborations between voice experts and AI engineers, supported by bioethicists and social scientists to ensure the creation of ethically sourced voice databases representing our populations.</p>
+
+<p>Based on the existing literature and ongoing research in different fields of voice research, our group identified <strong><em>5 disease cohort categories</em></strong> for which voice changes have been associated to specific diseases with well-recognized unmet needs. These categories were:</p>
+
+<ol>
+	<li><strong><em>Voice Disorders: </em></strong>Laryngeal disorders are the most studied pathologies linked to vocal changes. Benign and malignant lesions can affect the shape, mass, density, and tension of the vocal folds resulting in changes in vibratory function resulting in changes in phonation.</li>
+	<li><strong><em>Neurological and Neurodegenerative Disorders: </em></strong>Changes in voice have been linked to depression, and other mood disorders. Individuals with depression have been found to have decreased fundamental frequency (f0) as well as a monotonous speech, while individuals with anxiety disorders have a significant increase in F0. Regrettably, much of the literature examining the intersection of voice and speech changes in psychiatric conditions have used small datasets with limited demographic diversity reporting, lack of standardized data collection protocol precluding meta-analysis and possible confounders, all limiting external validity and clinical usability.</li>
+	<li><strong><em>Mood and Psychiatric Disorders: </em></strong>Voice and speech are altered in many neurological and neurodegenerative conditions. Acute strokes can present with slurred speech (Dysarthria) or expressive deficits speech (Aphasia). Voice and speech changes can be the presenting symptoms of many neurodegenerative conditions, such as Parkinson&rsquo;s and ALS with changes such as slowed, low frequency, monotonous speech as well as vocal tremor.</li>
+	<li><strong><em>Respiratory disorders: </em></strong>Respiratory sounds, including breath, cough and voice have long been used for diagnostic purposes. For instance, pediatric croup can be suspected based on the presence of barking cough, stridor and dysphonia. With advances in acoustic recording and analysis in the second half on the twentieth century, increasing interest has emerged in the use of respiratory sounds for disease screening and therapeutic monitoring, especially with cough sounds.</li>
+	<li><strong><em>Pediatric Voice and Speech Disorders: </em></strong>The literature is sparser in terms of pediatric voice and speech analysis partly due to ethical concerns and challenges in data acquisition for this cohort. However, many studies have investigated the use of machine learning models for voice and speech analysis for detection of Autism and Speech Delays in the pediatric population.</li>
+</ol>
+
+<p>The protocols used for data collection in this study have been extensively described [1].</p>
+    <hr>
+  
+
+  
+    <h2 id="methods">Methods</h2>
+    <p>Patients presenting at specialty clinics and institutions were considered for enrolment. Patients were selected based on membership to five predetermined groups (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric). Patients presenting at the given clinic were screened for inclusion and exclusion criteria prior to their visit by the project investigators. If eligible for enrolment, patient consent was sought for the data collection initiative and to share the acquired research data. Once consented, a standardized protocol for data collection was adopted. This protocol involved the collection of demographic information, health questionnaires, targeted questionnaires inquiring about known confounders for voice, disease specific information, and voice recording tasks such as sustained phonation of a vowel sound. Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible. For most participants a single session was sufficient to collect all relevant data. However, a subset of participants required multiple sessions to complete the data collection. As a result, there may be more than one session per participant in the current dataset. Data were exported and converted from RedCap using an open source library developed by our team [2].</p>
+
+<p>Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied. From this standardized audio, we extracted five types of derived data:</p>
+
+<ul>
+	<li>Spectrograms - Time-frequency representations were computed using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 512-point FFT.</li>
+	<li>Mel-frequency cepstral coefficients (MFCC) - 60 MFCCs were extracted using the above spectrograms.</li>
+	<li>Acoustic features were extracted using OpenSMILE, capturing temporal dynamics and acoustic characteristics.</li>
+	<li>Phonetic and prosodic features were computed using Parselmouth and Praat, providing measures of fundamental frequency, formants, and voice quality.</li>
+	<li>Transcriptions were generated using OpenAI&#39;s Whisper Large model.</li>
+</ul>
+
+<p>The following de-identification steps were taken in the process of preparing the dataset:</p>
+
+<ul>
+	<li>HIPAA Safe Harbor identifiers were removed.
+	<ul>
+		<li>While not all relevant to this dataset, these identifiers include: names, geographic locators, date information (at resolution finer than years), phone/fax numbers, email addresses, IP addresses, Social Security Numbers, medical record numbers, health plan beneficiary numbers, device identifiers, license numbers, account numbers, vehicle identifiers, website URLs, full face photos, biometric identifiers, and any unique identifiers.
+		<ul>
+			<li>State and province were removed. Country of data collection was retained.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li>Transcripts of free speech audio were removed.</li>
+	<li>In this release, audio waveforms were omitted, and only spectrograph data and other derived features are made available.</li>
+</ul>
+
+<p>We aim to include voice data on future releases with additional precautions taken to ensure data security.</p>
+
+<ul>
+</ul>
+    <hr>
+  
+
+  
+    <h2 id="description">Data Description</h2>
+    <p>As of v1.1, only data from the adult cohort is available.</p>
+
+<p>The dataset has been made available in three files:</p>
+
+<ul>
+	<li>spectrograms.parquet - a Parquet file storing dense data derived from voice waveforms.</li>
+	<li>mfcc.parquet - a Parquet file storing MFCC data derived from the above spectrograms</li>
+	<li>phenotype.tsv - Information collected during the visit including demographics, acoustic confounders, and responses to validated&nbsp;questionnaires.</li>
+	<li>phenotype.json - A data dictionary for the phenotype data.</li>
+	<li>static_features.tsv - Features derived from the raw audio, with one feature per audio recording.</li>
+	<li>static_features.json - A data dictionary for the features data.</li>
+</ul>
+
+<p>The above data dictionaries have the same overall structure: a dictionary where keys are the column names matching the associated data file, and values are dictionaries with further detail. The description value in the data dictionary provides a one sentence summary of the respective column.</p>
+
+<p>The spectrograms.parquet file contains the majority of the data derived from the raw audio. Each element of the parquet formatted dataset contains a unique identifier for the participant (participant_id), a unique identifier for the recording session (session_id), the task performed (task_name), and the a 513xN dimension spectrogram of the raw audio waveform. The mfcc.parquet file contains MFCCs derived from the spectrograms, and is of size 60xN, where N is proportional to the length of the audio recording.</p>
+
+<p>Features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [3]), Praat [4], parselmouth [5], and torchaudio [6, 7] are provided. Each feature is present in the static_features.tsv file, with the data dictionary providing a description of each feature, and one row per unique recording. The phenotype.tsv file is similarly a tab delimited file with one row per unique participant. Each column is the response to a question asked during clinical data collection within the custom data collection app. The phenotype.json file provides a description of each column of data.</p>
+
+<p>The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files has been made open source in the <a href="https://github.com/sensein/b2aiprep">b2aiprep library</a> [8].</p>
+    <hr>
+  
+
+  
+    <h2 id="usage-notes">Usage Notes</h2>
+    <p>If using Python, the parquet dataset can be loaded in with the following code:</p>
+
+<pre>from datasets import Dataset
+ds = Dataset.from_parquet(&quot;spectrograms.parquet&quot;)
+</pre>
+
+<p>A spectrogram can be plotted in decibels by converting it from its original power representation:</p>
+
+<pre>import librosa
+spectrogram = librosa.power_to_db(ds[0][&#39;spectrogram&#39;])
+plt.figure(figsize=(10, 4))
+plt.imshow(spectrogram, aspect=&#39;auto&#39;, origin=&#39;lower&#39;)
+plt.title(&#39;Spectrogram&#39;)
+plt.xlabel(&#39;Time&#39;)
+plt.ylabel(&#39;Frequency&#39;)
+plt.colorbar()
+</pre>
+
+<p>The phenotype file can be loaded with any statistical analysis tool. For example, the pandas library in Python can read the data:</p>
+
+<pre>import pandas as pd
+df = pd.read_csv(&quot;phenotype.tsv&quot;, sep=&quot;\t&quot;, header=0)
+</pre>
+    <hr>
+  
+
+  
+    <h2 id="release-notes">Release Notes</h2>
+    <p><strong>b2ai-voice v1.1:&nbsp;</strong>This release added Mel-frequency cepstral coefficients (MFCCs).</p>
+
+<p><strong>b2ai-voice v1.0: </strong>This was the first release of the Bridge2AI voice as a biomarker of health dataset [9].</p>
+    <hr>
+  
+
+  
+    <h2 id="ethics">Ethics</h2>
+    <p>Data collection and sharing was approved by the University of South Florida Institutional Review Board.</p>
+    <hr>
+  
+
+  
+    <h2 id="acknowledgements">Acknowledgements</h2>
+    <p>This project was funded by NIH project number 3OT2OD032720-01S1: Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before. We would like to acknowledge that this release would not be possible without the graceful contribution of data from all the participants of the study. We would also like to thank the NIH for their continued support of the project.</p>
+    <hr>
+  
+
+  
+    <h2 id="conflicts-of-interest">Conflicts of Interest</h2>
+    <p>None to declare.</p>
+    <hr>
+  
+
+
+
+  <h2 id="references">References</h2>
+  <ol>
+  
+    <li>Rameau, A., Ghosh, S., Sigaras, A., Elemento, O., Belisle-Pipon, J.-C., Ravitsky, V., Powell, M., Johnson, A., Dorr, D., Payne, P., Boyer, M., Watts, S., Bahr, R., Rudzicz, F., Lerner-Ellis, J., Awan, S., Bolser, D., Bensoussan, Y. (2024) Developing Multi-Disorder Voice Protocols: A team science approach involving clinical expertise, bioethics, standards, and DEI.. Proc. Interspeech 2024, 1445-1449, doi: 10.21437/Interspeech.2024-1926</li>
+  
+    <li>Bensoussan, Y., Ghosh, S. S., Rameau, A., Boyer, M., Bahr, R., Watts, S., Rudzicz, F., Bolser, D., Lerner-Ellis, J., Awan, S., Powell, M. E., Belisle-Pipon, J.-C., Ravitsky, V., Johnson, A., Zisimopoulos, P., Tang, J., Sigaras, A., Elemento, O., Dorr, D., … Bridge2AI-Voice. (2024). Bridge2AI Voice REDCap (v3.20.0). Zenodo. <a href="https://doi.org/10.5281/zenodo.14148755">https://doi.org/10.5281/zenodo.14148755</a></li>
+  
+    <li>Florian Eyben, Martin Wöllmer, Björn Schuller: &quot;openSMILE - The Munich Versatile and Fast Open-Source Audio Feature Extractor&quot;, Proc. ACM Multimedia (MM), ACM, Florence, Italy, ISBN 978-1-60558-933-6, pp. 1459-1462, 25.-29.10.2010.</li>
+  
+    <li>Boersma P, Van Heuven V. Speak and unSpeak with PRAAT. Glot International. 2001 Nov;5(9/10):341-7.</li>
+  
+    <li>Jadoul Y, Thompson B, De Boer B. Introducing parselmouth: A python interface to praat. Journal of Phonetics. 2018 Nov 1;71:1-5.</li>
+  
+    <li>Hwang, J., Hira, M., Chen, C., Zhang, X., Ni, Z., Sun, G., Ma, P., Huang, R., Pratap, V., Zhang, Y., Kumar, A., Yu, C.-Y., Zhu, C., Liu, C., Kahn, J., Ravanelli, M., Sun, P., Watanabe, S., Shi, Y., Tao, T., Scheibler, R., Cornell, S., Kim, S., &amp; Petridis, S. (2023). TorchAudio 2.1: Advancing speech recognition, self-supervised learning, and audio processing components for PyTorch. arXiv preprint arXiv:2310.17864</li>
+  
+    <li>Yang, Y.-Y., Hira, M., Ni, Z., Chourdia, A., Astafurov, A., Chen, C., Yeh, C.-F., Puhrsch, C., Pollack, D., Genzel, D., Greenberg, D., Yang, E. Z., Lian, J., Mahadeokar, J., Hwang, J., Chen, J., Goldsborough, P., Roy, P., Narenthiran, S., Watanabe, S., Chintala, S., Quenneville-Bélair, V, &amp; Shi, Y. (2021). TorchAudio: Building Blocks for Audio and Speech Processing. arXiv preprint arXiv:2110.15018.</li>
+  
+    <li>Bevers, I., Ghosh, S., Johnson, A., Brito, R., Bedrick, S., Catania, F., &amp; Ng, E. (2017). My Research Software (Version 0.21.0) [Computer software]. <a href="https://github.com/sensein/b2aiprep">https://github.com/sensein/b2aiprep</a></li>
+  
+    <li>Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., &amp; Bensoussan, Y. (2024). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.0). Health Data Nexus. <a href="https://doi.org/10.57764/qb6h-em84">https://doi.org/10.57764/qb6h-em84</a></li>
+  
+</ol>
+
+  <hr>
+
+
+        
+      </div>
+      <!-- /.main column -->
+
+      <!-- Sidebar Column -->
+      <div class="col-md-4">
+        
+        
+        <div class="card" style="border: 0">
+          <button class="btn btn-secondary dropdown-toggle btn-rsp btn-right" type="button"
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Contents
+          </button>
+          <div class="dropdown-menu">
+            
+              
+                <a class="dropdown-item" href="#abstract">Abstract</a>
+              
+            
+              
+                <a class="dropdown-item" href="#background">Background</a>
+              
+            
+              
+                <a class="dropdown-item" href="#methods">Methods</a>
+              
+            
+              
+                <a class="dropdown-item" href="#description">Data Description</a>
+              
+            
+              
+                <a class="dropdown-item" href="#usage-notes">Usage Notes</a>
+              
+            
+              
+                <a class="dropdown-item" href="#release-notes">Release Notes</a>
+              
+            
+              
+                <a class="dropdown-item" href="#ethics">Ethics</a>
+              
+            
+              
+                <a class="dropdown-item" href="#acknowledgements">Acknowledgements</a>
+              
+            
+              
+                <a class="dropdown-item" href="#conflicts-of-interest">Conflicts of Interest</a>
+              
+            
+            
+              <a class="dropdown-item" href="#references">References</a>
+            
+            <a class="dropdown-item" href="#files">Files</a>
+          </div>
+        </div>
+        
+
+        
+
+        <div class="card my-4">
+          <h5 class="card-header">Share</h5>
+          <div class="card-body">
+            <a class="btn btn-sm share-email sharebtn"
+              href="mailto:?subject=Bridge2AI-Voice%3A%20An%20ethically-sourced%2C%20diverse%20voice%20dataset%20linked%20to%20health%20information&body=https://physionet.org/content/b2ai-voice/1.1/"
+              role="button" title="Share with email"><i class="far fa-envelope"></i></a>
+            <a class="btn btn-sm facebook sharebtn"
+              href="http://www.facebook.com/sharer.php?u=https://physionet.org/content/b2ai-voice/1.1/" role="button"
+              title="Share on Facebook"><i class="fab fa-facebook"></i></a>
+            <a class="btn btn-sm linkedin sharebtn"
+              href="https://www.linkedin.com/shareArticle?url=https://physionet.org/content/b2ai-voice/1.1/"
+              role="button" title="Share on LinkedIn"><i class="fab fa-linkedin"></i></a>
+            <a class="btn btn-sm reddit sharebtn"
+              href="https://www.reddit.com/submit?url=https://physionet.org/content/b2ai-voice/1.1/&title=Bridge2AI-Voice%3A%20An%20ethically-sourced%2C%20diverse%20voice%20dataset%20linked%20to%20health%20information"
+              role="button" title="Share on Reddit"><i class="fab fa-reddit"></i></a>
+            <a class="btn btn-sm twitter sharebtn"
+              href="https://twitter.com/intent/tweet?text=Bridge2AI-Voice%3A%20An%20ethically-sourced%2C%20diverse%20voice%20dataset%20linked%20to%20health%20information. https://physionet.org/content/b2ai-voice/1.1/"
+              role="button" title="Share on Twitter"><i class="fab fa-twitter"></i></a>
+          </div>
+        </div>
+
+        <div class="card my-4">
+          <h5 class="card-header">Access</h5>
+          <div class="card-body">
+            <p>
+              <strong>Access Policy:</strong>
+              <br>
+              Only registered users who sign the specified data use agreement can access the files.
+            </p>
+            <p>
+              <strong>License (for files):</strong>
+              <br>
+              <a href="/content/b2ai-voice/view-license/1.1/">Bridge2AI Voice Registered Access License</a>
+            </p>
+            
+              <p>
+                <strong>Data Use Agreement:</strong>
+                <br>
+                <a href="/content/b2ai-voice/view-dua/1.1/">Bridge2AI Voice Registered Access Agreement</a>
+              </p>
+            
+
+            
+          </div>
+        </div>
+        <div class="card my-4">
+          <h5 class="card-header">Discovery</h5>
+          <div class="card-body">
+            
+              <p><strong>DOI (version 1.1):</strong>
+                <br>
+                <a href="https://doi.org/10.13026/249v-w155">https://doi.org/10.13026/249v-w155</a>
+              </p>
+            
+
+            
+              <p><strong>DOI (latest version):</strong>
+                <br>
+                <a href="https://doi.org/10.13026/37yb-1t42">https://doi.org/10.13026/37yb-1t42</a>
+              </p>
+            
+
+            
+
+            
+              <p><strong>Topics:</strong>
+                <br>
+                
+                  <a href="/content/?topic=voice"><span class="badge badge-pn">voice</span></a>
+                
+                  <a href="/content/?topic=bridge2ai"><span class="badge badge-pn">bridge2ai</span></a>
+                
+              </p>
+            
+
+            
+              <p><strong>Project Website:</strong>
+                <br>
+                <a href="https://docs.b2ai-voice.org"><i
+                  class="fas fa-external-link-alt"></i> https://docs.b2ai-voice.org</a>
+              </p>
+            
+          </div>
+        </div>
+
+        <div class="card my-4">
+          <h5 class="card-header">Corresponding Author</h5>
+          <div class="card-body">
+            
+              <em>You must be logged in to view the contact information.</em>
+            
+          </div>
+        </div>
+        
+          <div class="card my-4">
+            <h5 class="card-header">Versions</h5>
+            <ul class="list-group">
+              
+                <li class="list-group-item"><a
+                  href="/content/b2ai-voice/1.1/">1.1</a>
+                  - Jan. 17, 2025
+                </li>
+              
+                <li class="list-group-item"><a
+                  href="/content/b2ai-voice/2.0.0/">2.0.0</a>
+                  - April 16, 2025
+                </li>
+              
+                <li class="list-group-item"><a
+                  href="/content/b2ai-voice/2.0.1/">2.0.1</a>
+                  - Aug. 18, 2025
+                </li>
+              
+            </ul>
+          </div>
+        
+
+      </div>
+      <!-- /.sidebar -->
+    </div>
+    <h2 id="files">Files</h2>
+    
+      <div class="alert alert-danger col-md-8" role="alert">
+        
+          The files for this version of the project (1.1) are no longer available. The
+          latest version of this project is
+          <a href="/content/b2ai-voice/2.0.1/"
+            target="_blank">2.0.1</a>
+        
+      </div>
+    
+    <br>
+    
+</div>
+
+
+
+</main>
+
+    
+<link rel="stylesheet" type="text/css" href="/static/custom/css/footer.css"/>
+
+<div class="modern-ui">
+  <footer class="footer w-100 secondary-bg py-5">
+    <div class="container my-0 py-0 py-md-5">
+      
+        <img src="/static/images/physionet-logo-white.svg" width="180px" alt="PhysioNet" class="pb-2" />
+      
+      <div class="footer__columns light-text">
+        <div>
+          
+            <p class="dark-light-text mb-2">MIT Laboratory for Computational Physiology</p>
+          
+          
+            <p class="dark-light-text mb-2">National Institute of Biomedical Imaging and Bioengineering (NIBIB) under NIH grant number R01EB030362</p>
+          
+          
+        </div>
+        <div class="d-flex flex-column pl-0 pl-md-5 pt-4 pt-md-0">
+          <h2 class="text-white font-weight-bold">Navigation</h2>
+          <a href="/content" class="pb-3 dark-light-text">Discover Data</a>
+          <a href="/about/publish" class="pb-3 dark-light-text">Share Data</a>
+          <a href="/about" class="pb-3 dark-light-text">About</a>
+          <a href="/news" class="pb-3 dark-light-text">News</a>
+        </div>
+        <div class="d-flex flex-column pt-4 pt-md-0">
+          <h2 class="text-white font-weight-bold">Explore</h2>
+          
+            <a href="/about/database/" class="pb-3 dark-light-text">Data</a>
+          
+            <a href="/about/software/" class="pb-3 dark-light-text">Software</a>
+          
+            <a href="/about/tutorial/" class="pb-3 dark-light-text">Tutorials</a>
+          
+            <a href="/about/challenge/" class="pb-3 dark-light-text">Challenges</a>
+          
+        </div>
+        <!-- <div class="d-flex flex-column flex-grow">
+          <h2 class="text-white font-weight-bold">Subscribe to our Newsletter</h2>
+          <input type="email" class="form-control mb-2" placeholder="Your email">
+          <button type="button" class="primary-button">Subscribe Now</button>
+        </div> -->
+      </div>
+      <hr >
+      <div class="d-flex flex-column align-items-center justify-content-between flex-md-row">
+        <div class="d-flex pt-2 pt-md-0">
+          
+            <a class="mr-3" href="https://github.com/MIT-LCP/physionet-build/"><img src="/static/images/icons/github.png" height="18px"></a>
+          
+          
+          
+          
+        </div>
+        <div class="pt-4 pt-md-0">
+          
+          
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+    
+<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script src="/static/bootstrap/js/ie10-viewport-bug-workaround.js"></script>
+
+    
+  <script src="/static/project/js/dynamic-files-panel.js"></script>
+  <script src="/static/custom/js/enable-popover.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+    
+  <!-- https://schema.org/ metadata for discovery -->
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Dataset",
+  "name": "Bridge2AI\u002DVoice: An ethically\u002Dsourced, diverse voice dataset linked to health information",
+  "description": "The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost\u002Deffective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI\u002DVoice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI\u002DVoice, a comprehensive collection of data derived from voice recordings with corresponding clinical information. Bridge2AI\u002DVoice v1.0, the initial release, provides 12,523 recordings for 306 participants collected across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The initial release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.",
+  "version": "1.1",
+  "license": "https://physionet.org/about/duas/bridge2ai\u002Dvoice\u002Dregistered\u002Daccess\u002Dagreement/",
+  "datePublished" : "Jan. 17, 2025",
+  "url": "https://physionet.org/content/b2ai-voice/1.1/",
+  
+  "identifier": "https://doi.org/10.13026/249v\u002Dw155",
+  
+  "creator": [
+  
+    {
+      "@type": "Person",
+      "givenName": "Alistair",
+      "familyName": "Johnson",
+      "name": "Alistair Johnson"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Jean\u002DChristophe",
+      "familyName": "Bélisle\u002DPipon",
+      "name": "Jean\u002DChristophe Bélisle\u002DPipon"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "David",
+      "familyName": "Dorr",
+      "name": "David Dorr"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Satrajit",
+      "familyName": "Ghosh",
+      "name": "Satrajit Ghosh"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Philip",
+      "familyName": "Payne",
+      "name": "Philip Payne"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Maria",
+      "familyName": "Powell",
+      "name": "Maria Powell"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Anais",
+      "familyName": "Rameau",
+      "name": "Anais Rameau"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Vardit",
+      "familyName": "Ravitsky",
+      "name": "Vardit Ravitsky"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Alexandros",
+      "familyName": "Sigaras",
+      "name": "Alexandros Sigaras"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Olivier",
+      "familyName": "Elemento",
+      "name": "Olivier Elemento"
+    },
+  
+    {
+      "@type": "Person",
+      "givenName": "Yael",
+      "familyName": "Bensoussan",
+      "name": "Yael Bensoussan"
+    }
+  
+    ],
+  "includedInDataCatalog":{
+     "@type": "DataCatalog",
+     "name": "physionet.org"
+  },
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "contentUrl": "https://physionet.org/content/b2ai-voice/1.1/#files"
+    }
+  ]
+}
+</script>
+
+  </body>
+  
+</html>

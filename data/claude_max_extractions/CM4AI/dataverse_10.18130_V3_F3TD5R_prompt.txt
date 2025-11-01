@@ -1,0 +1,240 @@
+I need you to analyze the following content and extract dataset metadata following the "Datasheets for Datasets" (D4D) schema.
+
+**Source Information:**
+- File: dataverse_10.18130_V3_F3TD5R_row16.txt
+- Project Column: CM4AI
+- File Type: .txt
+- Validation: ✅ Relevant
+
+**Instructions:**
+1. Analyze the content below and extract all available dataset metadata
+2. Format the output as valid YAML following the D4D schema structure
+3. Include these key sections if information is available:
+   - id, name, title, description
+   - creators (with names, affiliations, roles)
+   - purposes and intended uses
+   - instances (data types, counts, representations)
+   - collection_mechanisms and timeframes
+   - preprocessing_strategies and cleaning
+   - distribution_formats and access
+   - ethical_reviews and consent
+   - license_and_use_terms
+   - maintainers and funding
+
+**D4D Schema Reference:**
+```yaml
+# Key D4D fields (use as template):
+id: dataset-identifier
+name: Dataset Name
+title: "Full Dataset Title"
+description: "Detailed description..."
+
+creators:
+  - name: "Author Name"
+    affiliation: "Institution"
+    role: "Principal Investigator"
+
+purposes:
+  response: "Why was this dataset created..."
+
+instances:
+  representation: "What the data represents"
+  data_type: "Type of data (text, images, etc.)"
+  counts: 1000
+
+collection_mechanisms:
+  description: "How data was collected..."
+
+# Add other relevant sections...
+```
+
+**Content to Analyze:**
+```
+
+
+
+
+
+Log In - University of Virginia Dataverse
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Skip to main content
+
+
+
+
+Toggle navigation
+
+
+
+
+
+
+
+
+
+
+Search 
+
+
+
+Search
+
+
+
+
+
+
+
+
+
+
+
+About
+User Guide
+
+
+
+
+Support
+
+
+
+
+
+                                    Log In
+                                
+
+
+
+
+
+
+Please enable JavaScript in your browser. It is required to use most of the features of Dataverse.
+                
+
+
+
+
+
+× LibraData Dataverse will be down for maintenance on Tuesday 9/09 from 8am to 10am.
+                        
+
+
+
+
+
+
+
+ Log In
+
+
+Log in with your institutional account — more information about account creation. Leaving UVa? Please contact University of Virginia Dataverse Support for assistance.
+                                    
+
+
+
+
+                                            UVa Log in
+                                        
+
+
+
+
+
+
+
+
+Other options
+
+
+Admin Log in
+
+
+
+
+
+
+
+
+Copyright © 2025, by the Rector and Visitors of the University of Virginia | Terms of Use |  Privacy Policy
+
+
+
+Powered by
+v. 6.6 build 1829-192cdc4
+
+
+
+
+
+Contact University of Virginia Dataverse Support
+
+
+
+
+To
+
+University of Virginia Dataverse Support
+
+
+From 
+
+
+
+Subject 
+
+
+
+Message 
+
+
+
+
+
+Please fill this out to prove you are not a robot. 
+
+3 + 4 = 
+                        
+
+
+Send Message
+
+                        Cancel
+                    
+
+
+
+
+
+
+
+
+ 
+        
+        
+
+```
+
+**Output Instructions:**
+- Provide ONLY valid YAML output (no explanations or markdown formatting)
+- Start directly with the YAML content
+- If specific information isn't available, omit those fields rather than guessing
+- Focus on extracting concrete, factual information from the source material

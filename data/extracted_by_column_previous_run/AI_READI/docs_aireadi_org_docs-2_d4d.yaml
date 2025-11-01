@@ -1,0 +1,49 @@
+# D4D Metadata extracted from: docs_aireadi_org_docs-2_row8.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:30:30
+
+id: "docs_aireadi_org_docs-2_row8.txt"
+name: "AI-READI Dataset"
+title: "Documentation for the AI-READI Dataset"
+description: >
+  This documentation accompanies the AI-READI Dataset, the Flagship Dataset of Type 2 Diabetes from the AI-READI Project. The dataset is harmonized from data collected at three different sites and includes a variety of data domains such as survey responses, clinical measurements, lab results (blood and urine), imaging data (retinal images, ECG), wearable device data, and environmental measurements. Publicly accessible data (non-sensitive personal health data) are available for download under a defined license, while sensitive data (e.g., five-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications) are provided through controlled access under a data use agreement. The dataset has been designed to support future AI/ML analyses aimed at understanding salutogenesis (the pathway from disease to health) in individuals with and without Type 2 Diabetes Mellitus (T2DM).
+version: "2.0.0"
+keywords:
+  - AI_READI
+  - Type 2 Diabetes
+  - AI/ML
+  - Clinical Data
+  - Survey Data
+  - Harmonized Data
+creators:
+  - name: "Aydan"
+    affiliation: "AI-READI Project"
+purposes:
+  - response: >
+      To support research in understanding salutogenesis in T2DM and to enable downstream AI/ML analyses with a harmonized dataset integrating survey data, clinical measurements, laboratory results, imaging data, and wearable device data.
+composition:
+  - response: >
+      The dataset comprises multiple data domains including survey data, physical measurements, clinical lab results (blood and urine), fitness and activity levels, retinal images, ECG traces, blood sugar levels, and environmental variables such as home air quality. Controlled access components include sensitive personal health information and demographic details to ensure privacy.
+collection_timeframes:
+  - response: >
+      Data collection is ongoing with an initial pilot study phase. Periodic updates and pilot data releases have been implemented; however, early releases may not show balanced distributions across all participant groups.
+collection_mechanisms:
+  - response: >
+      Data was collected from individuals with and without T2DM across three different collection sites. Recruitment sampling procedures were used aiming for approximately equal distribution of participants by diabetes severity. Data acquisition spanned multiple domains including surveys, clinical measurements, lab testing, imaging, and wearable device tracking.
+preprocessing_strategies:
+  - response: >
+      The documentation details processing steps for each data domain, including the application of data standards, file formatting, metadata generation, and example outputs to support interoperability and AI-readiness.
+distribution:
+  distribution_formats:
+    - response: "Downloadable public datasets in defined file formats available via FAIRhub data portal; sensitive data requires controlled access through a data use agreement."
+  license_and_use_terms:
+    - response: >
+        Non-sensitive personal health data are released under a license specifying data use, while the full dataset (including protected data) requires entering into a data use agreement.
+maintenance:
+  update_plan:
+    - response: >
+        The dataset is periodically updated, with the most recent update noted as of September 8, 2025. Future updates and maintenance plans will be communicated through the project’s documentation and data portal.
+  
+funders: []

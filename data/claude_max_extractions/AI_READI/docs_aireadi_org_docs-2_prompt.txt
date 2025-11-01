@@ -1,0 +1,74 @@
+I need you to analyze the following content and extract dataset metadata following the "Datasheets for Datasets" (D4D) schema.
+
+**Source Information:**
+- File: docs_aireadi_org_docs-2_row8.txt
+- Project Column: AI_READI
+- File Type: .txt
+- Validation: ✅ Relevant
+
+**Instructions:**
+1. Analyze the content below and extract all available dataset metadata
+2. Format the output as valid YAML following the D4D schema structure
+3. Include these key sections if information is available:
+   - id, name, title, description
+   - creators (with names, affiliations, roles)
+   - purposes and intended uses
+   - instances (data types, counts, representations)
+   - collection_mechanisms and timeframes
+   - preprocessing_strategies and cleaning
+   - distribution_formats and access
+   - ethical_reviews and consent
+   - license_and_use_terms
+   - maintainers and funding
+
+**D4D Schema Reference:**
+```yaml
+# Key D4D fields (use as template):
+id: dataset-identifier
+name: Dataset Name
+title: "Full Dataset Title"
+description: "Detailed description..."
+
+creators:
+  - name: "Author Name"
+    affiliation: "Institution"
+    role: "Principal Investigator"
+
+purposes:
+  response: "Why was this dataset created..."
+
+instances:
+  representation: "What the data represents"
+  data_type: "Type of data (text, images, etc.)"
+  counts: 1000
+
+collection_mechanisms:
+  description: "How data was collected..."
+
+# Add other relevant sections...
+```
+
+**Content to Analyze:**
+```
+About | Documentation for the AI-READI Dataset
+Skip to main contentAI-READI Dataset DocsDataset v2.0.0Dataset v2.0.0Dataset v1.0.0GitHubContact UsSearchAboutCitationPreliminary InformationDataset DocumentationControlled VariablesAI-readinessAdditional ResourcesChangelogContact UsAboutVersion: 2.0.0On this pageAboutAbout this documentationâ
+This is the documentation for the AI-READI dataset called Flagship Dataset of Type 2 Diabetes from the AI-READI Project. It is intended to complement the information provided on the dataset landing page on the FAIRhub data portal. It is highly suggested to read this documentation first before accessing the dataset.
+About the AI-READI datasetâ
+The AI-READI is a dataset consisting of data collected from individuals with and without Type 2 Diabetes Mellitus (T2DM) and harmonized across 3 data collection sites. The composition of the dataset was designed with future studies using AI/Machine Learning in mind. This included recruitment sampling procedures aimed at achieving approximately equal distribution of participants across diabetes severity, as well as the design of a data acquisition protocol across multiple domains (survey data, physical measurements, clinical data, imaging data, wearable device data, etc.) to enable downstream AI/ML analyses that may not be feasible with existing data sources such as claims or electronic health records data.
+The goal is to better understand salutogenesis (the pathway from disease to health) in T2DM. Some data that are not considered to be sensitive personal health data will be available to the public for download upon agreement with a license that defines how the data can be used. The full dataset will be accessible by entering into a data use agreement. The public dataset will include survey data, blood and urine lab results, fitness activity levels, clinical measurements (e.g. monofilament and cognitive function testing), retinal images, ECG, blood sugar levels, and environmental variables such as home air quality. The data held under controlled access include 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports. As enrollment is ongoing, the pilot data release and periodic updates to data releases may not have achieved balanced distribution across groups.
+About the structure of this documentationâ
+There is one version of this documentation associated with each version of the AI-READI dataset. You can navigate between the different versions from the dropdown in the upper right corner.
+This documentation is associated with v1.0 of the dataset, which contains data from the participants of the pilot study phase. This version of the documentation is structured as follows
+The Citation section explains how the dataset needs to be cited if used.
+The Preliminary Information section contains information about accessing and using the dataset so you can understand what is expected from users of the dataset. This includes information about the license associated with the dataset and training prerequisites.
+The Dataset Documentation section includes an overall description of the dataset using the Healthsheet template, and this section also provides details about each of the data domains included in the dataset. For each data domain, we have provided a general overview of the clinical context and how the data were acquired in the study, relevant individual variables, and data processing details including file formats, data standards, metadata, and example outputs.
+The AI-readiness section describes additional considerations that were integrated into the study design, including consideration of FAIR principles and Ethical practices.
+The Additional resources section provides a list of resources related to the dataset that could be useful for understanding and using the dataset.
+Edit this pageLast updated on Sep 8, 2025 by AydanNextCitationAbout this documentationAbout the AI-READI datasetAbout the structure of this documentationDocsChangelogCommunityHomepageMoreGitHubCopyright Â© 2025 AI-READI.This repository is under review for potential modification in compliance with Administration directives.
+```
+
+**Output Instructions:**
+- Provide ONLY valid YAML output (no explanations or markdown formatting)
+- Start directly with the YAML content
+- If specific information isn't available, omit those fields rather than guessing
+- Focus on extracting concrete, factual information from the source material

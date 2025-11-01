@@ -1,0 +1,143 @@
+{
+  "timestamp": "2025-09-08 21:55:06",
+  "statistics": {
+    "pdfs_downloaded": 1,
+    "repositories_found": 6,
+    "dois_found": 3,
+    "other_resources": 2,
+    "errors": 0
+  },
+  "results": {
+    "pdfs": [
+      {
+        "type": "PDF Document",
+        "url": "https://www.aim-ahead.net/media/raekwjgs/aim-ahead-bridge2ai-for-clinical-care-informational-webinar.pdf",
+        "files": [
+          {
+            "name": "aim-ahead-bridge2ai-for-clinical-care-informational-webinar.pdf",
+            "path": "extracted_datasets/aim-ahead-bridge2ai-for-clinical-care-informational-webinar.pdf",
+            "size": 3352117,
+            "downloaded": true
+          }
+        ],
+        "metadata": {
+          "status": "Downloaded"
+        }
+      }
+    ],
+    "repositories": [
+      {
+        "type": "Dataverse Dataset",
+        "url": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R&version=DRAFT",
+        "files": [],
+        "metadata": {
+          "doi": "doi:10.18130/V3/F3TD5R",
+          "access_instructions": "Visit the Dataverse URL and use the 'Download' button for files"
+        },
+        "metadata_file": "extracted_datasets/dataverse_10.18130_V3_F3TD5R_metadata.json"
+      },
+      {
+        "type": "Dataverse Dataset",
+        "url": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX",
+        "files": [],
+        "metadata": {
+          "doi": "doi:10.18130/V3/B35XWX",
+          "access_instructions": "Visit the Dataverse URL and use the 'Download' button for files"
+        },
+        "metadata_file": "extracted_datasets/dataverse_10.18130_V3_B35XWX_metadata.json"
+      },
+      {
+        "type": "FAIRhub Dataset",
+        "url": "https://fairhub.io/datasets/2",
+        "files": [],
+        "metadata": {
+          "dataset_id": "2",
+          "platform": "FAIRhub",
+          "access_instructions": "Use FAIRhub platform for data access"
+        },
+        "metadata_file": "extracted_datasets/fairhub_dataset_2_metadata.json"
+      },
+      {
+        "type": "PhysioNet Dataset",
+        "url": "https://physionet.org/content/b2ai-voice/1.1/",
+        "files": [],
+        "metadata": {
+          "dataset_id": "b2ai-voice",
+          "version": "1.1",
+          "access_requirements": "PhysioNet credentialed access required",
+          "access_instructions": "1. Create a PhysioNet account\n2. Complete required training (CITI Data or Specimens Only)\n3. Request access to this specific dataset\n4. Use wget with credentials to download files",
+          "files_url": "https://physionet.org/content/b2ai-voice/1.1/files/"
+        },
+        "metadata_file": "extracted_datasets/physionet_b2ai-voice_1.1_metadata.json"
+      },
+      {
+        "type": "GitHub Repository",
+        "url": "https://github.com/chorus-ai#table-of-contents",
+        "files": [],
+        "metadata": {}
+      },
+      {
+        "type": "Health Data Nexus Dataset",
+        "url": "https://healthdatanexus.ai/content/b2ai-voice/1.0/",
+        "files": [],
+        "metadata": {
+          "dataset_id": "b2ai-voice",
+          "version": "1.0",
+          "access_instructions": "Visit Health Data Nexus for access requirements"
+        },
+        "metadata_file": "extracted_datasets/healthnexus_b2ai-voice_1.0_metadata.json"
+      }
+    ],
+    "dois": [
+      {
+        "type": "DOI",
+        "url": "https://doi.org/10.5281/zenodo.10642459",
+        "metadata": {
+          "doi": "10.5281/zenodo.10642459",
+          "resolver_url": "https://doi.org/10.5281/zenodo.10642459",
+          "note": "This is a DOI resolver link. The actual content location varies."
+        },
+        "metadata_file": "extracted_datasets/doi_10.5281_zenodo.10642459_metadata.json"
+      },
+      {
+        "type": "DOI",
+        "url": "https://aireadi.org/publicationshttps://doi.org/10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449",
+        "metadata": {
+          "doi": "10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449",
+          "resolver_url": "https://aireadi.org/publicationshttps://doi.org/10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449",
+          "note": "This is a DOI resolver link. The actual content location varies."
+        },
+        "metadata_file": "extracted_datasets/doi_10.1038_s42255-024-01165-xhttps:__doi.org_10.1136_bmjopen-2024-097449_metadata.json"
+      },
+      {
+        "type": "DOI",
+        "url": "https://doi.org/10.1101/2024.05.21.589311",
+        "metadata": {
+          "doi": "10.1101/2024.05.21.589311",
+          "resolver_url": "https://doi.org/10.1101/2024.05.21.589311",
+          "note": "This is a DOI resolver link. The actual content location varies."
+        },
+        "metadata_file": "extracted_datasets/doi_10.1101_2024.05.21.589311_metadata.json"
+      }
+    ],
+    "other": [
+      {
+        "type": "Web Page",
+        "url": "https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit",
+        "metadata": {
+          "note": "Generic web page - manual review recommended"
+        },
+        "metadata_file": "extracted_datasets/webpage_f3f74e_metadata.json"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://docs.aireadi.org/docs/2/about",
+        "metadata": {
+          "note": "Generic web page - manual review recommended"
+        },
+        "metadata_file": "extracted_datasets/webpage_18ec4f_metadata.json"
+      }
+    ],
+    "errors": []
+  }
+}

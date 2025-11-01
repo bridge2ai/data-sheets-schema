@@ -45,7 +45,7 @@ def format_yaml_for_html(data: Dict[str, Any], indent: int = 0) -> str:
                     # Simple list item
                     html.append(f'<div class="{indent_class + 1}">{line_prefix}&nbsp;&nbsp;- <span class="value">{item}</span></div>')
         else:
-            # Simple key-value
+            # Simple key-value - convert None to empty string for HTML
             if value is None:
                 value = ""
             elif isinstance(value, str) and "\n" in value:
@@ -128,6 +128,7 @@ def format_yaml_for_pdf(data: Dict[str, Any], pdf_renderer, x_pos: float, y_pos:
             pdf_renderer.set_font("Arial", "", 10)
             
             # Handle multiline strings and long values
+            # Convert None to empty string for PDF
             if value is None:
                 pdf_renderer.text(x_indent + len(key) + 3, y_pos, "")
                 y_pos += 5

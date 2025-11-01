@@ -1,0 +1,35 @@
+# D4D Metadata extracted from: doi_row2.json
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:06:09
+
+id: ai-readi-doi-10-1038
+name: ai-readi-publication-dataset
+title: AI-READI Publication DOI Collection
+description: Dataset containing publication DOIs related to the AI-READI project
+
+doi: doi:10.1038/s42255-024-01165-x
+
+publisher: AI-READI
+
+format: JSON
+
+keywords:
+  - AI-READI
+  - publications
+  - DOIs
+
+media_type: application/json
+
+created_on: "2024"
+
+version: "1.0"
+
+status: bibo:draft
+
+distribution_formats:
+  description:
+    - JSON via web access
+
+download_url: https://aireadi.org/publications

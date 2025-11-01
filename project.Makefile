@@ -15,3 +15,77 @@ gen-minimal-examples:
 # Generate HTML from current D4D YAML files
 gen-html:
 	$(RUN) python src/html/human_readable_renderer.py
+
+# Concatenate documents from a directory
+# Usage: make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=path/to/output.txt
+# Optional: EXTENSIONS=".txt .md" RECURSIVE=true
+concat-docs:
+ifndef INPUT_DIR
+	$(error INPUT_DIR is not defined. Usage: make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=path/to/output.txt)
+endif
+ifndef OUTPUT_FILE
+	$(error OUTPUT_FILE is not defined. Usage: make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=path/to/output.txt)
+endif
+	@echo "Concatenating documents from $(INPUT_DIR) to $(OUTPUT_FILE)"
+	$(RUN) python src/download/concatenate_documents.py -i $(INPUT_DIR) -o $(OUTPUT_FILE) \
+		$(if $(EXTENSIONS),-e $(EXTENSIONS),) \
+		$(if $(RECURSIVE),-r,)
+
+# Concatenate extracted D4D documents by column
+# This creates a single file per project column from data/extracted_by_column
+concat-extracted:
+	@echo "Concatenating extracted D4D documents by column..."
+	@mkdir -p data/sheets_concatenated
+	@for column_dir in data/extracted_by_column/*/; do \
+		if [ -d "$$column_dir" ]; then \
+			column_name=$$(basename "$$column_dir"); \
+			output_file="data/sheets_concatenated/$${column_name}_concatenated.txt"; \
+			echo "Processing $$column_name..."; \
+			$(RUN) python src/download/concatenate_documents.py -i "$$column_dir" -o "$$output_file" || exit 1; \
+		fi \
+	done
+	@echo "✅ All columns concatenated to data/sheets_concatenated/"
+
+# Concatenate documents from downloads_by_column subdirectories
+# This creates a single file per project column from raw downloads
+concat-downloads:
+	@echo "Concatenating downloaded documents by column..."
+	@mkdir -p data/sheets_concatenated
+	@for column_dir in downloads_by_column/*/; do \
+		if [ -d "$$column_dir" ]; then \
+			column_name=$$(basename "$$column_dir"); \
+			output_file="data/sheets_concatenated/$${column_name}_raw_concatenated.txt"; \
+			echo "Processing $$column_name..."; \
+			$(RUN) python src/download/concatenate_documents.py -i "$$column_dir" -o "$$output_file" || exit 1; \
+		fi \
+	done
+	@echo "✅ All downloads concatenated to data/sheets_concatenated/"
+
+# Process concatenated D4D documents with D4D agent
+# Usage: make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_concatenated.txt
+process-concat:
+ifndef INPUT_FILE
+	$(error INPUT_FILE is not defined. Usage: make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_concatenated.txt)
+endif
+	@echo "Processing concatenated document: $(INPUT_FILE)"
+	@if [ ! -d "aurelian" ]; then \
+		echo "❌ Error: aurelian directory not found"; \
+		echo "Please ensure the aurelian submodule is initialized"; \
+		exit 1; \
+	fi
+	cd aurelian && uv run python ../src/download/process_concatenated_d4d.py -i ../$(INPUT_FILE) \
+		$(if $(OUTPUT_FILE),-o ../$(OUTPUT_FILE),) \
+		$(if $(MODEL),-m $(MODEL),)
+
+# Process all concatenated D4D documents in data/sheets_concatenated/
+# This creates alldocs D4D YAML files for each column
+process-all-concat:
+	@echo "Processing all concatenated D4D documents..."
+	@mkdir -p data/sheets_concatenated
+	@if [ ! -d "aurelian" ]; then \
+		echo "❌ Error: aurelian directory not found"; \
+		echo "Please ensure the aurelian submodule is initialized"; \
+		exit 1; \
+	fi
+	cd aurelian && uv run python ../src/download/process_concatenated_d4d.py -d ../data/sheets_concatenated --output-dir ../data/sheets_concatenated
+	@echo "✅ All concatenated files processed to data/sheets_concatenated/"

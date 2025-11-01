@@ -1,0 +1,10 @@
+{
+  "type": "FAIRhub Dataset",
+  "url": "https://fairhub.io/datasets/2",
+  "files": [],
+  "metadata": {
+    "dataset_id": "2",
+    "platform": "FAIRhub",
+    "access_instructions": "Use FAIRhub platform for data access"
+  }
+}

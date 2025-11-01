@@ -1,0 +1,60 @@
+I need you to analyze the following content and extract dataset metadata following the "Datasheets for Datasets" (D4D) schema.
+
+**Source Information:**
+- File: docs_google_com_document-d_row11.txt
+- Project Column: AI_READI
+- File Type: .txt
+- Validation: ⚠️ Limited relevance
+
+**Instructions:**
+1. Analyze the content below and extract all available dataset metadata
+2. Format the output as valid YAML following the D4D schema structure
+3. Include these key sections if information is available:
+   - id, name, title, description
+   - creators (with names, affiliations, roles)
+   - purposes and intended uses
+   - instances (data types, counts, representations)
+   - collection_mechanisms and timeframes
+   - preprocessing_strategies and cleaning
+   - distribution_formats and access
+   - ethical_reviews and consent
+   - license_and_use_terms
+   - maintainers and funding
+
+**D4D Schema Reference:**
+```yaml
+# Key D4D fields (use as template):
+id: dataset-identifier
+name: Dataset Name
+title: "Full Dataset Title"
+description: "Detailed description..."
+
+creators:
+  - name: "Author Name"
+    affiliation: "Institution"
+    role: "Principal Investigator"
+
+purposes:
+  response: "Why was this dataset created..."
+
+instances:
+  representation: "What the data represents"
+  data_type: "Type of data (text, images, etc.)"
+  counts: 1000
+
+collection_mechanisms:
+  description: "How data was collected..."
+
+# Add other relevant sections...
+```
+
+**Content to Analyze:**
+```
+APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025.docx - Google DocsJavaScript isn't enabled in your browser, so this file can't be opened. Enable and reload.APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025  External         ShareSign inFileEditViewToolsHelpAccessibilityDebug  Unsaved changes to Drive
+```
+
+**Output Instructions:**
+- Provide ONLY valid YAML output (no explanations or markdown formatting)
+- Start directly with the YAML content
+- If specific information isn't available, omit those fields rather than guessing
+- Focus on extracting concrete, factual information from the source material

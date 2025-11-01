@@ -1,0 +1,102 @@
+# D4D Metadata extracted from: physionet_b2ai-voice_1.1_row14.txt
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-09-08 23:07:29
+
+id: b2ai-voice-1.1
+name: Bridge2AI-Voice
+title: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
+description: |
+  A comprehensive collection of data derived from voice recordings with corresponding clinical information. Contains 12,523 recordings from 306 participants collected across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders.
+
+creators:
+  - principal_investigator:
+      name: Alistair Johnson
+  - principal_investigator:
+      name: Jean-Christophe Bélisle-Pipon
+  - principal_investigator:
+      name: David Dorr
+  - principal_investigator:
+      name: Satrajit Ghosh
+  - principal_investigator:
+      name: Philip Payne
+  - principal_investigator:
+      name: Maria Powell
+  - principal_investigator:
+      name: Anais Rameau
+  - principal_investigator:
+      name: Vardit Ravitsky
+  - principal_investigator:
+      name: Alexandros Sigaras
+  - principal_investigator:
+      name: Olivier Elemento
+  - principal_investigator:
+      name: Yael Bensoussan
+
+version: "1.1"
+issued: "2025-01-17"
+doi: "10.13026/249v-w155"
+license_and_use_terms:
+  description: "Bridge2AI Voice Registered Access License"
+
+purposes:
+  response: "To create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health"
+
+instances:
+  representation: "Voice recordings and derived data"
+  data_type: "Derived features including spectrograms, MFCCs, acoustic features, and phonetic/prosodic features"
+  counts: 12523
+
+collection_mechanisms:
+  description: "Data collected using custom tablet application with headset in specialty clinics"
+
+subpopulations:
+  identification: |
+    Five main cohort categories:
+    - Voice Disorders
+    - Neurological and Neurodegenerative Disorders 
+    - Mood and Psychiatric Disorders
+    - Respiratory disorders
+    - Pediatric Voice and Speech Disorders
+
+preprocessing_strategies:
+  description: |
+    - Audio converted to monaural and resampled to 16 kHz
+    - Butterworth anti-aliasing filter applied
+    - Spectrograms computed using short-time FFT
+    - 60 MFCCs extracted
+    - Acoustic features extracted using OpenSMILE
+    - Phonetic/prosodic features computed using Parselmouth and Praat
+    - Transcriptions generated using OpenAI Whisper
+
+distribution_formats:
+  description: |
+    Files provided:
+    - spectrograms.parquet
+    - mfcc.parquet 
+    - phenotype.tsv
+    - phenotype.json
+    - static_features.tsv
+    - static_features.json
+
+ethical_reviews:
+  description: "Data collection and sharing approved by University of South Florida Institutional Review Board"
+
+maintainers:
+  description: "MIT Laboratory for Computational Physiology"
+
+funding:
+  grantor:
+    name: "National Institute of Biomedical Imaging and Bioengineering (NIBIB)"
+  grant:
+    name: "Bridge2AI: Voice as a Biomarker of Health"
+    grant_number: "3OT2OD032720-01S1"
+
+is_deidentified:
+  description: |
+    De-identification steps:
+    - HIPAA Safe Harbor identifiers removed
+    - State/province removed
+    - Transcripts of free speech removed
+    - Raw audio waveforms omitted from initial release

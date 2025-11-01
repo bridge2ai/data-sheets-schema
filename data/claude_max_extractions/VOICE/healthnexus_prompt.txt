@@ -1,0 +1,64 @@
+I need you to analyze the following content and extract dataset metadata following the "Datasheets for Datasets" (D4D) schema.
+
+**Source Information:**
+- File: healthnexus_row13.json
+- Project Column: VOICE
+- File Type: .json
+- Validation: ✅ Relevant
+
+**Instructions:**
+1. Analyze the content below and extract all available dataset metadata
+2. Format the output as valid YAML following the D4D schema structure
+3. Include these key sections if information is available:
+   - id, name, title, description
+   - creators (with names, affiliations, roles)
+   - purposes and intended uses
+   - instances (data types, counts, representations)
+   - collection_mechanisms and timeframes
+   - preprocessing_strategies and cleaning
+   - distribution_formats and access
+   - ethical_reviews and consent
+   - license_and_use_terms
+   - maintainers and funding
+
+**D4D Schema Reference:**
+```yaml
+# Key D4D fields (use as template):
+id: dataset-identifier
+name: Dataset Name
+title: "Full Dataset Title"
+description: "Detailed description..."
+
+creators:
+  - name: "Author Name"
+    affiliation: "Institution"
+    role: "Principal Investigator"
+
+purposes:
+  response: "Why was this dataset created..."
+
+instances:
+  representation: "What the data represents"
+  data_type: "Type of data (text, images, etc.)"
+  counts: 1000
+
+collection_mechanisms:
+  description: "How data was collected..."
+
+# Add other relevant sections...
+```
+
+**Content to Analyze:**
+```
+{
+  "type": "Health Data Nexus",
+  "url": "https://healthdatanexus.ai/content/b2ai-voice/1.0/",
+  "row": 13
+}
+```
+
+**Output Instructions:**
+- Provide ONLY valid YAML output (no explanations or markdown formatting)
+- Start directly with the YAML content
+- If specific information isn't available, omit those fields rather than guessing
+- Focus on extracting concrete, factual information from the source material
