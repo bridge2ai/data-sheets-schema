@@ -1,0 +1,59 @@
+name: "Run script to update the D4D Synapse table"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/html/output/*'
+
+env:
+  IGNORE_UNCHANGED: true
+
+jobs:
+  update_d4d_table:
+    name: Run script to update synapse tables with data changes
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10.x]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1.3.1
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-interaction
+
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Get changed files
+        id: changes
+        run: |
+          CHANGED_FILES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }} | jq -r '.files[].filename?' | grep -e 'src/html/output/.*\.css$' -e 'src/html/output/.*\.html$')
+          CHANGED_FILES=$(echo "$CHANGED_FILES" | tr '\n' ' ')
+          echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
+          echo "Files changed: $CHANGED_FILES"
+        continue-on-error: true
+
+      - name: Run script to update synapse tables
+        run: |
+          if [ -n "${{ env.CHANGED_FILES }}" ]; then
+            poetry run python utils/d4d_to_synapse_table.py
+          elif ${{ env.IGNORE_UNCHANGED }}; then
+            poetry run python utils/d4d_to_synapse_table.py
+          else
+            echo "No updated files found. Exiting."
+          fi
+        env:
+          SYNAPSE_AUTH_TOKEN: ${{ secrets.SYNAPSE_AUTH_TOKEN }}
