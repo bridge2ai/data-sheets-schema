@@ -1,0 +1,243 @@
+# D4D Metadata extracted from: AI_READI_all_combined.txt
+# Source: downloads_by_column_combined/AI_READI/AI_READI_all_combined.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-01T12:15:12
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: ai-readi-flagship-t2dm
+name: AI-READI Flagship Dataset of Type 2 Diabetes
+title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+description: >
+  The AI-READI flagship dataset consists of multi-domain data collected from
+  individuals with and without Type 2 Diabetes Mellitus (T2DM), harmonized across
+  three data collection sites. The study design targeted approximately equal
+  distribution of participants across diabetes severity and includes survey data,
+  physical measurements, clinical data, imaging data, wearable device data, and
+  environmental measurements to enable downstream AI/ML analyses not feasible with
+  claims or electronic health record data. A public dataset (non-sensitive data)
+  is available under a Health Data License; access to the full dataset requires a
+  data use agreement. Enrollment has been ongoing; early releases may not achieve
+  balanced distributions across groups. This repository is noted as under review
+  for potential modification in compliance with Administration directives.
+keywords:
+  - Diabetes mellitus
+  - Machine Learning
+  - Artificial Intelligence
+  - Electrocardiography
+  - Continuous Glucose Monitoring
+  - Retinal imaging
+  - Eye exam
+license: Health Data License
+version: 2.0.0
+doi: "doi:10.60775/fairhub.2"
+issued: 2024-11-08
+last_updated_on: 2025-10-21
+page: "https://docs.aireadi.org/docs/2/"
+created_by:
+  - AI-READI Consortium
+was_derived_from: >
+  Harmonized data collected across three AI-READI data collection sites with
+  standardized acquisition protocols.
+purposes:
+  - id: purpose-1
+    name: Dataset purpose
+    response: >
+      Create an ethically-sourced, FAIR, flagship multi-domain dataset to enable
+      AI/ML research on Type 2 Diabetes and to better understand salutogenesis
+      (pathway from disease to health) in T2DM.
+tasks:
+  - id: task-1
+    name: Intended tasks
+    response: >
+      Downstream AI/Machine Learning analyses leveraging survey, clinical,
+      physiological (e.g., ECG, CGM), imaging (e.g., retinal), wearable, and
+      environmental data related to Type 2 Diabetes.
+addressing_gaps:
+  - id: gap-1
+    name: Addressing gaps
+    response: >
+      Provide multi-domain, prospectively collected data to support AI/ML
+      analyses not feasible with existing sources such as claims or electronic
+      health records data.
+creators:
+  - id: creator-aireadi
+    name: AI-READI Consortium
+    affiliation:
+      id: org-aireadi-consortium
+      name: AI-READI Consortium
+instances:
+  - id: instance-participants
+    name: Participant-level, multi-domain observations
+    representation: Participants with and without T2DM
+    instance_type: >
+      Multiple linked domains per participant (surveys, clinical measurements,
+      imaging, physiological time series, wearable, and environmental data)
+    data_type: >
+      Primarily raw and processed observational and clinical measurements,
+      imaging files, and time-series signals suitable for AI/ML.
+    sampling_strategies:
+      - id: samp-1
+        name: Recruitment sampling strategy
+        is_sample:
+          - Yes, recruited cohort
+        is_random:
+          - Not purely random; targeted recruitment
+        source_data:
+          - Prospective study across three data collection sites
+        is_representative:
+          - Designed for approximate balance across diabetes severity; not intended as a population-representative sample
+        representative_verification:
+          - Study design targeted balance by diabetes severity
+        why_not_representative:
+          - Enrollment ongoing; early releases may not be balanced across groups
+        strategies:
+          - Targeted recruitment to achieve approximately equal distribution by diabetes severity
+sampling_strategies:
+  - id: samp-2
+    name: Study-level sampling notes
+    is_sample:
+      - Recruited cohort
+    is_random:
+      - No
+    source_data:
+      - Prospective data collection at three sites following a unified protocol
+    is_representative:
+      - No, designed for balance across severity rather than population representativeness
+    representative_verification:
+      - Protocol-level planning for balanced severity strata
+    why_not_representative:
+      - Ongoing enrollment; balance may vary in early releases
+    strategies:
+      - Stratified, targeted recruitment by diabetes severity
+relationships:
+  description:
+    - Multi-domain data are linked at the participant level across surveys, clinical measures, imaging, wearables, and environmental measurements.
+subpopulations:
+  - id: subpop-1
+    name: Subpopulations by disease and demographics
+    identification:
+      - T2DM status (with/without T2DM)
+      - Diabetes severity strata
+      - Demographic attributes (e.g., sex, race, ethnicity) present under controlled access
+    distribution:
+      - Study design aimed for approximately equal distribution across diabetes severity; actual distributions may vary due to ongoing enrollment
+deidentification:
+  description:
+    - Public dataset excludes sensitive personal health data; controlled-access dataset includes identifiable/sensitive fields and requires a data use agreement.
+confidential_elements:
+  - id: conf-1
+    name: Confidentiality
+    description:
+      - Dataset contains personal health information; public release excludes sensitive fields, and full access is governed by a data use agreement.
+sensitive_elements:
+  - id: sens-1
+    name: Sensitive elements (controlled access)
+    description:
+      - 5-digit ZIP code
+      - Sex
+      - Race
+      - Ethnicity
+      - Genetic sequencing data
+      - Past health records
+      - Medications
+      - Traffic and accident reports
+acquisition_methods:
+  - id: acq-1
+    name: Data acquisition methods
+    description:
+      - Multi-modal acquisition across surveys, clinical measurements, imaging, wearables, physiological monitoring, and environmental sensors.
+    was_directly_observed: Yes (e.g., imaging, ECG/CGM signals, clinical measurements, environmental sensors)
+    was_reported_by_subjects: Yes (e.g., survey responses)
+    was_inferred_derived: Not stated
+    was_validated_verified: Not stated
+collection_mechanisms:
+  - id: coll-1
+    name: Collection mechanisms
+    description:
+      - Standardized acquisition protocol across three sites including hardware sensors (wearables, ECG/CGM), imaging systems (retinal), clinical devices, and survey instruments.
+data_collectors: []
+collection_timeframes:
+  - id: timeframe-1
+    name: Collection timeframe
+    description:
+      - Pilot study participants included in v1.0.0; enrollment ongoing with periodic updates in subsequent releases.
+ethical_reviews: []
+data_protection_impacts: []
+preprocessing_strategies:
+  - id: prep-1
+    name: Harmonization
+    description:
+      - Data were harmonized across three collection sites following a unified acquisition protocol to enable cross-domain AI/ML analyses.
+cleaning_strategies:
+  - id: clean-1
+    name: Public release curation
+    description:
+      - Removal/exclusion of sensitive elements from the public dataset; controlled elements available only under data use agreement.
+labeling_strategies: []
+raw_sources: []
+existing_uses: []
+use_repository: []
+other_tasks: []
+future_use_impacts:
+  - id: fut-1
+    name: Considerations for future use
+    description:
+      - Early releases may not be balanced across groups due to ongoing enrollment; users should account for potential distributional shifts and consider stratification or reweighting.
+discouraged_uses: []
+external_resources:
+  - id: ext-1
+    name: Documentation
+    external_resources:
+      - https://docs.aireadi.org/docs/2/
+      - https://docs.aireadi.org/docs/2/citation
+    future_guarantees:
+      - Versioned documentation accompanies each dataset version.
+    archival:
+      - Official versioned releases with DOIs on FAIRhub
+    restrictions:
+      - Documentation is open; dataset access governed by Health Data License and data use agreement for controlled elements.
+distribution_formats:
+  - id: distfmt-1
+    name: Distribution channels
+    description:
+      - FAIRhub portal with controlled-access workflow (Overview, Log In, Training, Research Purpose, License, Select Data, Submitted)
+distribution_dates:
+  - id: distdate-2-0-0
+    name: Version 2.0.0
+    description:
+      - Released Nov 8, 2024 (doi:10.60775/fairhub.2)
+  - id: distdate-1-0-0
+    name: Version 1.0.0
+    description:
+      - Released May 3, 2024 (doi:10.60775/fairhub.1)
+license_and_use_terms:
+  id: license-terms-1
+  name: License and use terms
+  description:
+    - Public dataset is available under a Health Data License.
+    - Full dataset requires entering into a data use agreement.
+    - Access is managed through a multi-step FAIRhub workflow including training and purpose documentation.
+ip_restrictions: {}
+regulatory_restrictions: {}
+maintainers:
+  - id: maint-1
+    name: Dataset maintenance and hosting
+    description:
+      - AI-READI Consortium (dataset stewardship) and FAIRhub (hosting/distribution portal).
+errata: []
+updates:
+  id: updates-1
+  name: Update plan
+  description:
+    - Periodic updates to incorporate new participants and domains and to correct/augment data as enrollment progresses.
+retention_limit: {}
+version_access:
+  id: version-access-1
+  name: Access to older versions
+  description:
+    - Older versions remain available and citable via persistent DOIs (e.g., 10.60775/fairhub.1).
+extension_mechanism: {}

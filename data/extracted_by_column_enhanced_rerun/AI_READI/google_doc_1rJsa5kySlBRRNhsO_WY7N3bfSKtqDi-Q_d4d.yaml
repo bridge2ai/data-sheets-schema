@@ -1,0 +1,26 @@
+# D4D Metadata extracted from: google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+# Source: downloads_by_column_enhanced/AI_READI/google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-10-31T16:53:32
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: ai_readi_google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12
+name: AI_READI google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+title: AI_READI PDF - google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+description: PDF document associated with the AI_READI project. Specific dataset content was not available; metadata derived from the filename and provided context.
+keywords:
+  - AI_READI
+  - PDF
+resources:
+  - id: google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+    name: google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+    title: google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+    description: PDF file referenced in the AI_READI project context. Detailed dataset metadata not available from the provided source.
+    media_type: application/pdf
+    path: google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+    keywords:
+      - AI_READI

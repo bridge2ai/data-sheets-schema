@@ -1,0 +1,395 @@
+=== YAML Fixing Applied ===
+id: "doi:10.18130/V3/F3TD5R"
+name: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+description: This dataset is the June 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB-468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+language: en
+page: "https://doi.org/10.18130/V3/F3TD5R"
+doi: "doi:10.18130/V3/F3TD5R"
+issued: "2025-07-01"
+created_on: "2025-02-27"
+publisher: "https://dataverse.lib.virginia.edu"
+version: "2.0"
+license: CC BY-NC-SA 4.0
+keywords:
+  - AI
+  - artificial intelligence
+  - machine learning
+  - Bridge2AI
+  - CM4AI
+  - functional genomics
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - cardiomyocyte
+  - breast cancer
+  - MDA-MB-468
+  - perturb-seq
+  - perturbation sequencing
+  - CRISPR/Cas9
+  - single-cell RNA sequencing
+  - scRNAseq
+  - protein-protein interaction
+  - size exclusion chromatography
+  - SEC-MS
+  - mass spectroscopy
+  - affinity purification
+  - AP-MS
+  - protein localization
+  - subcellular imaging
+  - immunofluorescence
+  - confocal microscopy
+  - paclitaxel
+  - vorinostat
+created_by:
+  - Clark T (University of Virginia) ORCID: https://orcid.org/0000-0003-4060-7360
+  - Parker J (University of California, San Diego) ORCID: https://orcid.org/0000-0003-4535-3486
+  - Al Manir S (University of Virginia) ORCID: https://orcid.org/0000-0003-4647-3877
+  - Axelsson U (KTH Royal Institute of Technology)
+  - Ballllosero Navarro F (Stanford University) ORCID: https://orcid.org/0000-0002-4180-422X
+  - Chinn B (University of California San Diego)
+  - Churas CP (University of California San Diego) ORCID: https://orcid.org/0000-0001-9998-705X
+  - Dailamy A (University of California, San Diego) ORCID: https://orcid.org/0000-0002-6711-8260
+  - Doctor Y (University of California, San Diego) ORCID: https://orcid.org/0009-0009-0483-7506
+  - Fall J (KTH - Royal Institute of Technology)
+  - Forget A (University of California San Francisco) ORCID: https://orcid.org/0000-0003-0223-0312
+  - Gao J (University of California San Diego) ORCID: https://orcid.org/0000-0002-6311-3526
+  - Hansen JN (Stanford University) ORCID: https://orcid.org/0000-0002-4650-9094
+  - Hu M (University of California San Diego) ORCID: https://orcid.org/0000-0002-1571-8029
+  - Johannesson A (KTH - Royal Institute of Technology)
+  - Khaliq H (University of California San Diego)
+  - Lee YH (University of California San Diego) ORCID: https://orcid.org/0000-0003-0917-355X
+  - Lenkiewicz J (University of California San Diego) ORCID: https://orcid.org/0000-0001-7252-8638
+  - Levinson MA (University of Virginia) ORCID: https://orcid.org/0000-0003-0384-8499
+  - Marquez C (University of California San Diego) ORCID: 0000-0003-3960-420X
+  - Metallo C (University of California San Diego) ORCID: https://orcid.org/0000-0003-2404-3040
+  - Muralidharan M (University of California San Francisco)
+  - Nourreddine S (University of California San Diego) ORCID: https://orcid.org/0000-0003-3881-7588
+  - Niestroy J (University of Virginia) ORCID: https://orcid.org/0000-0002-1103-3882
+  - Obernier K (University of California San Francisco) ORCID: https://orcid.org/0000-0002-4025-1299
+  - Pan E (University of California San Diego)
+  - Polacco B (University of California San Francisco)
+  - Pratt D (University of California San Diego) ORCID: https://orcid.org/0000-0002-1471-9513
+  - Qian G (University of California San Diego) ORCID: https://orcid.org/0009-0005-4217-2745
+  - Schaffer L (University of California San Diego) ORCID: https://orcid.org/0000-0001-6339-9141
+  - Sigaeva A (KTH Royal Institute of Technology) ORCID: https://orcid.org/0000-0003-3361-3797
+  - Thaker S (University of Alabama at Birmingham) ORCID: https://orcid.org/0000-0001-6730-2773
+  - Zhang Y (University of California San Diego)
+  - Bélisle-Pipon JC (Simon Fraser University) ORCID: https://orcid.org/0000-0002-8965-8153
+  - Brandt C (Yale University) ORCID: https://orcid.org/0000-0001-8179-1796
+  - Chen JY (The University of Alabama at Birmingham) ORCID: https://orcid.org/0000-0002-6112-415X
+  - Ding Y (University of Texas at Austin) ORCID: https://orcid.org/0000-0003-2567-2009
+  - Fodeh S (Yale University) ORCID: https://orcid.org/0000-0003-4664-3143
+  - Krogan N (University of California San Francisco) ORCID: https://orcid.org/0000-0003-4902-337X
+  - Lundberg E (Stanford University) ORCID: https://orcid.org/0000-0001-7034-0850
+  - Mali P (University of California San Diego) ORCID: https://orcid.org/0000-0002-3383-1287
+  - Payne-Foster P (University of Alabama) ORCID: https://orcid.org/0000-0002-3508-3577
+  - Ratcliffe S (University of Virginia) ORCID: https://orcid.org/0000-0002-6644-8284
+  - Ravitsky V (University of Montreal) ORCID: https://orcid.org/0000-0002-7080-8801
+  - Sali A (University of California San Diego) ORCID: https://orcid.org/0000-0003-0435-6197
+  - Schulz W (Yale University) ORCID: https://orcid.org/0000-0002-2048-4028
+  - Ideker T (University of California San Diego) ORCID: https://orcid.org/0000-0002-1708-8454
+purposes:
+  - id: purpose-1
+    name: Purpose
+    description: AI-ready datasets to support research in functional genomics under the NIH Bridge2AI program.
+    response: Create AI-ready multimodal cell maps resources for algorithm development and biomedical discovery (CM4AI).
+tasks:
+  - id: task-1
+    name: Primary intended tasks
+    response: AI model training; cellular process analysis; analysis of cell architectural changes and interactions under disease, treatment, or genetic perturbations.
+addressing_gaps:
+  - id: gap-1
+    name: AddressingGap
+    response: Provides interim, harmonized AI-ready datasets spanning imaging, proteomics, and perturb-seq for building future computed cell maps.
+creators:
+  - id: creator-ideker
+    name: CM4AI PI - Ideker
+    principal_investigator:
+      id: person-ideker
+      name: Trey Ideker
+      description: Point of contact listed for the dataset.
+      affiliation:
+        - id: org-ucsd
+          name: University of California San Diego
+    affiliation:
+      id: org-ucsd
+      name: University of California San Diego
+  - id: creator-clark
+    name: CM4AI PI - Clark
+    principal_investigator:
+      id: person-clark
+      name: Tim Clark
+      affiliation:
+        - id: org-uva
+          name: University of Virginia
+    affiliation:
+      id: org-uva
+      name: University of Virginia
+funders:
+  - id: fund-nih-ot2
+    name: NIH OT2 Funding
+    grantor:
+      id: org-nih
+      name: National Institutes of Health
+    grant:
+      id: grant-1OT2OD032742-01
+      name: NIH OT2 award
+      grant_number: 1OT2OD032742-01
+instances:
+  - id: inst-perturbseq
+    name: Perturb-seq in undifferentiated KOLF2.1J iPSCs
+    representation: Single-cell transcriptomic profiles with CRISPRi perturbations (perturb-seq) in KOLF2.1J iPSCs.
+    instance_type: Cells and per-cell RNA profiles with perturbation labels.
+    data_type: Raw and processed single-cell RNA-seq derived measurements and associated perturbation metadata.
+  - id: inst-secms
+    name: SEC-MS protein-protein interaction profiles
+    representation: Proteomic fractionation and mass spectrometry profiles (size exclusion chromatography mass spectrometry).
+    instance_type: Proteins and inferred protein-protein interactions across fractions.
+    data_type: Mass spectrometry signal intensities, fractionation profiles, and derived interaction metrics.
+  - id: inst-if
+    name: Immunofluorescence (IF) imaging in MDA-MB-468 cells
+    representation: Microscopy images showing protein localization under treatment and control conditions.
+    instance_type: Images per protein target and condition.
+    data_type: Confocal microscopy images with multichannel immunofluorescence staining.
+sampling_strategies:
+  - id: samp-1
+    name: SamplingStrategy
+    is_sample:
+      - yes
+    source_data:
+      - Commercially available de-identified human cell lines; specific cell types and treatments profiled.
+    is_representative:
+      - no
+    why_not_representative:
+      - Derived from selected cell lines and perturbations, not representative of all human biological variation.
+collection_mechanisms:
+  - id: mech-if
+    name: IF imaging collection
+    description:
+      - Immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab (Stanford University). Nuclei stained with DAPI (blue), ER with calreticulin antibody (yellow), microtubules with tubulin antibody (red), and protein-of-interest antibody (green).
+  - id: mech-secms
+    name: SEC-MS collection
+    description:
+      - Size exclusion chromatography followed by mass spectrometry to profile protein-protein interactions across fractions.
+  - id: mech-perturbseq
+    name: Perturb-seq collection
+    description:
+      - CRISPRi-based perturbation combined with single-cell RNA sequencing in undifferentiated KOLF2.1J iPSCs.
+acquisition_methods:
+  - id: acq-if
+    name: Imaging acquisition
+    description:
+      - Directly observed microscopy images via ICC-IF and confocal imaging.
+    was_directly_observed: yes
+    was_reported_by_subjects: no
+    was_inferred_derived: no
+  - id: acq-secms
+    name: Proteomics acquisition
+    description:
+      - Directly observed mass spectrometry measurements following chromatographic fractionation.
+    was_directly_observed: yes
+    was_reported_by_subjects: no
+    was_inferred_derived: no
+  - id: acq-perturbseq
+    name: Perturb-seq acquisition
+    description:
+      - Directly observed single-cell RNA counts post CRISPRi perturbations.
+    was_directly_observed: yes
+    was_reported_by_subjects: no
+    was_inferred_derived: no
+data_collectors:
+  - id: collectors-1
+    name: Data collection teams
+    description:
+      - Stanford University (Lundberg Lab) for IF imaging.
+      - University of California San Diego for perturb-seq.
+      - University of California San Francisco for proteomics.
+collection_timeframes:
+  - id: timeframe-1
+    name: Collection and release dates
+    description:
+      - Data creation date: 2025-02-27; initial public release: 2025-07-01 (Version 2.0). Some image archives carry later publication dates as listed in file metadata.
+ethical_reviews:
+  - id: ethics-1
+    name: Data Governance & Ethics
+    description:
+      - Human Subjects: No; De-identified Samples: Yes; FDA Regulated: No.
+      - Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu).
+      - Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Bélisle-Pipon (jean-christophe_belisle-pipon@sfu.ca).
+external_resources:
+  - id: ext-sra
+    name: Sequence Read Archive (SRA) Data
+    external_resources:
+      - NCBI BioProject (perturb-seq raw data)
+  - id: ext-massive-ipsc
+    name: Mass Spectrometry Data (Human iPSCs)
+    external_resources:
+      - MassIVE Repository (SEC-MS iPSC data)
+  - id: ext-massive-cancer
+    name: Mass Spectrometry Data (Human Cancer Cells)
+    external_resources:
+      - MassIVE Repository (SEC-MS cancer cell data)
+subpopulations:
+  - id: subpops-1
+    name: Cell types and conditions
+    identification:
+      - Undifferentiated KOLF2.1J iPSCs
+      - iPSC-derived neural progenitor cells (NPCs)
+      - iPSC-derived neurons
+      - iPSC-derived cardiomyocytes
+      - MDA-MB-468 breast cancer cells (treated with vorinostat, treated with paclitaxel, untreated)
+deidentification:
+  id: deid-1
+  name: Deidentification
+  description:
+    - De-identified Samples: Yes. Data derived from commercially available de-identified human cell lines; Human Subjects: No.
+confidential_elements:
+  - id: conf-1
+    name: Confidentiality
+    description:
+      - No confidential patient data; laboratory datasets from de-identified cell lines.
+distribution_formats:
+  - id: dist-1
+    name: Distribution formats
+    description:
+      - Dataverse-hosted files (HTML, JSON, ZIP archives) and links to external repositories (NCBI SRA, MassIVE).
+distribution_dates:
+  - id: distdate-1
+    name: Initial release
+    description:
+      - 2025-07-01 (Version 2.0)
+  - id: distdate-2
+    name: Additional file publications
+    description:
+      - Some image archives list publication date 2025-10-22 as per file table.
+license_and_use_terms:
+  id: ltu-1
+  name: License and Terms of Use
+  description:
+    - License: CC BY-NC-SA 4.0. Community norms expect proper citation as shown on the dataset page.
+discouraged_uses:
+  - id: disuse-1
+    name: Prohibited Uses
+    description:
+      - Not to be used for clinical decision-making or any patient care context without appropriate regulatory oversight and approval.
+future_use_impacts:
+  - id: future-1
+    name: Limitations and potential impacts
+    description:
+      - Interim release; computed cell maps are not included.
+      - Protein sets interrogated across modalities incompletely overlap.
+      - Best suited for bioinformatics analyses of individual datasets; domain expertise required.
+      - Data derived from selected, commercially available cell lines and may not represent all biological variants in the wider population.
+existing_uses:
+  - id: use-1
+    name: Related publications
+    description:
+      - Clark T, Parker J, Schaffer L, Obernier K, et al. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05.21.589311
+      - Nourreddine S, Doctor Y, Dailamy A, Forget A, et al. A Perturbation Cell Atlas of Human Induced Pluripotent Stem Cells. bioRxiv. 2024 Nov 4;2024.11.03.621734. PMCID: PMC11580897. doi: https://doi.org/10.1101/2024.11.03.621734
+maintainers:
+  - id: maint-1
+    name: University of Virginia Dataverse
+    description:
+      - Long-term preservation in the University of Virginia Dataverse supported by institutional funds.
+  - id: maint-2
+    name: Data Governance Committee
+    description:
+      - Jillian Parker (jillianparker@health.ucsd.edu)
+updates:
+  id: updates-1
+  name: Maintenance and update plan
+  description:
+    - Dataset will be regularly updated and augmented through November 2026; updates on a quarterly basis; long-term preservation in UVA Dataverse.
+subsets:
+  - id: subset-release-datasheet
+    name: release-ro-crate-datasheet.html
+    title: HTML datasheet summarizing key release information
+    description: HTML datasheet summarizing key release information.
+    path: release-ro-crate-datasheet.html
+    md5: 599c9ece9b88b3ce797b82463b4a1eb4
+    media_type: text/html
+    issued: "2025-07-01"
+  - id: subset-release-rocrate
+    name: release-ro-crate-metadata.json
+    title: Release RO-Crate with pointers to sub ro-crates
+    description: RO-Crate metadata file listing sub-crates for the release.
+    path: release-ro-crate-metadata.json
+    md5: 99f9e00053bff3020fd9832a3a518bbb
+    media_type: application/json
+    format: JSON
+    issued: "2025-07-01"
+  - id: subset-if-paclitaxel-zip
+    name: cm4ai-ifimages-mda-mb-468-paclitaxel.zip
+    title: IF images - MDA-MB-468 treated with paclitaxel
+    description: Spatial localization of 464 proteins in MDA-MB-468 cells treated with paclitaxel (ICC-IF confocal microscopy).
+    path: Images/cm4ai-ifimages-mda-mb-468-paclitaxel.zip
+    md5: 0d972b80744344ddeede516a0cf6e3d7
+    media_type: application/zip
+    issued: "2025-10-22"
+  - id: subset-if-untreated-zip
+    name: cm4ai-ifimages-mda-mb-468-untreated.zip
+    title: IF images - MDA-MB-468 untreated
+    description: Spatial localization of 464 proteins in untreated MDA-MB-468 cells (ICC-IF confocal microscopy).
+    path: Images/cm4ai-ifimages-mda-mb-468-untreated.zip
+    md5: a98affcc05429650c6bb3906cd836d55
+    media_type: application/zip
+    issued: "2025-10-22"
+  - id: subset-if-vorinostat-zip
+    name: cm4ai-ifimages-mda-mb-468-vorinostat.zip
+    title: IF images - MDA-MB-468 treated with vorinostat
+    description: Spatial localization of 464 proteins in MDA-MB-468 cells treated with vorinostat (ICC-IF confocal microscopy).
+    path: Images/cm4ai-ifimages-mda-mb-468-vorinostat.zip
+    md5: ad4e68ccc14b0f3349dad3321e7b81b2
+    media_type: application/zip
+    issued: "2025-10-22"
+  - id: subset-if-paclitaxel-prov
+    name: Images-paclitaxel-provenance-graph.html
+    title: Provenance graph (paclitaxel images)
+    description: HTML provenance graph for paclitaxel image workflow (download to view properly).
+    path: Images/paclitaxel/Images-paclitaxel-provenance-graph.html
+    md5: e38e63e4c8dfc5808a5ffa2d7829fc38
+    media_type: text/html
+    issued: "2025-07-01"
+  - id: subset-if-untreated-prov
+    name: Images-untreated-provenance-graph.html
+    title: Provenance graph (untreated images)
+    description: HTML provenance graph for untreated image workflow (download to view properly).
+    path: Images/untreated/Images-untreated-provenance-graph.html
+    md5: 1a3b510f74d3f8647e07c6559ce64ee8
+    media_type: text/html
+    issued: "2025-07-01"
+  - id: subset-if-vorinostat-prov
+    name: Images-vorinostat-provenance-graph.html
+    title: Provenance graph (vorinostat images)
+    description: HTML provenance graph for vorinostat image workflow (download to view properly).
+    path: Images/vorinostat/Images-vorinostat-provenance-graph.html
+    md5: 58935fe4e254b31d33fed019f24c7668
+    media_type: text/html
+    issued: "2025-07-01"
+  - id: subset-ms-cancer-prov
+    name: mass-spec-cancer-cells-provenance-graph.html
+    title: Provenance graph (mass spec - cancer cells)
+    description: HTML provenance graph for cancer cell SEC-MS workflow (download to view properly).
+    path: mass-spec/cancer-cells/mass-spec-cancer-cells-provenance-graph.html
+    md5: 931ad9b552562024cb84ebe62d1f1838
+    media_type: text/html
+    issued: "2025-07-01"
+  - id: subset-ms-cancer-rocrate
+    name: mass-spec-cancer-cells-ro-crate-metadata.json
+    title: RO-Crate metadata (mass spec - cancer cells)
+    description: RO-Crate metadata for SEC-MS cancer cell sub-crate.
+    path: mass-spec/cancer-cells/mass-spec-cancer-cells-ro-crate-metadata.json
+    md5: 3a7063bb391ea5e05a32ba5da5f4b2f8
+    media_type: application/json
+    format: JSON
+    issued: "2025-07-01"
+is_deidentified:
+  id: isdeid
+  name: Is Deidentified
+  description:
+    - Yes — samples are de-identified cell lines; no human subjects.
+is_tabular: "no"

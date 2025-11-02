@@ -1,0 +1,213 @@
+{
+  "timestamp": "2025-10-31 17:50:29",
+  "input_dir": "downloads_by_column_enhanced_combined",
+  "output_dir": "data/extracted_by_column_tab_combined",
+  "columns": [
+    {
+      "column": "AI_READI",
+      "processed": [],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "downloads_by_column_enhanced_combined/AI_READI/fairhub_dataset_2_row15_combined.txt",
+          "stage": "download_validation",
+          "error": "Content appears to be incomplete or invalid",
+          "details": {
+            "file_exists": true,
+            "file_size": 778,
+            "content_length": 778,
+            "file_type": ".txt",
+            "has_meaningful_content": false,
+            "validation_details": [
+              "File size: 778 bytes"
+            ]
+          }
+        }
+      ],
+      "validation_summary": {
+        "download_successful": 0,
+        "download_failed": 1,
+        "relevant_content": 0,
+        "irrelevant_content": 0
+      }
+    },
+    {
+      "column": "CM4AI",
+      "processed": [],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "downloads_by_column_enhanced_combined/CM4AI/dataverse_10.18130_V3_B35XWX_row15_combined.txt",
+          "stage": "d4d_processing",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 228, column 136:\n     ... e-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05 ... \n                                         ^",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 150168,
+                "content_length": 50040,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 150168 bytes",
+                  "Text file with 634 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "CM4AI",
+                "keywords_found": [
+                  "cm4ai",
+                  "microscopy",
+                  "imaging",
+                  "cellular",
+                  "dataverse"
+                ],
+                "relevance_score": 16,
+                "relevance_details": [
+                  "Filename contains 'dataverse'",
+                  "Found keywords: cm4ai, microscopy, imaging, cellular, dataverse",
+                  "Found project indicators: microscopy, imaging, cellular, virginia"
+                ],
+                "content_indicators": [
+                  "microscopy",
+                  "imaging",
+                  "cellular",
+                  "virginia"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "file": "downloads_by_column_enhanced_combined/CM4AI/dataverse_10.18130_V3_F3TD5R_row18_combined.txt",
+          "stage": "d4d_processing",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 185, column 52:\n     ... jects: No; De-identified Samples: Yes.\n                                         ^",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 158316,
+                "content_length": 50040,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 158316 bytes",
+                  "Text file with 797 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "CM4AI",
+                "keywords_found": [
+                  "cm4ai",
+                  "microscopy",
+                  "imaging",
+                  "cellular",
+                  "dataverse"
+                ],
+                "relevance_score": 16,
+                "relevance_details": [
+                  "Filename contains 'dataverse'",
+                  "Found keywords: cm4ai, microscopy, imaging, cellular, dataverse",
+                  "Found project indicators: microscopy, imaging, cellular, virginia"
+                ],
+                "content_indicators": [
+                  "microscopy",
+                  "imaging",
+                  "cellular",
+                  "virginia"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "validation_summary": {
+        "download_successful": 2,
+        "download_failed": 0,
+        "relevant_content": 2,
+        "irrelevant_content": 0
+      }
+    },
+    {
+      "column": "VOICE",
+      "processed": [],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "downloads_by_column_enhanced_combined/VOICE/healthnexus_row15_combined.txt",
+          "stage": "d4d_processing",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 175, column 32:\n        - Required training: TCPS 2: CORE 2022\n                                   ^",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 312946,
+                "content_length": 50040,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 312946 bytes",
+                  "Text file with 494 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "VOICE",
+                "keywords_found": [
+                  "voice",
+                  "b2ai-voice",
+                  "bridge2ai voice",
+                  "vocal",
+                  "speech",
+                  "health data nexus"
+                ],
+                "relevance_score": 21,
+                "relevance_details": [
+                  "Filename contains 'healthnexus'",
+                  "Found keywords: voice, b2ai-voice, bridge2ai voice, vocal, speech, health data nexus",
+                  "Found project indicators: voice recording, speech, vocal, acoustic, biomarker, mit"
+                ],
+                "content_indicators": [
+                  "voice recording",
+                  "speech",
+                  "vocal",
+                  "acoustic",
+                  "biomarker",
+                  "mit"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "validation_summary": {
+        "download_successful": 1,
+        "download_failed": 0,
+        "relevant_content": 1,
+        "irrelevant_content": 0
+      }
+    }
+  ],
+  "summary": {
+    "total_processed": 0,
+    "total_errors": 4,
+    "total_skipped": 0,
+    "validation_summary": {
+      "download_successful": 3,
+      "download_failed": 1,
+      "relevant_content": 3,
+      "irrelevant_content": 0
+    }
+  }
+}

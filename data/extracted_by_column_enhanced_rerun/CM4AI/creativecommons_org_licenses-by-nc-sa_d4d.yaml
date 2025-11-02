@@ -1,0 +1,115 @@
+# D4D Metadata extracted from: creativecommons_org_licenses-by-nc-sa_row14.txt
+# Source: downloads_by_column_enhanced/CM4AI/creativecommons_org_licenses-by-nc-sa_row14.txt
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-10-31T17:06:46
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: creativecommons-cc-by-nc-sa-4-0-deed
+name: CC BY-NC-SA 4.0 Deed (Creative Commons)
+title: Deed - Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)
+description: >
+  Human-readable summary (Deed) of the Creative Commons Attribution-NonCommercial-ShareAlike
+  4.0 International license. Describes permitted uses (Share, Adapt) and core terms
+  (Attribution, NonCommercial, ShareAlike), along with notices and limitations. Canonical
+  landing page hosted by Creative Commons.
+page: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+publisher: "https://creativecommons.org/"
+license: "https://creativecommons.org/licenses/by/4.0/"
+version: "4.0"
+language: en
+media_type: text/html
+keywords:
+  - Creative Commons
+  - CC BY-NC-SA 4.0
+  - NonCommercial
+  - ShareAlike
+  - Attribution
+  - open license
+  - licensing terms
+  - deed
+created_by:
+  - Creative Commons
+
+purposes:
+  - id: purpose-1
+    name: Purpose
+    response: Provide a human-readable summary (Deed) of the CC BY-NC-SA 4.0 license terms for reference and education.
+
+tasks:
+  - id: task-1
+    name: Primary Task
+    response: Reference for understanding and applying CC BY-NC-SA 4.0 licensing to creative works.
+
+addressing_gaps:
+  - id: gap-1
+    name: Addressed Gap
+    response: Improves accessibility and comprehension of the CC BY-NC-SA 4.0 legal code for non-lawyers.
+
+creators:
+  - id: creator-cc
+    name: Creative Commons
+    affiliation:
+      id: org-creativecommons
+      name: Creative Commons
+      description: Nonprofit behind the open licenses and other legal tools that allow creators to share their work.
+      email: info@creativecommons.org
+      wikidata_id: "WIKIDATA:Q166118"
+
+instances:
+  - id: instance-1
+    name: Webpage Content
+    representation: Web page describing the CC BY-NC-SA 4.0 license (Deed).
+    instance_type: Single HTML page
+    data_type: Human-readable text content (HTML)
+    counts: 1
+
+external_resources:
+  - id: ext-1
+    name: Compatible Licenses
+    external_resources:
+      - https://creativecommons.org/compatiblelicenses
+    future_guarantees:
+      - Not specified
+    archival:
+      - Not specified
+    restrictions:
+      - None indicated beyond standard site terms and noted license on site content.
+
+license_and_use_terms:
+  description:
+    - Content on the Creative Commons site (including this page), except where otherwise noted, is licensed under CC BY 4.0.
+    - This Deed summarizes CC BY-NC-SA 4.0; it is not itself the legal code and has no legal value.
+    - Users should review the full legal code for definitive terms.
+
+future_use_impacts:
+  - id: impact-1
+    name: Notices and Limitations
+    description:
+      - No warranties are given; additional permissions may be needed for publicity, privacy, or moral rights.
+      - The Deed does not replace the legal code; it highlights key features only.
+
+distribution_formats:
+  - id: distfmt-1
+    name: Distribution
+    description:
+      - Website (HTML)
+
+maintainers:
+  - id: maintainer-cc
+    name: Maintainer
+    description:
+      - Creative Commons — info@creativecommons.org
+      - Address: PO Box 1866, Mountain View, CA 94042, USA
+      - Phone: +1-415-429-6753
+
+discouraged_uses:
+  - id: discouraged-1
+    name: Discouraged Use
+    description:
+      - Do not treat the Deed as a substitute for the legal code; consult the full license for binding terms.
+
+is_tabular: "false"

@@ -1,0 +1,35 @@
+# D4D Metadata extracted from: github_eipm_bridge2ai-docs_row21.json
+# Source: downloads_by_column_enhanced/VOICE/github_eipm_bridge2ai-docs_row21.json
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-10-31T17:38:38
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: "https://github.com/eipm/bridge2ai-docs.git"
+name: bridge2ai-docs
+title: Bridge2AI Voice | Documentation Dashboard
+description: Bridge2AI Voice | Documentation Dashboard
+license: MIT License
+keywords:
+  - ai
+  - bridge2ai
+  - bridge2ai-voice
+  - python
+  - streamlit-dashboard
+  - VOICE
+page: "https://github.com/eipm/bridge2ai-docs/tree/main/docs"
+download_url: "https://github.com/eipm/bridge2ai-docs.git"
+purposes:
+  - response: Documentation dashboard for the Bridge2AI Voice project
+tasks:
+  - response: Documentation and dashboarding for Bridge2AI Voice
+distribution_formats:
+  - description:
+      - GitHub repository
+      - Git clone via https://github.com/eipm/bridge2ai-docs.git
+license_and_use_terms:
+  description:
+    - MIT License
