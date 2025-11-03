@@ -1,0 +1,196 @@
+name: D4D AI Assistant GitHub Mentions
+
+on:
+  issues:
+    types: [opened, edited]
+  issue_comment:
+    types: [created, edited]
+  pull_request:
+    types: [opened, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+  workflow_dispatch:
+    inputs:
+      item-type:
+        description: 'Type of item (issue or pull_request)'
+        required: true
+        type: choice
+        options:
+          - issue
+          - pull_request
+      item-number:
+        description: 'Issue or PR number'
+        required: true
+        type: number
+
+jobs:
+  check-mention:
+    runs-on: ubuntu-latest
+    outputs:
+      qualified-mention: ${{ steps.detect.outputs.qualified-mention }}
+      prompt: ${{ steps.detect.outputs.prompt }}
+      user: ${{ steps.detect.outputs.user }}
+      item-type: ${{ steps.detect.outputs.item-type }}
+      item-number: ${{ steps.detect.outputs.item-number }}
+      controllers: ${{ steps.detect.outputs.controllers }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect AI mention
+        id: detect
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_FOR_PR }}
+          script: |
+            // Load allowed users from config
+            const fs = require('fs');
+            let allowedUsers = [];
+            try {
+              const configContent = fs.readFileSync('.github/ai-controllers.json', 'utf8');
+              allowedUsers = JSON.parse(configContent);
+            } catch (error) {
+              console.log('Error loading allowed users:', error);
+              // Use fallback controllers if provided
+              const fallback = 'jtr4v';
+              allowedUsers = fallback ? fallback.split(',').map(u => u.trim()) : [];
+            }
+
+            // Get content and user from event payload
+            let content = '';
+            let userLogin = '';
+            let itemType = '';
+            let itemNumber = 0;
+
+            if (context.eventName === 'workflow_dispatch') {
+              // Manual trigger - fetch the issue/PR from GitHub API
+              itemType = context.payload.inputs['item-type'];
+              itemNumber = parseInt(context.payload.inputs['item-number']);
+              userLogin = context.actor; // Use the person who triggered the workflow
+
+              if (itemType === 'issue') {
+                // First check issue body
+                const issue = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: itemNumber
+                });
+                content = issue.data.body || '';
+
+                // If no @d4dassistant in body, check comments
+                if (!content.includes('@d4dassistant')) {
+                  const comments = await github.rest.issues.listComments({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: itemNumber
+                  });
+                  // Find the most recent comment with @d4dassistant
+                  for (let i = comments.data.length - 1; i >= 0; i--) {
+                    if (comments.data[i].body && comments.data[i].body.includes('@d4dassistant')) {
+                      content = comments.data[i].body;
+                      break;
+                    }
+                  }
+                }
+              } else if (itemType === 'pull_request') {
+                const pr = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: itemNumber
+                });
+                content = pr.data.body || '';
+
+                // If no @d4dassistant in body, check comments
+                if (!content.includes('@d4dassistant')) {
+                  const comments = await github.rest.issues.listComments({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: itemNumber
+                  });
+                  // Find the most recent comment with @d4dassistant
+                  for (let i = comments.data.length - 1; i >= 0; i--) {
+                    if (comments.data[i].body && comments.data[i].body.includes('@d4dassistant')) {
+                      content = comments.data[i].body;
+                      break;
+                    }
+                  }
+                }
+              }
+            } else if (context.eventName === 'issues') {
+              content = context.payload.issue.body || '';
+              userLogin = context.payload.issue.user.login;
+              itemType = 'issue';
+              itemNumber = context.payload.issue.number;
+            } else if (context.eventName === 'pull_request') {
+              content = context.payload.pull_request.body || '';
+              userLogin = context.payload.pull_request.user.login;
+              itemType = 'pull_request';
+              itemNumber = context.payload.pull_request.number;
+            } else if (context.eventName === 'issue_comment') {
+              content = context.payload.comment.body || '';
+              userLogin = context.payload.comment.user.login;
+              itemType = 'issue';
+              itemNumber = context.payload.issue.number;
+            } else if (context.eventName === 'pull_request_review_comment') {
+              content = context.payload.comment.body || '';
+              userLogin = context.payload.comment.user.login;
+              itemType = 'pull_request';
+              itemNumber = context.payload.pull_request.number;
+            }
+
+            // Check if user is allowed and mention exists
+            const isAllowed = allowedUsers.includes(userLogin);
+            const mentionRegex = new RegExp('@d4dassistant\\s+(.*)', 'i');
+            const mentionMatch = content.match(mentionRegex);
+
+            const qualifiedMention = isAllowed && mentionMatch !== null;
+            const prompt = qualifiedMention ? mentionMatch[1].trim() : '';
+
+            console.log(`User: ${userLogin}, Allowed: ${isAllowed}, Has mention: ${mentionMatch !== null}, Content: "${content}"`);
+
+            // Set outputs
+            core.setOutput('qualified-mention', qualifiedMention);
+            core.setOutput('prompt', prompt);
+            core.setOutput('user', userLogin);
+            core.setOutput('item-type', itemType);
+            core.setOutput('item-number', itemNumber);
+            core.setOutput('controllers', allowedUsers.map(u => '@' + u).join(', '));
+
+            return {
+              qualifiedMention,
+              itemType,
+              itemNumber,
+              prompt,
+              user: userLogin,
+              controllers: allowedUsers.map(u => '@' + u).join(', ')
+            };
+
+  respond-to-mention:
+    needs: check-mention
+    if: needs.check-mention.outputs.qualified-mention == 'true'
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_FOR_PR }}
+
+      - name: Respond with AI Agent
+        uses: dragon-ai-agent/run-goose-obo@v1.0.4
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          github-token: ${{ secrets.PAT_FOR_PR }}
+          prompt: ${{ needs.check-mention.outputs.prompt }}
+          user: ${{ needs.check-mention.outputs.user }}
+          item-type: ${{ needs.check-mention.outputs.item-type }}
+          item-number: ${{ needs.check-mention.outputs.item-number }}
+          controllers: ${{ needs.check-mention.outputs.controllers }}
+          agent-name: 'd4dassistant'
+          branch-prefix: 'd4dassistant'
+          robot-version: 'v1.9.7'
