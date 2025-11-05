@@ -181,10 +181,9 @@ jobs:
           token: ${{ secrets.PAT_FOR_PR }}
 
       - name: Respond with AI Agent
-        uses: dragon-ai-agent/run-goose-obo@v1.0.4
+        uses: dragon-ai-agent/run-claude-obo@v1.0.2
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
-          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           github-token: ${{ secrets.PAT_FOR_PR }}
           prompt: ${{ needs.check-mention.outputs.prompt }}
           user: ${{ needs.check-mention.outputs.user }}
@@ -194,3 +193,8 @@ jobs:
           agent-name: 'd4dassistant'
           branch-prefix: 'd4dassistant'
           robot-version: 'v1.9.7'
+          enable-robot: 'true'
+          enable-obo-scripts: 'true'
+          enable-python-tools: 'true'
+          python-packages: 'aurelian jinja2-cli "wrapt>=1.17.2"'
+          claude-allowed-tools: '["Bash(git:*)", "Bash(gh:*)", "FileSystem(*)"]'
