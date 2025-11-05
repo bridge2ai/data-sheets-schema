@@ -1,0 +1,20 @@
+{
+  "model": "anthropic/claude-sonnet",
+  "apiKeyHelper": "echo $ANTHROPIC_API_KEY",
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.cborg.lbl.gov",
+    "ANTHROPIC_MODEL": "anthropic/claude-sonnet",
+    "ANTHROPIC_SMALL_FAST_MODEL": "anthropic/claude-haiku",
+    "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(poetry:*)",
+      "Bash(make:*)",
+      "Bash(python:*)",
+      "Bash(uv:*)"
+    ]
+  }
+}
