@@ -14,7 +14,12 @@
       "Bash(poetry:*)",
       "Bash(make:*)",
       "Bash(python:*)",
-      "Bash(uv:*)"
+      "Bash(uv:*)",
+      "mcp__github__*",
+      "mcp__artl__*",
+      "WebSearch",
+      "WebFetch"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true
 }

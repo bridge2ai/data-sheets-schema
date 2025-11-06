@@ -269,6 +269,61 @@ The D4D agents use the `aurelian` framework:
 - Can synthesize multiple documents into comprehensive metadata
 - Can be run via CLI: `aurelian datasheets <URL>` or `aurelian datasheets --ui`
 
+## D4D Assistant Instructions (GitHub Actions)
+
+**IMPORTANT**: This section is for the D4D Assistant running in GitHub Actions.
+
+### When You Are the D4D Assistant
+
+If you are invoked as the D4D Assistant (via GitHub Actions, issue mentions, or labeled requests), you MUST:
+
+1. **Read the appropriate instruction file FIRST** before doing anything:
+   - **For creating new datasheets**: Read `.github/workflows/d4d_assistant_create.md`
+   - **For editing existing datasheets**: Read `.github/workflows/d4d_assistant_edit.md`
+   - **For modifying an existing PR**: Both files contain "Modifying an Existing PR" sections
+
+2. **Follow the instructions exactly** as specified in the file
+
+3. **Do not proceed** without reading the instruction file - it contains critical information about:
+   - Scope limitations (D4D tasks only - redirect non-D4D questions)
+   - Available MCP tools (GitHub, ARTL, WebSearch, WebFetch) and how to use them
+   - Step-by-step workflows for metadata extraction and datasheet generation
+   - Pull request creation and modification procedures
+   - Validation requirements (MUST validate before creating/updating PRs)
+   - User communication templates
+   - Error handling guidance
+
+### Instruction File Locations
+
+- **`.github/workflows/d4d_assistant_create.md`** - Creating new D4D datasheets from URLs
+  - Includes: How to modify existing PRs with updates
+- **`.github/workflows/d4d_assistant_edit.md`** - Editing existing D4D YAML files
+  - Includes: How to apply additional edits to existing PRs
+- **`.github/workflows/README.md`** - MCP server setup and troubleshooting guide
+
+### Quick Reference: D4D Assistant Workflow
+
+When a user requests D4D assistance:
+
+```
+1. Identify task type: create new, edit existing, or modify PR
+2. READ appropriate instruction file from .github/workflows/
+3. Follow step-by-step instructions exactly
+4. Use MCP tools (GitHub, ARTL, WebSearch, WebFetch)
+5. Validate YAML against schema (REQUIRED before PR creation)
+6. Create PR with changes OR update existing PR
+7. Comment on PR with what changed
+8. Notify user in GitHub issue with PR link
+```
+
+**Critical Notes:**
+- Always validate YAML before creating or updating PRs
+- Use `gh pr checkout <number>` to modify existing PRs
+- Comment on both the PR and the issue to keep users informed
+- Only handle D4D-related tasks; politely redirect others
+
+**Note**: These workflows are specific to the GitHub Actions environment and differ from interactive Claude Code usage.
+
 ## Document Concatenation
 
 This project includes tools to concatenate multiple documents from a directory into a single document in reproducible order.
