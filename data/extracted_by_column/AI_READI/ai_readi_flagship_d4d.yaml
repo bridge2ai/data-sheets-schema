@@ -1,0 +1,173 @@
+# D4D Metadata for AI-READI Flagship Dataset
+# Created from documentation at:
+# - https://aireadi.org/
+# - https://docs.aireadi.org
+# - https://fairhub.io
+# - https://github.com/AI-READI
+# Generated: 2025-11-06
+
+id: "ai-readi-flagship-v2.0.0"
+page: "https://fairhub.io"
+keywords:
+  - AI_READI
+  - type 2 diabetes
+  - multimodal
+  - AI-ready
+  - FAIR
+
+dataset_name: "Flagship Dataset of Type 2 Diabetes from the AI-READI Project"
+dataset_acronym: "AI-READI"
+project: "AI-READI"
+publisher: "AI-READI Consortium"
+dataset_version: "2.0.0"
+release_date: "2024-07-31"
+doi: "10.5281/zenodo.10642459"
+doi_url: "https://doi.org/10.5281/zenodo.10642459"
+project_website: "https://aireadi.org"
+download_url: "https://fairhub.io"
+
+title: "AI-READI: Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights"
+
+abstract: |
+  A comprehensive multimodal, AI-ready dataset for studying salutogenesis in Type 2 Diabetes Mellitus.
+  The AI-READI project creates and shares a flagship dataset of type 2 diabetes optimized for artificial
+  intelligence and machine learning analysis. The initiative illuminates pathways from diabetes toward
+  health recovery through computational methods and emphasizes ethical data sourcing and equity.
+
+creators:
+  - name: "AI-READI Consortium"
+
+motivation: |
+  To create and share a flagship ethically-sourced dataset of type 2 diabetes optimized for AI/ML
+  analysis. The dataset aims to illuminate salutogenic pathways from diabetes toward health recovery
+  through future AI/ML-driven computational analysis. The project develops open-source tools and
+  standards for ethical, FAIR, and AI-ready datasets and shares best practices to guide future data
+  generation projects.
+
+composition:
+  overview: "Multimodal health data from participants across four diabetes severity categories"
+  population:
+    participants: 1067
+    target_recruitment: 4000
+    consented: 4920
+    visits_completed: 2830
+  diabetes_severity_groups:
+    - "No diabetes"
+    - "Prediabetes or lifestyle-controlled diabetes"
+    - "Oral and non-insulin injectable controlled diabetes"
+    - "Insulin-controlled diabetes"
+
+data_characteristics:
+  modalities:
+    - "Vital signs and clinical measurements"
+    - "Electrocardiogram (ECG) readings"
+    - "Ophthalmological measurements"
+    - "Retinal imaging (Topcon Healthcare, Heidelberg Engineering, iCare, Optomed)"
+    - "Wearable device data (Dexcom)"
+    - "Clinical and demographic information"
+  data_formats:
+    - "DICOM"
+    - "CSV"
+    - "Markdown"
+  total_size: "2.01 TB"
+  total_files: 165051
+
+collection_process:
+  sites:
+    - "University of Alabama at Birmingham (UAB)"
+    - "University of California San Diego (UCSD)"
+    - "University of Washington (UW)"
+  protocols: "Clinical Dataset Structure (CDS) specification"
+  devices:
+    - "Dexcom"
+    - "Topcon Healthcare"
+    - "Heidelberg Engineering"
+    - "iCare"
+    - "Optomed"
+
+preprocessing_and_derived_data:
+  principles: "FAIR (Findable, Accessible, Interoperable, Reusable)"
+  standardization: "Clinical Dataset Structure (CDS) specification"
+  metadata_standards: "Bridge2AI standards"
+  deidentification: "Removal of protected health information (PHI)"
+  removed_identifiers: "Sex, race/ethnicity, medication data in public version"
+
+access_and_licensing:
+  platform: "FAIRhub"
+  access_policy: "Controlled access"
+  license: "AI-READI custom license v1.0"
+  doi_license: "10.5281/zenodo.10642459"
+  restrictions: "Use limited to type 2 diabetes-related research"
+  requirements:
+    - "Login through verified identity system"
+    - "Agree to use restrictions"
+    - "Accept license terms"
+
+deidentification_and_privacy:
+  approach: "De-identified with PHI removal"
+  status: "No protected health information in public version"
+  removed_data:
+    - "Sex"
+    - "Race/ethnicity"
+    - "Medication data"
+    - "Other PHI"
+
+ethics:
+  irb_approval: "Data collection and sharing approved by institutional review boards at all three collection sites"
+  community_engagement: "Stakeholder input on data collection, management, and sharing decisions"
+  american_indian_engagement: "Specific American Indian engagement initiatives"
+  ethical_position: "Ethically-sourced data with emphasis on equity"
+
+funding_and_acknowledgements:
+  funding:
+    - agency: "National Institutes of Health (NIH)"
+      award_number: "1OT2OD032644"
+      program: "Bridge2AI Program"
+
+maintainers:
+  - name: "AI-READI Consortium"
+  - name: "FAIRhub"
+
+references:
+  - citation: |
+      Owsley et al. (2025). Cross-sectional design and protocol for Artificial Intelligence Ready
+      and Equitable Atlas for Diabetes Insights. BMJ Open.
+    doi: "10.1136/bmjopen-2024-097449"
+  - citation: |
+      AI-READI Consortium (2024). Rethinking approaches to AI data collection, preparation and
+      sharing in diabetes research and beyond. Nature Metabolism.
+    doi: "10.1038/s42255-024-01165-x"
+
+resources:
+  - id: "fairhub"
+    page: "https://fairhub.io"
+    description: "Main dataset distribution portal"
+  - id: "docs"
+    page: "https://docs.aireadi.org"
+    description: "Comprehensive dataset documentation"
+  - id: "github"
+    page: "https://github.com/AI-READI"
+    description: "Open-source tools, standards, and code repositories"
+  - id: "website"
+    page: "https://aireadi.org"
+    description: "Project overview and information"
+
+conformance_standards:
+  - name: "FAIR Principles"
+    description: "Findable, Accessible, Interoperable, Reusable data principles"
+  - name: "Clinical Dataset Structure (CDS)"
+    description: "AI-READI developed specification for structuring clinical datasets"
+  - name: "Bridge2AI Standards"
+    description: "NIH Bridge2AI program standards for AI-ready biomedical data"
+
+software_and_tools:
+  preprocessing_code:
+    - name: "FAIRhub platform"
+      url: "https://github.com/AI-READI/fairhub-app"
+      description: "Vue-based platform for managing FAIR and AI-ready clinical data"
+    - name: "FAIRhub API"
+      url: "https://github.com/AI-READI/fairhub-api"
+      description: "Python API for programmatic access to FAIRhub"
+    - name: "pyfairdatatools"
+      url: "https://github.com/AI-READI"
+      description: "Python library for handling AI-READI data"
