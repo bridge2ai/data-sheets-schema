@@ -269,6 +269,23 @@ The D4D agents use the `aurelian` framework:
 - Can synthesize multiple documents into comprehensive metadata
 - Can be run via CLI: `aurelian datasheets <URL>` or `aurelian datasheets --ui`
 
+## D4D Assistant Instructions (GitHub Actions)
+
+**IMPORTANT**: This section is for the D4D Assistant running in GitHub Actions.
+
+The D4D Assistant responds to GitHub issue requests to create or edit D4D datasheets. Detailed instructions for the assistant are maintained in separate workflow-specific files:
+
+- **Creating new datasheets**: See `.github/workflows/d4d_assistant_create.md`
+- **Editing existing datasheets**: See `.github/workflows/d4d_assistant_edit.md`
+
+These instruction files contain:
+- Step-by-step workflows for metadata extraction and datasheet generation
+- Pull request creation and notification procedures
+- Validation requirements and schema references
+- User communication templates
+
+**Note**: These workflows are specific to the GitHub Actions environment and differ from interactive Claude Code usage.
+
 ## Document Concatenation
 
 This project includes tools to concatenate multiple documents from a directory into a single document in reproducible order.
