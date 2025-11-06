@@ -433,6 +433,142 @@ The updated datasheet has been validated and is ready for review.
 🤖 D4D Assistant"
 ```
 
+## Modifying an Existing PR
+
+If the user requests further changes to a PR you already created, follow this workflow:
+
+### When to Modify vs. Create New PR
+
+**Modify existing PR when:**
+- User requests additional changes after reviewing your edit PR
+- Validation errors need fixing
+- User provides more information to improve the edits
+- PR is still open and relates to the same datasheet
+
+**Create new PR when:**
+- Different datasheet entirely
+- Original PR was already merged
+- User explicitly requests a fresh edit PR
+
+### Steps to Modify Existing PR
+
+1. **Find the PR and Branch**
+   ```bash
+   # List recent PRs to find the one to modify
+   gh pr list --author "@me" --state open
+
+   # Get PR details (replace 123 with PR number)
+   gh pr view 123
+
+   # Checkout the PR branch
+   gh pr checkout 123
+   ```
+
+2. **Make Additional Changes**
+   - Edit the YAML file with further modifications
+   - Apply user's additional feedback
+   - Fix any validation errors discovered
+   - Regenerate HTML preview
+
+3. **Validate Changes**
+   ```bash
+   # Always validate after modifications
+   poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
+     -C Dataset <edited-file>.yaml
+   ```
+
+4. **Commit and Push Updates**
+   ```bash
+   # Stage modified files
+   git add <edited-file>.yaml
+   git add <edited-file>.html  # Updated HTML
+
+   # Commit with descriptive message
+   git commit -m "Apply additional edits based on review
+
+   - <List specific additional changes>
+   - Re-validated against schema
+
+   Co-Authored-By: Claude <noreply@anthropic.com>"
+
+   # Push to existing PR branch
+   git push
+   ```
+
+5. **Comment on PR with Updates**
+   ```bash
+   PR_NUMBER=<pr-number>
+
+   gh pr comment ${PR_NUMBER} --body "## Additional Updates
+
+   I've applied your additional feedback:
+
+   ### Changes
+   - ✏️ <List each additional change>
+   - ✏️ <Be specific about what else was modified>
+
+   ### Validation
+   ✅ Schema validation passed
+   ✅ HTML preview regenerated
+
+   The updated datasheet is ready for another review."
+   ```
+
+6. **Optionally Notify in Original Issue**
+   ```bash
+   # If changes are substantial, also update the issue
+   ISSUE_NUMBER=<issue-number>
+
+   gh issue comment ${ISSUE_NUMBER} --body "✏️ **PR Updated Again**
+
+   I've made additional updates to pull request #${PR_NUMBER}:
+   - <Brief list of new changes>
+
+   ---
+   🤖 D4D Assistant"
+   ```
+
+### Example Modification Scenarios
+
+**Scenario 1: User wants more fields added**
+```bash
+User comment: "Actually, can you also add the preprocessing steps?"
+
+1. gh pr checkout <pr-number>
+2. Add preprocessing section to YAML based on sources
+3. Regenerate HTML
+4. Validate
+5. Commit: "Add preprocessing section per request"
+6. Push
+7. Comment on PR listing new fields added
+```
+
+**Scenario 2: User corrects a value**
+```bash
+User comment: "The instance_count should be 10000, not 5000"
+
+1. gh pr checkout <pr-number>
+2. Edit YAML to change instance_count: 10000
+3. Regenerate HTML
+4. Validate
+5. Commit: "Correct instance_count to 10000"
+6. Push
+7. Comment on PR confirming the correction
+```
+
+**Scenario 3: Validation fails after edit**
+```bash
+If validation errors are discovered after creating edit PR:
+
+1. gh pr checkout <pr-number>
+2. Fix validation errors in YAML
+3. Re-validate until passes
+4. Regenerate HTML
+5. Commit: "Fix schema validation errors"
+6. Push
+7. Comment on PR: "Fixed validation issues, now passes all checks"
+```
+
 ## Common Editing Scenarios
 
 ### Adding a New Field
