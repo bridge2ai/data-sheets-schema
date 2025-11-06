@@ -1,0 +1,99 @@
+# D4D Metadata extracted from: https://zenodo.org/records/3905420
+# Generated: 2025-11-06
+
+id: zenodo_3905420_phenopackets
+name: 384 Phenopackets
+title: 384 Phenopackets Dataset
+description: >
+  GA4GH Phenopackets representing 384 individuals described in published case
+  reports with standardized phenotypic and genetic information. The dataset
+  integrates Human Phenotype Ontology (HPO) terms with causal genetic variants
+  for each individual case, following the GA4GH Phenopacket schema standard.
+version: "1.0"
+language: en
+keywords:
+  - Phenopacket
+  - HPO
+  - GA4GH
+  - Human Phenotype Ontology
+  - genetic variants
+  - phenotypic data
+  - case reports
+  - genomic medicine
+
+purposes:
+  - response: >
+      This dataset was created to provide standardized phenotypic and genetic
+      information from published case reports using the GA4GH Phenopacket schema
+      standard, enabling interoperability and computational analysis of rare disease
+      cases.
+
+tasks:
+  - response: >
+      Enable computational analysis of phenotype-genotype relationships using
+      standardized HPO terms and genetic variant data from clinical case reports.
+
+addressing_gaps:
+  - response: >
+      Addresses the gap in standardized, machine-readable representation of
+      phenotypic and genetic data from published case reports by using the
+      GA4GH Phenopacket schema standard.
+
+creators:
+  - principal_investigator:
+      name: Peter N Robinson
+      affiliation:
+        name: The Jackson Laboratory for Genomic Medicine
+        location: Farmington, CT
+
+instances:
+  - representation: Individual clinical case reports from published literature
+    instance_type: GA4GH Phenopackets
+    data_type: >
+      Standardized phenotypic descriptions using Human Phenotype Ontology (HPO)
+      terms combined with causal genetic variant information for each individual.
+    count: 384
+
+distribution_formats:
+  - description:
+      - ZIP archive containing 384 Phenopacket files
+      - Compressed size 572.3 KB; total data volume 202.6 MB
+
+distribution_dates:
+  - response: "Initial publication on June 24, 2020"
+
+license_and_use_terms:
+  description:
+    - Dataset is distributed under Creative Commons Attribution 4.0 International (CC-BY-4.0) license
+    - Allows sharing and adaptation with appropriate attribution
+
+version_access:
+  description:
+    - Version 1.0 available on Zenodo with DOI 10.5281/zenodo.3905420
+    - Dataset has been viewed 1,533 times and downloaded 319 times as of October 15, 2020
+
+use_repository:
+  - description:
+      - Hosted on Zenodo, an open-access repository operated by CERN
+      - Indexed in the Bioinformatics community on Zenodo and OpenAIRE
+
+maintainers:
+  - description:
+      - Peter N Robinson (The Jackson Laboratory)
+      - Contact available through Zenodo record
+
+external_resources:
+  - external_resources:
+      - Zenodo record https://zenodo.org/records/3905420
+      - GA4GH Phenopacket Schema https://github.com/phenopackets/phenopacket-schema
+      - Human Phenotype Ontology https://hpo.jax.org/
+
+collection_mechanisms:
+  - description:
+      - Data extracted from published case reports in scientific literature
+      - Standardized using GA4GH Phenopacket schema with HPO term annotations
+
+data_collectors:
+  - description:
+      - Peter N Robinson (The Jackson Laboratory for Genomic Medicine, Farmington, CT)
+      - Courtney L. Thaxton (University of North Carolina, Chapel Hill) - data curation
