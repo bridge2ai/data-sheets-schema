@@ -167,21 +167,15 @@ collection_process:
 
 ### 5. Save and Validate
 
-**Save Location:**
-
-All D4D datasheets created by the assistant MUST be saved to:
+**Determine Save Location:**
 ```bash
-# Extract dataset name from YAML (use lowercase, replace spaces with underscores)
-DATASET_NAME="<dataset_name>"  # e.g., "cm4ai", "ai_readi_voice"
+# Suggested locations:
+# - src/data/examples/valid/<dataset_name>_d4d.yaml (for example datasets)
+# - data/extracted_by_column/<project>/<dataset_name>_d4d.yaml (for project datasets)
 
-# Save location (REQUIRED - all assistant-created D4Ds go here)
-OUTPUT_FILE="data/sheets_d4d_agent/${DATASET_NAME}_d4d.yaml"
+# Use project-specific directory if dataset belongs to a known project (AI_READI, CHORUS, CM4AI, VOICE)
+OUTPUT_FILE="data/extracted_by_column/<project>/<dataset_name>_d4d.yaml"
 ```
-
-**Why this location:**
-- Separates assistant-created datasheets from manually curated examples
-- All assistant outputs in one place for easy review and management
-- Distinct from project-specific extraction outputs in `data/extracted_by_column/`
 
 **Validate Against Schema:**
 
