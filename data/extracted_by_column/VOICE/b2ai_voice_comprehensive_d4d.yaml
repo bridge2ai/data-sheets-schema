@@ -2,9 +2,10 @@
 # Sources:
 #   - https://physionet.org/content/b2ai-voice/1.1/
 #   - https://healthdatanexus.ai/content/b2ai-voice/1.0/
-#   - https://docs.b2ai-voice.org/
+#   - Bridge2AI Data Transfer and Use Agreement (Google Drive PDF)
 # Column: VOICE
 # Generated: 2025-11-07
+# Updated: 2025-11-07 with DUA details
 
 id: "b2ai-voice-v1.1"
 dataset_name: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
@@ -182,6 +183,12 @@ preprocessing_and_derived_data:
 deidentification_and_privacy:
   approach: "HIPAA Safe Harbor"
 
+  data_classification: |
+    Data is Personally Identifiable Information (PII) as defined in OMB Memorandum M-07-16, and not
+    covered under HIPAA, FERPA, or similar laws governing personal information. Data is protected under
+    a Certificate of Confidentiality (CoC), which must be asserted against compulsory legal demands such
+    as court orders and subpoenas for identifying information or characteristics of research participants.
+
   actions:
     - "Removal of all 18 HIPAA Safe Harbor identifier categories"
     - "Removal of state and province; retention of country of data collection only"
@@ -207,6 +214,12 @@ deidentification_and_privacy:
     - "Full face photographs"
     - "Biometric identifiers"
     - "Any other unique identifying numbers or codes"
+
+  security_requirements: |
+    Recipients must store data with security controls adequate to protect Personally Identifiable Information,
+    including administrative, physical, and technical safeguards that covered entities and business associates
+    must put in place to secure individuals' electronic protected health information. Only authorized persons
+    may have access to the data at all times.
 
 files:
   version_notice: |
@@ -284,9 +297,69 @@ access_and_licensing:
     2. Complete required training (TCPS 2: CORE 2022)
     3. Sign the Bridge2AI Voice Registered Access Agreement
     4. Agree to use data only for research purposes
+    5. Have IRB approval for their research project (may be required)
+    6. Submit application to Data Access Compliance Office (DACO) for review and approval
 
   license: "Bridge2AI Voice Registered Access License"
   data_use_agreement: "Bridge2AI Voice Registered Access Agreement"
+
+  data_use_agreement_provider: "University of South Florida Board of Trustees"
+
+  dua_key_terms:
+    agreement_term: "Two years after start date, upon completion of project, upon expiration of applicable ethics approval, or termination by Provider, whichever occurs first"
+
+    permitted_uses: |
+      Data shall be used solely to conduct the approved research project and only by Recipient Scientist and
+      approved Recipient Personnel (faculty, employees, fellows, students, agents) with a need to use the data.
+      Collaborators at other research organizations and other research teams at the same organization must apply
+      independently for access and sign separate DUA before accessing data.
+
+    restrictions: |
+      - No disclosure, release, sale, rent, lease, loan, or access to third parties without prior written consent
+      - No use of intellectual property protection or database rights to prevent or limit access to data or research conclusions
+      - No contact with data subjects without IRB approval, Provider approval, and informed consent
+      - No use or further disclosure except as permitted by DUA or required by law
+      - Must establish administrative, technical, and physical safeguards to prevent unauthorized access
+      - Must store data with security controls adequate to protect Personally Identifiable Information
+      - Must ensure only Authorized Persons have access to data
+
+    sharing_policy: |
+      Recipient is encouraged to make research results publicly available in open-access journals or
+      pre-print servers where possible. Results must recognize the contribution of Provider as source of data
+      in all public disclosures.
+
+    data_disposition: |
+      Upon termination or expiration, data shall be destroyed according to Provider instructions.
+      Recipient shall submit written certification of data destruction within 30 days after termination
+      or expiration. Recipient may retain one copy to comply with records retention requirements under law,
+      regulation, or institutional policy, and for research integrity and verification purposes.
+
+    legal_protections: |
+      - Data is Personally Identifiable Information (PII) as defined in OMB Memorandum M-07-16
+      - Not covered under HIPAA, FERPA, or similar laws
+      - Protected under a Certificate of Confidentiality, which must be asserted against compulsory legal
+        demands (court orders, subpoenas) for identifying information or characteristics of research participants
+      - If required by law or legal process to disclose, Recipient must notify Provider prior to disclosure
+        (to extent allowed by law) and disclose least possible amount necessary
+
+    breach_notification: |
+      Recipient must notify Provider of any unauthorized use or disclosure not provided for by DUA within
+      5 business days of discovery. Recipient shall take steps to minimize impact, cooperate with Provider
+      to investigate/correct/mitigate, and support Provider's obligations to make notifications under state law.
+
+    warranties_and_liability: |
+      Data provided "AS IS" with no warranties of merchantability, fitness for particular purpose, or
+      non-infringement. Recipient assumes all liability for damages arising from use, storage, disclosure,
+      or disposal of data. Provider not liable for any loss, claim, or demand. No indemnification provided
+      by either party.
+
+    physionet_compliance: |
+      Recipient agrees to adhere to specific requirements of PhysioNet.org managed by MIT Laboratory for
+      Computational Physiology and supported by NIBIB under NIH grant R01EB030362.
+
+    amendment_rights: |
+      Provider may unilaterally amend DUA if federal sponsor requires revision. If Recipient objects to
+      amendment, DUA terminates immediately and Recipient must return or destroy all data.
 
   raw_audio_access: |
     Raw audio waveforms are not included in the public PhysioNet release. Researchers requiring raw audio
