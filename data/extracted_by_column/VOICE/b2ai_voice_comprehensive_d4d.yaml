@@ -3,9 +3,10 @@
 #   - https://physionet.org/content/b2ai-voice/1.1/
 #   - https://healthdatanexus.ai/content/b2ai-voice/1.0/
 #   - Bridge2AI Data Transfer and Use Agreement (Google Drive PDF)
+#   - Bridge2AI Voice IRB Protocol v14 (Google Doc)
 # Column: VOICE
 # Generated: 2025-11-07
-# Updated: 2025-11-07 with DUA details
+# Updated: 2025-11-07 with DUA and IRB details
 
 id: "b2ai-voice-v1.1"
 dataset_name: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
@@ -121,15 +122,75 @@ data_characteristics:
 collection_process:
   setting: "Specialty clinics and institutions across five North American sites"
 
+  sites:
+    us_institutions:
+      - "University of South Florida (USF) - IRB of record for Single IRB"
+      - "Weill Cornell Medicine (WCM)"
+      - "Vanderbilt University Medical Center (VUMC)"
+      - "Massachusetts Institute of Technology (MIT)"
+      - "Massachusetts Eye and Ear Institute (MEEI)"
+      - "Emory University (EU)"
+    canadian_institutions:
+      - "University of Toronto (UofT) - separate REB approval"
+      - "Hospital for Sick Children (HSC) - separate REB approval"
+      - "Mount Sinai Hospital (MSH) - separate REB approval"
+
   participant_selection: |
     Participants were screened for inclusion and exclusion criteria within five predetermined clinical
     condition groups: voice disorders, neurological/neurodegenerative disorders, mood/psychiatric disorders,
     respiratory disorders, and pediatric conditions.
 
+  inclusion_criteria:
+    treatment_population:
+      - "Diagnosed or treated for voice, respiratory, pediatric, mood, or neurological disorders affecting voice, speech, cough, or breath"
+      - "Age ≥18 years (pediatric exceptions at designated sites)"
+      - "English or Spanish language proficiency"
+      - "Smartphone access for remote data collection participants"
+      - "Consent to voice/speech sample contribution to open-source database"
+    control_population:
+      - "Same as treatment population except NOT diagnosed/treated for specified conditions"
+
+  exclusion_criteria:
+    - "Non-English/Spanish speakers"
+    - "Recent surgical intervention significantly altering disease symptoms"
+    - "Refusal of data de-identification for database upload"
+
+  recruitment_methods:
+    in_clinic:
+      - "Clinic-based screening from High Volume Expert Clinics (HVEC) and Community Outreach Clinics (COC)"
+      - "EHR review for eligibility prior to appointments using EPIC at USF"
+      - "Research staff available during clinic visits for interested participants"
+    digital:
+      - "Social media platforms: LinkedIn, X, Facebook, Instagram, YouTube"
+      - "Bridge2AI-Voice website: www.b2ai-voice.org"
+      - "Bridge2AI website: www.bridge2ai.org"
+      - "FlowTrials online platform"
+      - "QR-coded flyers linking to REDCap screening surveys"
+      - "Institutional websites"
+    recruitment_app:
+      - "Bridge2AI Enrollment Web app (HIPAA-compliant, browser-based, no download required)"
+
   consent: |
     Participants provided informed consent for data collection and sharing of de-identified research data.
-    Data collection and sharing was approved by the University of South Florida Institutional Review Board
-    and submitted to the University of Toronto Research Ethics Board.
+    Multiple consent modalities were permitted: signed paper consent, electronic consent via REDCap,
+    video consent within app (participants record themselves reading a consent statement), or verbal consent
+    with waiver of documentation for remote participation. Research assistants conducted consent discussions
+    lasting approximately 30 minutes. Electronic consent versions stored in REDCap for minimum 5-year retention
+    post-study. For longitudinal data collection, ongoing electronic consent was required before each subsequent
+    session to ensure continued agreement.
+
+  consent_special_populations:
+    pediatric: |
+      Only enrolled at pediatric participating institutions (not USF). Parents/guardians provided signed consent;
+      children provided assent when developmentally appropriate. Children under 7 were not asked to provide assent.
+
+  irb_approval_structure:
+    single_irb: |
+      All US-based institutions operate under a Single IRB arrangement with USF serving as the IRB of record.
+      Once protocol approved at USF, each participating US institution submitted review based on the Single IRB at USF.
+    canadian_reb: |
+      Canadian institutions (UofT, HSC, MSH) do not follow the Single IRB process and applied for separate
+      Research Ethics Board (REB) approval to comply with Canadian regulations.
 
   procedure: |
     Standardized protocol collecting demographics, health questionnaires, targeted confounders for voice,
@@ -137,9 +198,50 @@ collection_process:
     designed through a team science approach involving clinical expertise, bioethics, standards, and
     diversity/equity/inclusion considerations.
 
+  data_types_collected:
+    acoustic_data:
+      - "Prolonged vowel sounds"
+      - "Free and spontaneous speech"
+      - "Rainbow Passage (standardized text containing all English phonemes)"
+      - "Breathing, coughing, and snoring sounds"
+      - "Disease-specific vocalizations"
+    clinical_data:
+      - "Demographics (age, sex, gender, race, ethnicity, language)"
+      - "Disease diagnosis, severity, symptoms, and management"
+    imaging_retrospective_only:
+      - "Chest X-rays (respiratory disorders)"
+      - "Brain CT/MRI (neurological disorders)"
+      - "Video-laryngoscopy (voice disorders)"
+      - "NOTE: NO ADDITIONAL IMAGING PERFORMED"
+    genomic_data:
+      - "Whole genome sequencing (Alzheimer's cohort only)"
+      - "Collected exclusively at UofT and MSH under separate protocol/REB"
+    validated_questionnaires:
+      - "Voice-Handicap Index-10 (VHI-10) for voice disorders"
+      - "Disease-specific instruments integrated into mobile app"
+
+  collection_settings:
+    in_clinic:
+      - "High Volume Expert Clinics during regular follow-up visits"
+      - "Morsani location (primary USF site)"
+      - "USF Health Byrd Institute, Park Clinic, Davis Medical Building"
+      - "VUMC Shade Tree Clinic and Academy Children's Clinic"
+    remote:
+      - "Bridge2AI Voice Web app (browser-based)"
+      - "Bridge2AI Voice iOS app (for iOS devices)"
+      - "Participant's personal smartphone at home"
+
+  longitudinal_data:
+    conditions: "Alzheimer's, Parkinson's, and similar progressive/degenerative diseases"
+    in_clinic_collection: "During regular follow-up visits (no additional visits required)"
+    home_based_collection: "Via smartphone app at 1-6 month intervals"
+    maximum_duration: "4 years"
+    withdrawal: "Participants may withdraw anytime"
+
   data_capture: |
     Custom tablet application used for collection with headset when possible. Tasks included sustained
-    phonation of vowel sounds and free speech recordings.
+    phonation of vowel sounds and free speech recordings. Bridge2AI Voice Web app and iOS app are both
+    HIPAA-compliant with automatic data deletion after page closure (no persistent local storage).
 
   sessions: |
     Most participants completed one session; a subset required multiple sessions to complete all data
@@ -366,20 +468,189 @@ access_and_licensing:
     for specific approved purposes may submit controlled access requests to DACO@b2ai-voice.org.
 
 ethics:
+  protocol_title: "Bridge2AI Voice Data Acquisition"
+
+  protocol_version: "V14 (July 11, 2025, clean version dated September 4, 2025)"
+
+  principal_investigator: "Yael Bensoussan, MD MSc, FRCSC (USF Department of Otolaryngology)"
+
+  study_design: "Prospective cohort study"
+
+  target_sample: "30,000 participants across 9 participating institutions"
+
   irb_approval: |
-    Data collection and sharing approved by the University of South Florida Institutional Review Board (IRB).
-    Protocol also submitted to the University of Toronto Research Ethics Board.
+    Data collection and sharing approved by the University of South Florida Institutional Review Board (IRB),
+    which serves as the IRB of record for all US-based institutions under a Single IRB arrangement. Canadian
+    institutions (University of Toronto, Hospital for Sick Children, Mount Sinai Hospital) obtained separate
+    Research Ethics Board (REB) approval to comply with Canadian regulations.
+
+  irb_structure:
+    single_irb_lead: "University of South Florida (USF) - IRB of record for US institutions"
+    us_institutions_under_single_irb:
+      - "Weill Cornell Medicine (WCM)"
+      - "Vanderbilt University Medical Center (VUMC)"
+      - "Massachusetts Institute of Technology (MIT)"
+      - "Massachusetts Eye and Ear Institute (MEEI)"
+      - "Emory University (EU)"
+    canadian_separate_reb:
+      - "University of Toronto (UofT)"
+      - "Hospital for Sick Children (HSC)"
+      - "Mount Sinai Hospital (MSH)"
 
   ethical_position: |
     Dataset is ethically sourced with extensive privacy protections. Derived data released as low-risk
     category. The project emphasizes demographic diversity, ethical data collection practices, and transparent
-    documentation of methods and limitations.
+    documentation of methods and limitations. The protocol underwent 14 revisions (January 2023 - July 2025)
+    with major updates including electronic consent options, Spanish-language speaker inclusion, and additional
+    recruitment platforms.
 
   participant_consent: |
     All participants provided informed consent for data collection and sharing of de-identified research data.
-    Consent process included explanation of data use, privacy protections, and participant rights.
+    Multiple consent modalities permitted: signed paper consent, electronic consent via REDCap, video consent
+    within app, or verbal consent with documentation waiver for remote participation. Research assistants
+    conducted consent discussions lasting approximately 30 minutes, allowing adequate time for questions.
+    Participants made explicitly aware that participation is optional and voluntary. For longitudinal studies,
+    ongoing electronic consent required before each subsequent data collection to ensure continued agreement.
+    When study changes occur, participants receive notification and re-consent before additional data collection.
+
+  consent_retention: |
+    Electronic consent versions stored in REDCap for minimum 5-year retention post-study. Paper copies scanned
+    and uploaded electronically.
+
+  participant_rights:
+    withdrawal: |
+      If participants withdraw after completing voice data collection, their data is retained. If withdrawal
+      occurs during/before completion, data is excluded. For longitudinal studies, completed data from withdrawn
+      participants remains in the database since the purpose is to provide a platform, not analyze during
+      the study.
+    satisfaction_survey: |
+      Participants withdrawing or declining participation may optionally complete a satisfaction survey (no PHI
+      collected) to provide feedback on their decision.
+    future_contact: |
+      Participants may consent to future contact for extended longitudinal data collection beyond the 4-year
+      study period. Contact information (email, phone) stored locally at each institution only.
+
+  vulnerable_populations:
+    pediatric_protections:
+      - "Enrollment restricted to designated pediatric sites only (not USF)"
+      - "Parental consent required (one parent sufficient for minimal-risk research)"
+      - "Assent documentation required for children ≥7 years (developmentally appropriate)"
+      - "Children under 7 not asked to provide assent"
+      - "Checklist HRP-416 completed for subjects under 21"
+      - "No compensation for pediatric participants"
+    diversity_and_inclusion:
+      - "Plan for Enhancing Diverse Perspectives (PEDP) ensures recruitment from socioeconomically disadvantaged populations"
+      - "Community Outreach Clinics prioritize underserved/underrepresented groups"
+      - "Spanish-language speaker recruitment added in V11 (February 2025)"
+      - "Medical record review for underrepresented diagnostic categories"
+
+  risks_and_mitigation:
+    identified_risks:
+      primary_risk: "Personal information being mistakenly released"
+      physical_risk: "Minimal - voice collection is safe and non-invasive"
+      psychological_risk: "Questionnaires addressing mood disorders may trigger negative emotions in vulnerable participants"
+      voice_recognition_risk: |
+        Voice data cannot be completely de-identified due to unique biometric properties. Even when removing
+        all HIPAA protected information, it is always possible, even if unlikely, that someone could recognize
+        the participant's voice.
+    mitigation_strategies:
+      - "Strict confidentiality protocols and HIPAA compliance training for all personnel"
+      - "Federated learning to prevent centralized data aggregation"
+      - "HIPAA waivers limited to recruitment screening purposes only"
+      - "Two-tiered privacy: institutional storage + de-identified cloud sharing"
+      - "Data use agreements between collaborating institutions"
+      - "Multi-level privacy framework with institutional, shared, and federated layers"
+
+  potential_benefits: |
+    No direct immediate benefits to participants during this study. Societal benefits include development
+    of AI models for earlier disease screening, improved diagnostic accuracy, and enhanced healthcare
+    accessibility for underserved populations.
+
+  compensation:
+    adults:
+      - "$40 gift card for sessions <90 minutes"
+      - "$80 gift card for sessions ≥90 minutes"
+      - "Maximum of three compensated sessions ($120 total)"
+    pediatric:
+      - "No compensation for pediatric participants"
+
+  data_retention:
+    institutional_storage: "Maximum 10 years post-study; then destroyed"
+    participant_withdrawal: |
+      If participants withdraw before data completion, data is excluded. If withdrawal occurs after completion,
+      data is retained as the purpose is to provide a platform for future research.
+
+  privacy_framework:
+    level_1_institutional:
+      - "Identifiable PHI maintained locally at each institution on password-protected REDCap databases"
+      - "Access restricted to authorized research personnel"
+      - "Retention period: maximum 10 years post-study; then destroyed"
+    level_2_deidentified_shared:
+      - "De-identified voice, demographic, and clinical data hosted on NIH STRIDES Partner cloud infrastructure"
+      - "Partners: Amazon, Google, Microsoft (pre-negotiated HIPAA agreements)"
+      - "Data transfer agreements drafted by each institution"
+    level_3_federated_learning:
+      - "Algorithms run on data at each institution and model updates shared to central node"
+      - "Researchers benefit from other institutions' data without sharing actual data"
+      - "Prevents centralized data aggregation while enabling multi-center collaboration"
+
+  data_security:
+    - "Secure HTTPS protocol for all data transmission"
+    - "Bridge2AI Voice Web app and iOS app both HIPAA-compliant"
+    - "Automatic data deletion after page closure (no persistent local storage)"
+    - "Individual usernames and passwords for REDCap access"
+    - "Encryption and access controls on cloud servers"
+    - "Security controls adequate to protect Personally Identifiable Information"
+    - "Only authorized persons have access to data at all times"
+
+  quality_control:
+    year_1: "All samples reviewed for acoustic quality and machine learning readiness by 2 acoustic engineers and 3 AI data scientists"
+    years_2_4: "Random 10% monthly sample audits for quality and ML preparedness"
+    application_features: "Volume standardization and noise cancellation models"
+
+  phased_implementation:
+    phase_1_exploratory:
+      status: "Completed November 2023"
+      activities:
+        - "IT/cloud infrastructure development"
+        - "App development and refinement"
+        - "Initial data collection: up to 180 participants"
+    phase_2_pilot:
+      status: "Began November 2023 (ongoing as of document date)"
+      activities:
+        - "Cumulative 600 participants"
+        - "Main sites + HVEC expansion"
+        - "Data sharing framework development"
+    phase_3_expansion:
+      activities:
+        - "Community Outreach Clinic inclusion"
+        - "Cumulative 3,000 participants"
+        - "Open-source database preparation"
+    phase_4_outreach:
+      activities:
+        - "Normal cohort partnerships"
+        - "HVEC/COC expansion"
+        - "Cumulative 5,000 participants"
+
+  open_source_timeline: |
+    By end of Phase 2, de-identified data becomes publicly available through an NIH hosted platform similar
+    to the Clinical Genomic Database.
+
+  special_features:
+    nih_strides: |
+      This initiative leverages cloud environments to streamline NIH data use by partnering with commercial
+      providers (Amazon, Google, Microsoft), modernizing biomedical research through commercial cloud services.
+    federated_learning: |
+      Federated learning prevents institutions from sharing raw data while enabling multi-center model training.
+      Centralized model updates allow distributed research collaboration with HIPAA-compliant AI analysis
+      without data migration.
 
   conflicts_of_interest: "None to declare"
+
+  protocol_revision_history: |
+    The protocol has undergone 14 revisions (January 2023 - July 2025). Major updates include: V4 - electronic
+    consent options added; V11 - Spanish-language speaker inclusion and new recruitment platform; V13 - flyer
+    recruitment clarification and additional Vanderbilt sites.
 
 funding_and_acknowledgements:
   funding:
