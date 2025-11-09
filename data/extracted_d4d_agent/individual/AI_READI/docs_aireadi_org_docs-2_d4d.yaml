@@ -1,0 +1,156 @@
+id: ai-readi-flagship-t2dm
+name: AI-READI Dataset
+title: AI-READI Flagship Dataset of Type 2 Diabetes
+description: >-
+  The AI-READI dataset consists of data collected from individuals with and
+  without Type 2 Diabetes Mellitus (T2DM), harmonized across three data
+  collection sites. The study design and sampling aimed to achieve approximately
+  equal distribution of participants across diabetes severity categories and to
+  acquire data across multiple domains (e.g., surveys, physical measurements,
+  clinical data, imaging, wearable device data) to support downstream AI/ML
+  analyses that are difficult with claims or EHR-only sources. Some data that
+  are not considered sensitive personal health data are publicly available under
+  a license agreement; access to the full dataset requires a data use
+  agreement. Enrollment is ongoing; pilot and periodic releases may not be
+  fully balanced across groups.
+version: 2.0.0
+keywords:
+  - Type 2 Diabetes Mellitus
+  - T2DM
+  - AI
+  - Machine Learning
+  - Multimodal
+  - Surveys
+  - Clinical measurements
+  - Imaging
+  - Wearable devices
+  - Retinal images
+  - ECG
+  - Blood sugar
+  - Environmental variables
+  - Harmonized
+  - Multi-site
+created_by:
+  - AI-READI Project
+last_updated_on: 2025-09-08
+modified_by: Aydan
+purposes:
+  - response: >-
+      To enable AI/Machine Learning research to better understand
+      salutogenesis—the pathway from disease to health—in Type 2 Diabetes
+      Mellitus (T2DM).
+tasks:
+  - response: >-
+      Downstream AI/ML analyses across multiple clinical and real-world data
+      domains (surveys, physical measurements, labs, imaging, wearable device
+      data, ECG, glucose, environmental variables).
+addressing_gaps:
+  - response: >-
+      Provide harmonized, multi-domain, prospective data suitable for AI/ML that
+      are not feasible to obtain from existing sources such as claims or EHR
+      data alone.
+instances:
+  - representation: Individual study participants across three collection sites
+    instance_type: >-
+      Multimodal per-participant record composed of multiple clinical and
+      real-world data domains
+    data_type: >-
+      Survey responses, physical/clinical measurements, blood and urine lab
+      results, retinal images, ECG, blood sugar levels, wearable device activity
+      data, and environmental measures (e.g., home air quality)
+    sampling_strategies:
+      - strategies:
+          - Stratified recruitment targeting approximately equal distribution by
+            diabetes severity
+sampling_strategies:
+  - strategies:
+      - Stratified sampling targeting approximate balance across diabetes
+        severity categories
+    is_sample:
+      - yes
+    is_representative:
+      - Not guaranteed; pilot release may not be balanced due to ongoing enrollment
+subpopulations:
+  - identification:
+      - With and without T2DM
+      - Diabetes severity categories (targeted approximate balance)
+    distribution:
+      - Targeted ~equal distribution by diabetes severity; pilot data may not be
+        balanced due to ongoing enrollment
+acquisition_methods:
+  - description:
+      - Data include directly observed clinical measurements and sensor data
+        (e.g., imaging, ECG, wearable devices) and participant-reported survey
+        responses
+    was_directly_observed: includes directly observed measurements and sensor data
+    was_reported_by_subjects: includes participant-reported survey responses
+collection_mechanisms:
+  - description:
+      - Multi-site clinical data acquisition
+      - Clinical equipment and imaging systems (e.g., retinal imaging, ECG)
+      - Wearable device data capture
+      - Surveys and standardized clinical assessments
+data_collectors:
+  - description:
+      - Three data collection sites participated in recruitment and data
+        acquisition
+collection_timeframes:
+  - description:
+      - Pilot study phase; ongoing enrollment with periodic data releases
+preprocessing_strategies:
+  - description:
+      - Data harmonized across three collection sites
+external_resources:
+  - external_resources:
+      - FAIRhub data portal (dataset landing page referenced)
+      - AI-READI dataset documentation site
+      - GitHub repository (project resources)
+confidential_elements:
+  - description:
+      - Controlled-access elements include 5-digit ZIP code, sex, race,
+        ethnicity, genetic sequencing data, past health records, medications, and
+        traffic and accident reports
+sensitive_elements:
+  - description:
+      - Health and clinical data, genetic data, and other potentially identifying
+        variables are held under controlled access
+is_deidentified:
+  - description:
+      - Public dataset excludes sensitive personal health data; additional
+        potentially identifying or sensitive data are available only under
+        controlled access via a data use agreement
+future_use_impacts:
+  - description:
+      - Potential imbalance in pilot and early releases (due to ongoing
+        enrollment) may affect model training and evaluation; users should check
+        group distributions and consider stratification or rebalancing
+distribution_formats:
+  - description:
+      - Public data distributed via a portal under license agreement; full data
+        accessible via data use agreement
+distribution_dates:
+  - description:
+      - Pilot release available; periodic updates to data releases as enrollment
+        continues
+license_and_use_terms:
+  description:
+    - Public (non-sensitive) data available upon agreement with a license that
+      defines permitted uses
+    - Full dataset access requires entering into a data use agreement (DUA)
+updates:
+  description:
+    - Periodic updates to data releases as enrollment continues and new data are
+      acquired
+subsets:
+  - name: Public dataset
+    description: >-
+      Includes non-sensitive data such as survey data, blood and urine lab
+      results, fitness activity levels, clinical measurements (e.g., monofilament
+      and cognitive function testing), retinal images, ECG, blood sugar levels,
+      and environmental variables (e.g., home air quality). Available for public
+      download upon agreement with a license.
+  - name: Controlled-access dataset
+    description: >-
+      Includes controlled-access elements such as 5-digit ZIP code, sex, race,
+      ethnicity, genetic sequencing data, past health records, medications, and
+      traffic and accident reports. Access requires a data use agreement (DUA).

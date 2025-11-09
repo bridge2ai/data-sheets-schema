@@ -1,0 +1,157 @@
+id: doi:10.18130/V3/B35XWX
+name: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+description: >-
+  This dataset is the March 2025 Data Release of Cell Maps for Artificial
+  Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in
+  the NIH Bridge2AI program. This Beta release includes perturb-seq data in
+  undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J
+  iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in
+  MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy
+  (vorinostat and paclitaxel). CM4AI output data are packaged with provenance
+  graphs and rich metadata as AI-ready datasets in RO-Crate format using the
+  FAIRSCAPE framework. Data presented here will be augmented regularly through
+  the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford,
+  UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center.
+  This data is Copyright (c) 2025 The Regents of the University of California
+  except where otherwise noted. Spatial proteomics raw image data is copyright
+  (c) 2025 The Board of Trustees of the Leland Stanford Junior University.
+  Dataset licensed for reuse under Creative Commons
+  Attribution-NonCommercial-ShareAlike 4.0 International license
+  (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required
+  to the copyright holders and the authors. Any publications referencing this
+  data or derived products should cite the Related Publication below, as well as
+  directly citing this data collection (2025-03-04).
+language: en
+publisher: https://dataverse.lib.virginia.edu
+issued: "2025-03-20"
+page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
+doi: doi:10.18130/V3/B35XWX
+keywords:
+  - Medicine, Health and Life Sciences
+  - Cell Maps for Artificial Intelligence
+  - CM4AI
+  - Bridge2AI
+  - perturb-seq
+  - SEC-MS
+  - immunofluorescence
+  - RO-Crate
+  - FAIRSCAPE
+  - iPSC
+  - NPCs
+  - neurons
+  - cardiomyocytes
+  - MDA-MB-468
+  - vorinostat
+  - paclitaxel
+license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+version: March 2025 (Beta)
+created_by:
+  - Cell Maps for Artificial Intelligence (CM4AI)
+creators:
+  - name: Clark T
+  - name: Parker J
+  - name: Al Manir S
+  - name: Axelsson U
+  - name: Ballllosero Navarro F
+  - name: Chinn B
+  - name: Churas CP
+  - name: Dailamy A
+  - name: Doctor Y
+  - name: Fall J
+  - name: Forget A
+  - name: Gao J
+  - name: Hansen JN
+  - name: Hu M
+  - name: Johannesson A
+  - name: Khaliq H
+  - name: Lee YH
+  - name: Lenkiewicz J
+  - name: Levinson MA
+  - name: Marquez C
+  - name: Metallo C
+  - name: Muralidharan M
+  - name: Nourreddine S
+  - name: Niestroy J
+  - name: Obernier K
+  - name: Pan E
+  - name: Polacco B
+  - name: Pratt D
+  - name: Qian G
+  - name: Schaffer L
+  - name: Sigaeva A
+  - name: Thaker S
+  - name: Zhang Y
+  - name: Bélisle-Pipon JC
+  - name: Brandt C
+  - name: Chen JY
+  - name: Ding Y
+  - name: Fodeh S
+  - name: Krogan N
+  - name: Lundberg E
+  - name: Mali P
+  - name: Payne-Foster P
+  - name: Ratcliffe S
+  - name: Ravitsky V
+  - name: Sali A
+  - name: Schulz W
+  - name: Ideker T
+funders:
+  - grantor:
+      name: National Institutes of Health (NIH) Bridge2AI program
+purposes:
+  - response: >-
+      March 2025 data release of CM4AI (the NIH Bridge2AI Functional Genomics
+      Grand Challenge), providing AI-ready multimodal cellular datasets
+      (perturb-seq, SEC-MS, and immunofluorescence imaging) packaged with
+      provenance and rich metadata.
+instances:
+  - representation: perturb-seq data in undifferentiated KOLF2.1J iPSCs
+    data_type: perturb-seq data
+  - representation: >-
+      SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs,
+      neurons, and cardiomyocytes
+    data_type: SEC-MS data
+  - representation: >-
+      IF images in MDA-MB-468 breast cancer cells in the presence and absence
+      of chemotherapy (vorinostat and paclitaxel)
+    data_type: immunofluorescence images
+subsets:
+  - name: perturb-seq (KOLF2.1J iPSCs)
+    description: Perturb-seq data in undifferentiated KOLF2.1J iPSCs.
+  - name: SEC-MS (KOLF2.1J iPSCs, NPCs, neurons, cardiomyocytes)
+    description: >-
+      SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs,
+      neurons, and cardiomyocytes.
+  - name: Immunofluorescence images (MDA-MB-468)
+    description: >-
+      IF images in MDA-MB-468 breast cancer cells with and without chemotherapy
+      (vorinostat and paclitaxel).
+distribution_formats:
+  - description:
+      - RO-Crate
+      - FAIRSCAPE provenance and metadata packaging
+distribution_dates:
+  - description:
+      - "2025-03-20"
+license_and_use_terms:
+  description:
+    - >-
+      Dataset licensed for reuse under Creative Commons
+      Attribution-NonCommercial-ShareAlike 4.0 International license
+      (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+    - Attribution is required to the copyright holders and the authors.
+    - >-
+      Any publications referencing this data or derived products should cite the
+      Related Publication and directly cite this data collection (2025-03-04).
+ip_restrictions:
+  description:
+    - >-
+      Copyright (c) 2025 The Regents of the University of California except
+      where otherwise noted.
+    - >-
+      Spatial proteomics raw image data is copyright (c) 2025 The Board of
+      Trustees of the Leland Stanford Junior University.
+updates:
+  description:
+    - Beta release; data will be augmented regularly through the end of the project.

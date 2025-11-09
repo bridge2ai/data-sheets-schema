@@ -1,0 +1,27 @@
+# D4D Metadata extracted from: dataverse_10.18130_V3_F3TD5R_row16.txt
+# Source: downloads_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_row16.txt
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:54:14
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: "doi:10.18130/V3/F3TD5R"
+title: Unknown UVA Dataverse dataset (access requires login)
+description: The provided source captures the University of Virginia Dataverse login page rather than a dataset landing page. No dataset-specific metadata (title, authors, files, description) was visible. The page mentions "LibraData Dataverse," a maintenance notice (Tuesday 9/09, 8am–10am), and that the Dataverse software version is v. 6.6 build 1829-192cdc4. A contact link for "University of Virginia Dataverse Support" is present. Dataset-level terms, license, and access details are not visible in the provided content.
+doi: "doi:10.18130/V3/F3TD5R"
+keywords:
+  - University of Virginia Dataverse
+  - LibraData Dataverse
+  - Dataverse 6.6
+created_by:
+  - University of Virginia Dataverse
+version: Dataverse platform v. 6.6 build 1829-192cdc4 (platform version; dataset version not visible)
+license_and_use_terms:
+  description:
+    - Site-wide Terms of Use and Privacy Policy links are present on the UVA Dataverse login page; dataset-specific license/ToU not visible in the provided content.
+maintainers:
+  - description:
+      - University of Virginia Dataverse Support (contact link present on page).

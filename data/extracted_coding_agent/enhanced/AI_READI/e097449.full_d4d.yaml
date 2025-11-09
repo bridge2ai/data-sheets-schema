@@ -1,0 +1,22 @@
+# D4D Metadata extracted from: e097449.full_row2.pdf
+# Source: downloads_by_column_enhanced/AI_READI/e097449.full_row2.pdf
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-11-08T17:49:44
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: e097449.full_row2
+name: e097449.full_row2.pdf
+description: PDF dataset artifact associated with the AI_READI project. Detailed content not available from the provided source.
+keywords:
+  - AI_READI
+resources:
+  - id: e097449.full_row2.pdf
+    name: e097449.full_row2.pdf
+    path: e097449.full_row2.pdf
+    media_type: application/pdf
+    keywords:
+      - AI_READI

@@ -1,0 +1,29 @@
+# D4D Metadata extracted from: drive_google_com_B2AI_Voice_DTUA_row13.pdf
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-10-31 13:22:32
+
+id: drive_google_com_B2AI_Voice_DTUA_row13.pdf
+name: B2AI Voice DTUA row13
+title: B2AI Voice DTUA Row 13
+description: PDF document titled "B2AI_Voice_DTUA_row13.pdf" associated with the VOICE project. Detailed contents were not available in the provided source.
+media_type: application/pdf
+path: drive_google_com_B2AI_Voice_DTUA_row13.pdf
+keywords:
+  - VOICE
+  - DTUA
+  - PDF
+  - Google Drive
+purposes:
+  - response: Data Transfer and Use Agreement (DTUA) related to the VOICE project.
+tasks:
+  - response: Document and govern data transfer and use for VOICE project data.
+distribution_formats:
+  - description:
+      - PDF document
+      - Media type: application/pdf
+      - Google Drive hosting (inferred from filename)
+license_and_use_terms:
+  description:
+    - Terms of use are contained within the DTUA PDF; specific licensing text not available from the provided metadata.

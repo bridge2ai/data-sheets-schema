@@ -1,0 +1,42 @@
+# D4D Metadata extracted from: B2AI-Voice DTUA 2025 2025-09-04.pdf
+# Source: downloads_by_column/VOICE/B2AI-Voice DTUA 2025 2025-09-04.pdf
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:59:31
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: b2ai-voice-dtua-2025-09-04
+name: Bridge2AI VOICE - Data Transfer and Use Agreement (DTUA)
+title: B2AI-Voice DTUA 2025 2025-09-04.pdf
+description: This record reflects a Data Transfer and Use Agreement (DTUA) PDF associated with the Bridge2AI VOICE project, inferred from the filename "B2AI-Voice DTUA 2025 2025-09-04.pdf". The PDF content was not available for parsing; details herein are limited to information implied by the filename and context.
+issued: "2025-09-04"
+keywords:
+  - Bridge2AI
+  - VOICE
+  - DTUA
+  - Data Transfer and Use Agreement
+  - PDF
+  - 2025
+resources:
+  - id: b2ai-voice-dtua-2025-09-04-pdf
+    name: B2AI-Voice DTUA 2025 2025-09-04
+    title: B2AI-Voice DTUA 2025 2025-09-04.pdf
+    description: Data Transfer and Use Agreement (DTUA) document for the Bridge2AI VOICE project. The file is a PDF; specific terms are not extractable from the filename alone.
+    media_type: application/pdf
+    keywords:
+      - Bridge2AI
+      - VOICE
+      - DTUA
+      - Data Transfer and Use Agreement
+    distribution_formats:
+      - description:
+          - PDF document
+    distribution_dates:
+      - description:
+          - "2025-09-04"
+    license_and_use_terms:
+      description:
+        - This document appears to define data transfer and use terms (DTUA) governing access to and use of Bridge2AI VOICE project datasets. Full terms are not available without the PDF content.

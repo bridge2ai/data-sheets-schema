@@ -1,0 +1,250 @@
+# D4D Metadata for: AI-READI Flagship Dataset of Type 2 Diabetes
+# Input Case: Case 3 - Directory Combined
+# Source: downloads_by_column_combined/AI_READI/AI_READI_all_combined.txt
+# Generated: 2025-11-08T20:35:00Z
+# Generator: aurelian D4D agent (GPT-5) with Claude Code oversight
+# Method: Automated extraction with interactive human oversight and YAML fixing
+# Approach: Approach 2 - Interactive Coding Agents
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+# Reviewed by: Claude Code (claude-sonnet-4-5)
+# Notes: Synthesized from 6 combined source files; YAML validated and corrected
+---
+id: "doi:10.60775/fairhub.2"
+name: ai-readi-flagship-dataset-t2dm
+title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+description: |-
+  The AI-READI Flagship Dataset is a harmonized, multi-modal human health dataset
+  collected across three data collection sites from individuals with and without
+  Type 2 Diabetes Mellitus (T2DM). The dataset was designed with future AI/ML
+  applications in mind, including a recruitment and sampling approach intended
+  to approximate equal distribution across diabetes severity levels and a
+  standardized data acquisition protocol spanning multiple domains: survey data,
+  physical measurements, clinical assessments, imaging, wearable device data,
+  and more. The overarching scientific goal is to support research into
+  salutogenesis (the pathway from disease to health) in T2DM.
+  
+  The dataset is distributed via the FAIRhub data portal and has both a public
+  component (de-identified and non-sensitive health data, available under a
+  license) and a controlled-access component (additional sensitive elements,
+  accessible via a data use agreement and an approval workflow). As enrollment is
+  ongoing, early/pilot releases and periodic updates may not fully achieve the
+  target balanced distribution across groups. Documentation for each dataset
+  version is maintained and includes clinical context, acquisition methods,
+  variable summaries, domain-specific processing and formats, and additional
+  resources for AI-readiness, FAIR principles, and ethical considerations.
+language: English
+page: "https://docs.aireadi.org/docs/2"
+version: 2.0.0
+issued: 2024-11-08
+created_on: 2024-05-03
+last_updated_on: 2024-11-08
+created_by:
+  - AI-READI Consortium
+doi: "doi:10.60775/fairhub.2"
+keywords:
+  - Diabetes mellitus
+  - Machine Learning
+  - Artificial Intelligence
+  - Electrocardiography
+  - Continuous Glucose Monitoring
+  - Retinal imaging
+  - Eye exam
+license: Health Data License
+is_tabular: mixed (tabular, imaging, waveform, sensor-derived)
+creators:
+  - name: AI-READI Consortium
+purposes:
+  - name: primary-purpose
+    response: |-
+      Create a harmonized, multi-modal flagship dataset to enable AI/ML research
+      on Type 2 Diabetes Mellitus (T2DM), with a focus on salutogenesis (the
+      pathway from disease to health).
+tasks:
+  - name: intended-ai-ml-uses
+    response: |-
+      Broad AI/ML analyses across multiple domains (survey, clinical, lab,
+      imaging, wearable/device, environmental) to support prediction, discovery,
+      and integrative modeling in T2DM.
+addressing_gaps:
+  - name: addressing-data-gaps
+    response: |-
+      Provide integrated, multi-domain data not feasible to obtain from single
+      sources such as claims or EHR alone; harmonize data across multiple
+      collection sites to support robust AI/ML development and evaluation.
+instances:
+  - name: participant-level-multimodal-records
+    representation: Participant-centric records with linked multi-domain measurements and observations
+    instance_type: Participants and their associated multi-modal data (surveys, clinical assessments, labs, imaging, wearables, environmental)
+    data_type: |-
+      Mixed data modalities including tabular variables (surveys, labs, clinical),
+      imaging (retinal), physiological signals (ECG), continuous glucose monitor
+      streams, and derived features; harmonized across sites.
+    label: No universal target; labels/variables vary by domain and analysis
+    sampling_strategies:
+      - name: recruitment-and-balance
+        is_sample:
+          - yes
+        is_random:
+          - no
+        source_data:
+          - Prospective recruitment across three clinical sites
+        is_representative:
+          - Partially; enrollment ongoing
+        representative_verification:
+          - Recruitment targeted approximate balance by diabetes severity; ongoing monitoring via study dashboard
+        why_not_representative:
+          - Pilot and early releases may not fully achieve balance across groups as enrollment continues
+        strategies:
+          - Targeted stratified recruitment by diabetes severity across sites
+subsets:
+  - name: Public subset
+    description: |-
+      De-identified, non-sensitive health data available for download upon agreement
+      to the dataset license. Includes survey data, blood and urine lab results,
+      fitness/activity levels, selected clinical measurements (e.g., monofilament
+      and cognitive function tests), retinal images, ECG, blood sugar levels (e.g.,
+      CGM), and environmental variables such as home air quality.
+    is_data_split: no
+    is_subpopulation: no
+  - name: Controlled-access subset
+    description: |-
+      Additional sensitive elements available under a data use agreement and
+      approval process. Includes 5-digit ZIP code, sex, race, ethnicity, genetic
+      sequencing data, past health records, medications, and traffic/accident
+      reports.
+    is_data_split: no
+    is_subpopulation: no
+anomalies:
+  - name: distribution-notes
+    description:
+      - Early releases and periodic updates may not fully achieve balanced distribution across groups as enrollment is ongoing.
+external_resources:
+  - name: linked-external-context
+    external_resources:
+      - Environmental variables (e.g., home air quality) and traffic/accident reports may be derived from or linked to external sources.
+    future_guarantees:
+      - Not specified; see dataset documentation and FAIRhub records for archival details.
+    archival:
+      - Versioned releases with documentation are maintained; prior versions retain DOIs.
+    restrictions:
+      - External datasets, if used, may carry their own licenses/terms; users must review terms where applicable.
+confidential_elements:
+  - name: controlled-elements
+    description:
+      - Controlled-access data include quasi-identifiers and sensitive health/genetic data (e.g., 5-digit ZIP, sex, race, ethnicity, genetic sequencing, past health records, medications, traffic/accident reports).
+content_warnings:
+  - name: potential-sensitive-health-content
+    warnings:
+      - Contains medical and genetic information; exposure to sensitive health topics.
+subpopulations:
+  - name: diabetes-status-and-severity
+    identification:
+      - Participants with and without T2DM; severity strata targeted during recruitment.
+    distribution:
+      - Approximate balance targeted; may vary in pilot/early releases due to ongoing enrollment.
+sensitive_elements:
+  - name: sensitive-health-and-demographic-elements
+    description:
+      - Health data (labs, clinical assessments), genetic data, demographic attributes (sex, race, ethnicity), location-derived data (5-digit ZIP).
+is_deidentified:
+  name: deidentification-summary
+  description:
+    - Public subset is de-identified and excludes sensitive personal health data.
+    - Controlled-access subset includes additional sensitive/quasi-identifying elements and is governed by a DUA and access controls.
+acquisition_methods:
+  - name: mixed-acquisition
+    description:
+      - Multi-domain acquisition across surveys, clinical measurements, labs, imaging devices, ECG, CGM, wearables, and linked environmental/contextual sources.
+    was_directly_observed: yes (e.g., imaging, ECG, CGM, physical measurements)
+    was_reported_by_subjects: yes (e.g., survey responses)
+    was_inferred_derived: yes (e.g., derived features, harmonized variables)
+    was_validated_verified: Not specified in provided sources
+collection_mechanisms:
+  - name: instruments-and-procedures
+    description:
+      - Standardized data acquisition protocols across three sites, including clinical instruments, imaging hardware, physiological sensors, wearables, survey tools, and EHR extraction; harmonization applied across sites.
+data_collectors:
+  - name: collection-sites-and-study-staff
+    description:
+      - Data collected at three clinical sites by study staff under a common protocol.
+collection_timeframes:
+  - name: enrollment-and-releases
+    description:
+      - Pilot phase data comprise v1.0.0 (2024-05-03). Enrollment continued with v2.0.0 (2024-11-08). Ongoing releases are planned as data collection proceeds.
+ethical_reviews:
+  - name: ethical-sourcing-statement
+    description:
+      - Described as an ethically-sourced dataset; consult site-specific documentation for IRB and ethics review details.
+data_protection_impacts:
+  - name: data-protection-and-access-controls
+    description:
+      - Public data under license; controlled-access data require a data use agreement and justification of research purpose; multi-step access workflow includes login, training, purpose statement, license acceptance, and data selection.
+preprocessing_strategies:
+  - name: harmonization
+    description:
+      - Harmonized across three collection sites; domain-specific processing described in versioned documentation.
+cleaning_strategies:
+  - name: quality-and-standardization
+    description:
+      - Standardization and quality checks applied per domain; refer to domain-specific docs for details.
+raw_sources:
+  - name: primary-data-sources
+    description:
+      - Surveys, clinical measurements and tests, laboratory results (blood, urine), imaging (retinal), ECG, CGM and wearable device data, EHR-derived variables, environmental/traffic context.
+existing_uses:
+  - name: usage-and-stats
+    description:
+      - FAIRhub provides usage statistics and a "Dataset Uses" section; see portal for details.
+use_repository:
+  - name: citation-and-docs
+    description:
+      - Citation instructions and versioned documentation: https://docs.aireadi.org/docs/2/citation
+other_tasks:
+  - name: potential-uses
+    description:
+      - Multi-modal integrative modeling, phenotype characterization, prognostic/risk modeling, and cross-domain exploratory analyses in T2DM and related conditions (subject to license/DUA).
+future_use_impacts:
+  - name: fairness-and-generalizability
+    description:
+      - Potential impacts from evolving cohort composition (e.g., interim imbalance across groups) should be considered to mitigate fairness and generalizability risks in downstream models.
+distribution_formats:
+  - name: distribution
+    description:
+      - Distributed via the FAIRhub data portal; gated controlled-access workflow; mixed modalities and file types across imaging, signals, and tabular data.
+distribution_dates:
+  - name: version-1.0.0
+    description:
+      - 2024-05-03 (DOI: 10.60775/fairhub.1)
+  - name: version-2.0.0
+    description:
+      - 2024-11-08 (DOI: 10.60775/fairhub.2)
+license_and_use_terms:
+  name: licensing-and-dua
+  description:
+    - Public subset available under a Health Data License; users must accept the license.
+    - Controlled-access subset requires a Data Use Agreement and approval.
+    - Access workflow includes login, diabetes research eligibility, required training, research purpose statement, license acceptance, and data selection.
+ip_restrictions:
+  name: third-party-ip
+  description:
+    - Users should review terms for any linked external datasets (e.g., environmental, traffic) that may impose additional restrictions.
+maintainers:
+  - name: dataset-maintenance
+    description:
+      - AI-READI Consortium and FAIRhub platform maintain the dataset and documentation; "Changelog" and versioned docs are provided.
+errata:
+  - name: changelog
+    description:
+      - A versioned changelog is maintained in the documentation site.
+updates:
+  name: update-plan
+  description:
+    - Periodic updates to add new participants/modalities and to correct issues; communicated via FAIRhub versioning and documentation updates.
+version_access:
+  name: versioning-and-persistence
+  description:
+    - Older versions remain accessible and citable via their DOIs (e.g., v1.0.0: 10.60775/fairhub.1).
+extension_mechanism:
+  name: community-and-contact
+  description:
+    - Contribution and inquiry via the project documentation site and "Contact Us"; project GitHub links are provided in the docs.

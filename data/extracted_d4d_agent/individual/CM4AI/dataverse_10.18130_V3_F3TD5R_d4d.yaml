@@ -1,0 +1,31 @@
+name: University of Virginia Dataverse
+title: Log In - University of Virginia Dataverse
+description: |-
+  This content reflects the University of Virginia Dataverse login page.
+  It indicates that access requires an institutional account and provides a
+  contact form for University of Virginia Dataverse Support. The page also
+  includes references to Terms of Use and a Privacy Policy and displays the
+  Dataverse software version in use.
+keywords:
+  - Dataverse
+  - University of Virginia
+  - LibraData
+  - Login
+  - Institutional access
+version: "6.6 (build 1829-192cdc4)"
+license_and_use_terms:
+  description:
+    - Terms of Use (referenced on page; link not provided in source)
+    - Privacy Policy (referenced on page; link not provided in source)
+    - "Copyright © 2025, by the Rector and Visitors of the University of Virginia"
+distribution_formats:
+  - description:
+      - Web portal (Dataverse) access
+      - Institutional account login required
+maintainers:
+  - description:
+      - University of Virginia Dataverse Support
+      - Contact form available via "Contact University of Virginia Dataverse Support" on the page
+updates:
+  description:
+    - "Maintenance notice: LibraData Dataverse will be down Tuesday 9/09 from 8am to 10am (timezone not specified in source)"

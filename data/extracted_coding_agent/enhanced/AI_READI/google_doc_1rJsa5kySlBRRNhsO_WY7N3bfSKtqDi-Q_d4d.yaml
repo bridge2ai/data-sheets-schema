@@ -1,0 +1,22 @@
+# D4D Metadata extracted from: google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+# Source: downloads_by_column_enhanced/AI_READI/google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-11-08T17:51:29
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: ai_readi-google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12
+name: google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf
+title: AI_READI google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12
+description: Dataset description could not be extracted from the PDF content. This record is derived from a PDF document filename and associated project context indicating relevance to the AI_READI project.
+keywords:
+  - AI_READI
+page: "https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q"
+media_type: application/pdf
+distribution_formats:
+  - name: PDF
+    description:
+      - PDF document (application/pdf)

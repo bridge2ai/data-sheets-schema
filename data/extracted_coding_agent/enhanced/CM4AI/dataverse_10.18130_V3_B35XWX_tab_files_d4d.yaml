@@ -1,0 +1,310 @@
+# D4D Metadata extracted from: dataverse_10.18130_V3_B35XWX_tab_files_row15.txt
+# Source: downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_files_row15.txt
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T18:08:44
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: "doi:10.18130/V3/B35XWX"
+name: CM4AI March 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+description: "This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center. This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection (2025-03-04). (2025-03-07)"
+doi: "doi:10.18130/V3/B35XWX"
+page: "https://doi.org/10.18130/V3/B35XWX"
+issued: 2025-03-03
+created_on: 2025-02-27
+last_updated_on: 2025-03-07
+license: "CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/"
+version: "1.4"
+status: "bibo:draft"
+keywords:
+  - AI
+  - affinity purification
+  - AP-MS
+  - artificial intelligence
+  - breast cancer
+  - Bridge2AI
+  - cardiomyocyte
+  - CM4AI
+  - CRISPR/Cas9
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - machine learning
+  - mass spectroscopy
+  - MDA-MB-468
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - paclitaxel
+  - perturb-seq
+  - perturbation sequencing
+  - protein-protein interaction
+  - protein localization
+  - single-cell RNA sequencing
+  - scRNAseq
+  - SEC-MS
+  - size exclusion chromatography
+  - subcellular imaging
+  - vorinostat
+created_by:
+  - CM4AI Consortium
+  - Clark T
+  - Ideker T
+  - Krogan N
+  - Lundberg E
+  - Mali P
+license_and_use_terms:
+  description:
+    - Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0). Attribution is required to the copyright holders and the authors.
+    - Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University.
+ip_restrictions:
+  description:
+    - Copyrights as noted; reuse under CC BY-NC-SA 4.0.
+regulatory_restrictions:
+  description: []
+maintainers:
+  description:
+    - University of Virginia Dataverse (hosting)
+    - Point of Contact: Trey Ideker (University of California San Diego)
+updates:
+  description:
+    - Data will be augmented regularly through the end of the project.
+is_deidentified:
+  description:
+    - Dataset contains measurements from cell lines and iPSC-derived cells; no directly identifiable human subject data.
+resources:
+  - id: doi:10.18130/V3/B35XWX#crisper-perturbation-cell-atlas-ro-crate
+    name: ro-crate-metadata.json (CRISPR Perturbation Cell Atlas)
+    title: CRISPR Perturbation Cell Atlas RO-Crate metadata
+    description: This dataset represents an expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes, as part of CM4AI.
+    issued: 2025-03-03
+    md5: cbdb263b1c099396d75e16f00a79a818
+    format: JSON
+    media_type: application/json
+    path: CRISPR Perturbation Cell Atlas/ro-crate-metadata.json
+    license: "CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    is_tabular: "no"
+    instances:
+      - representation: RO-Crate metadata and provenance for the CRISPRi Perturbation Cell Atlas
+        data_type: JSON metadata describing files, provenance graphs, and AI-ready packaging
+    collection_mechanisms:
+      - description:
+          - Packaged as RO-Crate using the FAIRSCAPE framework
+    acquisition_methods:
+      - description:
+          - CRISPRi perturb-seq in undifferentiated KOLF2.1J hiPSCs; phenotypic, protein-interaction, and metabolic tracing assays used for validation
+    subpopulations:
+      - identification:
+          - KOLF2.1J human induced pluripotent stem cells (hiPSCs)
+    tasks:
+      - response: AI-ready data packaging and provenance for downstream ML and analysis
+    purposes:
+      - response: Support AI/ML on cell architecture and functional genomics perturbation effects
+    funders:
+      - grantor:
+          name: National Institutes of Health
+        grant:
+          name: Bridge2AI - CM4AI
+          grant_number: 1OT2OD032742-01
+
+  - id: doi:10.18130/V3/B35XWX#crisper-perturbation-rna-raw-ro-crate
+    name: ro-crate-metadata.json (CRISPR Perturbation RNA Sequences - Raw Sequences)
+    title: CRISPR Perturbation RNA Sequences - Raw Sequences RO-Crate metadata
+    description: Raw sequence data from a genome-scale CRISPRi Perturbation Cell Atlas in KOLF2.1J hiPSCs mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes, as part of CM4AI.
+    issued: 2025-03-03
+    md5: 1cafefa32a897998e3e2ba0a29a3ef5c
+    format: JSON
+    media_type: application/json
+    path: CRISPR Perturbation RNA Sequences - Raw Sequences/ro-crate-metadata.json
+    license: "CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    is_tabular: "no"
+    instances:
+      - representation: RO-Crate metadata for raw RNA sequence files from CRISPRi perturb-seq
+        data_type: JSON metadata describing raw sequence data and provenance
+    collection_mechanisms:
+      - description:
+          - Packaged as RO-Crate using the FAIRSCAPE framework
+    acquisition_methods:
+      - description:
+          - CRISPRi perturb-seq in KOLF2.1J hiPSCs
+          - was_directly_observed: yes
+    subpopulations:
+      - identification:
+          - KOLF2.1J human induced pluripotent stem cells (hiPSCs)
+    tasks:
+      - response: Single-cell transcriptomics analysis; ML on perturbation effects
+    purposes:
+      - response: Provide AI-ready raw sequence data for modeling gene perturbations
+    funders:
+      - grantor:
+          name: National Institutes of Health
+        grant:
+          name: Bridge2AI - CM4AI
+          grant_number: 1OT2OD032742-01
+
+  - id: doi:10.18130/V3/B35XWX#if-images-untreated
+    name: cm4ai-v0.6-beta-if-images-untreated.zip
+    title: Protein Localization Subcellular Images (untreated)
+    description: Spatial localization of 563 proteins of interest in untreated MDA-MB-468 breast cancer cells imaged by ICC-IF and confocal microscopy in the Lundberg Lab at Stanford University, as part of CM4AI.
+    issued: 2025-03-03
+    md5: 0b4d129f5fbc3bb7f7ea564cd032cef7
+    compression: ZIP
+    media_type: application/zip
+    path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-untreated.zip
+    license: "CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    is_tabular: "no"
+    instances:
+      - representation: Immunofluorescence-based subcellular protein localization images
+        instance_type: Confocal microscopy image files
+        data_type: Multichannel confocal images (DAPI, ER, microtubules, protein of interest)
+    collection_mechanisms:
+      - description:
+          - Immunofluorescence-based staining (ICC-IF) and confocal microscopy (Lundberg Lab, Stanford University)
+    subpopulations:
+      - identification:
+          - MDA-MB-468 breast cancer cell line (untreated)
+    tasks:
+      - response: Protein localization image analysis; subcellular structure mapping; ML for cell architecture
+    purposes:
+      - response: Enable AI/ML models to learn subcellular protein localization patterns under baseline conditions
+    funders:
+      - grantor:
+          name: National Institutes of Health
+        grant:
+          name: Bridge2AI - CM4AI
+          grant_number: 1OT2OD032742-01
+
+  - id: doi:10.18130/V3/B35XWX#if-images-paclitaxel
+    name: cm4ai-v0.6-beta-if-images-paclitaxel.zip
+    title: Protein Localization Subcellular Images (paclitaxel-treated)
+    description: Spatial localization of 563 proteins of interest in MDA-MB-468 cells treated with paclitaxel, imaged by ICC-IF and confocal microscopy in the Lundberg Lab at Stanford University, as part of CM4AI.
+    issued: 2025-03-03
+    md5: 9422486c80bc9e1d35b2fbbc72a5f043
+    compression: ZIP
+    media_type: application/zip
+    path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-paclitaxel.zip
+    license: "CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    is_tabular: "no"
+    instances:
+      - representation: Immunofluorescence-based subcellular protein localization images under paclitaxel treatment
+        instance_type: Confocal microscopy image files
+        data_type: Multichannel confocal images (DAPI, ER, microtubules, protein of interest)
+    collection_mechanisms:
+      - description:
+          - Immunofluorescence-based staining (ICC-IF) and confocal microscopy (Lundberg Lab, Stanford University)
+    subpopulations:
+      - identification:
+          - MDA-MB-468 breast cancer cell line (paclitaxel-treated)
+    tasks:
+      - response: Treatment-response image analysis; ML for drug-induced subcellular changes
+    purposes:
+      - response: Compare protein localization patterns under chemotherapy treatment vs. baseline
+    funders:
+      - grantor:
+          name: National Institutes of Health
+        grant:
+          name: Bridge2AI - CM4AI
+          grant_number: 1OT2OD032742-01
+
+  - id: doi:10.18130/V3/B35XWX#if-images-vorinostat
+    name: cm4ai-v0.6-beta-if-images-vorinostat.zip
+    title: Protein Localization Subcellular Images (vorinostat-treated)
+    description: Spatial localization of 563 proteins of interest in MDA-MB-468 cells treated with vorinostat, imaged by ICC-IF and confocal microscopy in the Lundberg Lab at Stanford University, as part of CM4AI.
+    issued: 2025-03-03
+    md5: ac577109a41a9806978461157b777d52
+    compression: ZIP
+    media_type: application/zip
+    path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-vorinostat.zip
+    license: "CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    is_tabular: "no"
+    instances:
+      - representation: Immunofluorescence-based subcellular protein localization images under vorinostat treatment
+        instance_type: Confocal microscopy image files
+        data_type: Multichannel confocal images (DAPI, ER, microtubules, protein of interest)
+    collection_mechanisms:
+      - description:
+          - Immunofluorescence-based staining (ICC-IF) and confocal microscopy (Lundberg Lab, Stanford University)
+    subpopulations:
+      - identification:
+          - MDA-MB-468 breast cancer cell line (vorinostat-treated)
+    tasks:
+      - response: Treatment-response image analysis; ML for drug-induced subcellular changes
+    purposes:
+      - response: Compare protein localization patterns under chemotherapy treatment vs. baseline
+    funders:
+      - grantor:
+          name: National Institutes of Health
+        grant:
+          name: Bridge2AI - CM4AI
+          grant_number: 1OT2OD032742-01
+
+  - id: doi:10.18130/V3/B35XWX#sec-ms-ro-crate
+    name: ro-crate-metadata.json (Protein-protein Interaction SEC-MS)
+    title: Protein-protein Interaction SEC-MS RO-Crate metadata
+    description: Size exclusion chromatography-mass spectroscopy (SEC-MS) dataset on undifferentiated KOLF2.1J hiPSCs, generated in the Nevan Krogan laboratory at UCSF, as part of CM4AI. The data will be uploaded to PRIDE when available.
+    issued: 2025-03-03
+    md5: cb67e7749b15ce87b9042a9feba9d032
+    format: JSON
+    media_type: application/json
+    path: Protein-protein Interaction SEC-MS/ro-crate-metadata.json
+    license: "CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    is_tabular: "no"
+    instances:
+      - representation: RO-Crate metadata and provenance for SEC-MS proteomics
+        data_type: JSON metadata describing SEC-MS experimental outputs and provenance
+    collection_mechanisms:
+      - description:
+          - Packaged as RO-Crate using the FAIRSCAPE framework
+    acquisition_methods:
+      - description:
+          - Size exclusion chromatography-mass spectrometry (SEC-MS) on undifferentiated KOLF2.1J hiPSCs
+    external_resources:
+      - external_resources:
+          - Planned archival deposition to PRIDE (when available)
+        archival:
+          - PRIDE repository planned
+        restrictions:
+          - None beyond CC BY-NC-SA 4.0 for this collection metadata
+    subpopulations:
+      - identification:
+          - KOLF2.1J human induced pluripotent stem cells (hiPSCs)
+    tasks:
+      - response: Protein complex and protein-protein interaction analysis; ML on proteomics-derived interaction signals
+    purposes:
+      - response: Provide AI-ready proteomics metadata to support interaction network inference
+    funders:
+      - grantor:
+          name: National Institutes of Health
+        grant:
+          name: Bridge2AI - CM4AI
+          grant_number: 1OT2OD032742-01
+creators:
+  - principal_investigator:
+      id: "https://orcid.org/0000-0002-1708-8454"
+      name: Trey Ideker
+      affiliation:
+        - name: University of California San Diego
+    affiliation:
+      name: CM4AI (Cell Maps for Artificial Intelligence) Consortium
+funders:
+  - grantor:
+      name: National Institutes of Health
+    grant:
+      name: Bridge2AI - CM4AI
+      grant_number: 1OT2OD032742-01
+collection_timeframes:
+  - description:
+      - Data creation date: 2025-02-27
+distribution_dates:
+  - description:
+      - Public release date: 2025-03-03
+distribution_formats:
+  - description:
+      - RO-Crate JSON metadata
+      - ZIP archives of image data
+      - Proteomics RO-Crate JSON metadata
+is_tabular: "no"

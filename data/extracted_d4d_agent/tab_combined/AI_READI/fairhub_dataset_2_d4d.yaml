@@ -1,0 +1,27 @@
+resources:
+  - name: AI-READI Type 2 Diabetes Flagship Dataset
+    title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+    description: The AI-READI project seeks to create and share a flagship ethically-sourced dataset of type 2 diabetes.
+    keywords:
+      - AI-READI
+      - type 2 diabetes
+      - diabetes research
+      - training
+      - FAIRhub
+    created_by:
+      - AI-READI Consortium
+    creators:
+      - name: AI-READI Consortium
+        affiliation:
+          name: AI-READI Consortium
+    purposes:
+      - response: Create and share a flagship ethically-sourced dataset of type 2 diabetes to support research and training.
+    tasks:
+      - response: Diabetes research
+      - response: Training
+    distribution_formats:
+      - description:
+          - Accessible via the FAIRhub platform
+    updates:
+      description:
+        - This repository is under review for potential modification in compliance with Administration directives.

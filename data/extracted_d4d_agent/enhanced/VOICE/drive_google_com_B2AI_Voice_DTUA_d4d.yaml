@@ -1,0 +1,17 @@
+id: b2ai-voice-dtua-row13
+name: B2AI Voice DTUA (row 13)
+title: B2AI Voice DTUA (row 13)
+description: PDF document referenced as "drive_google_com_B2AI_Voice_DTUA_row13.pdf" associated with the VOICE project category. The file appears to be a Data Transfer and Use Agreement (DTUA). No additional dataset-specific metadata was available because the PDF content itself was not provided for extraction.
+resources:
+  - id: drive_google_com_B2AI_Voice_DTUA_row13.pdf
+    name: B2AI Voice DTUA PDF (row 13)
+    title: B2AI Voice Data Transfer and Use Agreement (row 13)
+    description: A PDF document presumed to contain data transfer and use terms related to a VOICE project dataset. Specific creators, collection methods, licensing, and other metadata could not be extracted without the PDF text.
+    media_type: application/pdf
+    keywords:
+      - VOICE
+      - DTUA
+    distribution_formats:
+      - description:
+          - PDF document
+          - application/pdf

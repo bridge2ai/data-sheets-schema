@@ -1,0 +1,24 @@
+id: google_doc_row12
+name: google_doc_row12
+description: Interstitial HTML page indicating restricted access to a Google Docs document; sign-in and necessary cookie/storage access are required to view the underlying content.
+resources:
+  - id: https://docs.google.com/document/d/1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN
+    name: 1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN
+    description: |-
+      Access to this document is restricted. The page indicates:
+      - "Sign in to your Google Account. You must sign in to access this content."
+      - "Allow Google Docs access to your necessary cookies. You won't be able to access this content if necessary cookies are turned off."
+    page: https://docs.google.com/document/d/1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN/edit
+    media_type: text/html
+    keywords:
+      - VOICE
+      - google_doc_row12.html
+    external_resources:
+      - external_resources:
+          - Google Docs document: https://docs.google.com/document/d/1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN/edit
+        restrictions:
+          - Requires Google Account sign-in to access
+          - Requires enabling necessary cookies/storage access in browser
+    distribution_formats:
+      - description:
+          - Accessible via Google Docs web interface

@@ -1,0 +1,15 @@
+{
+  "url": "https://github.com/eipm/bridge2ai-docs/tree/main/docs",
+  "name": "bridge2ai-docs",
+  "description": "Bridge2AI Voice | Documentation Dashboard",
+  "license": "MIT License",
+  "topics": [
+    "ai",
+    "bridge2ai",
+    "bridge2ai-voice",
+    "python",
+    "streamlit-dashboard"
+  ],
+  "clone_url": "https://github.com/eipm/bridge2ai-docs.git",
+  "row": 21
+}

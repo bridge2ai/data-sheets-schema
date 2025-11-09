@@ -1,0 +1,57 @@
+# D4D Metadata extracted from: creativecommons_org_licenses-by-nc-sa_row14.txt
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-10-31 12:45:31
+
+id: cc-by-nc-sa-4.0-deed
+name: Creative Commons CC BY-NC-SA 4.0 Deed
+title: Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) - Deed
+description: A human-readable summary of the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license, including permitted uses (share and adapt) and conditions (Attribution, NonCommercial, ShareAlike), plus notices and disclaimers that it is not the legal code and provides no warranties.
+page: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+language: English
+media_type: text/html
+version: "4.0"
+keywords:
+  - Creative Commons
+  - CC BY-NC-SA 4.0
+  - NonCommercial
+  - ShareAlike
+  - Attribution
+  - Open licensing
+  - License deed
+created_by:
+  - Creative Commons
+license: "https://creativecommons.org/licenses/by/4.0/"
+creators:
+  - name: Creative Commons
+    affiliation:
+      name: Creative Commons
+      email: info@creativecommons.org
+purposes:
+  - response: This deed highlights only some key features and terms of the CC BY-NC-SA 4.0 license; it is intended as a human-readable summary and not the legal code.
+distribution_formats:
+  - description:
+      - HTML webpage
+      - Canonical URL provided on the page
+license_and_use_terms:
+  description:
+    - This deed is not a license and has no legal value; review the full legal code before use.
+    - No warranties are given; additional rights such as publicity, privacy, or moral rights may limit use.
+    - Except where otherwise noted, content on the Creative Commons site is licensed under CC BY 4.0.
+discouraged_uses:
+  - description:
+      - Do not treat the deed as the legal license text or as legal advice.
+      - Do not rely on the deed alone for permissions; consult the legal code.
+future_use_impacts:
+  - description:
+      - The deed is a simplified summary; relying solely on it may lead to misuse or misunderstanding of license terms.
+external_resources:
+  - external_resources:
+      - https://creativecommons.org/compatiblelicenses
+maintainers:
+  - description:
+      - Creative Commons
+      - info@creativecommons.org
+      - PO Box 1866, Mountain View, CA 94042
+      - +1-415-429-6753

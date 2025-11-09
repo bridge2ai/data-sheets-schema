@@ -1,0 +1,31 @@
+# D4D Metadata extracted from: CHoRUS for Equitable AI.pdf
+# Source: downloads_by_column/CHORUS/CHoRUS for Equitable AI.pdf
+# Column: CHORUS
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:52:42
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: chorus-for-equitable-ai
+name: CHoRUS for Equitable AI
+title: CHoRUS for Equitable AI
+description: PDF titled "CHoRUS for Equitable AI" associated with the CHORUS project. Detailed dataset information could not be extracted because the PDF content was not available in this context.
+keywords:
+  - CHORUS
+  - CHoRUS
+  - Equitable AI
+purposes:
+  - name: Stated purpose
+    response: Equitable AI
+distribution_formats:
+  - name: Document format
+    description:
+      - PDF document (source material provided for analysis)
+external_resources:
+  - name: Source document
+    external_resources:
+      - CHoRUS for Equitable AI.pdf
+    archival:
+      - Not available in this context

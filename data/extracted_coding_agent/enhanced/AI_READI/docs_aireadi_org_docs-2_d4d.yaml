@@ -1,0 +1,207 @@
+# D4D Metadata extracted from: docs_aireadi_org_docs-2_row9.txt
+# Source: downloads_by_column_enhanced/AI_READI/docs_aireadi_org_docs-2_row9.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:48:03
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: ai-readi-flagship-t2dm
+name: AI-READI Dataset
+title: AI-READI Flagship Dataset of Type 2 Diabetes
+description: >-
+  The AI-READI Flagship Dataset of Type 2 Diabetes is a multimodal research
+  dataset consisting of data collected from individuals with and without Type 2
+  Diabetes Mellitus (T2DM), harmonized across three data collection sites. The
+  dataset was designed with future AI/Machine Learning studies in mind, including
+  recruitment aimed at achieving approximately equal distribution across diabetes
+  severity and a standardized acquisition protocol spanning multiple domains
+  (survey data, physical measurements, clinical data, imaging data, wearable
+  device data, etc.). The project goal is to better understand salutogenesis
+  (the pathway from disease to health) in T2DM. Public, non-sensitive data are
+  available for download upon agreement with a license, while the full dataset
+  is available under a data use agreement (DUA). Early releases (pilot phase)
+  and periodic updates may not achieve balanced distributions across groups due
+  to ongoing enrollment.
+language: en
+keywords:
+  - AI-READI
+  - Type 2 Diabetes Mellitus
+  - T2DM
+  - multimodal dataset
+  - survey data
+  - clinical data
+  - physical measurements
+  - retinal images
+  - ECG
+  - wearable device data
+  - environmental data
+  - harmonized
+  - multi-site
+  - FAIR
+last_updated_on: '2025-10-21'
+modified_by: Erik Benton
+resources:
+  - id: ai-readi-flagship-t2dm-v2-0-0
+    name: AI-READI Flagship Dataset of Type 2 Diabetes v2.0.0
+    title: AI-READI Flagship Dataset of Type 2 Diabetes
+    description: >-
+      Versioned release of the AI-READI Flagship Dataset of Type 2 Diabetes.
+      Multimodal data across survey, clinical, physical measurements, imaging,
+      wearable devices, ECG, blood sugar, and environmental variables were
+      harmonized across three data collection sites to support downstream AI/ML
+      analyses and research on salutogenesis in T2DM. Public, non-sensitive data
+      are accessible under a license; full data are available via DUA. Enrollment
+      is ongoing; pilot and periodic updates may not be balanced across groups.
+    version: 2.0.0
+    language: en
+    keywords:
+      - AI-READI
+      - Type 2 Diabetes Mellitus
+      - T2DM
+      - multimodal dataset
+      - survey data
+      - clinical data
+      - physical measurements
+      - retinal images
+      - ECG
+      - wearable device data
+      - environmental data
+      - harmonized
+      - multi-site
+      - FAIR
+    last_updated_on: '2025-10-21'
+    creators:
+      - name: AI-READI Project Team
+        affiliation:
+          name: AI-READI Project
+    purposes:
+      - name: purpose-1
+        response: >-
+          Enable downstream AI/Machine Learning analyses and support research to
+          better understand salutogenesis (pathway from disease to health) in T2DM.
+    tasks:
+      - name: task-1
+        response: >-
+          Downstream AI/ML analyses on multimodal T2DM cohort data collected and
+          harmonized across multiple domains and sites.
+    addressing_gaps:
+      - name: gap-1
+        response: >-
+          Provide multimodal, prospectively collected data enabling AI/ML analyses
+          not feasible with existing sources such as claims or electronic health
+          records alone.
+    instances:
+      - name: participant-instance
+        representation: Individuals with and without Type 2 Diabetes Mellitus (T2DM)
+        instance_type: Human participants with multi-domain measurements
+        data_type: >-
+          Survey responses; physical measurements; clinical data; imaging (retinal);
+          wearable device data; ECG; blood sugar levels; environmental variables
+          (e.g., home air quality)
+        sampling_strategies:
+          - name: sampling-1
+            is_sample:
+              - Yes; recruited cohort sampled across three collection sites
+            is_random:
+              - No; recruitment targeted approximately equal distribution across diabetes severity
+            source_data:
+              - Participants recruited at three data collection sites
+            is_representative:
+              - Intended balance by diabetes severity
+            why_not_representative:
+              - Enrollment ongoing; pilot release may not be balanced across groups
+            strategies:
+              - Targeted recruitment to balance diabetes severity groups
+    sampling_strategies:
+      - name: dataset-sampling-1
+        is_sample:
+          - Yes; cohort sampled across three sites
+        is_random:
+          - No; targeted recruitment for balance by diabetes severity
+        source_data:
+          - Human participants at three collection sites
+        is_representative:
+          - Intended to be balanced across diabetes severity; early releases may be imbalanced
+        why_not_representative:
+          - Ongoing enrollment may cause imbalance in early releases
+    acquisition_methods:
+      - name: acquisition-1
+        description:
+          - Data acquired via standardized multi-domain protocol across three sites
+        was_directly_observed: >-
+          Yes (e.g., imaging, ECG, lab measurements, environmental sensors)
+        was_reported_by_subjects: Yes (survey data)
+        was_inferred_derived: Not specified
+        was_validated_verified: Not specified
+    collection_mechanisms:
+      - name: mechanisms-1
+        description:
+          - >-
+            Standardized data acquisition protocol harmonized across three sites,
+            covering surveys, physical measurements, clinical tests, imaging,
+            wearables, and environmental sensors
+    data_collectors:
+      - name: collectors-1
+        description:
+          - Data collected at three data collection sites
+    collection_timeframes:
+      - name: timeframe-1
+        description:
+          - >-
+            Version 1.0 covers pilot study participants; enrollment is ongoing with
+            periodic data releases; documentation version 2.0.0 last updated 2025-10-21
+    preprocessing_strategies:
+      - name: harmonization-1
+        description:
+          - Data harmonized across three data collection sites
+    confidential_elements:
+      - name: controlled-access
+        description:
+          - Certain elements are under controlled access requiring a Data Use Agreement (DUA)
+    sensitive_elements:
+      - name: sensitive-1
+        description:
+          - 5-digit ZIP code
+          - Sex, race, ethnicity
+          - Genetic sequencing data
+          - Past health records
+          - Medications
+          - Traffic and accident reports
+    is_deidentified:
+      name: deidentification-1
+      description:
+        - Public dataset excludes sensitive personal health data; full dataset available under DUA
+    subpopulations:
+      - name: subpops-1
+        identification:
+          - With and without T2DM
+          - Diabetes severity categories
+        distribution:
+          - Recruitment aimed for approximately equal distribution across diabetes severity; pilot release may not be balanced
+    distribution_formats:
+      - name: distribution-portal
+        description:
+          - Public data downloadable from a FAIRhub data portal upon license agreement
+          - Full dataset available under a Data Use Agreement (DUA)
+    distribution_dates:
+      - name: release-1
+        description:
+          - Pilot data release (v1.0); periodic updates to data releases (e.g., v2.0.0)
+    license_and_use_terms:
+      name: terms-1
+      description:
+        - >-
+          Public, non-sensitive data available under a license defining permitted uses;
+          full dataset accessible by entering into a Data Use Agreement (DUA)
+    updates:
+      name: updates-1
+      description:
+        - Periodic updates planned; documentation provides versioned pages (v1.0.0, v2.0.0)
+    version_access:
+      name: versioning-1
+      description:
+        - Older documentation versions accessible via version dropdown; dataset releases are versioned
+    is_tabular: no

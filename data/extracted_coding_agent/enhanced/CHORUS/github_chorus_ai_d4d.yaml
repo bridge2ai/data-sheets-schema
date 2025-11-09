@@ -1,0 +1,30 @@
+# D4D Metadata extracted from: github_chorus_ai_row9.pdf
+# Source: downloads_by_column_enhanced/CHORUS/github_chorus_ai_row9.pdf
+# Column: CHORUS
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:52:17
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: chorus-github-row9
+name: CHORUS GitHub PDF Row 9
+title: CHORUS project dataset reference (row 9)
+description: PDF document named 'github_chorus_ai_row9.pdf'. No PDF content was available for extraction in this context. Classified under the CHORUS project category.
+keywords:
+  - CHORUS
+  - PDF
+resources:
+  - id: github_chorus_ai_row9.pdf
+    name: github_chorus_ai_row9.pdf
+    title: CHORUS project PDF (GitHub, row 9)
+    description: PDF file associated with the CHORUS project. Content not extractable in this context; metadata derived from filename and project category.
+    keywords:
+      - CHORUS
+      - PDF
+    media_type: application/pdf
+    path: github_chorus_ai_row9.pdf
+    distribution_formats:
+      - description:
+          - PDF

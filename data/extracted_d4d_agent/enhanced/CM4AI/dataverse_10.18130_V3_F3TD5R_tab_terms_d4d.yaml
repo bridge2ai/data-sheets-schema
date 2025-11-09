@@ -1,0 +1,187 @@
+id: doi:10.18130/V3/F3TD5R
+name: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+description: |-
+  Description This dataset is the June 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+
+  External Data Links
+  Access external data resources related to this dataset:
+  Sequence Read Archive (SRA) Data: NCBI BioProject
+  Mass Spectrometry Data (Human iPSCs): MassIVE Repository
+  Mass Spectrometry Data (Human Cancer Cells): MassIVE Repository
+
+  Data Governance & Ethics
+  Human Subjects: No
+  De-identified Samples: Yes
+  FDA Regulated: No
+  Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)
+  Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+
+  Completeness
+  These data are not yet in completed final form:
+  Some datasets are under temporary pre-publication embargo
+  Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap
+  Computed cell maps not included in this release
+
+  Maintenance Plan
+  Dataset will be regularly updated and augmented through the end of the project in November 2026
+  Updates on a quarterly basis
+  Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds
+
+  Intended Use
+  This dataset is intended for:
+  AI-ready datasets to support research in functional genomics
+  AI model training
+  Cellular process analysis
+  Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations
+
+  Limitations
+  Researchers should be aware of inherent limitations:
+  This is an interim release
+  Does not contain predicted cell maps, which will be added in future releases
+  The current release is most suitable for bioinformatics analysis of the individual datasets
+  Requires domain expertise for meaningful analysis
+
+  Prohibited Uses
+  These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval
+
+  Potential Sources of Bias
+  Users should be aware of potential biases:
+  Data in this release was derived from commercially available de-identified human cell lines
+  Does not represent all biological variants which may be seen in the population at large
+doi: doi:10.18130/V3/F3TD5R
+issued: "2025-10-22"
+version: June 2025 Beta
+creators:
+  - name: Clark T
+  - name: Parker J
+  - name: Al Manir S
+  - name: Axelsson U
+  - name: Ballllosero Navarro F
+  - name: Chinn B
+  - name: Churas CP
+  - name: Dailamy A
+  - name: Doctor Y
+  - name: Fall J
+  - name: Forget A
+  - name: Gao J
+  - name: Hansen JN
+  - name: Hu M
+  - name: Johannesson A
+  - name: Khaliq H
+  - name: Lee YH
+  - name: Lenkiewicz J
+  - name: Levinson MA
+  - name: Marquez C
+  - name: Metallo C
+  - name: Muralidharan M
+  - name: Nourreddine S
+  - name: Niestroy J
+  - name: Obernier K
+  - name: Pan E
+  - name: Polacco B
+  - name: Pratt D
+  - name: Qian G
+  - name: Schaffer L
+  - name: Sigaeva A
+  - name: Thaker S
+  - name: Zhang Y
+  - name: Bélisle-Pipon JC
+  - name: Brandt C
+  - name: Chen JY
+  - name: Ding Y
+  - name: Fodeh S
+  - name: Krogan N
+  - name: Lundberg E
+  - name: Mali P
+funders:
+  - grantor:
+      name: National Institutes of Health (NIH) Bridge2AI Program
+purposes:
+  - response: AI-ready datasets to support research in functional genomics
+tasks:
+  - response: AI model training
+  - response: Cellular process analysis
+  - response: Analysis of cell architectural changes and interactions under disease, treatment, or genetic perturbations
+instances:
+  - representation: Cell line assay data
+    instance_type: Perturb-seq (CRISPRi) in undifferentiated KOLF2.1J iPSCs
+    data_type: Sequencing-based single-cell perturbation readouts; primary data and/or intermediate processed data
+    missing_information:
+      - missing: Computed cell maps
+        why_missing: Not included in this release; to be added in future releases
+  - representation: Proteomics data
+    instance_type: Size exclusion chromatography mass spectrometry (SEC-MS) in iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and MDA-MB-468 cells (treated/untreated)
+    data_type: Mass spectrometry raw and/or processed spectral/protein interaction data
+  - representation: Imaging data
+    instance_type: Immunofluorescence (IF) images in MDA-MB-468 cells with and without chemotherapy (vorinostat and paclitaxel)
+    data_type: Microscopy image data
+anomalies:
+  - description:
+      - Interim release; some datasets under temporary pre-publication embargo
+      - Protein sets across modalities incompletely overlap
+      - Computed cell maps not included
+external_resources:
+  - external_resources:
+      - Sequence Read Archive (SRA) via NCBI BioProject
+      - MassIVE Repository (Human iPSCs)
+      - MassIVE Repository (Human Cancer Cells)
+    restrictions:
+      - External repositories may have their own licensing/terms of use
+subpopulations:
+  - identification:
+      - Undifferentiated KOLF2.1J human iPSCs
+      - iPSC-derived neural progenitor cells (NPCs)
+      - iPSC-derived neurons
+      - iPSC-derived cardiomyocytes
+      - MDA-MB-468 human breast cancer cell line (treated and untreated)
+collection_mechanisms:
+  - description:
+      - Perturb-seq (CRISPRi-based single-cell transcriptomics)
+      - Size exclusion chromatography coupled mass spectrometry (SEC-MS)
+      - Immunofluorescence microscopy imaging
+acquisition_methods:
+  - description:
+      - Data directly observed via sequencing, proteomics, and imaging assays
+    was_directly_observed: Yes
+    was_reported_by_subjects: No
+    was_inferred_derived: Some downstream computed cell maps are not included in this release
+ethical_reviews:
+  - description:
+      - Ethical review oversight by Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+deidentification:
+  description:
+    - Human Subjects: No
+    - De-identified Samples: Yes
+sensitive_elements:
+  - description:
+      - No patient-identifying information; data derived from de-identified human cell lines
+future_use_impacts:
+  - description:
+      - Data derived from commercially available de-identified human cell lines; may not represent all biological variants
+      - Interim release and modality coverage differences may impact integrative analyses
+discouraged_uses:
+  - description:
+      - Not for clinical decision-making or patient care without appropriate regulatory oversight and approval
+distribution_formats:
+  - description:
+      - University of Virginia Dataverse repository distribution
+      - Links to external repositories (NCBI SRA/BioProject, MassIVE)
+distribution_dates:
+  - description:
+      - "2025-10-22"
+license_and_use_terms:
+  - description:
+      - Prohibited clinical use without appropriate regulatory oversight and approval
+      - Some datasets subject to temporary pre-publication embargo
+regulatory_restrictions:
+  - description:
+      - FDA Regulated: No
+maintainers:
+  - description:
+      - Long-term preservation and hosting in the University of Virginia Dataverse (supported by institutional funds)
+      - Data Governance Committee contact: Jillian Parker (jillianparker@health.ucsd.edu)
+updates:
+  description:
+    - Dataset will be regularly updated and augmented through November 2026
+    - Quarterly updates planned

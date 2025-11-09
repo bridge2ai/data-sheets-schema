@@ -1,0 +1,1608 @@
+
+
+
+
+
+Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta) - Cell Maps for Artificial Intelligence
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Skip to main content
+
+
+
+
+Toggle navigation
+
+
+
+
+
+
+
+
+
+
+Search 
+
+
+
+Search
+
+
+
+
+
+
+
+
+
+
+
+About
+User Guide
+
+
+
+
+Support
+
+
+
+
+
+                                    Log In
+                                
+
+
+
+
+
+
+Please enable JavaScript in your browser. It is required to use most of the features of Dataverse.
+                
+
+
+
+
+
+
+
+
+Cell Maps for Artificial IntelligenceThis collection is under review for potential modification in compliance with Administration directives.
+
+
+University of Virginia Dataverse
+                            
+ > 
+
+LibraData: UVa's Scholarly Research
+                            
+ > 
+
+School of Medicine
+                            
+ > 
+
+Cell Maps for Artificial Intelligence
+                            
+ > 
+
+
+
+
+ Info – The "DRAFT" version was not found. This is version "2.0". 
+            
+
+
+
+
+
+
+
+
+Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+Version 2.0
+
+
+
+
+
+
+
+
+
+Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; Bélisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T, 2025, "Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)", https://doi.org/10.18130/V3/F3TD5R, University of Virginia Dataverse, V2
+                
+
+
+                        Cite Dataset 
+
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+                                View Styled Citation
+                            
+
+Learn about Data Citation Standards.
+
+
+
+
+
+
+                                                        Access Dataset 
+
+The dataset is too large to download. Please select the files you need from the files table.
+                                                        
+                                                    
+
+
+                                                    Contact Owner
+                                                
+                                                    Share
+                                                
+
+
+
+
+                                                Dataset Metrics
+                                                
+                                                    
+
+253 Downloads
+                                                    
+
+
+
+
+
+
+
+                                                            Dataset Description
+                                                            
+
+Description
+This dataset is the June 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+External Data Links
+Access external data resources related to this dataset:
+
+Sequence Read Archive (SRA) Data: NCBI BioProject
+Mass Spectrometry Data (Human iPSCs): MassIVE Repository
+Mass Spectrometry Data (Human Cancer Cells): MassIVE Repository
+
+
+Data Governance & Ethics
+
+Human Subjects: No
+De-identified Samples: Yes
+FDA Regulated: No
+Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)
+Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+
+Completeness
+These data are not yet in completed final form:
+
+Some datasets are under temporary pre-publication embargo
+Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap
+Computed cell maps not included in this release
+
+Maintenance Plan
+
+Dataset will be regularly updated and augmented through the end of the project in November 2026
+Updates on a quarterly basis
+Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds
+
+Intended Use
+This dataset is intended for:
+
+AI-ready datasets to support research in functional genomics
+AI model training
+Cellular process analysis
+Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations
+
+Limitations
+Researchers should be aware of inherent limitations:
+
+This is an interim release
+Does not contain predicted cell maps, which will be added in future releases
+The current release is most suitable for bioinformatics analysis of the individual datasets
+Requires domain expertise for meaningful analysis
+
+Prohibited Uses
+
+These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval
+
+Potential Sources of Bias
+Users should be aware of potential biases:
+
+Data in this release was derived from commercially available de-identified human cell lines
+Does not represent all biological variants which may be seen in the population at large
+ (2025-06-30)
+                                                                    
+
+                                                            Subject
+                                                            
+Medicine, Health and Life Sciences
+
+                                                            Keyword
+                                                            
+
+AI, affinity purification, AP-MS, artificial intelligence, breast cancer, Bridge2AI, cardiomyocyte, CM4AI, CRISPR/Cas9, induced pluripotent stem cell, iPSC, KOLF2.1J, machine learning, mass spectroscopy, MDA-MB-468, neural progenitor cell, NPC, neuron, paclitaxel, perturb-seq, perturbation sequencing, protein-protein interaction, protein localization, single-cell RNA sequencing, scRNAseq, SEC-MS, size exclusion chromatography, subcellular imaging, vorinostat
+
+                                                            Related Publication
+                                                            
+References: Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. 2024.doi: http://doi.org/10.1101/2024.05.21.589311
+
+
+                                                        License/Data Use Agreement
+                                                    
+
+
+
+CC BY-NC-SA 4.0
+
+
+
+
+
+
+
+ui-button
+FilesMetadataTermsVersions
+
+
+                Change View
+            
+TableTree
+
+
+Search
+
+
+
+
+
+Filter by
+
+                            File Type: All 
+
+
+All
+
+Text (12)
+Data (5)
+Archive (3)
+Metadata (1)
+
+
+                            Access: All 
+
+
+All
+
+Public (21)
+
+
+
+
+ Sort 
+
+
+Name (A-Z)
+Name (Z-A)
+Newest
+Oldest
+Size
+Type
+
+
+1 to 10 of 21 Files
+
+ Download
+                    
+
+
+
+
+
+
+
+                        release-ro-crate-datasheet.html
+                    
+
+HTML - 89.5 KB
+Published Jul 1, 2025
+19 Downloads
+MD5: 599c9ece9b88b3ce797b82463b4a1eb4
+
+HTML datasheet summarizing key release information. 
+
+
+Preview "release-ro-crate-datasheet.html"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                HTML
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+Explore Options 
+
+                    HTML Previewer
+                
+
+
+
+
+
+
+
+
+
+                        release-ro-crate-metadata.json
+                    
+
+RO-Crate metadata - 35.0 KB
+Published Jul 1, 2025
+24 Downloads
+MD5: 99f9e00053bff3020fd9832a3a518bbb
+
+Release RO-Crate with pointers to sub ro-crates. 
+
+
+Preview "release-ro-crate-metadata.json"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                RO-Crate metadata
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        cm4ai-ifimages-mda-mb-468-paclitaxel.zip
+                    
+
+Images/ZIP Archive - 3.8 GB
+Published Oct 22, 2025
+0 Downloads
+MD5: 0d972b80744344ddeede516a0cf6e3d7
+
+This data set displays the spatial localization of 464 proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel); endoplasmic reticulum with a calreticulin antibody (yellow channel); microtubules with tubulin antibody (red channel); and antibody against protein of interest (green channel).
+
+
+Preview "Images/cm4ai-ifimages-mda-mb-468-paclitaxel.zip"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                ZIP Archive
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        cm4ai-ifimages-mda-mb-468-untreated.zip
+                    
+
+Images/ZIP Archive - 4.6 GB
+Published Oct 22, 2025
+0 Downloads
+MD5: a98affcc05429650c6bb3906cd836d55
+
+This data set displays the spatial localization of 464 proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel); endoplasmic reticulum with a calreticulin antibody (yellow channel); microtubules with tubulin antibody (red channel); and antibody against protein of interest (green channel).
+
+
+Preview "Images/cm4ai-ifimages-mda-mb-468-untreated.zip"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                ZIP Archive
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        cm4ai-ifimages-mda-mb-468-vorinostat.zip
+                    
+
+Images/ZIP Archive - 4.2 GB
+Published Oct 22, 2025
+0 Downloads
+MD5: ad4e68ccc14b0f3349dad3321e7b81b2
+
+This data set displays the spatial localization of 464 proteins of interest in cells of the breast cancer cell line MDA-MB-468 treated with vorinostat as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel); endoplasmic reticulum with a calreticulin antibody (yellow channel); microtubules with tubulin antibody (red channel); and antibody against protein of interest (green channel).
+
+
+Preview "Images/cm4ai-ifimages-mda-mb-468-vorinostat.zip"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                ZIP Archive
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+
+
+
+
+
+
+
+
+                        Images-paclitaxel-provenance-graph.html
+                    
+
+Images/paclitaxel/HTML - 39.2 KB
+Published Jul 1, 2025
+7 Downloads
+MD5: e38e63e4c8dfc5808a5ffa2d7829fc38
+
+The .html provenance graph files require download to view properly. They will not display in the Dataverse preview.
+
+
+Preview "Images/paclitaxel/Images-paclitaxel-provenance-graph.html"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                HTML
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+Explore Options 
+
+                    HTML Previewer
+                
+
+
+
+
+
+
+
+
+
+                        Images-untreated-provenance-graph.html
+                    
+
+Images/untreated/HTML - 39.2 KB
+Published Jul 1, 2025
+1 Download
+MD5: 1a3b510f74d3f8647e07c6559ce64ee8
+
+The .html provenance graph files require download to view properly. They will not display in the Dataverse preview.
+
+
+Preview "Images/untreated/Images-untreated-provenance-graph.html"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                HTML
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+Explore Options 
+
+                    HTML Previewer
+                
+
+
+
+
+
+
+
+
+
+                        Images-vorinostat-provenance-graph.html
+                    
+
+Images/vorinostat/HTML - 39.2 KB
+Published Jul 1, 2025
+3 Downloads
+MD5: 58935fe4e254b31d33fed019f24c7668
+
+The .html provenance graph files require download to view properly. They will not display in the Dataverse preview.
+
+
+Preview "Images/vorinostat/Images-vorinostat-provenance-graph.html"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                HTML
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+Explore Options 
+
+                    HTML Previewer
+                
+
+
+
+
+
+
+
+
+
+                        mass-spec-cancer-cells-provenance-graph.html
+                    
+
+mass-spec/cancer-cells/HTML - 41.7 KB
+Published Jul 1, 2025
+9 Downloads
+MD5: 931ad9b552562024cb84ebe62d1f1838
+
+The .html provenance graph files require download to view properly.
+They will not display in the Dataverse preview.
+
+
+Preview "mass-spec/cancer-cells/mass-spec-cancer-cells-provenance-graph.html"
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                HTML
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+Explore Options 
+
+                    HTML Previewer
+                
+
+
+
+
+
+
+
+
+
+                        mass-spec-cancer-cells-ro-crate-metadata.json
+                    
+
+mass-spec/cancer-cells/JSON - 343.4 KB
+Published Jul 1, 2025
+6 Downloads
+MD5: 3a7063bb391ea5e05a32ba5da5f4b2f8
+
+
+
+
+Access File
+
+
+File Access 
+
+ Public
+
+Download Options 
+                
+                JSON
+            
+Download Metadata 
+Data File Citation
+
+Download EndNote XML
+
+Download RIS
+
+Download BibTeX
+
+
+
+FP123NEFiles Per Page Rows Per Page102550
+
+ Export Metadata 
+
+
+OAI_ORE
+
+DataCite
+
+OpenAIRE
+
+Schema.org JSON-LD
+
+DDI Codebook v2
+
+Dublin Core
+
+DDI HTML Codebook
+
+JSON
+
+
+
+
+
+
+                    Citation Metadata  
+
+
+
+
+
+
+
+                                            Persistent Identifier
+                                            
+
+doi:10.18130/V3/F3TD5R
+
+
+                                            Publication Date
+                                            
+
+2025-07-01
+
+
+                                            Title
+                                            
+Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+
+
+
+                                            Author
+                                            
+Clark T (University of Virginia) - ORCID: https://orcid.org/0000-0003-4060-7360
+Parker J (University of California, San Diego) - ORCID: https://orcid.org/0000-0003-4535-3486
+Al Manir S (University of Virginia) - ORCID: https://orcid.org/0000-0003-4647-3877
+Axelsson U (KTH Royal Institute of Technology,)
+                                                        Ballllosero Navarro F (Stanford University) - ORCID: https://orcid.org/0000-0002-4180-422X
+Chinn B (University of California San Diego)
+                                                        Churas CP (University of California San Diego) https://orcid.org/0000-0001-9998-705X
+                                                        Dailamy A (University of California, San Diego) - ORCID: https://orcid.org/0000-0002-6711-8260
+Doctor Y (University of California, San Diego) - ORCID: https://orcid.org/0009-0009-0483-7506
+Fall J (KTH - Royal Institute of Technology)
+                                                        Forget A (University of California San Francisco) - ORCID: https://orcid.org/0000-0003-0223-0312
+Gao J (University of California San Diego) - ORCID: https://orcid.org/0000-0002-6311-3526
+Hansen JN (Stanford University) - ORCID: https://orcid.org/0000-0002-4650-9094
+Hu M (University of California San Diego) https://orcid.org/0000-0002-1571-8029
+                                                        Johannesson A (KTH - Royal Institute of Technology)
+                                                        Khaliq H (University of California San Diego)
+                                                        Lee YH (University of California San Diego) - ORCID: https://orcid.org/0000-0003-0917-355X
+Lenkiewicz J (University of California San Diego) https://orcid.org/0000-0001-7252-8638
+                                                        Levinson MA (University of Virginia) - ORCID: https://orcid.org/0000-0003-0384-8499
+Marquez C (University of California San Diego) - ORCID: 0000-0003-3960-420X
+Metallo C (University of California San Diego) - ORCID: https://orcid.org/0000-0003-2404-3040
+Muralidharan M (University of California San Francisco)
+                                                        Nourreddine S (University of California San Diego) https://orcid.org/0000-0003-3881-7588
+                                                        Niestroy J (University of Virginia) - ORCID: https://orcid.org/0000-0002-1103-3882
+Obernier K (University of California San Francisco) - ORCID: https://orcid.org/0000-0002-4025-1299
+Pan E (University of California San Diego)
+                                                        Polacco B (University of California San Francisco)
+                                                        Pratt D (University of California San Diego) - ORCID: https://orcid.org/0000-0002-1471-9513
+Qian G (University of California San Diego) - ORCID: https://orcid.org/0009-0005-4217-2745
+Schaffer L (University of California San Diego) - ORCID: https://orcid.org/0000-0001-6339-9141
+Sigaeva A (KTH Royal Institute of Technology) - ORCID: https://orcid.org/0000-0003-3361-3797
+Thaker S (University of Alabama at Birmingham) - ORCID: https://orcid.org/0000-0001-6730-2773
+Zhang Y (University of California San Diego)
+                                                        Bélisle-Pipon JC (Simon Fraser University) - ORCID: https://orcid.org/0000-0002-8965-8153
+Brandt C (Yale University) - ORCID: https://orcid.org/0000-0001-8179-1796
+Chen JY (The University of Alabama at Birmingham) - ORCID: https://orcid.org/0000-0002-6112-415X
+Ding Y (University of Texas at Austin) - ORCID: https://orcid.org/0000-0003-2567-2009
+Fodeh S (Yale University) - ORCID: https://orcid.org/0000-0003-4664-3143
+Krogan N (University of California San Francisco) - ORCID: https://orcid.org/0000-0003-4902-337X
+Lundberg E (Stanford University) - ORCID: https://orcid.org/0000-0001-7034-0850
+Mali P (University of California San Diego) https://orcid.org/0000-0002-3383-1287
+                                                        Payne-Foster P (University of Alabama) - ORCID: https://orcid.org/0000-0002-3508-3577
+Ratcliffe S (University of Virginia) - ORCID: https://orcid.org/0000-0002-6644-8284
+Ravitsky V (University of Montreal) - ORCID: https://orcid.org/0000-0002-7080-8801
+Sali A (University of California San Diego) - ORCID: https://orcid.org/0000-0003-0435-6197
+Schulz W (Yale University) - ORCID: https://orcid.org/0000-0002-2048-4028
+Ideker T (University of California San Diego) - ORCID: https://orcid.org/0000-0002-1708-8454
+
+
+
+                                            Point of Contact
+                                            
+
+Use email button above to contact.
+                                                    Ideker Trey (University of California San Diego) 
+
+
+
+                                            Dataset Description
+                                            
+Description
+This dataset is the June 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+External Data Links
+Access external data resources related to this dataset:
+
+Sequence Read Archive (SRA) Data: NCBI BioProject
+Mass Spectrometry Data (Human iPSCs): MassIVE Repository
+Mass Spectrometry Data (Human Cancer Cells): MassIVE Repository
+
+
+Data Governance & Ethics
+
+Human Subjects: No
+De-identified Samples: Yes
+FDA Regulated: No
+Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)
+Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+
+Completeness
+These data are not yet in completed final form:
+
+Some datasets are under temporary pre-publication embargo
+Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap
+Computed cell maps not included in this release
+
+Maintenance Plan
+
+Dataset will be regularly updated and augmented through the end of the project in November 2026
+Updates on a quarterly basis
+Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds
+
+Intended Use
+This dataset is intended for:
+
+AI-ready datasets to support research in functional genomics
+AI model training
+Cellular process analysis
+Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations
+
+Limitations
+Researchers should be aware of inherent limitations:
+
+This is an interim release
+Does not contain predicted cell maps, which will be added in future releases
+The current release is most suitable for bioinformatics analysis of the individual datasets
+Requires domain expertise for meaningful analysis
+
+Prohibited Uses
+
+These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval
+
+Potential Sources of Bias
+Users should be aware of potential biases:
+
+Data in this release was derived from commercially available de-identified human cell lines
+Does not represent all biological variants which may be seen in the population at large
+ (2025-06-30)
+
+
+
+                                            Subject
+                                            
+Medicine, Health and Life Sciences
+
+
+
+                                            Keyword
+                                            
+AI http://purl.obolibrary.org/obo/NCIT_C16309 (NCI Thesaurus)
+                                                        affinity purification http://www.bioassayontology.org/bao#BAO_0002603 (BioAssay Ontology (BAO))
+                                                        AP-MS http://www.ebi.ac.uk/swo/SWO_1100012 (Software Ontology)
+                                                        artificial intelligence http://purl.obolibrary.org/obo/NCIT_C16309 (NCI Thesaurus)
+                                                        breast cancer http://purl.bioontology.org/ontology/LNC/LA14283-8 (LOINC)
+                                                        Bridge2AI
+                                                        cardiomyocyte http://purl.obolibrary.org/obo/CL_0000746
+CM4AI
+                                                        CRISPR/Cas9 http://www.bioassayontology.org/bao#BAO_0010249 (Bioassay Ontology (BAO))
+                                                        induced pluripotent stem cell http://www.ebi.ac.uk/efo/EFO_0004905 (Experimental Factor Ontology (EFO))
+                                                        iPSC http://www.ebi.ac.uk/efo/EFO_0004905 (Experimental Factor Ontology (EFO))
+                                                        KOLF2.1J
+                                                        machine learning http://purl.obolibrary.org/obo/OBI_0002587 (Ontology of Biomedical Investigations (OBI)) http://purl.obolibrary.org/obo/obi.owl
+mass spectroscopy http://purl.bioontology.org/ontology/MESH/D013058 (Medical Subject Headings (MeSH))
+                                                        MDA-MB-468
+                                                        neural progenitor cell http://purl.obolibrary.org/obo/CL_0011020 (Cell Ontology (CL))
+                                                        NPC http://purl.obolibrary.org/obo/CL_0011020 (Cell Ontology (CL)) http://purl.obolibrary.org/obo/cl.owl
+neuron http://purl.obolibrary.org/obo/CL_0000540 (Cell Ontology (CL)) http://purl.obolibrary.org/obo/cl.owl
+paclitaxel http://purl.obolibrary.org/obo/CHEBI_45863 (Chemical Entitites of Biological Interest (CHEBI))
+                                                        perturb-seq http://www.ebi.ac.uk/efo/EFO_0008860 (Experimental Factor Ontology (EFO))
+                                                        perturbation sequencing http://www.ebi.ac.uk/efo/EFO_0008860 (Experimental Factor Ontology (EFO))
+                                                        protein-protein interaction http://purl.obolibrary.org/obo/NCIT_C18469 (NCI Thesaurus (NCIT))
+                                                        protein localization http://purl.obolibrary.org/obo/GO_0008104 (Gene Ontology (GO)) http://purl.obolibrary.org/obo/go/extensions/go-plus.owl
+single-cell RNA sequencing http://www.ebi.ac.uk/efo/EFO_0008913 (Experimental Factor Ontology (EFO))
+                                                        scRNAseq http://www.ebi.ac.uk/efo/EFO_0008913 (Experimental Factor Ontology (EFO))
+                                                        SEC-MS
+                                                        size exclusion chromatography
+                                                        subcellular imaging
+                                                        vorinostat http://purl.obolibrary.org/obo/CHEBI_45716 (Chemical Entitites of Biological Interest (CHEBI))
+
+
+
+                                            Related Publication
+                                            
+References: Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. 2024. doi http://doi.org/10.1101/2024.05.21.589311
+                                                        Nourreddine S, Doctor Y, Dailamy A, Forget A, Lee YH, Chinn B, Khaliq H, Polacco B, Muralidharan M, Pan E, Zhang Y, Sigaeva A, Hansen JN, Gao J, Parker JA, Obernier K, Clark T, Chen JY, Metallo C, Lundberg E, Ideker T, Krogan N, Mali P. A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS. bioRxiv. 2024 Nov 4;2024.11.03.621734. PMCID: PMC11580897 doi https://doi.org/10.1101/2024.11.03.621734
+
+
+
+                                            Data Creation Date
+                                            
+2025-02-27
+
+
+
+                                            Production Location
+                                            
+University of California San Diego; University of California San Francisco; Stanford University; University of Virginia
+
+
+
+                                            Funding Information
+                                            
+National Institutes of Health: 1OT2OD032742-01
+
+
+
+                                            Depositor
+                                            
+Niestroy, Justin
+
+
+
+                                            Deposit Date
+                                            
+2025-02-27
+
+
+
+
+
+
+
+
+
+
+               Dataset Terms  
+
+
+
+
+
+                               License/Data Use Agreement
+                           
+
+Our Community Norms as well as good scientific practices expect that proper credit is given via citation. Please use the data citation shown on the dataset page.
+                                   
+
+
+CC BY-NC-SA 4.0
+
+
+
+
+
+
+
+
+Direct
+Dataset VersionSummaryVersion NoteContributorsPublished onNo records found.Edit File
+ This file has already been deleted (or replaced) in the current version. It may not be edited.
+
+
+                Close
+            
+Restrict Access
+Restricting limits access to published files. People who want to use the restricted files can request access by default.  If you disable request access, you must add information about access to the Terms of Access field.
+Learn about restricting files and dataset access in the User Guide.
+
+
+
+
+                    Request Access
+                    
+
+Enable access request
+
+
+You must enable request access or add terms of access to restrict file access.
+
+
+                    Terms of Access for Restricted Files
+                    
+
+
+
+
+
+Save Changes
+
+                Cancel
+            
+Edit EmbargoThe selected file or files have already been published. Contact an administrator to change the embargo date or reason of the file or files.
+
+
+
+
+Cancel
+Edit Retention PeriodThe selected file or files have already been published. Contact an administrator to change the retention period date or reason of the file or files.
+
+
+
+
+Cancel
+Delete Files
+ The file will be deleted after you click on the Delete button.
+ Files will not be removed from previously published versions of the dataset.
+Delete
+
+                Cancel
+            
+
+ 
+
+Continue
+
+                Cancel
+            
+Select File(s)
+ Please select one or more files.
+
+
+                Close
+            
+
+Share Dataset
+Share this dataset on your favorite social media networks.
+
+
+
+                                Close
+                            
+
+
+
+Continue
+
+                                Cancel
+                            
+Dataset Citations
+Citations for this dataset are retrieved from Crossref via DataCite using Make Data Count standards. For more information about dataset metrics, please refer to the User Guide.
+                        
+
+                                Sorry, no citations were found.
+                            
+
+
+
+                                Close
+                            
+Inaccessible Files Selected
+ The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired or the files can only be transferred via Globus.
+You may request access to any restricted file(s) by clicking the Request Access button.
+
+
+                                Close
+                            
+Ineligible Files Selected
+ The selected file(s) may not be transferred because you have not been granted access or the file(s) have a retention period that has expired or the files are not Globus accessible.
+You may request access to any restricted file(s) by clicking the Request Access button.
+
+
+                                Close
+                            
+Download Options
+  The files selected are too large to download as a ZIP.
+You can select individual files that are below the 953.7 MB download limit from the files table, or use the Data Access API for programmatic access to the files.
+                        Select File(s)
+ Please select a file or files to be downloaded.
+
+
+                                Close
+                            
+Inaccessible Files Selected
+ The selected file(s) may not be downloaded because you have not been granted access or the file(s) have a retention period that has expired.
+
+
+
+Click Continue to download the files you have access to download.Continue
+
+                                Cancel
+                            
+Ineligible Files Selected
+ Some file(s) cannot be transferred. (They are restricted, embargoed, with an expired retention period, or not Globus accessible.)
+
+
+
+Click Continue to transfer the elligible files.Continue
+
+                                Cancel
+                            
+Delete Dataset
+ Are you sure you want to delete this dataset and all of its files? You cannot undelete this dataset.
+Continue
+
+                                Cancel
+                            
+Delete Draft Version
+ Are you sure you want to delete this draft version? Files will be reverted to the most recently published version. You cannot undelete this draft.
+Continue
+
+                                Cancel
+                            
+Unpublished Dataset Preview URL
+ Preview URL can only be used with unpublished versions of datasets.
+
+
+                                    Cancel
+                                
+Unpublished Dataset Preview URL
+ Are you sure you want to disable the Preview URL? If you have shared the Preview URL with others they will no longer be able to use it to access your unpublished dataset.
+Yes, Disable General Preview URL
+
+                                Cancel
+                            
+Delete Files
+ The file(s) will be deleted after you click on the Delete button.
+ Files will not be removed from previously published versions of the dataset.
+Delete
+
+                                Cancel
+                            
+Compute
+ This dataset contains restricted files you may not compute on because you have not been granted access.
+
+
+                                Close
+                            
+Deaccession Dataset
+ Are you sure you want to deaccession? This is permanent and the selected version(s) will no longer be viewable by the public.
+
+
+                                No
+                            
+Deaccession Dataset
+ Are you sure you want to deaccession this dataset? This is permanent an it will no longer be viewable by the public.
+
+
+                                No
+                            
+Version Differences Details
+ Please select two versions to view the differences.
+
+
+                                Close
+                            
+Version Differences Details
+
+
+
+                                 
+                            
+
+                                Version: 
+                                Last Updated: 
+                            
+
+                                Version: 
+                                Last Updated: 
+                            
+
+
+
+                                Done
+                            
+Select File(s)
+ Please select a file or files for access request.
+
+
+                                Close
+                            
+Select File(s)
+ Embargoed files cannot be accessed. Please select an unembargoed file or files for your access request.
+
+
+                                Close
+                            
+Edit Tags
+Select existing file tags or create new tags to describe your files. Each file can have more than one tag.
+Save ChangesCancel
+Request Access
+
+ 
+                            You need to Log In to request access.
+
+
+
+                                Close
+                            
+Dataset Terms
+
+                Please confirm and/or complete the information needed below in order to request access to files in this dataset.
+            
+
+                This dataset is made available under the following terms. Please confirm and/or complete the information needed below in order to continue.
+            
+
+
+                License/Data Use Agreement 
+
+Our Community Norms as well as good scientific practices expect that proper credit is given via citation. Please use the data citation shown on the dataset page.
+                
+
+
+CC BY-NC-SA 4.0
+                    
+
+
+
+Preview Guestbook
+
+
+                Upon downloading files the guestbook asks for the following information.
+            
+
+
+                    Guestbook Name
+                
+
+
+
+
+
+
+
+                    Collected Data
+                    
+
+
+Account Information
+                        
+
+
+
+
+
+
+
+                Close
+            
+Package File Download
+
+Use the Download URL in a Wget command or a download manager to download this package file. Download via web browser is not recommended. User Guide - Downloading a Dataverse Package via URL
+
+
+
+
+
+Download URL
+https://dataverse.lib.virginia.edu/api/access/datafile/
+
+Close
+Compute Batch
+
+Clear Batchui-button
+
+
+
+Dataset
+Persistent Identifier
+Change Compute Batch
+
+
+
+
+
+Compute Batch
+
+                                Cancel
+                            
+Submit for Review
+
+ You will not be able to make changes to this dataset while it is in review.
+                        
+Submit
+
+                                Cancel
+                            
+Publish Dataset
+
+ Are you sure you want to republish this dataset?
+                            
+
+                                    Select if this is a minor or major version update.
+                                Minor Release (2.1)Major Release (3.0)
+
+
+Continue
+
+                                Cancel
+                            
+Publish Dataset
+
+This dataset cannot be published until 
+                                    Cell Maps for Artificial Intelligence
+                                      is published by its administrator.
+                        
+
+
+                                Close
+                            
+Publish Dataset
+
+This dataset cannot be published until 
+                                    Cell Maps for Artificial Intelligence
+                                     and 
+                                    School of Medicine
+                                      are published.
+                        
+
+
+                                Close
+                            
+Return to Author
+
+ Return this dataset to contributor for modification. The reason for return entered below will be sent by email to the author.
+                        
+
+
+Continue
+
+                                Cancel
+                            
+Add/Edit a Version Note
+
+Styled Citation
+
+
+
+
+
+
+
+Copyright © 2025, by the Rector and Visitors of the University of Virginia | Terms of Use |  Privacy Policy
+
+
+
+Powered by
+v. 6.6 build 1829-192cdc4
+
+
+
+
+
+Contact University of Virginia Dataverse Support
+
+
+
+
+To
+
+University of Virginia Dataverse Support
+
+
+From 
+
+
+
+Subject 
+
+
+
+Message 
+
+
+
+
+
+Please fill this out to prove you are not a robot. 
+
+3 + 1 = 
+                        
+
+
+Send Message
+
+                        Cancel
+                    
+
+
+
+
+
+
+
+
+ 
+        
+        

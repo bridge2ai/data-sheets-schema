@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a LinkML schema project for representing "Datasheets for Datasets" - a standardized way to document datasets inspired by electronic component datasheets. The project creates structured schemas for the 50+ questions and topics outlined in the original Datasheets for Datasets paper by Gebru et al.
+This is a LinkML schema project for representing "Datasheets for Datasets" (D4D) - a standardized way to document datasets inspired by electronic component datasheets. The project creates structured schemas for the 50+ questions and topics outlined in the original Datasheets for Datasets paper by Gebru et al.
+
+**Related work**:
+- Original paper: [Datasheets for Datasets](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext)
+- Example: [Structured dataset documentation: a datasheet for CheXpert](https://arxiv.org/abs/2105.03020)
+- Google's alternative: [Data Cards](https://arxiv.org/abs/2204.01075)
+- Augmented model: [Augmented Datasheets for Speech Datasets and Ethical Decision-Making](https://dl.acm.org/doi/10.1145/3593013.3594049)
 
 ## Development Commands
 
@@ -269,6 +275,11 @@ The D4D agents use the `aurelian` framework:
 - Can synthesize multiple documents into comprehensive metadata
 - Can be run via CLI: `aurelian datasheets <URL>` or `aurelian datasheets --ui`
 
+**Note**: The `aurelian/` directory is a git submodule. Initialize it with:
+```bash
+git submodule update --init --recursive
+```
+
 ## Document Concatenation
 
 This project includes tools to concatenate multiple documents from a directory into a single document in reproducible order.
@@ -362,6 +373,21 @@ field2: null        # No value (or omit entirely)
 <td></td>           <!-- field2 displays as empty -->
 ```
 
+## Running Single Tests
+
+To run a specific test file:
+```bash
+poetry run python -m unittest tests.test_d4d_full_schema
+poetry run python -m unittest tests.test_data
+poetry run python -m unittest tests.test_renderer
+```
+
+To run a specific test class or method:
+```bash
+poetry run python -m unittest tests.test_d4d_full_schema.TestD4DFullSchema
+poetry run python -m unittest tests.test_d4d_full_schema.TestD4DFullSchema.test_full_schema_generation
+```
+
 ## Important Notes
 
 - **DO NOT EDIT** files in `project/` or `src/data_sheets_schema/datamodel/` - these are auto-generated
@@ -372,3 +398,4 @@ field2: null        # No value (or omit entirely)
 - Always run `make gen-project` after schema changes to regenerate artifacts
 - Module files are in `src/data_sheets_schema/schema/` (NOT in a `modules/` subdirectory)
 - When adding new classes, prefer inheriting from existing base classes in `D4D_Base_import.yaml`
+- The `aurelian/` directory is a git submodule - initialize with `git submodule update --init --recursive`
