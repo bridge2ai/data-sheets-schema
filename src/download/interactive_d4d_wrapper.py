@@ -28,7 +28,7 @@ class SimpleD4DConfig:
 class ValidatedD4DWrapper:
     """Validated wrapper with download and content validation before D4D processing."""
     
-    def __init__(self, input_dir: str = "downloads_by_column", output_dir: str = "data/extracted_by_column"):
+    def __init__(self, input_dir: str = "downloads_by_column", output_dir: str = "data/extracted_coding_agent"):
         self.input_dir = Path(input_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -57,29 +57,28 @@ class ValidatedD4DWrapper:
             model="openai:gpt-5",
             deps_type=SimpleD4DConfig,
             system_prompt=f"""
-You are an expert data scientist specializing in extracting metadata from datasets following the "Datasheets for Datasets" schema.
+You are an expert data scientist specializing in extracting metadata from datasets.
+You will be provided with a schema that describes the metadata structure for datasets,
+and one or more URLs pointing to webpages or PDFs that describe a dataset.
+Your task is to extract all relevant metadata from the provided content and output it in
+YAML format, strictly following the provided schema. Generate only the YAML document.
+Do not respond with any additional commentary. Try to ensure that required fields are
+present, but only populate items that you are sure about. Ensure that output is valid
+YAML.
 
 Below is the complete datasheets for datasets schema:
 
 {self.schema}
 
-Your task is to analyze the provided content (which may be HTML, text, PDF, or JSON metadata) and extract all relevant dataset metadata to generate a complete YAML document that strictly follows the D4D schema above.
+For each URL to a webpage or PDF describing a dataset, you will fetch the
+content, extract all the relevant metadata, and output a YAML document that exactly
+conforms to the above schema. The output must be valid YAML with all required fields
+filled in, following the schema exactly.
 
-Focus on extracting:
-- Dataset identity (id, name, title, description)  
-- Creators and contributors with affiliations
-- Purpose and intended uses
-- Data composition and structure
-- Collection methodology and timeframe
-- Preprocessing and cleaning steps
-- Distribution information and formats
-- Licensing and terms of use
-- Maintenance information
-- Access requirements and restrictions
+If you get more than one URL, assume they are describing the same dataset. Process each
+URL to retrieve information about the dataset, concatenate the content from all URLs,
 
-Generate only valid YAML output without any additional commentary. Ensure all required fields are populated where information is available. If specific information is not available in the source, omit those fields rather than making assumptions.
-
-The output must be a valid YAML document that starts with the dataset metadata, not wrapped in code blocks or explanations.
+You should return a single YAML document describing the dataset.
 """,
             defer_model_check=True,
         )

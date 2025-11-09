@@ -29,7 +29,7 @@ except ImportError as e:
 class D4DAgentWrapper:
     """Wrapper to process files with D4D agent and generate YAML metadata."""
     
-    def __init__(self, input_dir: str = "downloads_by_column", output_dir: str = "data/extracted_by_column"):
+    def __init__(self, input_dir: str = "downloads_by_column", output_dir: str = "data/extracted_d4d_agent"):
         self.input_dir = Path(input_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
