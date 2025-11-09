@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="datasheet-common.css">
+    <title>dataverse 10.18130 V3 B35XWX tab metadata d4d - Datasheet for Dataset</title>
+</head>
+<body>
+    <div class="header">
+        <h1>dataverse 10.18130 V3 B35XWX tab metadata d4d</h1>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
+    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">Why was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>purpose-1</dd><dt>Name</dt><dd>Purpose</dd><dt>Response</dt><dd><div class="long-description">Provide AI-ready, richly annotated multimodal functional genomics datasets (transcriptomics, proteomics, and microscopy) to enable construction of cell maps and development of AI/ML methods under the NIH Bridge2AI CM4AI program.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Grantor</th><th>Grant Name</th><th>Grant Number</th></tr></thead><tbody><tr><td>National Institutes of Health</td><td>NIH Bridge2AI CM4AI</td><td>1OT2OD032742-01</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Counts</th><th>Data Type</th><th>ID</th><th>Instance Type</th><th>Name</th><th>Representation</th></tr></thead><tbody><tr><td>11739</td><td>Raw sequencing reads (fastq-equivalent as packaged), RO-Crate JSON metadata and provenance.</td><td>inst-perturbseq</td><td>Cells with gene perturbations; per-cell scRNAseq reads and derived counts/phenotypes.</td><td>Instance</td><td>Single-cell transcriptomic profiles and fitness phenotypes from CRISPRi perturb-seq in undifferentia...</td></tr><tr><td></td><td>RO-Crate JSON metadata; raw data to be deposited to PRIDE.</td><td>inst-secms</td><td>Fractionated protein complexes profiled by mass spectrometry in hiPSCs and iPSC-derived NPCs, neuron...</td><td>Instance</td><td>Protein-protein interaction profiles measured by size exclusion chromatography–mass spectrometry (SE...</td></tr><tr><td>563</td><td>ZIP archives of image files plus RO-Crate metadata and provenance.</td><td>inst-if</td><td>Images across treatment conditions (untreated, paclitaxel, vorinostat) with multi-channel staining.</td><td>Instance</td><td>Immunofluorescence (IF) confocal microscopy images showing spatial protein localization in MDA-MB-46...</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instance Acquisition Methods
+                            
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>acq-1</dd><dt>Name</dt><dd>InstanceAcquisition</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Directly observed measurements from sequencing, mass spectrometry, and microscopy; experimental perturbations via CRISPRi.</li></ul></dd><dt>Was Directly Observed</dt><dd>True</dd><dt>Was Reported By Subjects</dt><dd>False</dd><dt>Was Inferred Derived</dt><dd>True</dd><dt>Was Validated Verified</dt><dd>True</dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subpopulations
+                            
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>subpop-1</dd><dt>Name</dt><dd>Subpopulation</dd><dt>Identification</dt><dd><ul class='formatted-list'><li><dl class='nested-dict'><dt>Mda Mb 468 Breast Cancer Cell Line With Treatment Conditions</dt><dd>untreated, paclitaxel, vorinostat.</dd></dl></li></ul></dd><dt>Distribution</dt><dd><ul class='formatted-list'><li>Imaging subsets exist for each treatment condition; detailed counts per condition are provided within respective archives.</li></ul></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Formats
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>distfmt-1</dd><dt>Name</dt><dd>DistributionFormat</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Dataverse repository (web UI and Data Access API).</li><li>RO-Crate metadata (JSON-LD).</li><li>ZIP archives for large image collections.</li><li>JSON files for metadata packages.</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Dates
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>distdate-1</dd><dt>Name</dt><dd>DistributionDate</dd><dt>Description</dt><dd><ul class='formatted-list'><li>2025-03-03 (Version 1.4)</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label required-field">
+                            ID
+                            <span class="required-indicator" title="Required field">*</span>
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.18130/V3/B35XWX" target="_blank">doi:10.18130/V3/B35XWX</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Name
+                            
+                        </label>
+                        <div class="item-value">Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Title
+                            
+                        </label>
+                        <div class="item-value">Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Description
+                            
+                        </label>
+                        <div class="item-value"><div class="long-description">This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center. This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection (2025-03-04).</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Page
+                            
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.18130/V3/B35XWX" target="_blank">https://doi.org/10.18130/V3/B35XWX</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Publisher
+                            
+                        </label>
+                        <div class="item-value"><a href="https://dataverse.lib.virginia.edu" target="_blank">https://dataverse.lib.virginia.edu</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Issued
+                            
+                        </label>
+                        <div class="item-value">2025-03-03</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Created On
+                            
+                        </label>
+                        <div class="item-value">2025-02-27</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Language
+                            
+                        </label>
+                        <div class="item-value">en</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>AI</li><li>affinity purification</li><li>AP-MS</li><li>artificial intelligence</li><li>breast cancer</li><li>Bridge2AI</li><li>cardiomyocyte</li><li>CM4AI</li><li>CRISPR/Cas9</li><li>induced pluripotent stem cell</li><li>iPSC</li><li>KOLF2.1J</li><li>machine learning</li><li>mass spectroscopy</li><li>MDA-MB-468</li><li>neural progenitor cell</li><li>NPC</li><li>neuron</li><li>paclitaxel</li><li>perturb-seq</li><li>perturbation sequencing</li><li>protein-protein interaction</li><li>protein localization</li><li>single-cell RNA sequencing</li><li>scRNAseq</li><li>SEC-MS</li><li>size exclusion chromatography</li><li>subcellular imaging</li><li>vorinostat</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Conforms To
+                            
+                        </label>
+                        <div class="item-value"><a href="https://w3id.org/ro/crate" target="_blank">https://w3id.org/ro/crate</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Created By
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>Niestroy, Justin</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Addressing Gaps
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>gap-1</dd><dt>Name</dt><dd>AddressingGap</dd><dt>Response</dt><dd>Addresses the lack of standardized, provenance-rich, multimodal functional genomics datasets spanning perturb-seq, SEC-MS, and subcellular imaging across disease-relevant human cell lines.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Creators
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Principal Investigator</td><td>Ideker T</td><td>person-ideker</td><td>University of California San Diego</td></tr><tr><td>Principal Investigator</td><td>Krogan N</td><td>person-krogan</td><td>University of California San Francisco</td></tr><tr><td>Principal Investigator</td><td>Lundberg E</td><td>person-lundberg</td><td>Stanford University</td></tr><tr><td>Principal Investigator</td><td>Mali P</td><td>person-mali</td><td>University of California San Diego</td></tr><tr><td>Principal Investigator</td><td>Clark T</td><td>person-clark</td><td>University of Virginia</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Relationships
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>rel-1</dd><dt>Name</dt><dd>Relationships</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Multimodal linkage across perturb-seq gene targets, SEC-MS protein interactions, and IF-derived protein localization for integrated cell mapping.</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Mechanisms
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>mech-1</dd><dt>Name</dt><dd>CollectionMechanism</dd><dt>Description</dt><dd><ul class='formatted-list'><li>CRISPRi perturb-seq (single-cell RNA-seq after targeted gene knockdown).</li><li>Size exclusion chromatography followed by mass spectrometry (SEC-MS).</li><li>Immunofluorescence-based staining (ICC-IF) and confocal microscopy.</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Timeframes
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>timeframe-1</dd><dt>Name</dt><dd>CollectionTimeframe</dd><dt>Description</dt><dd><ul class='formatted-list'><li><dl class='nested-dict'><dt>Data Creation Date</dt><dd>2025-02-27; Public release: 2025-03-03 (March 2025 Beta release).</dd></dl></li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Ethical Reviews
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>er-1</dd><dt>Name</dt><dd>EthicalReview</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Data derive from human cell lines and do not include human subject PII; specific IRB details not provided in this record.</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Deidentified
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>deid-1</dd><dt>Name</dt><dd>Deidentification</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Dataset contains measurements from cell lines; no directly identifiable personal data are included.</li></ul></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sensitive Elements
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>sens-1</dd><dt>Name</dt><dd>SensitiveElement</dd><dt>Description</dt><dd><ul class='formatted-list'><li>No sensitive personal data; scientific data from established human cell lines.</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            External Resources
+                            
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>ext-1</dd><dt>Name</dt><dd>ExternalResource</dd><dt>External Resources</dt><dd><ul class='formatted-list'><li>Future deposition of SEC-MS raw data to PRIDE (Proteomics Identifications Database) is planned.</li><li><dl class='nested-dict'><dt>Related Publications On Biorxiv (e.g., DOI</dt><dd>10.1101/2024.05.21.589311; doi:10.1101/2024.11.03.621734).</dd></dl></li></ul></dd><dt>Future Guarantees</dt><dd><ul class='formatted-list'><li>SEC-MS raw data availability will be ensured upon PRIDE deposition (not yet available at time of release).</li></ul></dd><dt>Archival</dt><dd><ul class='formatted-list'><li>Dataset packaged as RO-Crate with provenance to support long-term archival references.</li></ul></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Ip Restrictions
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>ipr-1</dd><dt>Name</dt><dd>IPRestrictions</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Copyright (c) 2025 The Regents of the University of California except where otherwise noted.</li><li>Spatial proteomics raw image data copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University.</li></ul></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Maintainers
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>University of Virginia Dataverse (repository hosting and support).</td><td>maint-1</td><td>Maintainer</td></tr><tr><td>{'Point of contact': 'Ideker T (University of California San Diego) via Dataverse contact mechanism.'}</td><td>maint-2</td><td>Maintainer</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Is Tabular
+                            
+                        </label>
+                        <div class="item-value">no</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Resources
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Compression</th><th>Description</th><th>Encoding</th><th>Format</th><th>ID</th><th>Issued</th><th>Md5</th><th>Media Type</th><th>Name</th><th>Path</th><th>Title</th></tr></thead><tbody><tr><td></td><td>Expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J hiPSCs mapping t...</td><td>UTF-8</td><td>JSON</td><td>file-crispr-atlas-rocrate</td><td>2025-03-03</td><td>cbdb263b1c099396d75e16f00a79a818</td><td>application/json</td><td>ro-crate-metadata.json</td><td>CRISPR Perturbation Cell Atlas/ro-crate-metadata.json</td><td>CRISPR Perturbation Cell Atlas/JSON</td></tr><tr><td></td><td>Raw sequence data from genome-scale CRISPRi Perturbation Cell Atlas in KOLF2.1J hiPSCs; packaged as ...</td><td>UTF-8</td><td>JSON</td><td>file-crispr-rawseq-rocrate</td><td>2025-03-03</td><td>1cafefa32a897998e3e2ba0a29a3ef5c</td><td>application/json</td><td>ro-crate-metadata.json</td><td>CRISPR Perturbation RNA Sequences - Raw Sequences/ro-crate-metadata.json</td><td>CRISPR Perturbation RNA Sequences - Raw Sequences/JSON</td></tr><tr><td></td><td>SEC-MS dataset (KOLF2.1J hiPSCs) from the Krogan lab; packaged as RO-Crate. Raw data will be uploade...</td><td>UTF-8</td><td>JSON</td><td>file-sec-ms-rocrate</td><td>2025-03-03</td><td>cb67e7749b15ce87b9042a9feba9d032</td><td>application/json</td><td>ro-crate-metadata.json</td><td>Protein-protein Interaction SEC-MS/ro-crate-metadata.json</td><td>Protein-protein Interaction SEC-MS/JSON</td></tr><tr><td>ZIP</td><td>Spatial localization of 563 proteins in untreated MDA-MB-468 cells by ICC-IF and confocal microscopy...</td><td></td><td></td><td>file-if-untreated-zip</td><td>2025-03-03</td><td>0b4d129f5fbc3bb7f7ea564cd032cef7</td><td>application/zip</td><td>cm4ai-v0.6-beta-if-images-untreated.zip</td><td>Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-untreated.zip</td><td>Protein Localization Subcellular Images/ZIP Archive - Untreated</td></tr><tr><td>ZIP</td><td>Spatial localization of 563 proteins in MDA-MB-468 cells treated with paclitaxel by ICC-IF and confo...</td><td></td><td></td><td>file-if-paclitaxel-zip</td><td>2025-03-03</td><td>9422486c80bc9e1d35b2fbbc72a5f043</td><td>application/zip</td><td>cm4ai-v0.6-beta-if-images-paclitaxel.zip</td><td>Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-paclitaxel.zip</td><td>Protein Localization Subcellular Images/ZIP Archive - Paclitaxel</td></tr><tr><td>ZIP</td><td>Spatial localization of 563 proteins in MDA-MB-468 cells treated with vorinostat by ICC-IF and confo...</td><td></td><td></td><td>file-if-vorinostat-zip</td><td>2025-03-03</td><td>ac577109a41a9806978461157b777d52</td><td>application/zip</td><td>cm4ai-v0.6-beta-if-images-vorinostat.zip</td><td>Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-vorinostat.zip</td><td>Protein Localization Subcellular Images/ZIP Archive - Vorinostat</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">What (other) tasks could the dataset be used for?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>task-1</dd><dt>Name</dt><dd>Task</dd><dt>Response</dt><dd>AI/ML research on cell architecture and function, including training and benchmarking models for perturbation-response prediction, protein localization, and protein-protein interaction mapping.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License And Use Terms
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>lic-1</dd><dt>Name</dt><dd>LicenseAndUseTerms</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0).</li><li>Proper citation and attribution to copyright holders and authors required; follow Dataverse community norms.</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <div>
+                        <h2 class="section-title">Distribution</h2>
+                        <p class="section-description">How will the dataset be distributed?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            DOI
+                            
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.18130/V3/B35XWX" target="_blank">doi:10.18130/V3/B35XWX</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License
+                            
+                        </label>
+                        <div class="item-value">CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/)</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version Access
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>veracc-1</dd><dt>Name</dt><dd>VersionAccess</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Prior versions and release history are available via the Dataverse Versions interface for this DOI landing page.</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔄</span>
+                    <div>
+                        <h2 class="section-title">Maintenance</h2>
+                        <p class="section-description">How will the dataset be maintained?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Last Updated On
+                            
+                        </label>
+                        <div class="item-value">2025-03-07</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version
+                            
+                        </label>
+                        <div class="item-value">1.4</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Updates
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>update-1</dd><dt>Name</dt><dd>UpdatePlan</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Data will be augmented regularly through the end of the project; subsequent releases will add new instances and modalities and correct any issues.</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
+    <div class="timestamp">
+        Generated on 2025-11-08 22:21:58 using Bridge2AI Data Sheets Schema
+    </div>
+</body>
+</html>

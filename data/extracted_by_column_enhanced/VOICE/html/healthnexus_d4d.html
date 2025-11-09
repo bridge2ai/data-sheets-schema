@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="datasheet-common.css">
+    <title>healthnexus d4d - Datasheet for Dataset</title>
+</head>
+<body>
+    <div class="header">
+        <h1>healthnexus d4d</h1>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
+    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">Why was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Purpose</dd><dt>Response</dt><dd>Create an ethically sourced flagship dataset to enable AI research on voice as a biomarker of health by linking derived voice data with demographic, clinical, and validated questionnaire information.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Grantor</th><th>Grant Name</th><th>Grant Number</th></tr></thead><tbody><tr><td>National Institutes of Health (NIH)</td><td>Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioacoustic database</td><td>3OT2OD032720-01S1</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Counts</th><th>Data Type</th><th>Instance Type</th><th>Name</th><th>Representation</th></tr></thead><tbody><tr><td>12523</td><td>Derived spectrograms (513 x N), acoustic, phonetic, and prosodic features extracted from raw audio; ...</td><td>Audio-derived data (per recording)</td><td>Voice-derived recordings</td><td>Voice-derived recordings (spectrograms/features) linked to metadata</td></tr><tr><td>306</td><td>Tabular phenotype data (one row per participant) with data dictionary</td><td>Participant-level records</td><td>Participants</td><td>Participants with linked demographic, clinical, and questionnaire data</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subpopulations
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Adult cohort</dd><dt>Identification</dt><dd><ul class='formatted-list'><li>v1.0 includes adults only across five disease cohorts</li></ul></dd><dt>Distribution</dt><dd><ul class='formatted-list'><li>306 participants; disease-targeted cohorts (voice, neurological, mood/psychiatric, respiratory)</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Formats
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Files in v1.0</dd><dt>Description</dt><dd><ul class='formatted-list'><li>spectrograms.parquet (derived spectrograms; 513 x N per recording; includes participant_id, session_id, task_name)</li><li>phenotype.tsv (participant-level demographics, acoustic confounders, validated questionnaires)</li><li>phenotype.json (data dictionary for phenotype.tsv)</li><li>static_features.tsv (one row per recording with acoustic/phonetic/prosodic features)</li><li>static_features.json (data dictionary for static_features.tsv)</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Dates
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Initial release</dd><dt>Description</dt><dd><ul class='formatted-list'><li>2024-11-27</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label required-field">
+                            ID
+                            <span class="required-indicator" title="Required field">*</span>
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.57764/qb6h-em84" target="_blank">doi:10.57764/qb6h-em84</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Name
+                            
+                        </label>
+                        <div class="item-value">Bridge2AI-Voice</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Title
+                            
+                        </label>
+                        <div class="item-value">Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v1.0</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Description
+                            
+                        </label>
+                        <div class="item-value"><div class="long-description">Bridge2AI-Voice is a comprehensive collection of data derived from voice recordings linked to corresponding clinical information to enable research on voice as a biomarker of health. Version 1.0 provides 12,523 recordings for 306 participants collected across five sites in North America. Participants were selected based on conditions known to manifest in the voice waveform (voice, neurological, mood/psychiatric, and respiratory disorders). This initial release contains low-risk derived data (e.g., spectrograms and extracted features) and detailed demographic/clinical/questionnaire data; raw audio waveforms are not included in v1.0.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Language
+                            
+                        </label>
+                        <div class="item-value">en</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Page
+                            
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.57764/qb6h-em84" target="_blank">https://doi.org/10.57764/qb6h-em84</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Issued
+                            
+                        </label>
+                        <div class="item-value">2024-11-27</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>voice</li><li>bridge2ai</li><li>audio</li><li>biomarker</li><li>health</li><li>credentialed access</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Created By
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>Alistair Johnson</li><li>Jean-Christophe Bélisle-Pipon</li><li>David Dorr</li><li>Satrajit Ghosh</li><li>Philip Payne</li><li>Maria Powell</li><li>Anaïs Rameau</li><li>Vardit Ravitsky</li><li>Alexandros Sigaras</li><li>Olivier Elemento</li><li>Yael Bensoussan</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Addressing Gaps
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Gap addressed</dd><dt>Response</dt><dd><div class="long-description">Addresses the lack of large, diverse, multi-institutional voice datasets linked to health information with standardized collection protocols and ethical oversight; mitigates prior limitations such as small datasets and limited demographic diversity reporting.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                            
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Sampling approach</dd><dt>Is Sample</dt><dd><ul class='formatted-list'><li>True</li></ul></dd><dt>Is Random</dt><dd><ul class='formatted-list'><li>False</li></ul></dd><dt>Source Data</dt><dd><ul class='formatted-list'><li>Patients presenting at specialty clinics/institutions at five North American sites</li></ul></dd><dt>Is Representative</dt><dd><ul class='formatted-list'><li>False</li></ul></dd><dt>Why Not Representative</dt><dd><ul class='formatted-list'><li>Purposeful selection into five disease cohorts; v1.0 includes adults only</li></ul></dd><dt>Strategies</dt><dd><ul class='formatted-list'><li>Deterministic cohort-based enrollment using inclusion/exclusion screening</li></ul></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Mechanisms
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Data collection mechanisms</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Standardized protocol using a custom tablet application; headset used when possible</li><li>Clinical/demographic and validated questionnaires collected in-app</li><li>Data exported and converted from REDCap; processing via open-source b2aiprep library</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Collectors
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Data collection personnel</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Project investigators at specialty clinics and institutions screened and enrolled participants</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Timeframes
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Collection timeframe</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Collected across five sites in North America; specific calendar dates not specified in this record</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Ethical Reviews
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Ethics and IRB/REB review</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Approved by the University of South Florida Institutional Review Board</li><li>Submitted for review to the University of Toronto Research Ethics Board</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Preprocessing Strategies
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Audio preprocessing and feature derivation</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Raw audio converted to mono, resampled to 16 kHz with Butterworth anti-aliasing filter</li><li>Spectrograms via STFT (25 ms window, 10 ms hop, 512-point FFT)</li><li>Acoustic features via OpenSMILE</li><li>Phonetic/prosodic features via Parselmouth and Praat (F0, formants, voice quality)</li><li>Transcriptions generated using OpenAI Whisper Large (free speech transcripts not included in v1.0)</li></ul></dd><dt>Used Software</dt><dd><table class="data-table"><thead><tr><th>Name</th></tr></thead><tbody><tr><td>OpenSMILE</td></tr><tr><td>Parselmouth</td></tr><tr><td>Praat</td></tr><tr><td>OpenAI Whisper Large</td></tr><tr><td>torchaudio</td></tr><tr><td>b2aiprep</td></tr></tbody></table></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Labeling Strategies
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Transcription and derived annotations</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Automatic transcription using OpenAI Whisper Large for certain tasks; free speech transcripts were removed prior to release</li></ul></dd><dt>Used Software</dt><dd><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>OpenAI Whisper Large</dd></dl></li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Raw Sources
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Raw audio availability</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Raw audio waveforms were not distributed in v1.0; only derived spectrograms and features are provided. Future releases aim to include audio with additional safeguards.</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            External Resources
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>External Resources</th><th>Name</th></tr></thead><tbody><tr><td>https://docs.b2ai-voice.org</td><td>Documentation website</td></tr><tr><td>https://doi.org/10.5281/zenodo.14148755</td><td>Bridge2AI Voice REDCap (v3.20.0)</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Confidential Elements
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Confidentiality considerations</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Contains clinical and questionnaire data linked to participants; v1.0 includes only low-risk derived data and excludes raw audio</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Content Warnings
+                            
+                        </label>
+                        <div class="item-value"></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sensitive Elements
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Sensitive data elements</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Health-related data (demographics, clinical information, validated questionnaires)</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Is Deidentified
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>De-identification</dd><dt>Description</dt><dd><ul class='formatted-list'><li>HIPAA Safe Harbor identifiers removed (e.g., names, detailed dates, contact identifiers, IDs)</li><li>State/province removed; country of data collection retained</li><li>Free speech transcripts removed</li><li>Raw audio waveforms omitted from this release</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Ip Restrictions
+                            
+                        </label>
+                        <div class="item-value"></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Regulatory Restrictions
+                            
+                        </label>
+                        <div class="item-value"></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Maintainers
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Health Data Nexus</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Supported by the Temerty Centre for AI Research and Education in Medicine (Temerty Foundation)</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Errata
+                            
+                        </label>
+                        <div class="item-value"></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Is Tabular
+                            
+                        </label>
+                        <div class="item-value">Mixed (tabular phenotype/features and array-based parquet spectrograms)</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">What (other) tasks could the dataset be used for?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Name</dt><dd>Intended tasks</dd><dt>Response</dt><dd>Develop and evaluate AI/ML methods for detecting, characterizing, and monitoring health conditions from voice-derived representations and associated clinical data.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License And Use Terms
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Name</dt><dd>Access, license, and terms</dd><dt>Description</dt><dd><ul class='formatted-list'><li><dl class='nested-dict'><dt>License</dt><dd>Bridge2AI Voice Registered Access License</dd></dl></li><li><dl class='nested-dict'><dt>Data Use Agreement</dt><dd>Bridge2AI Voice Registered Access Agreement</dd></dl></li><li><dl class='nested-dict'><dt>Access</dt><dd>Credentialed users only; must sign DUA</dd></dl></li><li><dl class='nested-dict'><dt>Required Training</dt><dd>TCPS 2: CORE 2022</dd></dl></li><li>This is a restricted-access resource distributed via Health Data Nexus</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <div>
+                        <h2 class="section-title">Distribution</h2>
+                        <p class="section-description">How will the dataset be distributed?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            DOI
+                            
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.57764/qb6h-em84" target="_blank">doi:10.57764/qb6h-em84</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version Access
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Name</dt><dd>Versioning and access to latest</dd><dt>Description</dt><dd><ul class='formatted-list'><li><dl class='nested-dict'><dt>Latest Version DOI Resolver</dt><dd><a href="https://doi.org/10.57764/3sg0-7440" target="_blank">https://doi.org/10.57764/3sg0-7440</a></dd></dl></li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔄</span>
+                    <div>
+                        <h2 class="section-title">Maintenance</h2>
+                        <p class="section-description">How will the dataset be maintained?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version
+                            
+                        </label>
+                        <div class="item-value">1.0</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Updates
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Name</dt><dd>Update plans</dd><dt>Description</dt><dd><ul class='formatted-list'><li>Future releases aim to include voice waveforms (raw audio) with additional precautions to ensure data security</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
+    <div class="timestamp">
+        Generated on 2025-11-08 22:21:59 using Bridge2AI Data Sheets Schema
+    </div>
+</body>
+</html>

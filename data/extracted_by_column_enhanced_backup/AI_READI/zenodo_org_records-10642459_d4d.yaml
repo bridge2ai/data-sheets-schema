@@ -1,0 +1,16 @@
+# D4D Metadata extracted from: zenodo_org_records-10642459_row10.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-10-30 23:39:47
+
+id: zenodo_org_records-10642459_row10
+name: zenodo_org_records-10642459_row10
+description: Binary PDF content detected (PDF-1.7); no extractable textual metadata was available from the provided source.
+keywords:
+  - AI_READI
+media_type: application/pdf
+path: zenodo_org_records-10642459_row10.txt
+distribution_formats:
+  - description:
+      - PDF (application/pdf)

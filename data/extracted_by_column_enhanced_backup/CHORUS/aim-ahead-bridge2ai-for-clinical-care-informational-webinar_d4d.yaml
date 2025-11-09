@@ -1,0 +1,36 @@
+# D4D Metadata extracted from: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.pdf
+# Column: CHORUS
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-10-30 23:42:03
+
+id: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8
+name: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar
+title: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar (PDF)
+description: Informational webinar PDF related to AIM-AHEAD and Bridge2AI for Clinical Care, associated with the CHORUS project.
+keywords:
+  - AIM-AHEAD
+  - Bridge2AI
+  - Clinical Care
+  - CHORUS
+  - webinar
+  - PDF
+resources:
+  - id: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.pdf
+    name: Webinar PDF
+    title: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar (PDF)
+    description: PDF document of an informational webinar related to AIM-AHEAD, Bridge2AI, and the CHORUS project.
+    media_type: application/pdf
+    keywords:
+      - AIM-AHEAD
+      - Bridge2AI
+      - Clinical Care
+      - CHORUS
+      - webinar
+      - PDF
+    purposes:
+      - response: Provide informational materials about AIM-AHEAD Bridge2AI for Clinical Care within the CHORUS project context.
+    distribution_formats:
+      - description:
+          - PDF
+          - application/pdf

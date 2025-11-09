@@ -1,0 +1,23 @@
+# D4D Metadata extracted from: biorxiv_2024.05.21.589311v1_row4.pdf
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-10-30 23:54:36
+
+id: biorxiv_2024.05.21.589311v1_row4.pdf
+name: biorxiv_2024.05.21.589311v1_row4.pdf
+title: biorxiv_2024.05.21.589311v1_row4.pdf
+description: PDF document associated with a bioRxiv preprint identifier pattern "2024.05.21.589311 v1". Limited metadata available from filename only. Categorized under the CM4AI project.
+keywords:
+  - CM4AI
+  - bioRxiv
+  - preprint
+  - PDF
+media_type: application/pdf
+path: biorxiv_2024.05.21.589311v1_row4.pdf
+version: v1
+distribution_formats:
+  - name: PDF
+    description:
+      - Portable Document Format
+      - application/pdf

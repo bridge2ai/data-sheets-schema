@@ -1,0 +1,731 @@
+# === YAML Fixing Applied ===
+id: "doi:10.18130/V3/B35XWX"
+name: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+description: "This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center. This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection (2025-03-04). (2025-03-07)"
+doi: "doi:10.18130/V3/B35XWX"
+issued: 2025-03-03
+created_on: 2025-02-27
+page: "https://doi.org/10.18130/V3/B35XWX"
+keywords:
+  - AI
+  - affinity purification
+  - AP-MS
+  - artificial intelligence
+  - breast cancer
+  - Bridge2AI
+  - cardiomyocyte
+  - CM4AI
+  - CRISPR/Cas9
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - machine learning
+  - mass spectroscopy
+  - MDA-MB-468
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - paclitaxel
+  - perturb-seq
+  - perturbation sequencing
+  - protein-protein interaction
+  - protein localization
+  - single-cell RNA sequencing
+  - scRNAseq
+  - SEC-MS
+  - size exclusion chromatography
+  - subcellular imaging
+  - vorinostat
+license: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+version: "1.4"
+created_by:
+  - CM4AI Consortium
+  - Niestroy, Justin (Depositor)
+resources:
+  - id: cm4ai-march-2025-beta
+    name: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+    title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+    description: This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells ± chemotherapy (vorinostat and paclitaxel). Data are packaged as AI-ready RO-Crates using the FAIRSCAPE framework and will be augmented regularly through the end of the project.
+    doi: "doi:10.18130/V3/B35XWX"
+    page: "https://doi.org/10.18130/V3/B35XWX"
+    issued: 2025-03-03
+    created_on: 2025-02-27
+    keywords:
+      - AI
+      - Bridge2AI
+      - CM4AI
+      - perturb-seq
+      - SEC-MS
+      - protein localization
+      - subcellular imaging
+      - iPSC
+      - NPC
+      - neuron
+      - cardiomyocyte
+      - MDA-MB-468
+      - paclitaxel
+      - vorinostat
+    license: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+    purposes:
+      - name: Purpose
+        response: Provide AI-ready, richly annotated multi-modal cellular maps and measurements to enable artificial intelligence and machine learning research within the NIH Bridge2AI CM4AI program.
+    tasks:
+      - name: Task
+        response: Development and benchmarking of AI/ML methods for cellular architecture and function using perturb-seq, proteomics (SEC-MS), and subcellular imaging data.
+    creators:
+      - name: Clark T
+        principal_investigator:
+          id: Clark T
+          name: Clark T
+          affiliation:
+            - id: University of Virginia
+              name: University of Virginia
+        affiliation:
+          id: University of Virginia
+          name: University of Virginia
+      - name: Parker J
+        principal_investigator:
+          id: Parker J
+          name: Parker J
+          affiliation:
+            - id: University of California, San Diego
+              name: University of California, San Diego
+        affiliation:
+          id: University of California, San Diego
+          name: University of California, San Diego
+      - name: Al Manir S
+        principal_investigator:
+          id: Al Manir S
+          name: Al Manir S
+          affiliation:
+            - id: University of Virginia
+              name: University of Virginia
+        affiliation:
+          id: University of Virginia
+          name: University of Virginia
+      - name: Axelsson U
+        principal_investigator:
+          id: Axelsson U
+          name: Axelsson U
+          affiliation:
+            - id: KTH Royal Institute of Technology
+              name: KTH Royal Institute of Technology
+        affiliation:
+          id: KTH Royal Institute of Technology
+          name: KTH Royal Institute of Technology
+      - name: Ballllosero Navarro F
+        principal_investigator:
+          id: Ballllosero Navarro F
+          name: Ballllosero Navarro F
+          affiliation:
+            - id: Stanford University
+              name: Stanford University
+        affiliation:
+          id: Stanford University
+          name: Stanford University
+      - name: Chinn B
+        principal_investigator:
+          id: Chinn B
+          name: Chinn B
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Churas CP
+        principal_investigator:
+          id: Churas CP
+          name: Churas CP
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Dailamy A
+        principal_investigator:
+          id: Dailamy A
+          name: Dailamy A
+          affiliation:
+            - id: University of California, San Diego
+              name: University of California, San Diego
+        affiliation:
+          id: University of California, San Diego
+          name: University of California, San Diego
+      - name: Doctor Y
+        principal_investigator:
+          id: Doctor Y
+          name: Doctor Y
+          affiliation:
+            - id: University of California, San Diego
+              name: University of California, San Diego
+        affiliation:
+          id: University of California, San Diego
+          name: University of California, San Diego
+      - name: Fall J
+        principal_investigator:
+          id: Fall J
+          name: Fall J
+          affiliation:
+            - id: KTH - Royal Institute of Technology
+              name: KTH - Royal Institute of Technology
+        affiliation:
+          id: KTH - Royal Institute of Technology
+          name: KTH - Royal Institute of Technology
+      - name: Forget A
+        principal_investigator:
+          id: Forget A
+          name: Forget A
+          affiliation:
+            - id: University of California San Francisco
+              name: University of California San Francisco
+        affiliation:
+          id: University of California San Francisco
+          name: University of California San Francisco
+      - name: Gao J
+        principal_investigator:
+          id: Gao J
+          name: Gao J
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Hansen JN
+        principal_investigator:
+          id: Hansen JN
+          name: Hansen JN
+          affiliation:
+            - id: Stanford University
+              name: Stanford University
+        affiliation:
+          id: Stanford University
+          name: Stanford University
+      - name: Hu M
+        principal_investigator:
+          id: Hu M
+          name: Hu M
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Johannesson A
+        principal_investigator:
+          id: Johannesson A
+          name: Johannesson A
+          affiliation:
+            - id: KTH - Royal Institute of Technology
+              name: KTH - Royal Institute of Technology
+        affiliation:
+          id: KTH - Royal Institute of Technology
+          name: KTH - Royal Institute of Technology
+      - name: Khaliq H
+        principal_investigator:
+          id: Khaliq H
+          name: Khaliq H
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Lee YH
+        principal_investigator:
+          id: Lee YH
+          name: Lee YH
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Lenkiewicz J
+        principal_investigator:
+          id: Lenkiewicz J
+          name: Lenkiewicz J
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Levinson MA
+        principal_investigator:
+          id: Levinson MA
+          name: Levinson MA
+          affiliation:
+            - id: University of Virginia
+              name: University of Virginia
+        affiliation:
+          id: University of Virginia
+          name: University of Virginia
+      - name: Marquez C
+        principal_investigator:
+          id: Marquez C
+          name: Marquez C
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Metallo C
+        principal_investigator:
+          id: Metallo C
+          name: Metallo C
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Muralidharan M
+        principal_investigator:
+          id: Muralidharan M
+          name: Muralidharan M
+          affiliation:
+            - id: University of California San Francisco
+              name: University of California San Francisco
+        affiliation:
+          id: University of California San Francisco
+          name: University of California San Francisco
+      - name: Nourreddine S
+        principal_investigator:
+          id: Nourreddine S
+          name: Nourreddine S
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Niestroy J
+        principal_investigator:
+          id: Niestroy J
+          name: Niestroy J
+          affiliation:
+            - id: University of Virginia
+              name: University of Virginia
+        affiliation:
+          id: University of Virginia
+          name: University of Virginia
+      - name: Obernier K
+        principal_investigator:
+          id: Obernier K
+          name: Obernier K
+          affiliation:
+            - id: University of California San Francisco
+              name: University of California San Francisco
+        affiliation:
+          id: University of California San Francisco
+          name: University of California San Francisco
+      - name: Pan E
+        principal_investigator:
+          id: Pan E
+          name: Pan E
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Polacco B
+        principal_investigator:
+          id: Polacco B
+          name: Polacco B
+          affiliation:
+            - id: University of California San Francisco
+              name: University of California San Francisco
+        affiliation:
+          id: University of California San Francisco
+          name: University of California San Francisco
+      - name: Pratt D
+        principal_investigator:
+          id: Pratt D
+          name: Pratt D
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Qian G
+        principal_investigator:
+          id: Qian G
+          name: Qian G
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Schaffer L
+        principal_investigator:
+          id: Schaffer L
+          name: Schaffer L
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Sigaeva A
+        principal_investigator:
+          id: Sigaeva A
+          name: Sigaeva A
+          affiliation:
+            - id: KTH Royal Institute of Technology
+              name: KTH Royal Institute of Technology
+        affiliation:
+          id: KTH Royal Institute of Technology
+          name: KTH Royal Institute of Technology
+      - name: Thaker S
+        principal_investigator:
+          id: Thaker S
+          name: Thaker S
+          affiliation:
+            - id: University of Alabama at Birmingham
+              name: University of Alabama at Birmingham
+        affiliation:
+          id: University of Alabama at Birmingham
+          name: University of Alabama at Birmingham
+      - name: Zhang Y
+        principal_investigator:
+          id: Zhang Y
+          name: Zhang Y
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Bélisle-Pipon JC
+        principal_investigator:
+          id: Bélisle-Pipon JC
+          name: Bélisle-Pipon JC
+          affiliation:
+            - id: Simon Fraser University
+              name: Simon Fraser University
+        affiliation:
+          id: Simon Fraser University
+          name: Simon Fraser University
+      - name: Brandt C
+        principal_investigator:
+          id: Brandt C
+          name: Brandt C
+          affiliation:
+            - id: Yale University
+              name: Yale University
+        affiliation:
+          id: Yale University
+          name: Yale University
+      - name: Chen JY
+        principal_investigator:
+          id: Chen JY
+          name: Chen JY
+          affiliation:
+            - id: The University of Alabama at Birmingham
+              name: The University of Alabama at Birmingham
+        affiliation:
+          id: The University of Alabama at Birmingham
+          name: The University of Alabama at Birmingham
+      - name: Ding Y
+        principal_investigator:
+          id: Ding Y
+          name: Ding Y
+          affiliation:
+            - id: University of Texas at Austin
+              name: University of Texas at Austin
+        affiliation:
+          id: University of Texas at Austin
+          name: University of Texas at Austin
+      - name: Fodeh S
+        principal_investigator:
+          id: Fodeh S
+          name: Fodeh S
+          affiliation:
+            - id: Yale University
+              name: Yale University
+        affiliation:
+          id: Yale University
+          name: Yale University
+      - name: Krogan N
+        principal_investigator:
+          id: Krogan N
+          name: Krogan N
+          affiliation:
+            - id: University of California San Francisco
+              name: University of California San Francisco
+        affiliation:
+          id: University of California San Francisco
+          name: University of California San Francisco
+      - name: Lundberg E
+        principal_investigator:
+          id: Lundberg E
+          name: Lundberg E
+          affiliation:
+            - id: Stanford University
+              name: Stanford University
+        affiliation:
+          id: Stanford University
+          name: Stanford University
+      - name: Mali P
+        principal_investigator:
+          id: Mali P
+          name: Mali P
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Payne-Foster P
+        principal_investigator:
+          id: Payne-Foster P
+          name: Payne-Foster P
+          affiliation:
+            - id: University of Alabama
+              name: University of Alabama
+        affiliation:
+          id: University of Alabama
+          name: University of Alabama
+      - name: Ratcliffe S
+        principal_investigator:
+          id: Ratcliffe S
+          name: Ratcliffe S
+          affiliation:
+            - id: University of Virginia
+              name: University of Virginia
+        affiliation:
+          id: University of Virginia
+          name: University of Virginia
+      - name: Ravitsky V
+        principal_investigator:
+          id: Ravitsky V
+          name: Ravitsky V
+          affiliation:
+            - id: University of Montreal
+              name: University of Montreal
+        affiliation:
+          id: University of Montreal
+          name: University of Montreal
+      - name: Sali A
+        principal_investigator:
+          id: Sali A
+          name: Sali A
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+      - name: Schulz W
+        principal_investigator:
+          id: Schulz W
+          name: Schulz W
+          affiliation:
+            - id: Yale University
+              name: Yale University
+        affiliation:
+          id: Yale University
+          name: Yale University
+      - name: Ideker T
+        principal_investigator:
+          id: Ideker T
+          name: Ideker T
+          affiliation:
+            - id: University of California San Diego
+              name: University of California San Diego
+        affiliation:
+          id: University of California San Diego
+          name: University of California San Diego
+    funders:
+      - name: NIH OT2 funding
+        grantor:
+          id: National Institutes of Health
+          name: National Institutes of Health
+          email: ""
+        grant:
+          id: 1OT2OD032742-01
+          name: 1OT2OD032742-01
+          grant_number: 1OT2OD032742-01
+    instances:
+      - name: Perturb-seq in KOLF2.1J iPSCs
+        representation: Single-cell transcriptomic profiles under CRISPRi perturbations in undifferentiated KOLF2.1J hiPSCs
+        instance_type: Single-cell RNA sequencing (perturb-seq) observations
+        data_type: Raw sequences and processed RO-Crate metadata
+      - name: SEC-MS proteomics
+        representation: Protein complex size-exclusion chromatography fractionation with mass spectrometry in KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes
+        instance_type: Proteomics measurements (SEC-MS)
+        data_type: Processed RO-Crate metadata (raw data to be deposited to PRIDE)
+      - name: Subcellular IF imaging (MDA-MB-468)
+        representation: Confocal immunofluorescence images of MDA-MB-468 breast cancer cells ± chemotherapeutics
+        instance_type: Multichannel microscopy images
+        data_type: ZIP archives of images and metadata (RO-Crate)
+      - name: Instance labels/targets
+        label: Not applicable (observational measurements and images without explicit class labels)
+    acquisition_methods:
+      - name: Data acquisition overview
+        description:
+          - Perturb-seq: CRISPRi perturbations followed by single-cell RNA-seq in KOLF2.1J hiPSCs.
+          - SEC-MS: Size exclusion chromatography coupled to mass spectrometry in KOLF2.1J hiPSCs and derived NPCs, neurons, and cardiomyocytes.
+          - IF imaging: Immunofluorescence staining and confocal microscopy of MDA-MB-468 cells under untreated, paclitaxel, and vorinostat conditions.
+        was_directly_observed: yes
+        was_reported_by_subjects: no
+        was_inferred_derived: no
+        was_validated_verified: yes
+    collection_mechanisms:
+      - name: Collection mechanisms
+        description:
+          - High-throughput sequencing for perturb-seq.
+          - Size exclusion chromatography and mass spectrometry (SEC-MS).
+          - Confocal microscopy with DAPI, calreticulin (ER), tubulin (microtubules), and protein-of-interest antibodies.
+    data_collectors:
+      - name: Data collection teams
+        description:
+          - Nevan Krogan laboratory at UCSF (SEC-MS).
+          - Lundberg Lab at Stanford University (IF imaging).
+          - CM4AI consortium members at UC San Diego and partners (perturb-seq).
+    collection_timeframes:
+      - name: Collection timeframe
+        description:
+          - Data creation date: 2025-02-27.
+          - Public release date: 2025-03-03.
+    preprocessing_strategies:
+      - name: Packaging and provenance
+        description:
+          - Data packaged as RO-Crate with provenance graphs and rich metadata using the FAIRSCAPE framework.
+    raw_sources:
+      - name: Raw data availability
+        description:
+          - Raw CRISPR perturbation RNA sequences are included in the release.
+          - SEC-MS raw data will be uploaded to PRIDE when available.
+          - Image datasets are provided as ZIP archives produced by the Lundberg Lab.
+    existing_uses:
+      - name: Related publications
+        description:
+          - Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence: "AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05.21.589311"
+          - Nourreddine S, Doctor Y, Dailamy A, Forget A, Lee YH, Chinn B, Khaliq H, Polacco B, Muralidharan M, Pan E, Zhang Y, Sigaeva A, Hansen JN, Gao J, Parker JA, Obernier K, Clark T, Chen JY, Metallo C, Lundberg E, Ideker T, Krogan N, Mali P. A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS. bioRxiv. 2024 Nov 4;2024.11.03.621734. PMCID: "PMC11580897. doi: https://doi.org/10.1101/2024.11.03.621734"
+    other_tasks:
+      - name: Potential uses
+        description:
+          - Training and evaluation of machine learning and AI models for cellular state, protein localization, and interaction network inference.
+          - Multimodal integration and benchmark construction for AI-ready biological datasets.
+    external_resources:
+      - name: External repositories
+        external_resources:
+          - PRIDE (planned deposition for SEC-MS raw data)
+        future_guarantees:
+          - Dataverse DOI-backed landing page provides persistent access to the release.
+        archival:
+          - RO-Crate packages within the Dataverse record serve as archival bundles.
+        restrictions:
+          - Dataset licensed under CC BY-NC-SA 4.0; additional copyrights noted for specific modalities.
+    subpopulations:
+      - name: Cell line and derived types
+        identification:
+          - KOLF2.1J human induced pluripotent stem cells (hiPSCs)
+          - iPSC-derived neural progenitor cells (NPCs)
+          - iPSC-derived neurons
+          - iPSC-derived cardiomyocytes
+          - MDA-MB-468 breast cancer cells (untreated, paclitaxel-treated, vorinostat-treated)
+        distribution:
+          - Instances span the above cell types across sequencing, proteomics, and imaging modalities.
+    distribution_formats:
+      - name: JSON
+        description:
+          - RO-Crate metadata files (application/json)
+      - name: ZIP
+        description:
+          - Image archives and packaged data (application/zip)
+    distribution_dates:
+      - name: Release date
+        description:
+          - 2025-03-03
+    license_and_use_terms:
+      name: CC BY-NC-SA 4.0
+      description:
+        - Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/).
+        - Attribution is required to the copyright holders and the authors.
+        - Cite the related publications and this data collection.
+    ip_restrictions:
+      name: Copyright notices
+      description:
+        - Copyright (c) 2025 The Regents of the University of California except where otherwise noted.
+        - Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University.
+    maintainers:
+      - name: Maintainers
+        description:
+          - University of Virginia Dataverse (hosting)
+          - CM4AI Consortium
+          - Point of contact via Dataverse: Ideker, Trey (University of California San Diego)
+    updates:
+      name: Update plan
+      description:
+        - Data will be augmented regularly through the end of the project; new versions published via Dataverse versioning.
+    subsets:
+      - id: CRISPR-Perturbation-Cell-Atlas_ro-crate-metadata.json
+        name: ro-crate-metadata.json
+        title: CRISPR Perturbation Cell Atlas RO-Crate metadata
+        description:
+          - RO-Crate metadata for an expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J hiPSCs mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes.
+        format: JSON
+        media_type: application/json
+        md5: cbdb263b1c099396d75e16f00a79a818
+        issued: 2025-03-03
+        path: ro-crate-metadata.json
+      - id: CRISPR-Perturbation-RNA-Sequences_ro-crate-metadata.json
+        name: ro-crate-metadata.json
+        title: CRISPR Perturbation RNA Sequences - Raw Sequences RO-Crate metadata
+        description:
+          - RO-Crate metadata describing raw sequence data from the CRISPRi Perturbation Cell Atlas in KOLF2.1J hiPSCs.
+        format: JSON
+        media_type: application/json
+        md5: 1cafefa32a897998e3e2ba0a29a3ef5c
+        issued: 2025-03-03
+        path: ro-crate-metadata.json
+      - id: cm4ai-v0.6-beta-if-images-paclitaxel.zip
+        name: cm4ai-v0.6-beta-if-images-paclitaxel.zip
+        title: Protein Localization Subcellular Images - Paclitaxel
+        description:
+          - Spatial localization of 563 proteins of interest in MDA-MB-468 cells treated with paclitaxel using ICC-IF and confocal microscopy (Lundberg Lab, Stanford).
+        compression: ZIP
+        media_type: application/zip
+        md5: 9422486c80bc9e1d35b2fbbc72a5f043
+        issued: 2025-03-03
+        path: cm4ai-v0.6-beta-if-images-paclitaxel.zip
+      - id: cm4ai-v0.6-beta-if-images-untreated.zip
+        name: cm4ai-v0.6-beta-if-images-untreated.zip
+        title: Protein Localization Subcellular Images - Untreated
+        description:
+          - Spatial localization of 563 proteins of interest in untreated MDA-MB-468 cells using ICC-IF and confocal microscopy (Lundberg Lab, Stanford).
+        compression: ZIP
+        media_type: application/zip
+        md5: 0b4d129f5fbc3bb7f7ea564cd032cef7
+        issued: 2025-03-03
+        path: cm4ai-v0.6-beta-if-images-untreated.zip
+      - id: cm4ai-v0.6-beta-if-images-vorinostat.zip
+        name: cm4ai-v0.6-beta-if-images-vorinostat.zip
+        title: Protein Localization Subcellular Images - Vorinostat
+        description:
+          - Spatial localization of 563 proteins of interest in MDA-MB-468 cells treated with vorinostat using ICC-IF and confocal microscopy (Lundberg Lab, Stanford).
+        compression: ZIP
+        media_type: application/zip
+        md5: ac577109a41a9806978461157b777d52
+        issued: 2025-03-03
+        path: cm4ai-v0.6-beta-if-images-vorinostat.zip
+      - id: SEC-MS_ro-crate-metadata.json
+        name: ro-crate-metadata.json
+        title: Protein-protein Interaction SEC-MS RO-Crate metadata
+        description:
+          - RO-Crate metadata for SEC-MS data generated on KOLF2.1J hiPSCs (Nevan Krogan lab, UCSF). Data will be uploaded to PRIDE when available.
+        format: JSON
+        media_type: application/json
+        md5: cb67e7749b15ce87b9042a9feba9d032
+        issued: 2025-03-03
+        path: ro-crate-metadata.json

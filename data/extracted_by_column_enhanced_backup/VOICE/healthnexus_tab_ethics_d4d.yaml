@@ -1,0 +1,175 @@
+# === YAML Fixing Applied ===
+id: "doi:10.57764/qb6h-em84"
+name: Bridge2AI-Voice
+title: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.0)"
+description: >
+  Bridge2AI-Voice v1.0 is an ethically sourced, multi-institutional dataset for
+  artificial intelligence research on voice as a biomarker of health. The initial
+  release provides 12,523 recordings from 306 adult participants collected across
+  five North American sites. Only low-risk derived data are released (e.g.,
+  spectrograms and engineered features); original audio waveforms and free-speech
+  transcripts are not included. The dataset includes detailed demographic,
+  clinical, and validated questionnaire data, along with spectrograms and acoustic,
+  phonetic, and prosodic features derived from standardized preprocessing.
+doi: "doi:10.57764/qb6h-em84"
+version: "1.0"
+issued: "2024-11-27"
+page: "https://docs.b2ai-voice.org"
+keywords:
+  - voice
+  - bridge2ai
+  - audio
+license: Bridge2AI Voice Registered Access License
+purposes:
+  - response: >
+      Create an ethically sourced flagship dataset to enable future AI research
+      and support critical insights into the use of voice as a biomarker of health.
+tasks:
+  - response: >
+      Enable AI research leveraging derived voice representations (spectrograms and
+      features) linked to health information for investigating disease-related voice
+      changes and health-related predictions.
+addressing_gaps:
+  - response: >
+      Address the need for a large, high quality, multi-institutional, and diverse
+      voice dataset linked to other health biomarkers to fuel voice AI research and
+      answer tangible clinical questions.
+creators:
+  - principal_investigator:
+      name: Alistair Johnson
+  - principal_investigator:
+      name: Jean-Christophe Bélisle-Pipon
+  - principal_investigator:
+      name: David Dorr
+  - principal_investigator:
+      name: Satrajit Ghosh
+  - principal_investigator:
+      name: Philip Payne
+  - principal_investigator:
+      name: Maria Powell
+  - principal_investigator:
+      name: Anaïs Rameau
+  - principal_investigator:
+      name: Vardit Ravitsky
+  - principal_investigator:
+      name: Alexandros Sigaras
+  - principal_investigator:
+      name: Olivier Elemento
+  - principal_investigator:
+      name: Yael Bensoussan
+funders:
+  - grantor:
+      name: National Institutes of Health
+    grant:
+      name: "Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioacoustic database to understand disease like never before"
+      grant_number: 3OT2OD032720-01S1
+instances:
+  - representation: Voice recordings (released as derived spectrograms and engineered features)
+    instance_type: recordings
+    data_type: >
+      Derived data including spectrogram matrices (513 x N) and acoustic/phonetic/prosodic
+      features; automatic speech transcriptions were generated during processing but
+      free-speech transcripts are not included in the release.
+    counts: 12523
+    sampling_strategies:
+      - is_sample:
+          - Participants were selected based on membership in predefined disease cohorts at specialty clinics across five North American sites.
+        is_random:
+          - Non-probabilistic, purposive cohort selection.
+        source_data:
+          - Patients presenting at participating specialty clinics and institutions.
+        strategies:
+          - Purposive sampling across disease cohorts (respiratory, voice, neurological, mood; pediatric cohort planned but not in v1.0).
+  - representation: Participants
+    instance_type: participants
+    data_type: Demographic, clinical, and validated questionnaire data collected via standardized protocol.
+    counts: 306
+subpopulations:
+  - identification:
+      - Adult cohort in v1.0; participants grouped by predefined disease categories (voice disorders, neurological/neurodegenerative disorders, mood/psychiatric disorders, respiratory disorders); collected across five sites in North America.
+    distribution:
+      - Distribution across subpopulations not specified in this release.
+is_deidentified:
+  description:
+    - HIPAA Safe Harbor identifiers removed (e.g., names, detailed dates, contact and ID numbers, biometric identifiers).
+    - State and province removed; country of data collection retained.
+    - Free-speech transcripts removed from the release.
+    - Original audio waveforms omitted; only derived spectrograms and features released to reduce risk.
+confidential_elements:
+  description:
+    - Dataset contains health-related information (demographics, clinical and questionnaire responses) released in de-identified form and considered low risk in v1.0.
+sensitive_elements:
+  description:
+    - Health and demographic data are included; identifiers removed under HIPAA Safe Harbor and only derived audio data are released in v1.0.
+acquisition_methods:
+  - description:
+      - Voice data directly observed/recorded during clinic visits; questionnaire responses reported by participants; multiple engineered features derived from audio.
+    was_directly_observed: Yes – voice recordings captured during clinic visits.
+    was_reported_by_subjects: Yes – questionnaire responses.
+    was_inferred_derived: Yes – spectrograms and engineered acoustic/phonetic/prosodic features; automatic transcriptions were generated.
+    was_validated_verified: Standardized protocol, IRB oversight, and de-identification procedures applied.
+collection_mechanisms:
+  - description:
+      - Data collected using a custom tablet application with a headset when possible; exported from REDCap using an open-source library (b2aiprep).
+data_collectors:
+  - description:
+      - Project investigators at participating specialty clinics and institutions across five North American sites.
+collection_timeframes:
+  - description:
+      - Session-based collection during clinic visits; most participants had a single session, some had multiple; specific calendar timeframe not provided.
+ethical_reviews:
+  - description:
+      - Data collection and sharing approved by the University of South Florida Institutional Review Board; submission under review at the University of Toronto Research Ethics Board.
+preprocessing_strategies:
+  - description:
+      - Raw audio converted to mono and resampled to 16 kHz with a Butterworth anti-aliasing filter.
+      - Spectrograms computed via short-time FFT (25 ms window, 10 ms hop, 512-point FFT).
+      - Acoustic features extracted with OpenSMILE; phonetic/prosodic measures via Parselmouth and Praat.
+      - Additional audio features via torchaudio; transcriptions generated using OpenAI's Whisper Large model.
+    used_software:
+      - name: b2aiprep
+        url: "https://github.com/sensein/b2aiprep"
+      - name: OpenSMILE
+      - name: Parselmouth
+      - name: Praat
+      - name: Torchaudio
+      - name: OpenAI Whisper Large
+cleaning_strategies:
+  - description:
+      - Standardization of audio (mono, 16 kHz) with anti-alias filtering.
+      - Removal of HIPAA Safe Harbor identifiers and state/province fields; retention of country only.
+      - Removal of free-speech transcripts from the released dataset.
+      - Omission of original audio waveforms in v1.0.
+labeling_strategies:
+  - description:
+      - Automatic speech transcriptions generated using OpenAI's Whisper Large model; free-speech transcripts are not included in the v1.0 release.
+raw_sources:
+  - description:
+      - Original audio waveforms are not included in v1.0; only derived spectrograms and features are available. Future releases aim to include audio with additional security precautions.
+future_use_impacts:
+  - description:
+      - Limiting v1.0 to de-identified derived audio data (no raw audio, no free-speech transcripts) mitigates privacy risks while enabling research; inclusion of raw audio in future releases will incorporate additional safeguards.
+distribution_formats:
+  - description: spectrograms.parquet — derived spectrogram data.
+  - description: phenotype.tsv — participant-level demographics, acoustic confounders, and validated questionnaire responses (tab-delimited).
+  - description: phenotype.json — data dictionary for phenotype variables.
+  - description: static_features.tsv — engineered features per recording (tab-delimited).
+  - description: static_features.json — data dictionary for features.
+distribution_dates:
+  - description: 2024-11-27 — initial v1.0 release.
+license_and_use_terms:
+  description:
+    - Access is restricted to credentialed users who sign the Data Use Agreement (DUA).
+    - License: Bridge2AI Voice Registered Access License.
+    - Data Use Agreement: Bridge2AI Voice Registered Access Agreement.
+    - Required training: "TCPS 2: CORE 2022."
+regulatory_restrictions:
+  description:
+    - Access controlled via registered/credentialed user workflows and signed DUA; no additional regulatory restrictions specified.
+updates:
+  description:
+    - v1.0 is the first release; future releases aim to include voice audio waveforms with additional precautions to ensure data security.
+version_access:
+  description:
+    - Latest version DOI: "https://doi.org/10.57764/3sg0-7440; this record describes version 1.0 (DOI: https://doi.org/10.57764/qb6h-em84)."
+is_tabular: "Mixed: Parquet (array/matrix), TSV (tabular), and JSON (metadata dictionaries)"
