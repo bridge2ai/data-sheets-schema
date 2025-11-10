@@ -1,0 +1,4 @@
+id: t2d_longitudinal_study
+name: T2D Longitudinal Study
+description: 5-year longitudinal study of 1000 Type 2 diabetes patients to track clinical measurements and lab results over time. Dataset contains CSV files with clinical measurements and laboratory test results.
+license: CC-BY-4.0
