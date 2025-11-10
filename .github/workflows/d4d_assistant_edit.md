@@ -405,6 +405,9 @@ I've updated the D4D datasheet for **${DATASET_NAME}** and opened a pull request
 ## Pull Request
 🔗 #${PR_NUMBER}
 
+## Direct File Access
+📄 **D4D YAML Link**: https://raw.githubusercontent.com/bridge2ai/data-sheets-schema/${BRANCH_NAME}/<path-to-file>.yaml
+
 ## Changes Summary
 <!-- Briefly describe what was changed -->
 - ✏️ **Modified**: <list modified fields>
