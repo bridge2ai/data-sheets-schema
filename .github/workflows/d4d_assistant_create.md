@@ -350,6 +350,9 @@ I've created a new D4D datasheet for **${DATASET_NAME}** and opened a pull reque
 ## Pull Request
 🔗 #${PR_NUMBER}
 
+## Direct File Access
+📄 **D4D YAML Link**: https://raw.githubusercontent.com/bridge2ai/data-sheets-schema/${BRANCH_NAME}/${OUTPUT_FILE}
+
 ## What I Created
 - **YAML Datasheet**: \`${OUTPUT_FILE}\`
 - **HTML Preview**: \`${OUTPUT_FILE%.yaml}.html\`
