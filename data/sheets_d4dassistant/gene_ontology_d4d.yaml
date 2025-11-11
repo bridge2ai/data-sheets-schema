@@ -1,0 +1,168 @@
+id: gene_ontology
+name: Gene Ontology
+title: Gene Ontology (GO)
+description: |
+  The Gene Ontology (GO) project provides a computational model of biological systems,
+  representing knowledge about the molecular functions of gene products, their cellular
+  locations, and the biological processes they participate in. It comprises a structured
+  ontology of terms describing gene and gene product functions, organized hierarchically,
+  along with evidence-based annotations linking specific gene products to GO classes.
+  The ontology spans over 100 species including humans, model organisms (mice, zebrafish,
+  flies, yeast), plants, and bacteria.
+download_url: https://geneontology.org/
+license: CC BY 4.0
+
+purposes:
+  - response: >
+      The Gene Ontology aims to provide a uniform way to describe the functions of gene
+      products from organisms across all kingdoms of life and enable genomic data analysis.
+      Developed as a major bioinformatics initiative, GO emerged to standardize knowledge
+      representation of gene functions in a format that is both human-readable and
+      machine-interpretable for computational analysis. It creates a computational model
+      of biological systems to enable understanding of how genes encode biological functions
+      across molecular, cellular, and tissue levels.
+
+tasks:
+  - response: Enrichment analysis for genomic data
+  - response: Large-scale molecular biology and genetics research
+  - response: Biomedical computational analysis
+  - response: Gene function prediction and annotation
+
+creators:
+  - principal_investigator:
+      name: Gene Ontology Consortium
+    affiliation: Gene Ontology Consortium
+  - principal_investigator:
+      name: Suzi Aleksander
+    affiliation: Stanford University
+
+funders:
+  - grantor:
+      id: NIH
+      name: US National Institutes of Health
+    grant:
+      grant_number: HG012212
+
+instances:
+  - instance_type: ontology terms
+    data_topic: Gene function annotations, molecular functions, cellular locations, biological processes
+    counts: null
+
+subpopulations:
+  - subpopulation_elements_present: true
+    identification:
+      - Over 100 species represented
+      - Humans
+      - Model organisms (mice, zebrafish, flies, yeast)
+      - Plants
+      - Bacteria
+    distribution:
+      - Spans all kingdoms of life with emphasis on well-studied model organisms
+
+collection_mechanisms:
+  - mechanism: Literature curation
+    description: Annotations derived from specific, traceable scientific evidence across peer-reviewed literature
+  - mechanism: Computational prediction
+    description: Computational predictions from multiple annotation contributor organizations
+
+collection_timeframes:
+  - description: >
+      The Gene Ontology project is ongoing with regular releases. Daily snapshot versions
+      are available, and the ontology is actively maintained and continuously updated.
+
+preprocessing_strategies:
+  - description: >
+      The ontology is curated and structured hierarchically. Multiple format editions are
+      generated from the core ontology, including OWL (primary format), OBO format, JSON
+      (obographs format), basic filtered version for legacy tools, and extended versions
+      (GO-Plus) with connections to external ontologies.
+
+is_deidentified:
+  identifiable_elements_present: false
+  description:
+    - The Gene Ontology contains no personal or identifiable information. It is a structured knowledge base of biological terms and concepts.
+
+sensitive_elements:
+  - sensitive_elements_present: false
+    description:
+      - The dataset contains only biological ontology terms and gene function annotations. No sensitive information is present.
+
+existing_uses:
+  - description: >
+      The Gene Ontology is used for functional gene annotation by major biological databases
+      including the GO Consortium, UniProt, and Alliance of Genome Resources. It is used
+      for pathway and cellular localization annotation by Reactome, and for biochemical
+      reaction description by the Rhea database. Enrichment analysis is powered by PANTHER.
+
+distribution_formats:
+  - description: >
+      Multiple format editions are available: OWL (primary format), OBO format, JSON
+      (obographs format), basic filtered version for legacy tools, and extended versions
+      (GO-Plus) with connections to external ontologies including Cell Ontology, NCBI
+      Taxonomy, Relation Ontology, Uberon, and NIF Standard ontologies.
+
+license_and_use_terms:
+  description: >
+    The Gene Ontology is licensed under CC BY 4.0 (Creative Commons Attribution 4.0
+    International). Specific citation policies are required. The GO is a member of the
+    Open Biological Ontologies Foundry.
+
+acquisition_methods:
+  - description:
+      - >
+        Ontology terms and annotations are curated from peer-reviewed scientific literature
+        by expert biocurators. Computational predictions are also incorporated from multiple
+        annotation contributor organizations. All annotations are traceable to specific
+        scientific evidence.
+    was_directly_observed: false
+    was_reported_by_subjects: false
+    was_inferred_derived: true
+    was_validated_verified: true
+
+maintainers:
+  - name: Gene Ontology Consortium
+    description: The GO Consortium actively maintains and updates the ontology
+  - name: Suzi Aleksander
+    contact_email: suzia@stanford.edu
+    affiliation:
+      name: Stanford University
+
+updates:
+  description: >
+    Released regularly with daily snapshot versions available. Current releases include
+    updated GO terms, annotations, gene products, and species coverage with published
+    statistics available.
+
+version_access:
+  description: >
+    Multiple versions are available through persistent URLs (PURLs) for stable access.
+    Daily snapshots and regular releases are maintained for versioned access.
+
+external_resources:
+  - description: Available through multiple platforms
+    url: http://www.ontobee.org/
+    resource_name: OntoBee
+  - description: Available through multiple platforms
+    url: http://aberowl.net/
+    resource_name: AberOWL
+  - description: Available through multiple platforms
+    url: https://www.ebi.ac.uk/ols/
+    resource_name: EBI OLS
+  - description: Available through multiple platforms
+    url: https://bioportal.bioontology.org/
+    resource_name: BioPortal
+  - description: GO browser and search interface
+    url: http://amigo.geneontology.org/
+    resource_name: AmiGO
+  - description: Ontology registry
+    url: https://bioregistry.io/
+    resource_name: Bioregistry
+  - description: Source code and tools repository
+    url: https://github.com/geneontology/go-ontology
+    resource_name: GitHub Repository
+  - description: Official project website
+    url: https://geneontology.org/
+    resource_name: Gene Ontology Website
+  - description: OBO Foundry entry
+    url: https://obofoundry.org/ontology/go
+    resource_name: OBO Foundry
