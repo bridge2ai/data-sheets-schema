@@ -391,7 +391,24 @@ EOF
 )"
 ```
 
-### 8. Notify User in GitHub Issue
+### 8. Check Budget and Prepare Warning (If Needed)
+
+Before posting your final comment to the GitHub issue, check the CBORG API budget:
+
+```bash
+# Check budget spending and capture warning if over threshold
+BUDGET_WARNING=$(python3 scripts/check_budget.py)
+```
+
+**What this does:**
+- Queries the CBORG API to get current spending
+- If spending is > 75% of the $500 budget, outputs a warning message
+- The warning will be appended to your GitHub issue comment
+- If spending is under 75%, `BUDGET_WARNING` will be empty (no warning needed)
+
+**Note**: The script handles missing API keys gracefully - if `ANTHROPIC_API_KEY` is not set, it will skip the check and exit cleanly.
+
+### 9. Notify User in GitHub Issue
 
 ```bash
 # Comment on the original issue with PR link
@@ -429,9 +446,12 @@ I've updated the D4D datasheet for **${DATASET_NAME}** and opened a pull request
 
 The updated datasheet has been validated and is ready for review.
 
+${BUDGET_WARNING}
 ---
 🤖 D4D Assistant"
 ```
+
+**Important**: The `${BUDGET_WARNING}` variable will be empty if spending is under 75%, or will contain the budget alert message if over threshold. This ensures the warning only appears when needed.
 
 ## Modifying an Existing PR
 
