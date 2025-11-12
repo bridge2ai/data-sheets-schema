@@ -182,6 +182,8 @@ jobs:
 
       - name: Respond with AI Agent
         uses: dragon-ai-agent/run-claude-obo@v1.0.2
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           github-token: ${{ secrets.PAT_FOR_PR }}
