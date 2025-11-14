@@ -1,0 +1,101 @@
+id: human_phenotype_ontology
+name: Human Phenotype Ontology
+description: |
+  The Human Phenotype Ontology (HPO) is a structured and controlled vocabulary for the phenotypic features encountered in human hereditary and other disease. The HPO provides a standardized vocabulary of phenotypic abnormalities encountered in human disease. Each term in the HPO describes a phenotypic abnormality, such as atrial septal defect. The HPO is currently being developed using the medical literature, Orphanet, DECIPHER, and OMIM. HPO aims to provide a standardized vocabulary that enables computational inference and supports genomic and phenotypic analyses through semantic similarity and machine learning algorithms.
+page: http://www.human-phenotype-ontology.org/
+keywords:
+  - phenotype
+  - ontology
+  - human disease
+  - rare disease
+  - clinical phenotyping
+  - OMIM
+  - Orphanet
+  - computational inference
+  - semantic similarity
+  - OBO Foundry
+
+purposes:
+  - response: |
+      The Human Phenotype Ontology (HPO) was created to provide a standardized, structured, and controlled vocabulary for describing phenotypic abnormalities encountered in human disease. The primary purpose is to enable computational inference and support genomic and phenotypic analyses through semantic similarity and machine learning algorithms. HPO aims to bridge the gap between molecular biology and clinical medicine by providing a comprehensive framework for phenotype annotation that can be used across diverse research and clinical applications.
+
+tasks:
+  - response: |
+      The HPO is designed for multiple tasks including phenotype annotation and documentation of human diseases, computational inference for disease diagnosis and gene discovery, semantic similarity analyses to identify related diseases and genes, machine learning applications for precision medicine, clinical decision support systems, genomic variant interpretation, rare disease research and diagnosis, and integration with electronic health records.
+
+creators:
+  - response: Sebastian Koehler (dr.sebastian.koehler@gmail.com, ORCID 0000-0002-5316-1399) and Peter N. Robinson (peter.robinson@jax.org)
+
+funders: []
+
+subsets:
+  - name: hp.owl
+    description: Official HPO release in OWL format - Manually classified version of the ontology without the use of a reasoner, with imported terms
+    url: https://purl.obolibrary.org/obo/hp.owl
+  - name: hp.obo
+    description: Official HPO release in OBO format - Simple, manually curated version without reasoner or imported terms
+    url: https://purl.obolibrary.org/obo/hp.obo
+  - name: hp.json
+    description: Official HPO release in obographs JSON format
+    url: https://purl.obolibrary.org/obo/hp.json
+  - name: phenotype.hpoa
+    description: HPO Annotations - Phenotype to Disease mappings
+    url: https://purl.obolibrary.org/obo/hp/phenotype.hpoa
+  - name: phenotype_to_genes.txt
+    description: HPO phenotype to gene annotations
+    url: https://purl.obolibrary.org/obo/hp/phenotype_to_genes.txt
+  - name: genes_to_phenotype.txt
+    description: HPO gene to phenotype annotations
+    url: https://purl.obolibrary.org/obo/hp/genes_to_phenotype.txt
+
+instances:
+  - representation: |
+      Each instance in the HPO represents a phenotypic abnormality term. An instance is a specific term in the ontology that describes a particular phenotypic feature, such as "Atrial septal defect" (HP:0001631) or "Abnormality of the nervous system" (HP:0000707). Each term is structured with a unique identifier, a label, textual definitions, synonyms, and hierarchical relationships to parent and child terms. The ontology is organized as a directed acyclic graph (DAG) where more specific terms inherit from more general terms.
+    instance_type: Phenotypic abnormality terms
+    data_type: Ontology terms with identifiers, labels, definitions, synonyms, and hierarchical relationships
+
+external_resources:
+  - name: OBO Foundry
+    url: https://obofoundry.org/ontology/hp.html
+    description: Official OBO Foundry registry entry for HPO
+  - name: HPO Browser
+    url: https://hpo.jax.org/app/
+    description: Main browser interface for exploring HPO terms
+  - name: Monarch Initiative
+    url: https://monarchinitiative.org/phenotype/HP:0000118
+    description: Monarch Initiative phenotype browser for HPO
+  - name: GitHub Repository
+    url: https://github.com/obophenotype/human-phenotype-ontology
+    description: HPO development repository
+
+collection_mechanisms:
+  - response: |
+      The HPO is developed through manual curation of medical literature, integration of data from clinical databases, and community contributions. The ontology terms and relationships are created by domain experts who extract phenotypic information from multiple sources including OMIM (Online Mendelian Inheritance in Man), Orphanet (rare disease database), DECIPHER (Database of Chromosomal Imbalance and Phenotype in Humans using Ensembl Resources), and primary medical literature. The curation process involves identifying phenotypic features, defining terms with precise definitions, establishing hierarchical relationships, and adding synonyms and cross-references. Community feedback and term requests are collected through a GitHub issue tracker. The development follows the OBO Foundry principles for ontology development.
+
+preprocessing_strategies:
+  - response: |
+      The HPO undergoes continuous quality control and automated reasoning processes. The ontology is processed using OWL reasoners to ensure logical consistency and to infer implicit relationships. Multiple release versions are generated including manually classified versions and automatically classified versions using reasoners. The ontology is validated against OBO Foundry principles using automated dashboard checks. Cross-references to other ontologies and databases are validated and maintained.
+
+recommended_uses:
+  - response: |
+      HPO is recommended for annotating patient phenotypes in electronic health records and clinical databases, computational analysis of genotype-phenotype relationships, rare disease diagnosis and gene discovery, semantic similarity analyses to identify related diseases and genes, training machine learning models for precision medicine, clinical decision support systems, genomic variant interpretation and prioritization, integration with molecular and genetic databases, phenotype-driven patient matching for rare diseases, and standardized reporting of clinical findings in research publications. HPO is used by major initiatives including the Monarch Initiative, DECIPHER, and ClinVar.
+
+discouraged_uses:
+  - response: |
+      HPO should not be used as a replacement for detailed clinical documentation or medical records, as it provides structured terms rather than free-text clinical narratives. It is not designed for billing or administrative coding purposes (use ICD-10/11 instead). HPO is not intended for phenotypic features of non-human species. The ontology focuses on abnormal phenotypes and is not comprehensive for normal human variation. HPO should not be used without understanding the hierarchical structure and logical relationships.
+
+distribution_formats:
+  - description:
+      - OWL (Web Ontology Language) format in RDF/XML serialization
+      - OBO (Open Biomedical Ontologies) format
+      - Obographs JSON format
+
+license_and_use_terms:
+  description:
+    - Custom HPO License - see https://hpo.jax.org/app/license
+
+ip_restrictions: []
+
+update_plans:
+  - response: |
+      HPO is actively maintained with regular releases. The ontology is updated continuously based on new medical literature, community term requests, and feedback from users. Regular releases are published to the OBO Library with version control. The project has an active development team, responds to GitHub issues and term requests, and maintains mailing lists and social media presence (Twitter @hp_ontology). Updates follow a structured workflow using version control, automated testing, and quality assurance processes. The maintenance is coordinated by a core team of developers and curators with international collaboration. Contact: dr.sebastian.koehler@gmail.com and peter.robinson@jax.org
