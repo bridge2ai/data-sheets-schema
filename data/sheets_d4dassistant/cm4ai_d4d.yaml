@@ -1,0 +1,340 @@
+id: cm4ai-cell-maps
+name: CM4AI Cell Maps for AI
+title: "Cell Maps for AI: Multimodal cellular structure and function datasets"
+description: |
+  The Cell Maps for AI (CM4AI) project is a coordinated NIH Bridge2AI effort to create comprehensive,
+  multimodal maps of cellular structure and function across demographic and disease contexts. CM4AI integrates
+  three complementary mapping approaches: proteomic mass spectrometry, cellular imaging, and genetic perturbation
+  via CRISPR/Cas9. The project generates large-scale datasets designed to advance biomedical AI/ML applications
+  and address the Bridge2AI Functional Genomics grand challenge.
+
+  Comprehensive multimodal cellular dataset integrating:
+  (1) Proteomic mass spectrometry for protein abundance and interactions
+  (2) High-resolution cellular imaging for spatial organization and morphology
+  (3) CRISPR/Cas9 genetic perturbation data for functional characterization
+
+  The dataset provides integrated views of cellular structure and function across diverse cell types,
+  disease contexts, and demographic groups to support AI/ML model development for biomedical research.
+page: "https://cm4ai.org/"
+keywords:
+  - cell maps
+  - proteomics
+  - cellular imaging
+  - CRISPR
+  - functional genomics
+  - mass spectrometry
+  - multimodal data
+  - Bridge2AI
+  - biomedical AI
+  - cell biology
+  - protein interactions
+created_by:
+  - Organization
+purposes:
+  - name: primary-purpose
+    response: |
+      To create comprehensive, multimodal maps of cellular structure and function that enable AI/ML-driven
+      discoveries in biomedicine. The dataset aims to integrate proteomic, imaging, and genetic perturbation
+      data to provide unprecedented views of cellular systems across diverse contexts.
+tasks:
+  - name: task-1
+    response: Training AI/ML models for cellular function prediction and disease mechanism discovery
+  - name: task-2
+    response: Discovering novel protein interactions, pathways, and cellular organization principles
+  - name: task-3
+    response: Identifying disease biomarkers and drug targets through integrated multimodal analysis
+  - name: task-4
+    response: Understanding cellular responses to genetic perturbations across different contexts
+addressing_gaps:
+  - name: gap-addressed
+    response: |
+      Addresses the critical need for large-scale, integrated multimodal cellular datasets to train
+      AI/ML models for functional genomics. Existing datasets typically focus on single modalities
+      or limited cell types. CM4AI provides comprehensive integration across proteomics, imaging,
+      and genetic perturbation data at unprecedented scale.
+funders:
+  - name: bridge2ai-cm4ai
+    grantor:
+      name: National Institutes of Health (NIH)
+    grant:
+      name: "Bridge2AI: Cell Maps for AI"
+      grant_number: CM4AI_NIH_Bridge2AI
+instances:
+  - name: dataset-instances
+    representation: |
+      Multimodal cellular measurements including:
+      - Mass spectrometry data (protein abundance, modifications, interactions)
+      - Microscopy images (cellular morphology, protein localization)
+      - CRISPR perturbation profiles (gene knockout/modification effects)
+    instance_type: |
+      Per-cell measurements, per-protein measurements, per-image measurements, and per-perturbation
+      measurements across multiple cell types and experimental conditions.
+    data_type: |
+      - Quantitative mass spectrometry data (peptide intensities, protein abundance)
+      - High-resolution microscopy images (TIFF, OME-TIFF formats)
+      - Genetic perturbation readouts (CRISPR screen data, gene expression profiles)
+      - Integrated multimodal feature matrices
+    label: |
+      Metadata includes cell types, disease states, demographic information, experimental conditions,
+      protein identifications, gene perturbations, and cellular phenotypes. Labels are provided for
+      training supervised ML models where applicable.
+    sampling_strategies:
+      - name: systematic-sampling
+        is_sample:
+          - yes
+        is_random:
+          - no
+        source_data:
+          - Human cell lines and tissues from diverse demographic contexts
+          - Disease-relevant and healthy control samples
+          - Multiple cell types spanning different tissues and systems
+        is_representative:
+          - partially
+        why_not_representative:
+          - |
+            Sampling prioritizes cell types and disease contexts most relevant to functional genomics
+            research questions. Not all human cell types or diseases are equally represented. Demographic
+            diversity is intentionally incorporated but may not match population distributions.
+        strategies:
+          - Systematic selection across cell types, disease states, and demographics
+          - Prioritization of clinically relevant contexts
+          - Technical replication for quality assurance
+    missing_information:
+      - name: privacy-removals
+        missing:
+          - Personally identifiable information
+          - Protected health information
+          - Patient identifiers
+        why_missing:
+          - Removed to protect participant privacy and comply with ethical and regulatory requirements
+subpopulations:
+  - name: cell-type-diversity
+    identification:
+      - Multiple cell types from different tissues and organ systems
+      - Disease-relevant and healthy control cells
+      - Cells from diverse demographic backgrounds where applicable
+    distribution:
+      - Distribution varies by experimental modality and research focus
+      - Cell type representation guided by functional genomics priorities
+sensitive_elements:
+  - name: health-related-data
+    description:
+      - May contain de-identified health information associated with disease contexts
+      - Demographic data included to ensure diversity
+is_deidentified:
+  name: deidentification-applied
+  description:
+    - All human subject data is de-identified following institutional and regulatory guidelines
+    - Personal identifiers removed
+    - Data coded to prevent re-identification
+acquisition_methods:
+  - name: proteomic-mass-spectrometry
+    description:
+      - High-throughput mass spectrometry for protein abundance and post-translational modifications
+      - Protein interaction mapping through affinity purification and proximity labeling
+    was_directly_observed: yes
+    was_reported_by_subjects: no
+    was_inferred_derived: yes
+    was_validated_verified: |
+      Validation through technical replicates, spike-in standards, and orthogonal methods.
+      Quality control across consortium sites using standardized protocols.
+  - name: cellular-imaging
+    description:
+      - High-content microscopy capturing cellular morphology and protein localization
+      - Advanced imaging techniques including fluorescence microscopy and super-resolution imaging
+    was_directly_observed: yes
+    was_reported_by_subjects: no
+    was_inferred_derived: yes
+    was_validated_verified: |
+      Image quality assessment, automated quality control, and manual validation of imaging data.
+  - name: crispr-perturbation
+    description:
+      - CRISPR/Cas9-mediated gene knockouts and modifications
+      - Pooled and arrayed screening approaches
+    was_directly_observed: no
+    was_reported_by_subjects: no
+    was_inferred_derived: yes
+    was_validated_verified: |
+      Validation of gene editing efficiency, sequencing verification, and phenotypic confirmation.
+collection_mechanisms:
+  - name: data-collection-infrastructure
+    description:
+      - Automated mass spectrometry workflows at consortium institutions
+      - High-content imaging platforms with standardized protocols
+      - CRISPR screening facilities with quality-controlled reagents
+      - Centralized data management and integration systems
+data_collectors:
+  - name: consortium-members
+    description:
+      - Trained researchers and technicians at CM4AI consortium member institutions
+      - Specialized core facilities for proteomics, imaging, and genomics
+      - Bioinformatics teams for data processing and quality control
+collection_timeframes:
+  - name: ongoing-collection
+    description:
+      - Data collection ongoing as part of multi-year project
+      - Phased releases as data accumulates and passes quality control
+ethical_reviews:
+  - name: irb-approvals
+    description:
+      - All human subjects research approved by appropriate Institutional Review Boards (IRBs)
+      - Informed consent obtained from participants where applicable
+      - Ongoing ethical oversight through consortium ethics committee
+preprocessing_strategies:
+  - name: mass-spectrometry-processing
+    description:
+      - Spectral processing, peptide identification, and protein quantification
+      - Normalization across batches and experiments
+      - Quality filtering and outlier detection
+    used_software:
+      - name: MaxQuant
+        description: Mass spectrometry data processing software
+      - name: Proteome Discoverer
+        description: Protein identification and quantification platform
+      - name: Custom bioinformatics pipelines
+        description: Consortium-developed processing workflows
+  - name: imaging-processing
+    description:
+      - Image registration, background correction, and normalization
+      - Cell segmentation and feature extraction
+      - Quality filtering of images
+    used_software:
+      - name: CellProfiler
+        description: Image analysis software for cellular phenotyping
+      - name: ImageJ/Fiji
+        description: Image processing and analysis platform
+      - name: Custom image analysis pipelines
+        description: Specialized algorithms for cellular feature extraction
+  - name: crispr-data-processing
+    description:
+      - Read alignment and guide RNA quantification
+      - Hit calling and statistical analysis
+      - Integration with other data modalities
+    used_software:
+      - name: MAGeCK
+        description: CRISPR screen analysis software
+      - name: Custom analysis pipelines
+        description: Consortium-developed CRISPR analysis tools
+cleaning_strategies:
+  - name: quality-control
+    description:
+      - Multi-level quality control including technical QC and biological QC
+      - Removal of failed experiments and low-quality measurements
+      - Batch effect correction and normalization
+      - Outlier detection and handling
+labeling_strategies:
+  - name: metadata-annotation
+    description:
+      - Standardized metadata annotation using biomedical ontologies
+      - Protein identifications mapped to UniProt and other databases
+      - Cell types annotated using Cell Ontology
+      - Disease annotations using disease ontologies
+raw_sources:
+  - name: raw-data-availability
+    description:
+      - Raw mass spectrometry files (mzML format)
+      - Raw microscopy images (original TIFF files)
+      - Raw sequencing data from CRISPR screens (FASTQ files)
+      - Availability may vary by data release and access level
+existing_uses:
+  - name: publications
+    description:
+      - Multiple publications describing CM4AI methods and findings available at https://cm4ai.org/publications/
+      - Over 30 peer-reviewed papers as of 2025
+use_repository:
+  - name: data-repositories
+    description:
+      - Primary repository CM4AI website (https://cm4ai.org/data-releases/)
+      - Additional repositories may include ProteomeXchange, Image Data Resource, and others
+      - Tools available at https://cm4ai.org/tools/
+other_tasks:
+  - name: additional-applications
+    description:
+      - Development of new computational methods for multimodal data integration
+      - Benchmarking AI/ML algorithms on standardized datasets
+      - Educational and training applications (https://cm4ai.org/learning)
+future_use_impacts:
+  - name: ai-ml-applications
+    description:
+      - Dataset designed specifically to enable AI/ML applications in functional genomics
+      - May impact development of clinical tools, though validation required for clinical use
+      - Potential to reveal biases in current understanding of cellular biology
+discouraged_uses:
+  - name: inappropriate-uses
+    description:
+      - Direct clinical diagnosis without appropriate validation
+      - Patient treatment decisions without clinical trials
+      - Uses that would violate participant consent or ethical approvals
+      - Re-identification attempts of de-identified data
+distribution_formats:
+  - name: data-formats
+    description:
+      - Mass spectrometry mzML, mzTab, CSV/TSV
+      - Imaging TIFF, OME-TIFF, HDF5
+      - Tabular data CSV, TSV, Parquet
+      - Metadata JSON, RDF, XML
+distribution_dates:
+  - name: release-schedule
+    description:
+      - Ongoing releases as data accumulates
+      - Check https://cm4ai.org/data-releases/ for latest release information
+license_and_use_terms:
+  name: open-access-license
+  description:
+    - Data released under open access principles following NIH data sharing policies
+    - Specific licenses (e.g., CC BY 4.0) applied to allow broad use with attribution
+    - Users must cite CM4AI project and relevant publications
+    - Ethical use required; no attempts to re-identify participants
+ip_restrictions:
+  - name: standard-restrictions
+    description:
+      - Attribution required
+      - No use in ways that violate ethical guidelines or participant consent
+      - Standard academic and research use permitted
+regulatory_restrictions:
+  - name: no-export-controls
+    description:
+      - No export controls anticipated for this research dataset
+      - Standard data protection regulations apply
+maintainers:
+  - name: consortium-maintenance
+    description:
+      - CM4AI Consortium data curation teams
+      - Bioinformatics core facilities at member institutions
+      - Project coordination office
+      - NIH Bridge2AI program oversight
+errata:
+  - name: errata-reporting
+    description:
+      - Errata and corrections reported on CM4AI website
+      - Users encouraged to report issues through project contacts
+updates:
+  name: ongoing-updates
+  description:
+    - Dataset actively maintained with regular releases
+    - Updates include new data, refined annotations, improved processing
+    - Version history maintained for reproducibility
+retention_limit:
+  - name: long-term-retention
+    description:
+      - Data maintained long-term following NIH policies
+      - Preservation through institutional and national repositories
+version_access:
+  name: version-control
+  description:
+    - All versions maintained and accessible
+    - Semantic versioning used (e.g., v1.0, v1.1, v2.0)
+    - Change logs document differences between versions
+extension_mechanism:
+  - name: extensibility
+    description:
+      - Dataset designed to be extended with additional modalities
+      - Standardized formats facilitate integration with external data
+is_tabular: "yes"
+external_resources:
+  - "CM4AI Project Website: https://cm4ai.org/"
+  - "CM4AI Data Releases: https://cm4ai.org/data-releases/"
+  - "CM4AI Publications: https://cm4ai.org/publications/"
+  - "CM4AI Tools: https://cm4ai.org/tools/"
+  - "CM4AI Training Resources: https://cm4ai.org/learning"
+  - "Bridge2AI Program: https://commonfund.nih.gov/bridge2ai"
