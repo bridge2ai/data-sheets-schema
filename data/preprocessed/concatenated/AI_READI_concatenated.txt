@@ -1,8 +1,8 @@
 ================================================================================
 CONCATENATED DOCUMENT
 ================================================================================
-Input Directory: data/extracted_by_column/AI_READI
-Total Files: 6
+Input Directory: data/d4d_individual/gpt5/AI_READI
+Total Files: 7
 Extensions: All
 Recursive: False
 ================================================================================
@@ -11,14 +11,15 @@ TABLE OF CONTENTS
 --------------------------------------------------------------------------------
   1. docs_aireadi_org_docs-2_d4d.yaml
   2. docs_aireadi_org_docs-2_d4d_metadata.yaml
-  3. doi_d4d.yaml
-  4. doi_d4d_metadata.yaml
-  5. fairhub_d4d.yaml
-  6. fairhub_d4d_metadata.yaml
+  3. doi_row2_d4d.yaml
+  4. doi_row2_d4d_metadata.yaml
+  5. doi_row9_d4d.yaml
+  6. fairhub_row10_d4d.yaml
+  7. fairhub_row13_d4d.yaml
 ================================================================================
 
 FILE: docs_aireadi_org_docs-2_d4d.yaml
-PATH: data/extracted_by_column/AI_READI/docs_aireadi_org_docs-2_d4d.yaml
+PATH: data/d4d_individual/gpt5/AI_READI/docs_aireadi_org_docs-2_d4d.yaml
 SIZE: 9113 bytes
 --------------------------------------------------------------------------------
 
@@ -218,7 +219,7 @@ extension_mechanism: {}
 ================================================================================
 
 FILE: docs_aireadi_org_docs-2_d4d_metadata.yaml
-PATH: data/extracted_by_column/AI_READI/docs_aireadi_org_docs-2_d4d_metadata.yaml
+PATH: data/d4d_individual/gpt5/AI_READI/docs_aireadi_org_docs-2_d4d_metadata.yaml
 SIZE: 1704 bytes
 --------------------------------------------------------------------------------
 
@@ -284,8 +285,8 @@ provenance:
 
 ================================================================================
 
-FILE: doi_d4d.yaml
-PATH: data/extracted_by_column/AI_READI/doi_d4d.yaml
+FILE: doi_row2_d4d.yaml
+PATH: data/d4d_individual/gpt5/AI_READI/doi_row2_d4d.yaml
 SIZE: 680 bytes
 --------------------------------------------------------------------------------
 
@@ -318,8 +319,8 @@ resources:
 
 ================================================================================
 
-FILE: doi_d4d_metadata.yaml
-PATH: data/extracted_by_column/AI_READI/doi_d4d_metadata.yaml
+FILE: doi_row2_d4d_metadata.yaml
+PATH: data/d4d_individual/gpt5/AI_READI/doi_row2_d4d_metadata.yaml
 SIZE: 1577 bytes
 --------------------------------------------------------------------------------
 
@@ -382,128 +383,59 @@ provenance:
 
 ================================================================================
 
-FILE: fairhub_d4d.yaml
-PATH: data/extracted_by_column/AI_READI/fairhub_d4d.yaml
-SIZE: 1561 bytes
+FILE: doi_row9_d4d.yaml
+PATH: data/d4d_individual/gpt5/AI_READI/doi_row9_d4d.yaml
+SIZE: 311 bytes
+--------------------------------------------------------------------------------
+
+# D4D Metadata extracted from: doi_row9.json
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-10-30 19:47:22
+
+id: "doi:10.5281/zenodo.10642459"
+doi: "doi:10.5281/zenodo.10642459"
+page: "https://doi.org/10.5281/zenodo.10642459"
+keywords:
+  - AI_READI
+
+================================================================================
+
+FILE: fairhub_row10_d4d.yaml
+PATH: data/d4d_individual/gpt5/AI_READI/fairhub_row10_d4d.yaml
+SIZE: 395 bytes
+--------------------------------------------------------------------------------
+
+# D4D Metadata extracted from: fairhub_row10.json
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-10-30 19:48:08
+
+id: "https://fairhub.io/datasets/2"
+name: FAIRhub Dataset
+title: FAIRhub Dataset 2
+description: "Dataset record on FAIRhub with identifier 2. Project category: AI_READI."
+page: "https://fairhub.io/datasets/2"
+keywords:
+  - AI_READI
+
+================================================================================
+
+FILE: fairhub_row13_d4d.yaml
+PATH: data/d4d_individual/gpt5/AI_READI/fairhub_row13_d4d.yaml
+SIZE: 272 bytes
 --------------------------------------------------------------------------------
 
 # D4D Metadata extracted from: fairhub_row13.json
 # Column: AI_READI
-# Generated: 2025-09-16 18:31:22 (Retry)
-# Status: Fixed failed extraction
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-10-30 19:46:18
 
-dataset:
-  name: null
-  dataset_id: "2"
-  dataset_type: "FAIRhub Dataset"
-  url: "https://fairhub.io/datasets/2"
-  project: "AI_READI"
-  source:
-    file: "fairhub_row13.json"
-    row: 13
-  description: null
-  version: null
-  creators: []
-  contributors: []
-  contacts: []
-motivation:
-  rationale: null
-  tasks: []
-  intended_users: []
-  out_of_scope_uses: []
-  funding_sources: []
-composition:
-  instance_count: null
-  instance_types: []
-  data_fields: []
-  label_description: null
-  labeler_description: null
-  sensitive_content: null
-  languages: []
-  derived_from: []
-  additional_notes: null
-collection:
-  provenance_description: null
-  collection_process: null
-  sampling_strategy: null
-  timeframe: null
-  geographic_coverage: null
-  data_sources: []
-  consent: null
-  privacy: null
-  ethical_review: null
-preprocessing:
-  cleaning_operations: null
-  transformations: null
-  annotation_process: null
-  aggregation: null
-  missing_values: null
-  quality_control: null
-use:
-  intended_uses: []
-  prohibited_uses: []
-  known_risks: []
-  performance_metrics: []
-  evaluation_results: []
-distribution:
-  license: null
-  access_terms: null
-  restrictions: null
-  download_url: "https://fairhub.io/datasets/2"
-  citation: null
-  release_date: null
-  versioning_policy: null
-maintenance:
-  owners: []
-  update_frequency: null
-  maintenance_plan: null
-  contact_for_issues: null
-  errata: null
-  feedback_process: null
-
-================================================================================
-
-FILE: fairhub_d4d_metadata.yaml
-PATH: data/extracted_by_column/AI_READI/fairhub_d4d_metadata.yaml
-SIZE: 1176 bytes
---------------------------------------------------------------------------------
-
-extraction_metadata:
-  timestamp: '2025-09-16T18:31:22.024402Z'
-  extraction_id: 7682ce872a7e
-  extraction_type: failed_extraction_retry
-input_document:
-  filename: fairhub_row13.json
-  relative_path: fairhub_row13.json
-  format: json
-  size_bytes: 107
-  sha256_hash: ac18ebc8a8067ee4cf32cc56f0b71e717c58aefaed6524f3e9a0d9a67dba88e5
-  project_column: AI_READI
-output_document:
-  filename: fairhub_d4d.yaml
-  relative_path: fairhub_d4d.yaml
-  format: yaml
-datasheets_schema:
-  version: 1.0.0
-  url: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
-  retrieved_at: '2025-09-16T18:31:22.025539Z'
-d4d_agent:
-  version: 1.0.0
-  implementation: pydantic_ai
-  wrapper: fix_failed_extractions.py
-  wrapper_version: 1.0.0
-llm_model:
-  provider: openai
-  model_name: openai:gpt-5
-  model_version: gpt-5
-  temperature: null
-  max_tokens: null
-processing_environment:
-  platform: Darwin
-  python_version: 3.13.4
-  processor_architecture: arm64
-reproducibility:
-  command: python fix_failed_extractions.py
-  environment_variables:
-    OPENAI_API_KEY: required
-  notes: Retry of failed extraction with improved YAML validation
+id: "https://fairhub.io/datasets/2"
+page: "https://fairhub.io/datasets/2"
+keywords:
+  - AI_READI
+  - FAIRhub

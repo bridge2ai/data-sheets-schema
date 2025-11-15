@@ -183,73 +183,196 @@ poetry run gen-doc -d docs <schema.yaml>
 3. Run `make test-examples` to validate
 4. Check output in `examples/output/` for validation results
 
-## D4D Agent Scripts
+## D4D Pipeline and Data Organization
 
-This repository includes AI-powered scripts to extract D4D metadata from dataset documentation.
+This repository includes AI-powered scripts and make targets to extract D4D metadata from dataset documentation.
 
-### Running D4D Extraction
+### Data Organization Structure
 
-#### 1. Process Individual Downloaded Files
+All data is organized under the `data/` directory:
 
-**Validated D4D Wrapper (Recommended)**
-```bash
-python src/download/validated_d4d_wrapper.py -i downloads_by_column -o data/extracted_by_column
 ```
-Features:
+data/
+  raw/                            # Raw downloads (moved from downloads_by_column/)
+    AI_READI/, CHORUS/, CM4AI/, VOICE/
+
+  preprocessed/
+    individual/                   # Transformed source files (PDF→text, HTML→text)
+      AI_READI/, CHORUS/, CM4AI/, VOICE/
+    concatenated/                 # All docs per project concatenated
+      {PROJECT}_concatenated.txt
+
+  d4d_individual/                 # D4D YAMLs from individual docs
+    gpt5/AI_READI/, CHORUS/, CM4AI/, VOICE/
+    claudecode/AI_READI/, CHORUS/, CM4AI/, VOICE/
+
+  d4d_concatenated/               # D4D YAMLs from concatenated docs
+    gpt5/{PROJECT}_d4d.yaml
+    claudecode/{PROJECT}_d4d.yaml
+    curated/{PROJECT}_curated.yaml
+
+  d4d_html/                       # HTML renderings
+    individual/gpt5/, individual/claudecode/
+    concatenated/gpt5/, concatenated/claudecode/, concatenated/curated/
+
+  ATTIC/                          # Archived old data
+```
+
+### Complete D4D Pipeline (Recommended)
+
+Run the complete end-to-end pipeline for all projects using GPT-5:
+
+```bash
+# Full pipeline: extract → validate → concatenate → synthesize → HTML
+make d4d-pipeline-full-gpt5
+
+# Or run individual pipeline stages:
+make d4d-pipeline-individual-gpt5     # Extract + validate individual files
+make d4d-pipeline-concatenated-gpt5   # Concatenate + synthesize + HTML
+```
+
+### Step-by-Step Pipeline Targets
+
+#### Step 1: Extract D4D from Individual Files
+
+```bash
+# Extract D4D metadata for all projects using GPT-5 (with validation)
+make extract-d4d-individual-all-gpt5
+
+# Or extract for a single project
+make extract-d4d-individual-gpt5 PROJECT=AI_READI
+
+# Direct script usage (advanced)
+cd aurelian
+uv run python ../src/download/validated_d4d_wrapper.py -i ../data/raw/AI_READI -o ../data/d4d_individual/gpt5/AI_READI
+```
+
+**Features:**
 - Validates download success
-- Checks content relevance to project categories (AI_READI, CHORUS, CM4AI, VOICE)
+- Checks content relevance to project categories
 - Generates D4D YAML metadata
 - Creates detailed validation reports
+- Output: `data/d4d_individual/gpt5/{PROJECT}/`
 
-**Basic D4D Wrapper**
+#### Step 2: Validate D4D YAMLs
+
 ```bash
-python src/download/d4d_agent_wrapper.py -i downloads_by_column -o data/extracted_by_column
+# Validate all D4D YAMLs across all projects
+make validate-d4d-all GENERATOR=gpt5
+
+# Validate all YAMLs for a specific project
+make validate-d4d-project PROJECT=AI_READI GENERATOR=gpt5
+
+# Validate a single D4D YAML file
+make validate-d4d FILE=data/d4d_individual/gpt5/AI_READI/file_d4d.yaml
 ```
-Simpler version without validation steps.
 
-#### 2. Process Concatenated Documents (New!)
+**Features:**
+- Validates against LinkML D4D schema
+- Reports validation errors with details
+- Provides summary statistics
 
-Process concatenated documents created by `make concat-extracted`:
+#### Step 3: Concatenate Individual D4D YAMLs
 
 ```bash
-# Process a single concatenated file
-make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_d4d_concatenated.txt
+# Concatenate individual D4D YAMLs by project (for synthesis)
+make concat-extracted
 
-# Process with custom output
-make process-concat INPUT_FILE=data/sheets_concatenated/AI_READI_d4d_concatenated.txt OUTPUT_FILE=output.yaml
+# Concatenate preprocessed individual files
+make concat-preprocessed
 
-# Process all concatenated files in data/sheets_concatenated/
-make process-all-concat
+# Concatenate raw downloads
+make concat-raw
 
-# Direct script usage with more options
+# Custom concatenation from any directory
+make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=output.txt
+```
+
+**Features:**
+- Reproducible alphabetical ordering
+- Includes file metadata headers
+- Generates table of contents
+- Output: `data/preprocessed/concatenated/{PROJECT}_concatenated.txt`
+
+#### Step 4: Extract D4D from Concatenated Files
+
+```bash
+# Extract D4D from all concatenated files using GPT-5
+make extract-d4d-concat-all-gpt5
+
+# Or extract from a single project's concatenated file
+make extract-d4d-concat-gpt5 PROJECT=AI_READI
+
+# Process with custom parameters
+make process-concat INPUT_FILE=data/preprocessed/concatenated/AI_READI_concatenated.txt
+
+# Direct script usage (advanced)
 cd aurelian
-uv run python ../src/download/process_concatenated_d4d.py -i ../data/sheets_concatenated/AI_READI_d4d_concatenated.txt
-
-# Use a different model
-uv run python ../src/download/process_concatenated_d4d.py -i ../data/sheets_concatenated/AI_READI_d4d_concatenated.txt \
-  -m "anthropic:claude-3-opus-20240229"
-
-# Process all files in a directory
-uv run python ../src/download/process_concatenated_d4d.py -d ../data/sheets_concatenated --output-dir ../data/sheets_concatenated
+uv run python ../src/download/process_concatenated_d4d.py \
+  -i ../data/preprocessed/concatenated/AI_READI_concatenated.txt \
+  -o ../data/d4d_concatenated/gpt5/AI_READI_d4d.yaml
 ```
 
-**Features of concatenated processing:**
-- Synthesizes multiple D4D YAML files into a single comprehensive document
-- Merges complementary information from all concatenated sources
+**Features:**
+- Synthesizes multiple D4D YAML files into comprehensive document
+- Merges complementary information from all sources
 - Prefers more detailed/specific information over generic
-- Keeps the most comprehensive descriptions
-- Combines all relevant metadata sections
 - Uses aurelian's D4D agent for intelligent synthesis
+- Output: `data/d4d_concatenated/gpt5/{PROJECT}_d4d.yaml`
 
-**Typical workflow:**
-1. `make concat-extracted` - Concatenate all D4D files per project column
-2. `make process-all-concat` - Synthesize concatenated files into comprehensive D4D YAML
-3. Output: `data/sheets_concatenated/{PROJECT}_d4d_alldocs.yaml`
+#### Step 5: Generate HTML from D4D YAMLs
 
-#### 3. Test Script (Single URLs)
 ```bash
-cd aurelian
-python test_d4d.py
+# Generate human-readable HTML from all D4D YAMLs
+make gen-d4d-html
+```
+
+**Features:**
+- Generates HTML for individual and concatenated D4D YAMLs
+- Creates both GPT-5 and Claude Code versions
+- Preserves curated HTML files
+- Output: `data/d4d_html/`
+
+### Data Status and Monitoring
+
+Check the current state of your data pipeline:
+
+```bash
+# Full detailed status report
+make data-status
+
+# Quick compact overview
+make data-status-quick
+```
+
+**Features:**
+- Shows file counts for all directories in the pipeline
+- Flags empty directories with ⚠️ warnings
+- Identifies missing directories with ❌ markers
+- Displays file sizes and line counts for key files
+- Provides summary statistics across all projects
+
+### Quick Reference: Common Workflows
+
+```bash
+# Check current pipeline status
+make data-status-quick
+
+# Extract D4D from new raw downloads
+make extract-d4d-individual-all-gpt5
+
+# Validate all extracted YAMLs
+make validate-d4d-all
+
+# Create comprehensive D4D from all individual YAMLs
+make concat-extracted
+make extract-d4d-concat-all-gpt5
+
+# Generate HTML renderings
+make gen-d4d-html
+
+# Run complete pipeline
+make d4d-pipeline-full-gpt5
 ```
 
 ### D4D Agent Requirements
@@ -337,14 +460,17 @@ make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=path/to/output.txt
 # Optional parameters:
 make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=output.txt EXTENSIONS=".txt .md" RECURSIVE=true
 
-# Concatenate extracted D4D documents by column (from data/extracted_by_column)
+# Concatenate individual D4D YAMLs by project (from data/d4d_individual/gpt5/)
 make concat-extracted
 
-# Concatenate raw downloads by column (from downloads_by_column)
-make concat-downloads
+# Concatenate preprocessed files by project (from data/preprocessed/individual/)
+make concat-preprocessed
+
+# Concatenate raw downloads by project (from data/raw/)
+make concat-raw
 
 # Direct script usage with more options:
-python src/download/concatenate_documents.py -i input_dir -o output.txt [OPTIONS]
+poetry run python src/download/concatenate_documents.py -i input_dir -o output.txt [OPTIONS]
 
 # Script options:
 #   -e, --extensions .txt .md    # Filter by file extensions
@@ -354,36 +480,82 @@ python src/download/concatenate_documents.py -i input_dir -o output.txt [OPTIONS
 #   -s "separator"              # Custom separator between files
 ```
 
+**Output location:** All concatenated files are saved to `data/preprocessed/concatenated/`
+
 ### Features
 
 - **Reproducible ordering**: Files are sorted alphabetically for consistent results
-- **Multiple formats**: Handles text, HTML, YAML, and other text-based formats
+- **Multiple formats**: Handles text, HTML, YAML, JSON, and other text-based formats
 - **File metadata**: Includes headers with filename, path, and size
 - **Table of contents**: Summary section lists all concatenated files
 - **Error handling**: Gracefully handles encoding issues and read errors
+- **Project organization**: Automatically processes all projects (AI_READI, CHORUS, CM4AI, VOICE)
 
 ### Use Cases
 
-- Combine all downloaded dataset documentation for a project
+- Combine all D4D YAMLs for synthesis into comprehensive metadata
+- Concatenate preprocessed files for batch D4D extraction
+- Combine raw downloads for comprehensive processing
 - Create single input documents for LLM processing
 - Merge documentation fragments into complete documents
-- Aggregate logs or reports from multiple files
 
 ## Custom Makefile Targets
 
-Beyond standard LinkML targets, this project adds:
+Beyond standard LinkML targets, this project adds comprehensive D4D pipeline targets:
 
+### Status and Monitoring Targets
+```bash
+make data-status                         # Full data status report with counts
+make data-status-quick                   # Compact status overview
+```
+
+### Concatenation Targets
+```bash
+make concat-extracted      # Concatenate individual D4D YAMLs by project
+make concat-preprocessed   # Concatenate preprocessed files by project
+make concat-raw            # Concatenate raw downloads by project
+make concat-docs           # Concatenate documents from directory (INPUT_DIR=, OUTPUT_FILE=)
+```
+
+### D4D Extraction Targets
+```bash
+# Individual file extraction
+make extract-d4d-individual-gpt5         # Extract for one project (PROJECT=AI_READI)
+make extract-d4d-individual-all-gpt5     # Extract for all projects
+
+# Concatenated file extraction
+make extract-d4d-concat-gpt5             # Extract from one concatenated (PROJECT=AI_READI)
+make extract-d4d-concat-all-gpt5         # Extract from all concatenated files
+make process-concat                      # Process single file (INPUT_FILE=)
+make process-all-concat                  # Process all files in directory
+```
+
+### Validation Targets
+```bash
+make validate-d4d                        # Validate single file (FILE=path/to/file.yaml)
+make validate-d4d-project                # Validate project (PROJECT=, GENERATOR=gpt5)
+make validate-d4d-all                    # Validate all D4D YAMLs (GENERATOR=gpt5)
+```
+
+### HTML Generation Targets
+```bash
+make gen-d4d-html                        # Generate HTML from D4D YAMLs
+make gen-html                            # Alias for gen-d4d-html
+```
+
+### Complete Pipeline Workflows
+```bash
+make d4d-pipeline-individual-gpt5        # Extract + validate individual files
+make d4d-pipeline-concatenated-gpt5      # Concatenate + synthesize + HTML
+make d4d-pipeline-full-gpt5              # Complete end-to-end pipeline
+```
+
+### Schema and Example Targets
 ```bash
 make gen-minimal-examples  # Generate minimal example files for all classes
-make gen-html             # Generate HTML from D4D YAML files using human_readable_renderer.py
 make full-schema          # Generate data_sheets_schema_all.yaml (merged schema)
 make test-modules         # Validate all individual D4D module schemas
 make lint-modules         # Lint all individual D4D module schemas
-make concat-docs          # Concatenate documents from a directory
-make concat-extracted     # Concatenate extracted D4D documents by column
-make concat-downloads     # Concatenate raw downloads by column
-make process-concat       # Process concatenated doc with D4D agent
-make process-all-concat   # Process all concatenated docs with D4D agent
 ```
 
 ## Null/Empty Value Handling
