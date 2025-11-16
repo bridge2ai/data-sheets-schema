@@ -62,6 +62,7 @@ help: status
 	@echo "════════════════════════════════════════════════════════════════"
 	@echo "make data-status                       -- full data status report with counts"
 	@echo "make data-status-quick                 -- compact status overview"
+	@echo "make data-d4d-sizes                    -- detailed D4D YAML size report"
 	@echo ""
 	@echo "════════════════════════════════════════════════════════════════"
 	@echo "  D4D Pipeline: Concatenation"
@@ -82,9 +83,12 @@ help: status
 	@echo "════════════════════════════════════════════════════════════════"
 	@echo "  D4D Pipeline: Extraction (Concatenated Files)"
 	@echo "════════════════════════════════════════════════════════════════"
-	@echo "make extract-d4d-concat-gpt5       -- extract D4D from concatenated file"
+	@echo "make extract-d4d-concat-gpt5       -- extract D4D from concatenated file (GPT-5)"
 	@echo "                                      (usage: PROJECT=AI_READI)"
-	@echo "make extract-d4d-concat-all-gpt5   -- extract D4D from all concatenated"
+	@echo "make extract-d4d-concat-all-gpt5   -- extract D4D from all concatenated (GPT-5)"
+	@echo "make extract-d4d-concat-claude     -- extract D4D from concatenated file (Claude)"
+	@echo "                                      (usage: PROJECT=AI_READI)"
+	@echo "make extract-d4d-concat-all-claude -- extract D4D from all concatenated (Claude)"
 	@echo "make process-concat                -- process single concatenated doc"
 	@echo "                                      (usage: INPUT_FILE=file)"
 	@echo "make process-all-concat            -- process all concatenated docs"
@@ -251,9 +255,20 @@ gendoc: $(DOCDIR)
 	cp $(SRC)/docs/*md $(DOCDIR) ; \
 	$(RUN) gen-doc ${GEN_DARGS} -d $(DOCDIR) $(SOURCE_SCHEMA_PATH) ; \
 	mkdir -p $(DOCDIR)/html_output/concatenated ; \
+	mkdir -p $(DOCDIR)/html_output/concatenated/curated ; \
+	mkdir -p $(DOCDIR)/html_output/concatenated/claudecode ; \
+	mkdir -p $(DOCDIR)/yaml_output/concatenated/gpt5 ; \
+	mkdir -p $(DOCDIR)/yaml_output/concatenated/curated ; \
+	mkdir -p $(DOCDIR)/yaml_output/concatenated/claudecode ; \
 	cp -r $(SRC)/html/output/*.html $(DOCDIR)/html_output/ 2>/dev/null || true ; \
 	cp -r $(SRC)/html/output/concatenated/*.html $(DOCDIR)/html_output/concatenated/ 2>/dev/null || true ; \
-	cp $(SRC)/html/output/*.css $(DOCDIR)/html_output/ 2>/dev/null || true
+	cp $(SRC)/html/output/*.css $(DOCDIR)/html_output/ 2>/dev/null || true ; \
+	cp -r data/d4d_html/concatenated/curated/*.html $(DOCDIR)/html_output/concatenated/curated/ 2>/dev/null || true ; \
+	cp -r data/d4d_html/concatenated/claudecode/*.html $(DOCDIR)/html_output/concatenated/claudecode/ 2>/dev/null || true ; \
+	cp data/d4d_concatenated/gpt5/*_d4d.yaml $(DOCDIR)/yaml_output/concatenated/gpt5/ 2>/dev/null || true ; \
+	cp data/d4d_concatenated/curated/*_curated.yaml $(DOCDIR)/yaml_output/concatenated/curated/ 2>/dev/null || true ; \
+	cp data/d4d_concatenated/claudecode/*_d4d.yaml $(DOCDIR)/yaml_output/concatenated/claudecode/ 2>/dev/null || true ; \
+	cp data/d4d_concatenated/claudecode/*_metadata.yaml $(DOCDIR)/yaml_output/concatenated/claudecode/ 2>/dev/null || true
 
 testdoc: gendoc serve
 

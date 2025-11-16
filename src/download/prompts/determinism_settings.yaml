@@ -1,0 +1,112 @@
+---
+# Determinism Settings for D4D Generation
+# These settings ensure reproducible metadata extraction
+
+version: "1.0.0"
+last_updated: "2025-11-15"
+
+# Model Configuration
+model:
+  # Claude Sonnet 4.5 (date-pinned version)
+  claude:
+    provider: "anthropic"
+    model_name: "anthropic:claude-sonnet-4-5-20250929"
+    model_version: "claude-sonnet-4-5-20250929"
+    temperature: 0.0  # Maximum determinism
+    max_tokens: 16000
+    # Note: Claude API does not support random seed parameter
+
+  # GPT-5 configuration for comparison
+  gpt5:
+    provider: "openai"
+    model_name: "openai:gpt-5"
+    model_version: "gpt-5"
+    temperature: 0.0  # Should be set for determinism
+    max_tokens: 16000
+    # Note: GPT-5 may support seed parameter - check OpenAI docs
+
+# Schema Configuration
+schema:
+  # Use local version-controlled schema file instead of remote
+  source: "local"
+  path: "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+  # Alternative: Pin to specific GitHub commit
+  # source: "github"
+  # url: "https://raw.githubusercontent.com/monarch-initiative/ontogpt/{COMMIT_HASH}/src/ontogpt/templates/data_sheets_schema.yaml"
+
+# Prompts Configuration
+prompts:
+  source: "files"  # Load from external files (not hardcoded)
+  directory: "src/download/prompts"
+  system_prompt: "d4d_concatenated_system_prompt.txt"
+  user_prompt: "d4d_concatenated_user_prompt.txt"
+  # Track file hashes for verification
+  track_hashes: true
+
+# Processing Configuration
+processing:
+  # Ensure deterministic file ordering
+  sort_inputs: true
+  # Encoding settings
+  default_encoding: "utf-8"
+  fallback_encodings: ["utf-8-sig", "latin-1"]
+
+# Metadata Tracking
+metadata:
+  # Generate comprehensive metadata files
+  generate_metadata: true
+  metadata_format: "yaml"
+  track_input_hash: true
+  track_schema_hash: true
+  track_prompt_hashes: true
+  track_git_commit: true
+  track_environment: true
+
+# Reproducibility
+reproducibility:
+  # Environment variables required
+  required_env_vars:
+    claude: ["ANTHROPIC_API_KEY"]
+    gpt5: ["OPENAI_API_KEY"]
+
+  # Platform-independent processing
+  normalize_paths: true
+
+  # Validation
+  validate_yaml_syntax: true
+  # Note: Full LinkML validation not implemented yet
+  validate_schema_compliance: false
+
+# Output Configuration
+output:
+  # File naming conventions
+  d4d_suffix: "_d4d.yaml"
+  metadata_suffix: "_d4d_metadata.yaml"
+
+  # YAML header comments
+  add_generation_comments: true
+
+  # Directory structure
+  base_dir: "data/d4d_concatenated"
+  subdirs:
+    gpt5: "gpt5"
+    claude: "claudecode"
+    curated: "curated"
+
+# Notes
+notes: |
+  These settings ensure maximum reproducibility for D4D metadata extraction.
+
+  Key guarantees:
+  - Temperature=0.0 ensures deterministic model sampling
+  - Pinned model versions prevent changes from model updates
+  - Local schema file ensures consistent schema across runs
+  - External prompt files allow version control of prompts
+  - File hashing enables verification of inputs/prompts/schema
+  - Comprehensive metadata tracks all generation parameters
+
+  To verify reproducibility:
+  1. Run extraction on same input twice
+  2. Compare output YAMLs - should be identical
+  3. Check metadata files - settings should match
+  4. Verify file hashes match in metadata

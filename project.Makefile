@@ -243,6 +243,98 @@ data-status:
 	echo "Total D4D concatenated (GPT-5): $$total_d4d_concat_gpt5 YAMLs"; \
 	echo "Total curated HTML:            $$total_html files"
 	@echo ""
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo "  D4D YAML Size Breakdown"
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "Individual D4D YAMLs (GPT-5)"
+	@echo "────────────────────────────────────────────────────────────────"
+	@printf "  %-12s  %5s  %10s  %10s  %s\n" "PROJECT" "FILES" "TOTAL SIZE" "AVG SIZE" "LARGEST"
+	@echo "────────────────────────────────────────────────────────────────"
+	@for project in $(PROJECTS); do \
+		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
+		if [ -d "$$dir" ]; then \
+			files=$$(ls -1 "$$dir"/*_d4d.yaml 2>/dev/null | wc -l | tr -d ' '); \
+			if [ "$$files" -gt 0 ]; then \
+				total_bytes=$$(find "$$dir" -name "*_d4d.yaml" -exec stat -f%z {} \; 2>/dev/null | awk '{s+=$$1} END {print s}'); \
+				total_kb=$$(echo "scale=1; $$total_bytes/1024" | bc 2>/dev/null || echo "0"); \
+				avg_bytes=$$(echo "scale=0; $$total_bytes/$$files" | bc 2>/dev/null || echo "0"); \
+				avg_kb=$$(echo "scale=1; $$avg_bytes/1024" | bc 2>/dev/null || echo "0"); \
+				largest=$$(ls -lS "$$dir"/*_d4d.yaml 2>/dev/null | head -1 | awk '{print $$5}'); \
+				largest_kb=$$(echo "scale=1; $$largest/1024" | bc 2>/dev/null || echo "0"); \
+				printf "  %-12s  %5d  %8s KB  %8s KB  %8s KB\n" \
+					"$$project" "$$files" "$$total_kb" "$$avg_kb" "$$largest_kb"; \
+			else \
+				printf "  %-12s  %5s  %10s  %10s  %s\n" "$$project" "0" "-" "-" "-"; \
+			fi; \
+		else \
+			printf "  %-12s  %5s  %10s  %10s  %s\n" "$$project" "N/A" "-" "-" "-"; \
+		fi; \
+	done
+	@echo ""
+	@echo "Concatenated D4D YAMLs"
+	@echo "────────────────────────────────────────────────────────────────"
+	@printf "  %-12s  %10s  %7s  %10s  %7s  %10s  %7s\n" \
+		"PROJECT" "GPT-5" "LINES" "CLAUDE" "LINES" "CURATED" "LINES"
+	@echo "────────────────────────────────────────────────────────────────"
+	@for project in $(PROJECTS); do \
+		gpt5_file="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
+		claude_file="$(D4D_CONCAT_DIR)/claudecode/$${project}_d4d.yaml"; \
+		curated_file="$(D4D_CONCAT_DIR)/curated/$${project}_curated.yaml"; \
+		gpt5_size="-"; gpt5_lines="-"; \
+		claude_size="-"; claude_lines="-"; \
+		curated_size="-"; curated_lines="-"; \
+		if [ -f "$$gpt5_file" ]; then \
+			gpt5_bytes=$$(stat -f%z "$$gpt5_file" 2>/dev/null || echo "0"); \
+			gpt5_kb=$$(echo "scale=1; $$gpt5_bytes/1024" | bc 2>/dev/null || echo "0"); \
+			gpt5_size="$${gpt5_kb}K"; \
+			gpt5_lines=$$(wc -l < "$$gpt5_file" 2>/dev/null | tr -d ' ' || echo "0"); \
+		fi; \
+		if [ -f "$$claude_file" ]; then \
+			claude_bytes=$$(stat -f%z "$$claude_file" 2>/dev/null || echo "0"); \
+			claude_kb=$$(echo "scale=1; $$claude_bytes/1024" | bc 2>/dev/null || echo "0"); \
+			claude_size="$${claude_kb}K"; \
+			claude_lines=$$(wc -l < "$$claude_file" 2>/dev/null | tr -d ' ' || echo "0"); \
+		fi; \
+		if [ -f "$$curated_file" ]; then \
+			curated_bytes=$$(stat -f%z "$$curated_file" 2>/dev/null || echo "0"); \
+			curated_kb=$$(echo "scale=1; $$curated_bytes/1024" | bc 2>/dev/null || echo "0"); \
+			curated_size="$${curated_kb}K"; \
+			curated_lines=$$(wc -l < "$$curated_file" 2>/dev/null | tr -d ' ' || echo "0"); \
+		fi; \
+		printf "  %-12s  %10s  %7s  %10s  %7s  %10s  %7s\n" \
+			"$$project" "$$gpt5_size" "$$gpt5_lines" "$$claude_size" "$$claude_lines" "$$curated_size" "$$curated_lines"; \
+	done
+	@echo ""
+	@echo "Size Comparison Summary"
+	@echo "────────────────────────────────────────────────────────────────"
+	@total_individual=0; \
+	total_concat_gpt5=0; \
+	total_concat_curated=0; \
+	for project in $(PROJECTS); do \
+		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
+		if [ -d "$$dir" ]; then \
+			bytes=$$(find "$$dir" -name "*_d4d.yaml" -exec stat -f%z {} \; 2>/dev/null | awk '{s+=$$1} END {print s}'); \
+			total_individual=$$((total_individual + bytes)); \
+		fi; \
+		gpt5_file="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
+		if [ -f "$$gpt5_file" ]; then \
+			bytes=$$(stat -f%z "$$gpt5_file" 2>/dev/null || echo "0"); \
+			total_concat_gpt5=$$((total_concat_gpt5 + bytes)); \
+		fi; \
+		curated_file="$(D4D_CONCAT_DIR)/curated/$${project}_curated.yaml"; \
+		if [ -f "$$curated_file" ]; then \
+			bytes=$$(stat -f%z "$$curated_file" 2>/dev/null || echo "0"); \
+			total_concat_curated=$$((total_concat_curated + bytes)); \
+		fi; \
+	done; \
+	total_individual_kb=$$(echo "scale=1; $$total_individual/1024" | bc); \
+	total_concat_gpt5_kb=$$(echo "scale=1; $$total_concat_gpt5/1024" | bc); \
+	total_concat_curated_kb=$$(echo "scale=1; $$total_concat_curated/1024" | bc); \
+	echo "Total Individual D4D YAMLs (GPT-5):      $${total_individual_kb} KB"; \
+	echo "Total Concatenated D4D YAMLs (GPT-5):    $${total_concat_gpt5_kb} KB"; \
+	echo "Total Curated D4D YAMLs:                 $${total_concat_curated_kb} KB"
+	@echo ""
 
 # Quick data status - compact version
 data-status-quick:
@@ -258,6 +350,101 @@ data-status-quick:
 		printf "  %-12s : raw=%2d  prep=%2d  d4d=%2d  concat=%s\n" \
 			"$$project" "$$raw_count" "$$prep_count" "$$d4d_count" "$$concat_exists"; \
 	done
+
+# D4D YAML Size Report - detailed table of all D4D YAML files
+data-d4d-sizes:
+	@echo "════════════════════════════════════════════════════════════════════════════════"
+	@echo "  D4D YAML File Size Report"
+	@echo "════════════════════════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "Individual D4D YAMLs (GPT-5)"
+	@echo "────────────────────────────────────────────────────────────────────────────────"
+	@printf "  %-12s  %5s  %10s  %10s  %s\n" "PROJECT" "FILES" "TOTAL SIZE" "AVG SIZE" "LARGEST"
+	@echo "────────────────────────────────────────────────────────────────────────────────"
+	@for project in $(PROJECTS); do \
+		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
+		if [ -d "$$dir" ]; then \
+			files=$$(ls -1 "$$dir"/*_d4d.yaml 2>/dev/null | wc -l | tr -d ' '); \
+			if [ "$$files" -gt 0 ]; then \
+				total_bytes=$$(find "$$dir" -name "*_d4d.yaml" -exec stat -f%z {} \; 2>/dev/null | awk '{s+=$$1} END {print s}'); \
+				total_kb=$$(echo "scale=1; $$total_bytes/1024" | bc 2>/dev/null || echo "0"); \
+				avg_bytes=$$(echo "scale=0; $$total_bytes/$$files" | bc 2>/dev/null || echo "0"); \
+				avg_kb=$$(echo "scale=1; $$avg_bytes/1024" | bc 2>/dev/null || echo "0"); \
+				largest=$$(ls -lS "$$dir"/*_d4d.yaml 2>/dev/null | head -1 | awk '{print $$5}'); \
+				largest_kb=$$(echo "scale=1; $$largest/1024" | bc 2>/dev/null || echo "0"); \
+				printf "  %-12s  %5d  %8s KB  %8s KB  %8s KB\n" \
+					"$$project" "$$files" "$$total_kb" "$$avg_kb" "$$largest_kb"; \
+			else \
+				printf "  %-12s  %5s  %10s  %10s  %s\n" "$$project" "0" "-" "-" "-"; \
+			fi; \
+		else \
+			printf "  %-12s  %5s  %10s  %10s  %s\n" "$$project" "N/A" "-" "-" "-"; \
+		fi; \
+	done
+	@echo ""
+	@echo "Concatenated D4D YAMLs"
+	@echo "────────────────────────────────────────────────────────────────────────────────"
+	@printf "  %-12s  %10s  %7s  %10s  %7s  %10s  %7s\n" \
+		"PROJECT" "GPT-5" "LINES" "CLAUDE" "LINES" "CURATED" "LINES"
+	@echo "────────────────────────────────────────────────────────────────────────────────"
+	@for project in $(PROJECTS); do \
+		gpt5_file="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
+		claude_file="$(D4D_CONCAT_DIR)/claudecode/$${project}_d4d.yaml"; \
+		curated_file="$(D4D_CONCAT_DIR)/curated/$${project}_curated.yaml"; \
+		gpt5_size="-"; gpt5_lines="-"; \
+		claude_size="-"; claude_lines="-"; \
+		curated_size="-"; curated_lines="-"; \
+		if [ -f "$$gpt5_file" ]; then \
+			gpt5_bytes=$$(stat -f%z "$$gpt5_file" 2>/dev/null || echo "0"); \
+			gpt5_kb=$$(echo "scale=1; $$gpt5_bytes/1024" | bc 2>/dev/null || echo "0"); \
+			gpt5_size="$${gpt5_kb}K"; \
+			gpt5_lines=$$(wc -l < "$$gpt5_file" 2>/dev/null | tr -d ' ' || echo "0"); \
+		fi; \
+		if [ -f "$$claude_file" ]; then \
+			claude_bytes=$$(stat -f%z "$$claude_file" 2>/dev/null || echo "0"); \
+			claude_kb=$$(echo "scale=1; $$claude_bytes/1024" | bc 2>/dev/null || echo "0"); \
+			claude_size="$${claude_kb}K"; \
+			claude_lines=$$(wc -l < "$$claude_file" 2>/dev/null | tr -d ' ' || echo "0"); \
+		fi; \
+		if [ -f "$$curated_file" ]; then \
+			curated_bytes=$$(stat -f%z "$$curated_file" 2>/dev/null || echo "0"); \
+			curated_kb=$$(echo "scale=1; $$curated_bytes/1024" | bc 2>/dev/null || echo "0"); \
+			curated_size="$${curated_kb}K"; \
+			curated_lines=$$(wc -l < "$$curated_file" 2>/dev/null | tr -d ' ' || echo "0"); \
+		fi; \
+		printf "  %-12s  %10s  %7s  %10s  %7s  %10s  %7s\n" \
+			"$$project" "$$gpt5_size" "$$gpt5_lines" "$$claude_size" "$$claude_lines" "$$curated_size" "$$curated_lines"; \
+	done
+	@echo ""
+	@echo "Size Comparison Summary"
+	@echo "────────────────────────────────────────────────────────────────────────────────"
+	@total_individual=0; \
+	total_concat_gpt5=0; \
+	total_concat_curated=0; \
+	for project in $(PROJECTS); do \
+		dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
+		if [ -d "$$dir" ]; then \
+			bytes=$$(find "$$dir" -name "*_d4d.yaml" -exec stat -f%z {} \; 2>/dev/null | awk '{s+=$$1} END {print s}'); \
+			total_individual=$$((total_individual + bytes)); \
+		fi; \
+		gpt5_file="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
+		if [ -f "$$gpt5_file" ]; then \
+			bytes=$$(stat -f%z "$$gpt5_file" 2>/dev/null || echo "0"); \
+			total_concat_gpt5=$$((total_concat_gpt5 + bytes)); \
+		fi; \
+		curated_file="$(D4D_CONCAT_DIR)/curated/$${project}_curated.yaml"; \
+		if [ -f "$$curated_file" ]; then \
+			bytes=$$(stat -f%z "$$curated_file" 2>/dev/null || echo "0"); \
+			total_concat_curated=$$((total_concat_curated + bytes)); \
+		fi; \
+	done; \
+	total_individual_kb=$$(echo "scale=1; $$total_individual/1024" | bc); \
+	total_concat_gpt5_kb=$$(echo "scale=1; $$total_concat_gpt5/1024" | bc); \
+	total_concat_curated_kb=$$(echo "scale=1; $$total_concat_curated/1024" | bc); \
+	echo "Total Individual D4D YAMLs (GPT-5):      $${total_individual_kb} KB"; \
+	echo "Total Concatenated D4D YAMLs (GPT-5):    $${total_concat_gpt5_kb} KB"; \
+	echo "Total Curated D4D YAMLs:                 $${total_concat_curated_kb} KB"; \
+	echo ""
 
 # ============================================================================
 # D4D Pipeline: Step 2 - Concatenate preprocessed files
@@ -383,6 +570,33 @@ extract-d4d-individual-all-gpt5:
 	@echo ""
 	@echo "✅ All projects processed successfully!"
 
+# Extract D4D metadata from individual files using Claude Code (validated)
+# Usage: make extract-d4d-individual-claude
+#
+# NOTE: Current files (generated 2025-11-15) were validated from GPT-5 outputs
+# This target documents the validation process and can regenerate metadata
+#
+extract-d4d-individual-claude:
+	@echo "Claude Code individual D4D files:"
+	@echo "Current implementation: GPT-5 generated, Claude Code validated"
+	@echo "Files location: data/d4d_individual/claudecode/"
+	@echo ""
+	@find data/d4d_individual/claudecode -name '*_d4d.yaml' | wc -l | xargs echo "Total D4D YAMLs:"
+	@find data/d4d_individual/claudecode -name '*_metadata.yaml' | wc -l | xargs echo "Total metadata files:"
+	@echo ""
+	@echo "To regenerate metadata for existing D4D YAMLs, use:"
+	@echo "  python3 src/download/process_individual_d4d_claude_direct.py -i INPUT -o OUTPUT -p PROJECT"
+
+# List all Claude Code individual D4D files
+list-d4d-individual-claude:
+	@echo "Individual D4D YAMLs (Claude Code validated):"
+	@echo ""
+	@for project in $(PROJECTS); do \
+		echo "$$project:"; \
+		find data/d4d_individual/claudecode/$$project -name '*_d4d.yaml' 2>/dev/null | sed 's|.*/||' | sed 's/^/  /' || echo "  (none)"; \
+		echo ""; \
+	done
+
 # ============================================================================
 # D4D Pipeline: Step 4 - Extract D4D from concatenated files
 # ============================================================================
@@ -424,6 +638,75 @@ extract-d4d-concat-all-gpt5:
 	done
 	@echo ""
 	@echo "✅ All concatenated files processed!"
+
+# Extract D4D from a single concatenated file using Claude Code (deterministic)
+# Usage: make extract-d4d-concat-claude PROJECT=AI_READI
+#
+# IMPLEMENTATION NOTES:
+# - This target uses process_concatenated_d4d_claude.py with Claude Sonnet 4.5 API (temperature=0.0)
+# - Requires ANTHROPIC_API_KEY environment variable
+# - Alternative: Claude Code assistant can generate D4D YAMLs directly (see DETERMINISM.md)
+# - Current files in data/d4d_concatenated/claudecode/ were generated using Claude Code assistant
+#   direct synthesis (2025-11-15) following the same deterministic principles
+# - To regenerate using API: run this target with ANTHROPIC_API_KEY set
+#
+# Deterministic settings:
+# - Temperature: 0.0 (maximum determinism)
+# - Model: claude-sonnet-4-5-20250929 (date-pinned)
+# - Schema: Local file (version-controlled)
+# - Prompts: External files (version-controlled)
+# - Metadata: Comprehensive provenance tracking with SHA-256 hashes
+#
+extract-d4d-concat-claude:
+ifndef PROJECT
+	$(error PROJECT is not defined. Usage: make extract-d4d-concat-claude PROJECT=AI_READI)
+endif
+	@echo "Extracting D4D from concatenated $(PROJECT) files using Claude Code..."
+	@echo "Note: This uses Claude Sonnet 4.5 API with deterministic settings (temperature=0.0)"
+	@mkdir -p $(D4D_CONCAT_DIR)/claudecode
+	@if [ ! -d "aurelian" ]; then \
+		echo "❌ Error: aurelian directory not found"; \
+		echo "Please ensure the aurelian submodule is initialized"; \
+		exit 1; \
+	fi
+	@input_file="$(PREPROCESSED_CONCAT_DIR)/$(PROJECT)_concatenated.txt"; \
+	output_file="$(D4D_CONCAT_DIR)/claudecode/$(PROJECT)_d4d.yaml"; \
+	if [ -f "$$input_file" ]; then \
+		if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+			echo "❌ Error: ANTHROPIC_API_KEY environment variable not set"; \
+			echo ""; \
+			echo "To use API-based extraction, set ANTHROPIC_API_KEY"; \
+			echo "Alternative: Use Claude Code assistant for direct synthesis (see DETERMINISM.md)"; \
+			exit 1; \
+		fi; \
+		cd aurelian && uv run python ../src/download/process_concatenated_d4d_claude.py \
+			-i ../$$input_file -o ../$$output_file -p $(PROJECT); \
+		echo "✅ D4D concatenated extraction complete: $$output_file"; \
+	else \
+		echo "❌ Error: Input file not found: $$input_file"; \
+		echo "Run 'make concat-extracted PROJECT=$(PROJECT)' first"; \
+		exit 1; \
+	fi
+
+# Extract D4D from all concatenated files using Claude Code (deterministic)
+# Usage: make extract-d4d-concat-all-claude
+#
+# NOTE: Current files (generated 2025-11-15) used Claude Code assistant direct synthesis
+# To regenerate using API, ensure ANTHROPIC_API_KEY is set before running this target
+#
+extract-d4d-concat-all-claude:
+	@echo "Extracting D4D from all concatenated files using Claude Code (deterministic)..."
+	@echo "Note: Requires ANTHROPIC_API_KEY for API-based extraction"
+	@echo ""
+	@for project in $(PROJECTS); do \
+		echo ""; \
+		echo "═══════════════════════════════════════"; \
+		echo "Processing $$project..."; \
+		echo "═══════════════════════════════════════"; \
+		$(MAKE) extract-d4d-concat-claude PROJECT=$$project || true; \
+	done
+	@echo ""
+	@echo "✅ All concatenated files processed with Claude Code!"
 
 # ============================================================================
 # D4D Pipeline: Step 5 - Validate D4D YAML files

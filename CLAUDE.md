@@ -343,6 +343,9 @@ make data-status
 
 # Quick compact overview
 make data-status-quick
+
+# Detailed D4D YAML size report
+make data-d4d-sizes
 ```
 
 **Features:**
@@ -351,6 +354,7 @@ make data-status-quick
 - Identifies missing directories with ❌ markers
 - Displays file sizes and line counts for key files
 - Provides summary statistics across all projects
+- Reports D4D YAML sizes with individual and concatenated breakdowns
 
 ### Quick Reference: Common Workflows
 
@@ -507,6 +511,7 @@ Beyond standard LinkML targets, this project adds comprehensive D4D pipeline tar
 ```bash
 make data-status                         # Full data status report with counts
 make data-status-quick                   # Compact status overview
+make data-d4d-sizes                      # Detailed D4D YAML size report
 ```
 
 ### Concatenation Targets

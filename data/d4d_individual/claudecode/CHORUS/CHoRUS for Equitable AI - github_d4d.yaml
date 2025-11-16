@@ -1,0 +1,24 @@
+# D4D Metadata extracted from: CHoRUS for Equitable AI - github.pdf
+# Source: ../downloads_by_column/CHORUS/CHoRUS for Equitable AI - github.pdf
+# Column: CHORUS
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-15 (Claude Code validated)
+# Generator: claude_code_validated (originally gpt-5)
+# Method: validated and approved by Claude Code
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: chorus-for-equitable-ai-github-pdf
+name: CHoRUS for Equitable AI - GitHub PDF
+title: CHoRUS for Equitable AI
+description: PDF document related to the CHORUS project and equitable AI. Source filename indicates association with GitHub.
+media_type: application/pdf
+keywords:
+  - CHORUS
+  - Equitable AI
+  - GitHub
+  - PDF
+distribution_formats:
+  - description:
+      - PDF
+      - application/pdf

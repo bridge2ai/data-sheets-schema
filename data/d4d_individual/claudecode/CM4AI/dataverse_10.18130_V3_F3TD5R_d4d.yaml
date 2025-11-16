@@ -1,0 +1,33 @@
+# D4D Metadata extracted from: dataverse_10.18130_V3_F3TD5R_row16.txt
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-15 (Claude Code validated)
+
+id: dataverse_10.18130_V3_F3TD5R_row16
+title: University of Virginia Dataverse Login Page
+description: This record captures the University of Virginia Dataverse login page content. It provides institutional login options, contact information for University of Virginia Dataverse Support, and a maintenance notice. No dataset-specific metadata is present in this source.
+language: en
+keywords:
+  - CM4AI
+  - Dataverse
+  - University of Virginia
+  - Login
+path: dataverse_10.18130_V3_F3TD5R_row16.txt
+media_type: text/plain
+distribution_formats:
+  - description:
+      - Hosted and accessed via the University of Virginia Dataverse web portal (login required).
+    used_software:
+      - name: Dataverse
+        version: 6.6 build 1829-192cdc4
+maintainers:
+  - description:
+      - University of Virginia Dataverse Support
+license_and_use_terms:
+  description:
+    - The site references Terms of Use and a Privacy Policy; no specific dataset license information is present in the source.
+external_resources:
+  - external_resources:
+      - Terms of Use
+      - Privacy Policy
