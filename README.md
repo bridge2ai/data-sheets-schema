@@ -2,6 +2,8 @@ Executive Order 14168: This repository is under review for potential modificatio
 
 # data-sheets-schema
 
+**📚 [View Documentation & Examples](https://bridge2ai.github.io/data-sheets-schema/)**
+
 A LinkML schema for Datasheets for Datasets model as published in [Datasheets for Datasets](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext). Inspired by datasheets as used in the electronics and other industries, Gebru et al. proposed that every dataset "be accompanied with a datasheet that documents its motivation, composition, collection process, recommended uses, and so on". To this end the authors create a series of topics and over 50 questions addressing different aspects of datasets, also useful in an AI/ML context. An example of completed datasheet for datasets can be found here:
 [Structured dataset documentation: a datasheet for CheXpert](https://arxiv.org/abs/2105.03020)
 
