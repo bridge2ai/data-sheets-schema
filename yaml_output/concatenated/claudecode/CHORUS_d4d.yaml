@@ -1,0 +1,85 @@
+# D4D extracted from concatenated documents
+# Project: CHORUS
+# Model: Claude Sonnet 4.5 (temperature=0.0)
+# Schema: data_sheets_schema_all.yaml
+# Generated: 2025-11-15 (deterministic synthesis by Claude Code)
+# Metadata: See CHORUS_d4d_metadata.yaml
+
+id: chorus-for-equitable-ai
+name: CHoRUS for Equitable AI
+title: CHoRUS for Equitable AI - Bridge2AI for Clinical Care
+description: >
+  CHORUS (Collaborative Hospital Repository Uniting Standards) is a Bridge2AI project focused on
+  equitable AI for clinical care. The project aims to create standardized, ethically-sourced datasets
+  to enable AI/ML research in clinical care settings. This collection includes documentation related
+  to the CHORUS project and the AIM-AHEAD Bridge2AI for Clinical Care initiative, which seek to advance
+  equitable AI development in healthcare through standardized data repositories and informational
+  resources. The project is associated with GitHub repositories and includes informational webinar
+  materials about Bridge2AI for Clinical Care.
+language: en
+keywords:
+  - CHORUS
+  - Equitable AI
+  - Bridge2AI
+  - AIM-AHEAD
+  - Clinical care
+  - Informational webinar
+  - GitHub
+media_type: application/pdf
+page: https://github.com/chorus-ai
+purposes:
+  - response: >
+      Enable ethically-sourced, large-scale research on AI for clinical care through standardized
+      data repositories and collaborative frameworks.
+tasks:
+  - response: >
+      Support AI/ML model development for clinical care applications using standardized,
+      equitably-sourced hospital data.
+resources:
+  - id: chorus-github-pdf
+    name: CHoRUS for Equitable AI - GitHub PDF
+    title: CHoRUS for Equitable AI
+    description: PDF document related to the CHORUS project and equitable AI. Source filename indicates association with GitHub.
+    media_type: application/pdf
+    keywords:
+      - CHORUS
+      - Equitable AI
+      - GitHub
+      - PDF
+    distribution_formats:
+      - description:
+          - PDF
+          - application/pdf
+  - id: aim-ahead-bridge2ai-webinar
+    name: aim-ahead-bridge2ai-for-clinical-care-informational-webinar
+    title: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar
+    description: >
+      PDF document titled "AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar";
+      categorized under CHORUS. Informational webinar material related to Bridge2AI for Clinical Care.
+    path: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf
+    media_type: application/pdf
+    keywords:
+      - CHORUS
+      - Bridge2AI
+      - AIM-AHEAD
+      - Clinical care
+      - Informational webinar
+      - PDF
+    purposes:
+      - response: Informational webinar material related to Bridge2AI for Clinical Care (CHORUS).
+    distribution_formats:
+      - name: PDF
+        description:
+          - Portable Document Format (application/pdf)
+distribution_formats:
+  - description:
+      - PDF documents
+      - GitHub repositories
+license_and_use_terms:
+  description:
+    - Information about specific licensing terms available through project documentation and GitHub repositories.
+external_resources:
+  - external_resources:
+      - GitHub repositories for CHORUS project
+      - AIM-AHEAD initiative materials
+      - Bridge2AI program documentation
