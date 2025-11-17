@@ -1,261 +1,917 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="datasheet-common.css">
     <title>Flagship Dataset of Type 2 Diabetes from the AI-READI Project - Datasheet for Dataset</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: #fafafa;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .header h1 {
-            margin: 0 0 0.5rem 0;
-            font-size: 2rem;
-            font-weight: 300;
-        }
-        
-        .content {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .key {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .value {
-            color: #34495e;
-        }
-        
-        pre {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 4px;
-            overflow-x: auto;
-            border-left: 4px solid #667eea;
-        }
-        
-        .timestamp {
-            text-align: center;
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-    </style>
 </head>
 <body>
     <div class="header">
         <h1>Flagship Dataset of Type 2 Diabetes from the AI-READI Project</h1>
-        <p class="subtitle">Datasheet for Dataset</p>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
     </div>
-    <div class="content">
-        <pre>creators: &id001
-- affiliation:
-    id: AI-READI Consortium
-    name: AI-READI Consortium
-  principal_investigator: ''
-description: This dataset contains data from 1067 participants that was collected
-  between July 19, 2023 and July 31, 2024. Data from multiple modalities are included.
-  The data in this dataset contain no protected health information (PHI). Information
-  related to the sex and race/ethnicity of the participants as well as medication
-  used has also been removed.
-funders: &id002
-- grant:
-    grant_number: 1OT2OD032644
-    id: 1OT2OD032644
-    name: ''
-  grantor:
-    id: NIH
-    name: National Institutes of Health
-id: doi:10.60775/fairhub.2
-issued: '2024-11-08'
-keywords: &id003
-- Diabetes mellitus
-- Machine Learning
-- Artificial Intelligence
-- Electrocardiography
-- Continuous Glucose Monitoring
-- Retinal imaging
-- Eye exam
-resources:
-- acquisition_methods:
-  - description: Data was collected from multiple modalities, including 12-lead ECG,
-      Holter monitor, smartwatch, REDCap for clinical data, a custom environmental
-      sensor, fluorescence lifetime imaging ophthalmoscopy (FLIO), optical coherence
-      tomography (OCT), optical coherence tomography angiography (OCTA), retinal photography,
-      wearable fitness trackers, and continuous glucose monitoring (CGM) devices.
-    was_directly_observed: ''
-    was_inferred_derived: ''
-    was_reported_by_subjects: ''
-    was_validated_verified: ''
-  addressing_gaps: []
-  anomalies: []
-  bytes: 2210033333333
-  cleaning_strategies:
-  - description: The data in this dataset contain no protected health information
-      (PHI). Information related to the sex and race/ethnicity of the participants
-      as well as medication used has also been removed.
-  collection_mechanisms: []
-  collection_timeframes:
-  - description: The data was collected between July 19, 2023 and July 31, 2024.
-  compression: ''
-  confidential_elements: []
-  conforms_to:
-  - Clinical Dataset Structure (CDS) v0.1.1
-  - WaveForm DataBase (WFDB)
-  - Observational Medical Outcomes Partnership (OMOP) Common Data Model (CDM)
-  - Earth Science Data Systems (ESDS)
-  - Digital Imaging and Communications in Medicine (DICOM)
-  - Open mHealth
-  conforms_to_class: ''
-  conforms_to_schema: ''
-  content_warnings: []
-  created_by: []
-  created_on: ''
-  creators: *id001
-  data_collectors: []
-  data_protection_impacts: []
-  description: This dataset contains data from 1067 participants that was collected
-    between July 19, 2023 and July 31, 2024. Data from multiple modalities are included.
-    The data in this dataset contain no protected health information (PHI). Information
-    related to the sex and race/ethnicity of the participants as well as medication
-    used has also been removed.
-  dialect: ''
-  discouraged_uses:
-  - description: Users must agree to use the data only for type 2 diabetes related
-      research. Other uses are implicitly discouraged.
-  distribution_dates: []
-  distribution_formats:
-  - description: The dataset is organized into multiple directories by datatype, with
-      file formats including WaveForm DataBase (WFDB), CSV (conforming to OMOP CDM),
-      Earth Science Data Systems (ESDS), Digital Imaging and Communications in Medicine
-      (DICOM), and Open mHealth.
-  doi: 10.60775/fairhub.2
-  download_url: ''
-  encoding: ''
-  errata: []
-  ethical_reviews: []
-  existing_uses:
-  - description: As of the document date, the dataset has 12,603 views, has been cited
-      by 3 resources, and has had 539 approved access requests.
-  extension_mechanism: ''
-  external_resources: []
-  format: ''
-  funders: *id002
-  future_use_impacts: []
-  hash: ''
-  id: doi:10.60775/fairhub.2
-  instances:
-  - counts: 1067
-    data_substrate: ''
-    data_topic: ''
-    instance_type: participants
-    label: ''
-    label_description: ''
-    missing_information: []
-    sampling_strategies: []
-  ip_restrictions: ''
-  is_deidentified:
-    description:
-    - The data in this dataset contain no protected health information (PHI). Information
-      related to the sex and race/ethnicity of the participants as well as medication
-      used has also been removed.
-    identifiable_elements_present: false
-  is_tabular: ''
-  issued: '2024-11-08'
-  keywords: *id003
-  labeling_strategies: []
-  language: ''
-  last_updated_on: ''
-  license: https://doi.org/10.5281/zenodo.10642459
-  license_and_use_terms:
-  - description: This work is licensed under a custom license. Accessing the dataset
-      requires logging in through a verified ID system, agreeing to use the data only
-      for type 2 diabetes related research, and agreeing to the license terms which
-      set restrictions and obligations for data usage.
-  maintainers: []
-  md5: ''
-  media_type: ''
-  modified_by: []
-  other_tasks: []
-  page: ''
-  path: ''
-  preprocessing_strategies:
-  - description: Processing of the data was automated + custom.
-  publisher: ''
-  purposes:
-  - response: The Artificial Intelligence Ready and Exploratory Atlas for Diabetes
-      Insights (AI-READI) project seeks to create a flagship ethically-sourced dataset
-      to enable future generations of artificial intelligence/machine learning (AI/ML)
-      research to provide critical insights into type 2 diabetes mellitus (T2DM),
-      including salutogenic pathways to return to health.
-  raw_sources: []
-  regulatory_restrictions: ''
-  retention_limit: ''
-  sampling_strategies: []
-  sensitive_elements:
-  - description:
-    - The dataset contains health data related to Type 2 Diabetes. It originally contained
-      race/ethnicity and sex data which has been removed from the dataset but is available
-      in aggregate form.
-    sensitive_elements_present: true
-  sha256: ''
-  status: ''
-  subpopulations:
-  - distribution:
-    - 'Train Split: Hispanic (144), Asian (167), Black (211), White (225). Male (302),
-      Female (445). No DM (292), Lifestyle (162), Oral (235), Insulin (58).'
-    - 'Val Split: Hispanic (40), Asian (40), Black (40), White (40). Male (80), Female
-      (80). No DM (47), Lifestyle (33), Oral (40), Insulin (40).'
-    - 'Test Split: Hispanic (40), Asian (40), Black (40), White (40). Male (80), Female
-      (80). No DM (41), Lifestyle (39), Oral (36), Insulin (42).'
-    - 'Total: Hispanic (224), Asian (247), Black (291), White (305). Male (462), Female
-      (605). No DM (380), Lifestyle (234), Oral (311), Insulin (140).'
-    identification:
-    - Race/ethnicity
-    - Sex
-    - Diabetes status
-    subpopulation_elements_present: true
-  subsets: []
-  tasks: []
-  title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
-  updates:
-  - description: The dataset is versioned. Changes between versions are provided in
-      a CHANGELOG file. The current version is 2.0.0, and a previous version 1.0.0
-      exists.
-  use_repository: []
-  version: 2.0.0
-  version_access:
-  - description: Older versions of the dataset are accessible and have their own DOIs.
-      Version 1.0.0 is available at doi:10.60775/fairhub.1.
-  was_derived_from: ''
-title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
-version: 2.0.0
-</pre>
-    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">Why was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Grantor</th><th>Grant Name</th><th>Grant Number</th></tr></thead><tbody><tr><td>National Institutes of Health</td><td>-</td><td>1OT2OD032644</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Response</dt><dd><div class="long-description">The Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project seeks to create a flagship ethically-sourced dataset to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                            
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Counts</dt><dd>1,067</dd><dt>Instance Type</dt><dd>participants</dd><dt>Data Topic</dt><dd><em>Not specified</em></dd><dt>Data Substrate</dt><dd><em>Not specified</em></dd><dt>Label</dt><dd><em>Not specified</em></dd><dt>Label Description</dt><dd><em>Not specified</em></dd><dt>Sampling Strategies</dt><dd><em>No items</em></dd><dt>Missing Information</dt><dd><em>No items</em></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Subpopulations
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Subpopulation Elements Present</dt><dd>True</dd><dt>Identification</dt><dd><ul class='formatted-list'><li>Race/ethnicity</li><li>Sex</li><li>Diabetes status</li></ul></dd><dt>Distribution</dt><dd><table class="data-table"><thead><tr><th>Split Type</th><th>Race/Ethnicity</th><th>Sex</th><th>Diabetes Status</th></tr></thead><tbody><tr><td><strong>Train Split</strong></td><td>Hispanic: 144, Asian: 167, Black: 211, White: 225</td><td>Male: 302, Female: 445</td><td>No DM: 292, Lifestyle: 162, Oral: 235, Insulin: 58</td></tr><tr><td><strong>Val Split</strong></td><td>Hispanic: 40, Asian: 40, Black: 40, White: 40</td><td>Male: 80, Female: 80</td><td>No DM: 47, Lifestyle: 33, Oral: 40, Insulin: 40</td></tr><tr><td><strong>Test Split</strong></td><td>Hispanic: 40, Asian: 40, Black: 40, White: 40</td><td>Male: 80, Female: 80</td><td>No DM: 41, Lifestyle: 39, Oral: 36, Insulin: 42</td></tr><tr><td><strong>Total</strong></td><td>Hispanic: 224, Asian: 247, Black: 291, White: 305</td><td>Male: 462, Female: 605</td><td>No DM: 380, Lifestyle: 234, Oral: 311, Insulin: 140</td></tr></tbody></table></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Distribution Formats
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">The dataset is organized into multiple directories by datatype, with file formats including WaveForm DataBase (WFDB), CSV (conforming to OMOP CDM), Earth Science Data Systems (ESDS), Digital Imaging and Communications in Medicine (DICOM), and Open mHealth.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Distribution Dates
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label required-field">
+                            ID
+                            <span class="required-indicator" title="Required field">*</span>
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.60775/fairhub.2" target="_blank">doi:10.60775/fairhub.2</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Title
+                            
+                        </label>
+                        <div class="item-value">Flagship Dataset of Type 2 Diabetes from the AI-READI Project</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Description
+                            
+                        </label>
+                        <div class="item-value"><div class="long-description">This dataset contains data from 1067 participants that was collected between July 19, 2023 and July 31, 2024. Data from multiple modalities are included. The data in this dataset contain no protected health information (PHI). Information related to the sex and race/ethnicity of the participants as well as medication used has also been removed.</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Creators
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Principal Investigator</td><td></td><td>-</td><td>AI-READI Consortium</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Issued
+                            
+                        </label>
+                        <div class="item-value">2024-11-08</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>Diabetes mellitus</li><li>Machine Learning</li><li>Artificial Intelligence</li><li>Electrocardiography</li><li>Continuous Glucose Monitoring</li><li>Retinal imaging</li><li>Eye exam</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Collection Timeframes
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>The data was collected between July 19, 2023 and July 31, 2024.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Conforms To
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>Clinical Dataset Structure (CDS) v0.1.1</li><li>WaveForm DataBase (WFDB)</li><li>Observational Medical Outcomes Partnership (OMOP) Common Data Model (CDM)</li><li>Earth Science Data Systems (ESDS)</li><li>Digital Imaging and Communications in Medicine (DICOM)</li><li>Open mHealth</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Preprocessing Strategies
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>Processing of the data was automated + custom.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Cleaning Strategies
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>The data in this dataset contain no protected health information (PHI). Information related to the sex and race/ethnicity of the participants as well as medication used has also been removed.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Is Deidentified
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>Identifiable Elements Present</dt><dd>False</dd><dt>Description</dt><dd><ul class='formatted-list'><li>The data in this dataset contain no protected health information (PHI). Information related to the sex and race/ethnicity of the participants as well as medication used has also been removed.</li></ul></dd></dl></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Sensitive Elements
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Sensitive Elements Present</dt><dd>True</dd><dt>Description</dt><dd><ul class='formatted-list'><li>The dataset contains health data related to Type 2 Diabetes. It originally contained race/ethnicity and sex data which has been removed from the dataset but is available in aggregate form.</li></ul></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Acquisition Methods
+                            
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">Data was collected from multiple modalities, including 12-lead ECG, Holter monitor, smartwatch, REDCap for clinical data, a custom environmental sensor, fluorescence lifetime imaging ophthalmoscopy (FLIO), optical coherence tomography (OCT), optical coherence tomography angiography (OCTA), retinal photography, wearable fitness trackers, and continuous glucose monitoring (CGM) devices.</div></dd><dt>Was Directly Observed</dt><dd><em>Not specified</em></dd><dt>Was Reported By Subjects</dt><dd><em>Not specified</em></dd><dt>Was Inferred Derived</dt><dd><em>Not specified</em></dd><dt>Was Validated Verified</dt><dd><em>Not specified</em></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Compression
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Conforms To Class
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Conforms To Schema
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Created By
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Created On
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Language
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Modified By
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Page
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Publisher
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Status
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Was Derived From
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Dialect
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Encoding
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Format
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Hash
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Md5
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Media Type
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Path
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Sha256
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Addressing Gaps
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Subsets
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Anomalies
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            External Resources
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Confidential Elements
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Content Warnings
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Collection Mechanisms
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Data Collectors
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Ethical Reviews
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Data Protection Impacts
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Labeling Strategies
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Raw Sources
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Ip Restrictions
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Regulatory Restrictions
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Maintainers
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Errata
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Retention Limit
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Extension Mechanism
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Is Tabular
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">What (other) tasks could the dataset be used for?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Existing Uses
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>As of the document date, the dataset has 12,603 views, has been cited by 3 resources, and has had 539 approved access requests.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Discouraged Uses
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>Users must agree to use the data only for type 2 diabetes related research. Other uses are implicitly discouraged.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            License And Use Terms
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd><div class="long-description">This work is licensed under a custom license. Accessing the dataset requires logging in through a verified ID system, agreeing to use the data only for type 2 diabetes related research, and agreeing to the license terms which set restrictions and obligations for data usage.</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Use Repository
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Other Tasks
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Future Use Impacts
+                            
+                        </label>
+                        <div class="item-value"><em>No items</em></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <div>
+                        <h2 class="section-title">Distribution</h2>
+                        <p class="section-description">How will the dataset be distributed?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            License
+                            
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.5281/zenodo.10642459" target="_blank">https://doi.org/10.5281/zenodo.10642459</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            DOI
+                            
+                        </label>
+                        <div class="item-value">10.60775/fairhub.2</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Download URL
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Bytes
+                            
+                        </label>
+                        <div class="item-value">2,210,033,333,333</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Version Access
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>Older versions of the dataset are accessible and have their own DOIs. Version 1.0.0 is available at doi:10.60775/fairhub.1.</dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔄</span>
+                    <div>
+                        <h2 class="section-title">Maintenance</h2>
+                        <p class="section-description">How will the dataset be maintained?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Version
+                            
+                        </label>
+                        <div class="item-value">2.0.0</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Updates
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>Description</dt><dd>The dataset is versioned. Changes between versions are provided in a CHANGELOG file. The current version is 2.0.0, and a previous version 1.0.0 exists.</dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <div class="item-context">Dataset Resource</div>
+                        
+                        <label class="item-label optional-field">
+                            Last Updated On
+                            
+                        </label>
+                        <div class="item-value"><em>Not specified</em></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
     <div class="timestamp">
-        Generated on 2025-08-14 19:52:46
+        Generated on 2025-09-08 19:47:14 using Bridge2AI Data Sheets Schema
     </div>
 </body>
 </html>
