@@ -24,8 +24,7 @@ These are the most comprehensive and authoritative datasheets for each project, 
 - [Download YAML](yaml_output/concatenated/curated/VOICE_curated.yaml) - Source metadata
 
 ### CHORUS
-- [Human Readable HTML](html_output/concatenated/CHORUS_d4d_alldocs.html) - Comprehensive project metadata
-- [Download YAML](yaml_output/concatenated/gpt5/CHORUS_d4d.yaml) - Source metadata
+**Note**: CHORUS does not yet have a curated comprehensive datasheet. For CHORUS metadata, please see the GPT-5 Synthesized Datasheets section below.
 
 ## GPT-5 Synthesized Datasheets
 
