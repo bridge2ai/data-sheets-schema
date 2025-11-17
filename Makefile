@@ -63,6 +63,7 @@ help: status
 	@echo "make data-status                       -- full data status report with counts"
 	@echo "make data-status-quick                 -- compact status overview"
 	@echo "make data-d4d-sizes                    -- detailed D4D YAML size report"
+	@echo "make d4d-output-diagnostic             -- diagnose thin outputs and input problems"
 	@echo ""
 	@echo "════════════════════════════════════════════════════════════════"
 	@echo "  D4D Pipeline: Concatenation"

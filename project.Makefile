@@ -446,6 +446,94 @@ data-d4d-sizes:
 	echo "Total Curated D4D YAMLs:                 $${total_concat_curated_kb} KB"; \
 	echo ""
 
+# D4D Output Diagnostic - comprehensive analysis of input vs output sizes
+# Identifies thin outputs and potential input document problems
+d4d-output-diagnostic:
+	@echo "════════════════════════════════════════════════════════════════════════════════"
+	@echo "  D4D Output Diagnostic Report"
+	@echo "  Analyzes input sources and output completeness"
+	@echo "════════════════════════════════════════════════════════════════════════════════"
+	@echo ""
+	@printf "%-10s | %6s | %8s | %10s | %10s | %10s | %10s | %10s | %s\n" \
+		"PROJECT" "FILES" "IND.SIZE" "CONCAT.IN" "GPT5 YAML" "CC YAML" "GPT5 HTML" "CC HTML" "STATUS"
+	@echo "────────────────────────────────────────────────────────────────────────────────"
+	@for project in $(PROJECTS); do \
+		ind_dir="$(D4D_INDIVIDUAL_DIR)/gpt5/$$project"; \
+		concat_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_concatenated.txt"; \
+		gpt5_yaml="$(D4D_CONCAT_DIR)/gpt5/$${project}_d4d.yaml"; \
+		cc_yaml="$(D4D_CONCAT_DIR)/claudecode/$${project}_d4d.yaml"; \
+		gpt5_html="docs/html_output/concatenated/$${project}_d4d_gpt5.html"; \
+		cc_html="docs/html_output/concatenated/claudecode/$${project}.html"; \
+		\
+		file_count="-"; \
+		ind_size="-"; \
+		concat_size="-"; \
+		gpt5_yaml_size="-"; \
+		cc_yaml_size="-"; \
+		gpt5_html_size="-"; \
+		cc_html_size="-"; \
+		status="✅"; \
+		\
+		if [ -d "$$ind_dir" ]; then \
+			file_count=$$(ls -1 "$$ind_dir"/*.yaml 2>/dev/null | wc -l | tr -d ' '); \
+			ind_bytes=$$(du -sk "$$ind_dir" 2>/dev/null | awk '{print $$1}'); \
+			ind_size="$${ind_bytes}K"; \
+		fi; \
+		if [ -f "$$concat_file" ]; then \
+			concat_bytes=$$(stat -f%z "$$concat_file" 2>/dev/null | awk '{printf "%.1f", $$1/1024}'); \
+			concat_size="$${concat_bytes}K"; \
+		fi; \
+		if [ -f "$$gpt5_yaml" ]; then \
+			gpt5_bytes=$$(stat -f%z "$$gpt5_yaml" 2>/dev/null | awk '{printf "%.1f", $$1/1024}'); \
+			gpt5_yaml_size="$${gpt5_bytes}K"; \
+		fi; \
+		if [ -f "$$cc_yaml" ]; then \
+			cc_bytes=$$(stat -f%z "$$cc_yaml" 2>/dev/null | awk '{printf "%.1f", $$1/1024}'); \
+			cc_yaml_size="$${cc_bytes}K"; \
+		fi; \
+		if [ -f "$$gpt5_html" ]; then \
+			gpt5_html_bytes=$$(stat -f%z "$$gpt5_html" 2>/dev/null | awk '{printf "%.1f", $$1/1024}'); \
+			gpt5_html_size="$${gpt5_html_bytes}K"; \
+		fi; \
+		if [ -f "$$cc_html" ]; then \
+			cc_html_bytes=$$(stat -f%z "$$cc_html" 2>/dev/null | awk '{printf "%.1f", $$1/1024}'); \
+			cc_html_size="$${cc_html_bytes}K"; \
+		fi; \
+		\
+		if [ "$$file_count" != "-" ] && [ "$$file_count" -le 2 ]; then \
+			status="⚠️  FEW"; \
+		fi; \
+		if [ -f "$$concat_file" ]; then \
+			concat_kb=$$(stat -f%z "$$concat_file" 2>/dev/null | awk '{print int($$1/1024)}'); \
+			if [ "$$concat_kb" -lt 5 ]; then \
+				status="⚠️  THIN"; \
+			fi; \
+		fi; \
+		\
+		printf "%-10s | %6s | %8s | %10s | %10s | %10s | %10s | %10s | %s\n" \
+			"$$project" "$$file_count" "$$ind_size" "$$concat_size" "$$gpt5_yaml_size" "$$cc_yaml_size" \
+			"$$gpt5_html_size" "$$cc_html_size" "$$status"; \
+	done
+	@echo ""
+	@echo "Legend:"
+	@echo "  FILES      = Number of individual D4D YAML files for this project"
+	@echo "  IND.SIZE   = Total size of individual D4D files"
+	@echo "  CONCAT.IN  = Size of concatenated input document"
+	@echo "  GPT5 YAML  = Size of GPT-5 synthesized D4D YAML output"
+	@echo "  CC YAML    = Size of Claude Code synthesized D4D YAML output"
+	@echo "  GPT5 HTML  = Size of GPT-5 HTML rendering"
+	@echo "  CC HTML    = Size of Claude Code HTML rendering"
+	@echo "  STATUS:"
+	@echo "    ✅        = Normal output"
+	@echo "    ⚠️  FEW   = Only 1-2 input files (may indicate limited source documentation)"
+	@echo "    ⚠️  THIN  = Concatenated input <5KB (likely insufficient source material)"
+	@echo ""
+	@echo "Assessment:"
+	@echo "  - Projects with ⚠️  FEW or ⚠️  THIN likely have limited source documentation"
+	@echo "  - This is an INPUT PROBLEM, not a processing issue"
+	@echo "  - To improve: add more comprehensive source documentation for these projects"
+	@echo ""
+
 # ============================================================================
 # D4D Pipeline: Step 2 - Concatenate preprocessed files
 # ============================================================================
