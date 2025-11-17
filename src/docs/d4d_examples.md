@@ -29,22 +29,22 @@ These are the most comprehensive and authoritative datasheets for each project, 
 
 ## GPT-5 Synthesized Datasheets
 
-These datasheets were automatically synthesized from multiple documents using GPT-5. **Note**: Some synthesized outputs may have incomplete data extraction; YAML source files contain more complete information than the HTML renderings in some cases.
+These datasheets were automatically synthesized from multiple documents using GPT-5:
 
 ### AI-READI
-- [Synthesized HTML](html_output/concatenated/AI_READI_d4d_synthesized.html)
+- [GPT-5 Synthesized HTML](html_output/concatenated/AI_READI_d4d_gpt5.html)
 - [Download YAML](yaml_output/concatenated/gpt5/AI_READI_d4d.yaml)
 
 ### CHORUS
-- [Synthesized HTML](html_output/concatenated/CHORUS_d4d_synthesized.html)
+- [GPT-5 Synthesized HTML](html_output/concatenated/CHORUS_d4d_gpt5.html)
 - [Download YAML](yaml_output/concatenated/gpt5/CHORUS_d4d.yaml)
 
 ### CM4AI
-- [Synthesized HTML](html_output/concatenated/CM4AI_d4d_synthesized.html)
+- [GPT-5 Synthesized HTML](html_output/concatenated/CM4AI_d4d_gpt5.html)
 - [Download YAML](yaml_output/concatenated/gpt5/CM4AI_d4d.yaml)
 
 ### VOICE
-- [Synthesized HTML](html_output/concatenated/VOICE_d4d_synthesized.html)
+- [GPT-5 Synthesized HTML](html_output/concatenated/VOICE_d4d_gpt5.html)
 - [Download YAML](yaml_output/concatenated/gpt5/VOICE_d4d.yaml)
 
 ## Claude Code Synthesized Datasheets (Deterministic)
