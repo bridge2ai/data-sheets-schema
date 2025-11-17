@@ -49,25 +49,21 @@ These datasheets were automatically synthesized from multiple documents using GP
 
 ## Claude Code Synthesized Datasheets (Deterministic)
 
-These datasheets were automatically synthesized using Claude Sonnet 4.5 with **deterministic settings** (temperature=0.0) for reproducibility:
+These datasheets were automatically synthesized using Claude Sonnet 4.5 with **deterministic settings** (temperature=0.0) for reproducibility. **Note**: HTML renderings are not yet available; YAML source files can be downloaded below.
 
 ### AI-READI
-- [Synthesized HTML](html_output/concatenated/claudecode/AI_READI.html)
 - [Download YAML](yaml_output/concatenated/claudecode/AI_READI_d4d.yaml)
 - [Download Metadata](yaml_output/concatenated/claudecode/AI_READI_d4d_metadata.yaml)
 
 ### CHORUS
-- [Synthesized HTML](html_output/concatenated/claudecode/CHORUS.html)
 - [Download YAML](yaml_output/concatenated/claudecode/CHORUS_d4d.yaml)
 - [Download Metadata](yaml_output/concatenated/claudecode/CHORUS_d4d_metadata.yaml)
 
 ### CM4AI
-- [Synthesized HTML](html_output/concatenated/claudecode/CM4AI.html)
 - [Download YAML](yaml_output/concatenated/claudecode/CM4AI_d4d.yaml)
 - [Download Metadata](yaml_output/concatenated/claudecode/CM4AI_d4d_metadata.yaml)
 
 ### VOICE
-- [Synthesized HTML](html_output/concatenated/claudecode/VOICE.html)
 - [Download YAML](yaml_output/concatenated/claudecode/VOICE_d4d.yaml)
 - [Download Metadata](yaml_output/concatenated/claudecode/VOICE_d4d_metadata.yaml)
 
