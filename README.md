@@ -26,13 +26,14 @@ Curated comprehensive datasheets for each Bridge2AI data generating project:
 
 ## Repository Structure
 
-* `examples/` - example data
-* `project/` - project files (do not edit these)
-* `src/` - source files (edit these)
-  * `data_sheets_schema/`
-    * `schema/` - LinkML schema (edit this)
-    * `datamodel/` - generated Python datamodel
-* `tests/` - Python tests
+Browse the source code repository:
+
+* **[examples/](https://github.com/bridge2ai/data-sheets-schema/tree/main/examples)** - example data
+* **[project/](https://github.com/bridge2ai/data-sheets-schema/tree/main/project)** - project files (do not edit these)
+* **[src/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src)** - source files (edit these)
+  * **[src/data_sheets_schema/schema/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/schema)** - LinkML schema (edit this)
+  * **[src/data_sheets_schema/datamodel/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/datamodel)** - generated Python datamodel
+* **[tests/](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests)** - Python tests
 
 ## D4D Metadata Generation
 
