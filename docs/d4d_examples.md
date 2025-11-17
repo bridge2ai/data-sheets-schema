@@ -2,44 +2,30 @@
 
 This page provides links to rendered Datasheet for Datasets (D4D) examples for Bridge2AI data generating projects.
 
+**Recommended**: Use the **Curated Comprehensive Datasheets** below for the most complete and accurate project metadata.
+
 ## Curated Comprehensive Datasheets
 
-These are the most comprehensive datasheets for each project, created through extensive AI-powered synthesis:
+These are the most comprehensive and authoritative datasheets for each project, created through extensive AI-powered synthesis with human oversight and validation:
 
 ### AI-READI
-- [Human Readable HTML](html_output/concatenated/curated/AI_READI_human_readable.html)
-- [LinkML Format HTML](html_output/concatenated/curated/AI_READI_linkml.html)
-- [Download YAML](yaml_output/concatenated/curated/AI_READI_curated.yaml)
+- [Human Readable HTML](html_output/concatenated/curated/AI_READI_human_readable.html) - Recommended viewing format
+- [LinkML Format HTML](html_output/concatenated/curated/AI_READI_linkml.html) - Technical schema format
+- [Download YAML](yaml_output/concatenated/curated/AI_READI_curated.yaml) - Source metadata
 
 ### CM4AI
-- [Human Readable HTML](html_output/concatenated/curated/CM4AI_human_readable.html)
-- [LinkML Format HTML](html_output/concatenated/curated/CM4AI_linkml.html)
-- [Download YAML](yaml_output/concatenated/curated/CM4AI_curated.yaml)
+- [Human Readable HTML](html_output/concatenated/curated/CM4AI_human_readable.html) - Recommended viewing format
+- [LinkML Format HTML](html_output/concatenated/curated/CM4AI_linkml.html) - Technical schema format
+- [Download YAML](yaml_output/concatenated/curated/CM4AI_curated.yaml) - Source metadata
 
 ### VOICE
-- [Human Readable HTML](html_output/concatenated/curated/VOICE_human_readable.html)
-- [LinkML Format HTML](html_output/concatenated/curated/VOICE_linkml.html)
-- [Download YAML](yaml_output/concatenated/curated/VOICE_curated.yaml)
-
-## GPT-5 Synthesized Datasheets
-
-These datasheets were automatically synthesized from multiple documents using GPT-5:
-
-### AI-READI
-- [Synthesized HTML](html_output/concatenated/AI_READI_d4d_synthesized.html)
-- [Download YAML](yaml_output/concatenated/gpt5/AI_READI_d4d.yaml)
+- [Human Readable HTML](html_output/concatenated/curated/VOICE_human_readable.html) - Recommended viewing format
+- [LinkML Format HTML](html_output/concatenated/curated/VOICE_linkml.html) - Technical schema format
+- [Download YAML](yaml_output/concatenated/curated/VOICE_curated.yaml) - Source metadata
 
 ### CHORUS
-- [Synthesized HTML](html_output/concatenated/CHORUS_d4d_synthesized.html)
-- [Download YAML](yaml_output/concatenated/gpt5/CHORUS_d4d.yaml)
-
-### CM4AI
-- [Synthesized HTML](html_output/concatenated/CM4AI_d4d_synthesized.html)
-- [Download YAML](yaml_output/concatenated/gpt5/CM4AI_d4d.yaml)
-
-### VOICE
-- [Synthesized HTML](html_output/concatenated/VOICE_d4d_synthesized.html)
-- [Download YAML](yaml_output/concatenated/gpt5/VOICE_d4d.yaml)
+- [Human Readable HTML](html_output/concatenated/CHORUS_d4d_alldocs.html) - Comprehensive project metadata
+- [Download YAML](yaml_output/concatenated/gpt5/CHORUS_d4d.yaml) - Source metadata
 
 ## Individual Dataset Datasheets
 
@@ -60,19 +46,18 @@ These datasheets were created from specific dataset metadata sources:
 ## About the Datasheets
 
 ### Curated Comprehensive Datasheets
-The **Curated Comprehensive Datasheets** represent the most complete and authoritative metadata for each project, created through extensive AI-powered synthesis of multiple data sources and documentation. These files include both human-readable HTML renderings and downloadable YAML source files.
+The **Curated Comprehensive Datasheets** represent the most complete and authoritative metadata for each project. These were created through:
 
-### GPT-5 Synthesized Datasheets
-The **GPT-5 Synthesized Datasheets** were created by:
-1. Concatenating multiple project-related documents in reproducible order
-2. Processing with GPT-5 to extract and synthesize D4D metadata
-3. Validating against the LinkML schema
-4. Rendering to human-readable HTML format
+1. Automated extraction of metadata from multiple data sources and documentation using AI
+2. Human oversight and validation by domain experts
+3. Iterative refinement to ensure completeness and accuracy
+4. Validation against the LinkML schema
+5. Rendering to multiple formats (human-readable HTML, technical LinkML HTML, and YAML)
 
-These provide automated comprehensive project-level metadata and include both HTML views and downloadable YAML files.
+These datasheets provide comprehensive project-level metadata including dataset motivation, composition, collection processes, preprocessing, recommended uses, distribution, maintenance, ethics, and governance.
 
 ### Individual Dataset Datasheets
-The **Individual Dataset Datasheets** provide detailed metadata for specific datasets from each project's primary data repository (FAIRHub, Dataverse, PhysioNet).
+The **Individual Dataset Datasheets** provide detailed metadata for specific datasets from each project's primary data repository (FAIRHub, Dataverse, PhysioNet). These focus on individual dataset instances rather than project-level metadata.
 
 ## Schema Information
 
