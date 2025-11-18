@@ -2,7 +2,10 @@
 # Column: VOICE
 # Validation: Download ✅ success
 # Relevance: ✅ relevant
-# Generated: 2025-11-15 (Claude Code validated)
+# Generated: 2025-11-17 (Claude Code direct synthesis)
+# Framework: Direct synthesis following deterministic principles (see notes/DETERMINISM.md)
+# Model: claude-sonnet-4-5-20250929
+# Temperature: 0.0 (deterministic)
 
 id: "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
 title: b2ai-voice 1.0
