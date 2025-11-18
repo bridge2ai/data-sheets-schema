@@ -325,6 +325,37 @@ class D4DEvaluator:
 
         return evaluations
 
+    def evaluate_individual_files(self, base_dir: Path, methods: List[str]) -> List[D4DEvaluation]:
+        """Evaluate all individual D4D files for given methods"""
+
+        evaluations = []
+
+        for method in methods:
+            method_dir = base_dir / "d4d_individual" / method
+
+            if not method_dir.exists():
+                print(f"Skipping method {method}: directory not found at {method_dir}")
+                continue
+
+            # Find all *_d4d.yaml files (excluding *_metadata.yaml)
+            d4d_files = sorted(method_dir.glob("**/*_d4d.yaml"))
+            d4d_files = [f for f in d4d_files if not f.name.endswith("_metadata.yaml")]
+
+            print(f"\nEvaluating {len(d4d_files)} individual files for method: {method}")
+
+            for file_path in d4d_files:
+                # Extract project and file identifier from path
+                # Path format: data/d4d_individual/{method}/{PROJECT}/{filename}_d4d.yaml
+                project = file_path.parent.name
+                file_id = file_path.stem.replace("_d4d", "")
+
+                print(f"  - {project}/{file_id}...")
+
+                evaluation = self.evaluate_d4d_file(file_path, f"{project}/{file_id}", method)
+                evaluations.append(evaluation)
+
+        return evaluations
+
     def generate_summary_report(self, evaluations: List[D4DEvaluation], output_path: Path):
         """Generate executive summary report in Markdown"""
 
@@ -551,19 +582,21 @@ class D4DEvaluator:
 def main():
     parser = argparse.ArgumentParser(description='Evaluate D4D YAML files using rubrics')
     parser.add_argument('--base-dir', type=str, default='data',
-                        help='Base directory containing d4d_concatenated/')
+                        help='Base directory containing d4d_concatenated/ or d4d_individual/')
     parser.add_argument('--rubric10', type=str, default='data/rubric/rubric10.txt',
                         help='Path to rubric10.txt')
     parser.add_argument('--rubric20', type=str, default='data/rubric/rubric20.txt',
                         help='Path to rubric20.txt')
     parser.add_argument('--projects', nargs='+', default=['AI_READI', 'CM4AI', 'VOICE', 'CHORUS'],
-                        help='Projects to evaluate')
+                        help='Projects to evaluate (concatenated mode only)')
     parser.add_argument('--methods', nargs='+', default=['curated', 'gpt5', 'claudecode'],
                         help='Methods to evaluate')
     parser.add_argument('--output-dir', type=str, default='data/evaluation',
                         help='Output directory for reports')
     parser.add_argument('--project', type=str,
-                        help='Evaluate single project only')
+                        help='Evaluate single project only (concatenated mode)')
+    parser.add_argument('--individual', action='store_true',
+                        help='Evaluate individual D4D files instead of concatenated')
 
     args = parser.parse_args()
 
@@ -581,7 +614,15 @@ def main():
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    evaluations = evaluator.evaluate_all_projects(base_dir, projects, args.methods)
+    # Choose evaluation mode
+    if args.individual:
+        # Evaluate individual files
+        # For individual mode, exclude 'curated' method as it doesn't have individual files
+        methods = [m for m in args.methods if m != 'curated']
+        evaluations = evaluator.evaluate_individual_files(base_dir, methods)
+    else:
+        # Evaluate concatenated files
+        evaluations = evaluator.evaluate_all_projects(base_dir, projects, args.methods)
 
     if not evaluations:
         print("No evaluations completed!")
@@ -596,7 +637,9 @@ def main():
     detailed_dir.mkdir(exist_ok=True)
 
     for evaluation in evaluations:
-        detail_path = detailed_dir / f"{evaluation.project}_{evaluation.method}_evaluation.md"
+        # For individual files, use sanitized filename
+        safe_project = evaluation.project.replace("/", "_").replace(" ", "_")
+        detail_path = detailed_dir / f"{safe_project}_{evaluation.method}_evaluation.md"
         evaluator.generate_detailed_report(evaluation, detail_path)
 
     # Export scores

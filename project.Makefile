@@ -974,3 +974,30 @@ clean-eval:
 	@echo "Cleaning evaluation results..."
 	rm -rf $(EVAL_DIR)
 	@echo "✅ Evaluation results cleaned!"
+
+# Evaluate individual D4D files (not concatenated)
+evaluate-d4d-individual:
+	@echo "Evaluating individual D4D files..."
+	@mkdir -p $(EVAL_DIR)_individual
+	$(RUN) python src/evaluation/evaluate_d4d.py \
+		--base-dir data \
+		--rubric10 $(RUBRIC_DIR)/rubric10.txt \
+		--rubric20 $(RUBRIC_DIR)/rubric20.txt \
+		--methods gpt5 claudecode \
+		--output-dir $(EVAL_DIR)_individual \
+		--individual
+	@echo "✅ Individual file evaluation complete! Results in $(EVAL_DIR)_individual"
+
+# View individual evaluation summary
+eval-summary-individual:
+	@if [ -f "$(EVAL_DIR)_individual/summary_report.md" ]; then \
+		cat $(EVAL_DIR)_individual/summary_report.md; \
+	else \
+		echo "No individual summary report found. Run 'make evaluate-d4d-individual' first."; \
+	fi
+
+# Clean individual evaluation results
+clean-eval-individual:
+	@echo "Cleaning individual evaluation results..."
+	rm -rf $(EVAL_DIR)_individual
+	@echo "✅ Individual evaluation results cleaned!"
