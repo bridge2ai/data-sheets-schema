@@ -533,6 +533,8 @@ make concat-docs           # Concatenate documents from directory (INPUT_DIR=, O
 ```
 
 ### D4D Extraction Targets
+
+#### GPT-5 Extraction
 ```bash
 # Individual file extraction
 make extract-d4d-individual-gpt5         # Extract for one project (PROJECT=AI_READI)
@@ -544,6 +546,41 @@ make extract-d4d-concat-all-gpt5         # Extract from all concatenated files
 make process-concat                      # Process single file (INPUT_FILE=)
 make process-all-concat                  # Process all files in directory
 ```
+
+#### Claude Code Deterministic Extraction
+```bash
+# Concatenated file extraction (API-based, deterministic)
+make extract-d4d-concat-claude           # Extract for one project (PROJECT=AI_READI)
+make extract-d4d-concat-all-claude       # Extract for all projects
+
+# Direct script usage
+python3 src/download/process_d4d_deterministic.py --all
+python3 src/download/process_d4d_deterministic.py -i INPUT -o OUTPUT -p PROJECT
+```
+
+**Requirements:**
+- `ANTHROPIC_API_KEY` environment variable must be set
+- Python packages: `anthropic`, `pyyaml` (install with `pip install anthropic pyyaml`)
+
+**Limitations:**
+- Requires ANTHROPIC_API_KEY and incurs API costs
+- Requires network connectivity
+- Rate limits may apply for batch processing
+
+**Alternative Approach:**
+For scenarios where API access is not available, use Claude Code assistant direct synthesis:
+1. Read concatenated input files from `data/preprocessed/concatenated/`
+2. Follow prompts from `src/download/prompts/d4d_concatenated_*.txt`
+3. Reference schema from `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
+4. Generate D4D YAML following the same deterministic principles
+5. See `notes/DETERMINISM.md` for complete details on the direct synthesis approach
+
+**Deterministic Settings:**
+- Temperature: 0.0 (maximum determinism)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Schema: Local version-controlled file
+- Prompts: External version-controlled files
+- Metadata: Comprehensive provenance tracking with SHA-256 hashes
 
 ### Validation Targets
 ```bash

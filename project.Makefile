@@ -731,9 +731,10 @@ extract-d4d-concat-all-gpt5:
 # Usage: make extract-d4d-concat-claude PROJECT=AI_READI
 #
 # IMPLEMENTATION NOTES:
-# - This target uses process_concatenated_d4d_claude.py with Claude Sonnet 4.5 API (temperature=0.0)
+# - Uses process_d4d_deterministic.py with Claude Sonnet 4.5 API (temperature=0.0)
+# - Standalone script with minimal dependencies (anthropic, pyyaml)
 # - Requires ANTHROPIC_API_KEY environment variable
-# - Alternative: Claude Code assistant can generate D4D YAMLs directly (see DETERMINISM.md)
+# - Alternative: Claude Code assistant can generate D4D YAMLs directly (see notes/DETERMINISM.md)
 # - Current files in data/d4d_concatenated/claudecode/ were generated using Claude Code assistant
 #   direct synthesis (2025-11-15) following the same deterministic principles
 # - To regenerate using API: run this target with ANTHROPIC_API_KEY set
@@ -745,6 +746,12 @@ extract-d4d-concat-all-gpt5:
 # - Prompts: External files (version-controlled)
 # - Metadata: Comprehensive provenance tracking with SHA-256 hashes
 #
+# Limitations:
+# - Requires ANTHROPIC_API_KEY and incurs API costs
+# - Requires network connectivity
+# - Rate limits may apply for batch processing
+# - Alternative direct synthesis approach available (no API key needed)
+#
 extract-d4d-concat-claude:
 ifndef PROJECT
 	$(error PROJECT is not defined. Usage: make extract-d4d-concat-claude PROJECT=AI_READI)
@@ -752,49 +759,28 @@ endif
 	@echo "Extracting D4D from concatenated $(PROJECT) files using Claude Code..."
 	@echo "Note: This uses Claude Sonnet 4.5 API with deterministic settings (temperature=0.0)"
 	@mkdir -p $(D4D_CONCAT_DIR)/claudecode
-	@if [ ! -d "aurelian" ]; then \
-		echo "❌ Error: aurelian directory not found"; \
-		echo "Please ensure the aurelian submodule is initialized"; \
-		exit 1; \
-	fi
-	@input_file="$(PREPROCESSED_CONCAT_DIR)/$(PROJECT)_concatenated.txt"; \
-	output_file="$(D4D_CONCAT_DIR)/claudecode/$(PROJECT)_d4d.yaml"; \
-	if [ -f "$$input_file" ]; then \
-		if [ -z "$$ANTHROPIC_API_KEY" ]; then \
-			echo "❌ Error: ANTHROPIC_API_KEY environment variable not set"; \
-			echo ""; \
-			echo "To use API-based extraction, set ANTHROPIC_API_KEY"; \
-			echo "Alternative: Use Claude Code assistant for direct synthesis (see DETERMINISM.md)"; \
-			exit 1; \
-		fi; \
-		cd aurelian && uv run python ../src/download/process_concatenated_d4d_claude.py \
-			-i ../$$input_file -o ../$$output_file -p $(PROJECT); \
-		echo "✅ D4D concatenated extraction complete: $$output_file"; \
-	else \
-		echo "❌ Error: Input file not found: $$input_file"; \
-		echo "Run 'make concat-extracted PROJECT=$(PROJECT)' first"; \
-		exit 1; \
-	fi
+	@python3 src/download/process_d4d_deterministic.py \
+		-i $(PREPROCESSED_CONCAT_DIR)/$(PROJECT)_concatenated.txt \
+		-o $(D4D_CONCAT_DIR)/claudecode/$(PROJECT)_d4d.yaml \
+		-p $(PROJECT)
 
 # Extract D4D from all concatenated files using Claude Code (deterministic)
 # Usage: make extract-d4d-concat-all-claude
 #
-# NOTE: Current files (generated 2025-11-15) used Claude Code assistant direct synthesis
-# To regenerate using API, ensure ANTHROPIC_API_KEY is set before running this target
+# IMPLEMENTATION NOTES:
+# - Uses process_d4d_deterministic.py --all to process all projects
+# - Current files (generated 2025-11-15) used Claude Code assistant direct synthesis
+# - To regenerate using API, ensure ANTHROPIC_API_KEY is set before running this target
+#
+# Limitations (documented in script):
+# - Requires ANTHROPIC_API_KEY and incurs API costs
+# - Requires network connectivity
+# - Rate limits may apply for batch processing
+# - Alternative: Claude Code assistant direct synthesis (see notes/DETERMINISM.md)
 #
 extract-d4d-concat-all-claude:
-	@echo "Extracting D4D from all concatenated files using Claude Code (deterministic)..."
-	@echo "Note: Requires ANTHROPIC_API_KEY for API-based extraction"
-	@echo ""
-	@for project in $(PROJECTS); do \
-		echo ""; \
-		echo "═══════════════════════════════════════"; \
-		echo "Processing $$project..."; \
-		echo "═══════════════════════════════════════"; \
-		$(MAKE) extract-d4d-concat-claude PROJECT=$$project || true; \
-	done
-	@echo ""
-	@echo "✅ All concatenated files processed with Claude Code!"
+	@mkdir -p $(D4D_CONCAT_DIR)/claudecode
+	@python3 src/download/process_d4d_deterministic.py --all
 
 # ============================================================================
 # D4D Pipeline: Step 5 - Validate D4D YAML files
