@@ -1,6 +1,14 @@
-/docs/
+# Ignore generated docs but keep GitHub Pages content
 /project/docs/
 /tmp/
+
+# Track GitHub Pages content in docs/
+# (Generated markdown/html files from LinkML are ignored, but D4D examples are tracked)
+docs/*
+!docs/*.md
+!docs/*.css
+!docs/html_output/
+!docs/yaml_output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

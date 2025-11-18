@@ -2,6 +2,8 @@ Executive Order 14168: This repository is under review for potential modificatio
 
 # data-sheets-schema
 
+**📚 [View Documentation & Examples](https://bridge2ai.github.io/data-sheets-schema/)**
+
 A LinkML schema for Datasheets for Datasets model as published in [Datasheets for Datasets](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext). Inspired by datasheets as used in the electronics and other industries, Gebru et al. proposed that every dataset "be accompanied with a datasheet that documents its motivation, composition, collection process, recommended uses, and so on". To this end the authors create a series of topics and over 50 questions addressing different aspects of datasets, also useful in an AI/ML context. An example of completed datasheet for datasets can be found here:
 [Structured dataset documentation: a datasheet for CheXpert](https://arxiv.org/abs/2105.03020)
 
@@ -11,17 +13,27 @@ This repository stores a LinkML schema representation for the original Datasheet
 
 We are also tracking related developments, such as augmented Datasheets for Datasets models as in [Augmented Datasheets for Speech Datasets and Ethical Decision-Making](https://dl.acm.org/doi/10.1145/3593013.3594049).
 
+## Bridge2AI Generating Center Datasheets
+
+Curated comprehensive datasheets for each Bridge2AI data generating project:
+
+* **[AI-READI](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/AI_READI_human_readable.html)** - Retinal imaging and diabetes dataset
+* **[CM4AI](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/CM4AI_human_readable.html)** - Cell maps for AI dataset
+* **[VOICE](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/VOICE_human_readable.html)** - Voice biomarker dataset
+* **[CHORUS](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/CHORUS_d4d_alldocs.html)** - Health data for underrepresented populations
+
+[View all D4D examples →](https://bridge2ai.github.io/data-sheets-schema/d4d_examples.html)
+
 ## Repository Structure
 
-* [examples/](examples/) - example data
-* [project/](project/) - project files (do not edit these)
-* [src/](src/) - source files (edit these)
-  * [data_sheets_schema](src/data_sheets_schema)
-    * [schema](src/data_sheets_schema/schema) -- LinkML schema
-      (edit this)
-    * [datamodel](src/data_sheets_schema/datamodel) -- generated
-      Python datamodel
-* [tests/](tests/) - Python tests
+Browse the source code repository:
+
+* **[examples/](https://github.com/bridge2ai/data-sheets-schema/tree/main/examples)** - example data
+* **[project/](https://github.com/bridge2ai/data-sheets-schema/tree/main/project)** - project files (do not edit these)
+* **[src/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src)** - source files (edit these)
+  * **[src/data_sheets_schema/schema/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/schema)** - LinkML schema (edit this)
+  * **[src/data_sheets_schema/datamodel/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/datamodel)** - generated Python datamodel
+* **[tests/](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests)** - Python tests
 
 ## D4D Metadata Generation
 

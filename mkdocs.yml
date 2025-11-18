@@ -18,6 +18,13 @@ nav:
 site_url: https://bridge2ai.github.io/data-sheets-schema
 repo_url: https://github.com/bridge2ai/data-sheets-schema
 
+# Specify docs directory (default is 'docs/')
+docs_dir: docs
+
+# Include HTML and YAML files in the build
+# MkDocs will copy all files from docs/ to the site, including subdirectories
+use_directory_urls: true
+
 # Uncomment this block to enable use of Google Analytics.
 # Replace the property value with your own ID.
 # extra:

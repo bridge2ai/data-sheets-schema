@@ -1,0 +1,55 @@
+extraction_metadata:
+  timestamp: '2025-11-16T04:13:36.117234+00:00'
+  extraction_id: claudecode_individual_fairhub_
+  extraction_type: individual_claude_code_direct
+  processing_time_seconds: 0.0
+  notes: Direct synthesis by Claude Code assistant (not via API)
+input_document:
+  filename: fairhub_row10.json
+  relative_path: data/preprocessed/individual/AI_READI/fairhub_row10.json
+  format: json
+  size_bytes: 107
+  sha256_hash: 24f585f822cee5a7bd44bc0425e856aaf3ed66f875e609b973ef960eab65ec73
+  project: AI_READI
+output_document:
+  filename: fairhub_row10_d4d.yaml
+  relative_path: data/d4d_individual/claudecode/AI_READI/fairhub_row10_d4d.yaml
+  format: yaml
+datasheets_schema:
+  version: 1.0.0
+  source: local
+  path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+  sha256_hash: f28617b7c1613f9175d20da1b9f542b694f177603c8c8e89341d5e6dbdeb1a25
+  loaded_at: '2025-11-16T04:13:36.117234+00:00'
+d4d_agent:
+  version: 1.0.0
+  implementation: claude_code_direct
+  wrapper: Claude Code Assistant
+  wrapper_version: 1.0.0
+llm_model:
+  provider: anthropic
+  model_name: Claude Sonnet 4.5
+  model_version: claude-sonnet-4-5-20250929
+  temperature: 0.0
+  max_tokens: 16000
+  notes: Direct synthesis by Claude Code assistant (simulating deterministic extraction)
+prompts:
+  system_prompt_file: src/download/prompts/d4d_concatenated_system_prompt.txt
+  system_prompt_hash: 6e519922d9ede3506349b20c949d65003c9273005065af32002617e1e116ce32
+  notes: Individual file D4D extraction follows same principles as concatenated files
+processing_environment:
+  platform: Darwin
+  python_version: 3.12.11
+  processor_architecture: arm64
+reproducibility:
+  command: Claude Code direct synthesis from individual file
+  environment_variables:
+    ANTHROPIC_API_KEY: not_required_for_direct_synthesis
+  random_seed: null
+  deterministic_settings: true
+provenance:
+  extraction_performed_by: Claude Code Assistant
+  extraction_requested_at: '2025-11-16T04:13:36.117234+00:00'
+  git_commit: 4dc4bbbfaebc7f289bc12ba9bb8c9de87a92cd34
+  notes: Deterministic D4D extraction from individual preprocessed file for AI_READI
+    using Claude Code assistant directly (not API-based).
