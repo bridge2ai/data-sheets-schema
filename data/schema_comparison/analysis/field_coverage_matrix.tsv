@@ -1,0 +1,71 @@
+Concept/Field	Croissant	Croissant RAI	FAIR²	Schema.org	Data Statements	Frictionless	Data Cards	Healthsheet	FDO	Kaggle	OTDI	Current D4D Coverage	Priority Tier	Notes
+JSON-LD @context	✓	✓	✓	✓	✗	✗	✗	✗	✓	✗	✗	✗ Missing	1	Critical for machine actionability
+schema:name	✓	✓	✓	✓	✗	✓	✗	✗	✓	✓	✓	✓ D4D_Metadata.name	1	Already supported
+schema:description	✓	✓	✓	✓	✗	✓	✓	✓	✓	✓	✓	✓ D4D_Metadata.description	1	Already supported
+schema:license	✓	✓	✓	✓	✗	✓	✓	✓	✓	✓	✓	✓ D4D_Data_Governance.license	1	Already supported
+schema:creator	✓	✓	✓	✓	✗	✓	✓	✓	✓	✗	✓	✓ D4D_Metadata.creator	1	Already supported
+schema:datePublished	✓	✓	✓	✓	✗	✗	✗	✗	✗	✗	✗	✓ D4D_Metadata.date_created	1	Already supported
+schema:version	✓	✗	✓	✓	✗	✓	✗	✗	✗	✗	✗	✓ D4D_Maintenance.dataset_version	1	Already supported
+schema:keywords	✗	✗	✗	✓	✗	✓	✗	✗	✗	✓	✗	✗ Missing	1	Needed for discovery
+schema:sameAs	✗	✗	✗	✓	✗	✗	✗	✗	✓	✗	✗	✗ Missing	1	Critical for linking datasets
+schema:conformsTo	✓	✓	✓	✗	✗	✗	✗	✗	✓	✗	✓	✗ Missing	1	Standards conformance declaration
+Semantic Versioning (MAJOR.MINOR.PATCH)	✓	✗	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗ Missing	1	Version change type tracking
+File checksums (SHA256)	✓	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	1	Data integrity verification
+ORCID for creators	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	1	Persistent identifier for people
+CRediT roles	✗	✗	✓	✗	✗	✓	✗	✗	✗	✗	✗	✗ Missing	1	Contributor role taxonomy
+schema:variableMeasured	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗ Missing	2	Variable-level metadata
+Field/variable schema	✓	✗	✓	✓	✗	✓	✗	✗	✗	✓	✗	✗ Missing	2	Critical gap - no variable metadata
+Data type specifications	✓	✗	✓	✓	✗	✓	✗	✗	✗	✓	✗	✗ Missing	2	Variable data types
+Unit of measurement (QUDT)	✗	✗	✓	✓	✗	✗	✗	✗	✗	✗	✗	✗ Missing	2	Scientific units for variables
+Missing value codes	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	2	How missing values are encoded
+Data biases	✗	✓	✓	✗	✗	✗	✓	✓	✗	✗	✓	Partial D4D_Ethics.known_biases	1	Need structured bias taxonomy
+Bias type taxonomy	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	1	Selection, measurement, historical, etc.
+Social impact assessment	✗	✓	✗	✗	✗	✗	✓	✗	✗	✗	✓	✗ Missing	1	Impacted communities, mitigation
+Protected attributes	✗	✓	✗	✗	✗	✗	✗	✗	✓	✗	✓	✗ Missing	1	Sensitive demographic attributes
+Fairness definition	✗	✓	✗	✗	✗	✗	✗	✗	✓	✗	✗	✗ Missing	1	How fairness is framed
+Annotation protocol	✗	✓	✗	✗	✗	✗	✓	✗	✗	✗	✗	✓ D4D_Preprocessing.labeling_strategy	2	Enhance with RAI fields
+Annotation platform	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Preprocessing	2	Add as explicit field
+Annotations per item	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	2	Number of labels per instance
+Annotator demographics	✗	✓	✗	✗	✓	✗	✓	✗	✗	✗	✗	Partial D4D_Preprocessing	2	Enhance with structured demo
+Inter-annotator agreement	✗	✓	✗	✗	✗	✗	✓	✗	✗	✗	✗	✗ Missing	2	Quality metric for annotations
+Data collection type	✗	✓	✗	✗	✗	✗	✓	✓	✗	✗	✗	Partial D4D_Collection	2	Add enumeration (survey, scraping, etc.)
+Data limitations	✗	✓	✗	✗	✗	✗	✓	✓	✗	✗	✓	✓ D4D_Uses.limitations	1	Already supported
+Intended use cases	✗	✓	✗	✗	✗	✗	✓	✓	✗	✗	✓	✓ D4D_Uses	1	Already supported
+Discouraged uses	✗	✓	✗	✗	✗	✗	✓	✓	✗	✗	✗	Partial D4D_Uses	2	Add explicit field
+Personal/sensitive info categories	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✓	Partial D4D_Ethics	1	Add PII taxonomy
+Data preprocessing protocol	✗	✓	✗	✗	✗	✗	✓	✗	✗	✗	✗	✓ D4D_Preprocessing	1	Already supported
+Data splits (train/val/test)	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	ML-specific splits
+Bounding boxes / segmentation	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	4	Domain-specific (vision)
+Categorical enumerations	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	Controlled vocabularies
+Foreign key relationships	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	Table relationships
+PROV-O provenance	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	W3C provenance standard
+SHACL validation	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	RDF constraint validation
+Spatial coverage	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	Geographic extent
+Temporal coverage	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	Time period covered
+Measurement technique	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Collection	3	Add to variable metadata
+Data quality metrics	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Preprocessing	2	Add structured quality assessment
+Completeness metrics	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	2	Missing data percentage
+Accuracy metrics	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	2	Validation accuracy
+Outlier detection	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	Outlier identification
+Class distribution	✗	✗	✗	✗	✗	✗	✓	✓	✗	✗	✗	Partial D4D_Composition	2	Add quantitative metrics
+Representation bias	✗	✗	✗	✗	✓	✗	✓	✓	✓	✗	✗	✗ Missing	1	Which groups are underrepresented
+Language variety	✗	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗ Missing	3	Linguistic characteristics (NLP)
+Speaker demographics	✗	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	Partial D4D_Composition	3	Language dataset specific
+Data release maintenance	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✓ D4D_Maintenance	1	Already supported
+Versioning policy	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Maintenance	1	Add version change policy
+Deprecation policy	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	3	When/how data is retired
+Update frequency	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Maintenance	2	Add structured field
+Regulatory compliance	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	2	GDPR, HIPAA, EU AI Act
+EU AI Act risk category	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗ Missing	2	Minimal/limited/high/unacceptable
+Data provenance standard	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	✓	Partial D4D_Collection	2	Formalize with PROV-O
+Upstream source references	✗	✗	✗	✗	✗	✓	✗	✗	✗	✗	✓	Partial D4D_Motivation	2	Derived dataset lineage
+License inheritance	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✓	✗ Missing	2	Most restrictive upstream license
+Processing maturity level	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✓	✗ Missing	3	Raw/filtered/structured/derived
+Task categories	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	✓	✗ Missing	3	NLP/vision/audio/tabular
+File size	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Distribution	2	Add to file metadata
+Encoding format	✓	✗	✗	✗	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Distribution	2	MIME types
+Distribution URL	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Distribution	1	Add structured download links
+Access mechanism	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	Partial D4D_Distribution	1	Open/restricted/registered
+Data catalog inclusion	✗	✗	✗	✓	✗	✗	✗	✗	✓	✗	✗	✗ Missing	3	Which catalogs contain this
+ISSN	✗	✗	✗	✓	✗	✗	✗	✗	✗	✗	✗	✗ Missing	4	Serial publication identifier
+DOI	✗	✗	✗	✓	✗	✗	✗	✗	✓	✗	✗	✓ D4D_Metadata.doi	1	Already supported
