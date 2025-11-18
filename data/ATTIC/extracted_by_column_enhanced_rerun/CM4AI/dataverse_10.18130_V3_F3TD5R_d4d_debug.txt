@@ -1,0 +1,218 @@
+=== YAML Fixing Applied ===
+id: "doi:10.18130/V3/F3TD5R"
+name: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+description: This dataset is the June 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+doi: "doi:10.18130/V3/F3TD5R"
+page: "https://doi.org/10.18130/V3/F3TD5R"
+publisher: "https://dataverse.lib.virginia.edu"
+issued: 2025-07-01
+created_on: 2025-02-27
+last_updated_on: 2025-10-22
+version: "2.0"
+license: CC BY-NC-SA 4.0
+keywords:
+  - AI
+  - affinity purification
+  - AP-MS
+  - artificial intelligence
+  - breast cancer
+  - Bridge2AI
+  - cardiomyocyte
+  - CM4AI
+  - CRISPR/Cas9
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - machine learning
+  - mass spectroscopy
+  - MDA-MB-468
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - paclitaxel
+  - perturb-seq
+  - perturbation sequencing
+  - protein-protein interaction
+  - protein localization
+  - single-cell RNA sequencing
+  - scRNAseq
+  - SEC-MS
+  - size exclusion chromatography
+  - subcellular imaging
+  - vorinostat
+created_by:
+  - CM4AI Consortium
+  - University of Virginia Dataverse
+purposes:
+  - response: AI-ready datasets to support research in functional genomics
+  - response: Enable AI model training on multi-modal cellular data
+  - response: Support analysis of cellular processes and architecture under disease, treatment, and genetic perturbation conditions
+tasks:
+  - response: AI model training and benchmarking in functional genomics
+  - response: Cellular process and architecture analysis
+  - response: Multi-modal data integration (IF imaging, SEC-MS, perturb-seq)
+addressing_gaps:
+  - response: Provide interoperable, AI-ready multi-modal datasets from disease-relevant human cell lines to enable mapping of human cell architecture; predicted cell maps to be added in future releases.
+creators:
+  - name: CM4AI Consortium
+    principal_investigator:
+      name: Trey Ideker
+      affiliation:
+        - name: University of California San Diego
+    affiliation:
+      name: University of California San Diego
+funders:
+  - grantor:
+      name: National Institutes of Health
+    grant:
+      name: Bridge2AI Functional Genomics Grand Challenge
+      grant_number: 1OT2OD032742-01
+instances:
+  - representation: Multi-modal cellular datasets from human cell lines (KOLF2.1J iPSCs and derivatives; MDA-MB-468 breast cancer cells)
+    instance_type: Immunofluorescence (IF) confocal images; size exclusion chromatography mass spectrometry (SEC-MS); CRISPRi perturb-seq scRNA-seq
+    data_type: Imaging files (IF), proteomics (SEC-MS), and single-cell transcriptomics (perturb-seq/scRNA-seq); external raw data via SRA and MassIVE where applicable
+    sampling_strategies:
+      - is_sample:
+          - yes
+        source_data:
+          - Commercially available de-identified human cell lines (e.g., KOLF2.1J iPSCs; MDA-MB-468)
+        is_representative:
+          - no
+        why_not_representative:
+          - Data derived from specific de-identified human cell lines and do not represent all biological variants in the population.
+collection_mechanisms:
+  - description:
+      - IF imaging via immunofluorescence-based staining (ICC-IF) and confocal microscopy (Lundberg Lab, Stanford University)
+      - Protein-protein interaction profiling via size exclusion chromatography mass spectrometry (SEC-MS)
+      - CRISPRi-based perturb-seq single-cell RNA sequencing in undifferentiated KOLF2.1J iPSCs
+data_collectors:
+  - description:
+      - CM4AI consortium across UC San Diego, UC San Francisco, Stanford University, and University of Virginia; IF imaging performed in the Lundberg Lab (Stanford).
+collection_timeframes:
+  - description:
+      - Data creation date 2025-02-27; dataset release 2025-07-01 (Version 2.0).
+ethical_reviews:
+  - description:
+      - Data Governance & Ethics oversight; Human Subjects: No; De-identified Samples: Yes; FDA Regulated: No.
+      - Data Governance Committee contact: Jillian Parker (jillianparker@health.ucsd.edu).
+      - Ethical review leads: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Bélisle-Pipon (jean-christophe_belisle-pipon@sfu.ca).
+is_deidentified:
+  description:
+    - Human subjects data are not included; samples are de-identified. Data derived from commercially available de-identified human cell lines.
+external_resources:
+  - external_resources:
+      - Sequence Read Archive (SRA) Data via NCBI BioProject
+    archival:
+      - Hosted by NCBI SRA
+    restrictions:
+      - Some datasets may be under temporary pre-publication embargo.
+  - external_resources:
+      - Mass Spectrometry Data (Human iPSCs) via MassIVE Repository
+    archival:
+      - Hosted by MassIVE
+    restrictions:
+      - Some datasets may be under temporary pre-publication embargo.
+  - external_resources:
+      - Mass Spectrometry Data (Human Cancer Cells) via MassIVE Repository
+    archival:
+      - Hosted by MassIVE
+    restrictions:
+      - Some datasets may be under temporary pre-publication embargo.
+preprocessing_strategies:
+  - description:
+      - Not explicitly detailed for this release; modality-specific pipelines implied (IF imaging processing; SEC-MS workflows; perturb-seq processing via scRNA-seq pipelines). See RO-Crate metadata for details.
+raw_sources:
+  - description:
+      - Raw data and/or primary outputs are hosted in external repositories (SRA for sequencing; MassIVE for proteomics); IF image archives available as ZIPs in Dataverse.
+future_use_impacts:
+  - description:
+      - Interim release; predicted cell maps not yet included.
+      - Modalities interrogate overlapping but not identical protein sets across assays.
+      - Domain expertise recommended for meaningful analysis.
+      - Data derived from specific de-identified human cell lines and do not represent all biological variants.
+discouraged_uses:
+  - description:
+      - Not for clinical decision-making or any context involving patient care without appropriate regulatory oversight and approval.
+distribution_formats:
+  - description:
+      - Dataverse-hosted files (HTML datasheet; RO-Crate JSON metadata; modality-specific provenance HTML)
+  - description:
+      - ZIP archives for IF images (application/zip)
+  - description:
+      - External repositories (SRA, MassIVE) for raw/primary modality data
+distribution_dates:
+  - description:
+      - 2025-07-01 (initial public release, Version 2.0)
+  - description:
+      - 2025-10-22 (IF image ZIP archives published)
+license_and_use_terms:
+  description:
+    - CC BY-NC-SA 4.0; community norms expect proper citation using the dataset citation on the page.
+maintainers:
+  - description:
+      - Long-term preservation and hosting in the University of Virginia Dataverse (supported by committed institutional funds). Contact University of Virginia Dataverse Support.
+updates:
+  description:
+    - Dataset will be regularly updated and augmented through November 2026; updates on a quarterly basis.
+subsets:
+  - name: release-ro-crate-datasheet.html
+    description: HTML datasheet summarizing key release information.
+    path: release-ro-crate-datasheet.html
+    media_type: text/html
+    md5: 599c9ece9b88b3ce797b82463b4a1eb4
+    issued: 2025-07-01
+  - name: release-ro-crate-metadata.json
+    description: Release RO-Crate with pointers to sub ro-crates.
+    path: release-ro-crate-metadata.json
+    media_type: application/json
+    md5: 99f9e00053bff3020fd9832a3a518bbb
+    issued: 2025-07-01
+  - name: cm4ai-ifimages-mda-mb-468-paclitaxel.zip
+    description: IF imaging of 464 proteins in MDA-MB-468 cells treated with paclitaxel (ICC-IF confocal microscopy; DAPI, calreticulin, tubulin, POI channels).
+    path: Images/cm4ai-ifimages-mda-mb-468-paclitaxel.zip
+    media_type: application/zip
+    md5: 0d972b80744344ddeede516a0cf6e3d7
+    issued: 2025-10-22
+  - name: cm4ai-ifimages-mda-mb-468-untreated.zip
+    description: IF imaging of 464 proteins in untreated MDA-MB-468 cells (ICC-IF confocal microscopy; DAPI, calreticulin, tubulin, POI channels).
+    path: Images/cm4ai-ifimages-mda-mb-468-untreated.zip
+    media_type: application/zip
+    md5: a98affcc05429650c6bb3906cd836d55
+    issued: 2025-10-22
+  - name: cm4ai-ifimages-mda-mb-468-vorinostat.zip
+    description: IF imaging of 464 proteins in MDA-MB-468 cells treated with vorinostat (ICC-IF confocal microscopy; DAPI, calreticulin, tubulin, POI channels).
+    path: Images/cm4ai-ifimages-mda-mb-468-vorinostat.zip
+    media_type: application/zip
+    md5: ad4e68ccc14b0f3349dad3321e7b81b2
+    issued: 2025-10-22
+  - name: Images-paclitaxel-provenance-graph.html
+    description: IF imaging provenance graph (paclitaxel condition); download to view properly.
+    path: Images/paclitaxel/Images-paclitaxel-provenance-graph.html
+    media_type: text/html
+    md5: e38e63e4c8dfc5808a5ffa2d7829fc38
+    issued: 2025-07-01
+  - name: Images-untreated-provenance-graph.html
+    description: IF imaging provenance graph (untreated condition); download to view properly.
+    path: Images/untreated/Images-untreated-provenance-graph.html
+    media_type: text/html
+    md5: 1a3b510f74d3f8647e07c6559ce64ee8
+    issued: 2025-07-01
+  - name: Images-vorinostat-provenance-graph.html
+    description: IF imaging provenance graph (vorinostat condition); download to view properly.
+    path: Images/vorinostat/Images-vorinostat-provenance-graph.html
+    media_type: text/html
+    md5: 58935fe4e254b31d33fed019f24c7668
+    issued: 2025-07-01
+  - name: mass-spec-cancer-cells-provenance-graph.html
+    description: SEC-MS provenance graph for human cancer cells; download to view properly.
+    path: mass-spec/cancer-cells/mass-spec-cancer-cells-provenance-graph.html
+    media_type: text/html
+    md5: 931ad9b552562024cb84ebe62d1f1838
+    issued: 2025-07-01
+  - name: mass-spec-cancer-cells-ro-crate-metadata.json
+    description: RO-Crate metadata for SEC-MS cancer cell data.
+    path: mass-spec/cancer-cells/mass-spec-cancer-cells-ro-crate-metadata.json
+    media_type: application/json
+    md5: 3a7063bb391ea5e05a32ba5da5f4b2f8
+    issued: 2025-07-01

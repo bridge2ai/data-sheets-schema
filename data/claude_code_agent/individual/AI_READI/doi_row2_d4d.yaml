@@ -1,0 +1,27 @@
+# D4D Metadata extracted from: doi_row2.json
+# Source: downloads_by_column/AI_READI/doi_row2.json
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:48:59
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: ai-readi-doi-row-2
+name: AI-READI publications DOIs (row 2)
+title: AI-READI publications — DOIs extracted from source row 2
+description: DOIs referenced on the AI-READI publications page as extracted from the provided source content. These are treated as external resources related to the AI_READI project.
+page: "https://aireadi.org/publications"
+keywords:
+  - AI_READI
+  - Bridge2AI
+  - publication
+  - DOI
+external_resources:
+  - name: Article DOI 10.1038/s42255-024-01165-x
+    external_resources:
+      - https://doi.org/10.1038/s42255-024-01165-x
+  - name: Article DOI 10.1136/bmjopen-2024-097449
+    external_resources:
+      - https://doi.org/10.1136/bmjopen-2024-097449

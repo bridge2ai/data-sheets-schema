@@ -1,0 +1,32 @@
+# D4D Metadata extracted from: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.pdf
+# Source: downloads_by_column_enhanced/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.pdf
+# Column: CHORUS
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:52:59
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: chorus-aim-ahead-bridge2ai-for-clinical-care-informational-webinar
+name: "CHORUS: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar"
+title: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar
+description: This record represents a PDF document presumed to describe or relate to the CHORUS Bridge2AI project and an informational webinar about AIM-AHEAD Bridge2AI for Clinical Care. Full PDF content was not available for extraction. This entry captures known file-level metadata only.
+keywords:
+  - CHORUS
+  - Bridge2AI
+  - AIM-AHEAD
+  - Clinical Care
+  - Informational Webinar
+  - PDF
+resources:
+  - id: chorus-aim-ahead-bridge2ai-for-clinical-care-informational-webinar-pdf-row8
+    name: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar PDF (row 8)
+    title: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.pdf
+    description: PDF file associated with an informational webinar titled "AIM-AHEAD Bridge2AI for Clinical Care" and related to the CHORUS project.
+    path: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.pdf
+    media_type: application/pdf
+    is_tabular: "false"
+    distribution_formats:
+      - description:
+          - PDF

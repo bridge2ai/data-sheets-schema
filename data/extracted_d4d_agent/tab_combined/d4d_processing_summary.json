@@ -1,0 +1,55 @@
+{
+  "timestamp": "2025-11-08 19:12:17",
+  "input_dir": "../downloads_by_column_enhanced_combined",
+  "output_dir": "../data/extracted_d4d_agent/tab_combined",
+  "columns": [
+    {
+      "column": "AI_READI",
+      "processed": [
+        {
+          "input_file": "../downloads_by_column_enhanced_combined/AI_READI/fairhub_dataset_2_row15_combined.txt",
+          "output_file": "../data/extracted_d4d_agent/tab_combined/AI_READI/fairhub_dataset_2_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [
+        {
+          "file": "../downloads_by_column_enhanced_combined/AI_READI/fairhub_dataset_2_row11_combined.txt",
+          "reason": "Already exists"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "column": "CM4AI",
+      "processed": [],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "../downloads_by_column_enhanced_combined/CM4AI/dataverse_10.18130_V3_B35XWX_row15_combined.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 184, column 209:\n     ... e-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05 ... \n                                         ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced_combined/CM4AI/dataverse_10.18130_V3_F3TD5R_row18_combined.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 185, column 49:\n     ... ernance & Ethics: Human Subjects: No; De-identified Samples: Yes ... \n                                         ^"
+        }
+      ]
+    },
+    {
+      "column": "VOICE",
+      "processed": [],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "../downloads_by_column_enhanced_combined/VOICE/healthnexus_row15_combined.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_processed": 1,
+    "total_errors": 3,
+    "total_skipped": 1
+  }
+}

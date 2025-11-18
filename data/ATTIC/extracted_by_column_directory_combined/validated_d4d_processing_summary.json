@@ -1,0 +1,193 @@
+{
+  "timestamp": "2025-11-01 12:13:30",
+  "input_dir": "downloads_by_column_combined",
+  "output_dir": "data/extracted_by_column_directory_combined",
+  "columns": [
+    {
+      "column": "AI_READI",
+      "processed": [
+        {
+          "input_file": "downloads_by_column_combined/AI_READI/AI_READI_all_combined.txt",
+          "output_file": "data/extracted_by_column_directory_combined/AI_READI/AI_READI_all_combined_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 181802,
+                "content_length": 50040,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 181802 bytes",
+                  "Text file with 1197 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "AI_READI",
+                "keywords_found": [
+                  "ai-readi",
+                  "aireadi",
+                  "diabetes",
+                  "fairhub"
+                ],
+                "relevance_score": 6,
+                "relevance_details": [
+                  "Found keywords: ai-readi, aireadi, diabetes, fairhub",
+                  "Found project indicators: type 2 diabetes"
+                ],
+                "content_indicators": [
+                  "type 2 diabetes"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "skipped": [],
+      "errors": [],
+      "validation_summary": {
+        "download_successful": 1,
+        "download_failed": 0,
+        "relevant_content": 1,
+        "irrelevant_content": 0
+      }
+    },
+    {
+      "column": "CM4AI",
+      "processed": [
+        {
+          "input_file": "downloads_by_column_combined/CM4AI/CM4AI_all_combined.txt",
+          "output_file": "data/extracted_by_column_directory_combined/CM4AI/CM4AI_all_combined_d4d.yaml",
+          "status": "success",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 392024,
+                "content_length": 50040,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 392024 bytes",
+                  "Text file with 732 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "CM4AI",
+                "keywords_found": [
+                  "cm4ai",
+                  "microscopy",
+                  "imaging",
+                  "cellular",
+                  "dataverse"
+                ],
+                "relevance_score": 16,
+                "relevance_details": [
+                  "Filename contains 'cm4ai'",
+                  "Found keywords: cm4ai, microscopy, imaging, cellular, dataverse",
+                  "Found project indicators: microscopy, imaging, cellular, virginia"
+                ],
+                "content_indicators": [
+                  "microscopy",
+                  "imaging",
+                  "cellular",
+                  "virginia"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "skipped": [],
+      "errors": [],
+      "validation_summary": {
+        "download_successful": 1,
+        "download_failed": 0,
+        "relevant_content": 1,
+        "irrelevant_content": 0
+      }
+    },
+    {
+      "column": "VOICE",
+      "processed": [],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "downloads_by_column_combined/VOICE/VOICE_all_combined.txt",
+          "stage": "d4d_processing",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 221, column 32:\n        - Required training: TCPS 2: CORE 2022.\n                                   ^",
+          "validation": {
+            "download": {
+              "success": true,
+              "details": {
+                "file_exists": true,
+                "file_size": 356264,
+                "content_length": 50040,
+                "file_type": ".txt",
+                "has_meaningful_content": true,
+                "validation_details": [
+                  "File size: 356264 bytes",
+                  "Text file with 501 non-empty lines"
+                ]
+              }
+            },
+            "relevance": {
+              "success": true,
+              "details": {
+                "column": "VOICE",
+                "keywords_found": [
+                  "voice",
+                  "b2ai-voice",
+                  "bridge2ai voice",
+                  "vocal",
+                  "speech",
+                  "health data nexus"
+                ],
+                "relevance_score": 21,
+                "relevance_details": [
+                  "Filename contains 'voice'",
+                  "Found keywords: voice, b2ai-voice, bridge2ai voice, vocal, speech, health data nexus",
+                  "Found project indicators: voice recording, speech, vocal, acoustic, biomarker, mit"
+                ],
+                "content_indicators": [
+                  "voice recording",
+                  "speech",
+                  "vocal",
+                  "acoustic",
+                  "biomarker",
+                  "mit"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "validation_summary": {
+        "download_successful": 1,
+        "download_failed": 0,
+        "relevant_content": 1,
+        "irrelevant_content": 0
+      }
+    }
+  ],
+  "summary": {
+    "total_processed": 2,
+    "total_errors": 1,
+    "total_skipped": 0,
+    "validation_summary": {
+      "download_successful": 3,
+      "download_failed": 0,
+      "relevant_content": 3,
+      "irrelevant_content": 0
+    }
+  }
+}

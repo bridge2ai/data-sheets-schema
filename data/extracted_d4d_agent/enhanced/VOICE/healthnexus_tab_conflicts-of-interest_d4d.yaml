@@ -1,0 +1,74 @@
+name: Bridge2AI-Voice
+title: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
+description: "A dataset of voice recordings and metadata to enable the development, benchmarking, and validation of clinically applicable machine-learning models for diagnosing a wide range of health conditions."
+version: "1.0"
+keywords:
+  - Bridge2AI
+  - Voice
+  - Audio
+  - Health
+  - Clinical
+  - Machine Learning
+  - Diagnosis
+  - Diverse
+  - Ethically-sourced
+purposes:
+  - response: "Enable development, benchmarking, and validation of clinically applicable machine-learning models for diagnosing a wide range of health conditions."
+tasks:
+  - response: "Development, benchmarking, and validation of diagnostic machine-learning models for health conditions."
+instances:
+  - representation: "Voice recordings linked to health information"
+    data_type: "Audio recordings and associated metadata"
+creators:
+  - name: "Alistair Johnson"
+    principal_investigator:
+      name: "Alistair Johnson"
+      affiliation:
+        - name: "University of Toronto"
+    affiliation:
+      name: "University of Toronto"
+  - name: "Jean-Christophe Bélisle-Pipon"
+    principal_investigator:
+      name: "Jean-Christophe Bélisle-Pipon"
+      affiliation:
+        - name: "Simon Fraser University"
+    affiliation:
+      name: "Simon Fraser University"
+  - name: "David Dorr"
+    principal_investigator:
+      name: "David Dorr"
+      affiliation:
+        - name: "OHSU"
+    affiliation:
+      name: "OHSU"
+  - name: "Satrajit Ghosh"
+    principal_investigator:
+      name: "Satrajit Ghosh"
+      affiliation:
+        - name: "Massachusetts Institute of Technology"
+        - name: "Harvard Medical School"
+    affiliation:
+      name: "Massachusetts Institute of Technology"
+  - name: "Philip Payne"
+    principal_investigator:
+      name: "Philip Payne"
+      affiliation:
+        - name: "Washington University in St. Louis, School of Medicine"
+    affiliation:
+      name: "Washington University in St. Louis, School of Medicine"
+  - name: "Maria Powell"
+    principal_investigator:
+      name: "Maria Powell"
+      affiliation:
+        - name: "Vanderbilt University Medical Center"
+    affiliation:
+      name: "Vanderbilt University Medical Center"
+  - name: "Anaïs Rameau"
+    principal_investigator:
+      name: "Anaïs Rameau"
+distribution_formats:
+  - description:
+      - "Database"
+license_and_use_terms:
+  description:
+    - "Credentialed access required."

@@ -1,0 +1,262 @@
+# D4D Metadata extracted from: docs_aireadi_org_docs-2_row9.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-10-30 23:37:22
+
+id: ai-readi-flagship-dataset-t2dm
+name: AI-READI Flagship Dataset of Type 2 Diabetes
+title: Flagship Dataset of Type 2 Diabetes (AI-READI)
+description: >
+  The AI-READI dataset consists of data collected from individuals with and
+  without Type 2 Diabetes Mellitus (T2DM), harmonized across three data
+  collection sites. The study design targeted approximately equal distribution
+  of participants across diabetes severity and implemented a multi-domain data
+  acquisition protocol (e.g., survey data, physical measurements, clinical data,
+  imaging data, wearable device data) to enable downstream AI/ML analyses that
+  are not feasible with claims or electronic health records alone. Public data
+  (non-sensitive personal health data) are available for download under a
+  license; the full dataset is accessible via a data use agreement (DUA).
+  Public data include survey data, blood and urine laboratory results, fitness
+  activity levels, clinical measurements (e.g., monofilament and cognitive
+  function testing), retinal images, ECG, blood sugar levels, and environmental
+  variables (e.g., home air quality). Controlled-access data include 5-digit ZIP
+  code, sex, race, ethnicity, genetic sequencing data, past health records,
+  medications, and traffic and accident reports. Enrollment is ongoing; the
+  pilot release and periodic updates may not have achieved balanced distribution
+  across groups.
+version: 2.0.0
+keywords:
+  - AI-READI
+  - Type 2 Diabetes
+  - T2DM
+  - multimodal
+  - harmonized
+  - survey data
+  - clinical measurements
+  - wearable device data
+  - imaging data
+  - retinal images
+  - ECG
+  - blood glucose
+  - environmental data
+  - genetic sequencing
+  - data use agreement
+created_by:
+  - AI-READI Project dataset team
+last_updated_on: '2025-10-21'
+modified_by: Erik Benton
+purposes:
+  - name: Primary Purpose
+    response: >
+      Advance understanding of salutogenesis (pathway from disease to health) in
+      T2DM and support future AI/ML research by providing a harmonized,
+      multi-domain dataset.
+tasks:
+  - name: Intended AI/ML Tasks
+    response: >
+      Enable downstream AI/ML analyses across clinical, imaging, wearable,
+      survey, and environmental domains related to T2DM.
+addressing_gaps:
+  - name: Gap Addressed
+    response: >
+      Provides integrated, harmonized multi-domain data not feasible with
+      claims/EHR-only sources to support AI/ML development for T2DM.
+creators:
+  - name: AI-READI Project
+    affiliation:
+      name: AI-READI Project
+subsets:
+  - id: ai-readi-public-subset
+    name: Public Dataset Subset
+    description: >
+      Publicly distributable non-sensitive data available for download with a
+      license; includes survey data, blood and urine lab results, fitness
+      activity levels, clinical measurements (e.g., monofilament and cognitive
+      function testing), retinal images, ECG, blood sugar levels, and
+      environmental variables such as home air quality.
+    is_data_split: 'No'
+    is_subpopulation: 'No'
+  - id: ai-readi-controlled-access-subset
+    name: Controlled Access Dataset Subset
+    description: >
+      Controlled-access data available via data use agreement; includes 5-digit
+      ZIP code, sex, race, ethnicity, genetic sequencing data, past health
+      records, medications, and traffic and accident reports.
+    is_data_split: 'No'
+    is_subpopulation: 'No'
+instances:
+  - name: Participant-level multimodal instances
+    representation: >
+      Human participants (with and without T2DM) with multi-domain
+      measurements/observations.
+    instance_type: >
+      Multiple data domains: surveys, physical/clinical measurements, imaging,
+      wearable device data, laboratory results, environmental variables.
+    data_type: >
+      Combination of raw signals/images (e.g., ECG, retinal), structured/tabular
+      measurements (labs, vitals, clinical tests), survey responses, and
+      environmental sensor outputs.
+    sampling_strategies:
+      - name: Recruitment and composition strategy
+        strategies:
+          - >
+            Recruitment aimed at approximately equal distribution across
+            diabetes severity categories; harmonized across three collection
+            sites.
+        source_data:
+          - Multi-site clinical recruitment cohorts
+        is_representative:
+          - >
+            Not necessarily representative of broader populations; pilot release
+            may be imbalanced due to ongoing enrollment.
+        why_not_representative:
+          - >
+            Ongoing enrollment and pilot phase may not achieve balanced
+            distributions across groups.
+    missing_information: []
+sampling_strategies:
+  - name: Study sampling design
+    strategies:
+      - >
+        Targeted sampling to approximate equal distribution across diabetes
+        severity; multi-site harmonization across three sites.
+    is_sample:
+      - Sampled cohort of participants with and without T2DM
+    is_random:
+      - Not described as random; targeted recruitment by severity
+    source_data:
+      - Clinical cohorts at three data collection sites
+    is_representative:
+      - Not guaranteed; pilot release may be imbalanced
+    why_not_representative:
+      - Ongoing enrollment and phased releases may introduce imbalance
+acquisition_methods:
+  - name: Data acquisition across domains
+    description:
+      - >
+        Multi-domain acquisition including surveys, physical/clinical
+        measurements, laboratory assays, imaging (e.g., retinal), wearable
+        device data, ECG, blood glucose, and environmental sensors.
+    was_directly_observed: >
+      Yes — clinical measurements, imaging, ECG, laboratory assays, wearable
+      device streams, environmental sensors.
+    was_reported_by_subjects: >
+      Yes — survey responses.
+    was_inferred_derived: >
+      Yes — dataset harmonization across sites and domains may include derived
+      variables or standardized representations.
+    was_validated_verified: Not specified in this document.
+collection_mechanisms:
+  - name: Collection procedures and tools
+    description:
+      - >
+        Surveys (self-reported), clinical/physical measurements by study staff,
+        imaging devices (e.g., retinal imaging), wearable sensors, laboratory
+        instruments for blood/urine assays, environmental sensors (e.g., home
+        air quality).
+data_collectors:
+  - name: Data collection personnel
+    description:
+      - Study staff across three data collection sites; multi-site protocol.
+collection_timeframes:
+  - name: Enrollment and releases
+    description:
+      - >
+        Enrollment is ongoing. Pilot study phase data released as v1.0; later
+        dataset versions documented (e.g., v2.0.0 documentation available).
+preprocessing_strategies:
+  - name: Harmonization
+    description:
+      - >
+        Data harmonized across three collection sites and multiple domains; data
+        processing details per domain provided in the dataset documentation.
+external_resources:
+  - name: FAIRhub data portal
+    external_resources:
+      - >
+        Dataset landing page on the FAIRhub data portal (primary access and
+        distribution point referenced by this documentation).
+    archival:
+      - Not specified.
+    future_guarantees:
+      - Not specified.
+    restrictions:
+      - Subject to license and/or data use agreement.
+  - name: Documentation site
+    external_resources:
+      - Documentation website for AI-READI dataset (versioned documentation).
+    archival:
+      - Not specified.
+    future_guarantees:
+      - Not specified.
+    restrictions:
+      - None stated for documentation access.
+  - name: GitHub repository
+    external_resources:
+      - >
+        GitHub repository for documentation; repository under review for
+        potential modification in compliance with Administration directives.
+    archival:
+      - Not specified.
+    future_guarantees:
+      - Not specified.
+    restrictions:
+      - None stated for repository access.
+confidential_elements:
+  - name: Confidential/controlled data elements
+    description:
+      - >
+        Controlled-access elements include 5-digit ZIP code and content that may
+        be protected under privacy or confidentiality norms (e.g., past health
+        records).
+sensitive_elements:
+  - name: Sensitive data elements
+    description:
+      - >
+        Health and demographic attributes such as sex, race, ethnicity; genetic
+        sequencing data; past health records; medications; and external data
+        such as traffic and accident reports.
+is_deidentified:
+  - name: De-identification status
+    description:
+      - >
+        Public dataset excludes sensitive personal health data; full dataset
+        with sensitive elements is available under DUA, indicating potential
+        re-identification risks are mitigated via access controls rather than
+        full public release.
+license_and_use_terms:
+  name: Licensing and access terms
+  description:
+    - >
+      Public dataset is available for download upon agreement with a license
+      defining permitted uses.
+    - >
+      Full dataset requires entering into a data use agreement (DUA) for
+      access.
+future_use_impacts:
+  - name: Potential impacts on future use
+    description:
+      - >
+        Pilot release and ongoing enrollment may yield group imbalances that
+        could affect model fairness or generalizability; users should assess
+        distributions and consider mitigation strategies.
+maintainers:
+  - name: Maintainer
+    description:
+      - AI-READI Project (see site “Contact Us” for support).
+updates:
+  name: Update plan
+  description:
+    - >
+      Periodic updates to data releases are planned as enrollment continues and
+      additional data become available; versioned documentation (e.g., v1.0,
+      v2.0.0) is provided.
+version_access:
+  name: Version access and support
+  description:
+    - >
+      Documentation provides navigation across dataset versions (e.g., v1.0 and
+      v2.0.0). Prior releases remain documented; details on continued hosting or
+      support of older versions are not specified.
+is_tabular: Mixed multimodal (tabular + imaging + signals + surveys + environmental)

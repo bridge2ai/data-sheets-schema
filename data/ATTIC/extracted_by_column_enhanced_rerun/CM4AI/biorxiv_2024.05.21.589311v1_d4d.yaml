@@ -1,0 +1,28 @@
+# D4D Metadata extracted from: biorxiv_2024.05.21.589311v1_row4.pdf
+# Source: downloads_by_column_enhanced/CM4AI/biorxiv_2024.05.21.589311v1_row4.pdf
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-10-31T17:02:19
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: biorxiv_2024.05.21.589311v1_row4.pdf
+name: biorxiv_2024.05.21.589311v1_row4.pdf
+title: biorxiv_2024.05.21.589311v1
+description: PDF associated with a bioRxiv preprint identified as 2024.05.21.589311v1.
+path: biorxiv_2024.05.21.589311v1_row4.pdf
+media_type: application/pdf
+issued: 2024-05-21
+version: v1
+keywords:
+  - bioRxiv
+  - CM4AI
+distribution_formats:
+  - name: PDF
+    description:
+      - Portable Document Format
+distribution_dates:
+  - description:
+      - 2024-05-21

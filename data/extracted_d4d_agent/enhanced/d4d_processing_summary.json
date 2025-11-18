@@ -1,0 +1,353 @@
+{
+  "timestamp": "2025-11-08 19:12:13",
+  "input_dir": "../downloads_by_column_enhanced",
+  "output_dir": "../data/extracted_d4d_agent/enhanced",
+  "columns": [
+    {
+      "column": "AI_READI",
+      "processed": [
+        {
+          "input_file": "../downloads_by_column_enhanced/AI_READI/fairhub_dataset_2_tab_access_row11.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/AI_READI/fairhub_dataset_2_tab_access_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/AI_READI/fairhub_dataset_2_row11.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/AI_READI/fairhub_dataset_2_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/AI_READI/zenodo_org_records-10642459_row10.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/AI_READI/zenodo_org_records-10642459_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [
+        {
+          "file": "../downloads_by_column_enhanced/AI_READI/fairhub_dataset_2_row11.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/AI_READI/fairhub_dataset_2_tab_access_row11.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/AI_READI/fairhub_dataset_2_tab_access_row15.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/AI_READI/fairhub_dataset_2_row15.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/AI_READI/fairhub_dataset_2_row15.html",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/AI_READI/fairhub_dataset_2_tab_access_row15.html",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/AI_READI/zenodo_org_records-10642459_row10.txt",
+          "reason": "Already exists"
+        }
+      ],
+      "errors": [
+        {
+          "file": "../downloads_by_column_enhanced/AI_READI/google_doc_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row12.pdf",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 4, column 22:\n    description: PDF file: google_doc_1rJsa5kySlBRRNhsO_W ... \n                         ^"
+        }
+      ]
+    },
+    {
+      "column": "CHORUS",
+      "processed": [
+        {
+          "input_file": "../downloads_by_column_enhanced/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.pdf",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [],
+      "errors": []
+    },
+    {
+      "column": "CM4AI",
+      "processed": [
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_versions_row15.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_versions_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_metadata_row15.txt",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_metadata_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_files_row18.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_files_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_files_row15.txt",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_files_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_row18.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/creativecommons_org_licenses-by-nc-sa_row14.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/creativecommons_org_licenses-by-nc-sa_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_terms_row15.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_terms_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_terms_row18.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_terms_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_row15.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_versions_row15.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_files_row15.html",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_files_row18.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_row18.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/creativecommons_org_licenses-by-nc-sa_row14.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_metadata_row15.html",
+          "reason": "Already exists"
+        }
+      ],
+      "errors": [
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_versions_row18.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 142, column 416:\n     ... Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Ar ... \n                                         ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_metadata_row18.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 111, column 68:\n     ... opy ICC-IF images (multi-channel: DAPI, calreticulin/ER, tubulin ... \n                                         ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/biorxiv_2024.05.21.589311v1_row4.pdf",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 4, column 22:\n    description: PDF file: biorxiv_2024.05.21.589311v1_ro ... \n                         ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_versions_row18.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 151, column 54:\n     ... jects: No; De-identified Samples: Yes; FDA Regulated: No\n                                         ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 156, column 490:\n     ... e-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05 ... \n                                         ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_metadata_row18.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 143, column 48:\n     ... jects: No; De-identified Samples: Yes.\n                                         ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_B35XWX_tab_terms_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 162, column 194:\n     ... e-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05 ... \n                                         ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/CM4AI/dataverse_10.18130_V3_F3TD5R_tab_terms_row18.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 181, column 490:\n     ... e-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05 ... \n                                         ^"
+        }
+      ]
+    },
+    {
+      "column": "VOICE",
+      "processed": [
+        {
+          "input_file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_conflicts-of-interest_row15.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/VOICE/healthnexus_tab_conflicts-of-interest_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/VOICE/google_doc_row12.html",
+          "output_file": "../data/extracted_d4d_agent/enhanced/VOICE/google_doc_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "../downloads_by_column_enhanced/VOICE/drive_google_com_B2AI_Voice_DTUA_row13.pdf",
+          "output_file": "../data/extracted_d4d_agent/enhanced/VOICE/drive_google_com_B2AI_Voice_DTUA_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_acknowledgements_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_files_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_2_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 1, column 20:\n    id: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                       ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_background_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 2, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_description_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_background_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_documentation_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 2, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 2, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_methods_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 2, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_release-notes_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_documentation_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_usage-notes_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 2, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_conflicts-of-interest_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_release-notes_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_references_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 2, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_metadata_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 1, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_methods_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_abstract_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/physionet_b2ai-voice_1.1_row16.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_versions_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/physionet_b2ai-voice_1.1_row16.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 2, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_ethics_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_acknowledgements_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_metadata_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_usage-notes_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_files_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_ethics_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_description_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 2, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_references_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_versions_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_abstract_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_citationModal_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_citationModal_row15.html",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        },
+        {
+          "file": "../downloads_by_column_enhanced/VOICE/healthnexus_tab_2_row15.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 3, column 23:\n    title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                          ^"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_processed": 16,
+    "total_errors": 44,
+    "total_skipped": 13
+  }
+}

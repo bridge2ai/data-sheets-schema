@@ -1,0 +1,208 @@
+id: doi:10.18130/V3/F3TD5R
+name: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+description: |-
+  This dataset is the June 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB-468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+
+  External Data Links
+  - Sequence Read Archive (SRA) Data: NCBI BioProject
+  - Mass Spectrometry Data (Human iPSCs): MassIVE Repository
+  - Mass Spectrometry Data (Human Cancer Cells): MassIVE Repository
+
+  Data Governance & Ethics
+  - Human Subjects: No
+  - De-identified Samples: Yes
+  - FDA Regulated: No
+  - Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)
+  - Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+
+  Completeness
+  - Some datasets are under temporary pre-publication embargo
+  - Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturb-seq data interrogate sets of proteins which incompletely overlap
+  - Computed cell maps not included in this release
+
+  Maintenance Plan
+  - Dataset will be regularly updated and augmented through the end of the project in November 2026
+  - Updates on a quarterly basis
+  - Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds
+
+  Intended Use
+  - AI-ready datasets to support research in functional genomics
+  - AI model training
+  - Cellular process analysis
+  - Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations
+
+  Limitations
+  - This is an interim release
+  - Does not contain predicted cell maps, which will be added in future releases
+  - The current release is most suitable for bioinformatics analysis of the individual datasets
+  - Requires domain expertise for meaningful analysis
+
+  Prohibited Uses
+  - These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval
+
+  Potential Sources of Bias
+  - Data in this release was derived from commercially available de-identified human cell lines
+  - Does not represent all biological variants which may be seen in the population at large
+doi: doi:10.18130/V3/F3TD5R
+issued: "2025-10-22"
+page: https://doi.org/10.18130/V3/F3TD5R
+keywords:
+  - CM4AI
+  - Cell Maps for Artificial Intelligence
+  - functional genomics
+  - perturb-seq
+  - CRISPRi
+  - SEC-MS
+  - mass spectrometry
+  - immunofluorescence
+  - imaging
+  - iPSC
+  - KOLF2.1J
+  - NPCs
+  - neurons
+  - cardiomyocytes
+  - MDA-MB-468
+  - vorinostat
+  - paclitaxel
+created_by:
+  - Clark T
+  - Parker J
+  - Al Manir S
+  - Axelsson U
+  - Ballllosero Navarro F
+  - Chinn B
+  - Churas CP
+  - Dailamy A
+  - Doctor Y
+  - Fall J
+  - Forget A
+  - Gao J
+  - Hansen JN
+  - Hu M
+  - Johannesson A
+  - Khaliq H
+  - Lee YH
+  - Lenkiewicz J
+  - Levinson MA
+  - Marquez C
+  - Metallo C
+  - Muralidharan M
+  - Nourreddine S
+  - Niestroy J
+  - Obernier K
+  - Pan E
+  - Polacco B
+  - Pratt D
+  - Qian G
+  - Schaffer L
+  - Sigaeva A
+  - Thaker S
+  - Zhang Y
+  - Bélisle-Pipon JC
+  - Brandt C
+  - Chen JY
+  - Ding Y
+  - Fodeh S
+  - Krogan N
+  - Lundberg E
+  - Mali P
+purposes:
+  - name: Functional genomics AI readiness
+    response: AI-ready datasets to support research in functional genomics
+  - name: AI model training
+    response: Enable AI model training on multi-modal cellular/omics data
+  - name: Cellular process analysis
+    response: Support analysis of cellular processes and architectures
+  - name: Perturbation and treatment analysis
+    response: Study cell architectural changes and interactions under disease, treatment, or genetic perturbations
+tasks:
+  - name: AI model training
+    response: Train machine learning and AI models on perturb-seq, proteomics, and imaging data
+  - name: Cellular process analysis
+    response: Analyze cellular processes and structures from multi-modal assays
+  - name: Perturbation effect analysis
+    response: Assess effects of disease models, chemical treatments, or CRISPRi perturbations
+instances:
+  - name: CRISPRi perturb-seq in undifferentiated KOLF2.1J iPSCs
+    representation: Single-cell transcriptomic profiles under CRISPRi perturbations (perturb-seq)
+    data_type: Sequencing-based single-cell expression data with perturbation guides
+  - name: SEC-MS proteomics
+    representation: Protein-protein interaction measurements via Size Exclusion Chromatography–Mass Spectrometry (SEC-MS)
+    data_type: Proteomics mass spectrometry data across iPSCs, NPCs, neurons, cardiomyocytes, and MDA-MB-468 cells (treated/untreated)
+  - name: Immunofluorescence microscopy images
+    representation: IF images of MDA-MB-468 breast cancer cells with/without chemotherapy
+    data_type: Microscopy image data (immunofluorescence) under vorinostat and paclitaxel treatment conditions
+sampling_strategies:
+  - name: Cell line-based sampling
+    is_sample:
+      - Yes
+    source_data:
+      - Commercially available de-identified human cell lines
+    is_representative:
+      - No
+    why_not_representative:
+      - Derived from specific cell lines and conditions; does not represent all biological variants in the wider population
+collection_mechanisms:
+  - name: CRISPRi perturb-seq
+    description:
+      - Single-cell RNA-seq with CRISPR interference perturbations in KOLF2.1J iPSCs
+  - name: SEC-MS (proteomics)
+    description:
+      - Size Exclusion Chromatography coupled to Mass Spectrometry for protein-protein interactions
+  - name: Immunofluorescence imaging
+    description:
+      - IF microscopy of MDA-MB-468 cells under treatment and control conditions
+ethical_reviews:
+  - name: Governance and ethics
+    description:
+      - Human Subjects: No
+      - De-identified Samples: Yes
+      - FDA Regulated: No
+      - Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)
+      - Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org); Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+is_deidentified:
+  name: De-identification status
+  description:
+    - De-identified samples; no human subjects
+external_resources:
+  - name: Related external repositories
+    external_resources:
+      - NCBI SRA (BioProject) for sequencing data
+      - MassIVE repository (human iPSCs proteomics)
+      - MassIVE repository (human cancer cell proteomics)
+distribution_formats:
+  - name: Distribution channels
+    description:
+      - University of Virginia Dataverse landing page and downloads
+      - External repositories: NCBI SRA (BioProject), MassIVE
+distribution_dates:
+  - name: Release timeline
+    description:
+      - June 2025 (Beta data release)
+      - 2025-10-22 (Dataverse record date)
+license_and_use_terms:
+  name: Terms and prohibited uses
+  description:
+    - Prohibited uses: These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval
+regulatory_restrictions:
+  name: Regulatory status
+  description:
+    - FDA Regulated: No
+maintainers:
+  - name: Dataset hosting and governance
+    description:
+      - University of Virginia Dataverse (hosting and long-term preservation)
+      - CM4AI Data Governance Committee contact: Jillian Parker (jillianparker@health.ucsd.edu)
+updates:
+  name: Update plan
+  description:
+    - Dataset will be regularly updated and augmented through November 2026
+    - Quarterly updates planned
+    - Long-term preservation in the University of Virginia Dataverse
+future_use_impacts:
+  - name: Limitations and considerations
+    description:
+      - Interim release; computed cell maps not yet included
+      - Most suitable for bioinformatics analyses of individual datasets at this stage
+      - Requires domain expertise for meaningful analysis

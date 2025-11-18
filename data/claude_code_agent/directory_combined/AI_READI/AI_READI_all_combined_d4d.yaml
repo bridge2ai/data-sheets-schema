@@ -1,0 +1,139 @@
+# D4D Metadata extracted from: AI_READI_all_combined.txt
+# Source: downloads_by_column_combined/AI_READI/AI_READI_all_combined.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:47:50
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: "doi:10.60775/fairhub.2"
+name: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+title: Flagship Dataset of Type 2 Diabetes from the AI-READI Project
+description: The AI-READI flagship dataset consists of multimodal data collected from individuals with and without Type 2 Diabetes Mellitus (T2DM), harmonized across three collection sites. The study was designed for AI/ML readiness, with recruitment aimed at approximately equal distribution across diabetes severity and a standardized acquisition protocol spanning multiple domains (survey data, physical measurements, clinical data, imaging, wearable device data, etc.). Public data (non-sensitive) are available under a Health Data License; full data (including sensitive elements) are available under a data use agreement. The dataset supports research into salutogenesis (pathways from disease to health) in T2DM and is versioned with periodic updates as enrollment continues.
+language: English
+page: "https://doi.org/10.60775/fairhub.2"
+doi: "doi:10.60775/fairhub.2"
+keywords:
+  - Diabetes mellitus
+  - Machine Learning
+  - Artificial Intelligence
+  - Electrocardiography
+  - Continuous Glucose Monitoring
+  - Retinal imaging
+  - Eye exam
+created_by:
+  - AI-READI Consortium
+issued: 2024-11-08
+version: 2.0.0
+license: Health Data License
+purposes:
+  - response: Better understand salutogenesis (the pathway from disease to health) in Type 2 Diabetes Mellitus (T2DM) and enable downstream AI/ML analyses across multimodal health data.
+tasks:
+  - response: AI/ML method development and analysis for T2DM using multimodal clinical, imaging, wearable, and survey data.
+addressing_gaps:
+  - response: Provides an ethically sourced, harmonized, multimodal dataset for T2DM that is not feasible to obtain from claims/EHR alone; recruitment targeted balanced distribution across diabetes severity.
+creators:
+  - name: AI-READI Consortium
+    affiliation:
+      name: AI-READI Consortium
+instances:
+  - representation: Human participants with and without Type 2 Diabetes Mellitus (T2DM).
+    instance_type: Multiple modalities per participant, including survey responses, physical/clinical measurements, imaging (retinal), physiological signals (ECG), wearable device time series (e.g., CGM), lab results, and environmental variables.
+    data_type: Mix of raw and processed data depending on domain; harmonized across three collection sites under a standardized acquisition protocol.
+    sampling_strategies:
+      - strategies:
+          - Stratified recruitment to achieve approximately equal distribution across diabetes severity.
+        is_representative:
+          - Not fully representative in early releases due to ongoing enrollment.
+        why_not_representative:
+          - Pilot and periodic releases may not achieve balanced distribution across groups while enrollment is ongoing.
+sampling_strategies:
+  - strategies:
+      - Stratified sampling by diabetes severity across three data collection sites under a harmonized protocol.
+    is_representative:
+      - Not fully representative in early releases due to ongoing enrollment.
+    why_not_representative:
+      - Interim releases may have imbalances across groups while recruitment continues.
+anomalies:
+  - description:
+      - Early releases (pilot/periodic) may not fully achieve intended balanced distributions across severity groups.
+external_resources:
+  - external_resources:
+      - Documentation portal for dataset details and domain-specific processing guidance (https://docs.aireadi.org/docs/2)
+      - Some environmental exposure variables (e.g., traffic and accident reports) linked via participant geography may rely on external data sources.
+    restrictions:
+      - External data sources used for environmental variables may carry their own terms of use or licensing; consult source providers as applicable.
+confidential_elements:
+  - description:
+      - Elements under controlled access include 5-digit ZIP code, sex, race, ethnicity, genetic sequencing data, past health records, and medications.
+sensitive_elements:
+  - description:
+      - Health-related data including genetic data, medications, past health records.
+      - Demographic attributes such as race and ethnicity.
+      - Geolocation at 5-digit ZIP code granularity.
+subpopulations:
+  - identification:
+      - Subpopulations are identifiable by diabetes severity, sex, race, and ethnicity (among others).
+    distribution:
+      - Recruitment targeted approximately equal distribution across diabetes severity; actual distributions in pilot/periodic releases may vary during ongoing enrollment.
+is_deidentified:
+  - description:
+      - Publicly released subset excludes sensitive personal health data and is de-identified per project policies; controlled-access components include potentially re-identifiable elements and require a data use agreement.
+acquisition_methods:
+  - description:
+      - Data comprise directly observed clinical measurements and device outputs (e.g., ECG, retinal imaging, CGM), participant-reported survey responses, and variables derived/harmonized for analysis.
+    was_directly_observed: Yes (e.g., clinical measurements, imaging, device signals).
+    was_reported_by_subjects: Yes (e.g., surveys).
+    was_inferred_derived: Yes (harmonized/derived variables for analysis across sites and domains).
+    was_validated_verified: Collected under standardized, harmonized protocols across sites; domain-specific processing and quality steps are documented.
+collection_mechanisms:
+  - description:
+      - Standardized multi-site protocol using clinical procedures and hardware (e.g., ECG systems, retinal imaging cameras), wearable sensors (e.g., CGM), surveys, and harmonized data processing pipelines.
+data_collectors:
+  - description:
+      - Data collected and harmonized across three participating collection sites by AI-READI study teams.
+collection_timeframes:
+  - description:
+      - Enrollment and data collection are ongoing; Version 1.0.0 released 2024-05-03 (pilot), Version 2.0.0 released 2024-11-08, with periodic updates anticipated.
+preprocessing_strategies:
+  - description:
+      - Harmonization across sites; domain-specific preprocessing described in the documentation portal (file formats, data standards, metadata, and example outputs).
+cleaning_strategies:
+  - description:
+      - Domain-specific cleaning and quality control steps as described in the documentation; details vary by data modality.
+labeling_strategies:
+  - description:
+      - Domain-specific annotation/labeling (e.g., clinical assessments, test results) documented per modality.
+other_tasks:
+  - description:
+      - Multimodal representation learning; longitudinal modeling for glycemic control; risk stratification; phenotype discovery; causal inference and prognostic modeling in T2DM.
+future_use_impacts:
+  - description:
+      - Interim imbalance across groups in pilot/periodic releases and the inclusion/exclusion of sensitive attributes across access tiers may affect fairness and generalizability. Users should assess representativeness and potential bias before deployment and implement mitigations as needed.
+discouraged_uses:
+  - description:
+      - Any attempt to re-identify participants or to use the dataset outside the scope of the Health Data License or data use agreement terms.
+distribution_formats:
+  - description:
+      - Access via FAIRhub data portal; public subset (non-sensitive) downloadable under Health Data License; controlled-access components available via data use agreement.
+      - Data modalities include tabular (surveys, labs, clinical measures), images (retinal), physiological signals (ECG), and time series (CGM); specific file formats documented per domain.
+distribution_dates:
+  - description:
+      - 2024-11-08 (Version 2.0.0; DOI: 10.60775/fairhub.2)
+      - 2024-05-03 (Version 1.0.0; DOI: 10.60775/fairhub.1)
+license_and_use_terms:
+  description:
+    - Publicly available, non-sensitive data are distributed under a Health Data License.
+    - Full dataset access (including sensitive data such as ZIP code, genetic data, health records, and medications) requires entering into a data use agreement.
+maintainers:
+  - description:
+      - AI-READI Consortium (dataset stewardship and documentation).
+      - FAIRhub data portal (hosting and access workflows).
+updates:
+  description:
+    - Periodic updates planned as enrollment continues and additional data become available; major releases are versioned on the FAIRhub portal with corresponding documentation.
+version_access:
+  description:
+    - Prior versions remain available on the FAIRhub portal (e.g., v1.0.0 and v2.0.0), with documentation aligned to each dataset version.

@@ -1,0 +1,10 @@
+resources:
+  - language: en
+    media_type: application/pdf
+    keywords:
+      - AI_READI
+      - Zenodo
+    distribution_formats:
+      - description:
+          - PDF
+          - application/pdf

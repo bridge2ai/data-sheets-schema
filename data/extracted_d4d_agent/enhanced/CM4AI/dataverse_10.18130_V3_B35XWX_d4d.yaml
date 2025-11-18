@@ -1,0 +1,189 @@
+id: doi:10.18130/V3/B35XWX
+name: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+description: |-
+  This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center. This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection (2025-03-04).
+doi: doi:10.18130/V3/B35XWX
+page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
+issued: "2025-03-20"
+language: en
+license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+keywords:
+  - Medicine, Health and Life Sciences
+  - CM4AI
+  - Cell Maps for Artificial Intelligence
+  - Bridge2AI
+  - Functional Genomics
+  - RO-Crate
+  - FAIRSCAPE
+  - perturb-seq
+  - SEC-MS
+  - immunofluorescence
+  - iPSC
+  - KOLF2.1J
+  - NPCs
+  - neurons
+  - cardiomyocytes
+  - MDA-MB-468
+  - vorinostat
+  - paclitaxel
+created_by:
+  - Clark T
+  - Parker J
+  - Al Manir S
+  - Axelsson U
+  - Ballllosero Navarro F
+  - Chinn B
+  - Churas CP
+  - Dailamy A
+  - Doctor Y
+  - Fall J
+  - Forget A
+  - Gao J
+  - Hansen JN
+  - Hu M
+  - Johannesson A
+  - Khaliq H
+  - Lee YH
+  - Lenkiewicz J
+  - Levinson MA
+  - Marquez C
+  - Metallo C
+  - Muralidharan M
+  - Nourreddine S
+  - Niestroy J
+  - Obernier K
+  - Pan E
+  - Polacco B
+  - Pratt D
+  - Qian G
+  - Schaffer L
+  - Sigaeva A
+  - Thaker S
+  - Zhang Y
+  - Bélisle-Pipon JC
+  - Brandt C
+  - Chen JY
+  - Ding Y
+  - Fodeh S
+  - Krogan N
+  - Lundberg E
+  - Mali P
+  - Payne-Foster P
+  - Ratcliffe S
+  - Ravitsky V
+  - Sali A
+  - Schulz W
+  - Ideker T
+purposes:
+  - name: CM4AI March 2025 data release purpose
+    response: |-
+      Release of AI-ready multimodal functional genomics data (perturb-seq, SEC-MS, and immunofluorescence imaging) packaged with provenance graphs and rich metadata using RO-Crate/FAIRSCAPE to support AI method development and research.
+instances:
+  - name: perturb-seq in undifferentiated KOLF2.1J iPSCs
+    representation: Single-cell perturb-seq experiment outputs
+    data_type: Sequencing-derived data products; details provided within RO-Crate packages
+  - name: SEC-MS in KOLF2.1J iPSCs and derived cell types
+    representation: Size-exclusion chromatography mass spectrometry (SEC-MS) measurements
+    data_type: Proteomics mass spectrometry data products; details provided within RO-Crate packages
+  - name: IF images in MDA-MB-468 cells +/- chemotherapy
+    representation: Immunofluorescence microscopy images
+    data_type: Image data; conditions include presence/absence of vorinostat and paclitaxel
+collection_mechanisms:
+  - name: Experimental collection mechanisms
+    description:
+      - Single-cell perturb-seq
+      - Size-exclusion chromatography mass spectrometry (SEC-MS)
+      - Immunofluorescence microscopy imaging
+subpopulations:
+  - name: Experimental cell populations
+    identification:
+      - Undifferentiated KOLF2.1J iPSCs
+      - iPSC-derived NPCs
+      - iPSC-derived neurons
+      - iPSC-derived cardiomyocytes
+      - MDA-MB-468 breast cancer cells (with and without chemotherapy: vorinostat, paclitaxel)
+distribution_formats:
+  - name: Packaging and distribution formats
+    description:
+      - RO-Crate packaged datasets with provenance graphs and rich metadata
+      - FAIRSCAPE framework used for packaging
+      - Distributed via University of Virginia Dataverse
+distribution_dates:
+  - name: Initial public release
+    description:
+      - "2025-03-20"
+license_and_use_terms:
+  name: License and terms of use
+  description:
+    - Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0): https://creativecommons.org/licenses/by-nc-sa/4.0/
+    - Attribution required to the copyright holders and the authors.
+    - Cite the related publication and this data collection when referencing this data or derived products.
+ip_restrictions:
+  name: Copyright and IP notes
+  description:
+    - Copyright (c) 2025 The Regents of the University of California except where otherwise noted.
+    - Spatial proteomics raw image data copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University.
+maintainers:
+  - name: Hosting and support
+    description:
+      - Hosted and distributed by University of Virginia Dataverse
+updates:
+  name: Update plan
+  description:
+    - Data presented here will be augmented regularly through the end of the project.
+creators:
+  - name: Clark T
+  - name: Parker J
+  - name: Al Manir S
+  - name: Axelsson U
+  - name: Ballllosero Navarro F
+  - name: Chinn B
+  - name: Churas CP
+  - name: Dailamy A
+  - name: Doctor Y
+  - name: Fall J
+  - name: Forget A
+  - name: Gao J
+  - name: Hansen JN
+  - name: Hu M
+  - name: Johannesson A
+  - name: Khaliq H
+  - name: Lee YH
+  - name: Lenkiewicz J
+  - name: Levinson MA
+  - name: Marquez C
+  - name: Metallo C
+  - name: Muralidharan M
+  - name: Nourreddine S
+  - name: Niestroy J
+  - name: Obernier K
+  - name: Pan E
+  - name: Polacco B
+  - name: Pratt D
+  - name: Qian G
+  - name: Schaffer L
+  - name: Sigaeva A
+  - name: Thaker S
+  - name: Zhang Y
+  - name: Bélisle-Pipon JC
+  - name: Brandt C
+  - name: Chen JY
+  - name: Ding Y
+  - name: Fodeh S
+  - name: Krogan N
+  - name: Lundberg E
+  - name: Mali P
+  - name: Payne-Foster P
+  - name: Ratcliffe S
+  - name: Ravitsky V
+  - name: Sali A
+  - name: Schulz W
+  - name: Ideker T
+funders:
+  - name: NIH Bridge2AI program
+    grantor:
+      name: National Institutes of Health (NIH) — Bridge2AI program
+    grant:
+      name: Bridge2AI Functional Genomics Grand Challenge
+version: Beta

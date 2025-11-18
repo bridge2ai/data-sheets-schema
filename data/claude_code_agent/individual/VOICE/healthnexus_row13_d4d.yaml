@@ -1,0 +1,18 @@
+# D4D Metadata extracted from: healthnexus_row13.json
+# Source: downloads_by_column/VOICE/healthnexus_row13.json
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T18:03:34
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
+name: Health Data Nexus entry for b2ai-voice
+description: Landing page on Health Data Nexus referencing the VOICE project; dataset version indicated as 1.0 in the URL. Limited metadata available in the provided source (healthnexus_row13.json, row 13).
+page: "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
+version: "1.0"
+keywords:
+  - VOICE
+  - Health Data Nexus

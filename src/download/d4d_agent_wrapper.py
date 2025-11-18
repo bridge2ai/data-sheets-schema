@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 D4D Agent Wrapper - Processes downloaded files and generates D4D YAML metadata
-using the Anthropic Claude-based D4D agent.
+using either OpenAI or Anthropic API.
 """
 import asyncio
 import json
@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 import argparse
 import yaml
+from dotenv import load_dotenv
 
 # Add the aurelian src directory to path for D4D agent imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "aurelian" / "src"))
@@ -28,22 +29,45 @@ except ImportError as e:
 
 class D4DAgentWrapper:
     """Wrapper to process files with D4D agent and generate YAML metadata."""
-    
-    def __init__(self, input_dir: str = "downloads_by_column", output_dir: str = "data/extracted_by_column"):
+
+    def __init__(self, input_dir: str = "downloads_by_column", output_dir: str = "data/extracted_d4d_agent",
+                 model_provider: str = "openai"):
         self.input_dir = Path(input_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Check for API key
-        if not os.getenv("ANTHROPIC_API_KEY"):
-            print("❌ Error: ANTHROPIC_API_KEY environment variable not set")
-            print("Please set your Anthropic API key:")
-            print("export ANTHROPIC_API_KEY='your-api-key-here'")
+        self.model_provider = model_provider.lower()
+
+        # Load environment variables from .env file if it exists
+        env_file = Path(__file__).parent.parent.parent / "aurelian" / ".env"
+        if env_file.exists():
+            load_dotenv(env_file)
+            print(f"✅ Loaded API keys from {env_file}")
+
+        # Check for API key based on provider
+        if self.model_provider == "openai":
+            if not os.getenv("OPENAI_API_KEY"):
+                print("❌ Error: OPENAI_API_KEY environment variable not set")
+                print("Please set your OpenAI API key:")
+                print("export OPENAI_API_KEY='your-api-key-here'")
+                sys.exit(1)
+            model_name = "openai:gpt-5"
+            print(f"🤖 Using OpenAI GPT-5")
+        elif self.model_provider == "anthropic":
+            if not os.getenv("ANTHROPIC_API_KEY"):
+                print("❌ Error: ANTHROPIC_API_KEY environment variable not set")
+                print("Please set your Anthropic API key:")
+                print("export ANTHROPIC_API_KEY='your-api-key-here'")
+                sys.exit(1)
+            model_name = "anthropic:claude-3-5-sonnet-20241022"
+            print(f"🤖 Using Anthropic Claude 3.5 Sonnet")
+        else:
+            print(f"❌ Error: Unknown model provider '{self.model_provider}'")
+            print("Supported providers: openai, anthropic")
             sys.exit(1)
-        
-        # Create Claude-based D4D agent
+
+        # Create D4D agent with selected model
         self.d4d_agent = Agent(
-            model="anthropic:claude-3-5-sonnet-20241022",
+            model=model_name,
             deps_type=D4DConfig,
             system_prompt="""
 You are an expert data scientist specializing in extracting metadata from datasets following the "Datasheets for Datasets" schema.
@@ -70,7 +94,7 @@ Generate only valid YAML output without any additional commentary. Ensure all re
 """,
             defer_model_check=True,
         )
-        
+
         # Add schema loading
         @self.d4d_agent.system_prompt
         async def add_schema(ctx) -> str:
@@ -339,22 +363,28 @@ Generate a complete D4D YAML document based on this content.
 async def main():
     parser = argparse.ArgumentParser(
         description="Process downloaded files with D4D agent to generate YAML metadata",
-        epilog="Example: python d4d_agent_wrapper.py -i downloads_by_column -o data/extracted_by_column"
+        epilog="Example: python d4d_agent_wrapper.py -i downloads_by_column -o data/extracted_by_column --model openai"
     )
-    parser.add_argument("-i", "--input", default="downloads_by_column", 
+    parser.add_argument("-i", "--input", default="downloads_by_column",
                        help="Input directory with column-organized downloads")
     parser.add_argument("-o", "--output", default="data/extracted_by_column",
                        help="Output directory for D4D YAML files")
-    parser.add_argument("--api-key", help="Anthropic API key (or set ANTHROPIC_API_KEY env var)")
-    
+    parser.add_argument("--model", "--provider", dest="model", default="openai",
+                       choices=["openai", "anthropic"],
+                       help="Model provider to use (default: openai)")
+    parser.add_argument("--api-key", help="API key for the selected provider (or set OPENAI_API_KEY/ANTHROPIC_API_KEY env var)")
+
     args = parser.parse_args()
-    
+
     # Set API key if provided
     if args.api_key:
-        os.environ["ANTHROPIC_API_KEY"] = args.api_key
-    
+        if args.model == "openai":
+            os.environ["OPENAI_API_KEY"] = args.api_key
+        else:
+            os.environ["ANTHROPIC_API_KEY"] = args.api_key
+
     # Create and run wrapper
-    wrapper = D4DAgentWrapper(args.input, args.output)
+    wrapper = D4DAgentWrapper(args.input, args.output, model_provider=args.model)
     results = await wrapper.process_all_columns()
     
     # Print final summary

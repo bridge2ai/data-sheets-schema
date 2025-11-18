@@ -1,0 +1,192 @@
+# D4D Metadata extracted from: docs_aireadi_org_docs-2_row8.txt
+# Source: downloads_by_column/AI_READI/docs_aireadi_org_docs-2_row8.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-11-08T17:47:11
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: ai-readi-flagship-t2dm
+name: AI-READI Flagship Dataset of Type 2 Diabetes
+title: AI-READI Dataset
+description: >
+  A harmonized, multi-modal dataset collected across three data collection sites
+  from individuals with and without Type 2 Diabetes Mellitus (T2DM). The dataset
+  was designed to enable future AI/Machine Learning studies, with recruitment and
+  sampling aimed at approximately equal distribution across diabetes severity and
+  a standardized data acquisition protocol spanning multiple domains (survey data,
+  physical measurements, clinical data, imaging data, wearable device data, etc.).
+  The goal is to better understand salutogenesis (the pathway from disease to
+  health) in T2DM. A public dataset (non-sensitive) is downloadable under an
+  agreement-defined license; the full dataset, which includes sensitive elements,
+  is available via a data use agreement (DUA). Enrollment is ongoing; the pilot
+  data release and subsequent updates may not achieve balanced distribution across
+  all groups.
+keywords:
+  - AI
+  - Machine Learning
+  - Type 2 Diabetes
+  - T2DM
+  - Multi-modal
+  - Survey data
+  - Clinical measurements
+  - Imaging data
+  - Retinal images
+  - ECG
+  - Wearable devices
+  - Blood glucose
+  - Laboratory results
+  - Environmental data
+  - Data harmonization
+  - FAIR
+version: 2.0.0
+created_by:
+  - AI-READI Project
+last_updated_on: '2025-09-08'
+purposes:
+  - response: Enable AI/ML research to better understand salutogenesis (pathway from disease to health) in T2DM using harmonized, multi-domain data.
+tasks:
+  - response: >
+      Downstream AI/ML analyses across multiple domains (e.g., modeling from survey,
+      clinical, lab, imaging, wearable, and environmental signals); not limited to
+      tasks feasible with claims/EHR alone.
+addressing_gaps:
+  - response: >
+      Provides an AI/ML-ready, harmonized, multi-domain cohort resource that enables
+      analyses not feasible with existing sources such as claims or EHR data alone.
+creators:
+  - affiliation:
+      name: AI-READI Project
+funders: []
+instances:
+  - representation: >
+      Human participants (individuals with and without T2DM) with multi-domain
+      measurements.
+    instance_type: >
+      Single cohort with multiple data modalities per participant (e.g., surveys,
+      clinical exams, labs, imaging, wearables, environmental measures).
+    data_type: >
+      Mixed data: tabular (surveys, labs, clinical measurements, environmental),
+      time-series signals (e.g., ECG, activity), and images (e.g., retinal).
+    label: >
+      No single pre-defined target; resource intended for diverse AI/ML tasks.
+    sampling_strategies:
+      - is_sample:
+          - yes
+        is_random:
+          - no
+        source_data:
+          - Prospective recruitment across three data collection sites.
+        is_representative:
+          - Not explicitly; recruitment targeted diabetes severity balance.
+        why_not_representative:
+          - Enrollment is ongoing; pilot and periodic releases may not be balanced across groups.
+        strategies:
+          - Recruitment aimed at approximately equal distribution across diabetes severity.
+relationships: []
+splits: []
+anomalies: []
+external_resources:
+  - external_resources:
+      - Dataset landing and access via FAIRhub data portal (documentation references this portal).
+    future_guarantees:
+      - Not specified.
+    archival:
+      - Not specified.
+    restrictions:
+      - Full dataset requires entering into a Data Use Agreement (DUA).
+confidential_elements:
+  - description:
+      - Dataset includes sensitive personal health data under controlled access (via DUA).
+content_warnings: []
+subpopulations:
+  - identification:
+      - People with T2DM
+      - People without T2DM
+      - Diabetes severity strata
+    distribution:
+      - Recruitment aimed at approximately equal distribution across diabetes severity; pilot/updates may not be balanced.
+sensitive_elements:
+  - description:
+      - 5-digit ZIP code
+      - Sex
+      - Race
+      - Ethnicity
+      - Genetic sequencing data
+      - Past health records
+      - Medications
+      - Traffic and accident reports
+acquisition_methods:
+  - description:
+      - Multi-domain protocol including direct measurements, surveys, imaging, and device data.
+      - Data include directly observed, participant-reported, and derived elements.
+    was_directly_observed: yes
+    was_reported_by_subjects: yes
+    was_inferred_derived: yes
+    was_validated_verified: Not specified; harmonized protocol across three sites.
+collection_mechanisms:
+  - description:
+      - Standardized clinical examinations and measurements.
+      - Surveys/questionnaires.
+      - Imaging (e.g., retinal photography).
+      - Wearable/device data collection.
+      - Laboratory assays (blood and urine).
+data_collectors:
+  - description:
+      - Data collected and harmonized across three data collection sites (site personnel not specified).
+collection_timeframes:
+  - description:
+      - Pilot study phase; enrollment is ongoing with periodic data release updates.
+ethical_reviews:
+  - description:
+      - Documentation highlights AI-readiness and ethical practices; specific IRB details not provided on this page.
+data_protection_impacts: []
+preprocessing_strategies:
+  - description:
+      - Documentation provides domain-specific processing details (file formats, standards, metadata, example outputs) per data domain.
+cleaning_strategies:
+  - description:
+      - Domain sections describe data processing and harmonization; specific cleaning steps not detailed on this page.
+labeling_strategies:
+  - description:
+      - Not a labeled benchmark; domain documentation may include derived variables/annotations where applicable.
+raw_sources: []
+existing_uses: []
+use_repository: []
+other_tasks:
+  - description:
+      - Multimodal risk prediction, phenotype discovery, causal inference, and digital biomarker research in T2DM and metabolic health.
+future_use_impacts:
+  - description:
+      - Ongoing enrollment and potential imbalance in early releases may affect model fairness/generalization across demographic and severity groups.
+discouraged_uses: []
+distribution_formats:
+  - description:
+      - Public dataset downloadable under an agreement-defined license; full dataset accessible via Data Use Agreement (DUA) through FAIRhub data portal.
+distribution_dates:
+  - description:
+      - Pilot release completed; periodic updates planned (versions referenced include v1.0.0 and v2.0.0 in documentation).
+license_and_use_terms:
+  description:
+    - Some non-sensitive data are publicly available for download upon agreeing to a license that defines permitted use.
+    - Full dataset requires execution of a Data Use Agreement (DUA).
+ip_restrictions: {}
+regulatory_restrictions: {}
+maintainers:
+  - description:
+      - AI-READI Project (contact via project documentation "Contact Us"; GitHub repository referenced for docs).
+errata: []
+updates:
+  description:
+    - Pilot data release with periodic updates to subsequent releases; documentation supports version navigation (e.g., v1.0.0, v2.0.0).
+retention_limit: {}
+version_access:
+  description:
+    - Documentation provides a version selector to navigate datasets/documentation versions (e.g., v1.0.0 and v2.0.0).
+extension_mechanism: {}
+is_deidentified:
+  description:
+    - Public release excludes sensitive personal health information; controlled-access data include quasi-identifiers and sensitive clinical/genomic elements.
+is_tabular: Mixed; multi-modal (tabular, images, time-series signals)

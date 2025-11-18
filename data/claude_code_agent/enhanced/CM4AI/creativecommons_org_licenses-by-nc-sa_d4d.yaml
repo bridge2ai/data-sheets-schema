@@ -1,0 +1,44 @@
+# D4D Metadata extracted from: creativecommons_org_licenses-by-nc-sa_row14.txt
+# Source: downloads_by_column_enhanced/CM4AI/creativecommons_org_licenses-by-nc-sa_row14.txt
+# Column: CM4AI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-11-08T18:12:52
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: cc-by-nc-sa-4.0-deed
+name: CC BY-NC-SA 4.0 Deed
+title: Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) — Deed
+description: Plain-language summary of the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license. Summarizes freedoms (Share, Adapt) and terms (Attribution, NonCommercial, ShareAlike, No additional restrictions); includes notices and disclaimers; provides a canonical URL to the license page. The site indicates content is licensed under CC BY 4.0 unless otherwise noted. Multiple language versions are available from the landing page.
+language: English
+publisher: "https://creativecommons.org"
+page: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+media_type: text/html
+license: "https://creativecommons.org/licenses/by/4.0/"
+keywords:
+  - Creative Commons
+  - CC BY-NC-SA 4.0
+  - license
+  - deed
+  - NonCommercial
+  - ShareAlike
+  - Attribution
+instances:
+  - representation: document
+    data_type: unstructured text (HTML)
+distribution_formats:
+  - description:
+      - Web page (HTML)
+license_and_use_terms:
+  description:
+    - This deed is a human-readable summary of the CC BY-NC-SA 4.0 legal code; it is not itself a license and has no legal value.
+    - Freedoms granted by the underlying license: Share (copy and redistribute), Adapt (remix, transform, and build upon) — irrevocable so long as terms are followed.
+    - Conditions of the underlying license: Attribution (credit, link to license, indicate changes), NonCommercial (no commercial use), ShareAlike (distribute contributions under the same license or a listed compatible license), No additional restrictions (no legal or technological measures that restrict others).
+    - Notices: Exceptions and limitations (e.g., fair use) are unaffected; no warranties; additional rights (publicity, privacy, moral rights) may apply.
+    - Canonical URL for the license deed and access to the legal code is provided at https://creativecommons.org/licenses/by-nc-sa/4.0/
+maintainers:
+  - description:
+      - Creative Commons — info@creativecommons.org — +1-415-429-6753 — PO Box 1866, Mountain View, CA 94042
+is_tabular: "false"

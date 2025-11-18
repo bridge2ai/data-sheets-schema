@@ -1,0 +1,23 @@
+# D4D Metadata extracted from: s42255-024-01165-x_row3.pdf
+# Source: downloads_by_column_enhanced/AI_READI/s42255-024-01165-x_row3.pdf
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-10-31T16:52:11
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: s42255-024-01165-x_row3.pdf
+name: s42255-024-01165-x_row3.pdf
+title: s42255-024-01165-x_row3.pdf
+description: PDF file named s42255-024-01165-x_row3.pdf provided for analysis; detailed content could not be extracted from the source.
+media_type: application/pdf
+path: s42255-024-01165-x_row3.pdf
+keywords:
+  - AI_READI
+  - PDF
+distribution_formats:
+  - name: PDF
+    description:
+      - Distributed as a PDF document.

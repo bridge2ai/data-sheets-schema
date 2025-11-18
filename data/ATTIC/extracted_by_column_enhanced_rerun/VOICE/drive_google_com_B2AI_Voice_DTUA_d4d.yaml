@@ -1,0 +1,28 @@
+# D4D Metadata extracted from: drive_google_com_B2AI_Voice_DTUA_row13.pdf
+# Source: downloads_by_column_enhanced/VOICE/drive_google_com_B2AI_Voice_DTUA_row13.pdf
+# Column: VOICE
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-10-31T17:54:25
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: drive_google_com_B2AI_Voice_DTUA_row13.pdf
+name: B2AI_Voice_DTUA_row13
+title: B2AI Voice DTUA (row13)
+description: "PDF file named 'B2AI_Voice_DTUA_row13.pdf'. No PDF content was available for extraction in this context. The filename indicates association with the VOICE project and includes 'DTUA'."
+keywords:
+  - VOICE
+  - B2AI
+  - Voice
+  - DTUA
+  - PDF
+media_type: application/pdf
+path: drive_google_com_B2AI_Voice_DTUA_row13.pdf
+purposes:
+  - response: "Based on the filename, this appears to be a Data Transfer and Use Agreement (DTUA) document related to the VOICE project."
+distribution_formats:
+  - description:
+      - PDF document
+      - Accessible via Google Drive (inferred from filename)

@@ -1,0 +1,163 @@
+# D4D Metadata extracted from: docs_aireadi_org_docs-2_row9.txt
+# Source: downloads_by_column_enhanced/AI_READI/docs_aireadi_org_docs-2_row9.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ✅ relevant
+# Generated: 2025-10-31T16:51:37
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: ai-readi-flagship-t2dm
+name: AI-READI Flagship Dataset of Type 2 Diabetes
+title: AI-READI Flagship Dataset of Type 2 Diabetes
+description: >
+  The AI-READI Flagship Dataset of Type 2 Diabetes is a harmonized, multi-domain dataset
+  collected across three data collection sites from individuals with and without Type 2
+  Diabetes Mellitus (T2DM). It was designed with AI/Machine Learning applications in mind,
+  including recruitment sampling to achieve approximately equal distribution across diabetes
+  severity and a standardized data acquisition protocol covering survey data, physical and
+  clinical measurements, imaging data, wearable device data, and environmental variables.
+  The goal is to better understand salutogenesis (the pathway from disease to health) in
+  T2DM. A public subset excluding sensitive personal health data is available under a
+  license; access to the full dataset requires a data use agreement (DUA). As enrollment is
+  ongoing, the pilot data release and periodic updates may not have balanced distribution
+  across groups.
+keywords:
+  - AI-READI
+  - Type 2 Diabetes
+  - T2DM
+  - multimodal
+  - harmonized dataset
+  - survey data
+  - clinical measurements
+  - imaging
+  - wearable devices
+  - retinal images
+  - ECG
+  - blood sugar
+  - environmental variables
+  - FAIRhub
+last_updated_on: "2025-10-21"
+modified_by: Erik Benton
+resources:
+  - id: ai-readi-flagship-t2dm-v2
+    name: AI-READI Dataset v2.0.0
+    title: AI-READI Flagship Dataset of Type 2 Diabetes
+    version: "2.0.0"
+    description: >
+      Multimodal participant-level dataset harmonized across three data collection
+      sites, targeting approximately equal distribution across diabetes severity,
+      and spanning survey responses, physical and clinical measurements, imaging,
+      wearable device data, and environmental variables to enable downstream AI/ML
+      analyses in T2DM. Public subset available under license; full dataset under DUA.
+    keywords:
+      - AI-READI
+      - Type 2 Diabetes
+      - T2DM
+      - multimodal
+      - harmonized dataset
+      - survey data
+      - clinical measurements
+      - imaging
+      - wearable devices
+      - retinal images
+      - ECG
+      - blood sugar
+      - environmental variables
+      - FAIRhub
+    last_updated_on: "2025-10-21"
+    modified_by: Erik Benton
+    purposes:
+      - response: >
+          Better understand salutogenesis (the pathway from disease to health) in
+          Type 2 Diabetes Mellitus (T2DM).
+    tasks:
+      - response: >
+          Enable downstream AI/Machine Learning analyses across multiple data
+          domains related to T2DM.
+    addressing_gaps:
+      - response: >
+          Provides harmonized, multi-domain participant-level data enabling AI/ML
+          analyses not feasible with existing data sources such as claims or
+          electronic health records alone.
+    subsets:
+      - id: ai-readi-public-subset
+        name: Public subset
+        title: AI-READI Public Subset
+        description: >
+          Publicly available data (upon agreement with a license) including survey data,
+          blood and urine lab results, fitness activity levels, clinical measurements
+          (e.g., monofilament and cognitive function testing), retinal images, ECG,
+          blood sugar levels, and environmental variables (e.g., home air quality).
+      - id: ai-readi-controlled-subset
+        name: Controlled access subset
+        title: AI-READI Controlled Access Subset
+        description: >
+          Data available under controlled access via a Data Use Agreement (DUA) including
+          5-digit ZIP code, sex, race, ethnicity, genetic sequencing data, past health
+          records, medications, and traffic and accident reports.
+    instances:
+      - representation: >
+          Individuals (participants) with and without Type 2 Diabetes Mellitus (T2DM).
+        instance_type: >
+          Participant-level records comprising multiple data domains per participant.
+        data_type: >
+          Mixed-modality data including survey responses; physical and clinical measurements;
+          imaging (e.g., retinal images, ECG); wearable device data; and environmental measures
+          (e.g., home air quality).
+        sampling_strategies:
+          - is_sample:
+              - "Yes"
+            strategies:
+              - Recruitment sampling aimed at approximately equal distribution across diabetes severity.
+    subpopulations:
+      - identification:
+          - Participants with and without T2DM.
+          - Stratification by diabetes severity.
+        distribution:
+          - Recruitment targeted approximately equal distribution across severity; pilot and early releases may not be balanced across groups.
+    acquisition_methods:
+      - description:
+          - Data acquired across three data collection sites using a standardized protocol spanning surveys, physical and clinical measurements, imaging, wearable devices, and environmental sensors.
+        was_directly_observed: "Yes"
+        was_reported_by_subjects: "Yes"
+    collection_mechanisms:
+      - description:
+          - Surveys (self-reported), clinical instruments and physical measurements, imaging devices (retinal imaging, ECG), wearable devices, and environmental sensors; harmonized protocol across 3 sites.
+    data_collectors:
+      - description:
+          - Three data collection sites recruited participants and acquired data under a harmonized protocol.
+    collection_timeframes:
+      - description:
+          - Pilot study phase data released; enrollment is ongoing with periodic updates to data releases.
+    is_deidentified:
+      description:
+        - Public dataset excludes sensitive personal health data.
+        - Controlled-access data include potentially identifying or sensitive fields (e.g., 5-digit ZIP, sex, race, ethnicity, genetic sequencing data, past health records, medications, traffic and accident reports).
+    sensitive_elements:
+      - description:
+          - 5-digit ZIP code
+          - Sex
+          - Race
+          - Ethnicity
+          - Genetic sequencing data
+          - Past health records
+          - Medications
+          - Traffic and accident reports
+    distribution_formats:
+      - description:
+          - Distributed via FAIRhub data portal; public subset downloadable upon acceptance of a license; full dataset accessible via Data Use Agreement (DUA).
+    distribution_dates:
+      - description:
+          - Pilot data release completed; periodic updates to data releases; documentation last updated 2025-10-21.
+    license_and_use_terms:
+      description:
+        - Public data are available under a license that defines permitted uses.
+        - Access to the full dataset requires entering into a Data Use Agreement (DUA).
+    updates:
+      description:
+        - Periodic updates to data releases as enrollment continues; distributions may evolve to improve balance across groups.
+    future_use_impacts:
+      - description:
+          - Potential imbalance in early releases (e.g., across groups and diabetes severity) may affect analyses and fairness; users should assess distributions and mitigate bias where appropriate.

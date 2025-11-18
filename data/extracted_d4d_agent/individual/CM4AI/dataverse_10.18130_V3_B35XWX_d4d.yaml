@@ -1,0 +1,115 @@
+id: doi:10.18130/V3/B35XWX
+name: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+description: |-
+  This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center. This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection (2025-03-04).
+doi: doi:10.18130/V3/B35XWX
+page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
+issued: '2025-03-20'
+language: en
+license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+status: bibo:draft
+conforms_to: https://w3id.org/ro/crate
+keywords:
+  - Medicine, Health and Life Sciences
+  - Cell Maps for Artificial Intelligence
+  - CM4AI
+  - Bridge2AI
+  - perturb-seq
+  - SEC-MS
+  - immunofluorescence
+  - RO-Crate
+  - FAIRSCAPE
+  - functional genomics
+  - KOLF2.1J iPSCs
+  - NPCs
+  - neurons
+  - cardiomyocytes
+  - MDA-MB-468
+  - vorinostat
+  - paclitaxel
+created_by:
+  - Clark T
+  - Parker J
+  - Al Manir S
+  - Axelsson U
+  - Ballllosero Navarro F
+  - Chinn B
+  - Churas CP
+  - Dailamy A
+  - Doctor Y
+  - Fall J
+  - Forget A
+  - Gao J
+  - Hansen JN
+  - Hu M
+  - Johannesson A
+  - Khaliq H
+  - Lee YH
+  - Lenkiewicz J
+  - Levinson MA
+  - Marquez C
+  - Metallo C
+  - Muralidharan M
+  - Nourreddine S
+  - Niestroy J
+  - Obernier K
+  - Pan E
+  - Polacco B
+  - Pratt D
+  - Qian G
+  - Schaffer L
+  - Sigaeva A
+  - Thaker S
+  - Zhang Y
+  - Bélisle-Pipon JC
+  - Brandt C
+  - Chen JY
+  - Ding Y
+  - Fodeh S
+  - Krogan N
+  - Lundberg E
+  - Mali P
+  - Payne-Foster P
+  - Ratcliffe S
+  - Ravitsky V
+  - Sali A
+  - Schulz W
+  - Ideker T
+purposes:
+  - response: Release AI-ready CM4AI functional genomics data with provenance graphs and rich metadata for research use as part of the NIH Bridge2AI Functional Genomics Grand Challenge.
+funders:
+  - grantor:
+      name: National Institutes of Health (NIH) - Bridge2AI Program
+instances:
+  - representation: Single-cell perturb-seq experiments in undifferentiated KOLF2.1J iPSCs
+    data_type: Transcriptomic profiles from perturb-seq (single-cell RNA-seq under genetic perturbations)
+  - representation: Size-exclusion chromatography mass spectrometry (SEC-MS) profiles
+    data_type: Proteomic/complexome measurements in KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes
+  - representation: Immunofluorescence (IF) microscopy images
+    data_type: Cell imaging data from MDA-MB-468 breast cancer cells with and without chemotherapy (vorinostat, paclitaxel)
+collection_mechanisms:
+  - description: Experimental data collection including single-cell perturb-seq, SEC-MS proteomics, and immunofluorescence microscopy across specified cell types and treatment conditions.
+acquisition_methods:
+  - description: Experimental measurements acquired via laboratory assays (sequencing, mass spectrometry, fluorescence microscopy).
+    was_directly_observed: yes
+    was_reported_by_subjects: no
+    was_inferred_derived: no
+preprocessing_strategies:
+  - description: Packaged with provenance graphs and rich metadata as RO-Crate using the FAIRSCAPE framework to enable AI-ready use.
+raw_sources:
+  - description: Spatial proteomics raw image data are included (copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University).
+distribution_formats:
+  - description: RO-Crate
+distribution_dates:
+  - description: Released 2025-03-20 (DC.date)
+  - description: Dataset citation date referenced in description (2025-03-04)
+license_and_use_terms:
+  description:
+    - Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0).
+    - Attribution is required to the copyright holders and the authors.
+    - Copyright (c) 2025 The Regents of the University of California except where otherwise noted.
+    - Spatial proteomics raw image data copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University.
+updates:
+  description:
+    - Data will be augmented regularly through the end of the project; updates will appear on the Dataverse landing page.

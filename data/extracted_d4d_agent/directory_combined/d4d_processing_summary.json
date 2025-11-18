@@ -1,0 +1,47 @@
+{
+  "timestamp": "2025-11-08 19:12:20",
+  "input_dir": "../downloads_by_column_combined",
+  "output_dir": "../data/extracted_d4d_agent/directory_combined",
+  "columns": [
+    {
+      "column": "AI_READI",
+      "processed": [
+        {
+          "input_file": "../downloads_by_column_combined/AI_READI/AI_READI_all_combined.txt",
+          "output_file": "../data/extracted_d4d_agent/directory_combined/AI_READI/AI_READI_all_combined_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [],
+      "errors": []
+    },
+    {
+      "column": "CM4AI",
+      "processed": [
+        {
+          "input_file": "../downloads_by_column_combined/CM4AI/CM4AI_all_combined.txt",
+          "output_file": "../data/extracted_d4d_agent/directory_combined/CM4AI/CM4AI_all_combined_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [],
+      "errors": []
+    },
+    {
+      "column": "VOICE",
+      "processed": [],
+      "skipped": [],
+      "errors": [
+        {
+          "file": "../downloads_by_column_combined/VOICE/VOICE_all_combined.txt",
+          "error": "Invalid YAML generated: mapping values are not allowed here\n  in \"<unicode string>\", line 11, column 27:\n        title: Bridge2AI-Voice: An ethically-sourced, diverse  ... \n                              ^"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_processed": 2,
+    "total_errors": 1,
+    "total_skipped": 0
+  }
+}

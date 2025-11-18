@@ -1,0 +1,25 @@
+# D4D Metadata extracted from: zenodo_org_records-10642459_row10.txt
+# Source: downloads_by_column_enhanced/AI_READI/zenodo_org_records-10642459_row10.txt
+# Column: AI_READI
+# Validation: Download ✅ success
+# Relevance: ⚠️  limited relevance
+# Generated: 2025-11-08T17:50:30
+# Generator: validated_d4d_wrapper (openai:gpt-5)
+# Method: automated
+# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
+
+id: collection-zenodo-record-10642459
+name: Zenodo record 10642459 (AI_READI)
+description: PDF artifact associated with Zenodo record 10642459; source content is binary and does not contain extractable text for detailed metadata.
+resources:
+  - id: zenodo-record-10642459-pdf
+    name: PDF for Zenodo record 10642459
+    page: "https://zenodo.org/records/10642459"
+    media_type: application/pdf
+    keywords:
+      - AI_READI
+      - Zenodo
+    distribution_formats:
+      - description:
+          - PDF
+          - application/pdf
