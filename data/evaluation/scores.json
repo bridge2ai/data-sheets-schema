@@ -1,0 +1,5612 @@
+[
+  {
+    "project": "AI_READI",
+    "method": "curated",
+    "file_path": "data/d4d_concatenated/curated/AI_READI_curated.yaml",
+    "timestamp": "2025-11-17T22:11:52.862733",
+    "rubric10": {
+      "total": 11,
+      "max": 50,
+      "percentage": 22.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 4,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 3,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 41,
+      "max": 84,
+      "percentage": 48.80952380952381,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        }
+      ]
+    }
+  },
+  {
+    "project": "AI_READI",
+    "method": "gpt5",
+    "file_path": "data/d4d_concatenated/gpt5/AI_READI_d4d.yaml",
+    "timestamp": "2025-11-17T22:11:52.871298",
+    "rubric10": {
+      "total": 5,
+      "max": 50,
+      "percentage": 10.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 14,
+      "max": 84,
+      "percentage": 16.666666666666664,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "1 file type only"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No license info"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Non-standard or unspecified format"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No human subject information"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Unclear access method"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No license"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No provenance metadata"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        }
+      ]
+    }
+  },
+  {
+    "project": "AI_READI",
+    "method": "claudecode",
+    "file_path": "data/d4d_concatenated/claudecode/AI_READI_d4d.yaml",
+    "timestamp": "2025-11-17T22:11:52.879418",
+    "rubric10": {
+      "total": 12,
+      "max": 50,
+      "percentage": 24.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 39,
+      "max": 84,
+      "percentage": 46.42857142857143,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Non-standard or unspecified format"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        }
+      ]
+    }
+  },
+  {
+    "project": "CM4AI",
+    "method": "curated",
+    "file_path": "data/d4d_concatenated/curated/CM4AI_curated.yaml",
+    "timestamp": "2025-11-17T22:11:52.978051",
+    "rubric10": {
+      "total": 8,
+      "max": 50,
+      "percentage": 16.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 4,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 25,
+      "max": 84,
+      "percentage": 29.761904761904763,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "1 file type only"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No human subject information"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Unclear access method"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No provenance metadata"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        }
+      ]
+    }
+  },
+  {
+    "project": "CM4AI",
+    "method": "gpt5",
+    "file_path": "data/d4d_concatenated/gpt5/CM4AI_d4d.yaml",
+    "timestamp": "2025-11-17T22:11:52.999257",
+    "rubric10": {
+      "total": 9,
+      "max": 50,
+      "percentage": 18.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 18,
+      "max": 84,
+      "percentage": 21.428571428571427,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "1 file type only"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No license info"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No human subject information"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Unclear access method"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No license"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No provenance metadata"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        }
+      ]
+    }
+  },
+  {
+    "project": "CM4AI",
+    "method": "claudecode",
+    "file_path": "data/d4d_concatenated/claudecode/CM4AI_d4d.yaml",
+    "timestamp": "2025-11-17T22:11:53.019096",
+    "rubric10": {
+      "total": 13,
+      "max": 50,
+      "percentage": 26.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 3,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 38,
+      "max": 84,
+      "percentage": 45.23809523809524,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No human subject information"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        }
+      ]
+    }
+  },
+  {
+    "project": "VOICE",
+    "method": "curated",
+    "file_path": "data/d4d_concatenated/curated/VOICE_curated.yaml",
+    "timestamp": "2025-11-17T22:11:53.039689",
+    "rubric10": {
+      "total": 13,
+      "max": 50,
+      "percentage": 26.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 3,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 3,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 39,
+      "max": 84,
+      "percentage": 46.42857142857143,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Non-standard or unspecified format"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        }
+      ]
+    }
+  },
+  {
+    "project": "VOICE",
+    "method": "gpt5",
+    "file_path": "data/d4d_concatenated/gpt5/VOICE_d4d.yaml",
+    "timestamp": "2025-11-17T22:11:53.054559",
+    "rubric10": {
+      "total": 5,
+      "max": 50,
+      "percentage": 10.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 14,
+      "max": 84,
+      "percentage": 16.666666666666664,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "1 file type only"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No license info"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Non-standard or unspecified format"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No human subject information"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Unclear access method"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No license"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No provenance metadata"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        }
+      ]
+    }
+  },
+  {
+    "project": "VOICE",
+    "method": "claudecode",
+    "file_path": "data/d4d_concatenated/claudecode/VOICE_d4d.yaml",
+    "timestamp": "2025-11-17T22:11:53.067616",
+    "rubric10": {
+      "total": 39,
+      "max": 50,
+      "percentage": 78.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 4,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 3,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 4,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 4,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 4,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 3,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 68,
+      "max": 84,
+      "percentage": 80.95238095238095,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        }
+      ]
+    }
+  },
+  {
+    "project": "CHORUS",
+    "method": "gpt5",
+    "file_path": "data/d4d_concatenated/gpt5/CHORUS_d4d.yaml",
+    "timestamp": "2025-11-17T22:11:53.069611",
+    "rubric10": {
+      "total": 4,
+      "max": 50,
+      "percentage": 8.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 4,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 12,
+      "max": 84,
+      "percentage": 14.285714285714285,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "1 file type only"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No license info"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Non-standard or unspecified format"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No human subject information"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Unclear access method"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No license"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No provenance metadata"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        }
+      ]
+    }
+  },
+  {
+    "project": "CHORUS",
+    "method": "claudecode",
+    "file_path": "data/d4d_concatenated/claudecode/CHORUS_d4d.yaml",
+    "timestamp": "2025-11-17T22:11:53.072621",
+    "rubric10": {
+      "total": 11,
+      "max": 50,
+      "percentage": 22.0,
+      "elements": [
+        {
+          "id": 1,
+          "name": "Dataset Discovery and Identification",
+          "score": 5,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Persistent Identifier (DOI, RRID, etc.)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Title and Description Completeness",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Keywords or Tags for Searchability",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Dataset Landing Page or Platform URL",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "name": "Dataset Access and Retrieval",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Use Agreement Required?",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Download URL or Platform Link Available",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "File Formats Specified",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Links to Similar or Related Datasets",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "name": "Data Reuse and Interoperability",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "License Terms Allow Reuse",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Schema or Ontology Conformance Stated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Defined for Linking (e.g., participant_id)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Documentation of Processing Tools for Reproducibility",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "name": "Ethical Use and Privacy Safeguards",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "IRB or Ethics Review Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Deidentification Method Described (e.g., HIPAA Safe Harbor)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Identifiers Removed or Masked",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Informed Consent Obtained from Participants",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Ethical Sourcing Statement Included",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "name": "Data Composition and Structure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Cohort or Population Characteristics Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Number of Participants or Samples Reported",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Modalities or Data Types Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conditions or Phenotypes Represented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "File Dimensions or Sampling Rates Provided",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "name": "Data Provenance and Version Tracking",
+          "score": 1,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Version Number Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Version History Documented (release_notes)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Change Descriptions for Each Version",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Update Schedule or Frequency Indicated",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Versioned Documentation or External References",
+              "score": 1,
+              "found": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "name": "Scientific Motivation and Funding Transparency",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Motivation or Rationale for Dataset Creation",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Primary Research Objective or Task",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Funding Source or Grant Agency Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Award Number or Grant ID Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Acknowledgement of Platform or Participant Support",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "name": "Technical Transparency (Data Collection and Processing)",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Collection Setting or Sites Described",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Data Capture Method or Device Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Preprocessing or Cleaning Steps Documented",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Open-Source Processing Code Provided",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "External Standards or References Cited",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "name": "Dataset Evaluation and Limitations Disclosure",
+          "score": 0,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Limitations Section Present",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Sampling Bias or Representativeness Noted",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Quality Control or Validation Steps Mentioned",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Known Risks or Use Constraints Listed",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Conflicts of Interest Declared",
+              "score": 0,
+              "found": false
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Cross-Platform and Community Integration",
+          "score": 2,
+          "max_score": 5,
+          "sub_elements": [
+            {
+              "name": "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Cross-referenced DOIs or Related Dataset Links",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Community Standards or Schema Reference",
+              "score": 0,
+              "found": false
+            },
+            {
+              "name": "Associated Outreach Materials (e.g., webinar, documentation)",
+              "score": 1,
+              "found": true
+            },
+            {
+              "name": "Similar Dataset Links or Thematic Grouping",
+              "score": 0,
+              "found": false
+            }
+          ]
+        }
+      ]
+    },
+    "rubric20": {
+      "total": 31,
+      "max": 84,
+      "percentage": 36.904761904761905,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "category": "Structural Completeness",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "category": "Structural Completeness",
+          "score": 0,
+          "max_score": 1,
+          "score_label": "Fail"
+        },
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "category": "Metadata Quality & Content",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No funding data"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No ethics fields present"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "category": "Metadata Quality & Content",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "category": "Metadata Quality & Content",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Non-standard or unspecified format"
+        },
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No collection description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "Single version only"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No publications cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "category": "Technical Documentation",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No human subject information"
+        },
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "category": "FAIRness & Accessibility",
+          "score": 4,
+          "max_score": 5,
+          "score_label": "Field present with content"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "category": "FAIRness & Accessibility",
+          "score": 0,
+          "max_score": 5,
+          "score_label": "No provenance metadata"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "category": "FAIRness & Accessibility",
+          "score": 1,
+          "max_score": 1,
+          "score_label": "Pass"
+        }
+      ]
+    }
+  }
+]

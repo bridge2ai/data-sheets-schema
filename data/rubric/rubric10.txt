@@ -1,0 +1,182 @@
+d4d_complex_proxy_rubric:
+  schema_version: "1.0"
+  description: >
+    Ten-element hierarchical rubric for evaluating D4D YAML completeness and usability.
+    Each element represents a complex metadata-driven goal and includes up to five measurable
+    sub-elements. Scores can be computed at the element or sub-element level.
+
+  scoring_scale:
+    element: 0–5
+    sub_element: [0, 1]  # 0 = not present/fail, 1 = present/pass
+
+  rubric:
+    # ---------------------------------------------------- #
+    - id: 1
+      name: "Dataset Discovery and Identification"
+      description: "Can a user or system discover and uniquely identify this dataset?"
+      sub_elements:
+        - name: "Persistent Identifier (DOI, RRID, etc.)"
+          field: ["doi", "rrid", "id"]
+        - name: "Dataset Title and Description Completeness"
+          field: ["title", "description"]
+        - name: "Keywords or Tags for Searchability"
+          field: ["keywords"]
+        - name: "Dataset Landing Page or Platform URL"
+          field: ["page", "external_resources"]
+        - name: "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)"
+          field: ["project", "keywords"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 2
+      name: "Dataset Access and Retrieval"
+      description: "Can the dataset and its associated resources be located, accessed, and downloaded?"
+      sub_elements:
+        - name: "Access Mechanism Defined (e.g., open, restricted, registered)"
+          field: ["access_and_licensing.access_policy"]
+        - name: "Data Use Agreement Required?"
+          field: ["access_and_licensing.data_use_agreement"]
+        - name: "Download URL or Platform Link Available"
+          field: ["distribution_formats", "download_url"]
+        - name: "File Formats Specified"
+          field: ["data_characteristics.data_formats", "files.listing.type"]
+        - name: "External Links to Similar or Related Datasets"
+          field: ["external_resources", "project_website"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 3
+      name: "Data Reuse and Interoperability"
+      description: "Is sufficient information provided to reuse and integrate the dataset with others?"
+      sub_elements:
+        - name: "License Terms Allow Reuse"
+          field: ["license_and_use_terms.description"]
+        - name: "Data Formats Are Standardized (e.g., JSON, TSV, Parquet)"
+          field: ["data_characteristics.data_formats"]
+        - name: "Schema or Ontology Conformance Stated"
+          field: ["conforms_to"]
+        - name: "Identifiers Defined for Linking (e.g., participant_id)"
+          field: ["data_characteristics.identifiers_in_files"]
+        - name: "Documentation of Processing Tools for Reproducibility"
+          field: ["software_and_tools", "open_source_code"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 4
+      name: "Ethical Use and Privacy Safeguards"
+      description: "Does the dataset provide clear information about consent, privacy, and ethical oversight?"
+      sub_elements:
+        - name: "IRB or Ethics Review Documented"
+          field: ["ethics.irb_approval"]
+        - name: "Deidentification Method Described (e.g., HIPAA Safe Harbor)"
+          field: ["deidentification_and_privacy.approach"]
+        - name: "Identifiers Removed or Masked"
+          field: ["deidentification_and_privacy.examples_of_identifiers_removed"]
+        - name: "Informed Consent Obtained from Participants"
+          field: ["collection_process.consent"]
+        - name: "Ethical Sourcing Statement Included"
+          field: ["ethics.ethical_position"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 5
+      name: "Data Composition and Structure"
+      description: "Can the dataset’s structure, modality, and population be understood from metadata?"
+      sub_elements:
+        - name: "Cohort or Population Characteristics Described"
+          field: ["composition.population"]
+        - name: "Number of Participants or Samples Reported"
+          field: ["composition.population.participants"]
+        - name: "Modalities or Data Types Listed"
+          field: ["data_characteristics.modalities"]
+        - name: "Conditions or Phenotypes Represented"
+          field: ["composition.condition_groups"]
+        - name: "File Dimensions or Sampling Rates Provided"
+          field: ["data_characteristics.sampling_and_dimensions"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 6
+      name: "Data Provenance and Version Tracking"
+      description: "Can a user determine dataset versions, update history, and provenance?"
+      sub_elements:
+        - name: "Dataset Version Number Provided"
+          field: ["dataset_version", "version"]
+        - name: "Version History Documented (release_notes)"
+          field: ["release_notes"]
+        - name: "Change Descriptions for Each Version"
+          field: ["release_notes.notes"]
+        - name: "Update Schedule or Frequency Indicated"
+          field: ["updates"]
+        - name: "Versioned Documentation or External References"
+          field: ["version_access", "external_resources"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 7
+      name: "Scientific Motivation and Funding Transparency"
+      description: "Does the metadata clearly state why the dataset exists and who funded it?"
+      sub_elements:
+        - name: "Motivation or Rationale for Dataset Creation"
+          field: ["motivation"]
+        - name: "Primary Research Objective or Task"
+          field: ["intended_uses.primary"]
+        - name: "Funding Source or Grant Agency Listed"
+          field: ["funding_and_acknowledgements.funding.agency"]
+        - name: "Award Number or Grant ID Present"
+          field: ["funding_and_acknowledgements.funding.award_number"]
+        - name: "Acknowledgement of Platform or Participant Support"
+          field: ["funding_and_acknowledgements.acknowledgements"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 8
+      name: "Technical Transparency (Data Collection and Processing)"
+      description: "Can data collection and processing steps be replicated or understood?"
+      sub_elements:
+        - name: "Collection Setting or Sites Described"
+          field: ["collection_process.setting"]
+        - name: "Data Capture Method or Device Listed"
+          field: ["collection_process.data_capture"]
+        - name: "Preprocessing or Cleaning Steps Documented"
+          field: ["preprocessing_and_derived_data.raw_audio_processing"]
+        - name: "Open-Source Processing Code Provided"
+          field: ["software_and_tools.preprocessing_code"]
+        - name: "External Standards or References Cited"
+          field: ["references"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 9
+      name: "Dataset Evaluation and Limitations Disclosure"
+      description: "Does the metadata communicate known risks, biases, or dataset limitations?"
+      sub_elements:
+        - name: "Limitations Section Present"
+          field: ["limitations"]
+        - name: "Sampling Bias or Representativeness Noted"
+          field: ["composition.population", "sampling_and_dimensions"]
+        - name: "Quality Control or Validation Steps Mentioned"
+          field: ["preprocessing_and_derived_data", "data_quality"]
+        - name: "Known Risks or Use Constraints Listed"
+          field: ["intended_uses.usage_notes"]
+        - name: "Conflicts of Interest Declared"
+          field: ["ethics.conflicts_of_interest"]
+      scoring_method: "Sum of sub_element presence / 5"
+
+    # ---------------------------------------------------- #
+    - id: 10
+      name: "Cross-Platform and Community Integration"
+      description: "Does the dataset connect to wider data ecosystems, repositories, or standards?"
+      sub_elements:
+        - name: "Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)"
+          field: ["publisher", "access_and_licensing.platform"]
+        - name: "Cross-referenced DOIs or Related Dataset Links"
+          field: ["external_resources", "references"]
+        - name: "Community Standards or Schema Reference"
+          field: ["conforms_to"]
+        - name: "Associated Outreach Materials (e.g., webinar, documentation)"
+          field: ["external_resources", "distribution_formats"]
+        - name: "Similar Dataset Links or Thematic Grouping"
+          field: ["project", "related_datasets"]
+      scoring_method: "Sum of sub_element presence / 5"
+
