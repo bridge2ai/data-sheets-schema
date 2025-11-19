@@ -23,8 +23,8 @@ prefixes:
   # Common LinkML prefixes and any that your environment requires
   linkml: "https://w3id.org/linkml/"
   d4dmotivation: "https://w3id.org/bridge2ai/data-sheets-schema/motivation#"
-  # You can add or customize additional prefixes as needed:
-  # ex: "http://example.org/"
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
 
 
 default_prefix: "d4dmotivation"
@@ -45,6 +45,7 @@ classes:
       response:
         description: "Short explanation describing the primary purpose of creating the dataset."
         range: string
+        slot_uri: dcterms:description
 
 
   Task:
@@ -54,6 +55,7 @@ classes:
       response:
         description: "Short explanation describing the specific task or tasks for which this dataset was created."
         range: string
+        slot_uri: dcterms:description
 
 
   AddressingGap:
@@ -63,20 +65,25 @@ classes:
       response:
         description: "Short explanation of the knowledge or resource gap that this dataset was intended to address."
         range: string
+        slot_uri: dcterms:description
 
 
   Creator:
     description: >
-      Who created the dataset (e.g., which team, research group) and on behalf of which 
+      Who created the dataset (e.g., which team, research group) and on behalf of which
       entity (e.g., company, institution, organization)? This may also be considered a team.
     is_a: DatasetProperty
     attributes:
       principal_investigator:
         description: "A key individual (Principal Investigator) responsible for or overseeing dataset creation."
         range: Person
+        slot_uri: dcterms:creator
+        exact_mappings:
+          - schema:creator
       affiliation:
         description: "Organization(s) with which the creator or team is affiliated."
         range: Organization
+        slot_uri: schema:affiliation
 
 
   FundingMechanism:
@@ -88,9 +95,11 @@ classes:
       grantor:
         description: "Name/identifier of the organization providing monetary or resource support."
         range: Grantor
+        slot_uri: schema:funder
       grant:
         description: "Name/identifier of the specific grant mechanism supporting dataset creation."
         range: Grant
+        slot_uri: schema:funding
 
 
   Grantor:
@@ -111,3 +120,4 @@ classes:
       grant_number:
         description: "The alphanumeric identifier for the grant."
         range: string
+        slot_uri: schema:identifier

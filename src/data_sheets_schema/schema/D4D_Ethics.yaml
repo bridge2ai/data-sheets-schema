@@ -22,6 +22,8 @@ imports:
 prefixes:
   linkml: "https://w3id.org/linkml/"
   d4dethics: "https://w3id.org/bridge2ai/data-sheets-schema/ethics#"
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
 
 
 default_prefix: "d4dethics"
@@ -47,6 +49,7 @@ classes:
         description: "Short summary or details about the ethical review process(es)."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   DataProtectionImpact:
@@ -60,6 +63,7 @@ classes:
         description: "Details of the data protection impact analysis, if conducted."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   CollectionNotification:
@@ -73,6 +77,7 @@ classes:
         description: "Details about any notification provided to individuals whose data was collected."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   CollectionConsent:
@@ -86,6 +91,7 @@ classes:
         description: "Details about how consent was sought, provided, and documented."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   ConsentRevocation:
@@ -98,3 +104,4 @@ classes:
         description: "Information about any consent-revocation mechanism offered to data subjects."
         range: string
         multivalued: true
+        slot_uri: dcterms:description

@@ -1,5 +1,16 @@
 {
     "$defs": {
+        "AIActRiskEnum": {
+            "description": "Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/",
+            "enum": [
+                "minimal_risk",
+                "limited_risk",
+                "high_risk",
+                "unacceptable_risk"
+            ],
+            "title": "AIActRiskEnum",
+            "type": "string"
+        },
         "AddressingGap": {
             "additionalProperties": false,
             "description": "Was there a specific gap that needed to be filled by creation of the dataset?",
@@ -179,7 +190,7 @@
         },
         "CollectionMechanism": {
             "additionalProperties": false,
-            "description": "What mechanisms or procedures were used to collect the data (e.g., hardware,  manual curation, software APIs)? Also covers how these mechanisms were validated.",
+            "description": "What mechanisms or procedures were used to collect the data (e.g., hardware, manual curation, software APIs)? Also covers how these mechanisms were validated.",
             "properties": {
                 "description": {
                     "description": "Free-text description of the collection mechanism(s)",
@@ -263,7 +274,7 @@
         },
         "CollectionTimeframe": {
             "additionalProperties": false,
-            "description": "Over what timeframe was the data collected, and does this timeframe match the  creation timeframe of the underlying data?",
+            "description": "Over what timeframe was the data collected, and does this timeframe match the creation timeframe of the underlying data?",
             "properties": {
                 "description": {
                     "description": "Free-text description of the data collection timeframe",
@@ -302,6 +313,18 @@
             ],
             "title": "CollectionTimeframe",
             "type": "object"
+        },
+        "ComplianceStatusEnum": {
+            "description": "Compliance status for regulatory frameworks",
+            "enum": [
+                "compliant",
+                "partially_compliant",
+                "not_compliant",
+                "not_applicable",
+                "under_review"
+            ],
+            "title": "ComplianceStatusEnum",
+            "type": "string"
         },
         "CompressionEnum": {
             "description": "",
@@ -464,7 +487,7 @@
         },
         "Creator": {
             "additionalProperties": false,
-            "description": "Who created the dataset (e.g., which team, research group) and on behalf of which  entity (e.g., company, institution, organization)? This may also be considered a team.",
+            "description": "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team.",
             "properties": {
                 "affiliation": {
                     "description": "Organization(s) with which the creator or team is affiliated.",
@@ -576,7 +599,7 @@
         },
         "DataCollector": {
             "additionalProperties": false,
-            "description": "Who was involved in the data collection (e.g., students, crowdworkers, contractors),  and how they were compensated.",
+            "description": "Who was involved in the data collection (e.g., students, crowdworkers, contractors), and how they were compensated.",
             "properties": {
                 "description": {
                     "description": "Free-text details about the data collectors and compensation",
@@ -2070,7 +2093,7 @@
         },
         "DirectCollection": {
             "additionalProperties": false,
-            "description": "Indicates whether the data was collected directly from the individuals in question  or obtained via third parties/other sources.",
+            "description": "Indicates whether the data was collected directly from the individuals in question or obtained via third parties/other sources.",
             "properties": {
                 "description": {
                     "description": "Free-text description of data collection source(s)",
@@ -2282,7 +2305,7 @@
             "description": "Is there an erratum? If so, please provide a link or other access point.",
             "properties": {
                 "description": {
-                    "description": "Description or reference to the erratum, including details on known  issues and how they may be corrected.\n",
+                    "description": "Description or reference to the erratum, including details on known issues and how they may be corrected.\n",
                     "items": {
                         "type": "string"
                     },
@@ -2405,7 +2428,7 @@
         },
         "ExportControlRegulatoryRestrictions": {
             "additionalProperties": false,
-            "description": "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions and provide a link or copy of any supporting documentation.",
+            "description": "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? Includes compliance tracking for regulations like GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and provide a link or copy of any supporting documentation.",
             "properties": {
                 "description": {
                     "description": "Export or regulatory restrictions on the dataset.",
@@ -2417,6 +2440,18 @@
                         "null"
                     ]
                 },
+                "eu_ai_act_risk_category": {
+                    "$ref": "#/$defs/AIActRiskEnum",
+                    "description": "Risk category under the EU AI Act. The EU AI Act classifies AI systems into risk categories: minimal, limited, high, and unacceptable. High-risk AI systems face strict requirements."
+                },
+                "gdpr_compliant": {
+                    "$ref": "#/$defs/ComplianceStatusEnum",
+                    "description": "Indicates compliance with the EU General Data Protection Regulation (GDPR). GDPR applies to processing of personal data of individuals in the EU."
+                },
+                "hipaa_compliant": {
+                    "$ref": "#/$defs/ComplianceStatusEnum",
+                    "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States."
+                },
                 "id": {
                     "description": "A unique identifier for a thing.",
                     "type": "string"
@@ -2425,6 +2460,16 @@
                     "description": "A human-readable name for a thing.",
                     "type": [
                         "string",
+                        "null"
+                    ]
+                },
+                "other_compliance": {
+                    "description": "Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-specific regulations).",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
                         "null"
                     ]
                 },
@@ -2450,7 +2495,7 @@
             "description": "If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please describe how those contributions are validated and communicated.",
             "properties": {
                 "description": {
-                    "description": "Details on processes or tools that facilitate extensions,  augmentations, or third-party contributions, including any  review/approval workflows.\n",
+                    "description": "Details on processes or tools that facilitate extensions, augmentations, or third-party contributions, including any review/approval workflows.\n",
                     "items": {
                         "type": "string"
                     },
@@ -3340,7 +3385,7 @@
         },
         "InstanceAcquisition": {
             "additionalProperties": false,
-            "description": "Describes how data associated with each instance was acquired  (e.g., directly observed, reported by subjects, inferred).",
+            "description": "Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects, inferred).",
             "properties": {
                 "description": {
                     "description": "Free-text description of the acquisition process",
@@ -3410,8 +3455,32 @@
         },
         "LabelingStrategy": {
             "additionalProperties": false,
-            "description": "Was any labeling of the data done (e.g., part-of-speech tagging)?",
+            "description": "Was any labeling of the data done (e.g., part-of-speech tagging)? This class documents the annotation process and quality metrics.",
             "properties": {
+                "annotation_platform": {
+                    "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "annotations_per_item": {
+                    "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "annotator_demographics": {
+                    "description": "Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "description": {
                     "description": "Explanation of any labeling steps performed.",
                     "items": {
@@ -3425,6 +3494,13 @@
                 "id": {
                     "description": "A unique identifier for a thing.",
                     "type": "string"
+                },
+                "inter_annotator_agreement": {
+                    "description": "Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percent agreement). Include both the metric name and value.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
@@ -3455,7 +3531,7 @@
             "description": "Will the dataset be distributed under a copyright or other IP license, and/or under applicable terms of use? Provide a link or copy of relevant licensing terms and any fees.",
             "properties": {
                 "description": {
-                    "description": "Description of the dataset's license and terms of use (including  links, costs, or usage constraints).\n",
+                    "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
                     "items": {
                         "type": "string"
                     },
@@ -3497,7 +3573,7 @@
             "description": "Who will be supporting/hosting/maintaining the dataset?",
             "properties": {
                 "description": {
-                    "description": "Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum or other details.\n",
+                    "description": "Name or role of the maintainer, possibly referencing CreatorOrMaintainerEnum or other details.\n",
                     "items": {
                         "$ref": "#/$defs/CreatorOrMaintainerEnum"
                     },
@@ -3952,7 +4028,7 @@
         },
         "RawData": {
             "additionalProperties": false,
-            "description": "Was the \u201craw\u201d data saved in addition to the preprocessed/cleaned/labeled data? If so, please provide a link or other access point to the \u201craw\u201d data.",
+            "description": "Was the \"raw\" data saved in addition to the preprocessed/cleaned/labeled data? If so, please provide a link or other access point to the \"raw\" data.",
             "properties": {
                 "description": {
                     "description": "Details about the availability or location of raw data.",
@@ -3994,7 +4070,7 @@
         },
         "Relationships": {
             "additionalProperties": false,
-            "description": "Are relationships between individual instances made explicit (e.g., users\u2019 movie ratings, social network links)?",
+            "description": "Are relationships between individual instances made explicit (e.g., users' movie ratings, social network links)?",
             "properties": {
                 "description": {
                     "description": "Explanation of how these relationships are represented.",
@@ -4039,7 +4115,7 @@
             "description": "If the dataset relates to people, are there applicable limits on the retention of their data (e.g., were individuals told their data would be deleted after a certain time)? If so, please describe these limits and how they will be enforced.",
             "properties": {
                 "description": {
-                    "description": "Policies or regulations around data retention, including any  enforcement mechanisms or responsibilities.\n",
+                    "description": "Policies or regulations around data retention, including any enforcement mechanisms or responsibilities.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4436,7 +4512,7 @@
             "description": "Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?",
             "properties": {
                 "description": {
-                    "description": "Boolean or textual explanation regarding distribution to  parties external to the dataset-creating entity.\n",
+                    "description": "Boolean or textual explanation regarding distribution to parties external to the dataset-creating entity.\n",
                     "type": [
                         "boolean",
                         "null"
@@ -4472,10 +4548,10 @@
         },
         "UpdatePlan": {
             "additionalProperties": false,
-            "description": "Will the dataset be updated (e.g., to correct labeling errors, add new  instances, delete instances)? If so, how often, by whom, and how will  these updates be communicated?",
+            "description": "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, how often, by whom, and how will these updates be communicated?",
             "properties": {
                 "description": {
-                    "description": "Details on the dataset's update policy, schedule, responsible parties,  and communication channels (e.g., mailing list, GitHub releases).\n",
+                    "description": "Details on the dataset's update policy, schedule, responsible parties, and communication channels (e.g., mailing list, GitHub releases).\n",
                     "items": {
                         "type": "string"
                     },

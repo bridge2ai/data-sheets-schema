@@ -24,6 +24,9 @@ imports:
 prefixes:
   linkml: "https://w3id.org/linkml/"
   d4dpreprocessing: "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#"
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
+  prov: "http://www.w3.org/ns/prov#"
 
 
 default_prefix: "d4dpreprocessing"
@@ -47,6 +50,7 @@ classes:
         description: "Explanation of any preprocessing steps performed on the data."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   CleaningStrategy:
@@ -59,26 +63,53 @@ classes:
         description: "Explanation of any data cleaning steps performed."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   LabelingStrategy:
     description: >
       Was any labeling of the data done (e.g., part-of-speech tagging)?
+      This class documents the annotation process and quality metrics.
     is_a: DatasetProperty
     attributes:
       description:
         description: "Explanation of any labeling steps performed."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
+      annotation_platform:
+        description: >-
+          Platform or tool used for annotation (e.g., Label Studio, Prodigy,
+          Amazon Mechanical Turk, custom annotation tool).
+        range: string
+        slot_uri: schema:instrument
+      annotations_per_item:
+        description: >-
+          Number of annotations collected per data item. Multiple annotations
+          per item enable calculation of inter-annotator agreement.
+        range: integer
+      inter_annotator_agreement:
+        description: >-
+          Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa,
+          Krippendorff's alpha, percent agreement). Include both the metric name and value.
+        range: string
+        slot_uri: schema:measurementMethod
+      annotator_demographics:
+        description: >-
+          Demographic information about annotators, if available and relevant
+          (e.g., geographic location, language background, expertise level).
+        range: string
+        multivalued: true
 
 
   RawData:
     description: >
-      Was the “raw” data saved in addition to the preprocessed/cleaned/labeled
-      data? If so, please provide a link or other access point to the “raw” data.
+      Was the "raw" data saved in addition to the preprocessed/cleaned/labeled
+      data? If so, please provide a link or other access point to the "raw" data.
     is_a: DatasetProperty
     attributes:
       description:
         description: "Details about the availability or location of raw data."
         range: string
         multivalued: true
+        slot_uri: prov:wasDerivedFrom

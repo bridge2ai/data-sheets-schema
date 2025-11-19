@@ -22,6 +22,9 @@ imports:
 prefixes:
   linkml: "https://w3id.org/linkml/"
   d4dmaintenance: "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#"
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
+  pav: "http://purl.org/pav/"
 
 
 default_prefix: "d4dmaintenance"
@@ -42,10 +45,11 @@ classes:
     attributes:
       description:
         description: >
-          Name or role of the maintainer, possibly referencing 
+          Name or role of the maintainer, possibly referencing
           CreatorOrMaintainerEnum or other details.
         range: CreatorOrMaintainerEnum
         multivalued: true
+        slot_uri: schema:maintainer
 
 
   Erratum:
@@ -55,25 +59,27 @@ classes:
     attributes:
       description:
         description: >
-          Description or reference to the erratum, including details on known 
+          Description or reference to the erratum, including details on known
           issues and how they may be corrected.
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   UpdatePlan:
     description: >
-      Will the dataset be updated (e.g., to correct labeling errors, add new 
-      instances, delete instances)? If so, how often, by whom, and how will 
+      Will the dataset be updated (e.g., to correct labeling errors, add new
+      instances, delete instances)? If so, how often, by whom, and how will
       these updates be communicated?
     is_a: DatasetProperty
     attributes:
       description:
         description: >
-          Details on the dataset's update policy, schedule, responsible parties, 
+          Details on the dataset's update policy, schedule, responsible parties,
           and communication channels (e.g., mailing list, GitHub releases).
         range: string
         multivalued: true
+        slot_uri: pav:lastUpdateOn
 
 
   RetentionLimits:
@@ -86,10 +92,11 @@ classes:
     attributes:
       description:
         description: >
-          Policies or regulations around data retention, including any 
+          Policies or regulations around data retention, including any
           enforcement mechanisms or responsibilities.
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   VersionAccess:
@@ -104,6 +111,7 @@ classes:
           including versioning policies and deprecation announcements.
         range: string
         multivalued: true
+        slot_uri: pav:previousVersion
 
 
   ExtensionMechanism:
@@ -115,8 +123,9 @@ classes:
     attributes:
       description:
         description: >
-          Details on processes or tools that facilitate extensions, 
-          augmentations, or third-party contributions, including any 
+          Details on processes or tools that facilitate extensions,
+          augmentations, or third-party contributions, including any
           review/approval workflows.
         range: string
         multivalued: true
+        slot_uri: dcterms:description

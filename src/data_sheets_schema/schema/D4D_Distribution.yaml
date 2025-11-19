@@ -24,6 +24,9 @@ imports:
 prefixes:
   linkml: "https://w3id.org/linkml/"
   d4ddistribution: "https://w3id.org/bridge2ai/data-sheets-schema/distribution#"
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
+  dcat: "http://www.w3.org/ns/dcat#"
 
 
 default_prefix: "d4ddistribution"
@@ -46,9 +49,10 @@ classes:
     attributes:
       description:
         description: >
-          Boolean or textual explanation regarding distribution to 
+          Boolean or textual explanation regarding distribution to
           parties external to the dataset-creating entity.
         range: boolean
+        slot_uri: dcterms:accessRights
 
 
   DistributionFormat:
@@ -61,6 +65,7 @@ classes:
         description: "Details of the distribution channel(s) or format(s)."
         range: string
         multivalued: true
+        slot_uri: dcat:accessURL
 
 
   DistributionDate:
@@ -74,5 +79,6 @@ classes:
           or multiple scheduled releases.
         range: string
         multivalued: true
+        slot_uri: dcterms:available
 
 
