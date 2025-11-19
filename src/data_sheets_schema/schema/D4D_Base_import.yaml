@@ -11,6 +11,7 @@ see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"
 
 prefixes:
+  bibo: http://purl.org/ontology/bibo/
   biolink: https://w3id.org/biolink/vocab/
   csvw: http://www.w3.org/ns/csvw#
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
@@ -18,11 +19,15 @@ prefixes:
   dcat: http://www.w3.org/ns/dcat#
   dcterms: http://purl.org/dc/terms/
   example: https://example.org/
+  foaf: http://xmlns.com/foaf/0.1/
   formats: http://www.w3.org/ns/formats/
   frictionless: https://specs.frictionlessdata.io/
   linkml: https://w3id.org/linkml/
   mediatypes: https://www.iana.org/assignments/media-types/
+  oslc: http://open-services.net/ns/core#
   pav: http://purl.org/pav/
+  prov: http://www.w3.org/ns/prov#
+  qudt: http://qudt.org/schema/qudt/
   schema: http://schema.org/
   sh: https://w3id.org/shacl/
   skos: http://www.w3.org/2004/02/skos/core#
@@ -109,6 +114,9 @@ classes:
 
   Organization:
     is_a: NamedThing
+    class_uri: schema:Organization
+    exact_mappings:
+      - foaf:Organization
     description: >-
       Represents a group or organization.
 
@@ -125,25 +133,51 @@ classes:
   Software:
     description: "A software program or library."
     is_a: NamedThing
+    class_uri: schema:SoftwareApplication
+    exact_mappings:
+      - schema:SoftwareApplication
     attributes:
       version:
         range: string
+        slot_uri: schema:softwareVersion
       license:
         range: string
+        slot_uri: schema:license
       url:
         range: string
+        slot_uri: schema:url
 
   Person:
     description: "An individual human being."
     is_a: NamedThing
+    class_uri: schema:Person
+    exact_mappings:
+      - foaf:Person
     attributes:
       affiliation:
         description: "The organization(s) to which the person belongs."
         range: Organization
         multivalued: true
+        slot_uri: schema:affiliation
       email:
         description: "The email address of the person."
         range: string
+        slot_uri: schema:email
+      orcid:
+        description: >-
+          ORCID (Open Researcher and Contributor ID) - a persistent digital identifier
+          for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4).
+        range: string
+        pattern: "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$"
+        slot_uri: schema:identifier
+        exact_mappings:
+          - schema:identifier
+      credit_roles:
+        description: >-
+          Contributor roles using the CRediT (Contributor Roles Taxonomy).
+          Specifies the specific contributions made by this person to the dataset.
+        range: CRediTRoleEnum
+        multivalued: true
 
   Information:
     description: "Grouping for datasets and data files"
@@ -195,6 +229,9 @@ slots:
 
   language:
     description: language in which the information is expressed
+    slot_uri: dcterms:language
+    exact_mappings:
+      - schema:inLanguage
 
   publisher:
     slot_uri: dcterms:publisher
@@ -216,6 +253,7 @@ slots:
     slot_uri: dcat:byteSize
 
   path:
+    slot_uri: schema:contentUrl
     close_mappings:
       - frictionless:path
 
@@ -247,20 +285,28 @@ slots:
     description: >-
       compression format used, if any. e.g., gzip, bzip2, zip
     range: CompressionEnum
+    slot_uri: dcat:compressFormat
 
   media_type:
     description: >-
       The media type of the data. This should be a MIME type.
     range: MediaTypeEnum
+    slot_uri: dcat:mediaType
+    exact_mappings:
+      - frictionless:mediatype
+      - schema:encodingFormat
 
   hash:
     description: hash of the data
+    slot_uri: dcterms:identifier
 
   md5:
     description: md5 hash of the data
+    slot_uri: dcterms:identifier
 
   sha256:
     description: sha256 hash of the data
+    slot_uri: dcterms:identifier
 
   conforms_to:
     slot_uri: dcterms:conformsTo
@@ -293,16 +339,23 @@ slots:
     range: datetime
 
   modified_by:
-    slot_uri: pav:lastUpdateBy
+    slot_uri: oslc:modifiedBy
+    exact_mappings:
+      - pav:lastUpdateBy
 
   status:
+    slot_uri: bibo:status
 
   was_derived_from:
-    slot_uri: pav:derivedFrom
+    slot_uri: prov:wasDerivedFrom
+    exact_mappings:
+      - pav:derivedFrom
 
   doi:
     description: digital object identifier
-    slot_uri: void:uriRegexPattern
+    slot_uri: bibo:doi
+    exact_mappings:
+      - dcterms:identifier
     pattern: "10\\.\\d{4,}\\/.+"
 
 ## SHARED ENUMS ##
@@ -397,6 +450,74 @@ enums:
       UTF-32:
       UTF-7:
       UTF-8:
+
+  CRediTRoleEnum:
+    description: >-
+      Contributor roles based on the CRediT (Contributor Roles Taxonomy).
+      See https://credit.niso.org/
+    permissible_values:
+      conceptualization:
+        description: Ideas; formulation or evolution of overarching research goals and aims
+      methodology:
+        description: Development or design of methodology; creation of models
+      software:
+        description: Programming, software development; designing computer programs
+      validation:
+        description: Verification of the overall replication/reproducibility of results
+      formal_analysis:
+        description: Application of statistical, mathematical, or other formal techniques
+      investigation:
+        description: Conducting the research and investigation process
+      resources:
+        description: Provision of study materials, reagents, patients, laboratory samples, etc.
+      data_curation:
+        description: Management activities to annotate, scrub data and maintain research data
+      writing_original_draft:
+        description: Preparation, creation and/or presentation of the published work
+      writing_review_editing:
+        description: Critical review, commentary or revision of the work
+      visualization:
+        description: Preparation, creation and/or presentation of visualizations/data presentation
+      supervision:
+        description: Oversight and leadership responsibility for the research activity
+      project_administration:
+        description: Management and coordination responsibility for the research activity
+      funding_acquisition:
+        description: Acquisition of the financial support for the project
+
+  BiasTypeEnum:
+    description: Types of bias that may be present in datasets
+    permissible_values:
+      selection_bias:
+        description: Bias arising from non-random selection of data or participants
+      measurement_bias:
+        description: Bias in how data is measured or recorded
+      historical_bias:
+        description: Bias reflecting historical inequities or societal biases
+      representation_bias:
+        description: Certain groups are over- or under-represented in the data
+      aggregation_bias:
+        description: Bias from inappropriately combining distinct groups
+      algorithmic_bias:
+        description: Bias introduced or amplified by algorithmic processing
+      sampling_bias:
+        description: Bias from sampling methodology not representative of the population
+      annotation_bias:
+        description: Bias introduced during data labeling or annotation
+      confirmation_bias:
+        description: Bias from seeking data that confirms pre-existing beliefs
+
+  VersionTypeEnum:
+    description: >-
+      Type of version change using semantic versioning principles.
+      See https://semver.org/
+    permissible_values:
+      MAJOR:
+        description: Incompatible changes, breaking backward compatibility
+      MINOR:
+        description: Backward-compatible new functionality or enhancements
+      PATCH:
+        description: Backward-compatible bug fixes or minor corrections
       Windows-1250:
       Windows-1251:
       Windows-1252:

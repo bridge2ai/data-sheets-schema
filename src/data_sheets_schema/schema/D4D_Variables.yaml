@@ -1,0 +1,183 @@
+---
+id: https://w3id.org/bridge2ai/data-sheets-schema/variables
+name: D4D-Variables
+title: Datasheets for Datasets - Variable/Field Metadata Module
+description: >-
+  Module for documenting individual variables, fields, or columns in a dataset.
+  Enables detailed documentation of data types, units, ranges, and other
+  variable-level metadata.
+license: MIT
+see_also:
+  - https://bridge2ai.github.io/data-sheets-schema
+
+prefixes:
+  bibo: http://purl.org/ontology/bibo/
+  csvw: http://www.w3.org/ns/csvw#
+  d4dvariables: https://w3id.org/bridge2ai/data-sheets-schema/variables#
+  dcat: http://www.w3.org/ns/dcat#
+  dcterms: http://purl.org/dc/terms/
+  foaf: http://xmlns.com/foaf/0.1/
+  linkml: https://w3id.org/linkml/
+  oslc: http://open-services.net/ns/core#
+  pav: http://purl.org/pav/
+  prov: http://www.w3.org/ns/prov#
+  qudt: http://qudt.org/schema/qudt/
+  schema: http://schema.org/
+  skos: http://www.w3.org/2004/02/skos/core#
+
+default_prefix: d4dvariables
+default_range: string
+
+imports:
+  - linkml:types
+  - D4D_Base_import
+
+classes:
+
+  VariableMetadata:
+    description: >-
+      Metadata describing an individual variable, field, or column in a dataset.
+      Variables may represent measurements, observations, derived values, or
+      categorical attributes.
+    is_a: DatasetProperty
+    class_uri: schema:PropertyValue
+    exact_mappings:
+      - csvw:Column
+      - schema:PropertyValue
+    attributes:
+      variable_name:
+        description: >-
+          The name or identifier of the variable as it appears in the data files.
+        range: string
+        required: true
+        slot_uri: schema:name
+        exact_mappings:
+          - schema:name
+          - csvw:name
+
+      data_type:
+        description: >-
+          The data type of the variable (e.g., integer, float, string, boolean,
+          date, categorical). Use standard type names when possible.
+        range: string
+        slot_uri: schema:DataType
+        exact_mappings:
+          - csvw:datatype
+          - schema:DataType
+
+      unit:
+        description: >-
+          The unit of measurement for the variable, preferably using QUDT units
+          (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter,
+          qudt:DegreeCelsius.
+        range: uriorcurie
+        slot_uri: qudt:unit
+        exact_mappings:
+          - qudt:hasUnit
+          - schema:unitCode
+
+      missing_value_code:
+        description: >-
+          Code(s) used to represent missing values for this variable.
+          Examples: "NA", "-999", "null", "". Multiple codes may be specified.
+        range: string
+        multivalued: true
+        slot_uri: csvw:null
+
+      minimum_value:
+        description: >-
+          The minimum value that the variable can take. Applicable to numeric variables.
+        range: float
+        slot_uri: schema:minValue
+
+      maximum_value:
+        description: >-
+          The maximum value that the variable can take. Applicable to numeric variables.
+        range: float
+        slot_uri: schema:maxValue
+
+      categories:
+        description: >-
+          The permitted categories or values for a categorical variable.
+          Each entry should describe a possible value and its meaning.
+        range: string
+        multivalued: true
+        slot_uri: schema:valueReference
+
+      examples:
+        description: >-
+          Example values for this variable to illustrate typical data.
+        range: string
+        multivalued: true
+        slot_uri: skos:example
+
+      is_identifier:
+        description: >-
+          Indicates whether this variable serves as a unique identifier or key
+          for records in the dataset.
+        range: boolean
+        slot_uri: csvw:primaryKey
+
+      is_sensitive:
+        description: >-
+          Indicates whether this variable contains sensitive information
+          (e.g., personal data, protected health information).
+        range: boolean
+
+      precision:
+        description: >-
+          The precision or number of decimal places for numeric variables.
+        range: integer
+
+      measurement_technique:
+        description: >-
+          The technique or method used to measure this variable.
+          Examples: "mass spectrometry", "self-report survey", "GPS coordinates".
+        range: string
+        slot_uri: schema:measurementTechnique
+
+      derivation:
+        description: >-
+          Description of how this variable was derived or calculated from
+          other variables, if applicable.
+        range: string
+        slot_uri: prov:wasDerivedFrom
+
+      quality_notes:
+        description: >-
+          Notes about data quality, reliability, or known issues specific
+          to this variable.
+        range: string
+        multivalued: true
+
+enums:
+
+  VariableTypeEnum:
+    description: Common data types for variables
+    permissible_values:
+      integer:
+        description: Whole numbers
+      float:
+        description: Floating-point numbers
+      double:
+        description: Double-precision floating-point
+      string:
+        description: Text strings
+      boolean:
+        description: True/false values
+      date:
+        description: Date values
+      datetime:
+        description: Date and time values
+      categorical:
+        description: Categorical/factor variables with finite values
+      ordinal:
+        description: Ordered categorical variables
+      identifier:
+        description: Unique identifiers or keys
+      json:
+        description: JSON-encoded data
+      array:
+        description: Arrays or lists
+      object:
+        description: Complex structured objects

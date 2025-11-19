@@ -46,6 +46,53 @@
             "title": "AddressingGap",
             "type": "object"
         },
+        "BiasTypeEnum": {
+            "description": "Types of bias that may be present in datasets",
+            "enum": [
+                "selection_bias",
+                "measurement_bias",
+                "historical_bias",
+                "representation_bias",
+                "aggregation_bias",
+                "algorithmic_bias",
+                "sampling_bias",
+                "annotation_bias",
+                "confirmation_bias"
+            ],
+            "title": "BiasTypeEnum",
+            "type": "string"
+        },
+        "Boolean": {
+            "description": "",
+            "enum": [
+                "true",
+                "false",
+                "unknown"
+            ],
+            "title": "Boolean",
+            "type": "string"
+        },
+        "CRediTRoleEnum": {
+            "description": "Contributor roles based on the CRediT (Contributor Roles Taxonomy). See https://credit.niso.org/",
+            "enum": [
+                "conceptualization",
+                "methodology",
+                "software",
+                "validation",
+                "formal_analysis",
+                "investigation",
+                "resources",
+                "data_curation",
+                "writing_original_draft",
+                "writing_review_editing",
+                "visualization",
+                "supervision",
+                "project_administration",
+                "funding_acquisition"
+            ],
+            "title": "CRediTRoleEnum",
+            "type": "string"
+        },
         "CleaningStrategy": {
             "additionalProperties": false,
             "description": "Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?",
@@ -259,10 +306,13 @@
         "CompressionEnum": {
             "description": "",
             "enum": [
-                "GZIP",
-                "TAR",
-                "TARGZIP",
-                "ZIP"
+                "gzip",
+                "bzip2",
+                "zip",
+                "tar",
+                "xz",
+                "lzma",
+                "compress"
             ],
             "title": "CompressionEnum",
             "type": "string"
@@ -466,10 +516,19 @@
             "type": "object"
         },
         "CreatorOrMaintainerEnum": {
-            "description": "The entity responsible for maintaining a dataset.",
+            "description": "",
             "enum": [
-                "Person",
-                "Organization"
+                "data_subject",
+                "third_party",
+                "researcher",
+                "industry",
+                "academic_institution",
+                "government_agency",
+                "commercial_entity",
+                "non_profit_organization",
+                "crowdsourced",
+                "automated_system",
+                "other"
             ],
             "title": "CreatorOrMaintainerEnum",
             "type": "string"
@@ -666,7 +725,7 @@
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
+                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
                 },
                 "confidential_elements": {
                     "items": {
@@ -678,21 +737,18 @@
                     ]
                 },
                 "conforms_to": {
-                    "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc. This should be a standard from the Bridge2AI standards registry.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The class in the schema to which the data object instantiates.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
                     "type": [
                         "string",
                         "null"
@@ -708,17 +764,12 @@
                     ]
                 },
                 "created_by": {
-                    "description": "Agent that created the element",
-                    "items": {
-                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "created_on": {
-                    "description": "Date and Time at which the element was created",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -793,7 +844,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "The Digital Object Identifier of the data, with the doi prefix.",
+                    "description": "digital object identifier",
+                    "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
                         "null"
@@ -808,7 +860,7 @@
                 },
                 "encoding": {
                     "$ref": "#/$defs/EncodingEnum",
-                    "description": "The encoding of the data. This is not the same as the media type. Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8, ASCII, etc."
+                    "description": "the character encoding of the data"
                 },
                 "errata": {
                     "items": {
@@ -854,7 +906,7 @@
                 },
                 "format": {
                     "$ref": "#/$defs/FormatEnum",
-                    "description": "The format of the data. This is not the same as the media type. Rather, this is the format of the data in a more specific sense, e.g., CSV, JSON, etc."
+                    "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
                 },
                 "funders": {
                     "items": {
@@ -875,7 +927,7 @@
                     ]
                 },
                 "hash": {
-                    "description": "The hash representation of the data, e.g., sha256, md5, etc. Subtypes have their own slots.",
+                    "description": "hash of the data",
                     "type": [
                         "string",
                         "null"
@@ -934,7 +986,6 @@
                     ]
                 },
                 "keywords": {
-                    "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
                     "items": {
                         "type": "string"
                     },
@@ -960,7 +1011,6 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "Date and Time at which the element was last updated",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -968,7 +1018,6 @@
                     ]
                 },
                 "license": {
-                    "description": "license for the data",
                     "type": [
                         "string",
                         "null"
@@ -990,22 +1039,21 @@
                     ]
                 },
                 "md5": {
-                    "description": "The md5 hash representation of the data.",
+                    "description": "md5 hash of the data",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "media_type": {
-                    "description": "The media type of the data. This is not the same as the format. Rather, this is the media type of the data in a more general sense, e.g., text/csv, application/json, etc., though as it is defined here the media type can be any string.",
+                    "$ref": "#/$defs/MediaTypeEnum",
+                    "description": "The media type of the data. This should be a MIME type."
+                },
+                "modified_by": {
                     "type": [
                         "string",
                         "null"
                     ]
-                },
-                "modified_by": {
-                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
-                    "description": "agent that modified the element"
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
@@ -1099,14 +1147,13 @@
                     ]
                 },
                 "sha256": {
-                    "description": "The sha256 hash representation of the data.",
+                    "description": "sha256 hash of the data",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "status": {
-                    "description": "Status of the element in terms of its maturity or life cycle",
                     "type": [
                         "string",
                         "null"
@@ -1161,8 +1208,17 @@
                         "null"
                     ]
                 },
+                "variables": {
+                    "description": "Metadata describing individual variables, fields, or columns in the dataset.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "version": {
-                    "description": "particular version of schema",
                     "type": [
                         "string",
                         "null"
@@ -1175,7 +1231,6 @@
                     ]
                 },
                 "was_derived_from": {
-                    "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
                     "type": [
                         "string",
                         "null"
@@ -1255,7 +1310,7 @@
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
+                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
                 },
                 "confidential_elements": {
                     "items": {
@@ -1267,21 +1322,18 @@
                     ]
                 },
                 "conforms_to": {
-                    "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc. This should be a standard from the Bridge2AI standards registry.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The class in the schema to which the data object instantiates.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
                     "type": [
                         "string",
                         "null"
@@ -1297,17 +1349,12 @@
                     ]
                 },
                 "created_by": {
-                    "description": "Agent that created the element",
-                    "items": {
-                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "created_on": {
-                    "description": "Date and Time at which the element was created",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1382,7 +1429,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "The Digital Object Identifier of the data, with the doi prefix.",
+                    "description": "digital object identifier",
+                    "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
                         "null"
@@ -1397,7 +1445,7 @@
                 },
                 "encoding": {
                     "$ref": "#/$defs/EncodingEnum",
-                    "description": "The encoding of the data. This is not the same as the media type. Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8, ASCII, etc."
+                    "description": "the character encoding of the data"
                 },
                 "errata": {
                     "items": {
@@ -1443,7 +1491,7 @@
                 },
                 "format": {
                     "$ref": "#/$defs/FormatEnum",
-                    "description": "The format of the data. This is not the same as the media type. Rather, this is the format of the data in a more specific sense, e.g., CSV, JSON, etc."
+                    "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
                 },
                 "funders": {
                     "items": {
@@ -1464,7 +1512,7 @@
                     ]
                 },
                 "hash": {
-                    "description": "The hash representation of the data, e.g., sha256, md5, etc. Subtypes have their own slots.",
+                    "description": "hash of the data",
                     "type": [
                         "string",
                         "null"
@@ -1509,7 +1557,6 @@
                     ]
                 },
                 "keywords": {
-                    "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
                     "items": {
                         "type": "string"
                     },
@@ -1535,7 +1582,6 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "Date and Time at which the element was last updated",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1543,7 +1589,6 @@
                     ]
                 },
                 "license": {
-                    "description": "license for the data",
                     "type": [
                         "string",
                         "null"
@@ -1565,22 +1610,21 @@
                     ]
                 },
                 "md5": {
-                    "description": "The md5 hash representation of the data.",
+                    "description": "md5 hash of the data",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "media_type": {
-                    "description": "The media type of the data. This is not the same as the format. Rather, this is the media type of the data in a more general sense, e.g., text/csv, application/json, etc., though as it is defined here the media type can be any string.",
+                    "$ref": "#/$defs/MediaTypeEnum",
+                    "description": "The media type of the data. This should be a MIME type."
+                },
+                "modified_by": {
                     "type": [
                         "string",
                         "null"
                     ]
-                },
-                "modified_by": {
-                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
-                    "description": "agent that modified the element"
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
@@ -1674,14 +1718,13 @@
                     ]
                 },
                 "sha256": {
-                    "description": "The sha256 hash representation of the data.",
+                    "description": "sha256 hash of the data",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "status": {
-                    "description": "Status of the element in terms of its maturity or life cycle",
                     "type": [
                         "string",
                         "null"
@@ -1736,8 +1779,17 @@
                         "null"
                     ]
                 },
+                "variables": {
+                    "description": "Metadata describing individual variables, fields, or columns in the dataset.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "version": {
-                    "description": "particular version of schema",
                     "type": [
                         "string",
                         "null"
@@ -1750,7 +1802,6 @@
                     ]
                 },
                 "was_derived_from": {
-                    "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
                     "type": [
                         "string",
                         "null"
@@ -1769,41 +1820,33 @@
             "properties": {
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
+                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
                 },
                 "conforms_to": {
-                    "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc. This should be a standard from the Bridge2AI standards registry.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The class in the schema to which the data object instantiates.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_by": {
-                    "description": "Agent that created the element",
-                    "items": {
-                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "created_on": {
-                    "description": "Date and Time at which the element was created",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1818,7 +1861,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "The Digital Object Identifier of the data, with the doi prefix.",
+                    "description": "digital object identifier",
+                    "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
                         "null"
@@ -1843,7 +1887,6 @@
                     ]
                 },
                 "keywords": {
-                    "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
                     "items": {
                         "type": "string"
                     },
@@ -1860,7 +1903,6 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "Date and Time at which the element was last updated",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1868,15 +1910,16 @@
                     ]
                 },
                 "license": {
-                    "description": "license for the data",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "modified_by": {
-                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
-                    "description": "agent that modified the element"
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
@@ -1907,7 +1950,6 @@
                     ]
                 },
                 "status": {
-                    "description": "Status of the element in terms of its maturity or life cycle",
                     "type": [
                         "string",
                         "null"
@@ -1921,14 +1963,12 @@
                     ]
                 },
                 "version": {
-                    "description": "particular version of schema",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "was_derived_from": {
-                    "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
                     "type": [
                         "string",
                         "null"
@@ -2567,31 +2607,24 @@
         "FormatEnum": {
             "description": "",
             "enum": [
-                "JSON-LD",
-                "N3",
-                "N-Triples",
-                "N-Quads",
-                "LD Patch",
-                "Microdata",
-                "OWL XML Serialization",
-                "OWL Functional Syntax",
-                "OWL Manchester Syntax",
-                "POWDER",
-                "POWDER-S",
-                "PROV-N",
-                "PROV-XML",
-                "RDFa",
-                "RDF/JSON",
-                "RDF/XML",
-                "RIF XML Syntax",
-                "SPARQL Results in XML",
-                "SPARQL Results in JSON",
-                "SPARQL Results in CSV",
-                "SPARQL Results in TSV",
-                "Turtle",
-                "TriG",
+                "CSV",
+                "TSV",
+                "XML",
+                "JSON",
+                "JSONL",
                 "YAML",
-                "JSON"
+                "HTML",
+                "PDF",
+                "DOCX",
+                "XLSX",
+                "PPTX",
+                "TXT",
+                "MD",
+                "ZIP",
+                "TAR",
+                "GZ",
+                "BZ2",
+                "XZ"
             ],
             "title": "FormatEnum",
             "type": "string"
@@ -2966,41 +2999,33 @@
             "properties": {
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
+                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
                 },
                 "conforms_to": {
-                    "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc. This should be a standard from the Bridge2AI standards registry.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
-                    "description": "The class in the schema to which the data object instantiates.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
-                    "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_by": {
-                    "description": "Agent that created the element",
-                    "items": {
-                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
-                    },
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "created_on": {
-                    "description": "Date and Time at which the element was created",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3015,7 +3040,8 @@
                     ]
                 },
                 "doi": {
-                    "description": "The Digital Object Identifier of the data, with the doi prefix.",
+                    "description": "digital object identifier",
+                    "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
                         "null"
@@ -3040,7 +3066,6 @@
                     ]
                 },
                 "keywords": {
-                    "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
                     "items": {
                         "type": "string"
                     },
@@ -3057,7 +3082,6 @@
                     ]
                 },
                 "last_updated_on": {
-                    "description": "Date and Time at which the element was last updated",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3065,15 +3089,16 @@
                     ]
                 },
                 "license": {
-                    "description": "license for the data",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "modified_by": {
-                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
-                    "description": "agent that modified the element"
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
@@ -3095,7 +3120,6 @@
                     ]
                 },
                 "status": {
-                    "description": "Status of the element in terms of its maturity or life cycle",
                     "type": [
                         "string",
                         "null"
@@ -3109,14 +3133,12 @@
                     ]
                 },
                 "version": {
-                    "description": "particular version of schema",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "was_derived_from": {
-                    "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
                     "type": [
                         "string",
                         "null"
@@ -3515,8 +3537,25 @@
         "MediaTypeEnum": {
             "description": "",
             "enum": [
-                "csv",
-                "rdf-xml"
+                "text/csv",
+                "text/tab-separated-values",
+                "application/json",
+                "application/xml",
+                "text/xml",
+                "application/yaml",
+                "text/yaml",
+                "text/html",
+                "application/pdf",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "text/plain",
+                "text/markdown",
+                "application/zip",
+                "application/x-tar",
+                "application/gzip",
+                "application/x-bzip2",
+                "application/x-xz"
             ],
             "title": "MediaTypeEnum",
             "type": "string"
@@ -3773,6 +3812,16 @@
                         "null"
                     ]
                 },
+                "credit_roles": {
+                    "description": "Contributor roles using the CRediT (Contributor Roles Taxonomy). Specifies the specific contributions made by this person to the dataset.",
+                    "items": {
+                        "$ref": "#/$defs/CRediTRoleEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "description": {
                     "description": "A human-readable description for a thing.",
                     "type": [
@@ -3793,6 +3842,14 @@
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "orcid": {
+                    "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4).",
+                    "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$",
                     "type": [
                         "string",
                         "null"
@@ -4497,6 +4554,173 @@
             "title": "UseRepository",
             "type": "object"
         },
+        "VariableMetadata": {
+            "additionalProperties": false,
+            "description": "Metadata describing an individual variable, field, or column in a dataset. Variables may represent measurements, observations, derived values, or categorical attributes.",
+            "properties": {
+                "categories": {
+                    "description": "The permitted categories or values for a categorical variable. Each entry should describe a possible value and its meaning.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "data_type": {
+                    "description": "The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standard type names when possible.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "derivation": {
+                    "description": "Description of how this variable was derived or calculated from other variables, if applicable.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "examples": {
+                    "description": "Example values for this variable to illustrate typical data.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "A unique identifier for a thing.",
+                    "type": "string"
+                },
+                "is_identifier": {
+                    "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "is_sensitive": {
+                    "description": "Indicates whether this variable contains sensitive information (e.g., personal data, protected health information).",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "maximum_value": {
+                    "description": "The maximum value that the variable can take. Applicable to numeric variables.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "measurement_technique": {
+                    "description": "The technique or method used to measure this variable. Examples: \"mass spectrometry\", \"self-report survey\", \"GPS coordinates\".",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "minimum_value": {
+                    "description": "The minimum value that the variable can take. Applicable to numeric variables.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "missing_value_code": {
+                    "description": "Code(s) used to represent missing values for this variable. Examples: \"NA\", \"-999\", \"null\", \"\". Multiple codes may be specified.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "precision": {
+                    "description": "The precision or number of decimal places for numeric variables.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "quality_notes": {
+                    "description": "Notes about data quality, reliability, or known issues specific to this variable.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "unit": {
+                    "description": "The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "variable_name": {
+                    "description": "The name or identifier of the variable as it appears in the data files.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "variable_name",
+                "id"
+            ],
+            "title": "VariableMetadata",
+            "type": "object"
+        },
+        "VariableTypeEnum": {
+            "description": "Common data types for variables",
+            "enum": [
+                "integer",
+                "float",
+                "double",
+                "string",
+                "boolean",
+                "date",
+                "datetime",
+                "categorical",
+                "ordinal",
+                "identifier",
+                "json",
+                "array",
+                "object"
+            ],
+            "title": "VariableTypeEnum",
+            "type": "string"
+        },
         "VersionAccess": {
             "additionalProperties": false,
             "description": "Will older versions of the dataset continue to be supported/hosted/maintained? If so, how? If not, how will obsolescence be communicated to dataset consumers?",
@@ -4538,6 +4762,25 @@
             ],
             "title": "VersionAccess",
             "type": "object"
+        },
+        "VersionTypeEnum": {
+            "description": "Type of version change using semantic versioning principles. See https://semver.org/",
+            "enum": [
+                "MAJOR",
+                "MINOR",
+                "PATCH",
+                "Windows-1250",
+                "Windows-1251",
+                "Windows-1252",
+                "Windows-1253",
+                "Windows-1254",
+                "Windows-1255",
+                "Windows-1256",
+                "Windows-1257",
+                "Windows-1258"
+            ],
+            "title": "VersionTypeEnum",
+            "type": "string"
         },
         "VulnerablePopulations": {
             "additionalProperties": false,
@@ -4624,41 +4867,33 @@
     "properties": {
         "compression": {
             "$ref": "#/$defs/CompressionEnum",
-            "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc."
+            "description": "compression format used, if any. e.g., gzip, bzip2, zip"
         },
         "conforms_to": {
-            "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc. This should be a standard from the Bridge2AI standards registry.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "conforms_to_class": {
-            "description": "The class in the schema to which the data object instantiates.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "conforms_to_schema": {
-            "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "created_by": {
-            "description": "Agent that created the element",
-            "items": {
-                "$ref": "#/$defs/CreatorOrMaintainerEnum"
-            },
             "type": [
-                "array",
+                "string",
                 "null"
             ]
         },
         "created_on": {
-            "description": "Date and Time at which the element was created",
             "format": "date-time",
             "type": [
                 "string",
@@ -4673,7 +4908,8 @@
             ]
         },
         "doi": {
-            "description": "The Digital Object Identifier of the data, with the doi prefix.",
+            "description": "digital object identifier",
+            "pattern": "10\\.\\d{4,}\\/.+",
             "type": [
                 "string",
                 "null"
@@ -4698,7 +4934,6 @@
             ]
         },
         "keywords": {
-            "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
             "items": {
                 "type": "string"
             },
@@ -4715,7 +4950,6 @@
             ]
         },
         "last_updated_on": {
-            "description": "Date and Time at which the element was last updated",
             "format": "date-time",
             "type": [
                 "string",
@@ -4723,15 +4957,16 @@
             ]
         },
         "license": {
-            "description": "license for the data",
             "type": [
                 "string",
                 "null"
             ]
         },
         "modified_by": {
-            "$ref": "#/$defs/CreatorOrMaintainerEnum",
-            "description": "agent that modified the element"
+            "type": [
+                "string",
+                "null"
+            ]
         },
         "name": {
             "description": "A human-readable name for a thing.",
@@ -4762,7 +4997,6 @@
             ]
         },
         "status": {
-            "description": "Status of the element in terms of its maturity or life cycle",
             "type": [
                 "string",
                 "null"
@@ -4776,14 +5010,12 @@
             ]
         },
         "version": {
-            "description": "particular version of schema",
             "type": [
                 "string",
                 "null"
             ]
         },
         "was_derived_from": {
-            "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
             "type": [
                 "string",
                 "null"
