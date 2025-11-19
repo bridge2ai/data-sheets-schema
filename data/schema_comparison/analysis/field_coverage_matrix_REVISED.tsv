@@ -1,0 +1,85 @@
+Concept/Field	Croissant	Croissant RAI	FAIR²	Schema.org	Data Statements	Frictionless	Current D4D Coverage	Status	Priority Tier	Notes
+# SEMANTIC INTEROPERABILITY
+slot_uri mappings (comprehensive)	✓	✓	✓	✓	✗	✗	Partial (20/144 slots = 14%)	MISSING 86%	1	Only 14% of slots have semantic mappings
+class_uri mappings (comprehensive)	✓	✓	✓	✓	✗	✗	Minimal (2/65 classes = 3%)	MISSING 97%	1	Only Dataset and NamedThing mapped
+Missing prefix definitions	n/a	n/a	n/a	n/a	n/a	n/a	4 prefixes used but undefined	BUG	1	dcterms, prov, bibo, oslc used but not in prefixes section
+schema:sameAs	✗	✗	✗	✓	✗	✗	✗ MISSING	MISSING	1	No alternative/canonical URLs
+schema:conformsTo	✓	✓	✓	✗	✗	✗	✓ HAS conforms_to slot	COVERED	-	Already in D4D
+schema:keywords	✗	✗	✗	✓	✗	✓	✓ HAS keywords slot	COVERED	-	Already in D4D
+schema:variableMeasured	✗	✗	✗	✓	✗	✗	✗ MISSING (no variable metadata)	MISSING	1	Critical - no field/variable documentation
+# CONTRIBUTOR ATTRIBUTION
+ORCID for Person	✗	✗	✓	✗	✗	✗	✗ MISSING	MISSING	1	Person class exists but no orcid attribute
+CRediT taxonomy	✗	✗	✓	✗	✗	✓	✗ MISSING	MISSING	1	No contributor role enumeration
+Person class	✗	✗	✓	✓	✗	✓	✓ HAS Person class	COVERED	-	Already in D4D
+Organization class	✗	✗	✓	✓	✗	✓	✓ HAS Organization class	COVERED	-	Already in D4D
+# VARIABLE/FIELD METADATA (CRITICAL GAP)
+Field/variable schema	✓	✗	✓	✓	✗	✓	✗ MISSING entirely	MISSING	1	No VariableMetadata class - biggest gap
+Data type specifications	✓	✗	✓	✓	✗	✓	✗ MISSING	MISSING	1	No way to document variable types
+Unit of measurement (QUDT)	✗	✗	✓	✓	✗	✗	✗ MISSING	MISSING	2	Scientific units for variables
+Missing value codes	✗	✗	✗	✗	✗	✗	✗ MISSING	MISSING	2	How missing values are encoded
+Variable ranges (min/max)	✗	✗	✗	✗	✗	✓	✗ MISSING	MISSING	2	Numeric variable bounds
+Categorical enumerations	✓	✗	✗	✗	✗	✗	✗ MISSING	MISSING	2	Allowed values for categorical variables
+# FAIRNESS & BIAS
+Structured bias taxonomy	✗	✓	✓	✗	✗	✗	Partial (has anomalies slot)	MISSING	1	No BiasTypeEnum (selection, measurement, historical, etc.)
+Protected attributes	✗	✓	✗	✗	✗	✗	✗ MISSING	MISSING	1	Sensitive demographic attributes
+Fairness definition	✗	✓	✗	✗	✗	✗	✗ MISSING	MISSING	1	No FairnessFraming class
+Social impact assessment	✗	✓	✗	✗	✗	✗	✗ MISSING	MISSING	1	Impacted communities, mitigation strategies
+Representation bias	✗	✗	✗	✗	✓	✗	Partial (has subpopulations)	ENHANCE	2	Add quantitative metrics
+Known biases	✗	✓	✓	✗	✗	✗	✓ HAS (in various classes)	COVERED	-	Already documented in ethics/composition
+# ANNOTATION QUALITY
+Annotation protocol	✗	✓	✗	✗	✗	✗	✓ HAS LabelingStrategy	COVERED	-	Already in D4D
+Annotation platform	✗	✓	✗	✗	✗	✗	Partial LabelingStrategy	ENHANCE	2	Add as explicit attribute
+Annotations per item	✗	✓	✗	✗	✗	✗	✗ MISSING	MISSING	2	Number of labels per instance
+Annotator demographics	✗	✓	✗	✗	✓	✗	Partial (has data_collectors)	ENHANCE	2	Add structured demographics to LabelingStrategy
+Inter-annotator agreement	✗	✓	✗	✗	✗	✗	✗ MISSING	MISSING	2	Quality metric (e.g., Cohen's kappa)
+Machine annotation tools	✗	✗	✗	✗	✗	✗	✓ HAS used_software	COVERED	-	Already in preprocessing
+# DATA QUALITY METRICS
+Completeness metrics	✗	✗	✗	✗	✗	✗	✗ MISSING	MISSING	2	Missing data percentage
+Accuracy metrics	✗	✗	✗	✗	✗	✗	✗ MISSING	MISSING	2	Validation accuracy
+Outlier detection	✗	✗	✗	✗	✗	✗	✗ MISSING	MISSING	3	Outlier identification
+Quality assessment	✗	✗	✗	✗	✗	✗	Partial (has preprocessing)	ENHANCE	2	Add structured quality metrics
+# FILE INTEGRITY & VERSIONING
+File checksums (SHA256)	✓	✗	✓	✗	✗	✗	✓ HAS sha256, md5, hash	COVERED	-	Already in D4D
+Semantic versioning type	✓	✗	✗	✗	✗	✓	✗ MISSING	MISSING	2	MAJOR/MINOR/PATCH change type
+Version slot	✓	✗	✓	✓	✗	✓	✓ HAS version slot	COVERED	-	Already in D4D
+Versioning policy	✗	✓	✗	✗	✗	✗	Partial (has updates)	ENHANCE	2	Add structured versioning policy
+# REGULATORY COMPLIANCE
+Regulatory compliance	✗	✗	✗	✗	✗	✗	Partial (has regulatory_restrictions)	ENHANCE	2	Add RegulatoryCompliance class
+EU AI Act risk category	✗	✗	✗	✗	✗	✗	✗ MISSING	MISSING	2	Minimal/limited/high/unacceptable
+GDPR/HIPAA compliance	✗	✗	✗	✗	✗	✗	Partial (privacy/ethics classes)	ENHANCE	2	Add explicit compliance tracking
+# DATASET LIFECYCLE
+Data collection type enum	✗	✓	✗	✗	✗	✗	✗ MISSING	MISSING	2	Survey, scraping, manual, etc.
+Collection process	✗	✓	✗	✗	✗	✗	✓ HAS DirectCollection	COVERED	-	Already in D4D
+Data preprocessing	✗	✓	✗	✗	✗	✗	✓ HAS PreprocessingStrategy	COVERED	-	Already in D4D
+Data limitations	✗	✓	✗	✗	✗	✗	✓ HAS MissingInfo, limitations	COVERED	-	Already in D4D
+Intended uses	✗	✓	✗	✗	✗	✗	✓ HAS ExistingUse, Task	COVERED	-	Already in D4D
+Discouraged uses	✗	✓	✗	✗	✗	✗	✓ HAS DiscouragedUse	COVERED	-	Already in D4D
+Processing maturity levels	✗	✗	✗	✗	✗	✗	✗ MISSING	MISSING	3	Raw/filtered/structured/derived
+Deprecation policy	✗	✗	✗	✗	✗	✗	✗ MISSING	MISSING	3	Dataset retirement procedures
+# PROVENANCE & LICENSING
+PROV-O provenance	✗	✗	✓	✗	✗	✗	Partial (has was_derived_from)	ENHANCE	3	Add comprehensive PROV-O
+License	✓	✓	✓	✓	✗	✓	✓ HAS license slot	COVERED	-	Already in D4D
+License inheritance	✗	✗	✗	✗	✗	✗	✗ MISSING	MISSING	3	Most restrictive upstream license
+Upstream source references	✗	✗	✗	✗	✗	✓	✓ HAS raw_sources	COVERED	-	Already in D4D
+# COVERAGE & SCOPE
+Spatial coverage	✗	✗	✗	✓	✗	✗	✗ MISSING	MISSING	3	Geographic extent
+Temporal coverage	✗	✗	✗	✓	✗	✗	Partial (has collection_timeframes)	ENHANCE	3	Add schema:temporalCoverage mapping
+Language variety	✗	✗	✗	✗	✓	✗	✓ HAS language slot	COVERED	-	Already in D4D
+# ML-SPECIFIC
+Data splits (train/val/test)	✓	✗	✗	✗	✗	✗	✓ HAS Splits class	COVERED	-	Already in D4D
+Task categories	✗	✗	✗	✗	✗	✗	✓ HAS Task class	COVERED	-	Already in D4D
+Bounding boxes	✓	✗	✗	✗	✗	✗	✗ MISSING	MISSING	4	Domain-specific (vision)
+Foreign key relationships	✓	✗	✗	✗	✗	✗	✗ MISSING	MISSING	3	Table relationships
+# ETHICS & PRIVACY
+IRB approval	✗	✗	✗	✗	✗	✗	✓ HAS EthicalReview	COVERED	-	Already in D4D
+Informed consent	✗	✗	✗	✗	✗	✗	✓ HAS InformedConsent	COVERED	-	Already in D4D
+Deidentification	✗	✗	✗	✗	✗	✗	✓ HAS Deidentification	COVERED	-	Already in D4D
+Vulnerable populations	✗	✗	✗	✗	✗	✗	✓ HAS VulnerablePopulations	COVERED	-	Already in D4D
+PII categories	✗	✓	✗	✗	✗	✗	Partial (has SensitiveElement)	ENHANCE	2	Add PII taxonomy enum
+# DISTRIBUTION & ACCESS
+Distribution formats	✓	✗	✗	✓	✗	✗	✓ HAS DistributionFormat	COVERED	-	Already in D4D
+Download URL	✗	✗	✗	✓	✗	✗	✓ HAS download_url slot	COVERED	-	Already in D4D
+Access mechanism	✗	✗	✗	✓	✗	✗	Partial (has restrictions)	ENHANCE	2	Add access type enum
+Landing page	✗	✗	✗	✓	✗	✗	✓ HAS page slot	COVERED	-	Already in D4D
+# VALIDATION
+SHACL validation	✗	✗	✓	✗	✗	✗	✗ MISSING	MISSING	3	RDF constraint validation (LinkML can generate)
