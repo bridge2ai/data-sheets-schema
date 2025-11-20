@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-11-20T11:56:44
+# Generation date: 2025-11-20T12:15:35
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2822,7 +2822,7 @@ class VariableMetadata(DatasetProperty):
 
     id: Union[str, VariableMetadataId] = None
     variable_name: str = None
-    data_type: Optional[str] = None
+    data_type: Optional[Union[str, "VariableTypeEnum"]] = None
     unit: Optional[Union[str, URIorCURIE]] = None
     missing_value_code: Optional[Union[str, list[str]]] = empty_list()
     minimum_value: Optional[float] = None
@@ -2847,8 +2847,8 @@ class VariableMetadata(DatasetProperty):
         if not isinstance(self.variable_name, str):
             self.variable_name = str(self.variable_name)
 
-        if self.data_type is not None and not isinstance(self.data_type, str):
-            self.data_type = str(self.data_type)
+        if self.data_type is not None and not isinstance(self.data_type, VariableTypeEnum):
+            self.data_type = VariableTypeEnum(self.data_type)
 
         if self.unit is not None and not isinstance(self.unit, URIorCURIE):
             self.unit = URIorCURIE(self.unit)
@@ -3960,7 +3960,7 @@ slots.variableMetadata__variable_name = Slot(uri=SCHEMA.name, name="variableMeta
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__variable_name, domain=None, range=str)
 
 slots.variableMetadata__data_type = Slot(uri=SCHEMA.DataType, name="variableMetadata__data_type", curie=SCHEMA.curie('DataType'),
-                   model_uri=DATA_SHEETS_SCHEMA.variableMetadata__data_type, domain=None, range=Optional[str])
+                   model_uri=DATA_SHEETS_SCHEMA.variableMetadata__data_type, domain=None, range=Optional[Union[str, "VariableTypeEnum"]])
 
 slots.variableMetadata__unit = Slot(uri=QUDT.unit, name="variableMetadata__unit", curie=QUDT.curie('unit'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__unit, domain=None, range=Optional[Union[str, URIorCURIE]])

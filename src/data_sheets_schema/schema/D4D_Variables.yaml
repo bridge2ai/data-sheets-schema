@@ -59,7 +59,7 @@ classes:
         description: >-
           The data type of the variable (e.g., integer, float, string, boolean,
           date, categorical). Use standard type names when possible.
-        range: string
+        range: VariableTypeEnum
         slot_uri: schema:DataType
         exact_mappings:
           - csvw:datatype

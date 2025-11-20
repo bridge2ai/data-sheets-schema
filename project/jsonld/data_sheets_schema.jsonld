@@ -4211,7 +4211,7 @@
       "domain_of": [
         "VariableMetadata"
       ],
-      "range": "string",
+      "range": "VariableTypeEnum",
       "@type": "SlotDefinition"
     },
     {
@@ -7124,7 +7124,7 @@
             "schema:DataType"
           ],
           "slot_uri": "schema:DataType",
-          "range": "string",
+          "range": "VariableTypeEnum",
           "@type": "SlotDefinition"
         },
         {
@@ -7225,7 +7225,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2025-11-18T17:40:41",
   "source_file_size": 9614,
-  "generation_date": "2025-11-20T11:56:43",
+  "generation_date": "2025-11-20T12:15:34",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

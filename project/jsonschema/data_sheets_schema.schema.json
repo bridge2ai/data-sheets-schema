@@ -4666,11 +4666,8 @@
                     ]
                 },
                 "data_type": {
-                    "description": "The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standard type names when possible.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
+                    "$ref": "#/$defs/VariableTypeEnum",
+                    "description": "The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standard type names when possible."
                 },
                 "derivation": {
                     "description": "Description of how this variable was derived or calculated from other variables, if applicable.",
