@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-11-18T18:08:13
+# Generation date: 2025-11-20T11:56:44
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2337,6 +2337,8 @@ class EthicalReview(DatasetProperty):
 
     id: Union[str, EthicalReviewId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
+    contact_person: Optional[Union[str, PersonId]] = None
+    reviewing_organization: Optional[Union[str, OrganizationId]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2347,6 +2349,12 @@ class EthicalReview(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+
+        if self.contact_person is not None and not isinstance(self.contact_person, PersonId):
+            self.contact_person = PersonId(self.contact_person)
+
+        if self.reviewing_organization is not None and not isinstance(self.reviewing_organization, OrganizationId):
+            self.reviewing_organization = OrganizationId(self.reviewing_organization)
 
         super().__post_init__(**kwargs)
 
@@ -2705,6 +2713,7 @@ class LicenseAndUseTerms(DatasetProperty):
 
     id: Union[str, LicenseAndUseTermsId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
+    contact_person: Optional[Union[str, PersonId]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2715,6 +2724,9 @@ class LicenseAndUseTerms(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+
+        if self.contact_person is not None and not isinstance(self.contact_person, PersonId):
+            self.contact_person = PersonId(self.contact_person)
 
         super().__post_init__(**kwargs)
 
@@ -3836,6 +3848,12 @@ slots.extensionMechanism__description = Slot(uri=DCTERMS.description, name="exte
 slots.ethicalReview__description = Slot(uri=DCTERMS.description, name="ethicalReview__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__description, domain=None, range=Optional[Union[str, list[str]]])
 
+slots.ethicalReview__contact_person = Slot(uri=SCHEMA.contactPoint, name="ethicalReview__contact_person", curie=SCHEMA.curie('contactPoint'),
+                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__contact_person, domain=None, range=Optional[Union[str, PersonId]])
+
+slots.ethicalReview__reviewing_organization = Slot(uri=SCHEMA.provider, name="ethicalReview__reviewing_organization", curie=SCHEMA.curie('provider'),
+                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__reviewing_organization, domain=None, range=Optional[Union[str, OrganizationId]])
+
 slots.dataProtectionImpact__description = Slot(uri=DCTERMS.description, name="dataProtectionImpact__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__description, domain=None, range=Optional[Union[str, list[str]]])
 
@@ -3916,6 +3934,9 @@ slots.vulnerablePopulations__guardian_consent = Slot(uri=D4DHUMAN.guardian_conse
 
 slots.licenseAndUseTerms__description = Slot(uri=DCTERMS.license, name="licenseAndUseTerms__description", curie=DCTERMS.curie('license'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__description, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.licenseAndUseTerms__contact_person = Slot(uri=SCHEMA.contactPoint, name="licenseAndUseTerms__contact_person", curie=SCHEMA.curie('contactPoint'),
+                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[str, PersonId]])
 
 slots.iPRestrictions__description = Slot(uri=DCTERMS.rights, name="iPRestrictions__description", curie=DCTERMS.curie('rights'),
                    model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__description, domain=None, range=Optional[Union[str, list[str]]])

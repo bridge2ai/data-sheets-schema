@@ -51,6 +51,16 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:license
+      contact_person:
+        description: >-
+          Contact person for licensing questions. Provides structured contact
+          information including name, email, affiliation, and optional ORCID.
+          This person can answer questions about licensing terms, usage restrictions,
+          fees, and permissions.
+        range: Person
+        slot_uri: schema:contactPoint
+        exact_mappings:
+          - schema:contactPoint
 
 
   IPRestrictions:

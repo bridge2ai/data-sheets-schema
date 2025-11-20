@@ -3641,6 +3641,44 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "ethicalReview__contact_person",
+      "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
+      "mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "exact_mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "slot_uri": "http://schema.org/contactPoint",
+      "alias": "contact_person",
+      "owner": "EthicalReview",
+      "domain_of": [
+        "EthicalReview"
+      ],
+      "range": "Person",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "ethicalReview__reviewing_organization",
+      "description": "Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). Provides information about the body responsible for ethical oversight.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
+      "mappings": [
+        "http://schema.org/provider"
+      ],
+      "exact_mappings": [
+        "http://schema.org/provider"
+      ],
+      "slot_uri": "http://schema.org/provider",
+      "alias": "reviewing_organization",
+      "owner": "EthicalReview",
+      "domain_of": [
+        "EthicalReview"
+      ],
+      "range": "Organization",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "dataProtectionImpact__description",
       "description": "Details of the data protection impact analysis, if conducted.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
@@ -4027,6 +4065,25 @@
       ],
       "range": "string",
       "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "licenseAndUseTerms__contact_person",
+      "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "exact_mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "slot_uri": "http://schema.org/contactPoint",
+      "alias": "contact_person",
+      "owner": "LicenseAndUseTerms",
+      "domain_of": [
+        "LicenseAndUseTerms"
+      ],
+      "range": "Person",
       "@type": "SlotDefinition"
     },
     {
@@ -6490,7 +6547,9 @@
         "namedThing__id",
         "namedThing__name",
         "datasetProperty__used_software",
-        "ethicalReview__description"
+        "ethicalReview__description",
+        "ethicalReview__contact_person",
+        "ethicalReview__reviewing_organization"
       ],
       "slot_usage": {},
       "attributes": [
@@ -6500,6 +6559,26 @@
           "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "contact_person",
+          "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+          "exact_mappings": [
+            "schema:contactPoint"
+          ],
+          "slot_uri": "schema:contactPoint",
+          "range": "Person",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "reviewing_organization",
+          "description": "Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). Provides information about the body responsible for ethical oversight.",
+          "exact_mappings": [
+            "schema:provider"
+          ],
+          "slot_uri": "schema:provider",
+          "range": "Organization",
           "@type": "SlotDefinition"
         }
       ],
@@ -6882,7 +6961,8 @@
         "namedThing__id",
         "namedThing__name",
         "datasetProperty__used_software",
-        "licenseAndUseTerms__description"
+        "licenseAndUseTerms__description",
+        "licenseAndUseTerms__contact_person"
       ],
       "slot_usage": {},
       "attributes": [
@@ -6892,6 +6972,16 @@
           "slot_uri": "dcterms:license",
           "range": "string",
           "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "contact_person",
+          "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+          "exact_mappings": [
+            "schema:contactPoint"
+          ],
+          "slot_uri": "schema:contactPoint",
+          "range": "Person",
           "@type": "SlotDefinition"
         }
       ],
@@ -7135,7 +7225,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2025-11-18T17:40:41",
   "source_file_size": 9614,
-  "generation_date": "2025-11-18T18:08:12",
+  "generation_date": "2025-11-20T11:56:43",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

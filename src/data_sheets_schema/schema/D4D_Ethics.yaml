@@ -50,6 +50,23 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+      contact_person:
+        description: >-
+          Contact person for questions about ethical review. Provides structured
+          contact information including name, email, affiliation, and optional ORCID.
+        range: Person
+        slot_uri: schema:contactPoint
+        exact_mappings:
+          - schema:contactPoint
+      reviewing_organization:
+        description: >-
+          Organization that conducted the ethical review (e.g., Institutional Review Board,
+          Ethics Committee, Research Ethics Board). Provides information about the body
+          responsible for ethical oversight.
+        range: Organization
+        slot_uri: schema:provider
+        exact_mappings:
+          - schema:provider
 
 
   DataProtectionImpact:
