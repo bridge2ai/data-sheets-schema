@@ -148,36 +148,41 @@ classes:
         slot_uri: schema:url
 
   Person:
-    description: "An individual human being."
+    description: >-
+      An individual human being. This class represents a person in the context
+      of a specific dataset. Attributes like affiliation and email represent
+      the person's current or most relevant contact information for this dataset.
+      For stable cross-dataset identification, use the ORCID field. Note that
+      contributor roles (CRediT) are specified in the usage context (e.g., Creator class)
+      rather than on the Person directly, since roles vary by dataset.
     is_a: NamedThing
     class_uri: schema:Person
     exact_mappings:
       - foaf:Person
     attributes:
       affiliation:
-        description: "The organization(s) to which the person belongs."
+        description: >-
+          The organization(s) to which the person belongs in the context of this dataset.
+          May vary across datasets; multivalued to support multiple affiliations.
         range: Organization
         multivalued: true
         slot_uri: schema:affiliation
       email:
-        description: "The email address of the person."
+        description: >-
+          The email address of the person. Represents current/preferred contact
+          information in the context of this dataset.
         range: string
         slot_uri: schema:email
       orcid:
         description: >-
           ORCID (Open Researcher and Contributor ID) - a persistent digital identifier
           for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4).
+          Use this for stable cross-dataset identification.
         range: string
         pattern: "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$"
         slot_uri: schema:identifier
         exact_mappings:
           - schema:identifier
-      credit_roles:
-        description: >-
-          Contributor roles using the CRediT (Contributor Roles Taxonomy).
-          Specifies the specific contributions made by this person to the dataset.
-        range: CRediTRoleEnum
-        multivalued: true
 
   Information:
     description: "Grouping for datasets and data files"

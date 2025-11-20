@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-11-20T12:15:35
+# Generation date: 2025-11-20T12:24:03
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -483,7 +483,10 @@ class Software(NamedThing):
 @dataclass(repr=False)
 class Person(NamedThing):
     """
-    An individual human being.
+    An individual human being. This class represents a person in the context of a specific dataset. Attributes like
+    affiliation and email represent the person's current or most relevant contact information for this dataset. For
+    stable cross-dataset identification, use the ORCID field. Note that contributor roles (CRediT) are specified in
+    the usage context (e.g., Creator class) rather than on the Person directly, since roles vary by dataset.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -496,7 +499,6 @@ class Person(NamedThing):
     affiliation: Optional[Union[Union[str, OrganizationId], list[Union[str, OrganizationId]]]] = empty_list()
     email: Optional[str] = None
     orcid: Optional[str] = None
-    credit_roles: Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -513,10 +515,6 @@ class Person(NamedThing):
 
         if self.orcid is not None and not isinstance(self.orcid, str):
             self.orcid = str(self.orcid)
-
-        if not isinstance(self.credit_roles, list):
-            self.credit_roles = [self.credit_roles] if self.credit_roles is not None else []
-        self.credit_roles = [v if isinstance(v, CRediTRoleEnum) else CRediTRoleEnum(v) for v in self.credit_roles]
 
         super().__post_init__(**kwargs)
 
@@ -1084,6 +1082,7 @@ class Creator(DatasetProperty):
     id: Union[str, CreatorId] = None
     principal_investigator: Optional[Union[str, PersonId]] = None
     affiliation: Optional[Union[str, OrganizationId]] = None
+    credit_roles: Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -1096,6 +1095,10 @@ class Creator(DatasetProperty):
 
         if self.affiliation is not None and not isinstance(self.affiliation, OrganizationId):
             self.affiliation = OrganizationId(self.affiliation)
+
+        if not isinstance(self.credit_roles, list):
+            self.credit_roles = [self.credit_roles] if self.credit_roles is not None else []
+        self.credit_roles = [v if isinstance(v, CRediTRoleEnum) else CRediTRoleEnum(v) for v in self.credit_roles]
 
         super().__post_init__(**kwargs)
 
@@ -3605,9 +3608,6 @@ slots.person__orcid = Slot(uri=SCHEMA.identifier, name="person__orcid", curie=SC
                    model_uri=DATA_SHEETS_SCHEMA.person__orcid, domain=None, range=Optional[str],
                    pattern=re.compile(r'^\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$'))
 
-slots.person__credit_roles = Slot(uri=DATA_SHEETS_SCHEMA.credit_roles, name="person__credit_roles", curie=DATA_SHEETS_SCHEMA.curie('credit_roles'),
-                   model_uri=DATA_SHEETS_SCHEMA.person__credit_roles, domain=None, range=Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]])
-
 slots.formatDialect__comment_prefix = Slot(uri=DATA_SHEETS_SCHEMA.comment_prefix, name="formatDialect__comment_prefix", curie=DATA_SHEETS_SCHEMA.curie('comment_prefix'),
                    model_uri=DATA_SHEETS_SCHEMA.formatDialect__comment_prefix, domain=None, range=Optional[str])
 
@@ -3637,6 +3637,9 @@ slots.creator__principal_investigator = Slot(uri=DCTERMS.creator, name="creator_
 
 slots.creator__affiliation = Slot(uri=SCHEMA.affiliation, name="creator__affiliation", curie=SCHEMA.curie('affiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__affiliation, domain=None, range=Optional[Union[str, OrganizationId]])
+
+slots.creator__credit_roles = Slot(uri=D4DMOTIVATION.credit_roles, name="creator__credit_roles", curie=D4DMOTIVATION.curie('credit_roles'),
+                   model_uri=DATA_SHEETS_SCHEMA.creator__credit_roles, domain=None, range=Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]])
 
 slots.fundingMechanism__grantor = Slot(uri=SCHEMA.funder, name="fundingMechanism__grantor", curie=SCHEMA.curie('funder'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grantor, domain=None, range=Optional[Union[str, GrantorId]])

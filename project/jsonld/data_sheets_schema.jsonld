@@ -2329,7 +2329,7 @@
     },
     {
       "name": "person__affiliation",
-      "description": "The organization(s) to which the person belongs.",
+      "description": "The organization(s) to which the person belongs in the context of this dataset. May vary across datasets; multivalued to support multiple affiliations.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://schema.org/affiliation"
@@ -2346,7 +2346,7 @@
     },
     {
       "name": "person__email",
-      "description": "The email address of the person.",
+      "description": "The email address of the person. Represents current/preferred contact information in the context of this dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://schema.org/email"
@@ -2362,7 +2362,7 @@
     },
     {
       "name": "person__orcid",
-      "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4).",
+      "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://schema.org/identifier"
@@ -2378,20 +2378,6 @@
       ],
       "range": "string",
       "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "person__credit_roles",
-      "description": "Contributor roles using the CRediT (Contributor Roles Taxonomy). Specifies the specific contributions made by this person to the dataset.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/credit_roles",
-      "alias": "credit_roles",
-      "owner": "Person",
-      "domain_of": [
-        "Person"
-      ],
-      "range": "CRediTRoleEnum",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -2535,6 +2521,20 @@
         "Creator"
       ],
       "range": "Organization",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "creator__credit_roles",
+      "description": "Contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#credit_roles",
+      "alias": "credit_roles",
+      "owner": "Creator",
+      "domain_of": [
+        "Creator"
+      ],
+      "range": "CRediTRoleEnum",
+      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5062,7 +5062,7 @@
     {
       "name": "Person",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Person",
-      "description": "An individual human being.",
+      "description": "An individual human being. This class represents a person in the context of a specific dataset. Attributes like affiliation and email represent the person's current or most relevant contact information for this dataset. For stable cross-dataset identification, use the ORCID field. Note that contributor roles (CRediT) are specified in the usage context (e.g., Creator class) rather than on the Person directly, since roles vary by dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "schema:Person"
@@ -5077,14 +5077,13 @@
         "namedThing__description",
         "person__affiliation",
         "person__email",
-        "person__orcid",
-        "person__credit_roles"
+        "person__orcid"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "affiliation",
-          "description": "The organization(s) to which the person belongs.",
+          "description": "The organization(s) to which the person belongs in the context of this dataset. May vary across datasets; multivalued to support multiple affiliations.",
           "slot_uri": "schema:affiliation",
           "range": "Organization",
           "multivalued": true,
@@ -5092,27 +5091,20 @@
         },
         {
           "name": "email",
-          "description": "The email address of the person.",
+          "description": "The email address of the person. Represents current/preferred contact information in the context of this dataset.",
           "slot_uri": "schema:email",
           "range": "string",
           "@type": "SlotDefinition"
         },
         {
           "name": "orcid",
-          "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4).",
+          "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
           "exact_mappings": [
             "schema:identifier"
           ],
           "slot_uri": "schema:identifier",
           "range": "string",
           "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "credit_roles",
-          "description": "Contributor roles using the CRediT (Contributor Roles Taxonomy). Specifies the specific contributions made by this person to the dataset.",
-          "range": "CRediTRoleEnum",
-          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -5285,7 +5277,8 @@
         "namedThing__description",
         "datasetProperty__used_software",
         "creator__principal_investigator",
-        "creator__affiliation"
+        "creator__affiliation",
+        "creator__credit_roles"
       ],
       "slot_usage": {},
       "attributes": [
@@ -5304,6 +5297,13 @@
           "description": "Organization(s) with which the creator or team is affiliated.",
           "slot_uri": "schema:affiliation",
           "range": "Organization",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "credit_roles",
+          "description": "Contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
+          "range": "CRediTRoleEnum",
+          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -7225,7 +7225,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2025-11-18T17:40:41",
   "source_file_size": 9614,
-  "generation_date": "2025-11-20T12:15:34",
+  "generation_date": "2025-11-20T12:24:02",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

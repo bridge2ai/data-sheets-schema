@@ -84,6 +84,15 @@ classes:
         description: "Organization(s) with which the creator or team is affiliated."
         range: Organization
         slot_uri: schema:affiliation
+      credit_roles:
+        description: >-
+          Contributor roles using the CRediT (Contributor Roles Taxonomy) for
+          the principal investigator or creator team. Specifies the specific
+          contributions made to this dataset (e.g., Conceptualization, Data Curation,
+          Methodology). Note: roles are specified here rather than on Person directly,
+          since the same person may have different roles across different datasets.
+        range: CRediTRoleEnum
+        multivalued: true
 
 
   FundingMechanism:
