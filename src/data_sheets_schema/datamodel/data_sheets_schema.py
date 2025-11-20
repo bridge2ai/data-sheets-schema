@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-11-20T12:24:03
+# Generation date: 2025-11-20T12:34:10
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -66,6 +66,7 @@ version = None
 B2AI_STANDARD = CurieNamespace('B2AI_STANDARD', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 B2AI_SUBSTRATE = CurieNamespace('B2AI_SUBSTRATE', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 B2AI_TOPIC = CurieNamespace('B2AI_TOPIC', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
+DUO = CurieNamespace('DUO', 'http://purl.obolibrary.org/obo/DUO_')
 BIBO = CurieNamespace('bibo', 'http://purl.org/ontology/bibo/')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/vocab/')
 CSVW = CurieNamespace('csvw', 'http://www.w3.org/ns/csvw#')
@@ -2716,6 +2717,7 @@ class LicenseAndUseTerms(DatasetProperty):
 
     id: Union[str, LicenseAndUseTermsId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
+    data_use_permission: Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]] = empty_list()
     contact_person: Optional[Union[str, PersonId]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -2728,6 +2730,10 @@ class LicenseAndUseTerms(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
+        if not isinstance(self.data_use_permission, list):
+            self.data_use_permission = [self.data_use_permission] if self.data_use_permission is not None else []
+        self.data_use_permission = [v if isinstance(v, DataUsePermissionEnum) else DataUsePermissionEnum(v) for v in self.data_use_permission]
+
         if self.contact_person is not None and not isinstance(self.contact_person, PersonId):
             self.contact_person = PersonId(self.contact_person)
 
@@ -2738,7 +2744,8 @@ class LicenseAndUseTerms(DatasetProperty):
 class IPRestrictions(DatasetProperty):
     """
     Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so,
-    describe them and note any relevant fees or licensing terms.
+    describe them and note any relevant fees or licensing terms. Maps to DUO terms related to commercial/non-profit
+    use restrictions (NCU, NPU, NPUNCU).
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -2768,7 +2775,8 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
     """
     Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? Includes
     compliance tracking for regulations like GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and
-    provide a link or copy of any supporting documentation.
+    provide a link or copy of any supporting documentation. Maps to DUO terms related to ethics approval, geographic
+    restrictions, and institutional requirements.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -3287,6 +3295,105 @@ class AIActRiskEnum(EnumDefinitionImpl):
     _defn = EnumDefinition(
         name="AIActRiskEnum",
         description="Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/",
+    )
+
+class DataUsePermissionEnum(EnumDefinitionImpl):
+    """
+    Data use permissions and restrictions based on the Data Use Ontology (DUO). DUO is a standardized ontology for
+    representing data use conditions developed by GA4GH. See https://github.com/EBISPOT/DUO
+    """
+    no_restriction = PermissibleValue(
+        text="no_restriction",
+        description="No restriction on data use",
+        meaning=DUO["0000004"])
+    general_research_use = PermissibleValue(
+        text="general_research_use",
+        description="Data available for any research purpose (GRU)",
+        meaning=DUO["0000042"])
+    health_medical_biomedical_research = PermissibleValue(
+        text="health_medical_biomedical_research",
+        description="Data limited to health, medical, or biomedical research (HMB)",
+        meaning=DUO["0000006"])
+    disease_specific_research = PermissibleValue(
+        text="disease_specific_research",
+        description="Data limited to research on specified disease(s) (DS)",
+        meaning=DUO["0000007"])
+    population_origins_ancestry_research = PermissibleValue(
+        text="population_origins_ancestry_research",
+        description="Data limited to population origins or ancestry research (POA)",
+        meaning=DUO["0000011"])
+    clinical_care_use = PermissibleValue(
+        text="clinical_care_use",
+        description="Data available for clinical care and applications (CC)",
+        meaning=DUO["0000043"])
+    no_commercial_use = PermissibleValue(
+        text="no_commercial_use",
+        description="Data use limited to non-commercial purposes (NCU)",
+        meaning=DUO["0000046"])
+    non_profit_use_only = PermissibleValue(
+        text="non_profit_use_only",
+        description="Data use limited to not-for-profit organizations (NPU)",
+        meaning=DUO["0000045"])
+    non_profit_use_and_non_commercial_use = PermissibleValue(
+        text="non_profit_use_and_non_commercial_use",
+        description="Data limited to not-for-profit organizations and non-commercial use (NPUNCU)",
+        meaning=DUO["0000018"])
+    no_methods_development = PermissibleValue(
+        text="no_methods_development",
+        description="Data cannot be used for methods or software development (NMDS)",
+        meaning=DUO["0000015"])
+    genetic_studies_only = PermissibleValue(
+        text="genetic_studies_only",
+        description="Data limited to genetic studies only (GSO)",
+        meaning=DUO["0000016"])
+    ethics_approval_required = PermissibleValue(
+        text="ethics_approval_required",
+        description="Ethics approval (e.g., IRB/ERB) required for data use (IRB)",
+        meaning=DUO["0000021"])
+    collaboration_required = PermissibleValue(
+        text="collaboration_required",
+        description="Collaboration with primary investigator required (COL)",
+        meaning=DUO["0000020"])
+    publication_required = PermissibleValue(
+        text="publication_required",
+        description="Results must be published/shared with research community (PUB)",
+        meaning=DUO["0000019"])
+    geographic_restriction = PermissibleValue(
+        text="geographic_restriction",
+        description="Data use limited to specific geographic region (GS)",
+        meaning=DUO["0000022"])
+    institution_specific = PermissibleValue(
+        text="institution_specific",
+        description="Data use limited to approved institutions (IS)",
+        meaning=DUO["0000028"])
+    project_specific = PermissibleValue(
+        text="project_specific",
+        description="Data use limited to approved project(s) (PS)",
+        meaning=DUO["0000027"])
+    user_specific = PermissibleValue(
+        text="user_specific",
+        description="Data use limited to approved users (US)",
+        meaning=DUO["0000026"])
+    time_limit = PermissibleValue(
+        text="time_limit",
+        description="Data use approved for limited time period (TS)",
+        meaning=DUO["0000025"])
+    return_to_database = PermissibleValue(
+        text="return_to_database",
+        description="Derived data must be returned to database/resource (RTN)",
+        meaning=DUO["0000029"])
+    publication_moratorium = PermissibleValue(
+        text="publication_moratorium",
+        description="Publication restricted until specified date (MOR)",
+        meaning=DUO["0000024"])
+    no_population_ancestry_research = PermissibleValue(
+        text="no_population_ancestry_research",
+        description="Population/ancestry research prohibited (NPOA)",
+        meaning=DUO["0000044"])
+
+    _defn = EnumDefinition(
+        name="DataUsePermissionEnum",
+        description="""Data use permissions and restrictions based on the Data Use Ontology (DUO). DUO is a standardized ontology for representing data use conditions developed by GA4GH. See https://github.com/EBISPOT/DUO""",
     )
 
 class VariableTypeEnum(EnumDefinitionImpl):
@@ -3937,6 +4044,9 @@ slots.vulnerablePopulations__guardian_consent = Slot(uri=D4DHUMAN.guardian_conse
 
 slots.licenseAndUseTerms__description = Slot(uri=DCTERMS.license, name="licenseAndUseTerms__description", curie=DCTERMS.curie('license'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__description, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="licenseAndUseTerms__data_use_permission", curie=DUO.curie('0000001'),
+                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]])
 
 slots.licenseAndUseTerms__contact_person = Slot(uri=SCHEMA.contactPoint, name="licenseAndUseTerms__contact_person", curie=SCHEMA.curie('contactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[str, PersonId]])
