@@ -113,7 +113,8 @@ class D4DEvaluator:
             if 'resources' in data['DatasetCollection'] and data['DatasetCollection']['resources']:
                 return data['DatasetCollection']['resources'][0]
             else:
-                print(f"Warning: DatasetCollection format but no resources found in {file_path}")
+                print(
+                    f"Warning: DatasetCollection format but no resources found in {file_path}")
                 return {}
 
         # Otherwise, return as-is (flat D4D format)
@@ -154,10 +155,12 @@ class D4DEvaluator:
             if value is not None:
                 # Handle different types
                 if isinstance(value, str) and value.strip():
-                    found_values.append(f"{field_path}: {value[:100]}")  # Truncate long strings
+                    # Truncate long strings
+                    found_values.append(f"{field_path}: {value[:100]}")
                     return True, found_values
                 elif isinstance(value, (list, dict)) and value:
-                    found_values.append(f"{field_path}: {type(value).__name__} (non-empty)")
+                    found_values.append(
+                        f"{field_path}: {type(value).__name__} (non-empty)")
                     return True, found_values
                 elif isinstance(value, (int, float, bool)):
                     found_values.append(f"{field_path}: {value}")
@@ -176,7 +179,8 @@ class D4DEvaluator:
                 field_paths = [field_paths]
 
             # Check if field is present
-            is_present, found_values = self._is_field_present(d4d_data, field_paths)
+            is_present, found_values = self._is_field_present(
+                d4d_data, field_paths)
 
             score = 1 if is_present else 0
 
@@ -205,7 +209,8 @@ class D4DEvaluator:
         if isinstance(field_paths, str):
             field_paths = [field_paths]
 
-        is_present, found_values = self._is_field_present(d4d_data, field_paths)
+        is_present, found_values = self._is_field_present(
+            d4d_data, field_paths)
 
         score_type = question['score_type']
 
@@ -220,7 +225,8 @@ class D4DEvaluator:
             # More sophisticated scoring would analyze content quality
             if not is_present:
                 score = 0
-                score_label = list(question['scoring'].values())[0]  # Get "0" description
+                score_label = list(question['scoring'].values())[
+                    0]  # Get "0" description
             else:
                 # Simple heuristic: if present, give middle-high score
                 score = 4
@@ -267,7 +273,8 @@ class D4DEvaluator:
 
         rubric10_total = sum(s.total_score for s in rubric10_scores)
         rubric10_max = len(rubric10_scores) * 5
-        rubric10_percentage = (rubric10_total / rubric10_max * 100) if rubric10_max > 0 else 0
+        rubric10_percentage = (
+            rubric10_total / rubric10_max * 100) if rubric10_max > 0 else 0
 
         # Score rubric20
         rubric20_scores = []
@@ -277,7 +284,8 @@ class D4DEvaluator:
 
         rubric20_total = sum(s.score for s in rubric20_scores)
         rubric20_max = sum(s.max_score for s in rubric20_scores)
-        rubric20_percentage = (rubric20_total / rubric20_max * 100) if rubric20_max > 0 else 0
+        rubric20_percentage = (
+            rubric20_total / rubric20_max * 100) if rubric20_max > 0 else 0
 
         return D4DEvaluation(
             project=project,
@@ -305,18 +313,22 @@ class D4DEvaluator:
                 # Curated files use {PROJECT}_curated.yaml naming
                 # Other methods use {PROJECT}_d4d.yaml naming
                 if method == "curated":
-                    file_path = base_dir / "d4d_concatenated" / "curated" / f"{project}_curated.yaml"
+                    file_path = base_dir / "d4d_concatenated" / \
+                        "curated" / f"{project}_curated.yaml"
                 elif method == "gpt5":
-                    file_path = base_dir / "d4d_concatenated" / "gpt5" / f"{project}_d4d.yaml"
+                    file_path = base_dir / "d4d_concatenated" / \
+                        "gpt5" / f"{project}_d4d.yaml"
                 elif method == "claudecode":
-                    file_path = base_dir / "d4d_concatenated" / "claudecode" / f"{project}_d4d.yaml"
+                    file_path = base_dir / "d4d_concatenated" / \
+                        "claudecode" / f"{project}_d4d.yaml"
                 else:
                     print(f"Unknown method: {method}")
                     continue
 
                 # Check if file exists
                 if not file_path.exists():
-                    print(f"Skipping {project}/{method}: file not found at {file_path}")
+                    print(
+                        f"Skipping {project}/{method}: file not found at {file_path}")
                     continue
 
                 print(f"Evaluating {project}/{method}...")
@@ -334,14 +346,17 @@ class D4DEvaluator:
             method_dir = base_dir / "d4d_individual" / method
 
             if not method_dir.exists():
-                print(f"Skipping method {method}: directory not found at {method_dir}")
+                print(
+                    f"Skipping method {method}: directory not found at {method_dir}")
                 continue
 
             # Find all *_d4d.yaml files (excluding *_metadata.yaml)
             d4d_files = sorted(method_dir.glob("**/*_d4d.yaml"))
-            d4d_files = [f for f in d4d_files if not f.name.endswith("_metadata.yaml")]
+            d4d_files = [
+                f for f in d4d_files if not f.name.endswith("_metadata.yaml")]
 
-            print(f"\nEvaluating {len(d4d_files)} individual files for method: {method}")
+            print(
+                f"\nEvaluating {len(d4d_files)} individual files for method: {method}")
 
             for file_path in d4d_files:
                 # Extract project and file identifier from path
@@ -351,7 +366,8 @@ class D4DEvaluator:
 
                 print(f"  - {project}/{file_id}...")
 
-                evaluation = self.evaluate_d4d_file(file_path, f"{project}/{file_id}", method)
+                evaluation = self.evaluate_d4d_file(
+                    file_path, f"{project}/{file_id}", method)
                 evaluations.append(evaluation)
 
         return evaluations
@@ -382,7 +398,8 @@ class D4DEvaluator:
         for project in sorted(projects):
             row = [project]
             for method in ["curated", "gpt5", "claudecode"]:
-                evals = [e for e in evaluations if e.project == project and e.method == method]
+                evals = [e for e in evaluations if e.project ==
+                         project and e.method == method]
                 if evals:
                     score = f"{evals[0].rubric10_total:.1f} ({evals[0].rubric10_percentage:.1f}%)"
                 else:
@@ -397,7 +414,8 @@ class D4DEvaluator:
         for project in sorted(projects):
             row = [project]
             for method in ["curated", "gpt5", "claudecode"]:
-                evals = [e for e in evaluations if e.project == project and e.method == method]
+                evals = [e for e in evaluations if e.project ==
+                         project and e.method == method]
                 if evals:
                     score = f"{evals[0].rubric20_total:.1f}/{evals[0].rubric20_max} ({evals[0].rubric20_percentage:.1f}%)"
                 else:
@@ -412,8 +430,10 @@ class D4DEvaluator:
             if not method_evals:
                 continue
 
-            avg_rubric10 = sum(e.rubric10_percentage for e in method_evals) / len(method_evals)
-            avg_rubric20 = sum(e.rubric20_percentage for e in method_evals) / len(method_evals)
+            avg_rubric10 = sum(
+                e.rubric10_percentage for e in method_evals) / len(method_evals)
+            avg_rubric20 = sum(
+                e.rubric20_percentage for e in method_evals) / len(method_evals)
 
             lines.append(f"\n### {method.upper()}")
             lines.append(f"- Average Rubric10: {avg_rubric10:.1f}%")
@@ -430,23 +450,28 @@ class D4DEvaluator:
         """Generate detailed evaluation report for a single D4D file"""
 
         lines = []
-        lines.append(f"# Detailed Evaluation: {evaluation.project} - {evaluation.method.upper()}")
+        lines.append(
+            f"# Detailed Evaluation: {evaluation.project} - {evaluation.method.upper()}")
         lines.append(f"\nEvaluated: {evaluation.timestamp}")
         lines.append(f"File: `{evaluation.file_path}`\n")
 
         lines.append("## Overall Scores\n")
-        lines.append(f"- **Rubric10**: {evaluation.rubric10_total:.1f}/{evaluation.rubric10_max} ({evaluation.rubric10_percentage:.1f}%)")
-        lines.append(f"- **Rubric20**: {evaluation.rubric20_total:.1f}/{evaluation.rubric20_max} ({evaluation.rubric20_percentage:.1f}%)\n")
+        lines.append(
+            f"- **Rubric10**: {evaluation.rubric10_total:.1f}/{evaluation.rubric10_max} ({evaluation.rubric10_percentage:.1f}%)")
+        lines.append(
+            f"- **Rubric20**: {evaluation.rubric20_total:.1f}/{evaluation.rubric20_max} ({evaluation.rubric20_percentage:.1f}%)\n")
 
         lines.append("## Rubric10 Element Scores\n")
         lines.append("| ID | Element | Score | Details |")
         lines.append("|----|---------|-------|---------|")
 
         for elem_score in evaluation.rubric10_scores:
-            passed = sum(1 for s in elem_score.sub_element_scores if s.score == 1)
+            passed = sum(
+                1 for s in elem_score.sub_element_scores if s.score == 1)
             failed = len(elem_score.sub_element_scores) - passed
             details = f"{passed}/5 sub-elements present"
-            lines.append(f"| {elem_score.element_id} | {elem_score.name} | {elem_score.total_score}/5 | {details} |")
+            lines.append(
+                f"| {elem_score.element_id} | {elem_score.name} | {elem_score.total_score}/5 | {details} |")
 
         lines.append("\n### Rubric10 Sub-Element Details\n")
 
@@ -460,7 +485,8 @@ class D4DEvaluator:
                 if sub_score.found_values:
                     lines.append(f"  - Found: {sub_score.found_values[0]}")
                 else:
-                    lines.append(f"  - Fields checked: {', '.join(sub_score.field_paths)}")
+                    lines.append(
+                        f"  - Fields checked: {', '.join(sub_score.field_paths)}")
 
         lines.append("\n## Rubric20 Question Scores\n")
 
@@ -482,8 +508,10 @@ class D4DEvaluator:
                 else:
                     score_str = f"{q_score.score:.1f}/{q_score.max_score}"
 
-                status = "✅" if (q_score.score == 1 and q_score.score_type == "pass_fail") or (q_score.score >= 3 and q_score.score_type == "numeric") else "❌"
-                lines.append(f"| {q_score.question_id} | {q_score.name} | {score_str} | {status} |")
+                status = "✅" if (q_score.score == 1 and q_score.score_type == "pass_fail") or (
+                    q_score.score >= 3 and q_score.score_type == "numeric") else "❌"
+                lines.append(
+                    f"| {q_score.question_id} | {q_score.name} | {score_str} | {status} |")
 
         # Write report
         with open(output_path, 'w') as f:
@@ -580,7 +608,8 @@ class D4DEvaluator:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Evaluate D4D YAML files using rubrics')
+    parser = argparse.ArgumentParser(
+        description='Evaluate D4D YAML files using rubrics')
     parser.add_argument('--base-dir', type=str, default='data',
                         help='Base directory containing d4d_concatenated/ or d4d_individual/')
     parser.add_argument('--rubric10', type=str, default='data/rubric/rubric10.txt',
@@ -622,7 +651,8 @@ def main():
         evaluations = evaluator.evaluate_individual_files(base_dir, methods)
     else:
         # Evaluate concatenated files
-        evaluations = evaluator.evaluate_all_projects(base_dir, projects, args.methods)
+        evaluations = evaluator.evaluate_all_projects(
+            base_dir, projects, args.methods)
 
     if not evaluations:
         print("No evaluations completed!")
@@ -639,7 +669,8 @@ def main():
     for evaluation in evaluations:
         # For individual files, use sanitized filename
         safe_project = evaluation.project.replace("/", "_").replace(" ", "_")
-        detail_path = detailed_dir / f"{safe_project}_{evaluation.method}_evaluation.md"
+        detail_path = detailed_dir / \
+            f"{safe_project}_{evaluation.method}_evaluation.md"
         evaluator.generate_detailed_report(evaluation, detail_path)
 
     # Export scores
