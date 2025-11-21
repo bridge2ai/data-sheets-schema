@@ -1,46 +1,36 @@
-id: chorus-equitable-ai
-name: CHoRUS for Equitable AI
-title: CHoRUS for Equitable AI
-description: A collection of CHORUS project documents related to equitable AI, including a GitHub PDF and an AIM-AHEAD Bridge2AI for Clinical Care informational webinar PDF.
-keywords:
-  - CHORUS
-  - Equitable AI
-  - GitHub
-  - PDF
-  - Bridge2AI
-  - AIM-AHEAD
-  - Clinical care
-  - Informational webinar
+id: chorus-project-documentation
+name: CHORUS Project Documentation
+title: CHORUS Project Documentation Resources
+description: |-
+  Consolidated documentation resources related to the CHORUS project, including:
+  1) "CHoRUS for Equitable AI" (GitHub-associated PDF), and
+  2) "AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar" (PDF).
+  These materials pertain to CHORUS, equitable AI, Bridge2AI, AIM-AHEAD, and clinical
+  care informational activities.
 resources:
   - id: chorus-for-equitable-ai-github-pdf
     name: CHoRUS for Equitable AI - GitHub PDF
     title: CHoRUS for Equitable AI
-    description: PDF document related to the CHORUS project and equitable AI. Source filename indicates association with GitHub.
+    description: |-
+      PDF document related to the CHORUS project and equitable AI. Source filename indicates
+      association with GitHub.
     media_type: application/pdf
-    keywords:
-      - CHORUS
-      - Equitable AI
-      - GitHub
-      - PDF
     distribution_formats:
-      - description:
-          - PDF
-          - application/pdf
+      - name: PDF
+        media_type: application/pdf
+        description: Portable Document Format
   - id: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7
     name: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf
     title: AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar
-    description: PDF document titled "AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar"; categorized under CHORUS. Source content text not available; metadata inferred from file name and project category.
+    description: |-
+      PDF document titled "AIM-AHEAD Bridge2AI for Clinical Care Informational Webinar";
+      categorized under CHORUS. Source content text not available; metadata inferred from
+      file name and project category.
     path: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf
     media_type: application/pdf
-    keywords:
-      - CHORUS
-      - Bridge2AI
-      - AIM-AHEAD
-      - Clinical care
-      - Informational webinar
-      - PDF
     purposes:
       - response: Informational webinar material related to Bridge2AI for Clinical Care (CHORUS).
     distribution_formats:
-      - description:
-          - Portable Document Format (application/pdf)
+      - name: PDF
+        media_type: application/pdf
+        description: Portable Document Format
