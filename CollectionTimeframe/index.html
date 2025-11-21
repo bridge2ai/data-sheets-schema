@@ -210,7 +210,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-collectiontimeframe">Class: CollectionTimeframe</h1>
-<p><em>Over what timeframe was the data collected, and does this timeframe match the  creation timeframe of the underlying data?</em></p>
+<p><em>Over what timeframe was the data collected, and does this timeframe match the creation timeframe of the underlying data?</em></p>
 <p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/CollectionTimeframe">data_sheets_schema:CollectionTimeframe</a></p>
 <div class="mermaid"> classDiagram
@@ -340,7 +340,7 @@
 <details>
 <pre><code class="language-yaml">name: CollectionTimeframe
 description: 'Over what timeframe was the data collected, and does this timeframe
-  match the  creation timeframe of the underlying data?
+  match the creation timeframe of the underlying data?
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -350,6 +350,7 @@ attributes:
     name: description
     description: Free-text description of the data collection timeframe
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    slot_uri: dcterms:temporal
     domain_of:
     - NamedThing
     - Relationships
@@ -398,7 +399,7 @@ attributes:
 <details>
 <pre><code class="language-yaml">name: CollectionTimeframe
 description: 'Over what timeframe was the data collected, and does this timeframe
-  match the  creation timeframe of the underlying data?
+  match the creation timeframe of the underlying data?
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -408,6 +409,7 @@ attributes:
     name: description
     description: Free-text description of the data collection timeframe
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    slot_uri: dcterms:temporal
     alias: description
     owner: CollectionTimeframe
     domain_of:

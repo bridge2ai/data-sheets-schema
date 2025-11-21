@@ -339,8 +339,8 @@
 
 
 <h1 id="slot-email">Slot: email</h1>
-<p><em>The email address of the person.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/email">data_sheets_schema:email</a>
+<p><em>The email address of the person. Represents current/preferred contact information in the context of this dataset.</em></p>
+<p>URI: <a href="http://schema.org/email">schema:email</a>
 Alias: email</p>
 <!-- no inheritance hierarchy -->
 
@@ -381,7 +381,7 @@ Alias: email</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:email</td>
+<td>schema:email</td>
 </tr>
 <tr>
 <td>native</td>
@@ -393,9 +393,11 @@ Alias: email</p>
 <details>
 
 <pre><code class="language-yaml">name: email
-description: The email address of the person.
+description: The email address of the person. Represents current/preferred contact
+  information in the context of this dataset.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:email
 alias: email
 owner: Person
 domain_of:

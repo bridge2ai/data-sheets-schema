@@ -271,7 +271,7 @@
 <tr>
 <td><a href="../description/">description</a></td>
 <td>* <br/> <a href="../CreatorOrMaintainerEnum/">CreatorOrMaintainerEnum</a></td>
-<td>Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum...</td>
+<td>Name or role of the maintainer, possibly referencing CreatorOrMaintainerEnum ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -356,11 +356,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum
+    description: 'Name or role of the maintainer, possibly referencing CreatorOrMaintainerEnum
       or other details.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    slot_uri: schema:maintainer
     domain_of:
     - NamedThing
     - Relationships
@@ -416,11 +417,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum
+    description: 'Name or role of the maintainer, possibly referencing CreatorOrMaintainerEnum
       or other details.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    slot_uri: schema:maintainer
     alias: description
     owner: Maintainer
     domain_of:

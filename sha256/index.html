@@ -340,7 +340,7 @@
 
 <h1 id="slot-sha256">Slot: sha256</h1>
 <p><em>sha256 hash of the data</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/sha256">data_sheets_schema:sha256</a>
+<p>URI: <a href="http://purl.org/dc/terms/identifier">dcterms:identifier</a>
 Alias: sha256</p>
 <!-- no inheritance hierarchy -->
 
@@ -355,13 +355,13 @@ Alias: sha256</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -386,7 +386,7 @@ Alias: sha256</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:sha256</td>
+<td>dcterms:identifier</td>
 </tr>
 <tr>
 <td>native</td>
@@ -401,6 +401,7 @@ Alias: sha256</p>
 description: sha256 hash of the data
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcterms:identifier
 alias: sha256
 domain_of:
 - Dataset

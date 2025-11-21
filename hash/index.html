@@ -340,7 +340,7 @@
 
 <h1 id="slot-hash">Slot: hash</h1>
 <p><em>hash of the data</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/hash">data_sheets_schema:hash</a>
+<p>URI: <a href="http://purl.org/dc/terms/identifier">dcterms:identifier</a>
 Alias: hash</p>
 <!-- no inheritance hierarchy -->
 
@@ -355,13 +355,13 @@ Alias: hash</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -386,7 +386,7 @@ Alias: hash</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:hash</td>
+<td>dcterms:identifier</td>
 </tr>
 <tr>
 <td>native</td>
@@ -401,6 +401,7 @@ Alias: hash</p>
 description: hash of the data
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcterms:identifier
 alias: hash
 domain_of:
 - Dataset

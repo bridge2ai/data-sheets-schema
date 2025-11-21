@@ -339,7 +339,7 @@
 
 
 <h1 id="slot-modified_by">Slot: modified_by</h1>
-<p>URI: <a href="http://purl.org/pav/lastUpdateBy">pav:lastUpdateBy</a>
+<p>URI: <a href="http://open-services.net/ns/core#modifiedBy">oslc:modifiedBy</a>
 Alias: modified_by</p>
 <!-- no inheritance hierarchy -->
 
@@ -359,8 +359,8 @@ Alias: modified_by</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -369,8 +369,8 @@ Alias: modified_by</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -395,11 +395,15 @@ Alias: modified_by</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>pav:lastUpdateBy</td>
+<td>oslc:modifiedBy</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:modified_by</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>pav:lastUpdateBy</td>
 </tr>
 </tbody>
 </table>
@@ -408,8 +412,10 @@ Alias: modified_by</p>
 
 <pre><code class="language-yaml">name: modified_by
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- pav:lastUpdateBy
 rank: 1000
-slot_uri: pav:lastUpdateBy
+slot_uri: oslc:modifiedBy
 alias: modified_by
 domain_of:
 - Information

@@ -210,7 +210,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-creator">Class: Creator</h1>
-<p><em>Who created the dataset (e.g., which team, research group) and on behalf of which  entity (e.g., company, institution, organization)? This may also be considered a team.</em></p>
+<p><em>Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team.</em></p>
 <p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/Creator">data_sheets_schema:Creator</a></p>
 <div class="mermaid"> classDiagram
@@ -227,6 +227,17 @@
 
         Creator --&gt; "0..1" Organization : affiliation
         click Organization href "../Organization/"
+
+
+
+      Creator : credit_roles
+
+
+
+
+
+        Creator --&gt; "*" CRediTRoleEnum : credit_roles
+        click CRediTRoleEnum href "../CRediTRoleEnum/"
 
 
 
@@ -291,6 +302,12 @@
 <td><a href="../affiliation/">affiliation</a></td>
 <td>0..1 <br/> <a href="../Organization/">Organization</a></td>
 <td>Organization(s) with which the creator or team is affiliated</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../credit_roles/">credit_roles</a></td>
+<td>* <br/> <a href="../CRediTRoleEnum/">CRediTRoleEnum</a></td>
+<td>Contributor roles using the CRediT (Contributor Roles Taxonomy) for the princ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -374,7 +391,7 @@
 <details>
 <pre><code class="language-yaml">name: Creator
 description: 'Who created the dataset (e.g., which team, research group) and on behalf
-  of which  entity (e.g., company, institution, organization)? This may also be considered
+  of which entity (e.g., company, institution, organization)? This may also be considered
   a team.
 
   '
@@ -386,7 +403,10 @@ attributes:
     description: A key individual (Principal Investigator) responsible for or overseeing
       dataset creation.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    exact_mappings:
+    - schema:creator
     rank: 1000
+    slot_uri: dcterms:creator
     domain_of:
     - Creator
     range: Person
@@ -394,10 +414,24 @@ attributes:
     name: affiliation
     description: Organization(s) with which the creator or team is affiliated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:affiliation
     domain_of:
     - Person
     - Creator
     range: Organization
+  credit_roles:
+    name: credit_roles
+    description: 'Contributor roles using the CRediT (Contributor Roles Taxonomy)
+      for the principal investigator or creator team. Specifies the specific contributions
+      made to this dataset (e.g., Conceptualization, Data Curation, Methodology).
+      Note: roles are specified here rather than on Person directly, since the same
+      person may have different roles across different datasets.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    rank: 1000
+    domain_of:
+    - Creator
+    range: CRediTRoleEnum
+    multivalued: true
 
 </code></pre>
 </details>
@@ -405,7 +439,7 @@ attributes:
 <details>
 <pre><code class="language-yaml">name: Creator
 description: 'Who created the dataset (e.g., which team, research group) and on behalf
-  of which  entity (e.g., company, institution, organization)? This may also be considered
+  of which entity (e.g., company, institution, organization)? This may also be considered
   a team.
 
   '
@@ -417,7 +451,10 @@ attributes:
     description: A key individual (Principal Investigator) responsible for or overseeing
       dataset creation.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    exact_mappings:
+    - schema:creator
     rank: 1000
+    slot_uri: dcterms:creator
     alias: principal_investigator
     owner: Creator
     domain_of:
@@ -427,12 +464,28 @@ attributes:
     name: affiliation
     description: Organization(s) with which the creator or team is affiliated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    slot_uri: schema:affiliation
     alias: affiliation
     owner: Creator
     domain_of:
     - Person
     - Creator
     range: Organization
+  credit_roles:
+    name: credit_roles
+    description: 'Contributor roles using the CRediT (Contributor Roles Taxonomy)
+      for the principal investigator or creator team. Specifies the specific contributions
+      made to this dataset (e.g., Conceptualization, Data Curation, Methodology).
+      Note: roles are specified here rather than on Person directly, since the same
+      person may have different roles across different datasets.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    rank: 1000
+    alias: credit_roles
+    owner: Creator
+    domain_of:
+    - Creator
+    range: CRediTRoleEnum
+    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?

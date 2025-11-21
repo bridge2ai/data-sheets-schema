@@ -210,7 +210,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-updateplan">Class: UpdatePlan</h1>
-<p><em>Will the dataset be updated (e.g., to correct labeling errors, add new  instances, delete instances)? If so, how often, by whom, and how will  these updates be communicated?</em></p>
+<p><em>Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, how often, by whom, and how will these updates be communicated?</em></p>
 <p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/UpdatePlan">data_sheets_schema:UpdatePlan</a></p>
 <div class="mermaid"> classDiagram
@@ -262,7 +262,7 @@
 <tr>
 <td><a href="../description/">description</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on the dataset's update policy, schedule, responsible parties,  and c...</td>
+<td>Details on the dataset's update policy, schedule, responsible parties, and co...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -339,8 +339,9 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: UpdatePlan
-description: 'Will the dataset be updated (e.g., to correct labeling errors, add new  instances,
-  delete instances)? If so, how often, by whom, and how will  these updates be communicated?
+description: 'Will the dataset be updated (e.g., to correct labeling errors, add new
+  instances, delete instances)? If so, how often, by whom, and how will these updates
+  be communicated?
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -348,11 +349,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Details on the dataset''s update policy, schedule, responsible parties,  and
-      communication channels (e.g., mailing list, GitHub releases).
+    description: 'Details on the dataset''s update policy, schedule, responsible parties,
+      and communication channels (e.g., mailing list, GitHub releases).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    slot_uri: pav:lastUpdateOn
     domain_of:
     - NamedThing
     - Relationships
@@ -400,8 +402,9 @@ attributes:
 <h3 id="induced">Induced</h3>
 <details>
 <pre><code class="language-yaml">name: UpdatePlan
-description: 'Will the dataset be updated (e.g., to correct labeling errors, add new  instances,
-  delete instances)? If so, how often, by whom, and how will  these updates be communicated?
+description: 'Will the dataset be updated (e.g., to correct labeling errors, add new
+  instances, delete instances)? If so, how often, by whom, and how will these updates
+  be communicated?
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -409,11 +412,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Details on the dataset''s update policy, schedule, responsible parties,  and
-      communication channels (e.g., mailing list, GitHub releases).
+    description: 'Details on the dataset''s update policy, schedule, responsible parties,
+      and communication channels (e.g., mailing list, GitHub releases).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    slot_uri: pav:lastUpdateOn
     alias: description
     owner: UpdatePlan
     domain_of:

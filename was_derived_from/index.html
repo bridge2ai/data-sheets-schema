@@ -339,7 +339,7 @@
 
 
 <h1 id="slot-was_derived_from">Slot: was_derived_from</h1>
-<p>URI: <a href="http://purl.org/pav/derivedFrom">pav:derivedFrom</a>
+<p>URI: <a href="http://www.w3.org/ns/prov#wasDerivedFrom">prov:wasDerivedFrom</a>
 Alias: was_derived_from</p>
 <!-- no inheritance hierarchy -->
 
@@ -359,8 +359,8 @@ Alias: was_derived_from</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -369,8 +369,8 @@ Alias: was_derived_from</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -395,11 +395,15 @@ Alias: was_derived_from</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>pav:derivedFrom</td>
+<td>prov:wasDerivedFrom</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:was_derived_from</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>pav:derivedFrom</td>
 </tr>
 </tbody>
 </table>
@@ -408,8 +412,10 @@ Alias: was_derived_from</p>
 
 <pre><code class="language-yaml">name: was_derived_from
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- pav:derivedFrom
 rank: 1000
-slot_uri: pav:derivedFrom
+slot_uri: prov:wasDerivedFrom
 alias: was_derived_from
 domain_of:
 - Information

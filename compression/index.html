@@ -340,7 +340,7 @@
 
 <h1 id="slot-compression">Slot: compression</h1>
 <p><em>compression format used, if any. e.g., gzip, bzip2, zip</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/compression">data_sheets_schema:compression</a>
+<p>URI: <a href="http://www.w3.org/ns/dcat#compressFormat">dcat:compressFormat</a>
 Alias: compression</p>
 <!-- no inheritance hierarchy -->
 
@@ -360,8 +360,8 @@ Alias: compression</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -370,8 +370,8 @@ Alias: compression</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -396,7 +396,7 @@ Alias: compression</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:compression</td>
+<td>dcat:compressFormat</td>
 </tr>
 <tr>
 <td>native</td>
@@ -411,6 +411,7 @@ Alias: compression</p>
 description: compression format used, if any. e.g., gzip, bzip2, zip
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcat:compressFormat
 alias: compression
 domain_of:
 - Information

@@ -211,7 +211,7 @@
 </a>
 <h1 id="class-software">Class: Software</h1>
 <p><em>A software program or library.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/Software">data_sheets_schema:Software</a></p>
+<p>URI: <a href="http://schema.org/SoftwareApplication">schema:SoftwareApplication</a></p>
 <div class="mermaid"> classDiagram
     class Software
     click Software href "../Software/"
@@ -623,6 +623,12 @@
 <td>range</td>
 <td><a href="./">Software</a></td>
 </tr>
+<tr>
+<td><a href="../VariableMetadata/">VariableMetadata</a></td>
+<td><a href="../used_software/">used_software</a></td>
+<td>range</td>
+<td><a href="./">Software</a></td>
+</tr>
 </tbody>
 </table>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
@@ -641,11 +647,15 @@
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:Software</td>
+<td>schema:SoftwareApplication</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:Software</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>schema:SoftwareApplication</td>
 </tr>
 </tbody>
 </table>
@@ -656,11 +666,14 @@
 <pre><code class="language-yaml">name: Software
 description: A software program or library.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- schema:SoftwareApplication
 is_a: NamedThing
 attributes:
   version:
     name: version
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:softwareVersion
     domain_of:
     - Software
     - Information
@@ -668,6 +681,7 @@ attributes:
   license:
     name: license
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:license
     domain_of:
     - Software
     - Information
@@ -676,9 +690,11 @@ attributes:
     name: url
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: schema:url
     domain_of:
     - Software
     range: string
+class_uri: schema:SoftwareApplication
 
 </code></pre>
 </details>
@@ -687,11 +703,14 @@ attributes:
 <pre><code class="language-yaml">name: Software
 description: A software program or library.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- schema:SoftwareApplication
 is_a: NamedThing
 attributes:
   version:
     name: version
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:softwareVersion
     alias: version
     owner: Software
     domain_of:
@@ -701,6 +720,7 @@ attributes:
   license:
     name: license
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:license
     alias: license
     owner: Software
     domain_of:
@@ -711,6 +731,7 @@ attributes:
     name: url
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: schema:url
     alias: url
     owner: Software
     domain_of:
@@ -788,6 +809,7 @@ attributes:
     - IPRestrictions
     - ExportControlRegulatoryRestrictions
     range: string
+class_uri: schema:SoftwareApplication
 
 </code></pre>
 </details>

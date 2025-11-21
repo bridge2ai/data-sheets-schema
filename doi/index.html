@@ -340,7 +340,7 @@
 
 <h1 id="slot-doi">Slot: doi</h1>
 <p><em>digital object identifier</em></p>
-<p>URI: <a href="http://rdfs.org/ns/void#uriRegexPattern">void:uriRegexPattern</a>
+<p>URI: <a href="http://purl.org/ontology/bibo/doi">bibo:doi</a>
 Alias: doi</p>
 <!-- no inheritance hierarchy -->
 
@@ -360,8 +360,8 @@ Alias: doi</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -370,8 +370,8 @@ Alias: doi</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -401,11 +401,15 @@ Alias: doi</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>void:uriRegexPattern</td>
+<td>bibo:doi</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:doi</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>dcterms:identifier</td>
 </tr>
 </tbody>
 </table>
@@ -415,8 +419,10 @@ Alias: doi</p>
 <pre><code class="language-yaml">name: doi
 description: digital object identifier
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- dcterms:identifier
 rank: 1000
-slot_uri: void:uriRegexPattern
+slot_uri: bibo:doi
 alias: doi
 domain_of:
 - Information

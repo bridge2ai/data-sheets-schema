@@ -211,7 +211,7 @@
 </a>
 <h1 id="class-organization">Class: Organization</h1>
 <p><em>Represents a group or organization.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/Organization">data_sheets_schema:Organization</a></p>
+<p>URI: <a href="http://schema.org/Organization">schema:Organization</a></p>
 <div class="mermaid"> classDiagram
     class Organization
     click Organization href "../Organization/"
@@ -295,6 +295,12 @@
 <td>range</td>
 <td><a href="./">Organization</a></td>
 </tr>
+<tr>
+<td><a href="../EthicalReview/">EthicalReview</a></td>
+<td><a href="../reviewing_organization/">reviewing_organization</a></td>
+<td>range</td>
+<td><a href="./">Organization</a></td>
+</tr>
 </tbody>
 </table>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
@@ -313,11 +319,15 @@
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:Organization</td>
+<td>schema:Organization</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:Organization</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>foaf:Organization</td>
 </tr>
 </tbody>
 </table>
@@ -328,7 +338,10 @@
 <pre><code class="language-yaml">name: Organization
 description: Represents a group or organization.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- foaf:Organization
 is_a: NamedThing
+class_uri: schema:Organization
 
 </code></pre>
 </details>
@@ -337,6 +350,8 @@ is_a: NamedThing
 <pre><code class="language-yaml">name: Organization
 description: Represents a group or organization.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- foaf:Organization
 is_a: NamedThing
 attributes:
   id:
@@ -411,6 +426,7 @@ attributes:
     - IPRestrictions
     - ExportControlRegulatoryRestrictions
     range: string
+class_uri: schema:Organization
 
 </code></pre>
 </details>

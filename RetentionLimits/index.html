@@ -262,7 +262,7 @@
 <tr>
 <td><a href="../description/">description</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Policies or regulations around data retention, including any  enforcement mec...</td>
+<td>Policies or regulations around data retention, including any enforcement mech...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -350,11 +350,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Policies or regulations around data retention, including any  enforcement
+    description: 'Policies or regulations around data retention, including any enforcement
       mechanisms or responsibilities.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    slot_uri: dcterms:description
     domain_of:
     - NamedThing
     - Relationships
@@ -413,11 +414,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Policies or regulations around data retention, including any  enforcement
+    description: 'Policies or regulations around data retention, including any enforcement
       mechanisms or responsibilities.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    slot_uri: dcterms:description
     alias: description
     owner: RetentionLimits
     domain_of:

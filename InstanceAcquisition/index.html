@@ -210,7 +210,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-instanceacquisition">Class: InstanceAcquisition</h1>
-<p><em>Describes how data associated with each instance was acquired  (e.g., directly observed, reported by subjects, inferred).</em></p>
+<p><em>Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects, inferred).</em></p>
 <p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/InstanceAcquisition">data_sheets_schema:InstanceAcquisition</a></p>
 <div class="mermaid"> classDiagram
@@ -371,7 +371,7 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: InstanceAcquisition
-description: 'Describes how data associated with each instance was acquired  (e.g.,
+description: 'Describes how data associated with each instance was acquired (e.g.,
   directly observed, reported by subjects, inferred).
 
   '
@@ -382,6 +382,7 @@ attributes:
     name: description
     description: Free-text description of the acquisition process
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    slot_uri: dcterms:description
     domain_of:
     - NamedThing
     - Relationships
@@ -444,6 +445,7 @@ attributes:
     description: Whether the data was inferred or derived from other data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
+    slot_uri: prov:wasDerivedFrom
     domain_of:
     - InstanceAcquisition
     range: boolean
@@ -461,7 +463,7 @@ attributes:
 <h3 id="induced">Induced</h3>
 <details>
 <pre><code class="language-yaml">name: InstanceAcquisition
-description: 'Describes how data associated with each instance was acquired  (e.g.,
+description: 'Describes how data associated with each instance was acquired (e.g.,
   directly observed, reported by subjects, inferred).
 
   '
@@ -472,6 +474,7 @@ attributes:
     name: description
     description: Free-text description of the acquisition process
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    slot_uri: dcterms:description
     alias: description
     owner: InstanceAcquisition
     domain_of:
@@ -540,6 +543,7 @@ attributes:
     description: Whether the data was inferred or derived from other data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
+    slot_uri: prov:wasDerivedFrom
     alias: was_inferred_derived
     owner: InstanceAcquisition
     domain_of:

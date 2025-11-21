@@ -210,8 +210,8 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-person">Class: Person</h1>
-<p><em>An individual human being.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/Person">data_sheets_schema:Person</a></p>
+<p><em>An individual human being. This class represents a person in the context of a specific dataset. Attributes like affiliation and email represent the person's current or most relevant contact information for this dataset. For stable cross-dataset identification, use the ORCID field. Note that contributor roles (CRediT) are specified in the usage context (e.g., Creator class) rather than on the Person directly, since roles vary by dataset.</em></p>
+<p>URI: <a href="http://schema.org/Person">schema:Person</a></p>
 <div class="mermaid"> classDiagram
     class Person
     click Person href "../Person/"
@@ -237,6 +237,8 @@
 
       Person : name
 
+      Person : orcid
+
 
 </div>
 <h2 id="inheritance">Inheritance</h2>
@@ -260,13 +262,19 @@
 <tr>
 <td><a href="../affiliation/">affiliation</a></td>
 <td>* <br/> <a href="../Organization/">Organization</a></td>
-<td>The organization(s) to which the person belongs</td>
+<td>The organization(s) to which the person belongs in the context of this datase...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../email/">email</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>The email address of the person</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../orcid/">orcid</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>ORCID (Open Researcher and Contributor ID) - a persistent digital identifier ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -306,6 +314,18 @@
 <td>range</td>
 <td><a href="./">Person</a></td>
 </tr>
+<tr>
+<td><a href="../EthicalReview/">EthicalReview</a></td>
+<td><a href="../contact_person/">contact_person</a></td>
+<td>range</td>
+<td><a href="./">Person</a></td>
+</tr>
+<tr>
+<td><a href="../LicenseAndUseTerms/">LicenseAndUseTerms</a></td>
+<td><a href="../contact_person/">contact_person</a></td>
+<td>range</td>
+<td><a href="./">Person</a></td>
+</tr>
 </tbody>
 </table>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
@@ -324,11 +344,15 @@
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:Person</td>
+<td>schema:Person</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:Person</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>foaf:Person</td>
 </tr>
 </tbody>
 </table>
@@ -337,15 +361,24 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: Person
-description: An individual human being.
+description: An individual human being. This class represents a person in the context
+  of a specific dataset. Attributes like affiliation and email represent the person's
+  current or most relevant contact information for this dataset. For stable cross-dataset
+  identification, use the ORCID field. Note that contributor roles (CRediT) are specified
+  in the usage context (e.g., Creator class) rather than on the Person directly, since
+  roles vary by dataset.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- foaf:Person
 is_a: NamedThing
 attributes:
   affiliation:
     name: affiliation
-    description: The organization(s) to which the person belongs.
+    description: The organization(s) to which the person belongs in the context of
+      this dataset. May vary across datasets; multivalued to support multiple affiliations.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: schema:affiliation
     domain_of:
     - Person
     - Creator
@@ -353,27 +386,53 @@ attributes:
     multivalued: true
   email:
     name: email
-    description: The email address of the person.
+    description: The email address of the person. Represents current/preferred contact
+      information in the context of this dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: schema:email
     domain_of:
     - Person
     range: string
+  orcid:
+    name: orcid
+    description: 'ORCID (Open Researcher and Contributor ID) - a persistent digital
+      identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups
+      of 4). Use this for stable cross-dataset identification.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    exact_mappings:
+    - schema:identifier
+    rank: 1000
+    slot_uri: schema:identifier
+    domain_of:
+    - Person
+    range: string
+    pattern: ^\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$
+class_uri: schema:Person
 
 </code></pre>
 </details>
 <h3 id="induced">Induced</h3>
 <details>
 <pre><code class="language-yaml">name: Person
-description: An individual human being.
+description: An individual human being. This class represents a person in the context
+  of a specific dataset. Attributes like affiliation and email represent the person's
+  current or most relevant contact information for this dataset. For stable cross-dataset
+  identification, use the ORCID field. Note that contributor roles (CRediT) are specified
+  in the usage context (e.g., Creator class) rather than on the Person directly, since
+  roles vary by dataset.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- foaf:Person
 is_a: NamedThing
 attributes:
   affiliation:
     name: affiliation
-    description: The organization(s) to which the person belongs.
+    description: The organization(s) to which the person belongs in the context of
+      this dataset. May vary across datasets; multivalued to support multiple affiliations.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: schema:affiliation
     alias: affiliation
     owner: Person
     domain_of:
@@ -383,14 +442,32 @@ attributes:
     multivalued: true
   email:
     name: email
-    description: The email address of the person.
+    description: The email address of the person. Represents current/preferred contact
+      information in the context of this dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: schema:email
     alias: email
     owner: Person
     domain_of:
     - Person
     range: string
+  orcid:
+    name: orcid
+    description: 'ORCID (Open Researcher and Contributor ID) - a persistent digital
+      identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups
+      of 4). Use this for stable cross-dataset identification.'
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    exact_mappings:
+    - schema:identifier
+    rank: 1000
+    slot_uri: schema:identifier
+    alias: orcid
+    owner: Person
+    domain_of:
+    - Person
+    range: string
+    pattern: ^\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$
   id:
     name: id
     description: A unique identifier for a thing.
@@ -463,6 +540,7 @@ attributes:
     - IPRestrictions
     - ExportControlRegulatoryRestrictions
     range: string
+class_uri: schema:Person
 
 </code></pre>
 </details>

@@ -340,7 +340,7 @@
 
 <h1 id="slot-media_type">Slot: media_type</h1>
 <p><em>The media type of the data. This should be a MIME type.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/media_type">data_sheets_schema:media_type</a>
+<p>URI: <a href="http://www.w3.org/ns/dcat#mediaType">dcat:mediaType</a>
 Alias: media_type</p>
 <!-- no inheritance hierarchy -->
 
@@ -355,13 +355,13 @@ Alias: media_type</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -386,11 +386,15 @@ Alias: media_type</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:media_type</td>
+<td>dcat:mediaType</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:media_type</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>frictionless:mediatype, schema:encodingFormat</td>
 </tr>
 </tbody>
 </table>
@@ -400,7 +404,11 @@ Alias: media_type</p>
 <pre><code class="language-yaml">name: media_type
 description: The media type of the data. This should be a MIME type.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- frictionless:mediatype
+- schema:encodingFormat
 rank: 1000
+slot_uri: dcat:mediaType
 alias: media_type
 domain_of:
 - Dataset

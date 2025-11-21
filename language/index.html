@@ -340,7 +340,7 @@
 
 <h1 id="slot-language">Slot: language</h1>
 <p><em>language in which the information is expressed</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/language">data_sheets_schema:language</a>
+<p>URI: <a href="http://purl.org/dc/terms/language">dcterms:language</a>
 Alias: language</p>
 <!-- no inheritance hierarchy -->
 
@@ -360,8 +360,8 @@ Alias: language</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -370,8 +370,8 @@ Alias: language</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../DatasetCollection/">DatasetCollection</a></td>
+<td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -396,11 +396,15 @@ Alias: language</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:language</td>
+<td>dcterms:language</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:language</td>
+</tr>
+<tr>
+<td>exact</td>
+<td>schema:inLanguage</td>
 </tr>
 </tbody>
 </table>
@@ -410,7 +414,10 @@ Alias: language</p>
 <pre><code class="language-yaml">name: language
 description: language in which the information is expressed
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- schema:inLanguage
 rank: 1000
+slot_uri: dcterms:language
 alias: language
 domain_of:
 - Information

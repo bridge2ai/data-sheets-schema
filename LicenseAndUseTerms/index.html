@@ -219,6 +219,28 @@
       DatasetProperty &lt;|-- LicenseAndUseTerms
         click DatasetProperty href "../DatasetProperty/"
 
+      LicenseAndUseTerms : contact_person
+
+
+
+
+
+        LicenseAndUseTerms --&gt; "0..1" Person : contact_person
+        click Person href "../Person/"
+
+
+
+      LicenseAndUseTerms : data_use_permission
+
+
+
+
+
+        LicenseAndUseTerms --&gt; "*" DataUsePermissionEnum : data_use_permission
+        click DataUsePermissionEnum href "../DataUsePermissionEnum/"
+
+
+
       LicenseAndUseTerms : description
 
       LicenseAndUseTerms : id
@@ -262,7 +284,19 @@
 <tr>
 <td><a href="../description/">description</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Description of the dataset's license and terms of use (including  links, cost...</td>
+<td>Description of the dataset's license and terms of use (including links, costs...</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../data_use_permission/">data_use_permission</a></td>
+<td>* <br/> <a href="../DataUsePermissionEnum/">DataUsePermissionEnum</a></td>
+<td>Structured data use permissions using the Data Use Ontology (DUO)</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../contact_person/">contact_person</a></td>
+<td>0..1 <br/> <a href="../Person/">Person</a></td>
+<td>Contact person for licensing questions</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -349,11 +383,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Description of the dataset''s license and terms of use (including  links,
-      costs, or usage constraints).
+    description: 'Description of the dataset''s license and terms of use (including
+      links, costs, or usage constraints).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    slot_uri: dcterms:license
     domain_of:
     - NamedThing
     - Relationships
@@ -395,6 +430,34 @@ attributes:
     - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
+  data_use_permission:
+    name: data_use_permission
+    description: Structured data use permissions using the Data Use Ontology (DUO).
+      Specifies permitted uses (e.g., general research, health/medical research, disease-specific
+      research) and restrictions (e.g., non-commercial use, ethics approval required,
+      collaboration required). See https://github.com/EBISPOT/DUO
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - DUO:0000001
+    rank: 1000
+    slot_uri: DUO:0000001
+    domain_of:
+    - LicenseAndUseTerms
+    range: DataUsePermissionEnum
+    multivalued: true
+  contact_person:
+    name: contact_person
+    description: Contact person for licensing questions. Provides structured contact
+      information including name, email, affiliation, and optional ORCID. This person
+      can answer questions about licensing terms, usage restrictions, fees, and permissions.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - schema:contactPoint
+    slot_uri: schema:contactPoint
+    domain_of:
+    - EthicalReview
+    - LicenseAndUseTerms
+    range: Person
 
 </code></pre>
 </details>
@@ -411,11 +474,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Description of the dataset''s license and terms of use (including  links,
-      costs, or usage constraints).
+    description: 'Description of the dataset''s license and terms of use (including
+      links, costs, or usage constraints).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    slot_uri: dcterms:license
     alias: description
     owner: LicenseAndUseTerms
     domain_of:
@@ -459,6 +523,38 @@ attributes:
     - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
+  data_use_permission:
+    name: data_use_permission
+    description: Structured data use permissions using the Data Use Ontology (DUO).
+      Specifies permitted uses (e.g., general research, health/medical research, disease-specific
+      research) and restrictions (e.g., non-commercial use, ethics approval required,
+      collaboration required). See https://github.com/EBISPOT/DUO
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - DUO:0000001
+    rank: 1000
+    slot_uri: DUO:0000001
+    alias: data_use_permission
+    owner: LicenseAndUseTerms
+    domain_of:
+    - LicenseAndUseTerms
+    range: DataUsePermissionEnum
+    multivalued: true
+  contact_person:
+    name: contact_person
+    description: Contact person for licensing questions. Provides structured contact
+      information including name, email, affiliation, and optional ORCID. This person
+      can answer questions about licensing terms, usage restrictions, fees, and permissions.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - schema:contactPoint
+    slot_uri: schema:contactPoint
+    alias: contact_person
+    owner: LicenseAndUseTerms
+    domain_of:
+    - EthicalReview
+    - LicenseAndUseTerms
+    range: Person
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?

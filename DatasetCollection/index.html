@@ -552,6 +552,7 @@ attributes:
     description: compression format used, if any. e.g., gzip, bzip2, zip
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcat:compressFormat
     alias: compression
     owner: DatasetCollection
     domain_of:
@@ -611,8 +612,10 @@ attributes:
     name: doi
     description: digital object identifier
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - dcterms:identifier
     rank: 1000
-    slot_uri: void:uriRegexPattern
+    slot_uri: bibo:doi
     alias: doi
     owner: DatasetCollection
     domain_of:
@@ -661,7 +664,10 @@ attributes:
     name: language
     description: language in which the information is expressed
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:inLanguage
     rank: 1000
+    slot_uri: dcterms:language
     alias: language
     owner: DatasetCollection
     domain_of:
@@ -691,8 +697,10 @@ attributes:
   modified_by:
     name: modified_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - pav:lastUpdateBy
     rank: 1000
-    slot_uri: pav:lastUpdateBy
+    slot_uri: oslc:modifiedBy
     alias: modified_by
     owner: DatasetCollection
     domain_of:
@@ -722,6 +730,7 @@ attributes:
     name: status
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: bibo:status
     alias: status
     owner: DatasetCollection
     domain_of:
@@ -752,8 +761,10 @@ attributes:
   was_derived_from:
     name: was_derived_from
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - pav:derivedFrom
     rank: 1000
-    slot_uri: pav:derivedFrom
+    slot_uri: prov:wasDerivedFrom
     alias: was_derived_from
     owner: DatasetCollection
     domain_of:

@@ -257,7 +257,7 @@
 <tr>
 <td><a href="../description/">description</a></td>
 <td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
-<td>Boolean or textual explanation regarding distribution to  parties external to...</td>
+<td>Boolean or textual explanation regarding distribution to parties external to ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -318,11 +318,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Boolean or textual explanation regarding distribution to  parties
+    description: 'Boolean or textual explanation regarding distribution to parties
       external to the dataset-creating entity.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    slot_uri: dcterms:accessRights
     domain_of:
     - NamedThing
     - Relationships
@@ -378,11 +379,12 @@ is_a: DatasetProperty
 attributes:
   description:
     name: description
-    description: 'Boolean or textual explanation regarding distribution to  parties
+    description: 'Boolean or textual explanation regarding distribution to parties
       external to the dataset-creating entity.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
+    slot_uri: dcterms:accessRights
     alias: description
     owner: ThirdPartySharing
     domain_of:

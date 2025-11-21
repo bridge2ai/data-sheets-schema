@@ -210,7 +210,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-rawdata">Class: RawData</h1>
-<p><em>Was the “raw” data saved in addition to the preprocessed/cleaned/labeled data? If so, please provide a link or other access point to the “raw” data.</em></p>
+<p><em>Was the "raw" data saved in addition to the preprocessed/cleaned/labeled data? If so, please provide a link or other access point to the "raw" data.</em></p>
 <p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/RawData">data_sheets_schema:RawData</a></p>
 <div class="mermaid"> classDiagram
@@ -339,8 +339,8 @@
 <h3 id="direct">Direct</h3>
 <details>
 <pre><code class="language-yaml">name: RawData
-description: 'Was the “raw” data saved in addition to the preprocessed/cleaned/labeled
-  data? If so, please provide a link or other access point to the “raw” data.
+description: 'Was the "raw" data saved in addition to the preprocessed/cleaned/labeled
+  data? If so, please provide a link or other access point to the "raw" data.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -350,6 +350,7 @@ attributes:
     name: description
     description: Details about the availability or location of raw data.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    slot_uri: prov:wasDerivedFrom
     domain_of:
     - NamedThing
     - Relationships
@@ -397,8 +398,8 @@ attributes:
 <h3 id="induced">Induced</h3>
 <details>
 <pre><code class="language-yaml">name: RawData
-description: 'Was the “raw” data saved in addition to the preprocessed/cleaned/labeled
-  data? If so, please provide a link or other access point to the “raw” data.
+description: 'Was the "raw" data saved in addition to the preprocessed/cleaned/labeled
+  data? If so, please provide a link or other access point to the "raw" data.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -408,6 +409,7 @@ attributes:
     name: description
     description: Details about the availability or location of raw data.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    slot_uri: prov:wasDerivedFrom
     alias: description
     owner: RawData
     domain_of:

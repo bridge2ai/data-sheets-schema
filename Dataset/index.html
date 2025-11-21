@@ -771,6 +771,17 @@
 
 
 
+      Dataset : variables
+
+
+
+
+
+        Dataset --&gt; "*" VariableMetadata : variables
+        click VariableMetadata href "../VariableMetadata/"
+
+
+
       Dataset : version
 
       Dataset : version_access
@@ -1104,6 +1115,12 @@
 <td><a href="../extension_mechanism/">extension_mechanism</a></td>
 <td>0..1 <br/> <a href="../ExtensionMechanism/">ExtensionMechanism</a></td>
 <td></td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../variables/">variables</a></td>
+<td>* <br/> <a href="../VariableMetadata/">VariableMetadata</a></td>
+<td>Metadata describing individual variables, fields, or columns in the dataset</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -1661,6 +1678,19 @@ attributes:
     domain_of:
     - Dataset
     range: ExtensionMechanism
+  variables:
+    name: variables
+    description: Metadata describing individual variables, fields, or columns in the
+      dataset.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:variableMeasured
+    rank: 1000
+    slot_uri: schema:variableMeasured
+    domain_of:
+    - Dataset
+    range: VariableMetadata
+    multivalued: true
   is_deidentified:
     name: is_deidentified
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2093,6 +2123,21 @@ attributes:
     domain_of:
     - Dataset
     range: ExtensionMechanism
+  variables:
+    name: variables
+    description: Metadata describing individual variables, fields, or columns in the
+      dataset.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:variableMeasured
+    rank: 1000
+    slot_uri: schema:variableMeasured
+    alias: variables
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: VariableMetadata
+    multivalued: true
   is_deidentified:
     name: is_deidentified
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2160,6 +2205,7 @@ attributes:
     description: hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:identifier
     alias: hash
     owner: Dataset
     domain_of:
@@ -2170,6 +2216,7 @@ attributes:
     description: md5 hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:identifier
     alias: md5
     owner: Dataset
     domain_of:
@@ -2179,7 +2226,11 @@ attributes:
     name: media_type
     description: The media type of the data. This should be a MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - frictionless:mediatype
+    - schema:encodingFormat
     rank: 1000
+    slot_uri: dcat:mediaType
     alias: media_type
     owner: Dataset
     domain_of:
@@ -2191,6 +2242,7 @@ attributes:
     close_mappings:
     - frictionless:path
     rank: 1000
+    slot_uri: schema:contentUrl
     alias: path
     owner: Dataset
     domain_of:
@@ -2201,6 +2253,7 @@ attributes:
     description: sha256 hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:identifier
     alias: sha256
     owner: Dataset
     domain_of:
@@ -2211,6 +2264,7 @@ attributes:
     description: compression format used, if any. e.g., gzip, bzip2, zip
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcat:compressFormat
     alias: compression
     owner: Dataset
     domain_of:
@@ -2270,8 +2324,10 @@ attributes:
     name: doi
     description: digital object identifier
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - dcterms:identifier
     rank: 1000
-    slot_uri: void:uriRegexPattern
+    slot_uri: bibo:doi
     alias: doi
     owner: Dataset
     domain_of:
@@ -2320,7 +2376,10 @@ attributes:
     name: language
     description: language in which the information is expressed
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:inLanguage
     rank: 1000
+    slot_uri: dcterms:language
     alias: language
     owner: Dataset
     domain_of:
@@ -2350,8 +2409,10 @@ attributes:
   modified_by:
     name: modified_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - pav:lastUpdateBy
     rank: 1000
-    slot_uri: pav:lastUpdateBy
+    slot_uri: oslc:modifiedBy
     alias: modified_by
     owner: Dataset
     domain_of:
@@ -2381,6 +2442,7 @@ attributes:
     name: status
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: bibo:status
     alias: status
     owner: Dataset
     domain_of:
@@ -2411,8 +2473,10 @@ attributes:
   was_derived_from:
     name: was_derived_from
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - pav:derivedFrom
     rank: 1000
-    slot_uri: pav:derivedFrom
+    slot_uri: prov:wasDerivedFrom
     alias: was_derived_from
     owner: Dataset
     domain_of:

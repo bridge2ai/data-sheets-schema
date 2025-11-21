@@ -210,7 +210,7 @@
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
 </a>
 <h1 id="class-iprestrictions">Class: IPRestrictions</h1>
-<p><em>Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, describe them and note any relevant fees or licensing terms.</em></p>
+<p><em>Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, describe them and note any relevant fees or licensing terms. Maps to DUO terms related to commercial/non-profit use restrictions (NCU, NPU, NPUNCU).</em></p>
 <p>__</p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/IPRestrictions">data_sheets_schema:IPRestrictions</a></p>
 <div class="mermaid"> classDiagram
@@ -341,7 +341,8 @@
 <pre><code class="language-yaml">name: IPRestrictions
 description: 'Have any third parties imposed IP-based or other restrictions on the
   data associated with the instances? If so, describe them and note any relevant fees
-  or licensing terms.
+  or licensing terms. Maps to DUO terms related to commercial/non-profit use restrictions
+  (NCU, NPU, NPUNCU).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -351,6 +352,10 @@ attributes:
     name: description
     description: Explanation of third-party IP restrictions.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    broad_mappings:
+    - DUO:0000046
+    - DUO:0000045
+    slot_uri: dcterms:rights
     domain_of:
     - NamedThing
     - Relationships
@@ -400,7 +405,8 @@ attributes:
 <pre><code class="language-yaml">name: IPRestrictions
 description: 'Have any third parties imposed IP-based or other restrictions on the
   data associated with the instances? If so, describe them and note any relevant fees
-  or licensing terms.
+  or licensing terms. Maps to DUO terms related to commercial/non-profit use restrictions
+  (NCU, NPU, NPUNCU).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -410,6 +416,10 @@ attributes:
     name: description
     description: Explanation of third-party IP restrictions.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    broad_mappings:
+    - DUO:0000046
+    - DUO:0000045
+    slot_uri: dcterms:rights
     alias: description
     owner: IPRestrictions
     domain_of:
