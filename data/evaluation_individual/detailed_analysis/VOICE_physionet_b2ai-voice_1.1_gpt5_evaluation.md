@@ -1,6 +1,6 @@
 # Detailed Evaluation: VOICE/physionet_b2ai-voice_1.1 - GPT5
 
-Evaluated: 2025-11-17T23:35:15.878246
+Evaluated: 2025-11-21T11:37:24.054281
 File: `data/d4d_individual/gpt5/VOICE/physionet_b2ai-voice_1.1_d4d.yaml`
 
 ## Overall Scores

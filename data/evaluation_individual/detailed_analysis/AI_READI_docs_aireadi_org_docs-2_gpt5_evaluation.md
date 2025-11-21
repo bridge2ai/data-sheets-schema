@@ -1,6 +1,6 @@
 # Detailed Evaluation: AI_READI/docs_aireadi_org_docs-2 - GPT5
 
-Evaluated: 2025-11-17T23:35:15.840777
+Evaluated: 2025-11-21T11:37:24.010389
 File: `data/d4d_individual/gpt5/AI_READI/docs_aireadi_org_docs-2_d4d.yaml`
 
 ## Overall Scores

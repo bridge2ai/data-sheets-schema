@@ -1,27 +1,27 @@
 # Detailed Evaluation: CHORUS - CLAUDECODE
 
-Evaluated: 2025-11-17T22:11:53.072621
+Evaluated: 2025-11-21T11:37:05.669985
 File: `data/d4d_concatenated/claudecode/CHORUS_d4d.yaml`
 
 ## Overall Scores
 
-- **Rubric10**: 11.0/50 (22.0%)
-- **Rubric20**: 31.0/84 (36.9%)
+- **Rubric10**: 9.0/50 (18.0%)
+- **Rubric20**: 36.0/84 (42.9%)
 
 ## Rubric10 Element Scores
 
 | ID | Element | Score | Details |
 |----|---------|-------|---------|
-| 1 | Dataset Discovery and Identification | 5/5 | 5/5 sub-elements present |
-| 2 | Dataset Access and Retrieval | 2/5 | 2/5 sub-elements present |
+| 1 | Dataset Discovery and Identification | 4/5 | 4/5 sub-elements present |
+| 2 | Dataset Access and Retrieval | 1/5 | 1/5 sub-elements present |
 | 3 | Data Reuse and Interoperability | 1/5 | 1/5 sub-elements present |
 | 4 | Ethical Use and Privacy Safeguards | 0/5 | 0/5 sub-elements present |
 | 5 | Data Composition and Structure | 0/5 | 0/5 sub-elements present |
-| 6 | Data Provenance and Version Tracking | 1/5 | 1/5 sub-elements present |
+| 6 | Data Provenance and Version Tracking | 2/5 | 2/5 sub-elements present |
 | 7 | Scientific Motivation and Funding Transparency | 0/5 | 0/5 sub-elements present |
 | 8 | Technical Transparency (Data Collection and Processing) | 0/5 | 0/5 sub-elements present |
 | 9 | Dataset Evaluation and Limitations Disclosure | 0/5 | 0/5 sub-elements present |
-| 10 | Cross-Platform and Community Integration | 2/5 | 2/5 sub-elements present |
+| 10 | Cross-Platform and Community Integration | 1/5 | 1/5 sub-elements present |
 
 ### Rubric10 Sub-Element Details
 
@@ -31,13 +31,13 @@ File: `data/d4d_concatenated/claudecode/CHORUS_d4d.yaml`
 Can a user or system discover and uniquely identify this dataset?
 
 - ✅ **Persistent Identifier (DOI, RRID, etc.)**
-  - Found: id: chorus-for-equitable-ai
+  - Found: id: CHoRUS Dataset
 - ✅ **Dataset Title and Description Completeness**
-  - Found: title: CHoRUS for Equitable AI - Bridge2AI for Clinical Care
+  - Found: title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI
 - ✅ **Keywords or Tags for Searchability**
   - Found: keywords: list (non-empty)
-- ✅ **Dataset Landing Page or Platform URL**
-  - Found: page: https://github.com/chorus-ai
+- ❌ **Dataset Landing Page or Platform URL**
+  - Fields checked: page, external_resources
 - ✅ **Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)**
   - Found: keywords: list (non-empty)
 
@@ -53,8 +53,8 @@ Can the dataset and its associated resources be located, accessed, and downloade
   - Found: distribution_formats: list (non-empty)
 - ❌ **File Formats Specified**
   - Fields checked: data_characteristics.data_formats, files.listing.type
-- ✅ **External Links to Similar or Related Datasets**
-  - Found: external_resources: list (non-empty)
+- ❌ **External Links to Similar or Related Datasets**
+  - Fields checked: external_resources, project_website
 
 #### 3. Data Reuse and Interoperability
 
@@ -111,10 +111,10 @@ Can a user determine dataset versions, update history, and provenance?
   - Fields checked: release_notes
 - ❌ **Change Descriptions for Each Version**
   - Fields checked: release_notes.notes
-- ❌ **Update Schedule or Frequency Indicated**
-  - Fields checked: updates
+- ✅ **Update Schedule or Frequency Indicated**
+  - Found: updates: dict (non-empty)
 - ✅ **Versioned Documentation or External References**
-  - Found: external_resources: list (non-empty)
+  - Found: version_access: dict (non-empty)
 
 #### 7. Scientific Motivation and Funding Transparency
 
@@ -167,12 +167,12 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 
 - ❌ **Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)**
   - Fields checked: publisher, access_and_licensing.platform
-- ✅ **Cross-referenced DOIs or Related Dataset Links**
-  - Found: external_resources: list (non-empty)
+- ❌ **Cross-referenced DOIs or Related Dataset Links**
+  - Fields checked: external_resources, references
 - ❌ **Community Standards or Schema Reference**
   - Fields checked: conforms_to
 - ✅ **Associated Outreach Materials (e.g., webinar, documentation)**
-  - Found: external_resources: list (non-empty)
+  - Found: distribution_formats: list (non-empty)
 - ❌ **Similar Dataset Links or Thematic Grouping**
   - Fields checked: project, related_datasets
 
@@ -193,7 +193,7 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 6 | Dataset Identification Metadata | Pass | ✅ |
+| 6 | Dataset Identification Metadata | Fail | ❌ |
 | 7 | Funding and Acknowledgements Completeness | 0.0/5 | ❌ |
 | 8 | Ethical and Privacy Declarations | 0.0/5 | ❌ |
 | 9 | Access Requirements Documentation | 4.0/5 | ✅ |
@@ -207,14 +207,14 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 | 12 | Collection Protocol Clarity | 0.0/5 | ❌ |
 | 13 | Version History Documentation | 0.0/5 | ❌ |
 | 14 | Associated Publications | 0.0/5 | ❌ |
-| 15 | Human Subject Representation | 0.0/5 | ❌ |
+| 15 | Human Subject Representation | 4.0/5 | ✅ |
 
 ### FAIRness & Accessibility
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 16 | Findability (Persistent Links) | Pass | ✅ |
+| 16 | Findability (Persistent Links) | Fail | ❌ |
 | 17 | Accessibility (Access Mechanism) | 4.0/5 | ✅ |
 | 18 | Reusability (License Clarity) | 4.0/5 | ✅ |
-| 19 | Data Integrity and Provenance | 0.0/5 | ❌ |
-| 20 | Interlinking Across Platforms | Pass | ✅ |
+| 19 | Data Integrity and Provenance | 4.0/5 | ✅ |
+| 20 | Interlinking Across Platforms | Fail | ❌ |

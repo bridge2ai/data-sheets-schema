@@ -1,6 +1,6 @@
 # D4D Evaluation Summary Report
 
-Generated: 2025-11-17T22:11:53.072638
+Generated: 2025-11-21T11:37:05.670003
 
 ## Overview
 
@@ -17,26 +17,26 @@ Methods evaluated: claudecode, curated, gpt5
 
 | Project | Curated | GPT-5 | Claude Code |
 |---------|---------|-------|-------------|
-| AI_READI | 11.0 (22.0%) | 5.0 (10.0%) | 12.0 (24.0%) |
-| CHORUS | N/A | 4.0 (8.0%) | 11.0 (22.0%) |
-| CM4AI | 8.0 (16.0%) | 9.0 (18.0%) | 13.0 (26.0%) |
-| VOICE | 13.0 (26.0%) | 5.0 (10.0%) | 39.0 (78.0%) |
+| AI_READI | 11.0 (22.0%) | 9.0 (18.0%) | 9.0 (18.0%) |
+| CHORUS | N/A | 2.0 (4.0%) | 9.0 (18.0%) |
+| CM4AI | 8.0 (16.0%) | 12.0 (24.0%) | 9.0 (18.0%) |
+| VOICE | 13.0 (26.0%) | 2.0 (4.0%) | 9.0 (18.0%) |
 
 ### Rubric20 Scores (varies by max)
 
 | Project | Curated | GPT-5 | Claude Code |
 |---------|---------|-------|-------------|
-| AI_READI | 41.0/84 (48.8%) | 14.0/84 (16.7%) | 39.0/84 (46.4%) |
-| CHORUS | N/A | 12.0/84 (14.3%) | 31.0/84 (36.9%) |
-| CM4AI | 25.0/84 (29.8%) | 18.0/84 (21.4%) | 38.0/84 (45.2%) |
-| VOICE | 39.0/84 (46.4%) | 14.0/84 (16.7%) | 68.0/84 (81.0%) |
+| AI_READI | 41.0/84 (48.8%) | 36.0/84 (42.9%) | 36.0/84 (42.9%) |
+| CHORUS | N/A | 8.0/84 (9.5%) | 36.0/84 (42.9%) |
+| CM4AI | 25.0/84 (29.8%) | 37.0/84 (44.0%) | 36.0/84 (42.9%) |
+| VOICE | 39.0/84 (46.4%) | 8.0/84 (9.5%) | 36.0/84 (42.9%) |
 
 ## Method Comparison
 
 
 ### CLAUDECODE
-- Average Rubric10: 37.5%
-- Average Rubric20: 52.4%
+- Average Rubric10: 18.0%
+- Average Rubric20: 42.9%
 - Evaluations: 4
 
 ### CURATED
@@ -45,6 +45,6 @@ Methods evaluated: claudecode, curated, gpt5
 - Evaluations: 3
 
 ### GPT5
-- Average Rubric10: 11.5%
-- Average Rubric20: 17.3%
+- Average Rubric10: 12.5%
+- Average Rubric20: 26.5%
 - Evaluations: 4

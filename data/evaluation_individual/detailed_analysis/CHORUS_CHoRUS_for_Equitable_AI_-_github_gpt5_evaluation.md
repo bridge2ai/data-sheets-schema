@@ -1,6 +1,6 @@
 # Detailed Evaluation: CHORUS/CHoRUS for Equitable AI - github - GPT5
 
-Evaluated: 2025-11-17T23:35:15.844057
+Evaluated: 2025-11-21T11:37:24.016924
 File: `data/d4d_individual/gpt5/CHORUS/CHoRUS for Equitable AI - github_d4d.yaml`
 
 ## Overall Scores

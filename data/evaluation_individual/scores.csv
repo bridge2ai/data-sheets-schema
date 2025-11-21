@@ -1,25 +1,18 @@
 project,method,rubric10_total,rubric10_max,rubric10_percentage,rubric20_total,rubric20_max,rubric20_percentage
 AI_READI/docs_aireadi_org_docs-2,gpt5,12,50,24.0,38,84,45.23809523809524
+AI_READI/docs_google_com_document-d,gpt5,2,50,4.0,8,84,9.523809523809524
+AI_READI/doi,gpt5,0,50,0.0,0,84,0.0
 AI_READI/doi_row2,gpt5,4,50,8.0,10,84,11.904761904761903
 AI_READI/doi_row9,gpt5,4,50,8.0,10,84,11.904761904761903
+AI_READI/fairhub,gpt5,2,50,4.0,8,84,9.523809523809524
 AI_READI/fairhub_row10,gpt5,5,50,10.0,14,84,16.666666666666664
 AI_READI/fairhub_row13,gpt5,4,50,8.0,10,84,11.904761904761903
 CHORUS/CHoRUS for Equitable AI - github,gpt5,6,50,12.0,20,84,23.809523809523807
 CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar,gpt5,6,50,12.0,20,84,23.809523809523807
 CM4AI/dataverse_10.18130_V3_B35XWX,gpt5,13,50,26.0,38,84,45.23809523809524
 CM4AI/dataverse_10.18130_V3_F3TD5R,gpt5,11,50,22.0,30,84,35.714285714285715
+CM4AI/doi,gpt5,1,50,2.0,4,84,4.761904761904762
 CM4AI/doi_row3,gpt5,4,50,8.0,10,84,11.904761904761903
+VOICE/healthnexus,gpt5,2,50,4.0,8,84,9.523809523809524
 VOICE/healthnexus_row13,gpt5,7,50,14.000000000000002,14,84,16.666666666666664
 VOICE/physionet_b2ai-voice_1.1,gpt5,37,50,74.0,51,84,60.71428571428571
-AI_READI/docs_aireadi_org_docs-2,claudecode,12,50,24.0,38,84,45.23809523809524
-AI_READI/doi_row2,claudecode,4,50,8.0,10,84,11.904761904761903
-AI_READI/doi_row9,claudecode,4,50,8.0,10,84,11.904761904761903
-AI_READI/fairhub_row10,claudecode,5,50,10.0,14,84,16.666666666666664
-AI_READI/fairhub_row13,claudecode,4,50,8.0,10,84,11.904761904761903
-CHORUS/CHoRUS for Equitable AI - github,claudecode,6,50,12.0,20,84,23.809523809523807
-CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar,claudecode,6,50,12.0,20,84,23.809523809523807
-CM4AI/dataverse_10.18130_V3_B35XWX,claudecode,13,50,26.0,38,84,45.23809523809524
-CM4AI/dataverse_10.18130_V3_F3TD5R,claudecode,11,50,22.0,30,84,35.714285714285715
-CM4AI/doi_row3,claudecode,4,50,8.0,10,84,11.904761904761903
-VOICE/healthnexus_row13,claudecode,7,50,14.000000000000002,14,84,16.666666666666664
-VOICE/physionet_b2ai-voice_1.1,claudecode,37,50,74.0,51,84,60.71428571428571

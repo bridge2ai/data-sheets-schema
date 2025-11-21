@@ -1,6 +1,6 @@
 # Detailed Evaluation: CM4AI - CURATED
 
-Evaluated: 2025-11-17T22:11:52.978051
+Evaluated: 2025-11-21T11:37:05.584638
 File: `data/d4d_concatenated/curated/CM4AI_curated.yaml`
 
 ## Overall Scores

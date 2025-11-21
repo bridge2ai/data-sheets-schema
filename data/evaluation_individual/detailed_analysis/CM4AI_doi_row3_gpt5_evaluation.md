@@ -1,6 +1,6 @@
 # Detailed Evaluation: CM4AI/doi_row3 - GPT5
 
-Evaluated: 2025-11-17T23:35:15.866653
+Evaluated: 2025-11-21T11:37:24.041434
 File: `data/d4d_individual/gpt5/CM4AI/doi_row3_d4d.yaml`
 
 ## Overall Scores

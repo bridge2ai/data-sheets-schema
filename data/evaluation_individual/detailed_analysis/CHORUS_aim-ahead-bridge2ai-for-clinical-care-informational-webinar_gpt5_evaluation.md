@@ -1,6 +1,6 @@
 # Detailed Evaluation: CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar - GPT5
 
-Evaluated: 2025-11-17T23:35:15.845240
+Evaluated: 2025-11-21T11:37:24.018244
 File: `data/d4d_individual/gpt5/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_d4d.yaml`
 
 ## Overall Scores

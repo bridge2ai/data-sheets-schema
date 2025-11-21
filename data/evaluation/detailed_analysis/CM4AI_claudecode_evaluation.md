@@ -1,27 +1,27 @@
 # Detailed Evaluation: CM4AI - CLAUDECODE
 
-Evaluated: 2025-11-17T22:11:53.019096
+Evaluated: 2025-11-21T11:37:05.618715
 File: `data/d4d_concatenated/claudecode/CM4AI_d4d.yaml`
 
 ## Overall Scores
 
-- **Rubric10**: 13.0/50 (26.0%)
-- **Rubric20**: 38.0/84 (45.2%)
+- **Rubric10**: 9.0/50 (18.0%)
+- **Rubric20**: 36.0/84 (42.9%)
 
 ## Rubric10 Element Scores
 
 | ID | Element | Score | Details |
 |----|---------|-------|---------|
-| 1 | Dataset Discovery and Identification | 5/5 | 5/5 sub-elements present |
+| 1 | Dataset Discovery and Identification | 4/5 | 4/5 sub-elements present |
 | 2 | Dataset Access and Retrieval | 1/5 | 1/5 sub-elements present |
-| 3 | Data Reuse and Interoperability | 2/5 | 2/5 sub-elements present |
+| 3 | Data Reuse and Interoperability | 1/5 | 1/5 sub-elements present |
 | 4 | Ethical Use and Privacy Safeguards | 0/5 | 0/5 sub-elements present |
 | 5 | Data Composition and Structure | 0/5 | 0/5 sub-elements present |
 | 6 | Data Provenance and Version Tracking | 2/5 | 2/5 sub-elements present |
 | 7 | Scientific Motivation and Funding Transparency | 0/5 | 0/5 sub-elements present |
 | 8 | Technical Transparency (Data Collection and Processing) | 0/5 | 0/5 sub-elements present |
 | 9 | Dataset Evaluation and Limitations Disclosure | 0/5 | 0/5 sub-elements present |
-| 10 | Cross-Platform and Community Integration | 3/5 | 3/5 sub-elements present |
+| 10 | Cross-Platform and Community Integration | 1/5 | 1/5 sub-elements present |
 
 ### Rubric10 Sub-Element Details
 
@@ -31,13 +31,13 @@ File: `data/d4d_concatenated/claudecode/CM4AI_d4d.yaml`
 Can a user or system discover and uniquely identify this dataset?
 
 - ✅ **Persistent Identifier (DOI, RRID, etc.)**
-  - Found: doi: doi:10.18130/V3/B35XWX
+  - Found: id: CM4AI Dataset
 - ✅ **Dataset Title and Description Completeness**
-  - Found: title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+  - Found: title: Cell Maps for Artificial Intelligence - AI-Ready Maps of Human Cell Architecture from Disease-Releva
 - ✅ **Keywords or Tags for Searchability**
   - Found: keywords: list (non-empty)
-- ✅ **Dataset Landing Page or Platform URL**
-  - Found: page: https://doi.org/10.18130/V3/B35XWX
+- ❌ **Dataset Landing Page or Platform URL**
+  - Fields checked: page, external_resources
 - ✅ **Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)**
   - Found: keywords: list (non-empty)
 
@@ -64,8 +64,8 @@ Is sufficient information provided to reuse and integrate the dataset with other
   - Found: license_and_use_terms.description: list (non-empty)
 - ❌ **Data Formats Are Standardized (e.g., JSON, TSV, Parquet)**
   - Fields checked: data_characteristics.data_formats
-- ✅ **Schema or Ontology Conformance Stated**
-  - Found: conforms_to: https://w3id.org/ro/crate
+- ❌ **Schema or Ontology Conformance Stated**
+  - Fields checked: conforms_to
 - ❌ **Identifiers Defined for Linking (e.g., participant_id)**
   - Fields checked: data_characteristics.identifiers_in_files
 - ❌ **Documentation of Processing Tools for Reproducibility**
@@ -105,16 +105,16 @@ Can the dataset’s structure, modality, and population be understood from metad
 
 Can a user determine dataset versions, update history, and provenance?
 
-- ✅ **Dataset Version Number Provided**
-  - Found: version: 1.4
+- ❌ **Dataset Version Number Provided**
+  - Fields checked: dataset_version, version
 - ❌ **Version History Documented (release_notes)**
   - Fields checked: release_notes
 - ❌ **Change Descriptions for Each Version**
   - Fields checked: release_notes.notes
 - ✅ **Update Schedule or Frequency Indicated**
   - Found: updates: dict (non-empty)
-- ❌ **Versioned Documentation or External References**
-  - Fields checked: version_access, external_resources
+- ✅ **Versioned Documentation or External References**
+  - Found: version_access: dict (non-empty)
 
 #### 7. Scientific Motivation and Funding Transparency
 
@@ -165,12 +165,12 @@ Does the metadata communicate known risks, biases, or dataset limitations?
 
 Does the dataset connect to wider data ecosystems, repositories, or standards?
 
-- ✅ **Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)**
-  - Found: publisher: https://dataverse.lib.virginia.edu
+- ❌ **Dataset Published on a Recognized Platform (e.g., PhysioNet, Dataverse, FAIRhub)**
+  - Fields checked: publisher, access_and_licensing.platform
 - ❌ **Cross-referenced DOIs or Related Dataset Links**
   - Fields checked: external_resources, references
-- ✅ **Community Standards or Schema Reference**
-  - Found: conforms_to: https://w3id.org/ro/crate
+- ❌ **Community Standards or Schema Reference**
+  - Fields checked: conforms_to
 - ✅ **Associated Outreach Materials (e.g., webinar, documentation)**
   - Found: distribution_formats: list (non-empty)
 - ❌ **Similar Dataset Links or Thematic Grouping**
@@ -193,11 +193,11 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 6 | Dataset Identification Metadata | Pass | ✅ |
+| 6 | Dataset Identification Metadata | Fail | ❌ |
 | 7 | Funding and Acknowledgements Completeness | 0.0/5 | ❌ |
 | 8 | Ethical and Privacy Declarations | 0.0/5 | ❌ |
 | 9 | Access Requirements Documentation | 4.0/5 | ✅ |
-| 10 | Interoperability and Standardization | 4.0/5 | ✅ |
+| 10 | Interoperability and Standardization | 0.0/5 | ❌ |
 
 ### Technical Documentation
 
@@ -207,13 +207,13 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 | 12 | Collection Protocol Clarity | 0.0/5 | ❌ |
 | 13 | Version History Documentation | 0.0/5 | ❌ |
 | 14 | Associated Publications | 0.0/5 | ❌ |
-| 15 | Human Subject Representation | 0.0/5 | ❌ |
+| 15 | Human Subject Representation | 4.0/5 | ✅ |
 
 ### FAIRness & Accessibility
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 16 | Findability (Persistent Links) | Pass | ✅ |
+| 16 | Findability (Persistent Links) | Fail | ❌ |
 | 17 | Accessibility (Access Mechanism) | 4.0/5 | ✅ |
 | 18 | Reusability (License Clarity) | 4.0/5 | ✅ |
 | 19 | Data Integrity and Provenance | 4.0/5 | ✅ |

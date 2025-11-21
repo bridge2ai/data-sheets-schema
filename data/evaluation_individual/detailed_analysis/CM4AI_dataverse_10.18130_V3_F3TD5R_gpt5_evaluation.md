@@ -1,6 +1,6 @@
 # Detailed Evaluation: CM4AI/dataverse_10.18130_V3_F3TD5R - GPT5
 
-Evaluated: 2025-11-17T23:35:15.866139
+Evaluated: 2025-11-21T11:37:24.040172
 File: `data/d4d_individual/gpt5/CM4AI/dataverse_10.18130_V3_F3TD5R_d4d.yaml`
 
 ## Overall Scores

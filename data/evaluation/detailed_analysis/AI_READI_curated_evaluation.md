@@ -1,6 +1,6 @@
 # Detailed Evaluation: AI_READI - CURATED
 
-Evaluated: 2025-11-17T22:11:52.862733
+Evaluated: 2025-11-21T11:37:05.477265
 File: `data/d4d_concatenated/curated/AI_READI_curated.yaml`
 
 ## Overall Scores

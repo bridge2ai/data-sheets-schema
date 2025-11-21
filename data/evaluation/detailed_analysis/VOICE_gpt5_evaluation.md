@@ -1,18 +1,18 @@
 # Detailed Evaluation: VOICE - GPT5
 
-Evaluated: 2025-11-17T22:11:53.054559
+Evaluated: 2025-11-21T11:37:05.648437
 File: `data/d4d_concatenated/gpt5/VOICE_d4d.yaml`
 
 ## Overall Scores
 
-- **Rubric10**: 5.0/50 (10.0%)
-- **Rubric20**: 14.0/84 (16.7%)
+- **Rubric10**: 2.0/50 (4.0%)
+- **Rubric20**: 8.0/84 (9.5%)
 
 ## Rubric10 Element Scores
 
 | ID | Element | Score | Details |
 |----|---------|-------|---------|
-| 1 | Dataset Discovery and Identification | 5/5 | 5/5 sub-elements present |
+| 1 | Dataset Discovery and Identification | 2/5 | 2/5 sub-elements present |
 | 2 | Dataset Access and Retrieval | 0/5 | 0/5 sub-elements present |
 | 3 | Data Reuse and Interoperability | 0/5 | 0/5 sub-elements present |
 | 4 | Ethical Use and Privacy Safeguards | 0/5 | 0/5 sub-elements present |
@@ -31,15 +31,15 @@ File: `data/d4d_concatenated/gpt5/VOICE_d4d.yaml`
 Can a user or system discover and uniquely identify this dataset?
 
 - ✅ **Persistent Identifier (DOI, RRID, etc.)**
-  - Found: id: bridge2ai-voice
+  - Found: id: https://docs.b2ai-voice.org
 - ✅ **Dataset Title and Description Completeness**
   - Found: title: Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information
-- ✅ **Keywords or Tags for Searchability**
-  - Found: keywords: list (non-empty)
-- ✅ **Dataset Landing Page or Platform URL**
-  - Found: page: https://docs.b2ai-voice.org
-- ✅ **Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)**
-  - Found: keywords: list (non-empty)
+- ❌ **Keywords or Tags for Searchability**
+  - Fields checked: keywords
+- ❌ **Dataset Landing Page or Platform URL**
+  - Fields checked: page, external_resources
+- ❌ **Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)**
+  - Fields checked: project, keywords
 
 #### 2. Dataset Access and Retrieval
 
@@ -185,7 +185,7 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 |----|----------|-------|--------|
 | 1 | Field Completeness | 4.0/5 | ✅ |
 | 2 | Entry Length Adequacy | 4.0/5 | ✅ |
-| 3 | Keyword Diversity | 4.0/5 | ✅ |
+| 3 | Keyword Diversity | 0.0/5 | ❌ |
 | 4 | File Enumeration and Type Variety | 0.0/5 | ❌ |
 | 5 | Data File Size Availability | Fail | ❌ |
 
@@ -193,7 +193,7 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 6 | Dataset Identification Metadata | Pass | ✅ |
+| 6 | Dataset Identification Metadata | Fail | ❌ |
 | 7 | Funding and Acknowledgements Completeness | 0.0/5 | ❌ |
 | 8 | Ethical and Privacy Declarations | 0.0/5 | ❌ |
 | 9 | Access Requirements Documentation | 0.0/5 | ❌ |
@@ -213,7 +213,7 @@ Does the dataset connect to wider data ecosystems, repositories, or standards?
 
 | ID | Question | Score | Status |
 |----|----------|-------|--------|
-| 16 | Findability (Persistent Links) | Pass | ✅ |
+| 16 | Findability (Persistent Links) | Fail | ❌ |
 | 17 | Accessibility (Access Mechanism) | 0.0/5 | ❌ |
 | 18 | Reusability (License Clarity) | 0.0/5 | ❌ |
 | 19 | Data Integrity and Provenance | 0.0/5 | ❌ |

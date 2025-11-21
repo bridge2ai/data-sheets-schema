@@ -1,6 +1,6 @@
 # Detailed Evaluation: AI_READI/fairhub_row13 - GPT5
 
-Evaluated: 2025-11-17T23:35:15.843192
+Evaluated: 2025-11-21T11:37:24.016060
 File: `data/d4d_individual/gpt5/AI_READI/fairhub_row13_d4d.yaml`
 
 ## Overall Scores

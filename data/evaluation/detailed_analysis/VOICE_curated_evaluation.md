@@ -1,6 +1,6 @@
 # Detailed Evaluation: VOICE - CURATED
 
-Evaluated: 2025-11-17T22:11:53.039689
+Evaluated: 2025-11-21T11:37:05.638739
 File: `data/d4d_concatenated/curated/VOICE_curated.yaml`
 
 ## Overall Scores
