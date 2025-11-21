@@ -640,7 +640,7 @@ endif
 		echo "Please ensure the aurelian submodule is initialized"; \
 		exit 1; \
 	fi
-	cd aurelian && uv run python ../src/download/validated_d4d_wrapper.py \
+	cd aurelian && uv run python ../src/download/interactive_d4d_wrapper.py \
 		-i ../$(RAW_DIR)/$(PROJECT) \
 		-o ../$(D4D_INDIVIDUAL_DIR)/gpt5/$(PROJECT)
 	@echo "✅ D4D extraction complete for $(PROJECT)"
