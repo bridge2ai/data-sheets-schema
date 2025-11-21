@@ -22,6 +22,8 @@ imports:
 prefixes:
   linkml: "https://w3id.org/linkml/"
   d4duses: "https://w3id.org/bridge2ai/data-sheets-schema/uses#"
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
 
 
 default_prefix: "d4duses"
@@ -44,6 +46,7 @@ classes:
         description: "List or summary of known/previous uses of the dataset."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   UseRepository:
@@ -56,6 +59,7 @@ classes:
         description: "Reference(s) to a repository of known dataset uses."
         range: string
         multivalued: true
+        slot_uri: schema:url
 
 
   OtherTask:
@@ -67,6 +71,7 @@ classes:
         description: "Potential additional tasks or domains for dataset usage."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   FutureUseImpact:
@@ -81,6 +86,7 @@ classes:
         description: "Details regarding the possible future impacts or risks of use."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   DiscouragedUse:
@@ -92,3 +98,4 @@ classes:
         description: "Description of tasks or contexts in which dataset use is discouraged."
         range: string
         multivalued: true
+        slot_uri: dcterms:description

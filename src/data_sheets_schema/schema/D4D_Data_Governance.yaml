@@ -22,6 +22,9 @@ imports:
 prefixes:
   linkml: "https://w3id.org/linkml/"
   d4ddatagovernance: "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#"
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
+  DUO: "http://purl.obolibrary.org/obo/DUO_"
 
 
 default_prefix: "d4ddatagovernance"
@@ -44,33 +47,205 @@ classes:
     attributes:
       description:
         description: >
-          Description of the dataset's license and terms of use (including 
+          Description of the dataset's license and terms of use (including
           links, costs, or usage constraints).
         range: string
         multivalued: true
+        slot_uri: dcterms:license
+      data_use_permission:
+        description: >-
+          Structured data use permissions using the Data Use Ontology (DUO).
+          Specifies permitted uses (e.g., general research, health/medical research,
+          disease-specific research) and restrictions (e.g., non-commercial use,
+          ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO
+        range: DataUsePermissionEnum
+        multivalued: true
+        slot_uri: DUO:0000001
+        exact_mappings:
+          - DUO:0000001
+      contact_person:
+        description: >-
+          Contact person for licensing questions. Provides structured contact
+          information including name, email, affiliation, and optional ORCID.
+          This person can answer questions about licensing terms, usage restrictions,
+          fees, and permissions.
+        range: Person
+        slot_uri: schema:contactPoint
+        exact_mappings:
+          - schema:contactPoint
 
 
   IPRestrictions:
     description: >
       Have any third parties imposed IP-based or other restrictions on the data
       associated with the instances? If so, describe them and note any relevant
-      fees or licensing terms.
+      fees or licensing terms. Maps to DUO terms related to commercial/non-profit
+      use restrictions (NCU, NPU, NPUNCU).
     is_a: DatasetProperty
     attributes:
       description:
         description: "Explanation of third-party IP restrictions."
         range: string
         multivalued: true
+        slot_uri: dcterms:rights
+        broad_mappings:
+          - DUO:0000046  # NCU - no commercial use
+          - DUO:0000045  # NPU - non-profit use only
 
 
   ExportControlRegulatoryRestrictions:
     description: >
       Do any export controls or other regulatory restrictions apply to the dataset
-      or to individual instances? If so, please describe these restrictions and
-      provide a link or copy of any supporting documentation.
+      or to individual instances? Includes compliance tracking for regulations like
+      GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and
+      provide a link or copy of any supporting documentation. Maps to DUO terms
+      related to ethics approval, geographic restrictions, and institutional requirements.
     is_a: DatasetProperty
     attributes:
       description:
         description: "Export or regulatory restrictions on the dataset."
         range: string
         multivalued: true
+        slot_uri: dcterms:accessRights
+        broad_mappings:
+          - DUO:0000021  # IRB - ethics approval required
+          - DUO:0000022  # GS - geographic restriction
+          - DUO:0000028  # IS - institution specific
+      gdpr_compliant:
+        description: >-
+          Indicates compliance with the EU General Data Protection Regulation (GDPR).
+          GDPR applies to processing of personal data of individuals in the EU.
+        range: ComplianceStatusEnum
+      hipaa_compliant:
+        description: >-
+          Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA).
+          HIPAA applies to protected health information in the United States.
+        range: ComplianceStatusEnum
+      eu_ai_act_risk_category:
+        description: >-
+          Risk category under the EU AI Act. The EU AI Act classifies AI systems
+          into risk categories: minimal, limited, high, and unacceptable.
+          High-risk AI systems face strict requirements.
+        range: AIActRiskEnum
+      other_compliance:
+        description: >-
+          Other regulatory compliance frameworks applicable to this dataset
+          (e.g., CCPA, PIPEDA, industry-specific regulations).
+        range: string
+        multivalued: true
+
+
+enums:
+
+  ComplianceStatusEnum:
+    description: >-
+      Compliance status for regulatory frameworks
+    permissible_values:
+      compliant:
+        description: Dataset is compliant with the regulation
+      partially_compliant:
+        description: Dataset is partially compliant, with known limitations
+      not_compliant:
+        description: Dataset does not comply with the regulation
+      not_applicable:
+        description: Regulation does not apply to this dataset
+      under_review:
+        description: Compliance status is currently under review
+
+  AIActRiskEnum:
+    description: >-
+      Risk categories under the EU AI Act.
+      See https://artificialintelligenceact.eu/
+    permissible_values:
+      minimal_risk:
+        description: >-
+          AI systems with minimal risk (e.g., AI-enabled video games, spam filters).
+          No specific obligations.
+      limited_risk:
+        description: >-
+          AI systems with limited risk subject to transparency obligations
+          (e.g., chatbots, emotion recognition systems).
+      high_risk:
+        description: >-
+          AI systems with high risk to health, safety, or fundamental rights
+          (e.g., AI in critical infrastructure, education, employment, law enforcement).
+          Subject to strict requirements.
+      unacceptable_risk:
+        description: >-
+          AI systems with unacceptable risk that are prohibited
+          (e.g., social scoring, real-time biometric identification in public spaces).
+
+  DataUsePermissionEnum:
+    description: >-
+      Data use permissions and restrictions based on the Data Use Ontology (DUO).
+      DUO is a standardized ontology for representing data use conditions developed
+      by GA4GH. See https://github.com/EBISPOT/DUO
+    permissible_values:
+      # Permissions
+      no_restriction:
+        description: No restriction on data use
+        meaning: DUO:0000004
+      general_research_use:
+        description: Data available for any research purpose (GRU)
+        meaning: DUO:0000042
+      health_medical_biomedical_research:
+        description: Data limited to health, medical, or biomedical research (HMB)
+        meaning: DUO:0000006
+      disease_specific_research:
+        description: Data limited to research on specified disease(s) (DS)
+        meaning: DUO:0000007
+      population_origins_ancestry_research:
+        description: Data limited to population origins or ancestry research (POA)
+        meaning: DUO:0000011
+      clinical_care_use:
+        description: Data available for clinical care and applications (CC)
+        meaning: DUO:0000043
+      # Modifiers/Restrictions
+      no_commercial_use:
+        description: Data use limited to non-commercial purposes (NCU)
+        meaning: DUO:0000046
+      non_profit_use_only:
+        description: Data use limited to not-for-profit organizations (NPU)
+        meaning: DUO:0000045
+      non_profit_use_and_non_commercial_use:
+        description: Data limited to not-for-profit organizations and non-commercial use (NPUNCU)
+        meaning: DUO:0000018
+      no_methods_development:
+        description: Data cannot be used for methods or software development (NMDS)
+        meaning: DUO:0000015
+      genetic_studies_only:
+        description: Data limited to genetic studies only (GSO)
+        meaning: DUO:0000016
+      ethics_approval_required:
+        description: Ethics approval (e.g., IRB/ERB) required for data use (IRB)
+        meaning: DUO:0000021
+      collaboration_required:
+        description: Collaboration with primary investigator required (COL)
+        meaning: DUO:0000020
+      publication_required:
+        description: Results must be published/shared with research community (PUB)
+        meaning: DUO:0000019
+      geographic_restriction:
+        description: Data use limited to specific geographic region (GS)
+        meaning: DUO:0000022
+      institution_specific:
+        description: Data use limited to approved institutions (IS)
+        meaning: DUO:0000028
+      project_specific:
+        description: Data use limited to approved project(s) (PS)
+        meaning: DUO:0000027
+      user_specific:
+        description: Data use limited to approved users (US)
+        meaning: DUO:0000026
+      time_limit:
+        description: Data use approved for limited time period (TS)
+        meaning: DUO:0000025
+      return_to_database:
+        description: Derived data must be returned to database/resource (RTN)
+        meaning: DUO:0000029
+      publication_moratorium:
+        description: Publication restricted until specified date (MOR)
+        meaning: DUO:0000024
+      no_population_ancestry_research:
+        description: Population/ancestry research prohibited (NPOA)
+        meaning: DUO:0000044

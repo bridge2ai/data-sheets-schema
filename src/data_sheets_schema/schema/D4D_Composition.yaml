@@ -24,7 +24,9 @@ imports:
 prefixes:
   linkml: "https://w3id.org/linkml/"
   d4dcomposition: "https://w3id.org/bridge2ai/data-sheets-schema/composition#"
-  # Additional prefixes if needed
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
+  dcat: "http://www.w3.org/ns/dcat#"
 
 
 default_prefix: "d4dcomposition"
@@ -50,20 +52,24 @@ classes:
         range: uriorcurie
         values_from:
           - B2AI_TOPIC
+        slot_uri: dcat:theme
       instance_type:
         description: >
           Multiple types of instances? (e.g., movies, users, and ratings).
         range: string
+        slot_uri: dcterms:type
       data_substrate:
         description: >
           Type of data (e.g., raw text, images) from Bridge2AI standards.
         range: uriorcurie
         values_from:
           - B2AI_SUBSTRATE
+        slot_uri: dcterms:format
       counts:
         description: >
           How many instances are there in total (of each type, if appropriate)?
         range: integer
+        slot_uri: schema:numberOfItems
       label:
         description: >
           Is there a label or target associated with each instance?
@@ -72,6 +78,7 @@ classes:
         description: >
           If labeled, what pattern or format do labels follow?
         range: string
+        slot_uri: schema:description
       sampling_strategies:
         description: >
           References to one or more SamplingStrategy objects.
@@ -137,23 +144,26 @@ classes:
           Description of the missing data fields or elements.
         range: string
         multivalued: true
+        slot_uri: dcterms:description
       why_missing:
         description: >
           Explanation of why each piece of data is missing.
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   Relationships:
     description: >
       Are relationships between individual instances made explicit
-      (e.g., users’ movie ratings, social network links)?
+      (e.g., users' movie ratings, social network links)?
     is_a: DatasetProperty
     attributes:
       description:
         description: "Explanation of how these relationships are represented."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   Splits:
@@ -165,6 +175,7 @@ classes:
       description:
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   DataAnomaly:
@@ -175,6 +186,7 @@ classes:
       description:
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   ExternalResource:
@@ -188,12 +200,14 @@ classes:
         description: "List of links or identifiers for external resources."
         range: string
         multivalued: true
+        slot_uri: dcterms:references
       future_guarantees:
         description: >
           Explanation of any commitments that external resources will remain
           available and stable over time.
         range: string
         multivalued: true
+        slot_uri: dcterms:description
       archival:
         description: >
           Indication whether official archival versions of external resources
@@ -205,6 +219,7 @@ classes:
           Description of any restrictions or fees associated with external resources.
         range: string
         multivalued: true
+        slot_uri: dcterms:accessRights
 
 
   Confidentiality:
@@ -219,6 +234,7 @@ classes:
       description:
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   ContentWarning:
@@ -233,6 +249,7 @@ classes:
       warnings:
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   Subpopulation:
@@ -247,9 +264,11 @@ classes:
       identification:
         range: string
         multivalued: true
+        slot_uri: dcterms:description
       distribution:
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   Deidentification:
@@ -264,6 +283,7 @@ classes:
       description:
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   SensitiveElement:
@@ -278,3 +298,4 @@ classes:
       description:
         range: string
         multivalued: true
+        slot_uri: dcterms:description

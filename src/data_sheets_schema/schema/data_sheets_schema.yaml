@@ -9,17 +9,23 @@ see_also:
   - https://bridge2ai.github.io/data-sheets-schema
 
 prefixes:
+  bibo: http://purl.org/ontology/bibo/
   biolink: https://w3id.org/biolink/vocab/
   csvw: http://www.w3.org/ns/csvw#
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
   datasets: https://w3id.org/linkml/report
   dcat: http://www.w3.org/ns/dcat#
+  dcterms: http://purl.org/dc/terms/
   example: https://example.org/
+  foaf: http://xmlns.com/foaf/0.1/
   formats: http://www.w3.org/ns/formats/
   frictionless: https://specs.frictionlessdata.io/
   linkml: https://w3id.org/linkml/
   mediatypes: https://www.iana.org/assignments/media-types/
+  oslc: http://open-services.net/ns/core#
   pav: http://purl.org/pav/
+  prov: http://www.w3.org/ns/prov#
+  qudt: http://qudt.org/schema/qudt/
   schema: http://schema.org/
   sh: https://w3id.org/shacl/
   skos: http://www.w3.org/2004/02/skos/core#
@@ -46,6 +52,7 @@ imports:
   - D4D_Ethics
   - D4D_Human
   - D4D_Data_Governance
+  - D4D_Variables
 
 ## TYPES ##
 
@@ -229,6 +236,15 @@ classes:
         range: VersionAccess
       extension_mechanism:
         range: ExtensionMechanism
+      # Variable/field metadata
+      variables:
+        description: >-
+          Metadata describing individual variables, fields, or columns in the dataset.
+        range: VariableMetadata
+        multivalued: true
+        slot_uri: schema:variableMeasured
+        exact_mappings:
+          - schema:variableMeasured
       # Other attributes
       is_deidentified:
         range: Deidentification
@@ -276,6 +292,18 @@ slots:
     range: uriorcurie
     exact_mappings:
       - frictionless:profiles
+
+  same_as:
+    description: >-
+      URL of a reference web resource that is the same as this dataset.
+      Used to link to canonical or alternative representations of the same dataset
+      on different platforms (e.g., DOI resolver, institutional repository, data catalog).
+    singular_name: same_as
+    multivalued: true
+    range: uriorcurie
+    slot_uri: schema:sameAs
+    exact_mappings:
+      - schema:sameAs
 
   themes:
     description: >-

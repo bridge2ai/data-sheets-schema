@@ -2,7 +2,10 @@
 # Column: AI_READI
 # Validation: Download ✅ success
 # Relevance: ⚠️  limited relevance
-# Generated: 2025-11-15 (Claude Code validated)
+# Generated: 2025-11-17 (Claude Code direct synthesis)
+# Framework: Direct synthesis following deterministic principles (see notes/DETERMINISM.md)
+# Model: claude-sonnet-4-5-20250929
+# Temperature: 0.0 (deterministic)
 
 id: "doi:10.5281/zenodo.10642459"
 doi: "doi:10.5281/zenodo.10642459"

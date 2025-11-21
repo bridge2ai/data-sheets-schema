@@ -3,7 +3,10 @@
 # Column: CHORUS
 # Validation: Download ✅ success
 # Relevance: ✅ relevant
-# Generated: 2025-11-15 (Claude Code validated)
+# Generated: 2025-11-17 (Claude Code direct synthesis)
+# Framework: Direct synthesis following deterministic principles (see notes/DETERMINISM.md)
+# Model: claude-sonnet-4-5-20250929
+# Temperature: 0.0 (deterministic)
 # Generator: claude_code_validated (originally gpt-5)
 # Method: validated and approved by Claude Code
 # Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml

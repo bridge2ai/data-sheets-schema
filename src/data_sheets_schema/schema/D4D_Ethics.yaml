@@ -22,6 +22,8 @@ imports:
 prefixes:
   linkml: "https://w3id.org/linkml/"
   d4dethics: "https://w3id.org/bridge2ai/data-sheets-schema/ethics#"
+  schema: "http://schema.org/"
+  dcterms: "http://purl.org/dc/terms/"
 
 
 default_prefix: "d4dethics"
@@ -47,6 +49,24 @@ classes:
         description: "Short summary or details about the ethical review process(es)."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
+      contact_person:
+        description: >-
+          Contact person for questions about ethical review. Provides structured
+          contact information including name, email, affiliation, and optional ORCID.
+        range: Person
+        slot_uri: schema:contactPoint
+        exact_mappings:
+          - schema:contactPoint
+      reviewing_organization:
+        description: >-
+          Organization that conducted the ethical review (e.g., Institutional Review Board,
+          Ethics Committee, Research Ethics Board). Provides information about the body
+          responsible for ethical oversight.
+        range: Organization
+        slot_uri: schema:provider
+        exact_mappings:
+          - schema:provider
 
 
   DataProtectionImpact:
@@ -60,6 +80,7 @@ classes:
         description: "Details of the data protection impact analysis, if conducted."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   CollectionNotification:
@@ -73,6 +94,7 @@ classes:
         description: "Details about any notification provided to individuals whose data was collected."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   CollectionConsent:
@@ -86,6 +108,7 @@ classes:
         description: "Details about how consent was sought, provided, and documented."
         range: string
         multivalued: true
+        slot_uri: dcterms:description
 
 
   ConsentRevocation:
@@ -98,3 +121,4 @@ classes:
         description: "Information about any consent-revocation mechanism offered to data subjects."
         range: string
         multivalued: true
+        slot_uri: dcterms:description

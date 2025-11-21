@@ -8,6 +8,7 @@
   "id": "https://w3id.org/bridge2ai/data-sheets-schema",
   "imports": [
     "linkml:types",
+    "D4D_Base_import",
     "D4D_Motivation",
     "D4D_Composition",
     "D4D_Collection",
@@ -18,10 +19,14 @@
     "D4D_Ethics",
     "D4D_Human",
     "D4D_Data_Governance",
-    "data_sheets_schema"
+    "D4D_Variables"
   ],
   "license": "MIT",
   "prefixes": [
+    {
+      "prefix_prefix": "bibo",
+      "prefix_reference": "http://purl.org/ontology/bibo/"
+    },
     {
       "prefix_prefix": "biolink",
       "prefix_reference": "https://w3id.org/biolink/vocab/"
@@ -43,8 +48,16 @@
       "prefix_reference": "http://www.w3.org/ns/dcat#"
     },
     {
+      "prefix_prefix": "dcterms",
+      "prefix_reference": "http://purl.org/dc/terms/"
+    },
+    {
       "prefix_prefix": "example",
       "prefix_reference": "https://example.org/"
+    },
+    {
+      "prefix_prefix": "foaf",
+      "prefix_reference": "http://xmlns.com/foaf/0.1/"
     },
     {
       "prefix_prefix": "formats",
@@ -63,8 +76,20 @@
       "prefix_reference": "https://www.iana.org/assignments/media-types/"
     },
     {
+      "prefix_prefix": "oslc",
+      "prefix_reference": "http://open-services.net/ns/core#"
+    },
+    {
       "prefix_prefix": "pav",
       "prefix_reference": "http://purl.org/pav/"
+    },
+    {
+      "prefix_prefix": "prov",
+      "prefix_reference": "http://www.w3.org/ns/prov#"
+    },
+    {
+      "prefix_prefix": "qudt",
+      "prefix_reference": "http://qudt.org/schema/qudt/"
     },
     {
       "prefix_prefix": "schema",
@@ -102,63 +127,63 @@
       "name": "Motivation",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Motivation",
       "description": "The questions in this section are primarily intended to encourage dataset creators to clearly articulate their reasons for creating the dataset and to promote transparency about funding interests. The latter may be particularly relevant for datasets created for research purposes.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
     {
       "name": "Composition",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Composition",
       "description": "The questions in this section are intended to provide dataset consumers with the information they need to make informed decisions about using the dataset for their chosen tasks. Some of the questions are designed to elicit information about compliance with the EU's General Data Protection Regulation (GDPR) or comparable regulations in other jurisdictions.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
     {
       "name": "Collection",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Collection",
       "description": "The questions in this section are designed to elicit information that may help researchers and practitioners to create alternative datasets with similar characteristics.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
     {
       "name": "Preprocessing_Cleaning_Labeling",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Preprocessing-Cleaning-Labeling",
       "description": "The questions in this section are intended to provide dataset consumers with the information they need to determine whether the \"raw\" data has been processed in ways that are compatible with their chosen tasks.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
     {
       "name": "Uses",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Uses",
       "description": "The questions in this section are intended to encourage dataset creators to reflect on the tasks for which the dataset should and should not be used.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
     {
       "name": "Distribution",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Distribution",
       "description": "The questions in this section pertain to dataset distribution.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
     {
       "name": "Maintenance",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Maintenance",
       "description": "The questions in this section are intended to encourage dataset creators to plan for dataset maintenance and communicate this plan to dataset consumers.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
     {
       "name": "Ethics",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Ethics",
       "description": "The questions in this section address ethical and data-protection concerns, including review by institutional bodies, consent and notification to data subjects, and potential impacts on data-protection rights.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
     {
       "name": "DataGovernance",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DataGovernance",
       "description": "The questions in this section relate to how the dataset is governed: how it is distributed, licensed, and maintained over time, plus third-party restrictions and update policies.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     }
   ],
@@ -474,165 +499,162 @@
   ],
   "enums": [
     {
-      "name": "CreatorOrMaintainerEnum",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/CreatorOrMaintainerEnum",
-      "description": "The entity responsible for maintaining a dataset.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "name": "FormatEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatEnum",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "permissible_values": [
         {
-          "text": "Person"
+          "text": "CSV"
         },
         {
-          "text": "Organization"
+          "text": "TSV"
+        },
+        {
+          "text": "XML"
+        },
+        {
+          "text": "JSON"
+        },
+        {
+          "text": "JSONL"
+        },
+        {
+          "text": "YAML"
+        },
+        {
+          "text": "HTML"
+        },
+        {
+          "text": "PDF"
+        },
+        {
+          "text": "DOCX"
+        },
+        {
+          "text": "XLSX"
+        },
+        {
+          "text": "PPTX"
+        },
+        {
+          "text": "TXT"
+        },
+        {
+          "text": "MD"
+        },
+        {
+          "text": "ZIP"
+        },
+        {
+          "text": "TAR"
+        },
+        {
+          "text": "GZ"
+        },
+        {
+          "text": "BZ2"
+        },
+        {
+          "text": "XZ"
         }
       ]
     },
     {
       "name": "MediaTypeEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/MediaTypeEnum",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "exact_mappings": [
-        "dcterms:MediaType"
-      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "permissible_values": [
         {
-          "text": "csv",
-          "meaning": "mediatypes:text/csv"
+          "text": "text/csv"
         },
         {
-          "text": "rdf-xml",
-          "meaning": "mediatypes:application/rdf+xml"
-        }
-      ]
-    },
-    {
-      "name": "FormatEnum",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatEnum",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "permissible_values": [
-        {
-          "text": "JSON-LD",
-          "meaning": "formats:JSON-LD"
+          "text": "text/tab-separated-values"
         },
         {
-          "text": "N3",
-          "meaning": "formats:N3"
+          "text": "application/json"
         },
         {
-          "text": "N-Triples",
-          "meaning": "formats:N-Triples"
+          "text": "application/xml"
         },
         {
-          "text": "N-Quads",
-          "meaning": "formats:N-Quads"
+          "text": "text/xml"
         },
         {
-          "text": "LD Patch",
-          "meaning": "formats:LD_Patch"
+          "text": "application/yaml"
         },
         {
-          "text": "Microdata",
-          "meaning": "formats:microdata"
+          "text": "text/yaml"
         },
         {
-          "text": "OWL XML Serialization",
-          "meaning": "formats:OWL_XML"
+          "text": "text/html"
         },
         {
-          "text": "OWL Functional Syntax",
-          "meaning": "formats:OWL_Functional"
+          "text": "application/pdf"
         },
         {
-          "text": "OWL Manchester Syntax",
-          "meaning": "formats:OWL_Manchester"
+          "text": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         },
         {
-          "text": "POWDER",
-          "meaning": "formats:POWDER"
+          "text": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         },
         {
-          "text": "POWDER-S",
-          "meaning": "formats:POWDER-S"
+          "text": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
         },
         {
-          "text": "PROV-N",
-          "meaning": "formats:PROV-N"
+          "text": "text/plain"
         },
         {
-          "text": "PROV-XML",
-          "meaning": "formats:PROV-XML"
+          "text": "text/markdown"
         },
         {
-          "text": "RDFa",
-          "meaning": "formats:RDFa"
+          "text": "application/zip"
         },
         {
-          "text": "RDF/JSON",
-          "meaning": "formats:RDF_JSON"
+          "text": "application/x-tar"
         },
         {
-          "text": "RDF/XML",
-          "meaning": "formats:RDF_XML"
+          "text": "application/gzip"
         },
         {
-          "text": "RIF XML Syntax",
-          "meaning": "formats:RIF_XML"
+          "text": "application/x-bzip2"
         },
         {
-          "text": "SPARQL Results in XML",
-          "meaning": "formats:SPARQL_Results_XML"
-        },
-        {
-          "text": "SPARQL Results in JSON",
-          "meaning": "formats:SPARQL_Results_JSON"
-        },
-        {
-          "text": "SPARQL Results in CSV",
-          "meaning": "formats:SPARQL_Results_CSV"
-        },
-        {
-          "text": "SPARQL Results in TSV",
-          "meaning": "formats:SPARQL_Results_TSV"
-        },
-        {
-          "text": "Turtle",
-          "meaning": "formats:Turtle"
-        },
-        {
-          "text": "TriG",
-          "meaning": "formats:TriG"
-        },
-        {
-          "text": "YAML"
-        },
-        {
-          "text": "JSON"
+          "text": "application/x-xz"
         }
       ]
     },
     {
       "name": "CompressionEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/CompressionEnum",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "permissible_values": [
         {
-          "text": "GZIP"
+          "text": "gzip"
         },
         {
-          "text": "TAR"
+          "text": "bzip2"
         },
         {
-          "text": "TARGZIP"
+          "text": "zip"
         },
         {
-          "text": "ZIP"
+          "text": "tar"
+        },
+        {
+          "text": "xz"
+        },
+        {
+          "text": "lzma"
+        },
+        {
+          "text": "compress"
         }
       ]
     },
     {
       "name": "EncodingEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/EncodingEnum",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "permissible_values": [
         {
           "text": "ASCII"
@@ -737,18 +759,516 @@
           "text": "UTF-8"
         }
       ]
+    },
+    {
+      "name": "CRediTRoleEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/CRediTRoleEnum",
+      "description": "Contributor roles based on the CRediT (Contributor Roles Taxonomy). See https://credit.niso.org/",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "permissible_values": [
+        {
+          "text": "conceptualization",
+          "description": "Ideas; formulation or evolution of overarching research goals and aims"
+        },
+        {
+          "text": "methodology",
+          "description": "Development or design of methodology; creation of models"
+        },
+        {
+          "text": "software",
+          "description": "Programming, software development; designing computer programs"
+        },
+        {
+          "text": "validation",
+          "description": "Verification of the overall replication/reproducibility of results"
+        },
+        {
+          "text": "formal_analysis",
+          "description": "Application of statistical, mathematical, or other formal techniques"
+        },
+        {
+          "text": "investigation",
+          "description": "Conducting the research and investigation process"
+        },
+        {
+          "text": "resources",
+          "description": "Provision of study materials, reagents, patients, laboratory samples, etc."
+        },
+        {
+          "text": "data_curation",
+          "description": "Management activities to annotate, scrub data and maintain research data"
+        },
+        {
+          "text": "writing_original_draft",
+          "description": "Preparation, creation and/or presentation of the published work"
+        },
+        {
+          "text": "writing_review_editing",
+          "description": "Critical review, commentary or revision of the work"
+        },
+        {
+          "text": "visualization",
+          "description": "Preparation, creation and/or presentation of visualizations/data presentation"
+        },
+        {
+          "text": "supervision",
+          "description": "Oversight and leadership responsibility for the research activity"
+        },
+        {
+          "text": "project_administration",
+          "description": "Management and coordination responsibility for the research activity"
+        },
+        {
+          "text": "funding_acquisition",
+          "description": "Acquisition of the financial support for the project"
+        }
+      ]
+    },
+    {
+      "name": "BiasTypeEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/BiasTypeEnum",
+      "description": "Types of bias that may be present in datasets",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "permissible_values": [
+        {
+          "text": "selection_bias",
+          "description": "Bias arising from non-random selection of data or participants"
+        },
+        {
+          "text": "measurement_bias",
+          "description": "Bias in how data is measured or recorded"
+        },
+        {
+          "text": "historical_bias",
+          "description": "Bias reflecting historical inequities or societal biases"
+        },
+        {
+          "text": "representation_bias",
+          "description": "Certain groups are over- or under-represented in the data"
+        },
+        {
+          "text": "aggregation_bias",
+          "description": "Bias from inappropriately combining distinct groups"
+        },
+        {
+          "text": "algorithmic_bias",
+          "description": "Bias introduced or amplified by algorithmic processing"
+        },
+        {
+          "text": "sampling_bias",
+          "description": "Bias from sampling methodology not representative of the population"
+        },
+        {
+          "text": "annotation_bias",
+          "description": "Bias introduced during data labeling or annotation"
+        },
+        {
+          "text": "confirmation_bias",
+          "description": "Bias from seeking data that confirms pre-existing beliefs"
+        }
+      ]
+    },
+    {
+      "name": "VersionTypeEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/VersionTypeEnum",
+      "description": "Type of version change using semantic versioning principles. See https://semver.org/",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "permissible_values": [
+        {
+          "text": "MAJOR",
+          "description": "Incompatible changes, breaking backward compatibility"
+        },
+        {
+          "text": "MINOR",
+          "description": "Backward-compatible new functionality or enhancements"
+        },
+        {
+          "text": "PATCH",
+          "description": "Backward-compatible bug fixes or minor corrections"
+        },
+        {
+          "text": "Windows-1250"
+        },
+        {
+          "text": "Windows-1251"
+        },
+        {
+          "text": "Windows-1252"
+        },
+        {
+          "text": "Windows-1253"
+        },
+        {
+          "text": "Windows-1254"
+        },
+        {
+          "text": "Windows-1255"
+        },
+        {
+          "text": "Windows-1256"
+        },
+        {
+          "text": "Windows-1257"
+        },
+        {
+          "text": "Windows-1258"
+        }
+      ]
+    },
+    {
+      "name": "CreatorOrMaintainerEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/CreatorOrMaintainerEnum",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "permissible_values": [
+        {
+          "text": "data_subject",
+          "description": "A person whose information is recorded in the dataset."
+        },
+        {
+          "text": "third_party",
+          "description": "A third party not involved in the direct creation or maintenance."
+        },
+        {
+          "text": "researcher",
+          "description": "A researcher involved in dataset creation or maintenance."
+        },
+        {
+          "text": "industry",
+          "description": "Industry professional involved in dataset creation or maintenance."
+        },
+        {
+          "text": "academic_institution",
+          "description": "Academic institution responsible for dataset."
+        },
+        {
+          "text": "government_agency",
+          "description": "Government agency responsible for dataset."
+        },
+        {
+          "text": "commercial_entity",
+          "description": "Commercial entity responsible for dataset."
+        },
+        {
+          "text": "non_profit_organization",
+          "description": "Non-profit organization responsible for dataset."
+        },
+        {
+          "text": "crowdsourced",
+          "description": "Dataset created through crowdsourcing efforts."
+        },
+        {
+          "text": "automated_system",
+          "description": "Automated system or process responsible for dataset."
+        },
+        {
+          "text": "other",
+          "description": "Other type of creator or maintainer not listed."
+        }
+      ]
+    },
+    {
+      "name": "Boolean",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Boolean",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "permissible_values": [
+        {
+          "text": "true",
+          "title": "True"
+        },
+        {
+          "text": "false",
+          "title": "False"
+        },
+        {
+          "text": "unknown",
+          "title": "Unknown"
+        }
+      ]
+    },
+    {
+      "name": "ComplianceStatusEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ComplianceStatusEnum",
+      "description": "Compliance status for regulatory frameworks",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "permissible_values": [
+        {
+          "text": "compliant",
+          "description": "Dataset is compliant with the regulation"
+        },
+        {
+          "text": "partially_compliant",
+          "description": "Dataset is partially compliant, with known limitations"
+        },
+        {
+          "text": "not_compliant",
+          "description": "Dataset does not comply with the regulation"
+        },
+        {
+          "text": "not_applicable",
+          "description": "Regulation does not apply to this dataset"
+        },
+        {
+          "text": "under_review",
+          "description": "Compliance status is currently under review"
+        }
+      ]
+    },
+    {
+      "name": "AIActRiskEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#AIActRiskEnum",
+      "description": "Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "permissible_values": [
+        {
+          "text": "minimal_risk",
+          "description": "AI systems with minimal risk (e.g., AI-enabled video games, spam filters). No specific obligations."
+        },
+        {
+          "text": "limited_risk",
+          "description": "AI systems with limited risk subject to transparency obligations (e.g., chatbots, emotion recognition systems)."
+        },
+        {
+          "text": "high_risk",
+          "description": "AI systems with high risk to health, safety, or fundamental rights (e.g., AI in critical infrastructure, education, employment, law enforcement). Subject to strict requirements."
+        },
+        {
+          "text": "unacceptable_risk",
+          "description": "AI systems with unacceptable risk that are prohibited (e.g., social scoring, real-time biometric identification in public spaces)."
+        }
+      ]
+    },
+    {
+      "name": "DataUsePermissionEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#DataUsePermissionEnum",
+      "description": "Data use permissions and restrictions based on the Data Use Ontology (DUO). DUO is a standardized ontology for representing data use conditions developed by GA4GH. See https://github.com/EBISPOT/DUO",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "permissible_values": [
+        {
+          "text": "no_restriction",
+          "description": "No restriction on data use",
+          "meaning": "DUO:0000004"
+        },
+        {
+          "text": "general_research_use",
+          "description": "Data available for any research purpose (GRU)",
+          "meaning": "DUO:0000042"
+        },
+        {
+          "text": "health_medical_biomedical_research",
+          "description": "Data limited to health, medical, or biomedical research (HMB)",
+          "meaning": "DUO:0000006"
+        },
+        {
+          "text": "disease_specific_research",
+          "description": "Data limited to research on specified disease(s) (DS)",
+          "meaning": "DUO:0000007"
+        },
+        {
+          "text": "population_origins_ancestry_research",
+          "description": "Data limited to population origins or ancestry research (POA)",
+          "meaning": "DUO:0000011"
+        },
+        {
+          "text": "clinical_care_use",
+          "description": "Data available for clinical care and applications (CC)",
+          "meaning": "DUO:0000043"
+        },
+        {
+          "text": "no_commercial_use",
+          "description": "Data use limited to non-commercial purposes (NCU)",
+          "meaning": "DUO:0000046"
+        },
+        {
+          "text": "non_profit_use_only",
+          "description": "Data use limited to not-for-profit organizations (NPU)",
+          "meaning": "DUO:0000045"
+        },
+        {
+          "text": "non_profit_use_and_non_commercial_use",
+          "description": "Data limited to not-for-profit organizations and non-commercial use (NPUNCU)",
+          "meaning": "DUO:0000018"
+        },
+        {
+          "text": "no_methods_development",
+          "description": "Data cannot be used for methods or software development (NMDS)",
+          "meaning": "DUO:0000015"
+        },
+        {
+          "text": "genetic_studies_only",
+          "description": "Data limited to genetic studies only (GSO)",
+          "meaning": "DUO:0000016"
+        },
+        {
+          "text": "ethics_approval_required",
+          "description": "Ethics approval (e.g., IRB/ERB) required for data use (IRB)",
+          "meaning": "DUO:0000021"
+        },
+        {
+          "text": "collaboration_required",
+          "description": "Collaboration with primary investigator required (COL)",
+          "meaning": "DUO:0000020"
+        },
+        {
+          "text": "publication_required",
+          "description": "Results must be published/shared with research community (PUB)",
+          "meaning": "DUO:0000019"
+        },
+        {
+          "text": "geographic_restriction",
+          "description": "Data use limited to specific geographic region (GS)",
+          "meaning": "DUO:0000022"
+        },
+        {
+          "text": "institution_specific",
+          "description": "Data use limited to approved institutions (IS)",
+          "meaning": "DUO:0000028"
+        },
+        {
+          "text": "project_specific",
+          "description": "Data use limited to approved project(s) (PS)",
+          "meaning": "DUO:0000027"
+        },
+        {
+          "text": "user_specific",
+          "description": "Data use limited to approved users (US)",
+          "meaning": "DUO:0000026"
+        },
+        {
+          "text": "time_limit",
+          "description": "Data use approved for limited time period (TS)",
+          "meaning": "DUO:0000025"
+        },
+        {
+          "text": "return_to_database",
+          "description": "Derived data must be returned to database/resource (RTN)",
+          "meaning": "DUO:0000029"
+        },
+        {
+          "text": "publication_moratorium",
+          "description": "Publication restricted until specified date (MOR)",
+          "meaning": "DUO:0000024"
+        },
+        {
+          "text": "no_population_ancestry_research",
+          "description": "Population/ancestry research prohibited (NPOA)",
+          "meaning": "DUO:0000044"
+        }
+      ]
+    },
+    {
+      "name": "VariableTypeEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#VariableTypeEnum",
+      "description": "Common data types for variables",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "permissible_values": [
+        {
+          "text": "integer",
+          "description": "Whole numbers"
+        },
+        {
+          "text": "float",
+          "description": "Floating-point numbers"
+        },
+        {
+          "text": "double",
+          "description": "Double-precision floating-point"
+        },
+        {
+          "text": "string",
+          "description": "Text strings"
+        },
+        {
+          "text": "boolean",
+          "description": "True/false values"
+        },
+        {
+          "text": "date",
+          "description": "Date values"
+        },
+        {
+          "text": "datetime",
+          "description": "Date and time values"
+        },
+        {
+          "text": "categorical",
+          "description": "Categorical/factor variables with finite values"
+        },
+        {
+          "text": "ordinal",
+          "description": "Ordered categorical variables"
+        },
+        {
+          "text": "identifier",
+          "description": "Unique identifiers or keys"
+        },
+        {
+          "text": "json",
+          "description": "JSON-encoded data"
+        },
+        {
+          "text": "array",
+          "description": "Arrays or lists"
+        },
+        {
+          "text": "object",
+          "description": "Complex structured objects"
+        }
+      ]
     }
   ],
   "slots": [
     {
+      "name": "profile",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/profile",
+      "description": "The frictionless data profile to which the data conforms.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "exact_mappings": [
+        "https://specs.frictionlessdata.io/profiles"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/profile",
+      "range": "uriorcurie",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "same_as",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/same_as",
+      "description": "URL of a reference web resource that is the same as this dataset. Used to link to canonical or alternative representations of the same dataset on different platforms (e.g., DOI resolver, institutional repository, data catalog).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://schema.org/sameAs"
+      ],
+      "exact_mappings": [
+        "http://schema.org/sameAs"
+      ],
+      "singular_name": "same_as",
+      "slot_uri": "http://schema.org/sameAs",
+      "range": "uriorcurie",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "themes",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/themes",
+      "description": "Themes associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#theme"
+      ],
+      "singular_name": "theme",
+      "slot_uri": "http://www.w3.org/ns/dcat#theme",
+      "range": "uriorcurie",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "title",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/title",
       "description": "the official title of the element",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://example.org/UNKNOWN/dcterms/title"
+        "http://purl.org/dc/terms/title"
       ],
-      "slot_uri": "http://example.org/UNKNOWN/dcterms/title",
+      "slot_uri": "http://purl.org/dc/terms/title",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -760,8 +1280,14 @@
       "name": "language",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/language",
       "description": "language in which the information is expressed",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/language",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/language"
+      ],
+      "exact_mappings": [
+        "http://schema.org/inLanguage"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/language",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -772,11 +1298,11 @@
     {
       "name": "publisher",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/publisher",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://example.org/UNKNOWN/dcterms/publisher"
+        "http://purl.org/dc/terms/publisher"
       ],
-      "slot_uri": "http://example.org/UNKNOWN/dcterms/publisher",
+      "slot_uri": "http://purl.org/dc/terms/publisher",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -787,11 +1313,11 @@
     {
       "name": "issued",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/issued",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://example.org/UNKNOWN/dcterms/issued"
+        "http://purl.org/dc/terms/issued"
       ],
-      "slot_uri": "http://example.org/UNKNOWN/dcterms/issued",
+      "slot_uri": "http://purl.org/dc/terms/issued",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -802,7 +1328,7 @@
     {
       "name": "page",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/page",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://www.w3.org/ns/dcat#landingPage"
       ],
@@ -817,7 +1343,7 @@
     {
       "name": "dialect",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/dialect",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://www.w3.org/ns/csvw#dialect"
       ],
@@ -833,7 +1359,7 @@
       "name": "bytes",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/bytes",
       "description": "Size of the data in bytes.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://www.w3.org/ns/dcat#byteSize"
       ],
@@ -848,11 +1374,14 @@
     {
       "name": "path",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/path",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/contentUrl"
+      ],
       "close_mappings": [
         "https://specs.frictionlessdata.io/path"
       ],
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/path",
+      "slot_uri": "http://schema.org/contentUrl",
       "owner": "Dataset",
       "domain_of": [
         "Dataset"
@@ -864,7 +1393,7 @@
       "name": "download_url",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/download_url",
       "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://www.w3.org/ns/dcat#downloadURL"
       ],
@@ -885,12 +1414,12 @@
     {
       "name": "format",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/format",
-      "description": "The format of the data. This is not the same as the media type. Rather, this is the format of the data in a more specific sense, e.g., CSV, JSON, etc.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://example.org/UNKNOWN/dcterms/format"
+        "http://purl.org/dc/terms/format"
       ],
-      "slot_uri": "http://example.org/UNKNOWN/dcterms/format",
+      "slot_uri": "http://purl.org/dc/terms/format",
       "owner": "Dataset",
       "domain_of": [
         "Dataset"
@@ -899,24 +1428,14 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "compression",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
-      "description": "The compression format of the data. This is not the same as the media type. Rather, this is the compression format of the data in a more specific sense, e.g., zip, gzip, etc.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
-      "owner": "Information",
-      "domain_of": [
-        "Information"
-      ],
-      "range": "CompressionEnum",
-      "@type": "SlotDefinition"
-    },
-    {
       "name": "encoding",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/encoding",
-      "description": "The encoding of the data. This is not the same as the media type. Rather, this is the encoding of the data in a more specific sense, e.g., UTF-8, ASCII, etc.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/encoding",
+      "description": "the character encoding of the data",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#mediaType"
+      ],
+      "slot_uri": "http://www.w3.org/ns/dcat#mediaType",
       "owner": "Dataset",
       "domain_of": [
         "Dataset"
@@ -925,61 +1444,26 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "hash",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/hash",
-      "description": "The hash representation of the data, e.g., sha256, md5, etc. Subtypes have their own slots.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/hash",
-      "owner": "Dataset",
-      "domain_of": [
-        "Dataset"
+      "name": "compression",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
+      "description": "compression format used, if any. e.g., gzip, bzip2, zip",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#compressFormat"
       ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "sha256",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sha256",
-      "description": "The sha256 hash representation of the data.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "hash",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sha256",
-      "owner": "Dataset",
+      "slot_uri": "http://www.w3.org/ns/dcat#compressFormat",
+      "owner": "Information",
       "domain_of": [
-        "Dataset"
+        "Information"
       ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "md5",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/md5",
-      "description": "The md5 hash representation of the data.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "hash",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/md5",
-      "owner": "Dataset",
-      "domain_of": [
-        "Dataset"
-      ],
-      "range": "string",
+      "range": "CompressionEnum",
       "@type": "SlotDefinition"
     },
     {
       "name": "media_type",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/media_type",
-      "description": "The media type of the data. This is not the same as the format. Rather, this is the media type of the data in a more general sense, e.g., text/csv, application/json, etc., though as it is defined here the media type can be any string.",
-      "examples": [
-        {
-          "value": "text/csv",
-          "@type": "Example"
-        },
-        {
-          "value": "application/json",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "description": "The media type of the data. This should be a MIME type.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://www.w3.org/ns/dcat#mediaType"
       ],
@@ -992,102 +1476,124 @@
       "domain_of": [
         "Dataset"
       ],
+      "range": "MediaTypeEnum",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "hash",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/hash",
+      "description": "hash of the data",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/identifier"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/identifier",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "md5",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/md5",
+      "description": "md5 hash of the data",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/identifier"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/identifier",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "sha256",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sha256",
+      "description": "sha256 hash of the data",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/identifier"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/identifier",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
       "range": "string",
       "@type": "SlotDefinition"
     },
     {
       "name": "conforms_to",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to",
-      "description": "The standard to which the data conforms. This is not the same as the media type. Rather, this is the standard to which the data conforms in a more specific sense, e.g., frictionless, schema.org, etc. This should be a standard from the Bridge2AI standards registry.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://example.org/UNKNOWN/dcterms/conformsTo"
+        "http://purl.org/dc/terms/conformsTo"
       ],
-      "values_from": [
-        "B2AI_STANDARD"
-      ],
-      "slot_uri": "http://example.org/UNKNOWN/dcterms/conformsTo",
+      "slot_uri": "http://purl.org/dc/terms/conformsTo",
       "owner": "Information",
       "domain_of": [
         "Information"
       ],
-      "range": "uriorcurie",
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
       "name": "conforms_to_schema",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_schema",
-      "description": "The schema to which the data conforms. This is not the same as the media type. Rather, this is the schema to which the data conforms in a more specific sense, and even more specific than the general set of standards it conforms to.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "exact_mappings": [
-        "https://specs.frictionlessdata.io/schema"
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/conformsTo"
       ],
-      "is_a": "conforms_to",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_schema",
+      "slot_uri": "http://purl.org/dc/terms/conformsTo",
       "owner": "Information",
       "domain_of": [
         "Information"
       ],
-      "range": "uriorcurie",
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
       "name": "conforms_to_class",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_class",
-      "description": "The class in the schema to which the data object instantiates.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "conforms_to",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conforms_to_class",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/conformsTo"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/conformsTo",
       "owner": "Information",
       "domain_of": [
         "Information"
       ],
-      "range": "uriorcurie",
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
-      "name": "doi",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/doi",
-      "description": "The Digital Object Identifier of the data, with the doi prefix.",
-      "examples": [
-        {
-          "value": "doi:10.48550/arXiv.2310.03666",
-          "@type": "Example"
-        }
+      "name": "license",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/license",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/license"
       ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/doi",
+      "slot_uri": "http://purl.org/dc/terms/license",
       "owner": "Information",
       "domain_of": [
         "Information"
       ],
-      "range": "uriorcurie",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "profile",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/profile",
-      "description": "The frictionless data profile to which the data conforms.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "exact_mappings": [
-        "https://specs.frictionlessdata.io/profiles"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/profile",
-      "range": "uriorcurie",
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
       "name": "keywords",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/keywords",
-      "description": "Keywords associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://www.w3.org/ns/dcat#keyword"
       ],
-      "exact_mappings": [
-        "http://schema.org/keywords"
-      ],
-      "singular_name": "keyword",
       "slot_uri": "http://www.w3.org/ns/dcat#keyword",
       "owner": "Information",
       "domain_of": [
@@ -1098,24 +1604,24 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "themes",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/themes",
-      "description": "Themes associated with the data. These may be provided by the data creator or assigned later in a manual or automated manner.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "name": "version",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/version",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://www.w3.org/ns/dcat#theme"
+        "http://purl.org/pav/version"
       ],
-      "singular_name": "theme",
-      "slot_uri": "http://www.w3.org/ns/dcat#theme",
-      "range": "uriorcurie",
-      "multivalued": true,
+      "slot_uri": "http://purl.org/pav/version",
+      "owner": "Information",
+      "domain_of": [
+        "Information"
+      ],
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
       "name": "created_by",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/created_by",
-      "description": "Agent that created the element",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/pav/createdBy"
       ],
@@ -1124,15 +1630,13 @@
       "domain_of": [
         "Information"
       ],
-      "range": "CreatorOrMaintainerEnum",
-      "multivalued": true,
+      "range": "string",
       "@type": "SlotDefinition"
     },
     {
       "name": "created_on",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/created_on",
-      "description": "Date and Time at which the element was created",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/pav/createdOn"
       ],
@@ -1147,8 +1651,7 @@
     {
       "name": "last_updated_on",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/last_updated_on",
-      "description": "Date and Time at which the element was last updated",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/pav/lastUpdatedOn"
       ],
@@ -1163,53 +1666,14 @@
     {
       "name": "modified_by",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/modified_by",
-      "description": "agent that modified the element",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://example.org/UNKNOWN/oslc/modifiedBy"
-      ],
-      "slot_uri": "http://example.org/UNKNOWN/oslc/modifiedBy",
-      "owner": "Information",
-      "domain_of": [
-        "Information"
-      ],
-      "range": "CreatorOrMaintainerEnum",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "status",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/status",
-      "description": "Status of the element in terms of its maturity or life cycle",
-      "examples": [
-        {
-          "value": "bibo:draft",
-          "@type": "Example"
-        }
-      ],
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "mappings": [
-        "http://example.org/UNKNOWN/bibo/status"
-      ],
-      "slot_uri": "http://example.org/UNKNOWN/bibo/status",
-      "owner": "Information",
-      "domain_of": [
-        "Information"
-      ],
-      "range": "uriorcurie",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "license",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/license",
-      "description": "license for the data",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "mappings": [
-        "http://example.org/UNKNOWN/dcterms/license"
+        "http://open-services.net/ns/core#modifiedBy"
       ],
       "exact_mappings": [
-        "https://specs.frictionlessdata.io/licenses"
+        "http://purl.org/pav/lastUpdateBy"
       ],
-      "slot_uri": "http://example.org/UNKNOWN/dcterms/license",
+      "slot_uri": "http://open-services.net/ns/core#modifiedBy",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1218,18 +1682,13 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "version",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/version",
-      "description": "particular version of schema",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "name": "status",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/status",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/pav/version"
+        "http://purl.org/ontology/bibo/status"
       ],
-      "exact_mappings": [
-        "http://schema.org/version",
-        "http://example.org/UNKNOWN/dcterms/hasVersion"
-      ],
-      "slot_uri": "http://purl.org/pav/version",
+      "slot_uri": "http://purl.org/ontology/bibo/status",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1240,12 +1699,14 @@
     {
       "name": "was_derived_from",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/was_derived_from",
-      "description": "A derivation is a transformation of an entity into another, an update of an entity resulting in a new one, or the construction of a new entity based on a pre-existing entity.@en",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://example.org/UNKNOWN/prov/wasDerivedFrom"
+        "http://www.w3.org/ns/prov#wasDerivedFrom"
       ],
-      "slot_uri": "http://example.org/UNKNOWN/prov/wasDerivedFrom",
+      "exact_mappings": [
+        "http://purl.org/pav/derivedFrom"
+      ],
+      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1254,190 +1715,23 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "namedThing__id",
-      "description": "A unique identifier for a thing.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "name": "doi",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/doi",
+      "description": "digital object identifier",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://schema.org/identifier"
+        "http://purl.org/ontology/bibo/doi"
       ],
-      "slot_uri": "http://schema.org/identifier",
-      "identifier": true,
-      "alias": "id",
-      "owner": "NamedThing",
+      "exact_mappings": [
+        "http://purl.org/dc/terms/identifier"
+      ],
+      "slot_uri": "http://purl.org/ontology/bibo/doi",
+      "owner": "Information",
       "domain_of": [
-        "NamedThing"
-      ],
-      "range": "uriorcurie",
-      "required": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "namedThing__name",
-      "description": "A human-readable name for a thing.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "mappings": [
-        "http://schema.org/name"
-      ],
-      "slot_uri": "http://schema.org/name",
-      "alias": "name",
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
+        "Information"
       ],
       "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "namedThing__description",
-      "description": "A human-readable description for a thing.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "mappings": [
-        "http://schema.org/description"
-      ],
-      "slot_uri": "http://schema.org/description",
-      "alias": "description",
-      "owner": "NamedThing",
-      "domain_of": [
-        "NamedThing"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "datasetProperty__used_software",
-      "description": "What software was used as part of this dataset property?",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/used_software",
-      "alias": "used_software",
-      "owner": "DatasetProperty",
-      "domain_of": [
-        "DatasetProperty"
-      ],
-      "range": "Software",
-      "multivalued": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "software__version",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/version",
-      "alias": "version",
-      "owner": "Software",
-      "domain_of": [
-        "Software"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "software__license",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/license",
-      "alias": "license",
-      "owner": "Software",
-      "domain_of": [
-        "Software"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "software__url",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/url",
-      "alias": "url",
-      "owner": "Software",
-      "domain_of": [
-        "Software"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "person__affiliation",
-      "description": "The organization(s) to which the person belongs.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/affiliation",
-      "alias": "affiliation",
-      "owner": "Person",
-      "domain_of": [
-        "Person"
-      ],
-      "range": "Organization",
-      "multivalued": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "person__email",
-      "description": "The email address of the person.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/email",
-      "alias": "email",
-      "owner": "Person",
-      "domain_of": [
-        "Person"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__comment_prefix",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/comment_prefix",
-      "alias": "comment_prefix",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__delimiter",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/delimiter",
-      "alias": "delimiter",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__double_quote",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/double_quote",
-      "alias": "double_quote",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__header",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/header",
-      "alias": "header",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "formatDialect__quote_char",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/quote_char",
-      "alias": "quote_char",
-      "owner": "FormatDialect",
-      "domain_of": [
-        "FormatDialect"
-      ],
-      "range": "string",
+      "pattern": "10\\.\\d{4,}\\/.+",
       "@type": "SlotDefinition"
     },
     {
@@ -1973,6 +2267,26 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "dataset__variables",
+      "description": "Metadata describing individual variables, fields, or columns in the dataset.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://schema.org/variableMeasured"
+      ],
+      "exact_mappings": [
+        "http://schema.org/variableMeasured"
+      ],
+      "slot_uri": "http://schema.org/variableMeasured",
+      "alias": "variables",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "VariableMetadata",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "dataset__is_deidentified",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/is_deidentified",
@@ -2023,10 +2337,235 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "namedThing__id",
+      "description": "A unique identifier for a thing.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/identifier"
+      ],
+      "slot_uri": "http://schema.org/identifier",
+      "identifier": true,
+      "alias": "id",
+      "owner": "NamedThing",
+      "domain_of": [
+        "NamedThing"
+      ],
+      "range": "uriorcurie",
+      "required": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "namedThing__name",
+      "description": "A human-readable name for a thing.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/name"
+      ],
+      "slot_uri": "http://schema.org/name",
+      "alias": "name",
+      "owner": "NamedThing",
+      "domain_of": [
+        "NamedThing"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "namedThing__description",
+      "description": "A human-readable description for a thing.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/description"
+      ],
+      "slot_uri": "http://schema.org/description",
+      "alias": "description",
+      "owner": "NamedThing",
+      "domain_of": [
+        "NamedThing"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "datasetProperty__used_software",
+      "description": "What software was used as part of this dataset property?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/used_software",
+      "alias": "used_software",
+      "owner": "DatasetProperty",
+      "domain_of": [
+        "DatasetProperty"
+      ],
+      "range": "Software",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "software__version",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/softwareVersion"
+      ],
+      "slot_uri": "http://schema.org/softwareVersion",
+      "alias": "version",
+      "owner": "Software",
+      "domain_of": [
+        "Software"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "software__license",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/license"
+      ],
+      "slot_uri": "http://schema.org/license",
+      "alias": "license",
+      "owner": "Software",
+      "domain_of": [
+        "Software"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "software__url",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/url"
+      ],
+      "slot_uri": "http://schema.org/url",
+      "alias": "url",
+      "owner": "Software",
+      "domain_of": [
+        "Software"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "person__affiliation",
+      "description": "The organization(s) to which the person belongs in the context of this dataset. May vary across datasets; multivalued to support multiple affiliations.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/affiliation"
+      ],
+      "slot_uri": "http://schema.org/affiliation",
+      "alias": "affiliation",
+      "owner": "Person",
+      "domain_of": [
+        "Person"
+      ],
+      "range": "Organization",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "person__email",
+      "description": "The email address of the person. Represents current/preferred contact information in the context of this dataset.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/email"
+      ],
+      "slot_uri": "http://schema.org/email",
+      "alias": "email",
+      "owner": "Person",
+      "domain_of": [
+        "Person"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "person__orcid",
+      "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/identifier"
+      ],
+      "exact_mappings": [
+        "http://schema.org/identifier"
+      ],
+      "slot_uri": "http://schema.org/identifier",
+      "alias": "orcid",
+      "owner": "Person",
+      "domain_of": [
+        "Person"
+      ],
+      "range": "string",
+      "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__comment_prefix",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/comment_prefix",
+      "alias": "comment_prefix",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__delimiter",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/delimiter",
+      "alias": "delimiter",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__double_quote",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/double_quote",
+      "alias": "double_quote",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__header",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/header",
+      "alias": "header",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "formatDialect__quote_char",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/quote_char",
+      "alias": "quote_char",
+      "owner": "FormatDialect",
+      "domain_of": [
+        "FormatDialect"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "purpose__response",
       "description": "Short explanation describing the primary purpose of creating the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#response",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "response",
       "owner": "Purpose",
       "domain_of": [
@@ -2039,7 +2578,10 @@
       "name": "task__response",
       "description": "Short explanation describing the specific task or tasks for which this dataset was created.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#response",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "response",
       "owner": "Task",
       "domain_of": [
@@ -2052,7 +2594,10 @@
       "name": "addressingGap__response",
       "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#response",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "response",
       "owner": "AddressingGap",
       "domain_of": [
@@ -2065,7 +2610,13 @@
       "name": "creator__principal_investigator",
       "description": "A key individual (Principal Investigator) responsible for or overseeing dataset creation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#principal_investigator",
+      "mappings": [
+        "http://purl.org/dc/terms/creator"
+      ],
+      "exact_mappings": [
+        "http://schema.org/creator"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/creator",
       "alias": "principal_investigator",
       "owner": "Creator",
       "domain_of": [
@@ -2078,7 +2629,10 @@
       "name": "creator__affiliation",
       "description": "Organization(s) with which the creator or team is affiliated.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#affiliation",
+      "mappings": [
+        "http://schema.org/affiliation"
+      ],
+      "slot_uri": "http://schema.org/affiliation",
       "alias": "affiliation",
       "owner": "Creator",
       "domain_of": [
@@ -2088,10 +2642,27 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "creator__credit_roles",
+      "description": "Contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#credit_roles",
+      "alias": "credit_roles",
+      "owner": "Creator",
+      "domain_of": [
+        "Creator"
+      ],
+      "range": "CRediTRoleEnum",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "fundingMechanism__grantor",
       "description": "Name/identifier of the organization providing monetary or resource support.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#grantor",
+      "mappings": [
+        "http://schema.org/funder"
+      ],
+      "slot_uri": "http://schema.org/funder",
       "alias": "grantor",
       "owner": "FundingMechanism",
       "domain_of": [
@@ -2104,7 +2675,10 @@
       "name": "fundingMechanism__grant",
       "description": "Name/identifier of the specific grant mechanism supporting dataset creation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#grant",
+      "mappings": [
+        "http://schema.org/funding"
+      ],
+      "slot_uri": "http://schema.org/funding",
       "alias": "grant",
       "owner": "FundingMechanism",
       "domain_of": [
@@ -2117,7 +2691,10 @@
       "name": "grant__grant_number",
       "description": "The alphanumeric identifier for the grant.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#grant_number",
+      "mappings": [
+        "http://schema.org/identifier"
+      ],
+      "slot_uri": "http://schema.org/identifier",
       "alias": "grant_number",
       "owner": "Grant",
       "domain_of": [
@@ -2130,10 +2707,13 @@
       "name": "instance__data_topic",
       "description": "General topic of each instance (e.g., from Bridge2AI standards).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#theme"
+      ],
       "values_from": [
         "B2AI_TOPIC"
       ],
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#data_topic",
+      "slot_uri": "http://www.w3.org/ns/dcat#theme",
       "alias": "data_topic",
       "owner": "Instance",
       "domain_of": [
@@ -2146,7 +2726,10 @@
       "name": "instance__instance_type",
       "description": "Multiple types of instances? (e.g., movies, users, and ratings).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#instance_type",
+      "mappings": [
+        "http://purl.org/dc/terms/type"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/type",
       "alias": "instance_type",
       "owner": "Instance",
       "domain_of": [
@@ -2159,10 +2742,13 @@
       "name": "instance__data_substrate",
       "description": "Type of data (e.g., raw text, images) from Bridge2AI standards.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "mappings": [
+        "http://purl.org/dc/terms/format"
+      ],
       "values_from": [
         "B2AI_SUBSTRATE"
       ],
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#data_substrate",
+      "slot_uri": "http://purl.org/dc/terms/format",
       "alias": "data_substrate",
       "owner": "Instance",
       "domain_of": [
@@ -2175,7 +2761,10 @@
       "name": "instance__counts",
       "description": "How many instances are there in total (of each type, if appropriate)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#counts",
+      "mappings": [
+        "http://schema.org/numberOfItems"
+      ],
+      "slot_uri": "http://schema.org/numberOfItems",
       "alias": "counts",
       "owner": "Instance",
       "domain_of": [
@@ -2201,7 +2790,10 @@
       "name": "instance__label_description",
       "description": "If labeled, what pattern or format do labels follow?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#label_description",
+      "mappings": [
+        "http://schema.org/description"
+      ],
+      "slot_uri": "http://schema.org/description",
       "alias": "label_description",
       "owner": "Instance",
       "domain_of": [
@@ -2340,7 +2932,10 @@
       "name": "missingInfo__missing",
       "description": "Description of the missing data fields or elements.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#missing",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "missing",
       "owner": "MissingInfo",
       "domain_of": [
@@ -2354,7 +2949,10 @@
       "name": "missingInfo__why_missing",
       "description": "Explanation of why each piece of data is missing.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#why_missing",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "why_missing",
       "owner": "MissingInfo",
       "domain_of": [
@@ -2368,7 +2966,10 @@
       "name": "relationships__description",
       "description": "Explanation of how these relationships are represented.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "Relationships",
       "domain_of": [
@@ -2381,7 +2982,10 @@
     {
       "name": "splits__description",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "Splits",
       "domain_of": [
@@ -2394,7 +2998,10 @@
     {
       "name": "dataAnomaly__description",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "DataAnomaly",
       "domain_of": [
@@ -2408,7 +3015,10 @@
       "name": "externalResource__external_resources",
       "description": "List of links or identifiers for external resources.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#external_resources",
+      "mappings": [
+        "http://purl.org/dc/terms/references"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/references",
       "alias": "external_resources",
       "owner": "ExternalResource",
       "domain_of": [
@@ -2422,7 +3032,10 @@
       "name": "externalResource__future_guarantees",
       "description": "Explanation of any commitments that external resources will remain available and stable over time.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#future_guarantees",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "future_guarantees",
       "owner": "ExternalResource",
       "domain_of": [
@@ -2450,7 +3063,10 @@
       "name": "externalResource__restrictions",
       "description": "Description of any restrictions or fees associated with external resources.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#restrictions",
+      "mappings": [
+        "http://purl.org/dc/terms/accessRights"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/accessRights",
       "alias": "restrictions",
       "owner": "ExternalResource",
       "domain_of": [
@@ -2476,7 +3092,10 @@
     {
       "name": "confidentiality__description",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "Confidentiality",
       "domain_of": [
@@ -2502,7 +3121,10 @@
     {
       "name": "contentWarning__warnings",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#warnings",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "warnings",
       "owner": "ContentWarning",
       "domain_of": [
@@ -2528,7 +3150,10 @@
     {
       "name": "subpopulation__identification",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#identification",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "identification",
       "owner": "Subpopulation",
       "domain_of": [
@@ -2541,7 +3166,10 @@
     {
       "name": "subpopulation__distribution",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#distribution",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "distribution",
       "owner": "Subpopulation",
       "domain_of": [
@@ -2567,7 +3195,10 @@
     {
       "name": "deidentification__description",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "Deidentification",
       "domain_of": [
@@ -2593,7 +3224,10 @@
     {
       "name": "sensitiveElement__description",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "SensitiveElement",
       "domain_of": [
@@ -2607,7 +3241,10 @@
       "name": "instanceAcquisition__description",
       "description": "Free-text description of the acquisition process",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "InstanceAcquisition",
       "domain_of": [
@@ -2647,7 +3284,10 @@
       "name": "instanceAcquisition__was_inferred_derived",
       "description": "Whether the data was inferred or derived from other data",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/was_inferred_derived",
+      "mappings": [
+        "http://www.w3.org/ns/prov#wasDerivedFrom"
+      ],
+      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
       "alias": "was_inferred_derived",
       "owner": "InstanceAcquisition",
       "domain_of": [
@@ -2673,7 +3313,10 @@
       "name": "collectionMechanism__description",
       "description": "Free-text description of the collection mechanism(s)",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "CollectionMechanism",
       "domain_of": [
@@ -2687,7 +3330,10 @@
       "name": "dataCollector__description",
       "description": "Free-text details about the data collectors and compensation",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "DataCollector",
       "domain_of": [
@@ -2701,7 +3347,10 @@
       "name": "collectionTimeframe__description",
       "description": "Free-text description of the data collection timeframe",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/description",
+      "mappings": [
+        "http://purl.org/dc/terms/temporal"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/temporal",
       "alias": "description",
       "owner": "CollectionTimeframe",
       "domain_of": [
@@ -2715,7 +3364,10 @@
       "name": "directCollection__description",
       "description": "Free-text description of data collection source(s)",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/description",
+      "mappings": [
+        "http://purl.org/dc/terms/source"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/source",
       "alias": "description",
       "owner": "DirectCollection",
       "domain_of": [
@@ -2729,7 +3381,10 @@
       "name": "preprocessingStrategy__description",
       "description": "Explanation of any preprocessing steps performed on the data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "PreprocessingStrategy",
       "domain_of": [
@@ -2743,7 +3398,10 @@
       "name": "cleaningStrategy__description",
       "description": "Explanation of any data cleaning steps performed.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "CleaningStrategy",
       "domain_of": [
@@ -2757,8 +3415,70 @@
       "name": "labelingStrategy__description",
       "description": "Explanation of any labeling steps performed.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
+      "owner": "LabelingStrategy",
+      "domain_of": [
+        "LabelingStrategy"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "labelingStrategy__annotation_platform",
+      "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "mappings": [
+        "http://schema.org/instrument"
+      ],
+      "slot_uri": "http://schema.org/instrument",
+      "alias": "annotation_platform",
+      "owner": "LabelingStrategy",
+      "domain_of": [
+        "LabelingStrategy"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "labelingStrategy__annotations_per_item",
+      "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#annotations_per_item",
+      "alias": "annotations_per_item",
+      "owner": "LabelingStrategy",
+      "domain_of": [
+        "LabelingStrategy"
+      ],
+      "range": "integer",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "labelingStrategy__inter_annotator_agreement",
+      "description": "Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percent agreement). Include both the metric name and value.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "mappings": [
+        "http://schema.org/measurementMethod"
+      ],
+      "slot_uri": "http://schema.org/measurementMethod",
+      "alias": "inter_annotator_agreement",
+      "owner": "LabelingStrategy",
+      "domain_of": [
+        "LabelingStrategy"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "labelingStrategy__annotator_demographics",
+      "description": "Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#annotator_demographics",
+      "alias": "annotator_demographics",
       "owner": "LabelingStrategy",
       "domain_of": [
         "LabelingStrategy"
@@ -2771,7 +3491,10 @@
       "name": "rawData__description",
       "description": "Details about the availability or location of raw data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description",
+      "mappings": [
+        "http://www.w3.org/ns/prov#wasDerivedFrom"
+      ],
+      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
       "alias": "description",
       "owner": "RawData",
       "domain_of": [
@@ -2785,7 +3508,10 @@
       "name": "existingUse__description",
       "description": "List or summary of known/previous uses of the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "ExistingUse",
       "domain_of": [
@@ -2799,7 +3525,10 @@
       "name": "useRepository__description",
       "description": "Reference(s) to a repository of known dataset uses.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#description",
+      "mappings": [
+        "http://schema.org/url"
+      ],
+      "slot_uri": "http://schema.org/url",
       "alias": "description",
       "owner": "UseRepository",
       "domain_of": [
@@ -2813,7 +3542,10 @@
       "name": "otherTask__description",
       "description": "Potential additional tasks or domains for dataset usage.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "OtherTask",
       "domain_of": [
@@ -2827,7 +3559,10 @@
       "name": "futureUseImpact__description",
       "description": "Details regarding the possible future impacts or risks of use.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "FutureUseImpact",
       "domain_of": [
@@ -2841,7 +3576,10 @@
       "name": "discouragedUse__description",
       "description": "Description of tasks or contexts in which dataset use is discouraged.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "DiscouragedUse",
       "domain_of": [
@@ -2853,9 +3591,12 @@
     },
     {
       "name": "thirdPartySharing__description",
-      "description": "Boolean or textual explanation regarding distribution to  parties external to the dataset-creating entity.\n",
+      "description": "Boolean or textual explanation regarding distribution to parties external to the dataset-creating entity.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/distribution#description",
+      "mappings": [
+        "http://purl.org/dc/terms/accessRights"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/accessRights",
       "alias": "description",
       "owner": "ThirdPartySharing",
       "domain_of": [
@@ -2868,7 +3609,10 @@
       "name": "distributionFormat__description",
       "description": "Details of the distribution channel(s) or format(s).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/distribution#description",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#accessURL"
+      ],
+      "slot_uri": "http://www.w3.org/ns/dcat#accessURL",
       "alias": "description",
       "owner": "DistributionFormat",
       "domain_of": [
@@ -2882,7 +3626,10 @@
       "name": "distributionDate__description",
       "description": "Dates or timeframe for dataset release. Could be a one-time release date or multiple scheduled releases.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/distribution#description",
+      "mappings": [
+        "http://purl.org/dc/terms/available"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/available",
       "alias": "description",
       "owner": "DistributionDate",
       "domain_of": [
@@ -2894,9 +3641,12 @@
     },
     {
       "name": "maintainer__description",
-      "description": "Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum or other details.\n",
+      "description": "Name or role of the maintainer, possibly referencing CreatorOrMaintainerEnum or other details.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#description",
+      "mappings": [
+        "http://schema.org/maintainer"
+      ],
+      "slot_uri": "http://schema.org/maintainer",
       "alias": "description",
       "owner": "Maintainer",
       "domain_of": [
@@ -2908,9 +3658,12 @@
     },
     {
       "name": "erratum__description",
-      "description": "Description or reference to the erratum, including details on known  issues and how they may be corrected.\n",
+      "description": "Description or reference to the erratum, including details on known issues and how they may be corrected.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "Erratum",
       "domain_of": [
@@ -2922,9 +3675,12 @@
     },
     {
       "name": "updatePlan__description",
-      "description": "Details on the dataset's update policy, schedule, responsible parties,  and communication channels (e.g., mailing list, GitHub releases).\n",
+      "description": "Details on the dataset's update policy, schedule, responsible parties, and communication channels (e.g., mailing list, GitHub releases).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#description",
+      "mappings": [
+        "http://purl.org/pav/lastUpdateOn"
+      ],
+      "slot_uri": "http://purl.org/pav/lastUpdateOn",
       "alias": "description",
       "owner": "UpdatePlan",
       "domain_of": [
@@ -2936,9 +3692,12 @@
     },
     {
       "name": "retentionLimits__description",
-      "description": "Policies or regulations around data retention, including any  enforcement mechanisms or responsibilities.\n",
+      "description": "Policies or regulations around data retention, including any enforcement mechanisms or responsibilities.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "RetentionLimits",
       "domain_of": [
@@ -2952,7 +3711,10 @@
       "name": "versionAccess__description",
       "description": "Explanation of whether and how previous dataset versions remain accessible, including versioning policies and deprecation announcements.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#description",
+      "mappings": [
+        "http://purl.org/pav/previousVersion"
+      ],
+      "slot_uri": "http://purl.org/pav/previousVersion",
       "alias": "description",
       "owner": "VersionAccess",
       "domain_of": [
@@ -2964,9 +3726,12 @@
     },
     {
       "name": "extensionMechanism__description",
-      "description": "Details on processes or tools that facilitate extensions,  augmentations, or third-party contributions, including any  review/approval workflows.\n",
+      "description": "Details on processes or tools that facilitate extensions, augmentations, or third-party contributions, including any review/approval workflows.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "ExtensionMechanism",
       "domain_of": [
@@ -2980,7 +3745,10 @@
       "name": "ethicalReview__description",
       "description": "Short summary or details about the ethical review process(es).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ethics#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "EthicalReview",
       "domain_of": [
@@ -2991,10 +3759,51 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "ethicalReview__contact_person",
+      "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
+      "mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "exact_mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "slot_uri": "http://schema.org/contactPoint",
+      "alias": "contact_person",
+      "owner": "EthicalReview",
+      "domain_of": [
+        "EthicalReview"
+      ],
+      "range": "Person",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "ethicalReview__reviewing_organization",
+      "description": "Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). Provides information about the body responsible for ethical oversight.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
+      "mappings": [
+        "http://schema.org/provider"
+      ],
+      "exact_mappings": [
+        "http://schema.org/provider"
+      ],
+      "slot_uri": "http://schema.org/provider",
+      "alias": "reviewing_organization",
+      "owner": "EthicalReview",
+      "domain_of": [
+        "EthicalReview"
+      ],
+      "range": "Organization",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "dataProtectionImpact__description",
       "description": "Details of the data protection impact analysis, if conducted.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ethics#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "DataProtectionImpact",
       "domain_of": [
@@ -3008,7 +3817,10 @@
       "name": "collectionNotification__description",
       "description": "Details about any notification provided to individuals whose data was collected.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ethics#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "CollectionNotification",
       "domain_of": [
@@ -3022,7 +3834,10 @@
       "name": "collectionConsent__description",
       "description": "Details about how consent was sought, provided, and documented.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ethics#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "CollectionConsent",
       "domain_of": [
@@ -3036,7 +3851,10 @@
       "name": "consentRevocation__description",
       "description": "Information about any consent-revocation mechanism offered to data subjects.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ethics#description",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
       "alias": "description",
       "owner": "ConsentRevocation",
       "domain_of": [
@@ -3352,9 +4170,12 @@
     },
     {
       "name": "licenseAndUseTerms__description",
-      "description": "Description of the dataset's license and terms of use (including  links, costs, or usage constraints).\n",
+      "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#description",
+      "mappings": [
+        "http://purl.org/dc/terms/license"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/license",
       "alias": "description",
       "owner": "LicenseAndUseTerms",
       "domain_of": [
@@ -3365,10 +4186,56 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "licenseAndUseTerms__data_use_permission",
+      "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "http://purl.obolibrary.org/obo/DUO_0000001"
+      ],
+      "exact_mappings": [
+        "http://purl.obolibrary.org/obo/DUO_0000001"
+      ],
+      "slot_uri": "http://purl.obolibrary.org/obo/DUO_0000001",
+      "alias": "data_use_permission",
+      "owner": "LicenseAndUseTerms",
+      "domain_of": [
+        "LicenseAndUseTerms"
+      ],
+      "range": "DataUsePermissionEnum",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "licenseAndUseTerms__contact_person",
+      "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "exact_mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "slot_uri": "http://schema.org/contactPoint",
+      "alias": "contact_person",
+      "owner": "LicenseAndUseTerms",
+      "domain_of": [
+        "LicenseAndUseTerms"
+      ],
+      "range": "Person",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "iPRestrictions__description",
       "description": "Explanation of third-party IP restrictions.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#description",
+      "mappings": [
+        "http://purl.org/dc/terms/rights"
+      ],
+      "broad_mappings": [
+        "http://purl.obolibrary.org/obo/DUO_0000046",
+        "http://purl.obolibrary.org/obo/DUO_0000045"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/rights",
       "alias": "description",
       "owner": "IPRestrictions",
       "domain_of": [
@@ -3382,7 +4249,15 @@
       "name": "exportControlRegulatoryRestrictions__description",
       "description": "Export or regulatory restrictions on the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#description",
+      "mappings": [
+        "http://purl.org/dc/terms/accessRights"
+      ],
+      "broad_mappings": [
+        "http://purl.obolibrary.org/obo/DUO_0000021",
+        "http://purl.obolibrary.org/obo/DUO_0000022",
+        "http://purl.obolibrary.org/obo/DUO_0000028"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/accessRights",
       "alias": "description",
       "owner": "ExportControlRegulatoryRestrictions",
       "domain_of": [
@@ -3391,234 +4266,294 @@
       "range": "string",
       "multivalued": true,
       "@type": "SlotDefinition"
+    },
+    {
+      "name": "exportControlRegulatoryRestrictions__gdpr_compliant",
+      "description": "Indicates compliance with the EU General Data Protection Regulation (GDPR). GDPR applies to processing of personal data of individuals in the EU.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#gdpr_compliant",
+      "alias": "gdpr_compliant",
+      "owner": "ExportControlRegulatoryRestrictions",
+      "domain_of": [
+        "ExportControlRegulatoryRestrictions"
+      ],
+      "range": "ComplianceStatusEnum",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "exportControlRegulatoryRestrictions__hipaa_compliant",
+      "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#hipaa_compliant",
+      "alias": "hipaa_compliant",
+      "owner": "ExportControlRegulatoryRestrictions",
+      "domain_of": [
+        "ExportControlRegulatoryRestrictions"
+      ],
+      "range": "ComplianceStatusEnum",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "exportControlRegulatoryRestrictions__eu_ai_act_risk_category",
+      "description": "Risk category under the EU AI Act. The EU AI Act classifies AI systems into risk categories: minimal, limited, high, and unacceptable. High-risk AI systems face strict requirements.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#eu_ai_act_risk_category",
+      "alias": "eu_ai_act_risk_category",
+      "owner": "ExportControlRegulatoryRestrictions",
+      "domain_of": [
+        "ExportControlRegulatoryRestrictions"
+      ],
+      "range": "AIActRiskEnum",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "exportControlRegulatoryRestrictions__other_compliance",
+      "description": "Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-specific regulations).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#other_compliance",
+      "alias": "other_compliance",
+      "owner": "ExportControlRegulatoryRestrictions",
+      "domain_of": [
+        "ExportControlRegulatoryRestrictions"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__variable_name",
+      "description": "The name or identifier of the variable as it appears in the data files.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://schema.org/name"
+      ],
+      "exact_mappings": [
+        "http://schema.org/name",
+        "http://www.w3.org/ns/csvw#name"
+      ],
+      "slot_uri": "http://schema.org/name",
+      "alias": "variable_name",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "string",
+      "required": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__data_type",
+      "description": "The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standard type names when possible.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://schema.org/DataType"
+      ],
+      "exact_mappings": [
+        "http://www.w3.org/ns/csvw#datatype",
+        "http://schema.org/DataType"
+      ],
+      "slot_uri": "http://schema.org/DataType",
+      "alias": "data_type",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "VariableTypeEnum",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__unit",
+      "description": "The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://qudt.org/schema/qudt/unit"
+      ],
+      "exact_mappings": [
+        "http://qudt.org/schema/qudt/hasUnit",
+        "http://schema.org/unitCode"
+      ],
+      "slot_uri": "http://qudt.org/schema/qudt/unit",
+      "alias": "unit",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "uriorcurie",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__missing_value_code",
+      "description": "Code(s) used to represent missing values for this variable. Examples: \"NA\", \"-999\", \"null\", \"\". Multiple codes may be specified.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://www.w3.org/ns/csvw#null"
+      ],
+      "slot_uri": "http://www.w3.org/ns/csvw#null",
+      "alias": "missing_value_code",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__minimum_value",
+      "description": "The minimum value that the variable can take. Applicable to numeric variables.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://schema.org/minValue"
+      ],
+      "slot_uri": "http://schema.org/minValue",
+      "alias": "minimum_value",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "float",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__maximum_value",
+      "description": "The maximum value that the variable can take. Applicable to numeric variables.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://schema.org/maxValue"
+      ],
+      "slot_uri": "http://schema.org/maxValue",
+      "alias": "maximum_value",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "float",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__categories",
+      "description": "The permitted categories or values for a categorical variable. Each entry should describe a possible value and its meaning.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://schema.org/valueReference"
+      ],
+      "slot_uri": "http://schema.org/valueReference",
+      "alias": "categories",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__examples",
+      "description": "Example values for this variable to illustrate typical data.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://www.w3.org/2004/02/skos/core#example"
+      ],
+      "slot_uri": "http://www.w3.org/2004/02/skos/core#example",
+      "alias": "examples",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__is_identifier",
+      "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://www.w3.org/ns/csvw#primaryKey"
+      ],
+      "slot_uri": "http://www.w3.org/ns/csvw#primaryKey",
+      "alias": "is_identifier",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__is_sensitive",
+      "description": "Indicates whether this variable contains sensitive information (e.g., personal data, protected health information).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#is_sensitive",
+      "alias": "is_sensitive",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__precision",
+      "description": "The precision or number of decimal places for numeric variables.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#precision",
+      "alias": "precision",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "integer",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__measurement_technique",
+      "description": "The technique or method used to measure this variable. Examples: \"mass spectrometry\", \"self-report survey\", \"GPS coordinates\".",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://schema.org/measurementTechnique"
+      ],
+      "slot_uri": "http://schema.org/measurementTechnique",
+      "alias": "measurement_technique",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__derivation",
+      "description": "Description of how this variable was derived or calculated from other variables, if applicable.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "http://www.w3.org/ns/prov#wasDerivedFrom"
+      ],
+      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
+      "alias": "derivation",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variableMetadata__quality_notes",
+      "description": "Notes about data quality, reliability, or known issues specific to this variable.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#quality_notes",
+      "alias": "quality_notes",
+      "owner": "VariableMetadata",
+      "domain_of": [
+        "VariableMetadata"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
     }
   ],
   "classes": [
-    {
-      "name": "NamedThing",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/NamedThing",
-      "description": "A generic grouping for any identifiable entity.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "mappings": [
-        "schema:Thing"
-      ],
-      "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "id",
-          "description": "A unique identifier for a thing.",
-          "slot_uri": "schema:identifier",
-          "identifier": true,
-          "range": "uriorcurie",
-          "required": true,
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "name",
-          "description": "A human-readable name for a thing.",
-          "slot_uri": "schema:name",
-          "range": "string",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "description",
-          "description": "A human-readable description for a thing.",
-          "slot_uri": "schema:description",
-          "range": "string",
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "http://schema.org/Thing",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "Organization",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Organization",
-      "description": "Represents a group or organization.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "NamedThing",
-      "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description"
-      ],
-      "slot_usage": {},
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Organization",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "DatasetProperty",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DatasetProperty",
-      "description": "Represents a single property of a dataset, or a set of related properties.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "NamedThing",
-      "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description",
-        "datasetProperty__used_software"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "used_software",
-          "description": "What software was used as part of this dataset property?",
-          "range": "Software",
-          "multivalued": true,
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DatasetProperty",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "Software",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Software",
-      "description": "A software program or library.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "NamedThing",
-      "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description",
-        "software__version",
-        "software__license",
-        "software__url"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "version",
-          "range": "string",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "license",
-          "range": "string",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "url",
-          "range": "string",
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Software",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "Person",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Person",
-      "description": "An individual human being.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "is_a": "NamedThing",
-      "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description",
-        "person__affiliation",
-        "person__email"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "affiliation",
-          "description": "The organization(s) to which the person belongs.",
-          "range": "Organization",
-          "multivalued": true,
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "email",
-          "description": "The email address of the person.",
-          "range": "string",
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Person",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "Information",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Information",
-      "description": "Grouping for datasets and data files",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "close_mappings": [
-        "schema:CreativeWork"
-      ],
-      "is_a": "NamedThing",
-      "slots": [
-        "namedThing__id",
-        "namedThing__name",
-        "namedThing__description",
-        "compression",
-        "conforms_to",
-        "conforms_to_class",
-        "conforms_to_schema",
-        "created_by",
-        "created_on",
-        "doi",
-        "download_url",
-        "issued",
-        "keywords",
-        "language",
-        "last_updated_on",
-        "license",
-        "modified_by",
-        "page",
-        "publisher",
-        "status",
-        "title",
-        "version",
-        "was_derived_from"
-      ],
-      "slot_usage": {},
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Information",
-      "@type": "ClassDefinition"
-    },
-    {
-      "name": "FormatDialect",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect",
-      "description": "Additional format information for a file",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slots": [
-        "formatDialect__comment_prefix",
-        "formatDialect__delimiter",
-        "formatDialect__double_quote",
-        "formatDialect__header",
-        "formatDialect__quote_char"
-      ],
-      "slot_usage": {},
-      "attributes": [
-        {
-          "name": "comment_prefix",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "delimiter",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "double_quote",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "header",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "quote_char",
-          "@type": "SlotDefinition"
-        }
-      ],
-      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect",
-      "@type": "ClassDefinition"
-    },
     {
       "name": "DatasetCollection",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DatasetCollection",
@@ -3768,6 +4703,7 @@
         "dataset__retention_limit",
         "dataset__version_access",
         "dataset__extension_mechanism",
+        "dataset__variables",
         "dataset__is_deidentified",
         "dataset__is_tabular"
       ],
@@ -4011,6 +4947,17 @@
           "@type": "SlotDefinition"
         },
         {
+          "name": "variables",
+          "description": "Metadata describing individual variables, fields, or columns in the dataset.",
+          "exact_mappings": [
+            "schema:variableMeasured"
+          ],
+          "slot_uri": "schema:variableMeasured",
+          "range": "VariableMetadata",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
           "name": "is_deidentified",
           "range": "Deidentification",
           "@type": "SlotDefinition"
@@ -4103,6 +5050,7 @@
         "dataset__retention_limit",
         "dataset__version_access",
         "dataset__extension_mechanism",
+        "dataset__variables",
         "dataset__is_deidentified",
         "dataset__is_tabular",
         "dataSubset__is_data_split",
@@ -4127,6 +5075,266 @@
       "@type": "ClassDefinition"
     },
     {
+      "name": "NamedThing",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/NamedThing",
+      "description": "A generic grouping for any identifiable entity.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "schema:Thing"
+      ],
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "namedThing__description"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "id",
+          "description": "A unique identifier for a thing.",
+          "slot_uri": "schema:identifier",
+          "identifier": true,
+          "range": "uriorcurie",
+          "required": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "name",
+          "description": "A human-readable name for a thing.",
+          "slot_uri": "schema:name",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "description",
+          "description": "A human-readable description for a thing.",
+          "slot_uri": "schema:description",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "http://schema.org/Thing",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Organization",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Organization",
+      "description": "Represents a group or organization.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "schema:Organization"
+      ],
+      "exact_mappings": [
+        "foaf:Organization"
+      ],
+      "is_a": "NamedThing",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "namedThing__description"
+      ],
+      "slot_usage": {},
+      "class_uri": "http://schema.org/Organization",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "DatasetProperty",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DatasetProperty",
+      "description": "Represents a single property of a dataset, or a set of related properties.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "is_a": "NamedThing",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "namedThing__description",
+        "datasetProperty__used_software"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "used_software",
+          "description": "What software was used as part of this dataset property?",
+          "range": "Software",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DatasetProperty",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Software",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Software",
+      "description": "A software program or library.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "schema:SoftwareApplication"
+      ],
+      "exact_mappings": [
+        "schema:SoftwareApplication"
+      ],
+      "is_a": "NamedThing",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "namedThing__description",
+        "software__version",
+        "software__license",
+        "software__url"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "version",
+          "slot_uri": "schema:softwareVersion",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "license",
+          "slot_uri": "schema:license",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "url",
+          "slot_uri": "schema:url",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "http://schema.org/SoftwareApplication",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Person",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Person",
+      "description": "An individual human being. This class represents a person in the context of a specific dataset. Attributes like affiliation and email represent the person's current or most relevant contact information for this dataset. For stable cross-dataset identification, use the ORCID field. Note that contributor roles (CRediT) are specified in the usage context (e.g., Creator class) rather than on the Person directly, since roles vary by dataset.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "schema:Person"
+      ],
+      "exact_mappings": [
+        "foaf:Person"
+      ],
+      "is_a": "NamedThing",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "namedThing__description",
+        "person__affiliation",
+        "person__email",
+        "person__orcid"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "affiliation",
+          "description": "The organization(s) to which the person belongs in the context of this dataset. May vary across datasets; multivalued to support multiple affiliations.",
+          "slot_uri": "schema:affiliation",
+          "range": "Organization",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "email",
+          "description": "The email address of the person. Represents current/preferred contact information in the context of this dataset.",
+          "slot_uri": "schema:email",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "orcid",
+          "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
+          "exact_mappings": [
+            "schema:identifier"
+          ],
+          "slot_uri": "schema:identifier",
+          "range": "string",
+          "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "http://schema.org/Person",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Information",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Information",
+      "description": "Grouping for datasets and data files",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "close_mappings": [
+        "schema:CreativeWork"
+      ],
+      "is_a": "NamedThing",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "namedThing__description",
+        "compression",
+        "conforms_to",
+        "conforms_to_class",
+        "conforms_to_schema",
+        "created_by",
+        "created_on",
+        "doi",
+        "download_url",
+        "issued",
+        "keywords",
+        "language",
+        "last_updated_on",
+        "license",
+        "modified_by",
+        "page",
+        "publisher",
+        "status",
+        "title",
+        "version",
+        "was_derived_from"
+      ],
+      "slot_usage": {},
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Information",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "FormatDialect",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect",
+      "description": "Additional format information for a file",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "slots": [
+        "formatDialect__comment_prefix",
+        "formatDialect__delimiter",
+        "formatDialect__double_quote",
+        "formatDialect__header",
+        "formatDialect__quote_char"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "comment_prefix",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "delimiter",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "double_quote",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "header",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "quote_char",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect",
+      "@type": "ClassDefinition"
+    },
+    {
       "name": "Purpose",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#Purpose",
       "description": "For what purpose was the dataset created?",
@@ -4144,6 +5352,7 @@
         {
           "name": "response",
           "description": "Short explanation describing the primary purpose of creating the dataset.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -4169,6 +5378,7 @@
         {
           "name": "response",
           "description": "Short explanation describing the specific task or tasks for which this dataset was created.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -4194,6 +5404,7 @@
         {
           "name": "response",
           "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -4204,7 +5415,7 @@
     {
       "name": "Creator",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/motivation#Creator",
-      "description": "Who created the dataset (e.g., which team, research group) and on behalf of which  entity (e.g., company, institution, organization)? This may also be considered a team.\n",
+      "description": "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "is_a": "DatasetProperty",
       "slots": [
@@ -4213,20 +5424,33 @@
         "namedThing__description",
         "datasetProperty__used_software",
         "creator__principal_investigator",
-        "creator__affiliation"
+        "creator__affiliation",
+        "creator__credit_roles"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "principal_investigator",
           "description": "A key individual (Principal Investigator) responsible for or overseeing dataset creation.",
+          "exact_mappings": [
+            "schema:creator"
+          ],
+          "slot_uri": "dcterms:creator",
           "range": "Person",
           "@type": "SlotDefinition"
         },
         {
           "name": "affiliation",
           "description": "Organization(s) with which the creator or team is affiliated.",
+          "slot_uri": "schema:affiliation",
           "range": "Organization",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "credit_roles",
+          "description": "Contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
+          "range": "CRediTRoleEnum",
+          "multivalued": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -4252,12 +5476,14 @@
         {
           "name": "grantor",
           "description": "Name/identifier of the organization providing monetary or resource support.",
+          "slot_uri": "schema:funder",
           "range": "Grantor",
           "@type": "SlotDefinition"
         },
         {
           "name": "grant",
           "description": "Name/identifier of the specific grant mechanism supporting dataset creation.",
+          "slot_uri": "schema:funding",
           "range": "Grant",
           "@type": "SlotDefinition"
         }
@@ -4297,6 +5523,7 @@
         {
           "name": "grant_number",
           "description": "The alphanumeric identifier for the grant.",
+          "slot_uri": "schema:identifier",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -4332,12 +5559,14 @@
           "values_from": [
             "B2AI_TOPIC"
           ],
+          "slot_uri": "dcat:theme",
           "range": "uriorcurie",
           "@type": "SlotDefinition"
         },
         {
           "name": "instance_type",
           "description": "Multiple types of instances? (e.g., movies, users, and ratings).\n",
+          "slot_uri": "dcterms:type",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -4347,12 +5576,14 @@
           "values_from": [
             "B2AI_SUBSTRATE"
           ],
+          "slot_uri": "dcterms:format",
           "range": "uriorcurie",
           "@type": "SlotDefinition"
         },
         {
           "name": "counts",
           "description": "How many instances are there in total (of each type, if appropriate)?\n",
+          "slot_uri": "schema:numberOfItems",
           "range": "integer",
           "@type": "SlotDefinition"
         },
@@ -4365,6 +5596,7 @@
         {
           "name": "label_description",
           "description": "If labeled, what pattern or format do labels follow?\n",
+          "slot_uri": "schema:description",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -4479,6 +5711,7 @@
         {
           "name": "missing",
           "description": "Description of the missing data fields or elements.\n",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4486,6 +5719,7 @@
         {
           "name": "why_missing",
           "description": "Explanation of why each piece of data is missing.\n",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4497,7 +5731,7 @@
     {
       "name": "Relationships",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#Relationships",
-      "description": "Are relationships between individual instances made explicit (e.g., users\u2019 movie ratings, social network links)?\n",
+      "description": "Are relationships between individual instances made explicit (e.g., users' movie ratings, social network links)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "is_a": "DatasetProperty",
       "slots": [
@@ -4511,6 +5745,7 @@
         {
           "name": "description",
           "description": "Explanation of how these relationships are represented.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4535,6 +5770,7 @@
       "attributes": [
         {
           "name": "description",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4559,6 +5795,7 @@
       "attributes": [
         {
           "name": "description",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4588,6 +5825,7 @@
         {
           "name": "external_resources",
           "description": "List of links or identifiers for external resources.",
+          "slot_uri": "dcterms:references",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4595,6 +5833,7 @@
         {
           "name": "future_guarantees",
           "description": "Explanation of any commitments that external resources will remain available and stable over time.\n",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4609,6 +5848,7 @@
         {
           "name": "restrictions",
           "description": "Description of any restrictions or fees associated with external resources.\n",
+          "slot_uri": "dcterms:accessRights",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4640,6 +5880,7 @@
         },
         {
           "name": "description",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4672,6 +5913,7 @@
         },
         {
           "name": "warnings",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4705,12 +5947,14 @@
         },
         {
           "name": "identification",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
           "name": "distribution",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4742,6 +5986,7 @@
         },
         {
           "name": "description",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4773,6 +6018,7 @@
         },
         {
           "name": "description",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4784,7 +6030,7 @@
     {
       "name": "InstanceAcquisition",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/InstanceAcquisition",
-      "description": "Describes how data associated with each instance was acquired  (e.g., directly observed, reported by subjects, inferred).\n",
+      "description": "Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects, inferred).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "is_a": "DatasetProperty",
       "slots": [
@@ -4802,6 +6048,7 @@
         {
           "name": "description",
           "description": "Free-text description of the acquisition process",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4821,6 +6068,7 @@
         {
           "name": "was_inferred_derived",
           "description": "Whether the data was inferred or derived from other data",
+          "slot_uri": "prov:wasDerivedFrom",
           "range": "boolean",
           "@type": "SlotDefinition"
         },
@@ -4837,7 +6085,7 @@
     {
       "name": "CollectionMechanism",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/CollectionMechanism",
-      "description": "What mechanisms or procedures were used to collect the data (e.g., hardware,  manual curation, software APIs)? Also covers how these mechanisms were validated.\n",
+      "description": "What mechanisms or procedures were used to collect the data (e.g., hardware, manual curation, software APIs)? Also covers how these mechanisms were validated.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "is_a": "DatasetProperty",
       "slots": [
@@ -4851,6 +6099,7 @@
         {
           "name": "description",
           "description": "Free-text description of the collection mechanism(s)",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4862,7 +6111,7 @@
     {
       "name": "DataCollector",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/DataCollector",
-      "description": "Who was involved in the data collection (e.g., students, crowdworkers, contractors),  and how they were compensated.\n",
+      "description": "Who was involved in the data collection (e.g., students, crowdworkers, contractors), and how they were compensated.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "is_a": "DatasetProperty",
       "slots": [
@@ -4876,6 +6125,7 @@
         {
           "name": "description",
           "description": "Free-text details about the data collectors and compensation",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4887,7 +6137,7 @@
     {
       "name": "CollectionTimeframe",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/CollectionTimeframe",
-      "description": "Over what timeframe was the data collected, and does this timeframe match the  creation timeframe of the underlying data?\n",
+      "description": "Over what timeframe was the data collected, and does this timeframe match the creation timeframe of the underlying data?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "is_a": "DatasetProperty",
       "slots": [
@@ -4901,6 +6151,7 @@
         {
           "name": "description",
           "description": "Free-text description of the data collection timeframe",
+          "slot_uri": "dcterms:temporal",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4912,7 +6163,7 @@
     {
       "name": "DirectCollection",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/DirectCollection",
-      "description": "Indicates whether the data was collected directly from the individuals in question  or obtained via third parties/other sources.\n",
+      "description": "Indicates whether the data was collected directly from the individuals in question or obtained via third parties/other sources.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "is_a": "DatasetProperty",
       "slots": [
@@ -4926,6 +6177,7 @@
         {
           "name": "description",
           "description": "Free-text description of data collection source(s)",
+          "slot_uri": "dcterms:source",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4951,6 +6203,7 @@
         {
           "name": "description",
           "description": "Explanation of any preprocessing steps performed on the data.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4976,6 +6229,7 @@
         {
           "name": "description",
           "description": "Explanation of any data cleaning steps performed.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -4987,20 +6241,52 @@
     {
       "name": "LabelingStrategy",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#LabelingStrategy",
-      "description": "Was any labeling of the data done (e.g., part-of-speech tagging)?\n",
+      "description": "Was any labeling of the data done (e.g., part-of-speech tagging)? This class documents the annotation process and quality metrics.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "is_a": "DatasetProperty",
       "slots": [
         "namedThing__id",
         "namedThing__name",
         "datasetProperty__used_software",
-        "labelingStrategy__description"
+        "labelingStrategy__description",
+        "labelingStrategy__annotation_platform",
+        "labelingStrategy__annotations_per_item",
+        "labelingStrategy__inter_annotator_agreement",
+        "labelingStrategy__annotator_demographics"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "description",
           "description": "Explanation of any labeling steps performed.",
+          "slot_uri": "dcterms:description",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "annotation_platform",
+          "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
+          "slot_uri": "schema:instrument",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "annotations_per_item",
+          "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
+          "range": "integer",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "inter_annotator_agreement",
+          "description": "Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percent agreement). Include both the metric name and value.",
+          "slot_uri": "schema:measurementMethod",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "annotator_demographics",
+          "description": "Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5012,7 +6298,7 @@
     {
       "name": "RawData",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#RawData",
-      "description": "Was the \u201craw\u201d data saved in addition to the preprocessed/cleaned/labeled data? If so, please provide a link or other access point to the \u201craw\u201d data.\n",
+      "description": "Was the \"raw\" data saved in addition to the preprocessed/cleaned/labeled data? If so, please provide a link or other access point to the \"raw\" data.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "is_a": "DatasetProperty",
       "slots": [
@@ -5026,6 +6312,7 @@
         {
           "name": "description",
           "description": "Details about the availability or location of raw data.",
+          "slot_uri": "prov:wasDerivedFrom",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5051,6 +6338,7 @@
         {
           "name": "description",
           "description": "List or summary of known/previous uses of the dataset.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5076,6 +6364,7 @@
         {
           "name": "description",
           "description": "Reference(s) to a repository of known dataset uses.",
+          "slot_uri": "schema:url",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5101,6 +6390,7 @@
         {
           "name": "description",
           "description": "Potential additional tasks or domains for dataset usage.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5126,6 +6416,7 @@
         {
           "name": "description",
           "description": "Details regarding the possible future impacts or risks of use.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5151,6 +6442,7 @@
         {
           "name": "description",
           "description": "Description of tasks or contexts in which dataset use is discouraged.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5175,7 +6467,8 @@
       "attributes": [
         {
           "name": "description",
-          "description": "Boolean or textual explanation regarding distribution to  parties external to the dataset-creating entity.\n",
+          "description": "Boolean or textual explanation regarding distribution to parties external to the dataset-creating entity.\n",
+          "slot_uri": "dcterms:accessRights",
           "range": "boolean",
           "@type": "SlotDefinition"
         }
@@ -5200,6 +6493,7 @@
         {
           "name": "description",
           "description": "Details of the distribution channel(s) or format(s).",
+          "slot_uri": "dcat:accessURL",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5225,6 +6519,7 @@
         {
           "name": "description",
           "description": "Dates or timeframe for dataset release. Could be a one-time release date or multiple scheduled releases.\n",
+          "slot_uri": "dcterms:available",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5249,7 +6544,8 @@
       "attributes": [
         {
           "name": "description",
-          "description": "Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum or other details.\n",
+          "description": "Name or role of the maintainer, possibly referencing CreatorOrMaintainerEnum or other details.\n",
+          "slot_uri": "schema:maintainer",
           "range": "CreatorOrMaintainerEnum",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5274,7 +6570,8 @@
       "attributes": [
         {
           "name": "description",
-          "description": "Description or reference to the erratum, including details on known  issues and how they may be corrected.\n",
+          "description": "Description or reference to the erratum, including details on known issues and how they may be corrected.\n",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5286,7 +6583,7 @@
     {
       "name": "UpdatePlan",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#UpdatePlan",
-      "description": "Will the dataset be updated (e.g., to correct labeling errors, add new  instances, delete instances)? If so, how often, by whom, and how will  these updates be communicated?\n",
+      "description": "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, how often, by whom, and how will these updates be communicated?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "is_a": "DatasetProperty",
       "slots": [
@@ -5299,7 +6596,8 @@
       "attributes": [
         {
           "name": "description",
-          "description": "Details on the dataset's update policy, schedule, responsible parties,  and communication channels (e.g., mailing list, GitHub releases).\n",
+          "description": "Details on the dataset's update policy, schedule, responsible parties, and communication channels (e.g., mailing list, GitHub releases).\n",
+          "slot_uri": "pav:lastUpdateOn",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5324,7 +6622,8 @@
       "attributes": [
         {
           "name": "description",
-          "description": "Policies or regulations around data retention, including any  enforcement mechanisms or responsibilities.\n",
+          "description": "Policies or regulations around data retention, including any enforcement mechanisms or responsibilities.\n",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5350,6 +6649,7 @@
         {
           "name": "description",
           "description": "Explanation of whether and how previous dataset versions remain accessible, including versioning policies and deprecation announcements.\n",
+          "slot_uri": "pav:previousVersion",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5374,7 +6674,8 @@
       "attributes": [
         {
           "name": "description",
-          "description": "Details on processes or tools that facilitate extensions,  augmentations, or third-party contributions, including any  review/approval workflows.\n",
+          "description": "Details on processes or tools that facilitate extensions, augmentations, or third-party contributions, including any review/approval workflows.\n",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5393,15 +6694,38 @@
         "namedThing__id",
         "namedThing__name",
         "datasetProperty__used_software",
-        "ethicalReview__description"
+        "ethicalReview__description",
+        "ethicalReview__contact_person",
+        "ethicalReview__reviewing_organization"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "description",
           "description": "Short summary or details about the ethical review process(es).",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "contact_person",
+          "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+          "exact_mappings": [
+            "schema:contactPoint"
+          ],
+          "slot_uri": "schema:contactPoint",
+          "range": "Person",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "reviewing_organization",
+          "description": "Organization that conducted the ethical review (e.g., Institutional Review Board, Ethics Committee, Research Ethics Board). Provides information about the body responsible for ethical oversight.",
+          "exact_mappings": [
+            "schema:provider"
+          ],
+          "slot_uri": "schema:provider",
+          "range": "Organization",
           "@type": "SlotDefinition"
         }
       ],
@@ -5425,6 +6749,7 @@
         {
           "name": "description",
           "description": "Details of the data protection impact analysis, if conducted.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5450,6 +6775,7 @@
         {
           "name": "description",
           "description": "Details about any notification provided to individuals whose data was collected.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5475,6 +6801,7 @@
         {
           "name": "description",
           "description": "Details about how consent was sought, provided, and documented.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5500,6 +6827,7 @@
         {
           "name": "description",
           "description": "Information about any consent-revocation mechanism offered to data subjects.",
+          "slot_uri": "dcterms:description",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5780,15 +7108,39 @@
         "namedThing__id",
         "namedThing__name",
         "datasetProperty__used_software",
-        "licenseAndUseTerms__description"
+        "licenseAndUseTerms__description",
+        "licenseAndUseTerms__data_use_permission",
+        "licenseAndUseTerms__contact_person"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "description",
-          "description": "Description of the dataset's license and terms of use (including  links, costs, or usage constraints).\n",
+          "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
+          "slot_uri": "dcterms:license",
           "range": "string",
           "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "data_use_permission",
+          "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO",
+          "exact_mappings": [
+            "DUO:0000001"
+          ],
+          "slot_uri": "DUO:0000001",
+          "range": "DataUsePermissionEnum",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "contact_person",
+          "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+          "exact_mappings": [
+            "schema:contactPoint"
+          ],
+          "slot_uri": "schema:contactPoint",
+          "range": "Person",
           "@type": "SlotDefinition"
         }
       ],
@@ -5798,7 +7150,7 @@
     {
       "name": "IPRestrictions",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#IPRestrictions",
-      "description": "Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, describe them and note any relevant fees or licensing terms.\n",
+      "description": "Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, describe them and note any relevant fees or licensing terms. Maps to DUO terms related to commercial/non-profit use restrictions (NCU, NPU, NPUNCU).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "is_a": "DatasetProperty",
       "slots": [
@@ -5812,6 +7164,11 @@
         {
           "name": "description",
           "description": "Explanation of third-party IP restrictions.",
+          "broad_mappings": [
+            "DUO:0000046",
+            "DUO:0000045"
+          ],
+          "slot_uri": "dcterms:rights",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5823,20 +7180,55 @@
     {
       "name": "ExportControlRegulatoryRestrictions",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ExportControlRegulatoryRestrictions",
-      "description": "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? If so, please describe these restrictions and provide a link or copy of any supporting documentation.\n",
+      "description": "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? Includes compliance tracking for regulations like GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and provide a link or copy of any supporting documentation. Maps to DUO terms related to ethics approval, geographic restrictions, and institutional requirements.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "is_a": "DatasetProperty",
       "slots": [
         "namedThing__id",
         "namedThing__name",
         "datasetProperty__used_software",
-        "exportControlRegulatoryRestrictions__description"
+        "exportControlRegulatoryRestrictions__description",
+        "exportControlRegulatoryRestrictions__gdpr_compliant",
+        "exportControlRegulatoryRestrictions__hipaa_compliant",
+        "exportControlRegulatoryRestrictions__eu_ai_act_risk_category",
+        "exportControlRegulatoryRestrictions__other_compliance"
       ],
       "slot_usage": {},
       "attributes": [
         {
           "name": "description",
           "description": "Export or regulatory restrictions on the dataset.",
+          "broad_mappings": [
+            "DUO:0000021",
+            "DUO:0000022",
+            "DUO:0000028"
+          ],
+          "slot_uri": "dcterms:accessRights",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "gdpr_compliant",
+          "description": "Indicates compliance with the EU General Data Protection Regulation (GDPR). GDPR applies to processing of personal data of individuals in the EU.",
+          "range": "ComplianceStatusEnum",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "hipaa_compliant",
+          "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States.",
+          "range": "ComplianceStatusEnum",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "eu_ai_act_risk_category",
+          "description": "Risk category under the EU AI Act. The EU AI Act classifies AI systems into risk categories: minimal, limited, high, and unacceptable. High-risk AI systems face strict requirements.",
+          "range": "AIActRiskEnum",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "other_compliance",
+          "description": "Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-specific regulations).",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -5844,17 +7236,169 @@
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ExportControlRegulatoryRestrictions",
       "@type": "ClassDefinition"
+    },
+    {
+      "name": "VariableMetadata",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#VariableMetadata",
+      "description": "Metadata describing an individual variable, field, or column in a dataset. Variables may represent measurements, observations, derived values, or categorical attributes.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
+      "mappings": [
+        "schema:PropertyValue"
+      ],
+      "exact_mappings": [
+        "csvw:Column",
+        "schema:PropertyValue"
+      ],
+      "is_a": "DatasetProperty",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "namedThing__description",
+        "datasetProperty__used_software",
+        "variableMetadata__variable_name",
+        "variableMetadata__data_type",
+        "variableMetadata__unit",
+        "variableMetadata__missing_value_code",
+        "variableMetadata__minimum_value",
+        "variableMetadata__maximum_value",
+        "variableMetadata__categories",
+        "variableMetadata__examples",
+        "variableMetadata__is_identifier",
+        "variableMetadata__is_sensitive",
+        "variableMetadata__precision",
+        "variableMetadata__measurement_technique",
+        "variableMetadata__derivation",
+        "variableMetadata__quality_notes"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "variable_name",
+          "description": "The name or identifier of the variable as it appears in the data files.",
+          "exact_mappings": [
+            "schema:name",
+            "csvw:name"
+          ],
+          "slot_uri": "schema:name",
+          "range": "string",
+          "required": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "data_type",
+          "description": "The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standard type names when possible.",
+          "exact_mappings": [
+            "csvw:datatype",
+            "schema:DataType"
+          ],
+          "slot_uri": "schema:DataType",
+          "range": "VariableTypeEnum",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "unit",
+          "description": "The unit of measurement for the variable, preferably using QUDT units (http://qudt.org/vocab/unit/). Examples: qudt:Kilogram, qudt:Meter, qudt:DegreeCelsius.",
+          "exact_mappings": [
+            "qudt:hasUnit",
+            "schema:unitCode"
+          ],
+          "slot_uri": "qudt:unit",
+          "range": "uriorcurie",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "missing_value_code",
+          "description": "Code(s) used to represent missing values for this variable. Examples: \"NA\", \"-999\", \"null\", \"\". Multiple codes may be specified.",
+          "slot_uri": "csvw:null",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "minimum_value",
+          "description": "The minimum value that the variable can take. Applicable to numeric variables.",
+          "slot_uri": "schema:minValue",
+          "range": "float",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "maximum_value",
+          "description": "The maximum value that the variable can take. Applicable to numeric variables.",
+          "slot_uri": "schema:maxValue",
+          "range": "float",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "categories",
+          "description": "The permitted categories or values for a categorical variable. Each entry should describe a possible value and its meaning.",
+          "slot_uri": "schema:valueReference",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "examples",
+          "description": "Example values for this variable to illustrate typical data.",
+          "slot_uri": "skos:example",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "is_identifier",
+          "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
+          "slot_uri": "csvw:primaryKey",
+          "range": "boolean",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "is_sensitive",
+          "description": "Indicates whether this variable contains sensitive information (e.g., personal data, protected health information).",
+          "range": "boolean",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "precision",
+          "description": "The precision or number of decimal places for numeric variables.",
+          "range": "integer",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "measurement_technique",
+          "description": "The technique or method used to measure this variable. Examples: \"mass spectrometry\", \"self-report survey\", \"GPS coordinates\".",
+          "slot_uri": "schema:measurementTechnique",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "derivation",
+          "description": "Description of how this variable was derived or calculated from other variables, if applicable.",
+          "slot_uri": "prov:wasDerivedFrom",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "quality_notes",
+          "description": "Notes about data quality, reliability, or known issues specific to this variable.",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "http://schema.org/PropertyValue",
+      "@type": "ClassDefinition"
     }
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-08-21T15:09:15",
-  "source_file_size": 20950,
-  "generation_date": "2025-08-21T15:20:25",
+  "source_file_date": "2025-11-18T17:40:41",
+  "source_file_size": 9614,
+  "generation_date": "2025-11-20T12:34:09",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
     "https://w3id.org/linkml/types.context.jsonld",
+    "D4D_Base_import.context.jsonld",
     "D4D_Motivation.context.jsonld",
     "D4D_Composition.context.jsonld",
     "D4D_Collection.context.jsonld",
@@ -5865,6 +7409,7 @@
     "D4D_Ethics.context.jsonld",
     "D4D_Human.context.jsonld",
     "D4D_Data_Governance.context.jsonld",
+    "D4D_Variables.context.jsonld",
     {
       "@base": "https://w3id.org/bridge2ai/data-sheets-schema/"
     }

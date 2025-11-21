@@ -909,3 +909,95 @@ d4d-pipeline-full-gpt5:
 	$(MAKE) d4d-pipeline-concatenated-gpt5
 	@echo ""
 	@echo "✅ Complete D4D pipeline finished successfully!"
+
+# ============================================================================
+# D4D Pipeline: Step 7 - Evaluation and Comparison
+# ============================================================================
+
+# Directories for evaluation
+EVAL_DIR = data/evaluation
+RUBRIC_DIR = data/rubric
+
+# Evaluate all D4D concatenated files across all methods
+evaluate-d4d:
+	@echo "Evaluating all D4D concatenated files..."
+	@mkdir -p $(EVAL_DIR)
+	$(RUN) python src/evaluation/evaluate_d4d.py \
+		--base-dir data \
+		--rubric10 $(RUBRIC_DIR)/rubric10.txt \
+		--rubric20 $(RUBRIC_DIR)/rubric20.txt \
+		--projects AI_READI CM4AI VOICE CHORUS \
+		--methods curated gpt5 claudecode \
+		--output-dir $(EVAL_DIR)
+	@echo "✅ Evaluation complete! Results in $(EVAL_DIR)"
+
+# Evaluate a single project
+evaluate-d4d-project:
+ifndef PROJECT
+	$(error PROJECT is not defined. Usage: make evaluate-d4d-project PROJECT=AI_READI)
+endif
+	@echo "Evaluating project: $(PROJECT)"
+	@mkdir -p $(EVAL_DIR)
+	$(RUN) python src/evaluation/evaluate_d4d.py \
+		--base-dir data \
+		--rubric10 $(RUBRIC_DIR)/rubric10.txt \
+		--rubric20 $(RUBRIC_DIR)/rubric20.txt \
+		--project $(PROJECT) \
+		--methods curated gpt5 claudecode \
+		--output-dir $(EVAL_DIR)
+	@echo "✅ Evaluation complete for $(PROJECT)!"
+
+# View evaluation summary
+eval-summary:
+	@if [ -f "$(EVAL_DIR)/summary_report.md" ]; then \
+		cat $(EVAL_DIR)/summary_report.md; \
+	else \
+		echo "No summary report found. Run 'make evaluate-d4d' first."; \
+	fi
+
+# View detailed evaluation for a specific project and method
+eval-details:
+ifndef PROJECT
+	$(error PROJECT is not defined. Usage: make eval-details PROJECT=AI_READI METHOD=curated)
+endif
+ifndef METHOD
+	$(error METHOD is not defined. Usage: make eval-details PROJECT=AI_READI METHOD=curated)
+endif
+	@if [ -f "$(EVAL_DIR)/detailed_analysis/$(PROJECT)_$(METHOD)_evaluation.md" ]; then \
+		cat $(EVAL_DIR)/detailed_analysis/$(PROJECT)_$(METHOD)_evaluation.md; \
+	else \
+		echo "No detailed report found for $(PROJECT)/$(METHOD). Run 'make evaluate-d4d' first."; \
+	fi
+
+# Clean evaluation results
+clean-eval:
+	@echo "Cleaning evaluation results..."
+	rm -rf $(EVAL_DIR)
+	@echo "✅ Evaluation results cleaned!"
+
+# Evaluate individual D4D files (not concatenated)
+evaluate-d4d-individual:
+	@echo "Evaluating individual D4D files..."
+	@mkdir -p $(EVAL_DIR)_individual
+	$(RUN) python src/evaluation/evaluate_d4d.py \
+		--base-dir data \
+		--rubric10 $(RUBRIC_DIR)/rubric10.txt \
+		--rubric20 $(RUBRIC_DIR)/rubric20.txt \
+		--methods gpt5 claudecode \
+		--output-dir $(EVAL_DIR)_individual \
+		--individual
+	@echo "✅ Individual file evaluation complete! Results in $(EVAL_DIR)_individual"
+
+# View individual evaluation summary
+eval-summary-individual:
+	@if [ -f "$(EVAL_DIR)_individual/summary_report.md" ]; then \
+		cat $(EVAL_DIR)_individual/summary_report.md; \
+	else \
+		echo "No individual summary report found. Run 'make evaluate-d4d-individual' first."; \
+	fi
+
+# Clean individual evaluation results
+clean-eval-individual:
+	@echo "Cleaning individual evaluation results..."
+	rm -rf $(EVAL_DIR)_individual
+	@echo "✅ Individual evaluation results cleaned!"

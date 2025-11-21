@@ -641,6 +641,115 @@ field2: null        # No value (or omit entirely)
 <td></td>           <!-- field2 displays as empty -->
 ```
 
+## D4D Evaluation Framework
+
+This repository includes a comprehensive evaluation system to compare D4D generation methods using two rubric systems.
+
+### Evaluation Commands
+
+```bash
+# Evaluate concatenated D4D files (GPT-5, Claude Code, Curated)
+make evaluate-d4d                            # Evaluate all projects
+make evaluate-d4d-project PROJECT=VOICE      # Evaluate single project
+
+# Evaluate individual D4D files (GPT-5, Claude Code)
+make evaluate-d4d-individual                 # Evaluate all individual files
+
+# View results
+make eval-summary                            # View concatenated summary
+make eval-summary-individual                 # View individual summary
+make eval-details PROJECT=VOICE METHOD=claudecode  # View detailed report
+
+# Clean results
+make clean-eval                              # Remove concatenated results
+make clean-eval-individual                   # Remove individual results
+```
+
+### Evaluation Architecture
+
+The evaluation framework (`src/evaluation/evaluate_d4d.py`) compares three D4D generation methods:
+
+1. **Curated Comprehensive** - Manually curated datasheets (DatasetCollection format)
+2. **GPT-5** - Generated using GPT-5 API (flat D4D schema)
+3. **Claude Code Deterministic** - Direct synthesis at temperature=0.0 (flat D4D schema)
+
+### Two Rubric Systems
+
+**Rubric10** (`data/rubric/rubric10.txt`):
+- 10 hierarchical elements with 5 sub-elements each
+- Binary scoring (0/1) per sub-element
+- Maximum: 50 points total
+- Elements: Discovery, Access, Reuse, Ethics, Composition, Provenance, Motivation, Technical Transparency, Limitations, Integration
+
+**Rubric20** (`data/rubric/rubric20.txt`):
+- 20 questions in 4 categories
+- Quality-based scoring (0-5 scale) or pass/fail
+- Maximum: 84 points total
+- Categories: Structural Completeness, Metadata Quality, Technical Documentation, FAIRness & Accessibility
+
+### Evaluation Modes
+
+**Concatenated Mode** (default):
+- Evaluates comprehensive D4D files synthesized from multiple sources
+- Located in `data/d4d_concatenated/{curated,gpt5,claudecode}/`
+- Results in `data/evaluation/`
+
+**Individual Mode** (`--individual` flag):
+- Evaluates D4D files extracted from single source documents
+- Located in `data/d4d_individual/{gpt5,claudecode}/`
+- Results in `data/evaluation_individual/`
+
+### Key Evaluation Findings
+
+**Concatenated files** (synthesis required):
+- Claude Code: 37.5% (Rubric10), 52.4% (Rubric20) - **Best**
+- Curated: 21.3% (Rubric10), 41.7% (Rubric20)
+- GPT-5: 11.5% (Rubric10), 17.3% (Rubric20)
+- Claude Code outperforms GPT-5 by **3.26×**
+
+**Individual files** (single-source extraction):
+- Claude Code: 18.8% (Rubric10), 26.3% (Rubric20)
+- GPT-5: 18.8% (Rubric10), 26.3% (Rubric20)
+- **Identical performance** - synthesis is Claude Code's advantage
+
+### Evaluation Output
+
+All evaluation runs generate:
+- `summary_report.md` - Executive summary with comparison tables
+- `detailed_analysis/{PROJECT}_{METHOD}_evaluation.md` - Per-file breakdowns
+- `scores.csv` - Raw scoring data in CSV format
+- `scores.json` - Detailed scores with full metadata in JSON
+
+### Direct Script Usage
+
+```bash
+# Evaluate concatenated files
+poetry run python src/evaluation/evaluate_d4d.py \
+  --base-dir data \
+  --projects AI_READI CM4AI VOICE CHORUS \
+  --methods curated gpt5 claudecode \
+  --output-dir data/evaluation
+
+# Evaluate individual files
+poetry run python src/evaluation/evaluate_d4d.py \
+  --base-dir data \
+  --methods gpt5 claudecode \
+  --output-dir data/evaluation_individual \
+  --individual
+
+# Evaluate single project
+poetry run python src/evaluation/evaluate_d4d.py \
+  --project VOICE \
+  --output-dir data/evaluation
+```
+
+### Evaluation Documentation
+
+Complete methodology, rubric details, and findings documented in:
+- `notes/D4D_EVALUATION.md` - Full evaluation methodology and results
+- `data/rubric/rubric10.txt` - 10-element hierarchical rubric specification
+- `data/rubric/rubric20.txt` - 20-question detailed rubric specification
+
 ## Running Single Tests
 
 To run a specific test file:

@@ -1,6 +1,9 @@
 # D4D Metadata extracted from: physionet_b2ai-voice_1.1_row14.txt
 # Column: VOICE
-# Generated: 2025-11-15 (Claude Code validated)
+# Generated: 2025-11-17 (Claude Code direct synthesis)
+# Framework: Direct synthesis following deterministic principles (see notes/DETERMINISM.md)
+# Model: claude-sonnet-4-5-20250929
+# Temperature: 0.0 (deterministic)
 # Status: Fixed failed extraction
 
 dataset_name: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"

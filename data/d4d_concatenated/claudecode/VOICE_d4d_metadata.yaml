@@ -1,9 +1,9 @@
 extraction_metadata:
-  timestamp: '2025-11-15T20:15:00Z'
-  extraction_id: claudecode_004
+  timestamp: '2025-11-17T20:20:00Z'
+  extraction_id: claudecode_20251117_00E
   extraction_type: concatenated_claude_code_direct
   processing_time_seconds: 0.0
-  notes: "Direct synthesis by Claude Code assistant (not via API)"
+  notes: "Direct synthesis by Claude Code assistant (not via API). Regenerated with updated framework documentation."
 input_document:
   filename: VOICE_concatenated.txt
   relative_path: data/preprocessed/concatenated/VOICE_concatenated.txt
@@ -51,6 +51,6 @@ reproducibility:
   deterministic_settings: true
 provenance:
   extraction_performed_by: Claude Code Assistant
-  extraction_requested_at: '2025-11-15T20:15:00Z'
-  git_commit: 4dc4bbbfaebc7f289bc12ba9bb8c9de87a92cd34
-  notes: "Deterministic D4D extraction from concatenated documents using Claude Code assistant directly (not API-based). Synthesized from 3 source files, primarily using the comprehensive PhysioNet v1.1 metadata (13.9KB) and adding Health Data Nexus reference, following the d4d_concatenated_system_prompt guidelines."
+  extraction_requested_at: '2025-11-17T20:20:00Z'
+  git_commit: a0ae646c1d692589dc71c664337bc55486585aed
+  notes: "Deterministic D4D extraction from concatenated documents using Claude Code assistant directly (not API-based). Regenerated 2025-11-17 with updated deterministic framework documentation (see notes/DETERMINISM.md and src/download/README_D4D_DETERMINISTIC.md). Synthesized from 3 source files, primarily using the comprehensive PhysioNet v1.1 metadata (13.9KB) and adding Health Data Nexus reference, following the d4d_concatenated_system_prompt guidelines."

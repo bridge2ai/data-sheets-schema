@@ -1,9 +1,9 @@
 extraction_metadata:
-  timestamp: '2025-11-16T04:14:43.115926+00:00'
-  extraction_id: claudecode_individual_CHoRUS f
+  timestamp: '2025-11-17T20:30:00Z'
+  extraction_id: claudecode_individual_20251117
   extraction_type: individual_claude_code_direct
   processing_time_seconds: 0.0
-  notes: Direct synthesis by Claude Code assistant (not via API)
+  notes: "Direct synthesis by Claude Code assistant. Updated 2025-11-17 with deterministic framework documentation (see notes/DETERMINISM.md)."
 input_document:
   filename: CHoRUS for Equitable AI - github.pdf
   relative_path: data/raw/CHORUS/CHoRUS for Equitable AI - github.pdf
@@ -20,7 +20,7 @@ datasheets_schema:
   source: local
   path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
   sha256_hash: f28617b7c1613f9175d20da1b9f542b694f177603c8c8e89341d5e6dbdeb1a25
-  loaded_at: '2025-11-16T04:14:43.115926+00:00'
+  loaded_at: '2025-11-17T20:30:00Z'
 d4d_agent:
   version: 1.0.0
   implementation: claude_code_direct
@@ -49,7 +49,7 @@ reproducibility:
   deterministic_settings: true
 provenance:
   extraction_performed_by: Claude Code Assistant
-  extraction_requested_at: '2025-11-16T04:14:43.115926+00:00'
-  git_commit: 4dc4bbbfaebc7f289bc12ba9bb8c9de87a92cd34
+  extraction_requested_at: '2025-11-17T20:30:00Z'
+  git_commit: a0ae646c1d692589dc71c664337bc55486585aed
   notes: Deterministic D4D extraction from individual preprocessed file for CHORUS
     using Claude Code assistant directly (not API-based).

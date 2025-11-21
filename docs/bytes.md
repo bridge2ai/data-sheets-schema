@@ -1,0 +1,80 @@
+
+
+# Slot: bytes 
+
+
+_Size of the data in bytes._
+
+
+
+
+
+URI: [dcat:byteSize](http://www.w3.org/ns/dcat#byteSize)
+Alias: bytes
+
+<!-- no inheritance hierarchy -->
+
+
+
+
+
+## Applicable Classes
+
+| Name | Description | Modifies Slot |
+| --- | --- | --- |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
+
+
+
+
+
+
+## Properties
+
+* Range: [Integer](Integer.md)
+
+
+
+
+## Identifier and Mapping Information
+
+
+
+
+
+
+### Schema Source
+
+
+* from schema: https://w3id.org/bridge2ai/data-sheets-schema
+
+
+
+
+## Mappings
+
+| Mapping Type | Mapped Value |
+| ---  | ---  |
+| self | dcat:byteSize |
+| native | data_sheets_schema:bytes |
+
+
+
+
+## LinkML Source
+
+<details>
+```yaml
+name: bytes
+description: Size of the data in bytes.
+from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+rank: 1000
+slot_uri: dcat:byteSize
+alias: bytes
+domain_of:
+- Dataset
+range: integer
+
+```
+</details>
