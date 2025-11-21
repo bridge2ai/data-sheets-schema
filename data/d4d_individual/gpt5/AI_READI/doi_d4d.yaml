@@ -1,0 +1,9 @@
+resources:
+  - path: doi_row2.json
+    media_type: mediatypes:application/json
+    format: json
+    is_tabular: false
+    same_as:
+      - https://aireadi.org/publications
+      - https://doi.org/10.1038/s42255-024-01165-x
+      - https://doi.org/10.1136/bmjopen-2024-097449

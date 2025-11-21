@@ -1,0 +1,8 @@
+id: https://fairhub.io/datasets/2
+name: FAIRhub Dataset 2 (AI_READI)
+description: Dataset referenced from FAIRhub for project AI_READI. Source row 10, dataset_id 2.
+resources:
+  - name: FAIRhub Dataset 2
+    path: https://fairhub.io/datasets/2
+    same_as:
+      - https://fairhub.io/datasets/2

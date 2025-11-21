@@ -1,0 +1,8 @@
+id: doi_row3.json
+name: CM4AI
+resources:
+  - id: https://doi.org/10.1101/2024.05.21.589311
+    name: 10.1101/2024.05.21.589311
+    path: https://doi.org/10.1101/2024.05.21.589311
+    same_as:
+      - https://doi.org/10.1101/2024.05.21.589311

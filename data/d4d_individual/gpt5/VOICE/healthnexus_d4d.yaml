@@ -1,0 +1,10 @@
+id: https://healthdatanexus.ai/content/b2ai-voice/1.0/
+name: VOICE
+description: Health Data Nexus catalog entry for the VOICE project (version 1.0).
+resources:
+  - id: https://healthdatanexus.ai/content/b2ai-voice/1.0/
+    name: VOICE 1.0 - Health Data Nexus catalog page
+    description: Catalog page for the VOICE project at Health Data Nexus.
+    path: https://healthdatanexus.ai/content/b2ai-voice/1.0/
+    media_type: text/html
+    format: html

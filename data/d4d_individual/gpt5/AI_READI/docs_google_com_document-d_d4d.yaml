@@ -1,0 +1,11 @@
+id: example:AI_READI
+name: AI_READI
+description: AI_READI project
+resources:
+  - id: example:AI_READI/APPLICATION_IRB_Protocol_v3.92_2022.08.01_OT2_MAIN_MOD17_25Mar2025.docx
+    name: APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025
+    description: Institutional Review Board (IRB) protocol document referenced via Google Docs; version 3.92 (dated 2022-08-01), OT2 MAIN MOD17, with a noted date of 25 Mar 2025.
+    path: APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025.docx
+    format: docx
+    media_type: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    is_tabular: false

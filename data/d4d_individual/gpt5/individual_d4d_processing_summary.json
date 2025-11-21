@@ -1,0 +1,90 @@
+{
+  "timestamp": "2025-11-21T05:26:12.406005+00:00",
+  "base_input_dir": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual",
+  "base_output_dir": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/d4d_individual/gpt5",
+  "projects": [
+    {
+      "project": "AI_READI",
+      "processed": [
+        {
+          "input_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/AI_READI/doi_row2.json",
+          "output_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/d4d_individual/gpt5/AI_READI/doi_d4d.yaml",
+          "status": "success"
+        },
+        {
+          "input_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/AI_READI/fairhub_row10.json",
+          "output_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/d4d_individual/gpt5/AI_READI/fairhub_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [
+        {
+          "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/AI_READI/docs_aireadi_org_docs-2_row8.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/AI_READI/docs_google_com_document-d_row11.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/AI_READI/doi_row9.json",
+          "reason": "Already exists"
+        },
+        {
+          "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/AI_READI/fairhub_row13.json",
+          "reason": "Already exists"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "project": "CHORUS",
+      "processed": [],
+      "skipped": [],
+      "errors": []
+    },
+    {
+      "project": "CM4AI",
+      "processed": [
+        {
+          "input_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/CM4AI/doi_row3.json",
+          "output_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/d4d_individual/gpt5/CM4AI/doi_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [
+        {
+          "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_B35XWX_row13.txt",
+          "reason": "Already exists"
+        },
+        {
+          "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_F3TD5R_row16.txt",
+          "reason": "Already exists"
+        }
+      ],
+      "errors": []
+    },
+    {
+      "project": "VOICE",
+      "processed": [
+        {
+          "input_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/VOICE/healthnexus_row13.json",
+          "output_file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/d4d_individual/gpt5/VOICE/healthnexus_d4d.yaml",
+          "status": "success"
+        }
+      ],
+      "skipped": [
+        {
+          "file": "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/aurelian/../data/preprocessed/individual/VOICE/physionet_b2ai-voice_1.1_row14.txt",
+          "reason": "Already exists"
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "summary": {
+    "total_processed": 4,
+    "total_errors": 0,
+    "total_skipped": 7
+  }
+}

@@ -306,13 +306,13 @@ def generate_d4d_yaml(
 
 def process_project(project: str, api_key: str) -> bool:
     """Process a single project."""
-    input_file = CONCAT_INPUT_DIR / f"{project}_concatenated.txt"
+    input_file = CONCAT_INPUT_DIR / "sources" / f"{project}_sources_concatenated.txt"
     output_file = OUTPUT_DIR / f"{project}_d4d.yaml"
     metadata_file = OUTPUT_DIR / f"{project}_d4d_metadata.yaml"
 
     if not input_file.exists():
         print(f"❌ Input file not found: {input_file}")
-        print(f"   Run 'make concat-extracted PROJECT={project}' first")
+        print(f"   Run 'make concat-docs INPUT_DIR=data/preprocessed/individual/{project} OUTPUT_FILE=data/preprocessed/concatenated/sources/{project}_sources_concatenated.txt' first")
         return False
 
     try:

@@ -1,0 +1,104 @@
+================================================================================
+CONCATENATED DOCUMENT
+================================================================================
+Input Directory: data/preprocessed/individual/AI_READI
+Total Files: 6
+Extensions: All
+Recursive: False
+================================================================================
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+  1. docs_aireadi_org_docs-2_row8.txt
+  2. docs_google_com_document-d_row11.txt
+  3. doi_row2.json
+  4. doi_row9.json
+  5. fairhub_row10.json
+  6. fairhub_row13.json
+================================================================================
+
+FILE: docs_aireadi_org_docs-2_row8.txt
+PATH: data/preprocessed/individual/AI_READI/docs_aireadi_org_docs-2_row8.txt
+SIZE: 4226 bytes
+--------------------------------------------------------------------------------
+
+About | Documentation for the AI-READI Dataset
+Skip to main contentAI-READI Dataset DocsDataset v2.0.0Dataset v2.0.0Dataset v1.0.0GitHubContact UsSearchAboutCitationPreliminary InformationDataset DocumentationControlled VariablesAI-readinessAdditional ResourcesChangelogContact UsAboutVersion: 2.0.0On this pageAboutAbout this documentationâ
+This is the documentation for the AI-READI dataset called Flagship Dataset of Type 2 Diabetes from the AI-READI Project. It is intended to complement the information provided on the dataset landing page on the FAIRhub data portal. It is highly suggested to read this documentation first before accessing the dataset.
+About the AI-READI datasetâ
+The AI-READI is a dataset consisting of data collected from individuals with and without Type 2 Diabetes Mellitus (T2DM) and harmonized across 3 data collection sites. The composition of the dataset was designed with future studies using AI/Machine Learning in mind. This included recruitment sampling procedures aimed at achieving approximately equal distribution of participants across diabetes severity, as well as the design of a data acquisition protocol across multiple domains (survey data, physical measurements, clinical data, imaging data, wearable device data, etc.) to enable downstream AI/ML analyses that may not be feasible with existing data sources such as claims or electronic health records data.
+The goal is to better understand salutogenesis (the pathway from disease to health) in T2DM. Some data that are not considered to be sensitive personal health data will be available to the public for download upon agreement with a license that defines how the data can be used. The full dataset will be accessible by entering into a data use agreement. The public dataset will include survey data, blood and urine lab results, fitness activity levels, clinical measurements (e.g. monofilament and cognitive function testing), retinal images, ECG, blood sugar levels, and environmental variables such as home air quality. The data held under controlled access include 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports. As enrollment is ongoing, the pilot data release and periodic updates to data releases may not have achieved balanced distribution across groups.
+About the structure of this documentationâ
+There is one version of this documentation associated with each version of the AI-READI dataset. You can navigate between the different versions from the dropdown in the upper right corner.
+This documentation is associated with v1.0 of the dataset, which contains data from the participants of the pilot study phase. This version of the documentation is structured as follows
+The Citation section explains how the dataset needs to be cited if used.
+The Preliminary Information section contains information about accessing and using the dataset so you can understand what is expected from users of the dataset. This includes information about the license associated with the dataset and training prerequisites.
+The Dataset Documentation section includes an overall description of the dataset using the Healthsheet template, and this section also provides details about each of the data domains included in the dataset. For each data domain, we have provided a general overview of the clinical context and how the data were acquired in the study, relevant individual variables, and data processing details including file formats, data standards, metadata, and example outputs.
+The AI-readiness section describes additional considerations that were integrated into the study design, including consideration of FAIR principles and Ethical practices.
+The Additional resources section provides a list of resources related to the dataset that could be useful for understanding and using the dataset.
+Edit this pageLast updated on Sep 8, 2025 by AydanNextCitationAbout this documentationAbout the AI-READI datasetAbout the structure of this documentationDocsChangelogCommunityHomepageMoreGitHubCopyright Â© 2025 AI-READI.This repository is under review for potential modification in compliance with Administration directives.
+
+================================================================================
+
+FILE: docs_google_com_document-d_row11.txt
+PATH: data/preprocessed/individual/AI_READI/docs_google_com_document-d_row11.txt
+SIZE: 350 bytes
+--------------------------------------------------------------------------------
+
+APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025.docx - Google DocsJavaScript isn't enabled in your browser, so this file can't be opened. Enable and reload.APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025  External         ShareSign inFileEditViewToolsHelpAccessibilityDebug  Unsaved changes to Drive
+
+================================================================================
+
+FILE: doi_row2.json
+PATH: data/preprocessed/individual/AI_READI/doi_row2.json
+SIZE: 243 bytes
+--------------------------------------------------------------------------------
+
+{
+  "type": "DOI",
+  "url": "https://aireadi.org/publicationshttps://doi.org/10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449",
+  "row": 2,
+  "doi": "10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449"
+}
+
+================================================================================
+
+FILE: doi_row9.json
+PATH: data/preprocessed/individual/AI_READI/doi_row9.json
+SIZE: 119 bytes
+--------------------------------------------------------------------------------
+
+{
+  "type": "DOI",
+  "url": "https://doi.org/10.5281/zenodo.10642459",
+  "row": 9,
+  "doi": "10.5281/zenodo.10642459"
+}
+
+================================================================================
+
+FILE: fairhub_row10.json
+PATH: data/preprocessed/individual/AI_READI/fairhub_row10.json
+SIZE: 107 bytes
+--------------------------------------------------------------------------------
+
+{
+  "type": "FAIRhub Dataset",
+  "url": "https://fairhub.io/datasets/2",
+  "row": 10,
+  "dataset_id": "2"
+}
+
+================================================================================
+
+FILE: fairhub_row13.json
+PATH: data/preprocessed/individual/AI_READI/fairhub_row13.json
+SIZE: 107 bytes
+--------------------------------------------------------------------------------
+
+{
+  "type": "FAIRhub Dataset",
+  "url": "https://fairhub.io/datasets/2",
+  "row": 13,
+  "dataset_id": "2"
+}
