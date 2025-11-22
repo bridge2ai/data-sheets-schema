@@ -1,0 +1,37 @@
+# D4D Metadata for CM4AI (Cell Maps for Artificial Intelligence)
+# Source: https://cm4ai.org/publications/, https://cm4ai.org, https://dataverse.lib.virginia.edu/dataverse/CM4AI
+# Generated: 2025-11-07
+# Project: Bridge2AI NIH OT2OD032742-01
+
+id: cm4ai-cell-maps
+name: Cell Maps for Artificial Intelligence
+title: CM4AI - AI-Ready Maps of Human Cell Architecture
+description: The Cell Maps for Artificial Intelligence (CM4AI) dataset consists of machine-readable hierarchical maps of cell architecture generated through multimodal approaches including proteomic mass spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9. The project targets 100 chromatin modifiers and 100 metabolic enzymes related to cancer, neuropsychiatric, and cardiac disorders. Data is collected across multiple cell models including triple-negative breast cancer cells (MDA-MB-468) and iPSC lines (undifferentiated, differentiated neurons, and cardiomyocytes), with treatment conditions including paclitaxel and vorinostat. The dataset is designed specifically for AI/ML applications with comprehensive FAIR metadata, provenance tracking using the FAIRSCAPE toolkit, and structured in RO-Crate format. Quarterly data releases are published through the University of Virginia Dataverse repository. As of the latest release, the dataset contains 53,788 immunofluorescent images, 1,374 protein interactions, 1,792 proteins investigated, 11,739 genes targeted, and over 22.7 terabytes of data.
+language: en
+page: https://cm4ai.org
+keywords:
+  - cell architecture
+  - proteomics
+  - mass spectrometry
+  - immunofluorescence imaging
+  - CRISPR/Cas9
+  - genetic perturbation
+  - AI-ready data
+  - FAIR data
+  - protein-protein interactions
+  - subcellular localization
+  - iPSCs
+  - cancer
+  - neuropsychiatric disorders
+  - cardiac disorders
+  - Bridge2AI
+  - spatial proteomics
+  - single-cell RNA sequencing
+  - chromatin modifiers
+  - metabolic enzymes
+  - RO-Crate
+  - FAIRSCAPE
+  - provenance
+doi: doi:10.18130/V3/B35XWX
+license: CC-BY-NC-SA-4.0
+version: "1.4"
