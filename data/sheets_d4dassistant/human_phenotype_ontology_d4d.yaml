@@ -1,0 +1,66 @@
+# D4D Metadata for Human Phenotype Ontology (HPO)
+# Sources:
+# - https://obofoundry.org/ontology/hp
+# - https://hpo.jax.org/
+# - https://github.com/obophenotype/human-phenotype-ontology
+# Generated: 2025-11-12
+
+id: human-phenotype-ontology
+name: Human Phenotype Ontology
+title: Human Phenotype Ontology (HPO)
+description: |
+  The Human Phenotype Ontology is a standardized, structured, and controlled vocabulary for describing phenotypic features encountered in human hereditary and other diseases. It provides a comprehensive set of terms for clinical features observed in human patients, enabling structured annotation of phenotypic abnormalities in medical and research contexts. The ontology enables computational analysis of disease manifestations and facilitates integration of phenotype data across different sources.
+
+version: null
+issued: null
+publisher: OBO Foundry
+format: OWL XML Serialization
+media_type: null
+license_and_use_terms: HPO license (available at https://hpo.jax.org/app/license)
+
+creators:
+  - Dr. Sebastian Köhler (dr.sebastian.koehler@gmail.com)
+  - Peter Robinson (peter.robinson@jax.org)
+
+keywords:
+  - phenotype
+  - ontology
+  - disease
+  - genetics
+  - clinical features
+  - human disease
+  - medical terminology
+  - standardized vocabulary
+
+download_url: http://purl.obolibrary.org/obo/hp.owl
+
+purposes:
+  - The Human Phenotype Ontology was created to provide a standardized vocabulary for the phenotypic features encountered in human diseases. It enables computational analysis of disease manifestations, facilitates data integration across medical and research databases, and supports clinical diagnosis and genetic research by providing a common language for describing patient phenotypes.
+
+tasks:
+  - Clinical phenotype annotation and description
+  - Disease classification and characterization
+  - Gene-phenotype association analysis
+  - Differential diagnosis support
+  - Phenotype-driven genetic variant prioritization
+  - Cross-database phenotype data integration
+
+instances:
+  - Ontology terms representing phenotypic abnormalities as controlled vocabulary terms with hierarchical relationships
+
+collection_mechanisms:
+  - The HPO is curated from multiple sources including medical literature, existing databases (Orphanet, DECIPHER, OMIM), and expert clinical knowledge. Terms are systematically collected and organized into a hierarchical ontology structure with relationships mapping phenotypes to diseases and genes.
+
+preprocessing_strategies:
+  - Terms undergo curation and quality control processes. The project uses the Ontology Development Kit (ODK) for ontology development and maintains continuous integration with automated quality control checks.
+
+distribution_formats:
+  - HPO is distributed in multiple formats including hp.owl (OWL/RDF XML format), hp.obo (OBO format), hp.json (JSON/obographs format), with international editions, full/base/simplified versions, and associated annotation files (phenotype.hpoa, phenotype_to_genes.txt, genes_to_phenotype.txt).
+
+ethical_reviews:
+  - Not applicable - HPO is an ontology/controlled vocabulary, not patient data
+
+maintainers:
+  - Maintained by the HPO Consortium led by Dr. Sebastian Köhler and Peter Robinson. Development uses the Ontology Development Kit (ODK). Community contributions welcome via GitHub.
+
+is_deidentified: Not applicable - HPO is an ontology/controlled vocabulary, not patient data
