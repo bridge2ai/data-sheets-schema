@@ -389,7 +389,7 @@
             "type": "object"
         },
         "ConfidentialityLevelEnum": {
-            "description": "Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.",
+            "description": "Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light Protocol).\nNOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted.",
             "enum": [
                 "unrestricted",
                 "restricted",

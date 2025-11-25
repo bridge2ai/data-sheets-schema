@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-11-24T22:18:14
+# Generation date: 2025-11-25T12:07:56
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3526,21 +3526,27 @@ class AIActRiskEnum(EnumDefinitionImpl):
 class ConfidentialityLevelEnum(EnumDefinitionImpl):
     """
     Confidentiality classification levels for datasets indicating the degree of access restrictions and data
-    sensitivity.
+    sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light
+    Protocol).
+    NOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to
+    DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data).
+    ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify
+    permitted uses once access is granted.
     """
     unrestricted = PermissibleValue(
         text="unrestricted",
-        description="No confidentiality restrictions. Data is publicly available with no access controls required.")
+        description="""No confidentiality restrictions. Data is publicly available with no access controls required. Equivalent to public or open access data.""")
     restricted = PermissibleValue(
         text="restricted",
-        description="""Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access.""")
+        description="""Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access. May require account creation, data use agreement, or institutional approval.""")
     confidential = PermissibleValue(
         text="confidential",
-        description="""Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. May require IRB approval, data use agreements, or other formal authorization.""")
+        description="""Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. Typically requires IRB approval, formal data use agreements, institutional authorization, or other formal vetting processes.""")
 
     _defn = EnumDefinition(
         name="ConfidentialityLevelEnum",
-        description="""Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.""",
+        description="""Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light Protocol).
+NOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted.""",
     )
 
 class DataUsePermissionEnum(EnumDefinitionImpl):

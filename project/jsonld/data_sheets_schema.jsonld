@@ -1104,20 +1104,35 @@
     {
       "name": "ConfidentialityLevelEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ConfidentialityLevelEnum",
-      "description": "Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.",
+      "description": "Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light Protocol).\nNOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "permissible_values": [
         {
           "text": "unrestricted",
-          "description": "No confidentiality restrictions. Data is publicly available with no access controls required."
+          "description": "No confidentiality restrictions. Data is publicly available with no access controls required. Equivalent to public or open access data.",
+          "broad_mappings": [
+            "TLP:CLEAR",
+            "NIST_Low_Impact",
+            "ISO27001_Public"
+          ]
         },
         {
           "text": "restricted",
-          "description": "Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access."
+          "description": "Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access. May require account creation, data use agreement, or institutional approval.",
+          "broad_mappings": [
+            "TLP:GREEN",
+            "NIST_Moderate_Impact",
+            "ISO27001_Internal"
+          ]
         },
         {
           "text": "confidential",
-          "description": "Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. May require IRB approval, data use agreements, or other formal authorization."
+          "description": "Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. Typically requires IRB approval, formal data use agreements, institutional authorization, or other formal vetting processes.",
+          "broad_mappings": [
+            "TLP:AMBER",
+            "NIST_High_Impact",
+            "ISO27001_Highly_Confidential"
+          ]
         }
       ]
     },
@@ -7980,7 +7995,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2025-11-24T22:16:32",
   "source_file_size": 12266,
-  "generation_date": "2025-11-24T22:18:13",
+  "generation_date": "2025-11-25T12:07:55",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
