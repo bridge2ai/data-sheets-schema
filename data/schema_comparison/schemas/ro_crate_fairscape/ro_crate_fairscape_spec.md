@@ -119,31 +119,55 @@ The `additionalProperty` field contains an array of `PropertyValue` objects with
 
 ## Gaps Relative to D4D
 
-### Fields Present in RO-Crate but Missing/Weak in D4D
+### RO-Crate to D4D Field Mapping Analysis
 
-1. **Structured Governance Metadata**
-   - `Data Governance Committee` → D4D has general `maintainers` but no governance-specific contact
-   - `confidentialityLevel` → D4D lacks structured confidentiality classification
-   - `FDA Regulated` → D4D has no regulatory compliance tracking
+#### ✅ Fields Already Integrated in D4D Dataset Class
 
-2. **Human Subjects Metadata**
-   - Explicit `Human Subject` Yes/No flag → D4D has free-text collection process
-   - `De-identified Samples` structured field → D4D has cleaning_strategies but less structured
+| RO-Crate Field | D4D Equivalent | Location |
+|----------------|----------------|----------|
+| **funder** | `FundingMechanism.grantor` (Grantor) | `Dataset.funders` ✅ |
+| **grant number** | `Grant.grant_number` | Via `FundingMechanism.grant` ✅ |
+| **GDPR/HIPAA** | `ExportControlRegulatoryRestrictions.gdpr_compliant`, `.hipaa_compliant` | `Dataset.regulatory_restrictions` ✅ |
+| **regulatory compliance** | `ExportControlRegulatoryRestrictions.regulatory_compliance`, `.other_compliance` | `Dataset.regulatory_restrictions` ✅ |
+| **De-identified** | `Deidentification` class | `Dataset.is_deidentified` ✅ |
 
-3. **Hierarchical Composition**
-   - `hasPart` / `isPartOf` for dataset relationships → D4D `subsets` is less formal
-   - Nested RO-Crate support → D4D flat structure
+#### ⚠️ Fields Defined in D4D Modules but NOT Integrated into Dataset Class
 
-4. **Usage Documentation**
-   - Separate `Intended Use` and `Prohibited Uses` → D4D combines in future_use_impacts
-   - `usageInfo` top-level field → D4D embeds in license terms
+**CRITICAL FINDING:** D4D_Human module (D4D_Human.yaml) defines comprehensive human subjects classes but they are **NOT referenced in the Dataset class**:
 
-5. **Publication Linkage**
-   - `associatedPublication` array → D4D `related_resources` is less typed
+| RO-Crate Field | D4D Class (Exists but Unused) | Required Action |
+|----------------|-------------------------------|-----------------|
+| **Human Subject** (boolean) | `HumanSubjectResearch.involves_human_subjects` | Add `Dataset.human_subject_research` attribute |
+| **IRB Approval** | `HumanSubjectResearch.irb_approval` | Already defined in unused class |
+| **Ethics Review** | `HumanSubjectResearch.ethics_review_board` | Already defined in unused class |
+| **Regulatory Compliance** | `HumanSubjectResearch.regulatory_compliance` | Already defined in unused class |
+| **Consent Obtained** | `InformedConsent.consent_obtained` | Add `Dataset.informed_consent` attribute |
+| **Consent Type** | `InformedConsent.consent_type` | Already defined in unused class |
+| **Withdrawal Mechanism** | `InformedConsent.withdrawal_mechanism` | Already defined in unused class |
+| **Anonymization Method** | `ParticipantPrivacy.anonymization_method` | Add `Dataset.participant_privacy` attribute |
+| **Reidentification Risk** | `ParticipantPrivacy.reidentification_risk` | Already defined in unused class |
+| **Compensation** | `HumanSubjectCompensation` (full class) | Add `Dataset.compensation` attribute |
+| **Vulnerable Populations** | `VulnerablePopulations` (full class) | Add `Dataset.vulnerable_populations` attribute |
+
+**Note:** These classes are imported via `D4D_Human` module but never added as attributes to the Dataset class in data_sheets_schema.yaml.
+
+#### ❌ Fields Truly Missing from D4D
+
+1. **Structured Confidentiality Level**
+   - `confidentialityLevel` enum [unrestricted, restricted, confidential] → D4D has compliance enums but no general confidentiality classification
+   - Recommendation: Add `ConfidentialityLevelEnum` to D4D_Data_Governance module
+
+2. **Data Governance Committee**
+   - `Data Governance Committee` contact → D4D has `Maintainer.contact_person` but no specific governance committee
+   - Recommendation: Add `governance_committee` field to `ExportControlRegulatoryRestrictions`
+
+3. **Dataset Citation**
    - `citation` recommended citation → D4D lacks standard citation field
+   - Recommendation: Add top-level `Dataset.citation` field
 
-6. **Funding Transparency**
-   - Structured `funder` field → D4D lacks dedicated funding field
+4. **Hierarchical Composition**
+   - `hasPart` / `isPartOf` for dataset relationships → D4D `subsets` is informal
+   - Recommendation: Add `Dataset.parent_datasets` and formalize composition relationships
 
 ### Fields Present in D4D but Missing/Weak in RO-Crate
 
@@ -184,69 +208,129 @@ The `additionalProperty` field contains an array of `PropertyValue` objects with
 
 ## Recommended Integration into D4D
 
-### Priority 1: Critical Additions
+### Priority 0: CRITICAL - Integrate Existing D4D_Human Module (IMMEDIATE)
 
-1. **Add `data_governance` class**
+**The D4D_Human module already exists but is not integrated into the Dataset class. This is the highest priority fix.**
+
+Add the following attributes to the `Dataset` class in `data_sheets_schema.yaml`:
+
+```yaml
+Dataset:
+  attributes:
+    # ... existing attributes ...
+
+    # Human subjects module classes (ADD THESE)
+    human_subject_research:
+      range: HumanSubjectResearch
+      description: Information about whether dataset involves human subjects research
+    informed_consent:
+      range: InformedConsent
+      multivalued: true
+      description: Details about informed consent procedures
+    participant_privacy:
+      range: ParticipantPrivacy
+      multivalued: true
+      description: Privacy protections and anonymization procedures
+    participant_compensation:
+      range: HumanSubjectCompensation
+      description: Compensation provided to participants
+    vulnerable_populations:
+      range: VulnerablePopulations
+      description: Protections for vulnerable populations
+```
+
+**Impact:** This single change adds all RO-Crate human subjects fields that were already defined but unused.
+
+### Priority 1: Add Truly Missing Fields
+
+1. **Add `ConfidentialityLevelEnum` to D4D_Data_Governance module**
    ```yaml
-   data_governance:
-     committee_contact: string
-     confidentiality_level: enum [unrestricted, restricted, confidential]
-     regulatory_status:
-       fda_regulated: boolean
-       gdpr_applicable: boolean
-       hipaa_covered: boolean
+   ConfidentialityLevelEnum:
+     permissible_values:
+       unrestricted:
+         description: No confidentiality restrictions
+       restricted:
+         description: Restricted access with approval required
+       confidential:
+         description: Highly confidential with strict access controls
    ```
 
-2. **Add `human_subjects` structured class**
+2. **Add governance committee to `ExportControlRegulatoryRestrictions`**
    ```yaml
-   human_subjects:
-     involves_human_subjects: boolean
-     deidentification_status: enum [identified, de-identified, anonymized]
-     consent_obtained: boolean
-     irb_approval: string
+   ExportControlRegulatoryRestrictions:
+     attributes:
+       # ... existing attributes ...
+       governance_committee_contact:
+         description: Contact for data governance committee
+         range: Person
    ```
 
-3. **Add `funding` class**
+3. **Add `citation` field to Dataset**
    ```yaml
-   funding:
-     - funder_name: string
-       grant_number: string
-       grant_url: string (optional)
+   Dataset:
+     attributes:
+       # ... existing attributes ...
+       citation:
+         description: Recommended citation for this dataset (DataCite/BibTeX format)
+         range: string
+         slot_uri: schema:citation
    ```
 
-4. **Separate `intended_uses` and `prohibited_uses`**
-   - Split current `future_use_impacts` and `tasks_not_suitable`
-   - Add structured categories
+4. **Add hierarchical composition to Dataset**
+   ```yaml
+   Dataset:
+     attributes:
+       # ... existing attributes ...
+       parent_datasets:
+         description: Parent datasets that this is part of
+         range: Dataset
+         multivalued: true
+         slot_uri: schema:isPartOf
+       related_datasets:
+         description: Related datasets with typed relationships
+         range: DatasetRelationship  # New class
+         multivalued: true
+   ```
 
 ### Priority 2: Enhanced Metadata
 
-5. **Add `dataset_citation` field**
-   - Top-level recommended citation string
-   - Follows DataCite/BibTeX format
-
-6. **Add hierarchical composition**
+5. **Add `DatasetRelationship` class for typed relationships**
    ```yaml
-   composition:
-     parent_datasets: [identifier references]
-     child_datasets: [identifier references]
-     related_datasets: [identifier references with relationship type]
+   DatasetRelationship:
+     description: Typed relationship to another dataset
+     is_a: DatasetProperty
+     attributes:
+       target_dataset:
+         range: Dataset
+       relationship_type:
+         range: DatasetRelationshipTypeEnum
+
+   DatasetRelationshipTypeEnum:
+     permissible_values:
+       derives_from: {}
+       supplements: {}
+       is_version_of: {}
+       replaces: {}
+       is_required_by: {}
    ```
 
-7. **Enhance `related_resources`**
-   - Add `associatedPublication` type for formal publications
-   - Separate from general resources
+6. **Separate `intended_uses` and `prohibited_uses`**
+   - Current: `future_use_impacts` combines both
+   - Recommendation: Split into separate classes with structured categories
 
 ### Priority 3: Export Compatibility
 
-8. **Add JSON-LD export capability**
+7. **Add JSON-LD export capability**
    - Generate schema.org-compatible JSON-LD from D4D YAML
    - Map D4D fields to schema.org vocabulary
    - Support `@context` and `@graph` structure
+   - Tool location: `src/export/d4d_to_jsonld.py`
 
-9. **Add RO-Crate packaging tool**
+8. **Add RO-Crate packaging tool**
    - Convert D4D YAML → RO-Crate JSON-LD
    - Preserve all metadata
    - Generate conformant crate structure
+   - Tool location: `src/export/d4d_to_rocrate.py`
 
 ## References
 
