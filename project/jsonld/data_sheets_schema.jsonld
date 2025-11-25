@@ -986,6 +986,70 @@
       ]
     },
     {
+      "name": "DatasetRelationshipTypeEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#DatasetRelationshipTypeEnum",
+      "description": "Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "permissible_values": [
+        {
+          "text": "derives_from",
+          "description": "This dataset is derived from the target dataset through processing, analysis, or transformation."
+        },
+        {
+          "text": "supplements",
+          "description": "This dataset supplements or adds to the target dataset."
+        },
+        {
+          "text": "is_supplemented_by",
+          "description": "This dataset is supplemented by the target dataset."
+        },
+        {
+          "text": "is_version_of",
+          "description": "This dataset is a version of the target dataset (e.g., updated, corrected, or revised version)."
+        },
+        {
+          "text": "is_new_version_of",
+          "description": "This dataset is a new version that replaces or updates the target dataset."
+        },
+        {
+          "text": "replaces",
+          "description": "This dataset replaces or supersedes the target dataset."
+        },
+        {
+          "text": "is_replaced_by",
+          "description": "This dataset is replaced or superseded by the target dataset."
+        },
+        {
+          "text": "is_required_by",
+          "description": "This dataset is required by the target dataset."
+        },
+        {
+          "text": "requires",
+          "description": "This dataset requires the target dataset."
+        },
+        {
+          "text": "is_part_of",
+          "description": "This dataset is part of the target dataset (e.g., subset, component)."
+        },
+        {
+          "text": "has_part",
+          "description": "This dataset has the target dataset as a part."
+        },
+        {
+          "text": "is_referenced_by",
+          "description": "This dataset is referenced or cited by the target dataset."
+        },
+        {
+          "text": "references",
+          "description": "This dataset references or cites the target dataset."
+        },
+        {
+          "text": "is_identical_to",
+          "description": "This dataset is identical to the target dataset (e.g., mirror, copy)."
+        }
+      ]
+    },
+    {
       "name": "ComplianceStatusEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ComplianceStatusEnum",
       "description": "Compliance status for regulatory frameworks",
@@ -1034,6 +1098,26 @@
         {
           "text": "unacceptable_risk",
           "description": "AI systems with unacceptable risk that are prohibited (e.g., social scoring, real-time biometric identification in public spaces)."
+        }
+      ]
+    },
+    {
+      "name": "ConfidentialityLevelEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ConfidentialityLevelEnum",
+      "description": "Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "permissible_values": [
+        {
+          "text": "unrestricted",
+          "description": "No confidentiality restrictions. Data is publicly available with no access controls required."
+        },
+        {
+          "text": "restricted",
+          "description": "Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access."
+        },
+        {
+          "text": "confidential",
+          "description": "Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. May require IRB approval, data use agreements, or other formal authorization."
         }
       ]
     },
@@ -2014,6 +2098,73 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "dataset__human_subject_research",
+      "description": "Information about whether dataset involves human subjects research, including IRB approval, ethics review, and regulatory compliance.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human_subject_research",
+      "alias": "human_subject_research",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "HumanSubjectResearch",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__informed_consent",
+      "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/informed_consent",
+      "alias": "informed_consent",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "InformedConsent",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__participant_privacy",
+      "description": "Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/participant_privacy",
+      "alias": "participant_privacy",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "ParticipantPrivacy",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__participant_compensation",
+      "description": "Compensation or incentives provided to human research participants.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/participant_compensation",
+      "alias": "participant_compensation",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "HumanSubjectCompensation",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__vulnerable_populations",
+      "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/vulnerable_populations",
+      "alias": "vulnerable_populations",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "VulnerablePopulations",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "dataset__preprocessing_strategies",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing_strategies",
@@ -2127,6 +2278,34 @@
         "Dataset"
       ],
       "range": "DiscouragedUse",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__intended_uses",
+      "description": "Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/intended_uses",
+      "alias": "intended_uses",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "IntendedUse",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__prohibited_uses",
+      "description": "Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/prohibited_uses",
+      "alias": "prohibited_uses",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "ProhibitedUse",
       "multivalued": true,
       "@type": "SlotDefinition"
     },
@@ -2308,6 +2487,59 @@
         "Dataset"
       ],
       "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__citation",
+      "description": "Recommended citation for this dataset in DataCite or BibTeX format. Provides a standard way to cite the dataset in publications.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://schema.org/citation"
+      ],
+      "exact_mappings": [
+        "http://schema.org/citation"
+      ],
+      "slot_uri": "http://schema.org/citation",
+      "alias": "citation",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__parent_datasets",
+      "description": "Parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "mappings": [
+        "http://schema.org/isPartOf"
+      ],
+      "exact_mappings": [
+        "http://schema.org/isPartOf"
+      ],
+      "slot_uri": "http://schema.org/isPartOf",
+      "alias": "parent_datasets",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "Dataset",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__related_datasets",
+      "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/related_datasets",
+      "alias": "related_datasets",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "DatasetRelationship",
+      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -3238,6 +3470,47 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "datasetRelationship__target_dataset",
+      "description": "The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#target_dataset",
+      "alias": "target_dataset",
+      "owner": "DatasetRelationship",
+      "domain_of": [
+        "DatasetRelationship"
+      ],
+      "range": "string",
+      "required": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "datasetRelationship__relationship_type",
+      "description": "The type of relationship (e.g., derives_from, supplements, is_version_of). Uses DatasetRelationshipTypeEnum for standardized relationship types.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#relationship_type",
+      "alias": "relationship_type",
+      "owner": "DatasetRelationship",
+      "domain_of": [
+        "DatasetRelationship"
+      ],
+      "range": "DatasetRelationshipTypeEnum",
+      "required": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "datasetRelationship__description",
+      "description": "Free-text description providing additional context about the relationship.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#description",
+      "alias": "description",
+      "owner": "DatasetRelationship",
+      "domain_of": [
+        "DatasetRelationship"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "instanceAcquisition__description",
       "description": "Free-text description of the acquisition process",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
@@ -3584,6 +3857,68 @@
       "owner": "DiscouragedUse",
       "domain_of": [
         "DiscouragedUse"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "intendedUse__description",
+      "description": "Description of recommended and intended uses for this dataset. May include specific tasks, research questions, or application domains.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
+      "alias": "description",
+      "owner": "IntendedUse",
+      "domain_of": [
+        "IntendedUse"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "intendedUse__use_category",
+      "description": "Category of intended use (e.g., research, clinical, educational, commercial, policy).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#use_category",
+      "alias": "use_category",
+      "owner": "IntendedUse",
+      "domain_of": [
+        "IntendedUse"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "prohibitedUse__description",
+      "description": "Description of explicitly prohibited uses for this dataset. May include specific tasks, applications, or domains that are forbidden by license terms, data use agreements, or ethical constraints.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
+      "alias": "description",
+      "owner": "ProhibitedUse",
+      "domain_of": [
+        "ProhibitedUse"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "prohibitedUse__prohibition_reason",
+      "description": "Reason why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#prohibition_reason",
+      "alias": "prohibition_reason",
+      "owner": "ProhibitedUse",
+      "domain_of": [
+        "ProhibitedUse"
       ],
       "range": "string",
       "multivalued": true,
@@ -4321,6 +4656,38 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "exportControlRegulatoryRestrictions__confidentiality_level",
+      "description": "Confidentiality classification of the dataset indicating level of access restrictions and sensitivity.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#confidentiality_level",
+      "alias": "confidentiality_level",
+      "owner": "ExportControlRegulatoryRestrictions",
+      "domain_of": [
+        "ExportControlRegulatoryRestrictions"
+      ],
+      "range": "ConfidentialityLevelEnum",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "exportControlRegulatoryRestrictions__governance_committee_contact",
+      "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
+      "mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "exact_mappings": [
+        "http://schema.org/contactPoint"
+      ],
+      "slot_uri": "http://schema.org/contactPoint",
+      "alias": "governance_committee_contact",
+      "owner": "ExportControlRegulatoryRestrictions",
+      "domain_of": [
+        "ExportControlRegulatoryRestrictions"
+      ],
+      "range": "Person",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "variableMetadata__variable_name",
       "description": "The name or identifier of the variable as it appears in the data files.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
@@ -4683,6 +5050,11 @@
         "dataset__collection_timeframes",
         "dataset__ethical_reviews",
         "dataset__data_protection_impacts",
+        "dataset__human_subject_research",
+        "dataset__informed_consent",
+        "dataset__participant_privacy",
+        "dataset__participant_compensation",
+        "dataset__vulnerable_populations",
         "dataset__preprocessing_strategies",
         "dataset__cleaning_strategies",
         "dataset__labeling_strategies",
@@ -4692,6 +5064,8 @@
         "dataset__other_tasks",
         "dataset__future_use_impacts",
         "dataset__discouraged_uses",
+        "dataset__intended_uses",
+        "dataset__prohibited_uses",
         "dataset__distribution_formats",
         "dataset__distribution_dates",
         "dataset__license_and_use_terms",
@@ -4705,7 +5079,10 @@
         "dataset__extension_mechanism",
         "dataset__variables",
         "dataset__is_deidentified",
-        "dataset__is_tabular"
+        "dataset__is_tabular",
+        "dataset__citation",
+        "dataset__parent_datasets",
+        "dataset__related_datasets"
       ],
       "slot_usage": {},
       "attributes": [
@@ -4834,6 +5211,38 @@
           "@type": "SlotDefinition"
         },
         {
+          "name": "human_subject_research",
+          "description": "Information about whether dataset involves human subjects research, including IRB approval, ethics review, and regulatory compliance.",
+          "range": "HumanSubjectResearch",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "informed_consent",
+          "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
+          "range": "InformedConsent",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "participant_privacy",
+          "description": "Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.",
+          "range": "ParticipantPrivacy",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "participant_compensation",
+          "description": "Compensation or incentives provided to human research participants.",
+          "range": "HumanSubjectCompensation",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "vulnerable_populations",
+          "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.",
+          "range": "VulnerablePopulations",
+          "@type": "SlotDefinition"
+        },
+        {
           "name": "preprocessing_strategies",
           "range": "PreprocessingStrategy",
           "multivalued": true,
@@ -4884,6 +5293,20 @@
         {
           "name": "discouraged_uses",
           "range": "DiscouragedUse",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "intended_uses",
+          "description": "Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
+          "range": "IntendedUse",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "prohibited_uses",
+          "description": "Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
+          "range": "ProhibitedUse",
           "multivalued": true,
           "@type": "SlotDefinition"
         },
@@ -4966,6 +5389,34 @@
           "name": "is_tabular",
           "range": "boolean",
           "@type": "SlotDefinition"
+        },
+        {
+          "name": "citation",
+          "description": "Recommended citation for this dataset in DataCite or BibTeX format. Provides a standard way to cite the dataset in publications.",
+          "exact_mappings": [
+            "schema:citation"
+          ],
+          "slot_uri": "schema:citation",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "parent_datasets",
+          "description": "Parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
+          "exact_mappings": [
+            "schema:isPartOf"
+          ],
+          "slot_uri": "schema:isPartOf",
+          "range": "Dataset",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "related_datasets",
+          "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
+          "range": "DatasetRelationship",
+          "multivalued": true,
+          "@type": "SlotDefinition"
         }
       ],
       "class_uri": "http://www.w3.org/ns/dcat#Distribution",
@@ -5030,6 +5481,11 @@
         "dataset__collection_timeframes",
         "dataset__ethical_reviews",
         "dataset__data_protection_impacts",
+        "dataset__human_subject_research",
+        "dataset__informed_consent",
+        "dataset__participant_privacy",
+        "dataset__participant_compensation",
+        "dataset__vulnerable_populations",
         "dataset__preprocessing_strategies",
         "dataset__cleaning_strategies",
         "dataset__labeling_strategies",
@@ -5039,6 +5495,8 @@
         "dataset__other_tasks",
         "dataset__future_use_impacts",
         "dataset__discouraged_uses",
+        "dataset__intended_uses",
+        "dataset__prohibited_uses",
         "dataset__distribution_formats",
         "dataset__distribution_dates",
         "dataset__license_and_use_terms",
@@ -5053,6 +5511,9 @@
         "dataset__variables",
         "dataset__is_deidentified",
         "dataset__is_tabular",
+        "dataset__citation",
+        "dataset__parent_datasets",
+        "dataset__related_datasets",
         "dataSubset__is_data_split",
         "dataSubset__is_subpopulation"
       ],
@@ -6028,6 +6489,46 @@
       "@type": "ClassDefinition"
     },
     {
+      "name": "DatasetRelationship",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#DatasetRelationship",
+      "description": "Typed relationship to another dataset, enabling precise specification of how datasets relate to each other (e.g., supplements, derives from, is version of). Supports RO-Crate-style dataset interlinking.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "datasetProperty__used_software",
+        "datasetRelationship__target_dataset",
+        "datasetRelationship__relationship_type",
+        "datasetRelationship__description"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "target_dataset",
+          "description": "The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.",
+          "range": "string",
+          "required": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "relationship_type",
+          "description": "The type of relationship (e.g., derives_from, supplements, is_version_of). Uses DatasetRelationshipTypeEnum for standardized relationship types.",
+          "range": "DatasetRelationshipTypeEnum",
+          "required": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "description",
+          "description": "Free-text description providing additional context about the relationship.",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#DatasetRelationship",
+      "@type": "ClassDefinition"
+    },
+    {
       "name": "InstanceAcquisition",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/InstanceAcquisition",
       "description": "Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects, inferred).\n",
@@ -6449,6 +6950,74 @@
         }
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#DiscouragedUse",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "IntendedUse",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#IntendedUse",
+      "description": "Explicit statement of intended uses for this dataset. Complements FutureUseImpact by focusing on positive, recommended applications rather than risks. Aligns with RO-Crate \"Intended Use\" field.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "datasetProperty__used_software",
+        "intendedUse__description",
+        "intendedUse__use_category"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "description",
+          "description": "Description of recommended and intended uses for this dataset. May include specific tasks, research questions, or application domains.",
+          "slot_uri": "dcterms:description",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "use_category",
+          "description": "Category of intended use (e.g., research, clinical, educational, commercial, policy).",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#IntendedUse",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "ProhibitedUse",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#ProhibitedUse",
+      "description": "Explicit statement of prohibited or forbidden uses for this dataset. Stronger than DiscouragedUse - these are uses that are explicitly not permitted by license, ethics, or policy. Aligns with RO-Crate \"Prohibited Uses\" field.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "datasetProperty__used_software",
+        "prohibitedUse__description",
+        "prohibitedUse__prohibition_reason"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "description",
+          "description": "Description of explicitly prohibited uses for this dataset. May include specific tasks, applications, or domains that are forbidden by license terms, data use agreements, or ethical constraints.",
+          "slot_uri": "dcterms:description",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "prohibition_reason",
+          "description": "Reason why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#ProhibitedUse",
       "@type": "ClassDefinition"
     },
     {
@@ -7191,7 +7760,9 @@
         "exportControlRegulatoryRestrictions__gdpr_compliant",
         "exportControlRegulatoryRestrictions__hipaa_compliant",
         "exportControlRegulatoryRestrictions__eu_ai_act_risk_category",
-        "exportControlRegulatoryRestrictions__other_compliance"
+        "exportControlRegulatoryRestrictions__other_compliance",
+        "exportControlRegulatoryRestrictions__confidentiality_level",
+        "exportControlRegulatoryRestrictions__governance_committee_contact"
       ],
       "slot_usage": {},
       "attributes": [
@@ -7231,6 +7802,22 @@
           "description": "Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-specific regulations).",
           "range": "string",
           "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "confidentiality_level",
+          "description": "Confidentiality classification of the dataset indicating level of access restrictions and sensitivity.",
+          "range": "ConfidentialityLevelEnum",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "governance_committee_contact",
+          "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
+          "exact_mappings": [
+            "schema:contactPoint"
+          ],
+          "slot_uri": "schema:contactPoint",
+          "range": "Person",
           "@type": "SlotDefinition"
         }
       ],
@@ -7391,9 +7978,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-11-18T17:40:41",
-  "source_file_size": 9614,
-  "generation_date": "2025-11-20T12:34:09",
+  "source_file_date": "2025-11-24T22:16:32",
+  "source_file_size": 12266,
+  "generation_date": "2025-11-24T22:18:13",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

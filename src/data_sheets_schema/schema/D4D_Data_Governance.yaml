@@ -133,6 +133,20 @@ classes:
           (e.g., CCPA, PIPEDA, industry-specific regulations).
         range: string
         multivalued: true
+      confidentiality_level:
+        description: >-
+          Confidentiality classification of the dataset indicating level of
+          access restrictions and sensitivity.
+        range: ConfidentialityLevelEnum
+      governance_committee_contact:
+        description: >-
+          Contact person for data governance committee. This person can answer
+          questions about data governance policies, access procedures, and
+          oversight mechanisms.
+        range: Person
+        slot_uri: schema:contactPoint
+        exact_mappings:
+          - schema:contactPoint
 
 
 enums:
@@ -174,6 +188,26 @@ enums:
         description: >-
           AI systems with unacceptable risk that are prohibited
           (e.g., social scoring, real-time biometric identification in public spaces).
+
+  ConfidentialityLevelEnum:
+    description: >-
+      Confidentiality classification levels for datasets indicating the degree
+      of access restrictions and data sensitivity.
+    permissible_values:
+      unrestricted:
+        description: >-
+          No confidentiality restrictions. Data is publicly available with
+          no access controls required.
+      restricted:
+        description: >-
+          Restricted access requiring approval or registration. Data contains
+          sensitive information requiring controlled access.
+      confidential:
+        description: >-
+          Highly confidential with strict access controls. Data contains
+          highly sensitive information with significant privacy or security
+          implications. May require IRB approval, data use agreements, or
+          other formal authorization.
 
   DataUsePermissionEnum:
     description: >-

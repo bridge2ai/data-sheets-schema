@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-11-20T12:34:10
+# Generation date: 2025-11-24T22:18:14
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -216,6 +216,10 @@ class SensitiveElementId(DatasetPropertyId):
     pass
 
 
+class DatasetRelationshipId(DatasetPropertyId):
+    pass
+
+
 class InstanceAcquisitionId(DatasetPropertyId):
     pass
 
@@ -269,6 +273,14 @@ class FutureUseImpactId(DatasetPropertyId):
 
 
 class DiscouragedUseId(DatasetPropertyId):
+    pass
+
+
+class IntendedUseId(DatasetPropertyId):
+    pass
+
+
+class ProhibitedUseId(DatasetPropertyId):
     pass
 
 
@@ -695,6 +707,11 @@ class Dataset(Information):
     collection_timeframes: Optional[Union[Union[str, CollectionTimeframeId], list[Union[str, CollectionTimeframeId]]]] = empty_list()
     ethical_reviews: Optional[Union[Union[str, EthicalReviewId], list[Union[str, EthicalReviewId]]]] = empty_list()
     data_protection_impacts: Optional[Union[Union[str, DataProtectionImpactId], list[Union[str, DataProtectionImpactId]]]] = empty_list()
+    human_subject_research: Optional[Union[str, HumanSubjectResearchId]] = None
+    informed_consent: Optional[Union[Union[str, InformedConsentId], list[Union[str, InformedConsentId]]]] = empty_list()
+    participant_privacy: Optional[Union[Union[str, ParticipantPrivacyId], list[Union[str, ParticipantPrivacyId]]]] = empty_list()
+    participant_compensation: Optional[Union[str, HumanSubjectCompensationId]] = None
+    vulnerable_populations: Optional[Union[str, VulnerablePopulationsId]] = None
     preprocessing_strategies: Optional[Union[Union[str, PreprocessingStrategyId], list[Union[str, PreprocessingStrategyId]]]] = empty_list()
     cleaning_strategies: Optional[Union[Union[str, CleaningStrategyId], list[Union[str, CleaningStrategyId]]]] = empty_list()
     labeling_strategies: Optional[Union[Union[str, LabelingStrategyId], list[Union[str, LabelingStrategyId]]]] = empty_list()
@@ -704,6 +721,8 @@ class Dataset(Information):
     other_tasks: Optional[Union[Union[str, OtherTaskId], list[Union[str, OtherTaskId]]]] = empty_list()
     future_use_impacts: Optional[Union[Union[str, FutureUseImpactId], list[Union[str, FutureUseImpactId]]]] = empty_list()
     discouraged_uses: Optional[Union[Union[str, DiscouragedUseId], list[Union[str, DiscouragedUseId]]]] = empty_list()
+    intended_uses: Optional[Union[Union[str, IntendedUseId], list[Union[str, IntendedUseId]]]] = empty_list()
+    prohibited_uses: Optional[Union[Union[str, ProhibitedUseId], list[Union[str, ProhibitedUseId]]]] = empty_list()
     distribution_formats: Optional[Union[Union[str, DistributionFormatId], list[Union[str, DistributionFormatId]]]] = empty_list()
     distribution_dates: Optional[Union[Union[str, DistributionDateId], list[Union[str, DistributionDateId]]]] = empty_list()
     license_and_use_terms: Optional[Union[str, LicenseAndUseTermsId]] = None
@@ -718,6 +737,9 @@ class Dataset(Information):
     variables: Optional[Union[Union[str, VariableMetadataId], list[Union[str, VariableMetadataId]]]] = empty_list()
     is_deidentified: Optional[Union[str, DeidentificationId]] = None
     is_tabular: Optional[Union[bool, Bool]] = None
+    citation: Optional[str] = None
+    parent_datasets: Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]] = empty_list()
+    related_datasets: Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -832,6 +854,23 @@ class Dataset(Information):
             self.data_protection_impacts = [self.data_protection_impacts] if self.data_protection_impacts is not None else []
         self.data_protection_impacts = [v if isinstance(v, DataProtectionImpactId) else DataProtectionImpactId(v) for v in self.data_protection_impacts]
 
+        if self.human_subject_research is not None and not isinstance(self.human_subject_research, HumanSubjectResearchId):
+            self.human_subject_research = HumanSubjectResearchId(self.human_subject_research)
+
+        if not isinstance(self.informed_consent, list):
+            self.informed_consent = [self.informed_consent] if self.informed_consent is not None else []
+        self.informed_consent = [v if isinstance(v, InformedConsentId) else InformedConsentId(v) for v in self.informed_consent]
+
+        if not isinstance(self.participant_privacy, list):
+            self.participant_privacy = [self.participant_privacy] if self.participant_privacy is not None else []
+        self.participant_privacy = [v if isinstance(v, ParticipantPrivacyId) else ParticipantPrivacyId(v) for v in self.participant_privacy]
+
+        if self.participant_compensation is not None and not isinstance(self.participant_compensation, HumanSubjectCompensationId):
+            self.participant_compensation = HumanSubjectCompensationId(self.participant_compensation)
+
+        if self.vulnerable_populations is not None and not isinstance(self.vulnerable_populations, VulnerablePopulationsId):
+            self.vulnerable_populations = VulnerablePopulationsId(self.vulnerable_populations)
+
         if not isinstance(self.preprocessing_strategies, list):
             self.preprocessing_strategies = [self.preprocessing_strategies] if self.preprocessing_strategies is not None else []
         self.preprocessing_strategies = [v if isinstance(v, PreprocessingStrategyId) else PreprocessingStrategyId(v) for v in self.preprocessing_strategies]
@@ -867,6 +906,14 @@ class Dataset(Information):
         if not isinstance(self.discouraged_uses, list):
             self.discouraged_uses = [self.discouraged_uses] if self.discouraged_uses is not None else []
         self.discouraged_uses = [v if isinstance(v, DiscouragedUseId) else DiscouragedUseId(v) for v in self.discouraged_uses]
+
+        if not isinstance(self.intended_uses, list):
+            self.intended_uses = [self.intended_uses] if self.intended_uses is not None else []
+        self.intended_uses = [v if isinstance(v, IntendedUseId) else IntendedUseId(v) for v in self.intended_uses]
+
+        if not isinstance(self.prohibited_uses, list):
+            self.prohibited_uses = [self.prohibited_uses] if self.prohibited_uses is not None else []
+        self.prohibited_uses = [v if isinstance(v, ProhibitedUseId) else ProhibitedUseId(v) for v in self.prohibited_uses]
 
         if not isinstance(self.distribution_formats, list):
             self.distribution_formats = [self.distribution_formats] if self.distribution_formats is not None else []
@@ -914,6 +961,17 @@ class Dataset(Information):
 
         if self.is_tabular is not None and not isinstance(self.is_tabular, Bool):
             self.is_tabular = Bool(self.is_tabular)
+
+        if self.citation is not None and not isinstance(self.citation, str):
+            self.citation = str(self.citation)
+
+        if not isinstance(self.parent_datasets, list):
+            self.parent_datasets = [self.parent_datasets] if self.parent_datasets is not None else []
+        self.parent_datasets = [v if isinstance(v, DatasetId) else DatasetId(v) for v in self.parent_datasets]
+
+        if not isinstance(self.related_datasets, list):
+            self.related_datasets = [self.related_datasets] if self.related_datasets is not None else []
+        self.related_datasets = [v if isinstance(v, DatasetRelationshipId) else DatasetRelationshipId(v) for v in self.related_datasets]
 
         super().__post_init__(**kwargs)
 
@@ -1636,6 +1694,46 @@ class SensitiveElement(DatasetProperty):
 
 
 @dataclass(repr=False)
+class DatasetRelationship(DatasetProperty):
+    """
+    Typed relationship to another dataset, enabling precise specification of how datasets relate to each other (e.g.,
+    supplements, derives from, is version of). Supports RO-Crate-style dataset interlinking.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["DatasetRelationship"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:DatasetRelationship"
+    class_name: ClassVar[str] = "DatasetRelationship"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetRelationship
+
+    id: Union[str, DatasetRelationshipId] = None
+    target_dataset: str = None
+    relationship_type: Union[str, "DatasetRelationshipTypeEnum"] = None
+    description: Optional[str] = None
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, DatasetRelationshipId):
+            self.id = DatasetRelationshipId(self.id)
+
+        if self._is_empty(self.target_dataset):
+            self.MissingRequiredField("target_dataset")
+        if not isinstance(self.target_dataset, str):
+            self.target_dataset = str(self.target_dataset)
+
+        if self._is_empty(self.relationship_type):
+            self.MissingRequiredField("relationship_type")
+        if not isinstance(self.relationship_type, DatasetRelationshipTypeEnum):
+            self.relationship_type = DatasetRelationshipTypeEnum(self.relationship_type)
+
+        if self.description is not None and not isinstance(self.description, str):
+            self.description = str(self.description)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
 class InstanceAcquisition(DatasetProperty):
     """
     Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects,
@@ -2064,6 +2162,74 @@ class DiscouragedUse(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class IntendedUse(DatasetProperty):
+    """
+    Explicit statement of intended uses for this dataset. Complements FutureUseImpact by focusing on positive,
+    recommended applications rather than risks. Aligns with RO-Crate "Intended Use" field.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DUSES["IntendedUse"]
+    class_class_curie: ClassVar[str] = "d4duses:IntendedUse"
+    class_name: ClassVar[str] = "IntendedUse"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.IntendedUse
+
+    id: Union[str, IntendedUseId] = None
+    description: Optional[Union[str, list[str]]] = empty_list()
+    use_category: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, IntendedUseId):
+            self.id = IntendedUseId(self.id)
+
+        if not isinstance(self.description, list):
+            self.description = [self.description] if self.description is not None else []
+        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+
+        if not isinstance(self.use_category, list):
+            self.use_category = [self.use_category] if self.use_category is not None else []
+        self.use_category = [v if isinstance(v, str) else str(v) for v in self.use_category]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class ProhibitedUse(DatasetProperty):
+    """
+    Explicit statement of prohibited or forbidden uses for this dataset. Stronger than DiscouragedUse - these are uses
+    that are explicitly not permitted by license, ethics, or policy. Aligns with RO-Crate "Prohibited Uses" field.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DUSES["ProhibitedUse"]
+    class_class_curie: ClassVar[str] = "d4duses:ProhibitedUse"
+    class_name: ClassVar[str] = "ProhibitedUse"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ProhibitedUse
+
+    id: Union[str, ProhibitedUseId] = None
+    description: Optional[Union[str, list[str]]] = empty_list()
+    prohibition_reason: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, ProhibitedUseId):
+            self.id = ProhibitedUseId(self.id)
+
+        if not isinstance(self.description, list):
+            self.description = [self.description] if self.description is not None else []
+        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+
+        if not isinstance(self.prohibition_reason, list):
+            self.prohibition_reason = [self.prohibition_reason] if self.prohibition_reason is not None else []
+        self.prohibition_reason = [v if isinstance(v, str) else str(v) for v in self.prohibition_reason]
 
         super().__post_init__(**kwargs)
 
@@ -2791,6 +2957,8 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
     hipaa_compliant: Optional[Union[str, "ComplianceStatusEnum"]] = None
     eu_ai_act_risk_category: Optional[Union[str, "AIActRiskEnum"]] = None
     other_compliance: Optional[Union[str, list[str]]] = empty_list()
+    confidentiality_level: Optional[Union[str, "ConfidentialityLevelEnum"]] = None
+    governance_committee_contact: Optional[Union[str, PersonId]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2814,6 +2982,12 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
         if not isinstance(self.other_compliance, list):
             self.other_compliance = [self.other_compliance] if self.other_compliance is not None else []
         self.other_compliance = [v if isinstance(v, str) else str(v) for v in self.other_compliance]
+
+        if self.confidentiality_level is not None and not isinstance(self.confidentiality_level, ConfidentialityLevelEnum):
+            self.confidentiality_level = ConfidentialityLevelEnum(self.confidentiality_level)
+
+        if self.governance_committee_contact is not None and not isinstance(self.governance_committee_contact, PersonId):
+            self.governance_committee_contact = PersonId(self.governance_committee_contact)
 
         super().__post_init__(**kwargs)
 
@@ -3250,6 +3424,58 @@ class Boolean(EnumDefinitionImpl):
         name="Boolean",
     )
 
+class DatasetRelationshipTypeEnum(EnumDefinitionImpl):
+    """
+    Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.
+    """
+    derives_from = PermissibleValue(
+        text="derives_from",
+        description="""This dataset is derived from the target dataset through processing, analysis, or transformation.""")
+    supplements = PermissibleValue(
+        text="supplements",
+        description="This dataset supplements or adds to the target dataset.")
+    is_supplemented_by = PermissibleValue(
+        text="is_supplemented_by",
+        description="This dataset is supplemented by the target dataset.")
+    is_version_of = PermissibleValue(
+        text="is_version_of",
+        description="""This dataset is a version of the target dataset (e.g., updated, corrected, or revised version).""")
+    is_new_version_of = PermissibleValue(
+        text="is_new_version_of",
+        description="This dataset is a new version that replaces or updates the target dataset.")
+    replaces = PermissibleValue(
+        text="replaces",
+        description="This dataset replaces or supersedes the target dataset.")
+    is_replaced_by = PermissibleValue(
+        text="is_replaced_by",
+        description="This dataset is replaced or superseded by the target dataset.")
+    is_required_by = PermissibleValue(
+        text="is_required_by",
+        description="This dataset is required by the target dataset.")
+    requires = PermissibleValue(
+        text="requires",
+        description="This dataset requires the target dataset.")
+    is_part_of = PermissibleValue(
+        text="is_part_of",
+        description="This dataset is part of the target dataset (e.g., subset, component).")
+    has_part = PermissibleValue(
+        text="has_part",
+        description="This dataset has the target dataset as a part.")
+    is_referenced_by = PermissibleValue(
+        text="is_referenced_by",
+        description="This dataset is referenced or cited by the target dataset.")
+    references = PermissibleValue(
+        text="references",
+        description="This dataset references or cites the target dataset.")
+    is_identical_to = PermissibleValue(
+        text="is_identical_to",
+        description="This dataset is identical to the target dataset (e.g., mirror, copy).")
+
+    _defn = EnumDefinition(
+        name="DatasetRelationshipTypeEnum",
+        description="""Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.""",
+    )
+
 class ComplianceStatusEnum(EnumDefinitionImpl):
     """
     Compliance status for regulatory frameworks
@@ -3295,6 +3521,26 @@ class AIActRiskEnum(EnumDefinitionImpl):
     _defn = EnumDefinition(
         name="AIActRiskEnum",
         description="Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/",
+    )
+
+class ConfidentialityLevelEnum(EnumDefinitionImpl):
+    """
+    Confidentiality classification levels for datasets indicating the degree of access restrictions and data
+    sensitivity.
+    """
+    unrestricted = PermissibleValue(
+        text="unrestricted",
+        description="No confidentiality restrictions. Data is publicly available with no access controls required.")
+    restricted = PermissibleValue(
+        text="restricted",
+        description="""Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access.""")
+    confidential = PermissibleValue(
+        text="confidential",
+        description="""Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. May require IRB approval, data use agreements, or other formal authorization.""")
+
+    _defn = EnumDefinition(
+        name="ConfidentialityLevelEnum",
+        description="""Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.""",
     )
 
 class DataUsePermissionEnum(EnumDefinitionImpl):
@@ -3609,6 +3855,21 @@ slots.dataset__ethical_reviews = Slot(uri=DATA_SHEETS_SCHEMA.ethical_reviews, na
 slots.dataset__data_protection_impacts = Slot(uri=DATA_SHEETS_SCHEMA.data_protection_impacts, name="dataset__data_protection_impacts", curie=DATA_SHEETS_SCHEMA.curie('data_protection_impacts'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__data_protection_impacts, domain=None, range=Optional[Union[Union[str, DataProtectionImpactId], list[Union[str, DataProtectionImpactId]]]])
 
+slots.dataset__human_subject_research = Slot(uri=DATA_SHEETS_SCHEMA.human_subject_research, name="dataset__human_subject_research", curie=DATA_SHEETS_SCHEMA.curie('human_subject_research'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__human_subject_research, domain=None, range=Optional[Union[str, HumanSubjectResearchId]])
+
+slots.dataset__informed_consent = Slot(uri=DATA_SHEETS_SCHEMA.informed_consent, name="dataset__informed_consent", curie=DATA_SHEETS_SCHEMA.curie('informed_consent'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__informed_consent, domain=None, range=Optional[Union[Union[str, InformedConsentId], list[Union[str, InformedConsentId]]]])
+
+slots.dataset__participant_privacy = Slot(uri=DATA_SHEETS_SCHEMA.participant_privacy, name="dataset__participant_privacy", curie=DATA_SHEETS_SCHEMA.curie('participant_privacy'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__participant_privacy, domain=None, range=Optional[Union[Union[str, ParticipantPrivacyId], list[Union[str, ParticipantPrivacyId]]]])
+
+slots.dataset__participant_compensation = Slot(uri=DATA_SHEETS_SCHEMA.participant_compensation, name="dataset__participant_compensation", curie=DATA_SHEETS_SCHEMA.curie('participant_compensation'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__participant_compensation, domain=None, range=Optional[Union[str, HumanSubjectCompensationId]])
+
+slots.dataset__vulnerable_populations = Slot(uri=DATA_SHEETS_SCHEMA.vulnerable_populations, name="dataset__vulnerable_populations", curie=DATA_SHEETS_SCHEMA.curie('vulnerable_populations'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__vulnerable_populations, domain=None, range=Optional[Union[str, VulnerablePopulationsId]])
+
 slots.dataset__preprocessing_strategies = Slot(uri=DATA_SHEETS_SCHEMA.preprocessing_strategies, name="dataset__preprocessing_strategies", curie=DATA_SHEETS_SCHEMA.curie('preprocessing_strategies'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__preprocessing_strategies, domain=None, range=Optional[Union[Union[str, PreprocessingStrategyId], list[Union[str, PreprocessingStrategyId]]]])
 
@@ -3635,6 +3896,12 @@ slots.dataset__future_use_impacts = Slot(uri=DATA_SHEETS_SCHEMA.future_use_impac
 
 slots.dataset__discouraged_uses = Slot(uri=DATA_SHEETS_SCHEMA.discouraged_uses, name="dataset__discouraged_uses", curie=DATA_SHEETS_SCHEMA.curie('discouraged_uses'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__discouraged_uses, domain=None, range=Optional[Union[Union[str, DiscouragedUseId], list[Union[str, DiscouragedUseId]]]])
+
+slots.dataset__intended_uses = Slot(uri=DATA_SHEETS_SCHEMA.intended_uses, name="dataset__intended_uses", curie=DATA_SHEETS_SCHEMA.curie('intended_uses'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__intended_uses, domain=None, range=Optional[Union[Union[str, IntendedUseId], list[Union[str, IntendedUseId]]]])
+
+slots.dataset__prohibited_uses = Slot(uri=DATA_SHEETS_SCHEMA.prohibited_uses, name="dataset__prohibited_uses", curie=DATA_SHEETS_SCHEMA.curie('prohibited_uses'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__prohibited_uses, domain=None, range=Optional[Union[Union[str, ProhibitedUseId], list[Union[str, ProhibitedUseId]]]])
 
 slots.dataset__distribution_formats = Slot(uri=DATA_SHEETS_SCHEMA.distribution_formats, name="dataset__distribution_formats", curie=DATA_SHEETS_SCHEMA.curie('distribution_formats'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__distribution_formats, domain=None, range=Optional[Union[Union[str, DistributionFormatId], list[Union[str, DistributionFormatId]]]])
@@ -3677,6 +3944,15 @@ slots.dataset__is_deidentified = Slot(uri=DATA_SHEETS_SCHEMA.is_deidentified, na
 
 slots.dataset__is_tabular = Slot(uri=DATA_SHEETS_SCHEMA.is_tabular, name="dataset__is_tabular", curie=DATA_SHEETS_SCHEMA.curie('is_tabular'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__is_tabular, domain=None, range=Optional[Union[bool, Bool]])
+
+slots.dataset__citation = Slot(uri=SCHEMA.citation, name="dataset__citation", curie=SCHEMA.curie('citation'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__citation, domain=None, range=Optional[str])
+
+slots.dataset__parent_datasets = Slot(uri=SCHEMA.isPartOf, name="dataset__parent_datasets", curie=SCHEMA.curie('isPartOf'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__parent_datasets, domain=None, range=Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]])
+
+slots.dataset__related_datasets = Slot(uri=DATA_SHEETS_SCHEMA.related_datasets, name="dataset__related_datasets", curie=DATA_SHEETS_SCHEMA.curie('related_datasets'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__related_datasets, domain=None, range=Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]])
 
 slots.dataSubset__is_data_split = Slot(uri=DATA_SHEETS_SCHEMA.is_data_split, name="dataSubset__is_data_split", curie=DATA_SHEETS_SCHEMA.curie('is_data_split'),
                    model_uri=DATA_SHEETS_SCHEMA.dataSubset__is_data_split, domain=None, range=Optional[Union[bool, Bool]])
@@ -3862,6 +4138,15 @@ slots.sensitiveElement__sensitive_elements_present = Slot(uri=D4DCOMPOSITION.sen
 slots.sensitiveElement__description = Slot(uri=DCTERMS.description, name="sensitiveElement__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__description, domain=None, range=Optional[Union[str, list[str]]])
 
+slots.datasetRelationship__target_dataset = Slot(uri=D4DCOMPOSITION.target_dataset, name="datasetRelationship__target_dataset", curie=D4DCOMPOSITION.curie('target_dataset'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__target_dataset, domain=None, range=str)
+
+slots.datasetRelationship__relationship_type = Slot(uri=D4DCOMPOSITION.relationship_type, name="datasetRelationship__relationship_type", curie=D4DCOMPOSITION.curie('relationship_type'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__relationship_type, domain=None, range=Union[str, "DatasetRelationshipTypeEnum"])
+
+slots.datasetRelationship__description = Slot(uri=D4DCOMPOSITION.description, name="datasetRelationship__description", curie=D4DCOMPOSITION.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__description, domain=None, range=Optional[str])
+
 slots.instanceAcquisition__description = Slot(uri=DCTERMS.description, name="instanceAcquisition__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__description, domain=None, range=Optional[Union[str, list[str]]])
 
@@ -3927,6 +4212,18 @@ slots.futureUseImpact__description = Slot(uri=DCTERMS.description, name="futureU
 
 slots.discouragedUse__description = Slot(uri=DCTERMS.description, name="discouragedUse__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.discouragedUse__description, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.intendedUse__description = Slot(uri=DCTERMS.description, name="intendedUse__description", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.intendedUse__description, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.intendedUse__use_category = Slot(uri=D4DUSES.use_category, name="intendedUse__use_category", curie=D4DUSES.curie('use_category'),
+                   model_uri=DATA_SHEETS_SCHEMA.intendedUse__use_category, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.prohibitedUse__description = Slot(uri=DCTERMS.description, name="prohibitedUse__description", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__description, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.prohibitedUse__prohibition_reason = Slot(uri=D4DUSES.prohibition_reason, name="prohibitedUse__prohibition_reason", curie=D4DUSES.curie('prohibition_reason'),
+                   model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__prohibition_reason, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.thirdPartySharing__description = Slot(uri=DCTERMS.accessRights, name="thirdPartySharing__description", curie=DCTERMS.curie('accessRights'),
                    model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__description, domain=None, range=Optional[Union[bool, Bool]])
@@ -4068,6 +4365,12 @@ slots.exportControlRegulatoryRestrictions__eu_ai_act_risk_category = Slot(uri=D4
 
 slots.exportControlRegulatoryRestrictions__other_compliance = Slot(uri=D4DDATAGOVERNANCE.other_compliance, name="exportControlRegulatoryRestrictions__other_compliance", curie=D4DDATAGOVERNANCE.curie('other_compliance'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__other_compliance, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.exportControlRegulatoryRestrictions__confidentiality_level = Slot(uri=D4DDATAGOVERNANCE.confidentiality_level, name="exportControlRegulatoryRestrictions__confidentiality_level", curie=D4DDATAGOVERNANCE.curie('confidentiality_level'),
+                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__confidentiality_level, domain=None, range=Optional[Union[str, "ConfidentialityLevelEnum"]])
+
+slots.exportControlRegulatoryRestrictions__governance_committee_contact = Slot(uri=SCHEMA.contactPoint, name="exportControlRegulatoryRestrictions__governance_committee_contact", curie=SCHEMA.curie('contactPoint'),
+                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__governance_committee_contact, domain=None, range=Optional[Union[str, PersonId]])
 
 slots.variableMetadata__variable_name = Slot(uri=SCHEMA.name, name="variableMetadata__variable_name", curie=SCHEMA.curie('name'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__variable_name, domain=None, range=str)

@@ -299,3 +299,81 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+
+
+  DatasetRelationship:
+    description: >
+      Typed relationship to another dataset, enabling precise specification
+      of how datasets relate to each other (e.g., supplements, derives from,
+      is version of). Supports RO-Crate-style dataset interlinking.
+    is_a: DatasetProperty
+    attributes:
+      target_dataset:
+        description: >-
+          The dataset that this relationship points to. Can be specified by
+          identifier, URL, or Dataset object.
+        range: string
+        required: true
+      relationship_type:
+        description: >-
+          The type of relationship (e.g., derives_from, supplements, is_version_of).
+          Uses DatasetRelationshipTypeEnum for standardized relationship types.
+        range: DatasetRelationshipTypeEnum
+        required: true
+      description:
+        description: >-
+          Free-text description providing additional context about the relationship.
+        range: string
+
+
+enums:
+
+  DatasetRelationshipTypeEnum:
+    description: >-
+      Standardized types of relationships between datasets, based on
+      DataCite and Dublin Core relationship vocabularies.
+    permissible_values:
+      derives_from:
+        description: >-
+          This dataset is derived from the target dataset through processing,
+          analysis, or transformation.
+      supplements:
+        description: >-
+          This dataset supplements or adds to the target dataset.
+      is_supplemented_by:
+        description: >-
+          This dataset is supplemented by the target dataset.
+      is_version_of:
+        description: >-
+          This dataset is a version of the target dataset (e.g., updated,
+          corrected, or revised version).
+      is_new_version_of:
+        description: >-
+          This dataset is a new version that replaces or updates the target dataset.
+      replaces:
+        description: >-
+          This dataset replaces or supersedes the target dataset.
+      is_replaced_by:
+        description: >-
+          This dataset is replaced or superseded by the target dataset.
+      is_required_by:
+        description: >-
+          This dataset is required by the target dataset.
+      requires:
+        description: >-
+          This dataset requires the target dataset.
+      is_part_of:
+        description: >-
+          This dataset is part of the target dataset (e.g., subset, component).
+      has_part:
+        description: >-
+          This dataset has the target dataset as a part.
+      is_referenced_by:
+        description: >-
+          This dataset is referenced or cited by the target dataset.
+      references:
+        description: >-
+          This dataset references or cites the target dataset.
+      is_identical_to:
+        description: >-
+          This dataset is identical to the target dataset (e.g., mirror, copy).
