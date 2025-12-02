@@ -573,25 +573,62 @@ enums:
       Windows-1258:
 
   CreatorOrMaintainerEnum:
+    description: >-
+      Types of agents (persons or organizations) involved in dataset creation or
+      maintenance. Mapped to PROV-O (W3C Provenance Ontology) agent concepts and
+      schema.org organization types. See https://www.w3.org/TR/prov-o/
     permissible_values:
       data_subject:
-        description: A person whose information is recorded in the dataset.
+        description: >-
+          A person whose information is recorded in the dataset.
+        broad_mappings:
+          - prov:Agent
       third_party:
-        description: A third party not involved in the direct creation or maintenance.
+        description: >-
+          A third party not involved in the direct creation or maintenance.
+        broad_mappings:
+          - prov:Agent
       researcher:
-        description: A researcher involved in dataset creation or maintenance.
+        description: >-
+          A researcher involved in dataset creation or maintenance.
+        broad_mappings:
+          - prov:Person
+          - schema:Person
       industry:
-        description: Industry professional involved in dataset creation or maintenance.
+        description: >-
+          Industry professional involved in dataset creation or maintenance.
+        broad_mappings:
+          - prov:Person
+          - schema:Person
       academic_institution:
-        description: Academic institution responsible for dataset.
+        description: >-
+          Academic institution responsible for dataset.
+        broad_mappings:
+          - prov:Organization
+          - schema:EducationalOrganization
       government_agency:
-        description: Government agency responsible for dataset.
+        description: >-
+          Government agency responsible for dataset.
+        broad_mappings:
+          - prov:Organization
+          - schema:GovernmentOrganization
       commercial_entity:
-        description: Commercial entity responsible for dataset.
+        description: >-
+          Commercial entity responsible for dataset.
+        broad_mappings:
+          - prov:Organization
+          - schema:Corporation
       non_profit_organization:
-        description: Non-profit organization responsible for dataset.
+        description: >-
+          Non-profit organization responsible for dataset.
+        broad_mappings:
+          - prov:Organization
+          - schema:Organization
       crowdsourced:
-        description: Dataset created through crowdsourcing efforts.
+        description: >-
+          Dataset created through crowdsourcing efforts with multiple contributors.
+        broad_mappings:
+          - prov:Agent
       automated_system:
         description: Automated system or process responsible for dataset.
       other:

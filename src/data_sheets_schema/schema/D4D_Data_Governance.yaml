@@ -153,41 +153,77 @@ enums:
 
   ComplianceStatusEnum:
     description: >-
-      Compliance status for regulatory frameworks
+      Compliance status for regulatory frameworks. Indicates the extent to which
+      a dataset complies with specific regulations (e.g., GDPR, HIPAA, EU AI Act).
+      These are workflow status values that may evolve as regulations are assessed
+      or as the dataset is modified.
     permissible_values:
       compliant:
-        description: Dataset is compliant with the regulation
+        description: >-
+          Dataset is compliant with the regulation. All requirements are met and
+          documented.
+        broad_mappings:
+          - dcterms:conformsTo
       partially_compliant:
-        description: Dataset is partially compliant, with known limitations
+        description: >-
+          Dataset is partially compliant, with known limitations or gaps in
+          compliance. Some but not all requirements are met.
+        broad_mappings:
+          - dcterms:conformsTo
       not_compliant:
-        description: Dataset does not comply with the regulation
+        description: >-
+          Dataset does not comply with the regulation. Significant requirements
+          are not met.
       not_applicable:
-        description: Regulation does not apply to this dataset
+        description: >-
+          Regulation does not apply to this dataset based on scope, jurisdiction,
+          or subject matter.
       under_review:
-        description: Compliance status is currently under review
+        description: >-
+          Compliance status is currently under review or assessment. Final
+          determination has not been made.
 
   AIActRiskEnum:
     description: >-
-      Risk categories under the EU AI Act.
-      See https://artificialintelligenceact.eu/
+      Risk categories under the EU Artificial Intelligence Act (Regulation (EU) 2024/1689).
+      The AI Act establishes a risk-based regulatory framework with four categories.
+      See https://artificialintelligenceact.eu/ and https://eur-lex.europa.eu/eli/reg/2024/1689/oj
     permissible_values:
       minimal_risk:
         description: >-
           AI systems with minimal risk (e.g., AI-enabled video games, spam filters).
-          No specific obligations.
+          No specific obligations beyond general transparency for certain AI systems
+          (Article 50). Represents the majority of AI systems on the EU market.
+        related_mappings:
+          - EUAIAct:Article50
       limited_risk:
         description: >-
           AI systems with limited risk subject to transparency obligations
-          (e.g., chatbots, emotion recognition systems).
+          (e.g., chatbots, emotion recognition systems, biometric categorization,
+          deepfakes). Must comply with specific transparency requirements to enable
+          users to make informed decisions (Article 50).
+        related_mappings:
+          - EUAIAct:Article50
+          - EUAIAct:TitleIV
       high_risk:
         description: >-
-          AI systems with high risk to health, safety, or fundamental rights
-          (e.g., AI in critical infrastructure, education, employment, law enforcement).
-          Subject to strict requirements.
+          AI systems with high risk to health, safety, or fundamental rights as
+          defined in Annex III (e.g., AI in critical infrastructure, education,
+          employment, law enforcement, migration, justice). Subject to strict
+          requirements including conformity assessment, risk management, data
+          governance, transparency, human oversight, and accuracy (Articles 6-51).
+        related_mappings:
+          - EUAIAct:Article6
+          - EUAIAct:AnnexIII
+          - EUAIAct:TitleIII
       unacceptable_risk:
         description: >-
-          AI systems with unacceptable risk that are prohibited
-          (e.g., social scoring, real-time biometric identification in public spaces).
+          AI systems with unacceptable risk that are prohibited under Article 5
+          (e.g., social scoring by public authorities, exploitation of vulnerabilities,
+          real-time remote biometric identification in public spaces for law enforcement
+          with limited exceptions). These AI practices are banned in the EU.
+        related_mappings:
+          - EUAIAct:Article5
 
   ConfidentialityLevelEnum:
     description: >-

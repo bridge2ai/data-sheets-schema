@@ -1,7 +1,7 @@
 {
     "$defs": {
         "AIActRiskEnum": {
-            "description": "Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/",
+            "description": "Risk categories under the EU Artificial Intelligence Act (Regulation (EU) 2024/1689). The AI Act establishes a risk-based regulatory framework with four categories. See https://artificialintelligenceact.eu/ and https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
             "enum": [
                 "minimal_risk",
                 "limited_risk",
@@ -315,7 +315,7 @@
             "type": "object"
         },
         "ComplianceStatusEnum": {
-            "description": "Compliance status for regulatory frameworks",
+            "description": "Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., GDPR, HIPAA, EU AI Act). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.",
             "enum": [
                 "compliant",
                 "partially_compliant",
@@ -559,7 +559,7 @@
             "type": "object"
         },
         "CreatorOrMaintainerEnum": {
-            "description": "",
+            "description": "Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to PROV-O (W3C Provenance Ontology) agent concepts and schema.org organization types. See https://www.w3.org/TR/prov-o/",
             "enum": [
                 "data_subject",
                 "third_party",

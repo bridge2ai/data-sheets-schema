@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-01T21:23:20
+# Generation date: 2025-12-01T21:28:31
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3374,7 +3374,10 @@ class VersionTypeEnum(EnumDefinitionImpl):
             PermissibleValue(text="Windows-1258"))
 
 class CreatorOrMaintainerEnum(EnumDefinitionImpl):
-
+    """
+    Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to PROV-O (W3C
+    Provenance Ontology) agent concepts and schema.org organization types. See https://www.w3.org/TR/prov-o/
+    """
     data_subject = PermissibleValue(
         text="data_subject",
         description="A person whose information is recorded in the dataset.")
@@ -3401,7 +3404,7 @@ class CreatorOrMaintainerEnum(EnumDefinitionImpl):
         description="Non-profit organization responsible for dataset.")
     crowdsourced = PermissibleValue(
         text="crowdsourced",
-        description="Dataset created through crowdsourcing efforts.")
+        description="Dataset created through crowdsourcing efforts with multiple contributors.")
     automated_system = PermissibleValue(
         text="automated_system",
         description="Automated system or process responsible for dataset.")
@@ -3411,6 +3414,7 @@ class CreatorOrMaintainerEnum(EnumDefinitionImpl):
 
     _defn = EnumDefinition(
         name="CreatorOrMaintainerEnum",
+        description="""Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to PROV-O (W3C Provenance Ontology) agent concepts and schema.org organization types. See https://www.w3.org/TR/prov-o/""",
     )
 
 class Boolean(EnumDefinitionImpl):
@@ -3485,49 +3489,53 @@ class DatasetRelationshipTypeEnum(EnumDefinitionImpl):
 
 class ComplianceStatusEnum(EnumDefinitionImpl):
     """
-    Compliance status for regulatory frameworks
+    Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific
+    regulations (e.g., GDPR, HIPAA, EU AI Act). These are workflow status values that may evolve as regulations are
+    assessed or as the dataset is modified.
     """
     compliant = PermissibleValue(
         text="compliant",
-        description="Dataset is compliant with the regulation")
+        description="Dataset is compliant with the regulation. All requirements are met and documented.")
     partially_compliant = PermissibleValue(
         text="partially_compliant",
-        description="Dataset is partially compliant, with known limitations")
+        description="""Dataset is partially compliant, with known limitations or gaps in compliance. Some but not all requirements are met.""")
     not_compliant = PermissibleValue(
         text="not_compliant",
-        description="Dataset does not comply with the regulation")
+        description="Dataset does not comply with the regulation. Significant requirements are not met.")
     not_applicable = PermissibleValue(
         text="not_applicable",
-        description="Regulation does not apply to this dataset")
+        description="Regulation does not apply to this dataset based on scope, jurisdiction, or subject matter.")
     under_review = PermissibleValue(
         text="under_review",
-        description="Compliance status is currently under review")
+        description="""Compliance status is currently under review or assessment. Final determination has not been made.""")
 
     _defn = EnumDefinition(
         name="ComplianceStatusEnum",
-        description="Compliance status for regulatory frameworks",
+        description="""Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., GDPR, HIPAA, EU AI Act). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.""",
     )
 
 class AIActRiskEnum(EnumDefinitionImpl):
     """
-    Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/
+    Risk categories under the EU Artificial Intelligence Act (Regulation (EU) 2024/1689). The AI Act establishes a
+    risk-based regulatory framework with four categories. See https://artificialintelligenceact.eu/ and
+    https://eur-lex.europa.eu/eli/reg/2024/1689/oj
     """
     minimal_risk = PermissibleValue(
         text="minimal_risk",
-        description="""AI systems with minimal risk (e.g., AI-enabled video games, spam filters). No specific obligations.""")
+        description="""AI systems with minimal risk (e.g., AI-enabled video games, spam filters). No specific obligations beyond general transparency for certain AI systems (Article 50). Represents the majority of AI systems on the EU market.""")
     limited_risk = PermissibleValue(
         text="limited_risk",
-        description="""AI systems with limited risk subject to transparency obligations (e.g., chatbots, emotion recognition systems).""")
+        description="""AI systems with limited risk subject to transparency obligations (e.g., chatbots, emotion recognition systems, biometric categorization, deepfakes). Must comply with specific transparency requirements to enable users to make informed decisions (Article 50).""")
     high_risk = PermissibleValue(
         text="high_risk",
-        description="""AI systems with high risk to health, safety, or fundamental rights (e.g., AI in critical infrastructure, education, employment, law enforcement). Subject to strict requirements.""")
+        description="""AI systems with high risk to health, safety, or fundamental rights as defined in Annex III (e.g., AI in critical infrastructure, education, employment, law enforcement, migration, justice). Subject to strict requirements including conformity assessment, risk management, data governance, transparency, human oversight, and accuracy (Articles 6-51).""")
     unacceptable_risk = PermissibleValue(
         text="unacceptable_risk",
-        description="""AI systems with unacceptable risk that are prohibited (e.g., social scoring, real-time biometric identification in public spaces).""")
+        description="""AI systems with unacceptable risk that are prohibited under Article 5 (e.g., social scoring by public authorities, exploitation of vulnerabilities, real-time remote biometric identification in public spaces for law enforcement with limited exceptions). These AI practices are banned in the EU.""")
 
     _defn = EnumDefinition(
         name="AIActRiskEnum",
-        description="Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/",
+        description="""Risk categories under the EU Artificial Intelligence Act (Regulation (EU) 2024/1689). The AI Act establishes a risk-based regulatory framework with four categories. See https://artificialintelligenceact.eu/ and https://eur-lex.europa.eu/eli/reg/2024/1689/oj""",
     )
 
 class ConfidentialityLevelEnum(EnumDefinitionImpl):

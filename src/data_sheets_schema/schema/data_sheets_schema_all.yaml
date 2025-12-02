@@ -727,35 +727,62 @@ enums:
         text: Windows-1258
   CreatorOrMaintainerEnum:
     name: CreatorOrMaintainerEnum
+    description: Types of agents (persons or organizations) involved in dataset creation
+      or maintenance. Mapped to PROV-O (W3C Provenance Ontology) agent concepts and
+      schema.org organization types. See https://www.w3.org/TR/prov-o/
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     permissible_values:
       data_subject:
         text: data_subject
         description: A person whose information is recorded in the dataset.
+        broad_mappings:
+        - prov:Agent
       third_party:
         text: third_party
         description: A third party not involved in the direct creation or maintenance.
+        broad_mappings:
+        - prov:Agent
       researcher:
         text: researcher
         description: A researcher involved in dataset creation or maintenance.
+        broad_mappings:
+        - prov:Person
+        - schema:Person
       industry:
         text: industry
         description: Industry professional involved in dataset creation or maintenance.
+        broad_mappings:
+        - prov:Person
+        - schema:Person
       academic_institution:
         text: academic_institution
         description: Academic institution responsible for dataset.
+        broad_mappings:
+        - prov:Organization
+        - schema:EducationalOrganization
       government_agency:
         text: government_agency
         description: Government agency responsible for dataset.
+        broad_mappings:
+        - prov:Organization
+        - schema:GovernmentOrganization
       commercial_entity:
         text: commercial_entity
         description: Commercial entity responsible for dataset.
+        broad_mappings:
+        - prov:Organization
+        - schema:Corporation
       non_profit_organization:
         text: non_profit_organization
         description: Non-profit organization responsible for dataset.
+        broad_mappings:
+        - prov:Organization
+        - schema:Organization
       crowdsourced:
         text: crowdsourced
-        description: Dataset created through crowdsourcing efforts.
+        description: Dataset created through crowdsourcing efforts with multiple contributors.
+        broad_mappings:
+        - prov:Agent
       automated_system:
         text: automated_system
         description: Automated system or process responsible for dataset.
@@ -872,46 +899,79 @@ enums:
         - dcterms:relation
   ComplianceStatusEnum:
     name: ComplianceStatusEnum
-    description: Compliance status for regulatory frameworks
+    description: Compliance status for regulatory frameworks. Indicates the extent
+      to which a dataset complies with specific regulations (e.g., GDPR, HIPAA, EU
+      AI Act). These are workflow status values that may evolve as regulations are
+      assessed or as the dataset is modified.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     permissible_values:
       compliant:
         text: compliant
-        description: Dataset is compliant with the regulation
+        description: Dataset is compliant with the regulation. All requirements are
+          met and documented.
+        broad_mappings:
+        - dcterms:conformsTo
       partially_compliant:
         text: partially_compliant
-        description: Dataset is partially compliant, with known limitations
+        description: Dataset is partially compliant, with known limitations or gaps
+          in compliance. Some but not all requirements are met.
+        broad_mappings:
+        - dcterms:conformsTo
       not_compliant:
         text: not_compliant
-        description: Dataset does not comply with the regulation
+        description: Dataset does not comply with the regulation. Significant requirements
+          are not met.
       not_applicable:
         text: not_applicable
-        description: Regulation does not apply to this dataset
+        description: Regulation does not apply to this dataset based on scope, jurisdiction,
+          or subject matter.
       under_review:
         text: under_review
-        description: Compliance status is currently under review
+        description: Compliance status is currently under review or assessment. Final
+          determination has not been made.
   AIActRiskEnum:
     name: AIActRiskEnum
-    description: Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/
+    description: Risk categories under the EU Artificial Intelligence Act (Regulation
+      (EU) 2024/1689). The AI Act establishes a risk-based regulatory framework with
+      four categories. See https://artificialintelligenceact.eu/ and https://eur-lex.europa.eu/eli/reg/2024/1689/oj
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     permissible_values:
       minimal_risk:
         text: minimal_risk
         description: AI systems with minimal risk (e.g., AI-enabled video games, spam
-          filters). No specific obligations.
+          filters). No specific obligations beyond general transparency for certain
+          AI systems (Article 50). Represents the majority of AI systems on the EU
+          market.
+        related_mappings:
+        - EUAIAct:Article50
       limited_risk:
         text: limited_risk
         description: AI systems with limited risk subject to transparency obligations
-          (e.g., chatbots, emotion recognition systems).
+          (e.g., chatbots, emotion recognition systems, biometric categorization,
+          deepfakes). Must comply with specific transparency requirements to enable
+          users to make informed decisions (Article 50).
+        related_mappings:
+        - EUAIAct:Article50
+        - EUAIAct:TitleIV
       high_risk:
         text: high_risk
         description: AI systems with high risk to health, safety, or fundamental rights
-          (e.g., AI in critical infrastructure, education, employment, law enforcement).
-          Subject to strict requirements.
+          as defined in Annex III (e.g., AI in critical infrastructure, education,
+          employment, law enforcement, migration, justice). Subject to strict requirements
+          including conformity assessment, risk management, data governance, transparency,
+          human oversight, and accuracy (Articles 6-51).
+        related_mappings:
+        - EUAIAct:Article6
+        - EUAIAct:AnnexIII
+        - EUAIAct:TitleIII
       unacceptable_risk:
         text: unacceptable_risk
-        description: AI systems with unacceptable risk that are prohibited (e.g.,
-          social scoring, real-time biometric identification in public spaces).
+        description: AI systems with unacceptable risk that are prohibited under Article
+          5 (e.g., social scoring by public authorities, exploitation of vulnerabilities,
+          real-time remote biometric identification in public spaces for law enforcement
+          with limited exceptions). These AI practices are banned in the EU.
+        related_mappings:
+        - EUAIAct:Article5
   ConfidentialityLevelEnum:
     name: ConfidentialityLevelEnum
     description: 'Confidentiality classification levels for datasets indicating the
