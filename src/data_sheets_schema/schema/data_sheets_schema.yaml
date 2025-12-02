@@ -178,6 +178,33 @@ classes:
       data_protection_impacts:
         range: DataProtectionImpact
         multivalued: true
+      # Human subjects module classes
+      human_subject_research:
+        range: HumanSubjectResearch
+        description: >-
+          Information about whether dataset involves human subjects research,
+          including IRB approval, ethics review, and regulatory compliance.
+      informed_consent:
+        range: InformedConsent
+        multivalued: true
+        description: >-
+          Details about informed consent procedures, including consent type,
+          documentation, and withdrawal mechanisms.
+      participant_privacy:
+        range: ParticipantPrivacy
+        multivalued: true
+        description: >-
+          Privacy protections and anonymization procedures for human research
+          participants, including reidentification risk assessment.
+      participant_compensation:
+        range: HumanSubjectCompensation
+        description: >-
+          Compensation or incentives provided to human research participants.
+      vulnerable_populations:
+        range: VulnerablePopulations
+        description: >-
+          Information about protections for vulnerable populations (e.g., minors,
+          pregnant women, prisoners) including special safeguards and assent procedures.
       # Preprocessing module classes
       preprocessing_strategies:
         range: PreprocessingStrategy
@@ -207,6 +234,18 @@ classes:
       discouraged_uses:
         range: DiscouragedUse
         multivalued: true
+      intended_uses:
+        range: IntendedUse
+        multivalued: true
+        description: >-
+          Explicit intended and recommended uses for this dataset.
+          Complements future_use_impacts by focusing on positive applications.
+      prohibited_uses:
+        range: ProhibitedUse
+        multivalued: true
+        description: >-
+          Explicitly prohibited or forbidden uses for this dataset.
+          Stronger than discouraged_uses - these are not permitted.
       # Distribution module classes
       distribution_formats:
         range: DistributionFormat
@@ -250,6 +289,30 @@ classes:
         range: Deidentification
       is_tabular:
         range: boolean
+      # Dataset citation and relationships
+      citation:
+        description: >-
+          Recommended citation for this dataset in DataCite or BibTeX format.
+          Provides a standard way to cite the dataset in publications.
+        range: string
+        slot_uri: schema:citation
+        exact_mappings:
+          - schema:citation
+      parent_datasets:
+        description: >-
+          Parent datasets that this dataset is part of or derived from.
+          Enables hierarchical dataset composition (hasPart/isPartOf relationships).
+        range: Dataset
+        multivalued: true
+        slot_uri: schema:isPartOf
+        exact_mappings:
+          - schema:isPartOf
+      related_datasets:
+        description: >-
+          Related datasets with typed relationships (e.g., supplements, derives from,
+          is version of). Use DatasetRelationship class to specify relationship types.
+        range: DatasetRelationship
+        multivalued: true
 
   DataSubset:
     description: >-

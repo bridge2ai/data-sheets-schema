@@ -50,6 +50,8 @@ help: status
 	@echo "make install         -- install dependencies"
 	@echo "make test            -- runs tests"
 	@echo "make test-modules    -- validate all D4D module schemas"
+	@echo "make check-sync      -- check if schema files are in sync"
+	@echo "make regen-all       -- force regenerate all schema artifacts"
 	@echo "make lint            -- perform linting"
 	@echo "make lint-modules    -- lint all D4D module schemas"
 	@echo "make site            -- makes site locally"
@@ -215,6 +217,18 @@ lint-modules:
 		$(RUN) linkml-lint $$module || exit 1; \
 	done
 	@echo "All D4D module schemas linted successfully!"
+
+# Check if schema files are in sync (source, merged, Python model)
+check-sync:
+	@./utils/check-schema-sync.sh
+
+# Force regenerate all schema artifacts (merged YAML + Python model + all exports)
+regen-all:
+	@echo "Force regenerating all schema artifacts..."
+	@rm -f $(SOURCE_SCHEMA_ALL)
+	@$(MAKE) full-schema
+	@$(MAKE) gen-project
+	@echo "All schema artifacts regenerated successfully!"
 
 check-config:
 	@(grep my-datamodel about.yaml > /dev/null && printf "\n**Project not configured**:\n\n  - Remember to edit 'about.yaml'\n\n" || exit 0)

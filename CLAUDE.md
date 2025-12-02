@@ -102,6 +102,61 @@ make deploy         # Deploy site to GitHub Pages
 - `make lint-modules && make test-modules` - Fast validation of D4D modules only
 - `make test-schema` - Full schema validation (includes all modules merged)
 
+## Keeping Schema Files in Sync
+
+The project maintains **three representations** of the schema that must stay synchronized:
+
+1. **`data_sheets_schema.yaml`** (12KB) - Source schema with module imports
+2. **`data_sheets_schema_all.yaml`** (671KB) - Fully merged schema (all imports resolved)
+3. **`data_sheets_schema.py`** (224KB) - Auto-generated Python datamodel
+
+### Automated Sync Checking
+
+```bash
+# Check if all three files are in sync
+make check-sync
+
+# Force regenerate everything if out of sync
+make regen-all
+```
+
+The `check-sync` target:
+- Compares modification times of source schema, module files, merged schema, and Python model
+- Reports which files are out of date
+- Provides commands to fix sync issues
+- Exit code 0 = in sync, 1 = out of sync
+
+### When Files Get Out of Sync
+
+Files become out of sync when:
+- You edit source schema or module files but don't regenerate artifacts
+- You pull changes that only update source files
+- Make's timestamp-based dependencies fail to trigger regeneration
+
+**Best practice after editing schemas:**
+```bash
+# 1. Edit source schema or modules
+vim src/data_sheets_schema/schema/D4D_*.yaml
+
+# 2. Regenerate everything
+make regen-all
+
+# 3. Verify sync
+make check-sync
+
+# 4. Test
+make test
+```
+
+### What Each Command Does
+
+| Command | What It Regenerates |
+|---------|---------------------|
+| `make full-schema` | Only `data_sheets_schema_all.yaml` (merged schema) |
+| `make gen-project` | Python model + JSON Schema + OWL + JSON-LD + etc. |
+| `make regen-all` | **Everything** (merged schema + all generated artifacts) |
+| `make check-sync` | Nothing - just checks if files are in sync |
+
 ## Working with Modules
 
 The schema is modularized by D4D sections. Key architectural patterns:

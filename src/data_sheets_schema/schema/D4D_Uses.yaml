@@ -99,3 +99,49 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+
+
+  IntendedUse:
+    description: >
+      Explicit statement of intended uses for this dataset. Complements
+      FutureUseImpact by focusing on positive, recommended applications
+      rather than risks. Aligns with RO-Crate "Intended Use" field.
+    is_a: DatasetProperty
+    attributes:
+      description:
+        description: >-
+          Description of recommended and intended uses for this dataset.
+          May include specific tasks, research questions, or application domains.
+        range: string
+        multivalued: true
+        slot_uri: dcterms:description
+      use_category:
+        description: >-
+          Category of intended use (e.g., research, clinical, educational,
+          commercial, policy).
+        range: string
+        multivalued: true
+
+
+  ProhibitedUse:
+    description: >
+      Explicit statement of prohibited or forbidden uses for this dataset.
+      Stronger than DiscouragedUse - these are uses that are explicitly
+      not permitted by license, ethics, or policy. Aligns with RO-Crate
+      "Prohibited Uses" field.
+    is_a: DatasetProperty
+    attributes:
+      description:
+        description: >-
+          Description of explicitly prohibited uses for this dataset.
+          May include specific tasks, applications, or domains that are
+          forbidden by license terms, data use agreements, or ethical constraints.
+        range: string
+        multivalued: true
+        slot_uri: dcterms:description
+      prohibition_reason:
+        description: >-
+          Reason why this use is prohibited (e.g., license restriction,
+          ethical concern, privacy risk, legal constraint).
+        range: string
+        multivalued: true
