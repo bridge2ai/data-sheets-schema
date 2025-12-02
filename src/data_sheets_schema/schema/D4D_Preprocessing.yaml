@@ -26,7 +26,6 @@ prefixes:
   d4dpreprocessing: "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#"
   schema: "http://schema.org/"
   dcterms: "http://purl.org/dc/terms/"
-  prov: "http://www.w3.org/ns/prov#"
 
 
 default_prefix: "d4dpreprocessing"
@@ -112,4 +111,3 @@ classes:
         description: "Details about the availability or location of raw data."
         range: string
         multivalued: true
-        slot_uri: prov:wasDerivedFrom

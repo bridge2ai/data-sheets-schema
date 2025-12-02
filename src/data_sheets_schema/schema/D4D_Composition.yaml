@@ -341,8 +341,6 @@ enums:
           analysis, or transformation. Equivalent to DataCite IsDerivedFrom.
         broad_mappings:
           - dcterms:source
-        related_mappings:
-          - prov:wasDerivedFrom
       supplements:
         description: >-
           This dataset supplements or adds to the target dataset.

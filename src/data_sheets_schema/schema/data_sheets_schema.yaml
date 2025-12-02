@@ -9,7 +9,7 @@ see_also:
   - https://bridge2ai.github.io/data-sheets-schema
 
 prefixes:
-  bibo: http://purl.org/ontology/bibo/
+  AIO: https://w3id.org/aio/
   biolink: https://w3id.org/biolink/vocab/
   csvw: http://www.w3.org/ns/csvw#
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
@@ -17,19 +17,14 @@ prefixes:
   dcat: http://www.w3.org/ns/dcat#
   dcterms: http://purl.org/dc/terms/
   example: https://example.org/
-  foaf: http://xmlns.com/foaf/0.1/
-  formats: http://www.w3.org/ns/formats/
   frictionless: https://specs.frictionlessdata.io/
   linkml: https://w3id.org/linkml/
   mediatypes: https://www.iana.org/assignments/media-types/
-  oslc: http://open-services.net/ns/core#
-  pav: http://purl.org/pav/
   prov: http://www.w3.org/ns/prov#
   qudt: http://qudt.org/schema/qudt/
   schema: http://schema.org/
   sh: https://w3id.org/shacl/
   skos: http://www.w3.org/2004/02/skos/core#
-  void: http://rdfs.org/ns/void#
   B2AI_TOPIC: https://w3id.org/bridge2ai/b2ai-standards-registry/
   B2AI_STANDARD: https://w3id.org/bridge2ai/b2ai-standards-registry/
   B2AI_SUBSTRATE: https://w3id.org/bridge2ai/b2ai-standards-registry/
@@ -94,8 +89,6 @@ classes:
     class_uri: dcat:Distribution
     exact_mappings:
       - schema:DataDownload
-    see_also:
-      - https://specs.frictionlessdata.io/data-resource
     description: >-
       A single component of related observations and/or information that can be
       read, manipulated, transformed, and otherwise interpreted.
@@ -349,13 +342,6 @@ classes:
 slots:
 
   # Additional main schema specific slots
-  profile:
-    description: >-
-      The frictionless data profile to which the data conforms.
-    range: uriorcurie
-    exact_mappings:
-      - frictionless:profiles
-
   same_as:
     description: >-
       URL of a reference web resource that is the same as this dataset.

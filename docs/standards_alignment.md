@@ -1,12 +1,12 @@
 # Standards Alignment Report
 
 **Data Sheets for Datasets (D4D) Schema**
-**Date**: 2025-12-01
-**Version**: Based on more-mappings branch
+**Date**: 2025-12-02
+**Version**: After ontology grounding optimization
 
 ## Executive Summary
 
-The Data Sheets for Datasets (D4D) schema aligns with **40+ international standards**, ontologies, and frameworks spanning metadata, semantic web, data governance, information security, and regulatory compliance. This comprehensive alignment ensures interoperability, semantic clarity, and compliance with community-adopted standards.
+The Data Sheets for Datasets (D4D) schema aligns with **25+ international standards**, ontologies, and frameworks spanning metadata, semantic web, data governance, and regulatory compliance. This focused alignment ensures interoperability, semantic clarity, and compliance with community-adopted standards while removing unused or redundant mappings based on expert review feedback.
 
 ## Standards by Category
 
@@ -29,15 +29,16 @@ The Data Sheets for Datasets (D4D) schema aligns with **40+ international standa
 - **Mapping Status**: All values have exact semantic mappings
 - **Reference**: https://github.com/EBISPOT/DUO
 
-#### 1.3 Provenance Ontology (PROV-O)
+#### 1.3 Provenance Ontology (PROV-O) - MINIMAL USE
 - **URL**: http://www.w3.org/ns/prov#
 - **Purpose**: Provenance and attribution metadata
 - **Authority**: W3C Recommendation
-- **D4D Usage**:
-  - Agent roles (Person, Organization, Agent)
-  - Derivation relationships (wasDerivedFrom)
-  - Attribution metadata (createdBy, modifiedBy)
-- **Mapping Status**: Exact and broad mappings
+- **D4D Usage**: **REDUCED TO ESSENTIAL USE ONLY**
+  - Derivation relationships (wasDerivedFrom slot in D4D_Base_import.yaml)
+  - **Removed**: Agent roles (replaced with schema.org)
+  - **Removed**: Redundant derivation mappings (replaced with Dublin Core dcterms:source)
+- **Mapping Status**: 1 essential mapping retained (was_derived_from slot)
+- **Rationale**: Reduced from 21 usages to 1 to avoid redundancy with Dublin Core
 - **Reference**: https://www.w3.org/TR/prov-o/
 
 #### 1.4 Simple Knowledge Organization System (SKOS)
@@ -47,14 +48,7 @@ The Data Sheets for Datasets (D4D) schema aligns with **40+ international standa
 - **D4D Usage**: Example values, concept mappings
 - **Reference**: https://www.w3.org/2004/02/skos/
 
-#### 1.5 Friend of a Friend (FOAF)
-- **URL**: http://xmlns.com/foaf/0.1/
-- **Purpose**: Social web vocabulary for people and organizations
-- **Authority**: Community standard
-- **D4D Usage**: Person and organization metadata
-- **Reference**: http://xmlns.com/foaf/spec/
-
-#### 1.6 Biolink Model
+#### 1.5 Biolink Model
 - **URL**: https://w3id.org/biolink/vocab/
 - **Purpose**: Biomedical knowledge graph schema
 - **Authority**: Biomedical Data Translator project
@@ -117,42 +111,6 @@ The Data Sheets for Datasets (D4D) schema aligns with **40+ international standa
   - Citation formatting
 - **Mapping Status**: Referenced in descriptions, aligned with Dublin Core
 - **Reference**: https://datacite-metadata-schema.readthedocs.io/
-
-#### 2.5 Provenance, Authoring and Versioning (PAV)
-- **URL**: http://purl.org/pav/
-- **Purpose**: Versioning and provenance metadata
-- **Authority**: Community ontology
-- **D4D Usage**:
-  - Versioning: version, previousVersion
-  - Temporal: createdOn, lastUpdateOn, lastUpdatedOn
-  - Attribution: createdBy
-- **Mapping Status**: Exact mappings
-- **Reference**: https://pav-ontology.github.io/pav/
-
-#### 2.6 Bibliographic Ontology (BIBO)
-- **URL**: http://purl.org/ontology/bibo/
-- **Purpose**: Bibliographic metadata
-- **Authority**: Community ontology
-- **D4D Usage**:
-  - Publication status
-  - DOI identifiers
-- **Mapping Status**: Exact mappings
-- **Reference**: https://www.bibliontology.com/
-
-#### 2.7 Open Services for Lifecycle Collaboration (OSLC)
-- **URL**: http://open-services.net/ns/core#
-- **Purpose**: Lifecycle metadata for tools and services
-- **Authority**: OASIS standard
-- **D4D Usage**: modifiedBy (change tracking)
-- **Mapping Status**: Exact mappings
-- **Reference**: https://open-services.net/
-
-#### 2.8 VoID (Vocabulary of Interlinked Datasets)
-- **URL**: http://rdfs.org/ns/void#
-- **Purpose**: Metadata for RDF datasets
-- **Authority**: Community standard
-- **D4D Usage**: Dataset linkage and discovery
-- **Reference**: http://vocab.deri.ie/void
 
 ### 3. Web and File Format Standards
 
@@ -494,6 +452,46 @@ The D4D schema team monitors the following for updates:
 3. **D4D GitHub Repository**: https://github.com/bridge2ai/data-sheets-schema
 
 ## Changelog
+
+**2025-12-02 - Ontology Grounding Optimization**:
+- **Reduced from 40+ to 25+ standards** based on expert review (Harry Caufield feedback)
+- **Phase 1**: Removed unused/minimal standards:
+  - VoID (Vocabulary of Interlinked Datasets) - minimal usage
+  - W3C Formats Registry - redundant with IANA Media Types
+  - FOAF (Friend of a Friend) - replaced with schema.org
+  - BIBO (Bibliographic Ontology) - minimal usage
+  - OSLC (Open Services for Lifecycle Collaboration) - single usage
+  - Frictionless Data Standards - unclear benefit
+  - XSD (XML Schema Datatypes) - removed from VariableTypeEnum (kept in schema.org mappings)
+- **Phase 2**: Replaced PAV (Provenance, Authoring, and Versioning) with Dublin Core:
+  - 9 PAV usages replaced with equivalent Dublin Core terms
+  - version → dcterms:hasVersion
+  - previousVersion → dcterms:isVersionOf
+  - createdOn → dcterms:created
+  - createdBy → dcterms:creator
+  - lastUpdateOn → dcterms:modified
+- **Phase 3**: Removed CSVW from Variables module:
+  - 6 CSVW usages removed (Column, name, datatype, primaryKey, null, dialect)
+  - Replaced with schema.org equivalents where needed
+- **Phase 4**: Reduced PROV-O to essential use:
+  - Reduced from 21 usages to 1 essential usage
+  - Kept: was_derived_from slot (prov:wasDerivedFrom)
+  - Removed: Agent roles (9 mappings in CreatorOrMaintainerEnum)
+  - Removed: Redundant derivation mappings in modules
+- **Phase 5-6**: Removed security classification mappings:
+  - Removed ISO 27001 mappings from ConfidentialityLevelEnum
+  - Removed NIST SP 800-60 mappings from ConfidentialityLevelEnum
+  - Removed Traffic Light Protocol (TLP) mappings from ConfidentialityLevelEnum
+  - Generalized regulatory compliance fields
+- **Phase 7**: Updated standards documentation (this file)
+- **Phase 8**: All tests pass with optimized mappings
+
+**Rationale for Changes**:
+- Eliminate redundancy (PAV overlaps with Dublin Core, FOAF overlaps with schema.org)
+- Remove unclear/unused ontologies (VoID, BIBO, OSLC had minimal benefit)
+- Simplify for maintainability (fewer external dependencies to track)
+- Focus on high-impact standards (DUO, schema.org, Dublin Core, DCAT)
+- Improve clarity (security classification is domain-specific, removed prescriptive mappings)
 
 **2025-12-01**:
 - Initial comprehensive standards alignment report

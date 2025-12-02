@@ -24,7 +24,6 @@ prefixes:
   d4dmaintenance: "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#"
   schema: "http://schema.org/"
   dcterms: "http://purl.org/dc/terms/"
-  pav: "http://purl.org/pav/"
 
 
 default_prefix: "d4dmaintenance"
@@ -79,7 +78,7 @@ classes:
           and communication channels (e.g., mailing list, GitHub releases).
         range: string
         multivalued: true
-        slot_uri: pav:lastUpdateOn
+        slot_uri: dcterms:modified
 
 
   RetentionLimits:
@@ -111,7 +110,7 @@ classes:
           including versioning policies and deprecation announcements.
         range: string
         multivalued: true
-        slot_uri: pav:previousVersion
+        slot_uri: dcterms:isVersionOf
 
 
   ExtensionMechanism:

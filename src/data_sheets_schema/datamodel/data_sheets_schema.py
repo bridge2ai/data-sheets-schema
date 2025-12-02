@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-01T21:28:31
+# Generation date: 2025-12-02T12:31:45
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -63,11 +63,11 @@ metamodel_version = "1.7.0"
 version = None
 
 # Namespaces
+AIO = CurieNamespace('AIO', 'https://w3id.org/aio/')
 B2AI_STANDARD = CurieNamespace('B2AI_STANDARD', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 B2AI_SUBSTRATE = CurieNamespace('B2AI_SUBSTRATE', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 B2AI_TOPIC = CurieNamespace('B2AI_TOPIC', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 DUO = CurieNamespace('DUO', 'http://purl.obolibrary.org/obo/DUO_')
-BIBO = CurieNamespace('bibo', 'http://purl.org/ontology/bibo/')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/vocab/')
 CSVW = CurieNamespace('csvw', 'http://www.w3.org/ns/csvw#')
 D4DCOMPOSITION = CurieNamespace('d4dcomposition', 'https://w3id.org/bridge2ai/data-sheets-schema/composition#')
@@ -85,19 +85,14 @@ DATASETS = CurieNamespace('datasets', 'https://w3id.org/linkml/report')
 DCAT = CurieNamespace('dcat', 'http://www.w3.org/ns/dcat#')
 DCTERMS = CurieNamespace('dcterms', 'http://purl.org/dc/terms/')
 EXAMPLE = CurieNamespace('example', 'https://example.org/')
-FOAF = CurieNamespace('foaf', 'http://xmlns.com/foaf/0.1/')
-FORMATS = CurieNamespace('formats', 'http://www.w3.org/ns/formats/')
 FRICTIONLESS = CurieNamespace('frictionless', 'https://specs.frictionlessdata.io/')
 LINKML = CurieNamespace('linkml', 'https://w3id.org/linkml/')
 MEDIATYPES = CurieNamespace('mediatypes', 'https://www.iana.org/assignments/media-types/')
-OSLC = CurieNamespace('oslc', 'http://open-services.net/ns/core#')
-PAV = CurieNamespace('pav', 'http://purl.org/pav/')
 PROV = CurieNamespace('prov', 'http://www.w3.org/ns/prov#')
 QUDT = CurieNamespace('qudt', 'http://qudt.org/schema/qudt/')
 SCHEMA = CurieNamespace('schema', 'http://schema.org/')
 SH = CurieNamespace('sh', 'https://w3id.org/shacl/')
 SKOS = CurieNamespace('skos', 'http://www.w3.org/2004/02/skos/core#')
-VOID = CurieNamespace('void', 'http://rdfs.org/ns/void#')
 DEFAULT_ = DATA_SHEETS_SCHEMA
 
 
@@ -3375,8 +3370,8 @@ class VersionTypeEnum(EnumDefinitionImpl):
 
 class CreatorOrMaintainerEnum(EnumDefinitionImpl):
     """
-    Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to PROV-O (W3C
-    Provenance Ontology) agent concepts and schema.org organization types. See https://www.w3.org/TR/prov-o/
+    Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to schema.org
+    organization types.
     """
     data_subject = PermissibleValue(
         text="data_subject",
@@ -3414,7 +3409,7 @@ class CreatorOrMaintainerEnum(EnumDefinitionImpl):
 
     _defn = EnumDefinition(
         name="CreatorOrMaintainerEnum",
-        description="""Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to PROV-O (W3C Provenance Ontology) agent concepts and schema.org organization types. See https://www.w3.org/TR/prov-o/""",
+        description="""Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to schema.org organization types.""",
     )
 
 class Boolean(EnumDefinitionImpl):
@@ -3541,8 +3536,7 @@ class AIActRiskEnum(EnumDefinitionImpl):
 class ConfidentialityLevelEnum(EnumDefinitionImpl):
     """
     Confidentiality classification levels for datasets indicating the degree of access restrictions and data
-    sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light
-    Protocol).
+    sensitivity.
     NOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to
     DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data).
     ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify
@@ -3560,7 +3554,7 @@ class ConfidentialityLevelEnum(EnumDefinitionImpl):
 
     _defn = EnumDefinition(
         name="ConfidentialityLevelEnum",
-        description="""Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light Protocol).
+        description="""Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.
 NOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted.""",
     )
 
@@ -3665,30 +3659,30 @@ class DataUsePermissionEnum(EnumDefinitionImpl):
 
 class VariableTypeEnum(EnumDefinitionImpl):
     """
-    Common data types for variables. Values are mapped to XML Schema Datatypes (XSD) and schema.org DataType
-    vocabulary. See https://www.w3.org/TR/xmlschema-2/ and https://schema.org/DataType
+    Common data types for variables. Values are mapped to schema.org DataType vocabulary. See
+    https://schema.org/DataType
     """
     integer = PermissibleValue(
         text="integer",
-        description="Whole numbers. Maps to XSD integer type.")
+        description="Whole numbers.")
     float = PermissibleValue(
         text="float",
-        description="Floating-point numbers (single precision). Maps to XSD float type.")
+        description="Floating-point numbers (single precision).")
     double = PermissibleValue(
         text="double",
-        description="Double-precision floating-point numbers. Maps to XSD double type.")
+        description="Double-precision floating-point numbers.")
     string = PermissibleValue(
         text="string",
-        description="Text strings. Maps to XSD string type.")
+        description="Text strings.")
     boolean = PermissibleValue(
         text="boolean",
-        description="True/false values. Maps to XSD boolean type.")
+        description="True/false values.")
     date = PermissibleValue(
         text="date",
-        description="Date values (without time). Maps to XSD date type.")
+        description="Date values (without time).")
     datetime = PermissibleValue(
         text="datetime",
-        description="Date and time values. Maps to XSD dateTime type.")
+        description="Date and time values.")
     categorical = PermissibleValue(
         text="categorical",
         description="""Categorical/factor variables with finite set of discrete values. Often used for nominal data (unordered categories).""")
@@ -3710,15 +3704,12 @@ class VariableTypeEnum(EnumDefinitionImpl):
 
     _defn = EnumDefinition(
         name="VariableTypeEnum",
-        description="""Common data types for variables. Values are mapped to XML Schema Datatypes (XSD) and schema.org DataType vocabulary. See https://www.w3.org/TR/xmlschema-2/ and https://schema.org/DataType""",
+        description="""Common data types for variables. Values are mapped to schema.org DataType vocabulary. See https://schema.org/DataType""",
     )
 
 # Slots
 class slots:
     pass
-
-slots.profile = Slot(uri=DATA_SHEETS_SCHEMA.profile, name="profile", curie=DATA_SHEETS_SCHEMA.curie('profile'),
-                   model_uri=DATA_SHEETS_SCHEMA.profile, domain=None, range=Optional[Union[str, URIorCURIE]])
 
 slots.same_as = Slot(uri=SCHEMA.sameAs, name="same_as", curie=SCHEMA.curie('sameAs'),
                    model_uri=DATA_SHEETS_SCHEMA.same_as, domain=None, range=Optional[Union[Union[str, URIorCURIE], list[Union[str, URIorCURIE]]]])
@@ -3789,28 +3780,28 @@ slots.license = Slot(uri=DCTERMS.license, name="license", curie=DCTERMS.curie('l
 slots.keywords = Slot(uri=DCAT.keyword, name="keywords", curie=DCAT.curie('keyword'),
                    model_uri=DATA_SHEETS_SCHEMA.keywords, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.version = Slot(uri=PAV.version, name="version", curie=PAV.curie('version'),
+slots.version = Slot(uri=DCTERMS.hasVersion, name="version", curie=DCTERMS.curie('hasVersion'),
                    model_uri=DATA_SHEETS_SCHEMA.version, domain=None, range=Optional[str])
 
-slots.created_by = Slot(uri=PAV.createdBy, name="created_by", curie=PAV.curie('createdBy'),
+slots.created_by = Slot(uri=DCTERMS.creator, name="created_by", curie=DCTERMS.curie('creator'),
                    model_uri=DATA_SHEETS_SCHEMA.created_by, domain=None, range=Optional[str])
 
-slots.created_on = Slot(uri=PAV.createdOn, name="created_on", curie=PAV.curie('createdOn'),
+slots.created_on = Slot(uri=DCTERMS.created, name="created_on", curie=DCTERMS.curie('created'),
                    model_uri=DATA_SHEETS_SCHEMA.created_on, domain=None, range=Optional[Union[str, XSDDateTime]])
 
-slots.last_updated_on = Slot(uri=PAV.lastUpdatedOn, name="last_updated_on", curie=PAV.curie('lastUpdatedOn'),
+slots.last_updated_on = Slot(uri=DCTERMS.modified, name="last_updated_on", curie=DCTERMS.curie('modified'),
                    model_uri=DATA_SHEETS_SCHEMA.last_updated_on, domain=None, range=Optional[Union[str, XSDDateTime]])
 
-slots.modified_by = Slot(uri=OSLC.modifiedBy, name="modified_by", curie=OSLC.curie('modifiedBy'),
+slots.modified_by = Slot(uri=DCTERMS.contributor, name="modified_by", curie=DCTERMS.curie('contributor'),
                    model_uri=DATA_SHEETS_SCHEMA.modified_by, domain=None, range=Optional[str])
 
-slots.status = Slot(uri=BIBO.status, name="status", curie=BIBO.curie('status'),
+slots.status = Slot(uri=DCTERMS.type, name="status", curie=DCTERMS.curie('type'),
                    model_uri=DATA_SHEETS_SCHEMA.status, domain=None, range=Optional[str])
 
 slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", curie=PROV.curie('wasDerivedFrom'),
                    model_uri=DATA_SHEETS_SCHEMA.was_derived_from, domain=None, range=Optional[str])
 
-slots.doi = Slot(uri=BIBO.doi, name="doi", curie=BIBO.curie('doi'),
+slots.doi = Slot(uri=DCTERMS.identifier, name="doi", curie=DCTERMS.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.doi, domain=None, range=Optional[str],
                    pattern=re.compile(r'10\.\d{4,}\/.+'))
 
@@ -4178,7 +4169,7 @@ slots.instanceAcquisition__was_directly_observed = Slot(uri=DATA_SHEETS_SCHEMA['
 slots.instanceAcquisition__was_reported_by_subjects = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_reported_by_subjects'], name="instanceAcquisition__was_reported_by_subjects", curie=DATA_SHEETS_SCHEMA.curie('collection/was_reported_by_subjects'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_reported_by_subjects, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.instanceAcquisition__was_inferred_derived = Slot(uri=PROV.wasDerivedFrom, name="instanceAcquisition__was_inferred_derived", curie=PROV.curie('wasDerivedFrom'),
+slots.instanceAcquisition__was_inferred_derived = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_inferred_derived'], name="instanceAcquisition__was_inferred_derived", curie=DATA_SHEETS_SCHEMA.curie('collection/was_inferred_derived'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_inferred_derived, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.instanceAcquisition__was_validated_verified = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_validated_verified'], name="instanceAcquisition__was_validated_verified", curie=DATA_SHEETS_SCHEMA.curie('collection/was_validated_verified'),
@@ -4217,7 +4208,7 @@ slots.labelingStrategy__inter_annotator_agreement = Slot(uri=SCHEMA.measurementM
 slots.labelingStrategy__annotator_demographics = Slot(uri=D4DPREPROCESSING.annotator_demographics, name="labelingStrategy__annotator_demographics", curie=D4DPREPROCESSING.curie('annotator_demographics'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__annotator_demographics, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.rawData__description = Slot(uri=PROV.wasDerivedFrom, name="rawData__description", curie=PROV.curie('wasDerivedFrom'),
+slots.rawData__description = Slot(uri=D4DPREPROCESSING.description, name="rawData__description", curie=D4DPREPROCESSING.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.rawData__description, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.existingUse__description = Slot(uri=DCTERMS.description, name="existingUse__description", curie=DCTERMS.curie('description'),
@@ -4262,13 +4253,13 @@ slots.maintainer__description = Slot(uri=SCHEMA.maintainer, name="maintainer__de
 slots.erratum__description = Slot(uri=DCTERMS.description, name="erratum__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.erratum__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.updatePlan__description = Slot(uri=PAV.lastUpdateOn, name="updatePlan__description", curie=PAV.curie('lastUpdateOn'),
+slots.updatePlan__description = Slot(uri=DCTERMS.modified, name="updatePlan__description", curie=DCTERMS.curie('modified'),
                    model_uri=DATA_SHEETS_SCHEMA.updatePlan__description, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.retentionLimits__description = Slot(uri=DCTERMS.description, name="retentionLimits__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.retentionLimits__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.versionAccess__description = Slot(uri=PAV.previousVersion, name="versionAccess__description", curie=PAV.curie('previousVersion'),
+slots.versionAccess__description = Slot(uri=DCTERMS.isVersionOf, name="versionAccess__description", curie=DCTERMS.curie('isVersionOf'),
                    model_uri=DATA_SHEETS_SCHEMA.versionAccess__description, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.extensionMechanism__description = Slot(uri=DCTERMS.description, name="extensionMechanism__description", curie=DCTERMS.curie('description'),
@@ -4403,7 +4394,7 @@ slots.variableMetadata__data_type = Slot(uri=SCHEMA.DataType, name="variableMeta
 slots.variableMetadata__unit = Slot(uri=QUDT.unit, name="variableMetadata__unit", curie=QUDT.curie('unit'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__unit, domain=None, range=Optional[Union[str, URIorCURIE]])
 
-slots.variableMetadata__missing_value_code = Slot(uri=CSVW.null, name="variableMetadata__missing_value_code", curie=CSVW.curie('null'),
+slots.variableMetadata__missing_value_code = Slot(uri=D4DVARIABLES.missing_value_code, name="variableMetadata__missing_value_code", curie=D4DVARIABLES.curie('missing_value_code'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__missing_value_code, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.variableMetadata__minimum_value = Slot(uri=SCHEMA.minValue, name="variableMetadata__minimum_value", curie=SCHEMA.curie('minValue'),
@@ -4418,7 +4409,7 @@ slots.variableMetadata__categories = Slot(uri=SCHEMA.valueReference, name="varia
 slots.variableMetadata__examples = Slot(uri=SKOS.example, name="variableMetadata__examples", curie=SKOS.curie('example'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__examples, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.variableMetadata__is_identifier = Slot(uri=CSVW.primaryKey, name="variableMetadata__is_identifier", curie=CSVW.curie('primaryKey'),
+slots.variableMetadata__is_identifier = Slot(uri=SCHEMA.identifier, name="variableMetadata__is_identifier", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__is_identifier, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.variableMetadata__is_sensitive = Slot(uri=D4DVARIABLES.is_sensitive, name="variableMetadata__is_sensitive", curie=D4DVARIABLES.curie('is_sensitive'),
@@ -4430,7 +4421,7 @@ slots.variableMetadata__precision = Slot(uri=D4DVARIABLES.precision, name="varia
 slots.variableMetadata__measurement_technique = Slot(uri=SCHEMA.measurementTechnique, name="variableMetadata__measurement_technique", curie=SCHEMA.curie('measurementTechnique'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__measurement_technique, domain=None, range=Optional[str])
 
-slots.variableMetadata__derivation = Slot(uri=PROV.wasDerivedFrom, name="variableMetadata__derivation", curie=PROV.curie('wasDerivedFrom'),
+slots.variableMetadata__derivation = Slot(uri=D4DVARIABLES.derivation, name="variableMetadata__derivation", curie=D4DVARIABLES.curie('derivation'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__derivation, domain=None, range=Optional[str])
 
 slots.variableMetadata__quality_notes = Slot(uri=D4DVARIABLES.quality_notes, name="variableMetadata__quality_notes", curie=D4DVARIABLES.curie('quality_notes'),

@@ -24,8 +24,8 @@
   "license": "MIT",
   "prefixes": [
     {
-      "prefix_prefix": "bibo",
-      "prefix_reference": "http://purl.org/ontology/bibo/"
+      "prefix_prefix": "AIO",
+      "prefix_reference": "https://w3id.org/aio/"
     },
     {
       "prefix_prefix": "biolink",
@@ -56,14 +56,6 @@
       "prefix_reference": "https://example.org/"
     },
     {
-      "prefix_prefix": "foaf",
-      "prefix_reference": "http://xmlns.com/foaf/0.1/"
-    },
-    {
-      "prefix_prefix": "formats",
-      "prefix_reference": "http://www.w3.org/ns/formats/"
-    },
-    {
       "prefix_prefix": "frictionless",
       "prefix_reference": "https://specs.frictionlessdata.io/"
     },
@@ -74,14 +66,6 @@
     {
       "prefix_prefix": "mediatypes",
       "prefix_reference": "https://www.iana.org/assignments/media-types/"
-    },
-    {
-      "prefix_prefix": "oslc",
-      "prefix_reference": "http://open-services.net/ns/core#"
-    },
-    {
-      "prefix_prefix": "pav",
-      "prefix_reference": "http://purl.org/pav/"
     },
     {
       "prefix_prefix": "prov",
@@ -102,10 +86,6 @@
     {
       "prefix_prefix": "skos",
       "prefix_reference": "http://www.w3.org/2004/02/skos/core#"
-    },
-    {
-      "prefix_prefix": "void",
-      "prefix_reference": "http://rdfs.org/ns/void#"
     },
     {
       "prefix_prefix": "B2AI_TOPIC",
@@ -938,28 +918,21 @@
     {
       "name": "CreatorOrMaintainerEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/CreatorOrMaintainerEnum",
-      "description": "Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to PROV-O (W3C Provenance Ontology) agent concepts and schema.org organization types. See https://www.w3.org/TR/prov-o/",
+      "description": "Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to schema.org organization types.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "permissible_values": [
         {
           "text": "data_subject",
-          "description": "A person whose information is recorded in the dataset.",
-          "broad_mappings": [
-            "prov:Agent"
-          ]
+          "description": "A person whose information is recorded in the dataset."
         },
         {
           "text": "third_party",
-          "description": "A third party not involved in the direct creation or maintenance.",
-          "broad_mappings": [
-            "prov:Agent"
-          ]
+          "description": "A third party not involved in the direct creation or maintenance."
         },
         {
           "text": "researcher",
           "description": "A researcher involved in dataset creation or maintenance.",
           "broad_mappings": [
-            "prov:Person",
             "schema:Person"
           ]
         },
@@ -967,7 +940,6 @@
           "text": "industry",
           "description": "Industry professional involved in dataset creation or maintenance.",
           "broad_mappings": [
-            "prov:Person",
             "schema:Person"
           ]
         },
@@ -975,7 +947,6 @@
           "text": "academic_institution",
           "description": "Academic institution responsible for dataset.",
           "broad_mappings": [
-            "prov:Organization",
             "schema:EducationalOrganization"
           ]
         },
@@ -983,7 +954,6 @@
           "text": "government_agency",
           "description": "Government agency responsible for dataset.",
           "broad_mappings": [
-            "prov:Organization",
             "schema:GovernmentOrganization"
           ]
         },
@@ -991,7 +961,6 @@
           "text": "commercial_entity",
           "description": "Commercial entity responsible for dataset.",
           "broad_mappings": [
-            "prov:Organization",
             "schema:Corporation"
           ]
         },
@@ -999,16 +968,12 @@
           "text": "non_profit_organization",
           "description": "Non-profit organization responsible for dataset.",
           "broad_mappings": [
-            "prov:Organization",
             "schema:Organization"
           ]
         },
         {
           "text": "crowdsourced",
-          "description": "Dataset created through crowdsourcing efforts with multiple contributors.",
-          "broad_mappings": [
-            "prov:Agent"
-          ]
+          "description": "Dataset created through crowdsourcing efforts with multiple contributors."
         },
         {
           "text": "automated_system",
@@ -1048,9 +1013,6 @@
         {
           "text": "derives_from",
           "description": "This dataset is derived from the target dataset through processing, analysis, or transformation. Equivalent to DataCite IsDerivedFrom.",
-          "related_mappings": [
-            "prov:wasDerivedFrom"
-          ],
           "broad_mappings": [
             "dcterms:source"
           ]
@@ -1227,35 +1189,20 @@
     {
       "name": "ConfidentialityLevelEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ConfidentialityLevelEnum",
-      "description": "Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light Protocol).\nNOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted.",
+      "description": "Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.\nNOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "permissible_values": [
         {
           "text": "unrestricted",
-          "description": "No confidentiality restrictions. Data is publicly available with no access controls required. Equivalent to public or open access data.",
-          "broad_mappings": [
-            "TLP:CLEAR",
-            "NIST_Low_Impact",
-            "ISO27001_Public"
-          ]
+          "description": "No confidentiality restrictions. Data is publicly available with no access controls required. Equivalent to public or open access data."
         },
         {
           "text": "restricted",
-          "description": "Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access. May require account creation, data use agreement, or institutional approval.",
-          "broad_mappings": [
-            "TLP:GREEN",
-            "NIST_Moderate_Impact",
-            "ISO27001_Internal"
-          ]
+          "description": "Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access. May require account creation, data use agreement, or institutional approval."
         },
         {
           "text": "confidential",
-          "description": "Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. Typically requires IRB approval, formal data use agreements, institutional authorization, or other formal vetting processes.",
-          "broad_mappings": [
-            "TLP:AMBER",
-            "NIST_High_Impact",
-            "ISO27001_Highly_Confidential"
-          ]
+          "description": "Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. Typically requires IRB approval, formal data use agreements, institutional authorization, or other formal vetting processes."
         }
       ]
     },
@@ -1380,75 +1327,54 @@
     {
       "name": "VariableTypeEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#VariableTypeEnum",
-      "description": "Common data types for variables. Values are mapped to XML Schema Datatypes (XSD) and schema.org DataType vocabulary. See https://www.w3.org/TR/xmlschema-2/ and https://schema.org/DataType",
+      "description": "Common data types for variables. Values are mapped to schema.org DataType vocabulary. See https://schema.org/DataType",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "permissible_values": [
         {
           "text": "integer",
-          "description": "Whole numbers. Maps to XSD integer type.",
-          "exact_mappings": [
-            "xsd:integer"
-          ],
+          "description": "Whole numbers.",
           "broad_mappings": [
             "schema:Integer"
           ]
         },
         {
           "text": "float",
-          "description": "Floating-point numbers (single precision). Maps to XSD float type.",
-          "exact_mappings": [
-            "xsd:float"
-          ],
+          "description": "Floating-point numbers (single precision).",
           "broad_mappings": [
             "schema:Float"
           ]
         },
         {
           "text": "double",
-          "description": "Double-precision floating-point numbers. Maps to XSD double type.",
-          "exact_mappings": [
-            "xsd:double"
-          ],
+          "description": "Double-precision floating-point numbers.",
           "broad_mappings": [
             "schema:Number"
           ]
         },
         {
           "text": "string",
-          "description": "Text strings. Maps to XSD string type.",
-          "exact_mappings": [
-            "xsd:string"
-          ],
+          "description": "Text strings.",
           "broad_mappings": [
             "schema:Text"
           ]
         },
         {
           "text": "boolean",
-          "description": "True/false values. Maps to XSD boolean type.",
-          "exact_mappings": [
-            "xsd:boolean"
-          ],
+          "description": "True/false values.",
           "broad_mappings": [
             "schema:Boolean"
           ]
         },
         {
           "text": "date",
-          "description": "Date values (without time). Maps to XSD date type.",
-          "exact_mappings": [
-            "xsd:date"
-          ],
+          "description": "Date values (without time).",
           "broad_mappings": [
             "schema:Date"
           ]
         },
         {
           "text": "datetime",
-          "description": "Date and time values. Maps to XSD dateTime type.",
-          "exact_mappings": [
-            "xsd:dateTime"
-          ],
+          "description": "Date and time values.",
           "broad_mappings": [
             "schema:DateTime"
           ]
@@ -1500,18 +1426,6 @@
     }
   ],
   "slots": [
-    {
-      "name": "profile",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/profile",
-      "description": "The frictionless data profile to which the data conforms.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "exact_mappings": [
-        "https://specs.frictionlessdata.io/profiles"
-      ],
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/profile",
-      "range": "uriorcurie",
-      "@type": "SlotDefinition"
-    },
     {
       "name": "same_as",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/same_as",
@@ -1661,9 +1575,6 @@
       "mappings": [
         "http://schema.org/contentUrl"
       ],
-      "close_mappings": [
-        "https://specs.frictionlessdata.io/path"
-      ],
       "slot_uri": "http://schema.org/contentUrl",
       "owner": "Dataset",
       "domain_of": [
@@ -1682,9 +1593,6 @@
       ],
       "exact_mappings": [
         "http://schema.org/url"
-      ],
-      "close_mappings": [
-        "https://specs.frictionlessdata.io/path"
       ],
       "slot_uri": "http://www.w3.org/ns/dcat#downloadURL",
       "owner": "Information",
@@ -1751,7 +1659,6 @@
         "http://www.w3.org/ns/dcat#mediaType"
       ],
       "exact_mappings": [
-        "https://specs.frictionlessdata.io/mediatype",
         "http://schema.org/encodingFormat"
       ],
       "slot_uri": "http://www.w3.org/ns/dcat#mediaType",
@@ -1891,9 +1798,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/version",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/pav/version"
+        "http://purl.org/dc/terms/hasVersion"
       ],
-      "slot_uri": "http://purl.org/pav/version",
+      "slot_uri": "http://purl.org/dc/terms/hasVersion",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1906,9 +1813,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/created_by",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/pav/createdBy"
+        "http://purl.org/dc/terms/creator"
       ],
-      "slot_uri": "http://purl.org/pav/createdBy",
+      "slot_uri": "http://purl.org/dc/terms/creator",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1921,9 +1828,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/created_on",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/pav/createdOn"
+        "http://purl.org/dc/terms/created"
       ],
-      "slot_uri": "http://purl.org/pav/createdOn",
+      "slot_uri": "http://purl.org/dc/terms/created",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1936,9 +1843,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/last_updated_on",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/pav/lastUpdatedOn"
+        "http://purl.org/dc/terms/modified"
       ],
-      "slot_uri": "http://purl.org/pav/lastUpdatedOn",
+      "slot_uri": "http://purl.org/dc/terms/modified",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1951,12 +1858,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/modified_by",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://open-services.net/ns/core#modifiedBy"
+        "http://purl.org/dc/terms/contributor"
       ],
-      "exact_mappings": [
-        "http://purl.org/pav/lastUpdateBy"
-      ],
-      "slot_uri": "http://open-services.net/ns/core#modifiedBy",
+      "slot_uri": "http://purl.org/dc/terms/contributor",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1969,9 +1873,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/status",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/ontology/bibo/status"
+        "http://purl.org/dc/terms/type"
       ],
-      "slot_uri": "http://purl.org/ontology/bibo/status",
+      "slot_uri": "http://purl.org/dc/terms/type",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1987,7 +1891,7 @@
         "http://www.w3.org/ns/prov#wasDerivedFrom"
       ],
       "exact_mappings": [
-        "http://purl.org/pav/derivedFrom"
+        "http://purl.org/dc/terms/source"
       ],
       "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
       "owner": "Information",
@@ -2003,12 +1907,9 @@
       "description": "digital object identifier",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/ontology/bibo/doi"
-      ],
-      "exact_mappings": [
         "http://purl.org/dc/terms/identifier"
       ],
-      "slot_uri": "http://purl.org/ontology/bibo/doi",
+      "slot_uri": "http://purl.org/dc/terms/identifier",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -3756,10 +3657,7 @@
       "name": "instanceAcquisition__was_inferred_derived",
       "description": "Whether the data was inferred or derived from other data",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
-      "mappings": [
-        "http://www.w3.org/ns/prov#wasDerivedFrom"
-      ],
-      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/was_inferred_derived",
       "alias": "was_inferred_derived",
       "owner": "InstanceAcquisition",
       "domain_of": [
@@ -3963,10 +3861,7 @@
       "name": "rawData__description",
       "description": "Details about the availability or location of raw data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
-      "mappings": [
-        "http://www.w3.org/ns/prov#wasDerivedFrom"
-      ],
-      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#description",
       "alias": "description",
       "owner": "RawData",
       "domain_of": [
@@ -4212,9 +4107,9 @@
       "description": "Details on the dataset's update policy, schedule, responsible parties, and communication channels (e.g., mailing list, GitHub releases).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
-        "http://purl.org/pav/lastUpdateOn"
+        "http://purl.org/dc/terms/modified"
       ],
-      "slot_uri": "http://purl.org/pav/lastUpdateOn",
+      "slot_uri": "http://purl.org/dc/terms/modified",
       "alias": "description",
       "owner": "UpdatePlan",
       "domain_of": [
@@ -4246,9 +4141,9 @@
       "description": "Explanation of whether and how previous dataset versions remain accessible, including versioning policies and deprecation announcements.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
-        "http://purl.org/pav/previousVersion"
+        "http://purl.org/dc/terms/isVersionOf"
       ],
-      "slot_uri": "http://purl.org/pav/previousVersion",
+      "slot_uri": "http://purl.org/dc/terms/isVersionOf",
       "alias": "description",
       "owner": "VersionAccess",
       "domain_of": [
@@ -4894,8 +4789,7 @@
         "http://schema.org/name"
       ],
       "exact_mappings": [
-        "http://schema.org/name",
-        "http://www.w3.org/ns/csvw#name"
+        "http://schema.org/name"
       ],
       "slot_uri": "http://schema.org/name",
       "alias": "variable_name",
@@ -4915,7 +4809,6 @@
         "http://schema.org/DataType"
       ],
       "exact_mappings": [
-        "http://www.w3.org/ns/csvw#datatype",
         "http://schema.org/DataType"
       ],
       "slot_uri": "http://schema.org/DataType",
@@ -4951,10 +4844,7 @@
       "name": "variableMetadata__missing_value_code",
       "description": "Code(s) used to represent missing values for this variable. Examples: \"NA\", \"-999\", \"null\", \"\". Multiple codes may be specified.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
-      "mappings": [
-        "http://www.w3.org/ns/csvw#null"
-      ],
-      "slot_uri": "http://www.w3.org/ns/csvw#null",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#missing_value_code",
       "alias": "missing_value_code",
       "owner": "VariableMetadata",
       "domain_of": [
@@ -5035,9 +4925,9 @@
       "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
-        "http://www.w3.org/ns/csvw#primaryKey"
+        "http://schema.org/identifier"
       ],
-      "slot_uri": "http://www.w3.org/ns/csvw#primaryKey",
+      "slot_uri": "http://schema.org/identifier",
       "alias": "is_identifier",
       "owner": "VariableMetadata",
       "domain_of": [
@@ -5092,10 +4982,7 @@
       "name": "variableMetadata__derivation",
       "description": "Description of how this variable was derived or calculated from other variables, if applicable.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
-      "mappings": [
-        "http://www.w3.org/ns/prov#wasDerivedFrom"
-      ],
-      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#derivation",
       "alias": "derivation",
       "owner": "VariableMetadata",
       "domain_of": [
@@ -5181,9 +5068,6 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Dataset",
       "description": "A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "see_also": [
-        "https://specs.frictionlessdata.io/data-resource"
-      ],
       "aliases": [
         "data resource",
         "data file",
@@ -5784,9 +5668,6 @@
       "mappings": [
         "schema:Organization"
       ],
-      "exact_mappings": [
-        "foaf:Organization"
-      ],
       "is_a": "NamedThing",
       "slots": [
         "namedThing__id",
@@ -5873,9 +5754,6 @@
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "schema:Person"
-      ],
-      "exact_mappings": [
-        "foaf:Person"
       ],
       "is_a": "NamedThing",
       "slots": [
@@ -6768,7 +6646,6 @@
         {
           "name": "was_inferred_derived",
           "description": "Whether the data was inferred or derived from other data",
-          "slot_uri": "prov:wasDerivedFrom",
           "range": "boolean",
           "@type": "SlotDefinition"
         },
@@ -7012,7 +6889,6 @@
         {
           "name": "description",
           "description": "Details about the availability or location of raw data.",
-          "slot_uri": "prov:wasDerivedFrom",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -7365,7 +7241,7 @@
         {
           "name": "description",
           "description": "Details on the dataset's update policy, schedule, responsible parties, and communication channels (e.g., mailing list, GitHub releases).\n",
-          "slot_uri": "pav:lastUpdateOn",
+          "slot_uri": "dcterms:modified",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -7417,7 +7293,7 @@
         {
           "name": "description",
           "description": "Explanation of whether and how previous dataset versions remain accessible, including versioning policies and deprecation announcements.\n",
-          "slot_uri": "pav:previousVersion",
+          "slot_uri": "dcterms:isVersionOf",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -8032,7 +7908,6 @@
         "schema:PropertyValue"
       ],
       "exact_mappings": [
-        "csvw:Column",
         "schema:PropertyValue"
       ],
       "is_a": "DatasetProperty",
@@ -8062,8 +7937,7 @@
           "name": "variable_name",
           "description": "The name or identifier of the variable as it appears in the data files.",
           "exact_mappings": [
-            "schema:name",
-            "csvw:name"
+            "schema:name"
           ],
           "slot_uri": "schema:name",
           "range": "string",
@@ -8074,7 +7948,6 @@
           "name": "data_type",
           "description": "The data type of the variable (e.g., integer, float, string, boolean, date, categorical). Use standard type names when possible.",
           "exact_mappings": [
-            "csvw:datatype",
             "schema:DataType"
           ],
           "slot_uri": "schema:DataType",
@@ -8095,7 +7968,6 @@
         {
           "name": "missing_value_code",
           "description": "Code(s) used to represent missing values for this variable. Examples: \"NA\", \"-999\", \"null\", \"\". Multiple codes may be specified.",
-          "slot_uri": "csvw:null",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -8133,7 +8005,7 @@
         {
           "name": "is_identifier",
           "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
-          "slot_uri": "csvw:primaryKey",
+          "slot_uri": "schema:identifier",
           "range": "boolean",
           "@type": "SlotDefinition"
         },
@@ -8159,7 +8031,6 @@
         {
           "name": "derivation",
           "description": "Description of how this variable was derived or calculated from other variables, if applicable.",
-          "slot_uri": "prov:wasDerivedFrom",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -8177,9 +8048,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-12-01T20:19:46",
-  "source_file_size": 12266,
-  "generation_date": "2025-12-01T21:28:30",
+  "source_file_date": "2025-12-02T12:31:34",
+  "source_file_size": 11839,
+  "generation_date": "2025-12-02T12:31:44",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

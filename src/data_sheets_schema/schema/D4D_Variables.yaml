@@ -11,20 +11,13 @@ see_also:
   - https://bridge2ai.github.io/data-sheets-schema
 
 prefixes:
-  bibo: http://purl.org/ontology/bibo/
-  csvw: http://www.w3.org/ns/csvw#
   d4dvariables: https://w3id.org/bridge2ai/data-sheets-schema/variables#
   dcat: http://www.w3.org/ns/dcat#
   dcterms: http://purl.org/dc/terms/
-  foaf: http://xmlns.com/foaf/0.1/
   linkml: https://w3id.org/linkml/
-  oslc: http://open-services.net/ns/core#
-  pav: http://purl.org/pav/
-  prov: http://www.w3.org/ns/prov#
   qudt: http://qudt.org/schema/qudt/
   schema: http://schema.org/
   skos: http://www.w3.org/2004/02/skos/core#
-  xsd: http://www.w3.org/2001/XMLSchema#
 
 default_prefix: d4dvariables
 default_range: string
@@ -43,7 +36,6 @@ classes:
     is_a: DatasetProperty
     class_uri: schema:PropertyValue
     exact_mappings:
-      - csvw:Column
       - schema:PropertyValue
     attributes:
       variable_name:
@@ -54,7 +46,6 @@ classes:
         slot_uri: schema:name
         exact_mappings:
           - schema:name
-          - csvw:name
 
       data_type:
         description: >-
@@ -63,7 +54,6 @@ classes:
         range: VariableTypeEnum
         slot_uri: schema:DataType
         exact_mappings:
-          - csvw:datatype
           - schema:DataType
 
       unit:
@@ -83,7 +73,6 @@ classes:
           Examples: "NA", "-999", "null", "". Multiple codes may be specified.
         range: string
         multivalued: true
-        slot_uri: csvw:null
 
       minimum_value:
         description: >-
@@ -117,7 +106,7 @@ classes:
           Indicates whether this variable serves as a unique identifier or key
           for records in the dataset.
         range: boolean
-        slot_uri: csvw:primaryKey
+        slot_uri: schema:identifier
 
       is_sensitive:
         description: >-
@@ -142,7 +131,6 @@ classes:
           Description of how this variable was derived or calculated from
           other variables, if applicable.
         range: string
-        slot_uri: prov:wasDerivedFrom
 
       quality_notes:
         description: >-
@@ -155,57 +143,42 @@ enums:
 
   VariableTypeEnum:
     description: >-
-      Common data types for variables. Values are mapped to XML Schema Datatypes
-      (XSD) and schema.org DataType vocabulary. See https://www.w3.org/TR/xmlschema-2/
-      and https://schema.org/DataType
+      Common data types for variables. Values are mapped to schema.org DataType
+      vocabulary. See https://schema.org/DataType
     permissible_values:
       integer:
         description: >-
-          Whole numbers. Maps to XSD integer type.
-        exact_mappings:
-          - xsd:integer
+          Whole numbers.
         broad_mappings:
           - schema:Integer
       float:
         description: >-
-          Floating-point numbers (single precision). Maps to XSD float type.
-        exact_mappings:
-          - xsd:float
+          Floating-point numbers (single precision).
         broad_mappings:
           - schema:Float
       double:
         description: >-
-          Double-precision floating-point numbers. Maps to XSD double type.
-        exact_mappings:
-          - xsd:double
+          Double-precision floating-point numbers.
         broad_mappings:
           - schema:Number
       string:
         description: >-
-          Text strings. Maps to XSD string type.
-        exact_mappings:
-          - xsd:string
+          Text strings.
         broad_mappings:
           - schema:Text
       boolean:
         description: >-
-          True/false values. Maps to XSD boolean type.
-        exact_mappings:
-          - xsd:boolean
+          True/false values.
         broad_mappings:
           - schema:Boolean
       date:
         description: >-
-          Date values (without time). Maps to XSD date type.
-        exact_mappings:
-          - xsd:date
+          Date values (without time).
         broad_mappings:
           - schema:Date
       datetime:
         description: >-
-          Date and time values. Maps to XSD dateTime type.
-        exact_mappings:
-          - xsd:dateTime
+          Date and time values.
         broad_mappings:
           - schema:DateTime
       categorical:

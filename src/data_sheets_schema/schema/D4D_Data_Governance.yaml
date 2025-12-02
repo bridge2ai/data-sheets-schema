@@ -228,8 +228,7 @@ enums:
   ConfidentialityLevelEnum:
     description: >-
       Confidentiality classification levels for datasets indicating the degree
-      of access restrictions and data sensitivity. Based on established information
-      classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light Protocol).
+      of access restrictions and data sensitivity.
 
       NOTE: This enum classifies data sensitivity and access control (WHO can access),
       which is orthogonal to DataUsePermissionEnum that specifies use restrictions
@@ -241,29 +240,17 @@ enums:
         description: >-
           No confidentiality restrictions. Data is publicly available with
           no access controls required. Equivalent to public or open access data.
-        broad_mappings:
-          - TLP:CLEAR  # Traffic Light Protocol (formerly TLP:WHITE)
-          - NIST_Low_Impact  # NIST SP 800-60 Low Impact
-          - ISO27001_Public  # ISO 27001 Public classification
       restricted:
         description: >-
           Restricted access requiring approval or registration. Data contains
           sensitive information requiring controlled access. May require account
           creation, data use agreement, or institutional approval.
-        broad_mappings:
-          - TLP:GREEN  # Traffic Light Protocol (limited disclosure)
-          - NIST_Moderate_Impact  # NIST SP 800-60 Moderate Impact
-          - ISO27001_Internal  # ISO 27001 Internal/Confidential classification
       confidential:
         description: >-
           Highly confidential with strict access controls. Data contains
           highly sensitive information with significant privacy or security
           implications. Typically requires IRB approval, formal data use agreements,
           institutional authorization, or other formal vetting processes.
-        broad_mappings:
-          - TLP:AMBER  # Traffic Light Protocol (limited distribution)
-          - NIST_High_Impact  # NIST SP 800-60 High Impact
-          - ISO27001_Highly_Confidential  # ISO 27001 Highly Confidential classification
 
   DataUsePermissionEnum:
     description: >-
