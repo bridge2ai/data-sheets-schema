@@ -248,6 +248,8 @@
         click Deidentification href "../Deidentification/"
       DatasetProperty &lt;|-- SensitiveElement
         click SensitiveElement href "../SensitiveElement/"
+      DatasetProperty &lt;|-- DatasetRelationship
+        click DatasetRelationship href "../DatasetRelationship/"
       DatasetProperty &lt;|-- InstanceAcquisition
         click InstanceAcquisition href "../InstanceAcquisition/"
       DatasetProperty &lt;|-- CollectionMechanism
@@ -276,6 +278,10 @@
         click FutureUseImpact href "../FutureUseImpact/"
       DatasetProperty &lt;|-- DiscouragedUse
         click DiscouragedUse href "../DiscouragedUse/"
+      DatasetProperty &lt;|-- IntendedUse
+        click IntendedUse href "../IntendedUse/"
+      DatasetProperty &lt;|-- ProhibitedUse
+        click ProhibitedUse href "../ProhibitedUse/"
       DatasetProperty &lt;|-- ThirdPartySharing
         click ThirdPartySharing href "../ThirdPartySharing/"
       DatasetProperty &lt;|-- DistributionFormat
@@ -364,6 +370,7 @@
 <li><a href="../Subpopulation/">Subpopulation</a></li>
 <li><a href="../Deidentification/">Deidentification</a></li>
 <li><a href="../SensitiveElement/">SensitiveElement</a></li>
+<li><a href="../DatasetRelationship/">DatasetRelationship</a></li>
 <li><a href="../InstanceAcquisition/">InstanceAcquisition</a></li>
 <li><a href="../CollectionMechanism/">CollectionMechanism</a></li>
 <li><a href="../DataCollector/">DataCollector</a></li>
@@ -378,6 +385,8 @@
 <li><a href="../OtherTask/">OtherTask</a></li>
 <li><a href="../FutureUseImpact/">FutureUseImpact</a></li>
 <li><a href="../DiscouragedUse/">DiscouragedUse</a></li>
+<li><a href="../IntendedUse/">IntendedUse</a></li>
+<li><a href="../ProhibitedUse/">ProhibitedUse</a></li>
 <li><a href="../ThirdPartySharing/">ThirdPartySharing</a></li>
 <li><a href="../DistributionFormat/">DistributionFormat</a></li>
 <li><a href="../DistributionDate/">DistributionDate</a></li>
@@ -546,6 +555,7 @@ attributes:
     - Confidentiality
     - Deidentification
     - SensitiveElement
+    - DatasetRelationship
     - InstanceAcquisition
     - CollectionMechanism
     - DataCollector
@@ -560,6 +570,8 @@ attributes:
     - OtherTask
     - FutureUseImpact
     - DiscouragedUse
+    - IntendedUse
+    - ProhibitedUse
     - ThirdPartySharing
     - DistributionFormat
     - DistributionDate

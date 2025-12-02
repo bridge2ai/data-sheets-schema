@@ -1,0 +1,1397 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/schema_evolution_analysis/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>Data Sheets Schema Evolution Analysis - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#data-sheets-schema-evolution-analysis" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Data Sheets Schema Evolution Analysis
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_examples/" class="md-nav__link">
+        D4D Examples
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    Executive Summary
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-commit-timeline" class="md-nav__link">
+    1. Commit Timeline
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Commit Timeline">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#chronological-history" class="md-nav__link">
+    Chronological History
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#baseline-identification" class="md-nav__link">
+    Baseline Identification
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-statistical-overview" class="md-nav__link">
+    2. Statistical Overview
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Statistical Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#file-growth-metrics" class="md-nav__link">
+    File Growth Metrics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#change-statistics-by-phase" class="md-nav__link">
+    Change Statistics by Phase
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-detailed-phase-1-analysis-pr-94-enhancements" class="md-nav__link">
+    3. Detailed Phase 1 Analysis: PR #94 Enhancements
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Detailed Phase 1 Analysis: PR #94 Enhancements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#commit-f66ed1c-2024-11-18" class="md-nav__link">
+    Commit: f66ed1c (2024-11-18)
+  </a>
+  
+    <nav class="md-nav" aria-label="Commit: f66ed1c (2024-11-18)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-phase-1a-semantic-interoperability" class="md-nav__link">
+    3.1 Phase 1A: Semantic Interoperability
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-phase-1b-variablefield-metadata" class="md-nav__link">
+    3.2 Phase 1B: Variable/Field Metadata
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-phase-1c-fairness-attribution-enhancements" class="md-nav__link">
+    3.3 Phase 1C: Fairness &amp; Attribution Enhancements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-phase-1-summary-new-additions" class="md-nav__link">
+    3.4 Phase 1 Summary: New Additions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-detailed-phase-2-analysis-ro-crate-integration" class="md-nav__link">
+    4. Detailed Phase 2 Analysis: RO-Crate Integration
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Detailed Phase 2 Analysis: RO-Crate Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#commit-9f0327e-2024-11-26" class="md-nav__link">
+    Commit: 9f0327e (2024-11-26)
+  </a>
+  
+    <nav class="md-nav" aria-label="Commit: 9f0327e (2024-11-26)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-priority-0-integrate-existing-d4d_human-module-critical" class="md-nav__link">
+    4.1 Priority 0: Integrate Existing D4D_Human Module (CRITICAL)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-priority-1-add-truly-missing-fields" class="md-nav__link">
+    4.2 Priority 1: Add Truly Missing Fields
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-priority-2-enhanced-metadata" class="md-nav__link">
+    4.3 Priority 2: Enhanced Metadata
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-additional-ro-crate-enhancements" class="md-nav__link">
+    4.4 Additional RO-Crate Enhancements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-phase-2-summary-new-additions" class="md-nav__link">
+    4.5 Phase 2 Summary: New Additions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-comparison-summary-tables" class="md-nav__link">
+    5. Comparison Summary Tables
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Comparison Summary Tables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-schema-metrics-evolution" class="md-nav__link">
+    5.1 Schema Metrics Evolution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-capability-enhancements" class="md-nav__link">
+    5.2 Capability Enhancements
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-semantic-interoperability-coverage" class="md-nav__link">
+    5.3 Semantic Interoperability Coverage
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-key-insights" class="md-nav__link">
+    6. Key Insights
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Key Insights">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-two-distinct-enhancement-waves" class="md-nav__link">
+    6.1 Two Distinct Enhancement Waves
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-critical-fixes" class="md-nav__link">
+    6.2 Critical Fixes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-standards-integration" class="md-nav__link">
+    6.3 Standards Integration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-granularity-improvements" class="md-nav__link">
+    6.4 Granularity Improvements
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-impact-assessment" class="md-nav__link">
+    7. Impact Assessment
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Impact Assessment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#before-baseline-84e0422" class="md-nav__link">
+    Before Baseline (84e0422)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-pr-94-f66ed1c" class="md-nav__link">
+    After PR #94 (f66ed1c)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#after-ro-crate-9f0327e" class="md-nav__link">
+    After RO-Crate (9f0327e)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#overall-transformation" class="md-nav__link">
+    Overall Transformation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-quick-reference-links" class="md-nav__link">
+    8. Quick Reference Links
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Quick Reference Links">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#view-changes-on-github" class="md-nav__link">
+    View Changes on GitHub
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-conclusion" class="md-nav__link">
+    9. Conclusion
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/schema_evolution_analysis.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="data-sheets-schema-evolution-analysis">Data Sheets Schema Evolution Analysis</h1>
+<p><strong>Comprehensive Comparison: Baseline to RO-Crate Integration</strong></p>
+<hr />
+<h2 id="executive-summary">Executive Summary</h2>
+<p>This report analyzes the evolution of <code>data_sheets_schema_all.yaml</code> from the baseline (August 2024) through two major enhancement phases culminating in RO-Crate integration (November 2024). The schema grew from <strong>586KB to 671KB</strong>, adding significant semantic interoperability, variable metadata capabilities, and dataset governance features.</p>
+<p><strong>Key Metrics:</strong>
+- <strong>File Size</strong>: 586KB → 671KB (+85KB, +14.5%)
+- <strong>Lines</strong>: 21,549 → 24,875 (+3,326, +15.4%)
+- <strong>Enums</strong>: 5 → 14 (+9, +180%)
+- <strong>Classes</strong>: 73 → 79 (+6, +8.2%)
+- <strong>Prefixes</strong>: ~29 → ~48 (+19, +65.5%)</p>
+<hr />
+<h2 id="1-commit-timeline">1. Commit Timeline</h2>
+<h3 id="chronological-history">Chronological History</h3>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Date</th>
+<th>Author</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>e503b59</strong></td>
+<td>2024-08-21</td>
+<td>J. Harry Caufield</td>
+<td>Remove import of standards-schemas</td>
+</tr>
+<tr>
+<td><strong>a1dfbc5</strong></td>
+<td>2024-08-21</td>
+<td>J. Harry Caufield</td>
+<td>Cleanup and remove dashes from prefixes</td>
+</tr>
+<tr>
+<td><strong>84e0422</strong></td>
+<td>2024-08-21</td>
+<td>J. Harry Caufield</td>
+<td><strong>BASELINE: Update project artifacts again</strong></td>
+</tr>
+<tr>
+<td><strong>f66ed1c</strong></td>
+<td>2024-11-18</td>
+<td>Marcin P. Joachimiak</td>
+<td><strong>PR #94: Phases 1-3 implementation</strong></td>
+</tr>
+<tr>
+<td><strong>7b4815a</strong></td>
+<td>2024-11-24</td>
+<td>Marcin P. Joachimiak</td>
+<td>Integrate RO-Crate features (Priority 0, 1, 2)</td>
+</tr>
+<tr>
+<td><strong>9f0327e</strong></td>
+<td>2024-11-26</td>
+<td>Marcin P. Joachimiak</td>
+<td><strong>LATEST: Regenerate with RO-Crate fields</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="baseline-identification">Baseline Identification</h3>
+<p><strong>Commit 84e0422</strong> (2024-08-21) represents the baseline - the last stable state before the major cross-schema comparison and enhancement work began. This commit created the initial merged schema file.</p>
+<hr />
+<h2 id="2-statistical-overview">2. Statistical Overview</h2>
+<h3 id="file-growth-metrics">File Growth Metrics</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Baseline (84e0422)</th>
+<th>PR #94 (f66ed1c)</th>
+<th>RO-Crate (9f0327e)</th>
+<th>Total Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>File Size</strong></td>
+<td>586KB</td>
+<td>612KB</td>
+<td>671KB</td>
+<td>+85KB (+14.5%)</td>
+</tr>
+<tr>
+<td><strong>Line Count</strong></td>
+<td>21,549</td>
+<td>22,459</td>
+<td>24,875</td>
+<td>+3,326 lines (+15.4%)</td>
+</tr>
+<tr>
+<td><strong>Enums</strong></td>
+<td>5</td>
+<td>9</td>
+<td>14</td>
+<td>+9 enums (+180%)</td>
+</tr>
+<tr>
+<td><strong>Classes</strong></td>
+<td>73</td>
+<td>75</td>
+<td>79</td>
+<td>+6 classes (+8.2%)</td>
+</tr>
+<tr>
+<td><strong>Prefixes</strong></td>
+<td>~29</td>
+<td>~48</td>
+<td>~48</td>
+<td>+19 prefixes (+65.5%)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="change-statistics-by-phase">Change Statistics by Phase</h3>
+<p><strong>Phase 1: PR #94 (Baseline → f66ed1c)</strong>
+- Lines changed: 6,476 insertions, 5,566 deletions (net +910 lines)
+- File size: +26KB (+4.4%)
+- Focus: Semantic mappings, variable metadata, attribution enhancements</p>
+<p><strong>Phase 2: RO-Crate Integration (f66ed1c → 9f0327e)</strong>
+- Lines changed: 2,614 insertions, 198 deletions (net +2,416 lines)
+- File size: +73KB (+11.9%)
+- Focus: Human subjects, governance, dataset relationships, use constraints</p>
+<p><strong>Total (Baseline → Latest)</strong>
+- Lines changed: 8,585 insertions, 5,259 deletions (net +3,326 lines)
+- File size: +85KB (+14.5%)</p>
+<hr />
+<h2 id="3-detailed-phase-1-analysis-pr-94-enhancements">3. Detailed Phase 1 Analysis: PR #94 Enhancements</h2>
+<h3 id="commit-f66ed1c-2024-11-18">Commit: f66ed1c (2024-11-18)</h3>
+<p><strong>Title:</strong> Implement Phases 1-3: Semantic mappings, variable metadata, and enhancements</p>
+<h4 id="31-phase-1a-semantic-interoperability">3.1 Phase 1A: Semantic Interoperability</h4>
+<p><strong>Missing Prefixes Added (6 new prefixes):</strong>
+- <code>bibo:</code> - Bibliographic Ontology (http://purl.org/ontology/bibo/)
+- <code>dcterms:</code> - Dublin Core Terms (http://purl.org/dc/terms/)
+- <code>foaf:</code> - Friend of a Friend (http://xmlns.com/foaf/0.1/)
+- <code>oslc:</code> - Open Services for Lifecycle Collaboration (http://open-services.net/ns/core#)
+- <code>prov:</code> - PROV Ontology (http://www.w3.org/ns/prov#)
+- <code>qudt:</code> - Quantities, Units, Dimensions and Types (http://qudt.org/schema/qudt/)</p>
+<p><strong>Impact:</strong> Fixed critical bug where 4 prefixes were used in <code>slot_uri</code> mappings but not defined.</p>
+<p><strong>Enhanced Class Mappings:</strong>
+- <code>Organization</code> → <code>schema:Organization</code>, <code>foaf:Organization</code>
+- <code>Person</code> → <code>schema:Person</code>, <code>foaf:Person</code>
+- <code>Software</code> → <code>schema:SoftwareApplication</code></p>
+<p><strong>Enhanced Slot Mappings (17+ slots):</strong>
+- <code>language</code> → <code>dcterms:language</code>, <code>schema:inLanguage</code>
+- <code>media_type</code> → <code>dcat:mediaType</code>, <code>schema:encodingFormat</code>
+- <code>hash</code>, <code>md5</code>, <code>sha256</code> → <code>dcterms:identifier</code>
+- <code>status</code> → <code>bibo:status</code>
+- <code>was_derived_from</code> → <code>prov:wasDerivedFrom</code> (changed from <code>pav:derivedFrom</code>)
+- <code>modified_by</code> → <code>oslc:modifiedBy</code>
+- <code>doi</code> → <code>bibo:doi</code>
+- <code>path</code> → <code>schema:contentUrl</code>
+- <code>compression</code> → <code>dcat:compressFormat</code>
+- <code>affiliation</code> → <code>schema:affiliation</code>
+- <code>email</code> → <code>schema:email</code>
+- <code>Software.version</code> → <code>schema:softwareVersion</code>
+- <code>Software.license</code> → <code>schema:license</code>
+- <code>Software.url</code> → <code>schema:url</code></p>
+<p><strong>New Slot Added:</strong>
+- <code>same_as</code> → <code>schema:sameAs</code> (for linking to canonical/alternative dataset URLs)</p>
+<p><strong>Semantic Coverage Improvement:</strong>
+- <code>slot_uri</code> coverage: 14% → ~30% (more than doubled)
+- <code>class_uri</code> coverage: 3% → ~10% (3x increase)</p>
+<h4 id="32-phase-1b-variablefield-metadata">3.2 Phase 1B: Variable/Field Metadata</h4>
+<p><strong>New Module Created:</strong> <code>D4D_Variables.yaml</code></p>
+<p><strong>New Class: VariableMetadata</strong></p>
+<p>Addresses critical gap - ability to document individual variables/columns/fields in datasets.</p>
+<p><strong>Attributes (14 fields):</strong>
+- <code>variable_name</code> (required) → <code>schema:name</code>
+- <code>data_type</code> → <code>schema:DataType</code>
+- <code>unit</code> → <code>qudt:unit</code> (QUDT vocabulary support)
+- <code>missing_value_code</code> → <code>csvw:null</code>
+- <code>minimum_value</code> → <code>schema:minValue</code>
+- <code>maximum_value</code> → <code>schema:maxValue</code>
+- <code>categories</code> → <code>schema:valueReference</code>
+- <code>examples</code> → <code>skos:example</code>
+- <code>is_identifier</code> → <code>csvw:primaryKey</code>
+- <code>is_sensitive</code> (boolean)
+- <code>precision</code> (integer)
+- <code>measurement_technique</code> → <code>schema:measurementTechnique</code>
+- <code>derivation</code> → <code>prov:wasDerivedFrom</code>
+- <code>quality_notes</code></p>
+<p><strong>New Enum: VariableTypeEnum (13 values)</strong>
+- integer, float, double, string, boolean, date, datetime
+- categorical, ordinal, identifier, json, array, object</p>
+<p><strong>Class Mappings:</strong>
+- <code>VariableMetadata</code> → <code>schema:PropertyValue</code>, <code>csvw:Column</code></p>
+<p><strong>Dataset Integration:</strong>
+- Added <code>variables</code> slot to Dataset class → <code>schema:variableMeasured</code></p>
+<h4 id="33-phase-1c-fairness-attribution-enhancements">3.3 Phase 1C: Fairness &amp; Attribution Enhancements</h4>
+<p><strong>ORCID Support:</strong>
+- Added <code>orcid</code> attribute to Person class
+- Pattern validation: <code>^\d{4}-\d{4}-\d{4}-\d{4}$</code>
+- Maps to <code>schema:identifier</code></p>
+<p><strong>New Enum: CRediTRoleEnum (14 roles)</strong></p>
+<p>Contributor Roles Taxonomy for documenting specific contributions:
+- conceptualization
+- methodology
+- software
+- validation
+- formal_analysis
+- investigation
+- resources
+- data_curation
+- writing_original_draft
+- writing_review_editing
+- visualization
+- supervision
+- project_administration
+- funding_acquisition</p>
+<p><strong>New Enum: BiasTypeEnum (9 types)</strong></p>
+<p>Structured bias taxonomy for fairness documentation:
+- selection_bias
+- measurement_bias
+- historical_bias
+- representation_bias
+- aggregation_bias
+- algorithmic_bias
+- sampling_bias
+- annotation_bias
+- confirmation_bias</p>
+<p><strong>New Enum: VersionTypeEnum (3 values)</strong></p>
+<p>Semantic versioning support following semver.org:
+- MAJOR
+- MINOR
+- PATCH</p>
+<p><strong>Other New Enums:</strong>
+- MediaTypeEnum
+- CreatorOrMaintainerEnum</p>
+<h4 id="34-phase-1-summary-new-additions">3.4 Phase 1 Summary: New Additions</h4>
+<p><strong>Enums Added (6):</strong>
+1. VariableTypeEnum
+2. CRediTRoleEnum
+3. BiasTypeEnum
+4. VersionTypeEnum
+5. MediaTypeEnum
+6. CreatorOrMaintainerEnum</p>
+<p><strong>Classes Added (2):</strong>
+1. VariableMetadata
+2. Boolean (type)</p>
+<p><strong>Notable:</strong> This phase mostly reorganized and enhanced existing schema structure rather than adding many new classes, focusing instead on semantic mappings and new metadata capabilities.</p>
+<hr />
+<h2 id="4-detailed-phase-2-analysis-ro-crate-integration">4. Detailed Phase 2 Analysis: RO-Crate Integration</h2>
+<h3 id="commit-9f0327e-2024-11-26">Commit: 9f0327e (2024-11-26)</h3>
+<p><strong>Title:</strong> Regenerate data_sheets_schema_all.yaml with RO-Crate fields</p>
+<p><strong>Based on:</strong> Commit 7b4815a "Integrate RO-Crate features into D4D schema (Priority 0, 1, 2)"</p>
+<h4 id="41-priority-0-integrate-existing-d4d_human-module-critical">4.1 Priority 0: Integrate Existing D4D_Human Module (CRITICAL)</h4>
+<p><strong>Problem:</strong> D4D_Human.yaml module existed but classes were unused - not accessible via Dataset.</p>
+<p><strong>Solution:</strong> Added 5 human subjects attributes to Dataset class:</p>
+<ol>
+<li><strong>human_subject_research</strong> → HumanSubjectResearch class</li>
+<li>Documents whether dataset involves human subjects</li>
+<li>
+<p>IRB approval information</p>
+</li>
+<li>
+<p><strong>informed_consent</strong> → InformedConsent class</p>
+</li>
+<li>
+<p>Consent mechanisms and documentation</p>
+</li>
+<li>
+<p><strong>participant_privacy</strong> → ParticipantPrivacy class</p>
+</li>
+<li>
+<p>Privacy protections and de-identification</p>
+</li>
+<li>
+<p><strong>participant_compensation</strong> → HumanSubjectCompensation class</p>
+</li>
+<li>
+<p>Compensation details for participants</p>
+</li>
+<li>
+<p><strong>vulnerable_populations</strong> → VulnerablePopulations class</p>
+</li>
+<li>Special protections for vulnerable groups</li>
+</ol>
+<p><strong>Impact:</strong> Made existing human subjects classes fully accessible and usable.</p>
+<h4 id="42-priority-1-add-truly-missing-fields">4.2 Priority 1: Add Truly Missing Fields</h4>
+<p><strong>1. ConfidentialityLevelEnum</strong></p>
+<p>Added to D4D_Data_Governance module with 3 levels:</p>
+<table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Description</th>
+<th>Mappings</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>unrestricted</strong></td>
+<td>Public data, no access restrictions</td>
+<td>TLP:CLEAR, NIST_Low_Impact, ISO27001_Public</td>
+</tr>
+<tr>
+<td><strong>restricted</strong></td>
+<td>Limited distribution, basic protections</td>
+<td>TLP:GREEN, NIST_Moderate_Impact, ISO27001_Internal</td>
+</tr>
+<tr>
+<td><strong>confidential</strong></td>
+<td>Strict access controls, high sensitivity</td>
+<td>TLP:AMBER, NIST_High_Impact, ISO27001_Highly_Confidential</td>
+</tr>
+</tbody>
+</table>
+<p>Based on established frameworks: ISO 27001, NIST SP 800-60, Traffic Light Protocol.</p>
+<p><strong>2. Governance Committee Contact</strong>
+- Added <code>governance_committee_contact</code> to ExportControlRegulatoryRestrictions
+- Type: Person
+- Purpose: Contact for data governance questions, access procedures</p>
+<p><strong>3. Dataset Citation</strong>
+- Added <code>citation</code> field to Dataset class
+- Format: Recommended citation in DataCite/BibTeX format
+- Purpose: Enable proper attribution</p>
+<p><strong>4. Parent Datasets</strong>
+- Added <code>parent_datasets</code> field to Dataset class
+- Purpose: Hierarchical composition relationships (hasPart/isPartOf)</p>
+<h4 id="43-priority-2-enhanced-metadata">4.3 Priority 2: Enhanced Metadata</h4>
+<p><strong>1. DatasetRelationship Class</strong></p>
+<p>New class for typed relationships between datasets.</p>
+<p><strong>DatasetRelationshipTypeEnum (14 types):</strong></p>
+<p>Comprehensive relationship vocabulary:
+- derives_from
+- supplements
+- is_supplemented_by
+- is_version_of
+- is_new_version_of
+- replaces
+- is_replaced_by
+- requires
+- is_required_by
+- is_part_of
+- has_part
+- references
+- is_referenced_by
+- is_identical_to</p>
+<p><strong>Integration:</strong>
+- Added <code>related_datasets</code> attribute to Dataset class
+- Enables precise specification of inter-dataset relationships</p>
+<p><strong>2. Separated Use Constraints</strong></p>
+<p><strong>IntendedUse Class:</strong>
+- Explicit statements of recommended applications
+- Positive, encouraged use cases
+- Complements FutureUseImpact</p>
+<p><strong>ProhibitedUse Class:</strong>
+- Explicitly forbidden uses
+- Stronger than DiscouragedUse
+- Non-permitted applications
+- Legal/ethical restrictions</p>
+<p><strong>Integration:</strong>
+- Added <code>intended_uses</code> attribute to Dataset class
+- Added <code>prohibited_uses</code> attribute to Dataset class</p>
+<h4 id="44-additional-ro-crate-enhancements">4.4 Additional RO-Crate Enhancements</h4>
+<p><strong>New Enums (5):</strong></p>
+<ol>
+<li><strong>DataUsePermissionEnum</strong> (22 DUO mappings)</li>
+</ol>
+<p>Based on Data Use Ontology (DUO) from GA4GH
+   - no_restriction → DUO:0000004
+   - general_research_use → DUO:0000042
+   - health_medical_biomedical_research → DUO:0000006
+   - disease_specific_research → DUO:0000007
+   - population_origins_ancestry_research → DUO:0000011
+   - clinical_care_use → DUO:0000043
+   - no_commercial_use → DUO:0000046
+   - non_profit_use_only → DUO:0000045
+   - non_profit_use_and_non_commercial_use → DUO:0000018
+   - no_methods_development → DUO:0000015
+   - genetic_studies_only → DUO:0000016
+   - ethics_approval_required → DUO:0000021
+   - collaboration_required → DUO:0000020
+   - publication_required → DUO:0000019
+   - geographic_restriction → DUO:0000022
+   - institution_specific → DUO:0000028
+   - project_specific → DUO:0000027
+   - user_specific → DUO:0000026
+   - time_limit → DUO:0000025
+   - return_to_database → DUO:0000029
+   - publication_moratorium → DUO:0000024
+   - no_population_ancestry_research → DUO:0000044</p>
+<ol>
+<li><strong>ComplianceStatusEnum</strong> (5 values)</li>
+<li>compliant</li>
+<li>partially_compliant</li>
+<li>not_compliant</li>
+<li>not_applicable</li>
+<li>
+<p>under_review</p>
+</li>
+<li>
+<p><strong>AIActRiskEnum</strong> (4 levels)</p>
+</li>
+</ol>
+<p>Based on EU AI Act risk classification:
+   - minimal_risk
+   - limited_risk
+   - high_risk
+   - unacceptable_risk</p>
+<ol>
+<li>
+<p><strong>ConfidentialityLevelEnum</strong> (3 levels)
+   See section 4.2 above</p>
+</li>
+<li>
+<p><strong>DatasetRelationshipTypeEnum</strong> (14 types)
+   See section 4.3 above</p>
+</li>
+</ol>
+<p><strong>DUO Prefix Added:</strong>
+- <code>DUO:</code> → http://purl.obolibrary.org/obo/DUO_
+- Enables standardized data use ontology mappings</p>
+<h4 id="45-phase-2-summary-new-additions">4.5 Phase 2 Summary: New Additions</h4>
+<p><strong>Enums Added (5):</strong>
+1. ConfidentialityLevelEnum (3 values)
+2. DataUsePermissionEnum (22 DUO mappings)
+3. DatasetRelationshipTypeEnum (14 types)
+4. ComplianceStatusEnum (5 values)
+5. AIActRiskEnum (4 levels)</p>
+<p><strong>Classes Added (4):</strong>
+1. DatasetRelationship
+2. IntendedUse
+3. ProhibitedUse
+4. DUO (prefix/namespace)</p>
+<p><strong>Dataset Attributes Added (10):</strong>
+1. human_subject_research
+2. informed_consent
+3. participant_privacy
+4. participant_compensation
+5. vulnerable_populations
+6. citation
+7. parent_datasets
+8. related_datasets
+9. intended_uses
+10. prohibited_uses</p>
+<p><strong>Schema Modules Modified:</strong>
+- data_sheets_schema.yaml (main schema)
+- D4D_Data_Governance.yaml
+- D4D_Composition.yaml
+- D4D_Uses.yaml</p>
+<hr />
+<h2 id="5-comparison-summary-tables">5. Comparison Summary Tables</h2>
+<h3 id="51-schema-metrics-evolution">5.1 Schema Metrics Evolution</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Baseline</th>
+<th>After PR #94</th>
+<th>After RO-Crate</th>
+<th>Total Δ</th>
+<th>% Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File Size</td>
+<td>586KB</td>
+<td>612KB</td>
+<td>671KB</td>
+<td>+85KB</td>
+<td>+14.5%</td>
+</tr>
+<tr>
+<td>Lines</td>
+<td>21,549</td>
+<td>22,459</td>
+<td>24,875</td>
+<td>+3,326</td>
+<td>+15.4%</td>
+</tr>
+<tr>
+<td>Enums</td>
+<td>5</td>
+<td>9</td>
+<td>14</td>
+<td>+9</td>
+<td>+180%</td>
+</tr>
+<tr>
+<td>Classes</td>
+<td>73</td>
+<td>75</td>
+<td>79</td>
+<td>+6</td>
+<td>+8.2%</td>
+</tr>
+<tr>
+<td>Prefixes</td>
+<td>~29</td>
+<td>~48</td>
+<td>~48</td>
+<td>+19</td>
+<td>+65.5%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-capability-enhancements">5.2 Capability Enhancements</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Baseline</th>
+<th>PR #94</th>
+<th>RO-Crate</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Variable Metadata</strong></td>
+<td>✗ None</td>
+<td>✓ VariableMetadata class</td>
+<td>✓ Full support</td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><strong>ORCID Support</strong></td>
+<td>✗ None</td>
+<td>✓ Pattern validation</td>
+<td>✓ Maintained</td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><strong>CRediT Roles</strong></td>
+<td>✗ None</td>
+<td>✓ 14 roles</td>
+<td>✓ Maintained</td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><strong>Bias Documentation</strong></td>
+<td>✗ None</td>
+<td>✓ 9 bias types</td>
+<td>✓ Maintained</td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><strong>Human Subjects</strong></td>
+<td>⚠️ Unused</td>
+<td>⚠️ Still unused</td>
+<td>✓ <strong>5 fields active</strong></td>
+<td>ACTIVATED</td>
+</tr>
+<tr>
+<td><strong>Confidentiality</strong></td>
+<td>✗ None</td>
+<td>✗ None</td>
+<td>✓ <strong>3-level enum</strong></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><strong>Dataset Relationships</strong></td>
+<td>⚠️ Basic</td>
+<td>⚠️ Basic</td>
+<td>✓ <strong>14 typed relations</strong></td>
+<td>ENHANCED</td>
+</tr>
+<tr>
+<td><strong>Use Constraints</strong></td>
+<td>⚠️ Discouraged only</td>
+<td>⚠️ Discouraged only</td>
+<td>✓ <strong>Intended + Prohibited</strong></td>
+<td>ENHANCED</td>
+</tr>
+<tr>
+<td><strong>DUO Integration</strong></td>
+<td>✗ None</td>
+<td>✗ None</td>
+<td>✓ <strong>22 DUO mappings</strong></td>
+<td>NEW</td>
+</tr>
+<tr>
+<td><strong>Citation Field</strong></td>
+<td>✗ None</td>
+<td>✗ None</td>
+<td>✓ DataCite/BibTeX</td>
+<td>NEW</td>
+</tr>
+</tbody>
+</table>
+<h3 id="53-semantic-interoperability-coverage">5.3 Semantic Interoperability Coverage</h3>
+<table>
+<thead>
+<tr>
+<th>Coverage Type</th>
+<th>Baseline</th>
+<th>PR #94</th>
+<th>RO-Crate</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>slot_uri</td>
+<td>~14% (20/144)</td>
+<td>~30% (est.)</td>
+<td>~30%+</td>
+<td>+16 percentage points</td>
+</tr>
+<tr>
+<td>class_uri</td>
+<td>~3% (2/65)</td>
+<td>~10% (est.)</td>
+<td>~10%+</td>
+<td>+7 percentage points</td>
+</tr>
+<tr>
+<td>Prefixes defined</td>
+<td>~29</td>
+<td>~48</td>
+<td>~48</td>
+<td>+19 ontology namespaces</td>
+</tr>
+<tr>
+<td>DUO mappings</td>
+<td>0</td>
+<td>0</td>
+<td>22</td>
+<td>Full DUO support</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="6-key-insights">6. Key Insights</h2>
+<h3 id="61-two-distinct-enhancement-waves">6.1 Two Distinct Enhancement Waves</h3>
+<p><strong>Wave 1: Foundational Semantic Infrastructure (PR #94)</strong>
+- Focus: Fix broken mappings, add missing prefixes
+- Add variable-level metadata capability
+- Enhance attribution (ORCID, CRediT)
+- Document bias and fairness concerns
+- Result: Doubled semantic mapping coverage</p>
+<p><strong>Wave 2: Dataset Governance &amp; Relationships (RO-Crate)</strong>
+- Focus: Activate unused human subjects module
+- Add confidentiality classifications
+- Implement typed dataset relationships
+- Separate intended vs. prohibited uses
+- Integrate DUO for data use permissions
+- Result: Comprehensive governance framework</p>
+<h3 id="62-critical-fixes">6.2 Critical Fixes</h3>
+<ol>
+<li><strong>Prefix Bug (PR #94):</strong> Fixed 4 prefixes (dcterms, prov, bibo, oslc) that were referenced but undefined</li>
+<li><strong>Orphaned Module (RO-Crate):</strong> Activated D4D_Human module that existed but was inaccessible</li>
+<li><strong>Semantic Coverage (PR #94):</strong> More than doubled slot_uri mappings for better interoperability</li>
+</ol>
+<h3 id="63-standards-integration">6.3 Standards Integration</h3>
+<p><strong>PR #94 Added:</strong>
+- QUDT (units)
+- CSVW (CSV on the Web)
+- PROV (provenance)
+- CRediT (contributor roles)</p>
+<p><strong>RO-Crate Added:</strong>
+- DUO (data use ontology - 22 standardized terms)
+- ISO 27001 (information security)
+- NIST SP 800-60 (security categorization)
+- Traffic Light Protocol (information sharing)
+- EU AI Act (risk levels)</p>
+<h3 id="64-granularity-improvements">6.4 Granularity Improvements</h3>
+<p><strong>Before:</strong> Dataset-level metadata only
+<strong>After PR #94:</strong> Variable/field-level metadata via VariableMetadata class
+<strong>After RO-Crate:</strong> Added relationship types, use constraints, confidentiality levels</p>
+<hr />
+<h2 id="7-impact-assessment">7. Impact Assessment</h2>
+<h3 id="before-baseline-84e0422">Before Baseline (84e0422)</h3>
+<ul>
+<li>Basic D4D schema with 10 modules</li>
+<li>Limited semantic mappings</li>
+<li>No variable-level metadata</li>
+<li>Unused human subjects module</li>
+<li>No structured governance framework</li>
+</ul>
+<h3 id="after-pr-94-f66ed1c">After PR #94 (f66ed1c)</h3>
+<ul>
+<li>Fixed prefix definitions</li>
+<li>Variable/field metadata capability</li>
+<li>ORCID and CRediT support</li>
+<li>Structured bias documentation</li>
+<li>Semantic version support</li>
+<li>Doubled semantic mapping coverage</li>
+</ul>
+<h3 id="after-ro-crate-9f0327e">After RO-Crate (9f0327e)</h3>
+<ul>
+<li>Active human subjects documentation</li>
+<li>3-level confidentiality classification</li>
+<li>14 typed dataset relationships</li>
+<li>Separated intended/prohibited uses</li>
+<li>22 DUO data use permissions</li>
+<li>Citation field for attribution</li>
+<li>Complete governance framework</li>
+</ul>
+<h3 id="overall-transformation">Overall Transformation</h3>
+<p>The schema evolved from a basic dataset documentation framework to a comprehensive, semantically-rich metadata standard with:</p>
+<ol>
+<li><strong>Semantic Interoperability:</strong> Through extensive ontology mappings (Schema.org, Dublin Core, PROV, FOAF, QUDT, DUO, etc.)</li>
+<li><strong>Variable-Level Documentation:</strong> Via the new VariableMetadata class with 14 attributes</li>
+<li><strong>Contributor Attribution:</strong> Using ORCID and the 14-role CRediT taxonomy</li>
+<li><strong>Fairness Documentation:</strong> With structured bias type enumeration</li>
+<li><strong>Human Subjects Protection:</strong> 5 activated classes for research ethics</li>
+<li><strong>Data Governance:</strong> Confidentiality levels, DUO permissions, compliance tracking</li>
+<li><strong>Dataset Relationships:</strong> 14 typed relationship types for precise dataset connections</li>
+<li><strong>Use Constraints:</strong> Clear separation of intended, discouraged, and prohibited uses</li>
+</ol>
+<p><strong>The schema now matches or exceeds RO-Crate/FAIRSCAPE metadata coverage while maintaining the D4D question-based documentation approach.</strong></p>
+<hr />
+<h2 id="8-quick-reference-links">8. Quick Reference Links</h2>
+<h3 id="view-changes-on-github">View Changes on GitHub</h3>
+<p><strong>PR #94 "Schema update":</strong>
+- Commit: https://github.com/bridge2ai/data-sheets-schema/commit/f66ed1c
+- PR: https://github.com/bridge2ai/data-sheets-schema/pull/94</p>
+<p><strong>PR #96 "RO-Crate integration":</strong>
+- Commit (regeneration): https://github.com/bridge2ai/data-sheets-schema/commit/9f0327e
+- Commit (integration): https://github.com/bridge2ai/data-sheets-schema/commit/7b4815a
+- PR: https://github.com/bridge2ai/data-sheets-schema/pull/96</p>
+<p><strong>Compare baseline to latest:</strong>
+- Full diff: https://github.com/bridge2ai/data-sheets-schema/compare/84e0422..9f0327e</p>
+<hr />
+<h2 id="9-conclusion">9. Conclusion</h2>
+<p>The evolution from baseline (84e0422) to the current RO-Crate-integrated schema (9f0327e) represents a <strong>180% increase in enums</strong>, a <strong>15.4% increase in total lines</strong>, and a <strong>14.5% increase in file size</strong>. More importantly, it transformed the D4D schema from a basic documentation tool into a comprehensive, standards-based metadata framework capable of supporting:</p>
+<ul>
+<li>✅ <strong>FAIR Principles</strong> - Full findability, accessibility, interoperability, reusability</li>
+<li>✅ <strong>Semantic Interoperability</strong> - 19 additional ontology namespaces</li>
+<li>✅ <strong>Granular Documentation</strong> - Variable-level metadata capability</li>
+<li>✅ <strong>Attribution</strong> - ORCID + 14 CRediT roles</li>
+<li>✅ <strong>Fairness</strong> - 9 structured bias types</li>
+<li>✅ <strong>Human Subjects</strong> - 5 active protection classes</li>
+<li>✅ <strong>Data Governance</strong> - Confidentiality, DUO permissions, compliance</li>
+<li>✅ <strong>Dataset Relationships</strong> - 14 precise relationship types</li>
+<li>✅ <strong>Use Constraints</strong> - Intended, discouraged, and prohibited uses</li>
+</ul>
+<hr />
+<p><strong>Report Generated:</strong> 2024-11-29
+<strong>Analysis Scope:</strong> Commits e503b59 through 9f0327e
+<strong>Baseline:</strong> 84e0422 (2024-08-21)
+<strong>Latest:</strong> 9f0327e (2024-11-26)
+<strong>Total Schema Growth:</strong> +85KB (+14.5%), +3,326 lines (+15.4%), +9 enums (+180%)</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>

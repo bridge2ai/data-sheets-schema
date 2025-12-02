@@ -219,6 +219,17 @@
       DatasetProperty &lt;|-- ExportControlRegulatoryRestrictions
         click DatasetProperty href "../DatasetProperty/"
 
+      ExportControlRegulatoryRestrictions : confidentiality_level
+
+
+
+
+
+        ExportControlRegulatoryRestrictions --&gt; "0..1" ConfidentialityLevelEnum : confidentiality_level
+        click ConfidentialityLevelEnum href "../ConfidentialityLevelEnum/"
+
+
+
       ExportControlRegulatoryRestrictions : description
 
       ExportControlRegulatoryRestrictions : eu_ai_act_risk_category
@@ -240,6 +251,17 @@
 
         ExportControlRegulatoryRestrictions --&gt; "0..1" ComplianceStatusEnum : gdpr_compliant
         click ComplianceStatusEnum href "../ComplianceStatusEnum/"
+
+
+
+      ExportControlRegulatoryRestrictions : governance_committee_contact
+
+
+
+
+
+        ExportControlRegulatoryRestrictions --&gt; "0..1" Person : governance_committee_contact
+        click Person href "../Person/"
 
 
 
@@ -322,6 +344,18 @@
 <td><a href="../other_compliance/">other_compliance</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
 <td>Other regulatory compliance frameworks applicable to this dataset (e</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../confidentiality_level/">confidentiality_level</a></td>
+<td>0..1 <br/> <a href="../ConfidentialityLevelEnum/">ConfidentialityLevelEnum</a></td>
+<td>Confidentiality classification of the dataset indicating level of access rest...</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../governance_committee_contact/">governance_committee_contact</a></td>
+<td>0..1 <br/> <a href="../Person/">Person</a></td>
+<td>Contact person for data governance committee</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -425,6 +459,7 @@ attributes:
     - Confidentiality
     - Deidentification
     - SensitiveElement
+    - DatasetRelationship
     - InstanceAcquisition
     - CollectionMechanism
     - DataCollector
@@ -439,6 +474,8 @@ attributes:
     - OtherTask
     - FutureUseImpact
     - DiscouragedUse
+    - IntendedUse
+    - ProhibitedUse
     - ThirdPartySharing
     - DistributionFormat
     - DistributionDate
@@ -496,6 +533,27 @@ attributes:
     - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
+  confidentiality_level:
+    name: confidentiality_level
+    description: Confidentiality classification of the dataset indicating level of
+      access restrictions and sensitivity.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    rank: 1000
+    domain_of:
+    - ExportControlRegulatoryRestrictions
+    range: ConfidentialityLevelEnum
+  governance_committee_contact:
+    name: governance_committee_contact
+    description: Contact person for data governance committee. This person can answer
+      questions about data governance policies, access procedures, and oversight mechanisms.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - schema:contactPoint
+    rank: 1000
+    slot_uri: schema:contactPoint
+    domain_of:
+    - ExportControlRegulatoryRestrictions
+    range: Person
 
 </code></pre>
 </details>
@@ -531,6 +589,7 @@ attributes:
     - Confidentiality
     - Deidentification
     - SensitiveElement
+    - DatasetRelationship
     - InstanceAcquisition
     - CollectionMechanism
     - DataCollector
@@ -545,6 +604,8 @@ attributes:
     - OtherTask
     - FutureUseImpact
     - DiscouragedUse
+    - IntendedUse
+    - ProhibitedUse
     - ThirdPartySharing
     - DistributionFormat
     - DistributionDate
@@ -610,6 +671,31 @@ attributes:
     - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
+  confidentiality_level:
+    name: confidentiality_level
+    description: Confidentiality classification of the dataset indicating level of
+      access restrictions and sensitivity.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    rank: 1000
+    alias: confidentiality_level
+    owner: ExportControlRegulatoryRestrictions
+    domain_of:
+    - ExportControlRegulatoryRestrictions
+    range: ConfidentialityLevelEnum
+  governance_committee_contact:
+    name: governance_committee_contact
+    description: Contact person for data governance committee. This person can answer
+      questions about data governance policies, access procedures, and oversight mechanisms.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - schema:contactPoint
+    rank: 1000
+    slot_uri: schema:contactPoint
+    alias: governance_committee_contact
+    owner: ExportControlRegulatoryRestrictions
+    domain_of:
+    - ExportControlRegulatoryRestrictions
+    range: Person
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?

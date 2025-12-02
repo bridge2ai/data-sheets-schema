@@ -253,6 +253,8 @@
 
       DataSubset : bytes
 
+      DataSubset : citation
+
       DataSubset : cleaning_strategies
 
 
@@ -504,7 +506,29 @@
 
       DataSubset : hash
 
+      DataSubset : human_subject_research
+
+
+
+
+
+        DataSubset --&gt; "0..1" HumanSubjectResearch : human_subject_research
+        click HumanSubjectResearch href "../HumanSubjectResearch/"
+
+
+
       DataSubset : id
+
+      DataSubset : informed_consent
+
+
+
+
+
+        DataSubset --&gt; "*" InformedConsent : informed_consent
+        click InformedConsent href "../InformedConsent/"
+
+
 
       DataSubset : instances
 
@@ -514,6 +538,17 @@
 
         DataSubset --&gt; "*" Instance : instances
         click Instance href "../Instance/"
+
+
+
+      DataSubset : intended_uses
+
+
+
+
+
+        DataSubset --&gt; "*" IntendedUse : intended_uses
+        click IntendedUse href "../IntendedUse/"
 
 
 
@@ -618,6 +653,39 @@
 
       DataSubset : page
 
+      DataSubset : parent_datasets
+
+
+
+
+
+        DataSubset --&gt; "*" Dataset : parent_datasets
+        click Dataset href "../Dataset/"
+
+
+
+      DataSubset : participant_compensation
+
+
+
+
+
+        DataSubset --&gt; "0..1" HumanSubjectCompensation : participant_compensation
+        click HumanSubjectCompensation href "../HumanSubjectCompensation/"
+
+
+
+      DataSubset : participant_privacy
+
+
+
+
+
+        DataSubset --&gt; "*" ParticipantPrivacy : participant_privacy
+        click ParticipantPrivacy href "../ParticipantPrivacy/"
+
+
+
       DataSubset : path
 
       DataSubset : preprocessing_strategies
@@ -628,6 +696,17 @@
 
         DataSubset --&gt; "*" PreprocessingStrategy : preprocessing_strategies
         click PreprocessingStrategy href "../PreprocessingStrategy/"
+
+
+
+      DataSubset : prohibited_uses
+
+
+
+
+
+        DataSubset --&gt; "*" ProhibitedUse : prohibited_uses
+        click ProhibitedUse href "../ProhibitedUse/"
 
 
 
@@ -663,6 +742,17 @@
 
         DataSubset --&gt; "0..1" ExportControlRegulatoryRestrictions : regulatory_restrictions
         click ExportControlRegulatoryRestrictions href "../ExportControlRegulatoryRestrictions/"
+
+
+
+      DataSubset : related_datasets
+
+
+
+
+
+        DataSubset --&gt; "*" DatasetRelationship : related_datasets
+        click DatasetRelationship href "../DatasetRelationship/"
 
 
 
@@ -781,6 +871,17 @@
 
         DataSubset --&gt; "0..1" VersionAccess : version_access
         click VersionAccess href "../VersionAccess/"
+
+
+
+      DataSubset : vulnerable_populations
+
+
+
+
+
+        DataSubset --&gt; "0..1" VulnerablePopulations : vulnerable_populations
+        click VulnerablePopulations href "../VulnerablePopulations/"
 
 
 
@@ -999,6 +1100,36 @@
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
+<td><a href="../human_subject_research/">human_subject_research</a></td>
+<td>0..1 <br/> <a href="../HumanSubjectResearch/">HumanSubjectResearch</a></td>
+<td>Information about whether dataset involves human subjects research, including...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../informed_consent/">informed_consent</a></td>
+<td>* <br/> <a href="../InformedConsent/">InformedConsent</a></td>
+<td>Details about informed consent procedures, including consent type, documentat...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../participant_privacy/">participant_privacy</a></td>
+<td>* <br/> <a href="../ParticipantPrivacy/">ParticipantPrivacy</a></td>
+<td>Privacy protections and anonymization procedures for human research participa...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../participant_compensation/">participant_compensation</a></td>
+<td>0..1 <br/> <a href="../HumanSubjectCompensation/">HumanSubjectCompensation</a></td>
+<td>Compensation or incentives provided to human research participants</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../vulnerable_populations/">vulnerable_populations</a></td>
+<td>0..1 <br/> <a href="../VulnerablePopulations/">VulnerablePopulations</a></td>
+<td>Information about protections for vulnerable populations (e</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
 <td><a href="../preprocessing_strategies/">preprocessing_strategies</a></td>
 <td>* <br/> <a href="../PreprocessingStrategy/">PreprocessingStrategy</a></td>
 <td></td>
@@ -1050,6 +1181,18 @@
 <td><a href="../discouraged_uses/">discouraged_uses</a></td>
 <td>* <br/> <a href="../DiscouragedUse/">DiscouragedUse</a></td>
 <td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../intended_uses/">intended_uses</a></td>
+<td>* <br/> <a href="../IntendedUse/">IntendedUse</a></td>
+<td>Explicit intended and recommended uses for this dataset</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../prohibited_uses/">prohibited_uses</a></td>
+<td>* <br/> <a href="../ProhibitedUse/">ProhibitedUse</a></td>
+<td>Explicitly prohibited or forbidden uses for this dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1134,6 +1277,24 @@
 <td><a href="../is_tabular/">is_tabular</a></td>
 <td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
 <td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../citation/">citation</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Recommended citation for this dataset in DataCite or BibTeX format</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../parent_datasets/">parent_datasets</a></td>
+<td>* <br/> <a href="../Dataset/">Dataset</a></td>
+<td>Parent datasets that this dataset is part of or derived from</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../related_datasets/">related_datasets</a></td>
+<td>* <br/> <a href="../DatasetRelationship/">DatasetRelationship</a></td>
+<td>Related datasets with typed relationships (e</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1694,6 +1855,62 @@ attributes:
     - Dataset
     range: DataProtectionImpact
     multivalued: true
+  human_subject_research:
+    name: human_subject_research
+    description: Information about whether dataset involves human subjects research,
+      including IRB approval, ethics review, and regulatory compliance.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: human_subject_research
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: HumanSubjectResearch
+  informed_consent:
+    name: informed_consent
+    description: Details about informed consent procedures, including consent type,
+      documentation, and withdrawal mechanisms.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: informed_consent
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: InformedConsent
+    multivalued: true
+  participant_privacy:
+    name: participant_privacy
+    description: Privacy protections and anonymization procedures for human research
+      participants, including reidentification risk assessment.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: participant_privacy
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ParticipantPrivacy
+    multivalued: true
+  participant_compensation:
+    name: participant_compensation
+    description: Compensation or incentives provided to human research participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: participant_compensation
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: HumanSubjectCompensation
+  vulnerable_populations:
+    name: vulnerable_populations
+    description: Information about protections for vulnerable populations (e.g., minors,
+      pregnant women, prisoners) including special safeguards and assent procedures.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: vulnerable_populations
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: VulnerablePopulations
   preprocessing_strategies:
     name: preprocessing_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1783,6 +2000,30 @@ attributes:
     domain_of:
     - Dataset
     range: DiscouragedUse
+    multivalued: true
+  intended_uses:
+    name: intended_uses
+    description: Explicit intended and recommended uses for this dataset. Complements
+      future_use_impacts by focusing on positive applications.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: intended_uses
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: IntendedUse
+    multivalued: true
+  prohibited_uses:
+    name: prohibited_uses
+    description: Explicitly prohibited or forbidden uses for this dataset. Stronger
+      than discouraged_uses - these are not permitted.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: prohibited_uses
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ProhibitedUse
     multivalued: true
   distribution_formats:
     name: distribution_formats
@@ -1920,6 +2161,48 @@ attributes:
     domain_of:
     - Dataset
     range: boolean
+  citation:
+    name: citation
+    description: Recommended citation for this dataset in DataCite or BibTeX format.
+      Provides a standard way to cite the dataset in publications.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:citation
+    rank: 1000
+    slot_uri: schema:citation
+    alias: citation
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: string
+  parent_datasets:
+    name: parent_datasets
+    description: Parent datasets that this dataset is part of or derived from. Enables
+      hierarchical dataset composition (hasPart/isPartOf relationships).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:isPartOf
+    rank: 1000
+    slot_uri: schema:isPartOf
+    alias: parent_datasets
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Dataset
+    multivalued: true
+  related_datasets:
+    name: related_datasets
+    description: Related datasets with typed relationships (e.g., supplements, derives
+      from, is version of). Use DatasetRelationship class to specify relationship
+      types.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: related_datasets
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DatasetRelationship
+    multivalued: true
   compression:
     name: compression
     description: compression format used, if any. e.g., gzip, bzip2, zip
@@ -2183,6 +2466,7 @@ attributes:
     - Confidentiality
     - Deidentification
     - SensitiveElement
+    - DatasetRelationship
     - InstanceAcquisition
     - CollectionMechanism
     - DataCollector
@@ -2197,6 +2481,8 @@ attributes:
     - OtherTask
     - FutureUseImpact
     - DiscouragedUse
+    - IntendedUse
+    - ProhibitedUse
     - ThirdPartySharing
     - DistributionFormat
     - DistributionDate
