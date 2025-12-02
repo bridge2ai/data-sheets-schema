@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-11-25T12:07:56
+# Generation date: 2025-12-01T21:10:34
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3293,39 +3293,44 @@ class CRediTRoleEnum(EnumDefinitionImpl):
 
 class BiasTypeEnum(EnumDefinitionImpl):
     """
-    Types of bias that may be present in datasets
+    Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO)
+    bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO
     """
     selection_bias = PermissibleValue(
         text="selection_bias",
-        description="Bias arising from non-random selection of data or participants")
+        description="Bias arising from non-random selection of data or participants.")
     measurement_bias = PermissibleValue(
         text="measurement_bias",
-        description="Bias in how data is measured or recorded")
+        description="""Bias in how data is measured or recorded. Occurs when features and labels are proxies for desired quantities, potentially leading to differential performance.""",
+        meaning=AIO["MeasurementBias"])
     historical_bias = PermissibleValue(
         text="historical_bias",
-        description="Bias reflecting historical inequities or societal biases")
+        description="""Bias reflecting historical inequities or societal biases. Long-standing biases encoded in society over time.""",
+        meaning=AIO["HistoricalBias"])
     representation_bias = PermissibleValue(
         text="representation_bias",
-        description="Certain groups are over- or under-represented in the data")
+        description="""Certain groups are over- or under-represented in the data. Results from non-random sampling of subgroups making trends non-generalizable to new populations.""",
+        meaning=AIO["RepresentationBias"])
     aggregation_bias = PermissibleValue(
         text="aggregation_bias",
-        description="Bias from inappropriately combining distinct groups")
+        description="""Bias from inappropriately combining distinct groups. Related to making inferences about individuals based on their group membership.""")
     algorithmic_bias = PermissibleValue(
         text="algorithmic_bias",
-        description="Bias introduced or amplified by algorithmic processing")
+        description="""Bias introduced or amplified by algorithmic processing. Computational bias from data analysis processes and methods.""")
     sampling_bias = PermissibleValue(
         text="sampling_bias",
-        description="Bias from sampling methodology not representative of the population")
+        description="Bias from sampling methodology not representative of the population.")
     annotation_bias = PermissibleValue(
         text="annotation_bias",
-        description="Bias introduced during data labeling or annotation")
+        description="""Bias introduced during data labeling or annotation. Occurs when annotators rely on heuristics or exhibit systematic patterns in labeling.""")
     confirmation_bias = PermissibleValue(
         text="confirmation_bias",
-        description="Bias from seeking data that confirms pre-existing beliefs")
+        description="""Bias from seeking data that confirms pre-existing beliefs. Tendency to prefer information that confirms existing beliefs, influencing the search for, interpretation of, and recall of information.""",
+        meaning=AIO["ConfirmationBias"])
 
     _defn = EnumDefinition(
         name="BiasTypeEnum",
-        description="Types of bias that may be present in datasets",
+        description="""Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO) bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO""",
     )
 
 class VersionTypeEnum(EnumDefinitionImpl):

@@ -827,44 +827,64 @@
     {
       "name": "BiasTypeEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/BiasTypeEnum",
-      "description": "Types of bias that may be present in datasets",
+      "description": "Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO) bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "permissible_values": [
         {
           "text": "selection_bias",
-          "description": "Bias arising from non-random selection of data or participants"
+          "description": "Bias arising from non-random selection of data or participants.",
+          "broad_mappings": [
+            "AIO:SelectionAndSamplingBias"
+          ]
         },
         {
           "text": "measurement_bias",
-          "description": "Bias in how data is measured or recorded"
+          "description": "Bias in how data is measured or recorded. Occurs when features and labels are proxies for desired quantities, potentially leading to differential performance.",
+          "meaning": "AIO:MeasurementBias"
         },
         {
           "text": "historical_bias",
-          "description": "Bias reflecting historical inequities or societal biases"
+          "description": "Bias reflecting historical inequities or societal biases. Long-standing biases encoded in society over time.",
+          "meaning": "AIO:HistoricalBias"
         },
         {
           "text": "representation_bias",
-          "description": "Certain groups are over- or under-represented in the data"
+          "description": "Certain groups are over- or under-represented in the data. Results from non-random sampling of subgroups making trends non-generalizable to new populations.",
+          "meaning": "AIO:RepresentationBias"
         },
         {
           "text": "aggregation_bias",
-          "description": "Bias from inappropriately combining distinct groups"
+          "description": "Bias from inappropriately combining distinct groups. Related to making inferences about individuals based on their group membership.",
+          "broad_mappings": [
+            "AIO:EcologicalFallacyBias"
+          ]
         },
         {
           "text": "algorithmic_bias",
-          "description": "Bias introduced or amplified by algorithmic processing"
+          "description": "Bias introduced or amplified by algorithmic processing. Computational bias from data analysis processes and methods.",
+          "broad_mappings": [
+            "AIO:ProcessingBias",
+            "AIO:ComputationalBias"
+          ]
         },
         {
           "text": "sampling_bias",
-          "description": "Bias from sampling methodology not representative of the population"
+          "description": "Bias from sampling methodology not representative of the population.",
+          "broad_mappings": [
+            "AIO:SelectionAndSamplingBias"
+          ]
         },
         {
           "text": "annotation_bias",
-          "description": "Bias introduced during data labeling or annotation"
+          "description": "Bias introduced during data labeling or annotation. Occurs when annotators rely on heuristics or exhibit systematic patterns in labeling.",
+          "broad_mappings": [
+            "AIO:AnnotatorReportingBias"
+          ]
         },
         {
           "text": "confirmation_bias",
-          "description": "Bias from seeking data that confirms pre-existing beliefs"
+          "description": "Bias from seeking data that confirms pre-existing beliefs. Tendency to prefer information that confirms existing beliefs, influencing the search for, interpretation of, and recall of information.",
+          "meaning": "AIO:ConfirmationBias"
         }
       ]
     },
@@ -7993,9 +8013,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-11-24T22:16:32",
+  "source_file_date": "2025-12-01T20:19:46",
   "source_file_size": 12266,
-  "generation_date": "2025-11-25T12:07:55",
+  "generation_date": "2025-12-01T21:10:33",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
