@@ -1008,64 +1008,112 @@
     {
       "name": "DatasetRelationshipTypeEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#DatasetRelationshipTypeEnum",
-      "description": "Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.",
+      "description": "Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "permissible_values": [
         {
           "text": "derives_from",
-          "description": "This dataset is derived from the target dataset through processing, analysis, or transformation."
+          "description": "This dataset is derived from the target dataset through processing, analysis, or transformation. Equivalent to DataCite IsDerivedFrom.",
+          "related_mappings": [
+            "prov:wasDerivedFrom"
+          ],
+          "broad_mappings": [
+            "dcterms:source"
+          ]
         },
         {
           "text": "supplements",
-          "description": "This dataset supplements or adds to the target dataset."
+          "description": "This dataset supplements or adds to the target dataset. Equivalent to DataCite IsSupplementTo.",
+          "broad_mappings": [
+            "dcterms:relation"
+          ]
         },
         {
           "text": "is_supplemented_by",
-          "description": "This dataset is supplemented by the target dataset."
+          "description": "This dataset is supplemented by the target dataset. Equivalent to DataCite IsSupplementedBy.",
+          "broad_mappings": [
+            "dcterms:relation"
+          ]
         },
         {
           "text": "is_version_of",
-          "description": "This dataset is a version of the target dataset (e.g., updated, corrected, or revised version)."
+          "description": "This dataset is a version of the target dataset (e.g., updated, corrected, or revised version). Equivalent to DataCite IsVersionOf.",
+          "exact_mappings": [
+            "dcterms:isVersionOf"
+          ]
         },
         {
           "text": "is_new_version_of",
-          "description": "This dataset is a new version that replaces or updates the target dataset."
+          "description": "This dataset is a new version that replaces or updates the target dataset. Equivalent to DataCite IsNewVersionOf.",
+          "exact_mappings": [
+            "dcterms:isVersionOf"
+          ],
+          "broad_mappings": [
+            "dcterms:replaces"
+          ]
         },
         {
           "text": "replaces",
-          "description": "This dataset replaces or supersedes the target dataset."
+          "description": "This dataset replaces or supersedes the target dataset. Equivalent to DataCite Obsoletes.",
+          "exact_mappings": [
+            "dcterms:replaces"
+          ]
         },
         {
           "text": "is_replaced_by",
-          "description": "This dataset is replaced or superseded by the target dataset."
+          "description": "This dataset is replaced or superseded by the target dataset. Equivalent to DataCite IsObsoletedBy.",
+          "exact_mappings": [
+            "dcterms:isReplacedBy"
+          ]
         },
         {
           "text": "is_required_by",
-          "description": "This dataset is required by the target dataset."
+          "description": "This dataset is required by the target dataset. Equivalent to DataCite IsRequiredBy.",
+          "exact_mappings": [
+            "dcterms:isRequiredBy"
+          ]
         },
         {
           "text": "requires",
-          "description": "This dataset requires the target dataset."
+          "description": "This dataset requires the target dataset. Equivalent to DataCite Requires.",
+          "exact_mappings": [
+            "dcterms:requires"
+          ]
         },
         {
           "text": "is_part_of",
-          "description": "This dataset is part of the target dataset (e.g., subset, component)."
+          "description": "This dataset is part of the target dataset (e.g., subset, component). Equivalent to DataCite IsPartOf.",
+          "exact_mappings": [
+            "dcterms:isPartOf"
+          ]
         },
         {
           "text": "has_part",
-          "description": "This dataset has the target dataset as a part."
+          "description": "This dataset has the target dataset as a part. Equivalent to DataCite HasPart.",
+          "exact_mappings": [
+            "dcterms:hasPart"
+          ]
         },
         {
           "text": "is_referenced_by",
-          "description": "This dataset is referenced or cited by the target dataset."
+          "description": "This dataset is referenced or cited by the target dataset. Equivalent to DataCite IsReferencedBy.",
+          "exact_mappings": [
+            "dcterms:isReferencedBy"
+          ]
         },
         {
           "text": "references",
-          "description": "This dataset references or cites the target dataset."
+          "description": "This dataset references or cites the target dataset. Equivalent to DataCite References.",
+          "exact_mappings": [
+            "dcterms:references"
+          ]
         },
         {
           "text": "is_identical_to",
-          "description": "This dataset is identical to the target dataset (e.g., mirror, copy)."
+          "description": "This dataset is identical to the target dataset (e.g., mirror, copy). Equivalent to DataCite IsIdenticalTo.",
+          "broad_mappings": [
+            "dcterms:relation"
+          ]
         }
       ]
     },
@@ -1277,60 +1325,121 @@
     {
       "name": "VariableTypeEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variables#VariableTypeEnum",
-      "description": "Common data types for variables",
+      "description": "Common data types for variables. Values are mapped to XML Schema Datatypes (XSD) and schema.org DataType vocabulary. See https://www.w3.org/TR/xmlschema-2/ and https://schema.org/DataType",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "permissible_values": [
         {
           "text": "integer",
-          "description": "Whole numbers"
+          "description": "Whole numbers. Maps to XSD integer type.",
+          "exact_mappings": [
+            "xsd:integer"
+          ],
+          "broad_mappings": [
+            "schema:Integer"
+          ]
         },
         {
           "text": "float",
-          "description": "Floating-point numbers"
+          "description": "Floating-point numbers (single precision). Maps to XSD float type.",
+          "exact_mappings": [
+            "xsd:float"
+          ],
+          "broad_mappings": [
+            "schema:Float"
+          ]
         },
         {
           "text": "double",
-          "description": "Double-precision floating-point"
+          "description": "Double-precision floating-point numbers. Maps to XSD double type.",
+          "exact_mappings": [
+            "xsd:double"
+          ],
+          "broad_mappings": [
+            "schema:Number"
+          ]
         },
         {
           "text": "string",
-          "description": "Text strings"
+          "description": "Text strings. Maps to XSD string type.",
+          "exact_mappings": [
+            "xsd:string"
+          ],
+          "broad_mappings": [
+            "schema:Text"
+          ]
         },
         {
           "text": "boolean",
-          "description": "True/false values"
+          "description": "True/false values. Maps to XSD boolean type.",
+          "exact_mappings": [
+            "xsd:boolean"
+          ],
+          "broad_mappings": [
+            "schema:Boolean"
+          ]
         },
         {
           "text": "date",
-          "description": "Date values"
+          "description": "Date values (without time). Maps to XSD date type.",
+          "exact_mappings": [
+            "xsd:date"
+          ],
+          "broad_mappings": [
+            "schema:Date"
+          ]
         },
         {
           "text": "datetime",
-          "description": "Date and time values"
+          "description": "Date and time values. Maps to XSD dateTime type.",
+          "exact_mappings": [
+            "xsd:dateTime"
+          ],
+          "broad_mappings": [
+            "schema:DateTime"
+          ]
         },
         {
           "text": "categorical",
-          "description": "Categorical/factor variables with finite values"
+          "description": "Categorical/factor variables with finite set of discrete values. Often used for nominal data (unordered categories).",
+          "broad_mappings": [
+            "schema:Text"
+          ]
         },
         {
           "text": "ordinal",
-          "description": "Ordered categorical variables"
+          "description": "Ordered categorical variables where values have a meaningful sequence (e.g., low/medium/high, strongly disagree/disagree/agree/strongly agree).",
+          "broad_mappings": [
+            "schema:Text"
+          ]
         },
         {
           "text": "identifier",
-          "description": "Unique identifiers or keys"
+          "description": "Unique identifiers or keys for records or entities.",
+          "broad_mappings": [
+            "schema:Text",
+            "schema:identifier"
+          ]
         },
         {
           "text": "json",
-          "description": "JSON-encoded data"
+          "description": "JSON-encoded data structures.",
+          "broad_mappings": [
+            "schema:Text"
+          ]
         },
         {
           "text": "array",
-          "description": "Arrays or lists"
+          "description": "Arrays or lists of values. May contain elements of the same or different types.",
+          "broad_mappings": [
+            "schema:ItemList"
+          ]
         },
         {
           "text": "object",
-          "description": "Complex structured objects"
+          "description": "Complex structured objects or nested data structures.",
+          "broad_mappings": [
+            "schema:StructuredValue"
+          ]
         }
       ]
     }
@@ -8015,7 +8124,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2025-12-01T20:19:46",
   "source_file_size": 12266,
-  "generation_date": "2025-12-01T21:10:33",
+  "generation_date": "2025-12-01T21:23:19",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

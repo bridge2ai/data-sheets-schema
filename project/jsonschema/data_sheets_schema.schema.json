@@ -2318,7 +2318,7 @@
             "type": "object"
         },
         "DatasetRelationshipTypeEnum": {
-            "description": "Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.",
+            "description": "Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/",
             "enum": [
                 "derives_from",
                 "supplements",
@@ -5206,7 +5206,7 @@
             "type": "object"
         },
         "VariableTypeEnum": {
-            "description": "Common data types for variables",
+            "description": "Common data types for variables. Values are mapped to XML Schema Datatypes (XSD) and schema.org DataType vocabulary. See https://www.w3.org/TR/xmlschema-2/ and https://schema.org/DataType",
             "enum": [
                 "integer",
                 "float",

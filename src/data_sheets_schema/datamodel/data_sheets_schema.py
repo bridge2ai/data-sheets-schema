@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-01T21:10:34
+# Generation date: 2025-12-01T21:23:20
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3431,54 +3431,56 @@ class Boolean(EnumDefinitionImpl):
 
 class DatasetRelationshipTypeEnum(EnumDefinitionImpl):
     """
-    Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.
+    Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled
+    vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and
+    http://purl.org/dc/terms/
     """
     derives_from = PermissibleValue(
         text="derives_from",
-        description="""This dataset is derived from the target dataset through processing, analysis, or transformation.""")
+        description="""This dataset is derived from the target dataset through processing, analysis, or transformation. Equivalent to DataCite IsDerivedFrom.""")
     supplements = PermissibleValue(
         text="supplements",
-        description="This dataset supplements or adds to the target dataset.")
+        description="This dataset supplements or adds to the target dataset. Equivalent to DataCite IsSupplementTo.")
     is_supplemented_by = PermissibleValue(
         text="is_supplemented_by",
-        description="This dataset is supplemented by the target dataset.")
+        description="This dataset is supplemented by the target dataset. Equivalent to DataCite IsSupplementedBy.")
     is_version_of = PermissibleValue(
         text="is_version_of",
-        description="""This dataset is a version of the target dataset (e.g., updated, corrected, or revised version).""")
+        description="""This dataset is a version of the target dataset (e.g., updated, corrected, or revised version). Equivalent to DataCite IsVersionOf.""")
     is_new_version_of = PermissibleValue(
         text="is_new_version_of",
-        description="This dataset is a new version that replaces or updates the target dataset.")
+        description="""This dataset is a new version that replaces or updates the target dataset. Equivalent to DataCite IsNewVersionOf.""")
     replaces = PermissibleValue(
         text="replaces",
-        description="This dataset replaces or supersedes the target dataset.")
+        description="This dataset replaces or supersedes the target dataset. Equivalent to DataCite Obsoletes.")
     is_replaced_by = PermissibleValue(
         text="is_replaced_by",
-        description="This dataset is replaced or superseded by the target dataset.")
+        description="""This dataset is replaced or superseded by the target dataset. Equivalent to DataCite IsObsoletedBy.""")
     is_required_by = PermissibleValue(
         text="is_required_by",
-        description="This dataset is required by the target dataset.")
+        description="This dataset is required by the target dataset. Equivalent to DataCite IsRequiredBy.")
     requires = PermissibleValue(
         text="requires",
-        description="This dataset requires the target dataset.")
+        description="This dataset requires the target dataset. Equivalent to DataCite Requires.")
     is_part_of = PermissibleValue(
         text="is_part_of",
-        description="This dataset is part of the target dataset (e.g., subset, component).")
+        description="""This dataset is part of the target dataset (e.g., subset, component). Equivalent to DataCite IsPartOf.""")
     has_part = PermissibleValue(
         text="has_part",
-        description="This dataset has the target dataset as a part.")
+        description="This dataset has the target dataset as a part. Equivalent to DataCite HasPart.")
     is_referenced_by = PermissibleValue(
         text="is_referenced_by",
-        description="This dataset is referenced or cited by the target dataset.")
+        description="""This dataset is referenced or cited by the target dataset. Equivalent to DataCite IsReferencedBy.""")
     references = PermissibleValue(
         text="references",
-        description="This dataset references or cites the target dataset.")
+        description="This dataset references or cites the target dataset. Equivalent to DataCite References.")
     is_identical_to = PermissibleValue(
         text="is_identical_to",
-        description="This dataset is identical to the target dataset (e.g., mirror, copy).")
+        description="""This dataset is identical to the target dataset (e.g., mirror, copy). Equivalent to DataCite IsIdenticalTo.""")
 
     _defn = EnumDefinition(
         name="DatasetRelationshipTypeEnum",
-        description="""Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.""",
+        description="""Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/""",
     )
 
 class ComplianceStatusEnum(EnumDefinitionImpl):
@@ -3655,51 +3657,52 @@ class DataUsePermissionEnum(EnumDefinitionImpl):
 
 class VariableTypeEnum(EnumDefinitionImpl):
     """
-    Common data types for variables
+    Common data types for variables. Values are mapped to XML Schema Datatypes (XSD) and schema.org DataType
+    vocabulary. See https://www.w3.org/TR/xmlschema-2/ and https://schema.org/DataType
     """
     integer = PermissibleValue(
         text="integer",
-        description="Whole numbers")
+        description="Whole numbers. Maps to XSD integer type.")
     float = PermissibleValue(
         text="float",
-        description="Floating-point numbers")
+        description="Floating-point numbers (single precision). Maps to XSD float type.")
     double = PermissibleValue(
         text="double",
-        description="Double-precision floating-point")
+        description="Double-precision floating-point numbers. Maps to XSD double type.")
     string = PermissibleValue(
         text="string",
-        description="Text strings")
+        description="Text strings. Maps to XSD string type.")
     boolean = PermissibleValue(
         text="boolean",
-        description="True/false values")
+        description="True/false values. Maps to XSD boolean type.")
     date = PermissibleValue(
         text="date",
-        description="Date values")
+        description="Date values (without time). Maps to XSD date type.")
     datetime = PermissibleValue(
         text="datetime",
-        description="Date and time values")
+        description="Date and time values. Maps to XSD dateTime type.")
     categorical = PermissibleValue(
         text="categorical",
-        description="Categorical/factor variables with finite values")
+        description="""Categorical/factor variables with finite set of discrete values. Often used for nominal data (unordered categories).""")
     ordinal = PermissibleValue(
         text="ordinal",
-        description="Ordered categorical variables")
+        description="""Ordered categorical variables where values have a meaningful sequence (e.g., low/medium/high, strongly disagree/disagree/agree/strongly agree).""")
     identifier = PermissibleValue(
         text="identifier",
-        description="Unique identifiers or keys")
+        description="Unique identifiers or keys for records or entities.")
     json = PermissibleValue(
         text="json",
-        description="JSON-encoded data")
+        description="JSON-encoded data structures.")
     array = PermissibleValue(
         text="array",
-        description="Arrays or lists")
+        description="Arrays or lists of values. May contain elements of the same or different types.")
     object = PermissibleValue(
         text="object",
-        description="Complex structured objects")
+        description="Complex structured objects or nested data structures.")
 
     _defn = EnumDefinition(
         name="VariableTypeEnum",
-        description="Common data types for variables",
+        description="""Common data types for variables. Values are mapped to XML Schema Datatypes (XSD) and schema.org DataType vocabulary. See https://www.w3.org/TR/xmlschema-2/ and https://schema.org/DataType""",
     )
 
 # Slots
