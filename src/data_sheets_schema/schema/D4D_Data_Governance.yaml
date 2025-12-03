@@ -97,7 +97,7 @@ classes:
     description: >
       Do any export controls or other regulatory restrictions apply to the dataset
       or to individual instances? Includes compliance tracking for regulations like
-      GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and
+      HIPAA and other US regulations. If so, please describe these restrictions and
       provide a link or copy of any supporting documentation. Maps to DUO terms
       related to ethics approval, geographic restrictions, and institutional requirements.
     is_a: DatasetProperty
@@ -111,22 +111,11 @@ classes:
           - DUO:0000021  # IRB - ethics approval required
           - DUO:0000022  # GS - geographic restriction
           - DUO:0000028  # IS - institution specific
-      gdpr_compliant:
-        description: >-
-          Indicates compliance with the EU General Data Protection Regulation (GDPR).
-          GDPR applies to processing of personal data of individuals in the EU.
-        range: ComplianceStatusEnum
       hipaa_compliant:
         description: >-
           Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA).
           HIPAA applies to protected health information in the United States.
         range: ComplianceStatusEnum
-      eu_ai_act_risk_category:
-        description: >-
-          Risk category under the EU AI Act. The EU AI Act classifies AI systems
-          into risk categories: minimal, limited, high, and unacceptable.
-          High-risk AI systems face strict requirements.
-        range: AIActRiskEnum
       other_compliance:
         description: >-
           Other regulatory compliance frameworks applicable to this dataset
@@ -153,47 +142,40 @@ enums:
 
   ComplianceStatusEnum:
     description: >-
-      Compliance status for regulatory frameworks
+      Compliance status for regulatory frameworks. Indicates the extent to which
+      a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46).
+      These are workflow status values that may evolve as regulations are assessed
+      or as the dataset is modified.
     permissible_values:
       compliant:
-        description: Dataset is compliant with the regulation
+        description: >-
+          Dataset is compliant with the regulation. All requirements are met and
+          documented.
+        broad_mappings:
+          - dcterms:conformsTo
       partially_compliant:
-        description: Dataset is partially compliant, with known limitations
+        description: >-
+          Dataset is partially compliant, with known limitations or gaps in
+          compliance. Some but not all requirements are met.
+        broad_mappings:
+          - dcterms:conformsTo
       not_compliant:
-        description: Dataset does not comply with the regulation
+        description: >-
+          Dataset does not comply with the regulation. Significant requirements
+          are not met.
       not_applicable:
-        description: Regulation does not apply to this dataset
+        description: >-
+          Regulation does not apply to this dataset based on scope, jurisdiction,
+          or subject matter.
       under_review:
-        description: Compliance status is currently under review
-
-  AIActRiskEnum:
-    description: >-
-      Risk categories under the EU AI Act.
-      See https://artificialintelligenceact.eu/
-    permissible_values:
-      minimal_risk:
         description: >-
-          AI systems with minimal risk (e.g., AI-enabled video games, spam filters).
-          No specific obligations.
-      limited_risk:
-        description: >-
-          AI systems with limited risk subject to transparency obligations
-          (e.g., chatbots, emotion recognition systems).
-      high_risk:
-        description: >-
-          AI systems with high risk to health, safety, or fundamental rights
-          (e.g., AI in critical infrastructure, education, employment, law enforcement).
-          Subject to strict requirements.
-      unacceptable_risk:
-        description: >-
-          AI systems with unacceptable risk that are prohibited
-          (e.g., social scoring, real-time biometric identification in public spaces).
+          Compliance status is currently under review or assessment. Final
+          determination has not been made.
 
   ConfidentialityLevelEnum:
     description: >-
       Confidentiality classification levels for datasets indicating the degree
-      of access restrictions and data sensitivity. Based on established information
-      classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light Protocol).
+      of access restrictions and data sensitivity.
 
       NOTE: This enum classifies data sensitivity and access control (WHO can access),
       which is orthogonal to DataUsePermissionEnum that specifies use restrictions
@@ -205,29 +187,17 @@ enums:
         description: >-
           No confidentiality restrictions. Data is publicly available with
           no access controls required. Equivalent to public or open access data.
-        broad_mappings:
-          - TLP:CLEAR  # Traffic Light Protocol (formerly TLP:WHITE)
-          - NIST_Low_Impact  # NIST SP 800-60 Low Impact
-          - ISO27001_Public  # ISO 27001 Public classification
       restricted:
         description: >-
           Restricted access requiring approval or registration. Data contains
           sensitive information requiring controlled access. May require account
           creation, data use agreement, or institutional approval.
-        broad_mappings:
-          - TLP:GREEN  # Traffic Light Protocol (limited disclosure)
-          - NIST_Moderate_Impact  # NIST SP 800-60 Moderate Impact
-          - ISO27001_Internal  # ISO 27001 Internal/Confidential classification
       confidential:
         description: >-
           Highly confidential with strict access controls. Data contains
           highly sensitive information with significant privacy or security
           implications. Typically requires IRB approval, formal data use agreements,
           institutional authorization, or other formal vetting processes.
-        broad_mappings:
-          - TLP:AMBER  # Traffic Light Protocol (limited distribution)
-          - NIST_High_Impact  # NIST SP 800-60 High Impact
-          - ISO27001_Highly_Confidential  # ISO 27001 Highly Confidential classification
 
   DataUsePermissionEnum:
     description: >-

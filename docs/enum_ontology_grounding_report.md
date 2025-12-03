@@ -1,18 +1,20 @@
 # Enumeration Ontology Grounding Report
 
-**Date**: 2025-12-01
+**Date**: 2025-12-02
 **Issue**: Identify and ground enumerations in ontology terms where appropriate
 **Related PR**: #96 (RO-Crate integration)
+**Update**: Ontology grounding optimization (Phases 1-6)
 
 ## Executive Summary
 
-Analyzed all enumerations in the D4D schema to identify which lack ontology term groundings. Successfully added **Artificial Intelligence Ontology (AIO)** mappings to BiasTypeEnum (9 bias types), complementing existing DUO mappings for data use permissions and ISO/NIST/TLP mappings for confidentiality levels.
+Analyzed all enumerations in the D4D schema and optimized ontology mappings based on expert review feedback. Successfully added **Artificial Intelligence Ontology (AIO)** mappings to BiasTypeEnum (9 bias types), complementing existing DUO mappings for data use permissions. **Removed** redundant security classification mappings (ISO/NIST/TLP) from ConfidentialityLevelEnum and PROV-O mappings from CreatorOrMaintainerEnum to simplify the schema.
 
-**Status Overview:**
-- **Fully Grounded**: 3 enums (DataUsePermissionEnum, ConfidentialityLevelEnum, BiasTypeEnum)
+**Status Overview (After Optimization)**:
+- **Fully Grounded**: 2 enums (DataUsePermissionEnum, BiasTypeEnum)
+- **Simplified/Ungrounded**: 1 enum (ConfidentialityLevelEnum - removed ISO/NIST/TLP mappings)
 - **Taxonomy-Based**: 2 enums (CRediTRoleEnum, VersionTypeEnum)
 - **Technical Standards**: 4 enums (FormatEnum, MediaTypeEnum, CompressionEnum, EncodingEnum)
-- **Ungrounded**: 5 enums (VariableTypeEnum, DatasetRelationshipTypeEnum, ComplianceStatusEnum, AIActRiskEnum, CreatorOrMaintainerEnum)
+- **Ungrounded**: 6 enums (VariableTypeEnum, DatasetRelationshipTypeEnum, ComplianceStatusEnum, AIActRiskEnum, CreatorOrMaintainerEnum, ConfidentialityLevelEnum)
 
 ## Changes Made
 
@@ -388,6 +390,33 @@ The Artificial Intelligence Ontology (AIO) provides a comprehensive taxonomy of 
 This hierarchical structure enables fine-grained bias classification while maintaining compatibility with broader bias categories.
 
 ## Changelog
+
+**2025-12-02 - Ontology Grounding Optimization**:
+- **Removed ConfidentialityLevelEnum mappings** (Phase 5):
+  - Removed ISO 27001 mappings (Public, Internal, Highly Confidential)
+  - Removed NIST SP 800-60 mappings (Low Impact, Moderate Impact, High Impact)
+  - Removed Traffic Light Protocol mappings (TLP:CLEAR, TLP:GREEN, TLP:AMBER)
+  - Rationale: Security classification is domain-specific; prescriptive mappings may not fit all use cases
+  - Result: ConfidentialityLevelEnum now has clear semantic descriptions without external ontology constraints
+- **Removed CreatorOrMaintainerEnum PROV-O mappings** (Phase 4):
+  - Removed 9 prov:Agent/Person/Organization mappings from enum values
+  - Kept schema.org mappings (schema:Person, schema:Organization, etc.)
+  - Rationale: PROV-O redundant with schema.org, simplifies dependencies
+- **Removed XSD mappings from VariableTypeEnum** (Phase 1):
+  - Removed 7 xsd:* mappings (xsd:integer, xsd:float, xsd:double, etc.)
+  - Kept schema.org broad_mappings for data types
+  - Rationale: XSD adds minimal value beyond schema.org mappings
+- **Documentation updates** (Phase 7):
+  - Updated status overview to reflect optimization
+  - Noted which enums were simplified vs removed entirely
+- **Removed AIActRiskEnum** (Phase 9):
+  - Removed entire AIActRiskEnum with 4 EU AI Act risk categories
+  - Removed `eu_ai_act_risk_category` field from ExportControlRegulatoryRestrictions
+  - Rationale: "stay US-centric" per expert feedback
+  - Result: ComplianceStatusEnum now references HIPAA and 45 CFR 46 instead of GDPR/EU AI Act
+- **Prefix cleanup** (Phase 10):
+  - Note: Frictionless and CSVW prefixes were removed but no enums were affected
+  - This phase impacted prefix declarations and slot mappings, not enum ontology grounding
 
 **2025-12-01**:
 - Initial enumeration inventory completed

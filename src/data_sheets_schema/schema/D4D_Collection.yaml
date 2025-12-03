@@ -13,7 +13,6 @@ prefixes:
   linkml: https://w3id.org/linkml/
   schema: http://schema.org/
   dcterms: http://purl.org/dc/terms/
-  prov: http://www.w3.org/ns/prov#
 
 
 imports:
@@ -50,7 +49,6 @@ classes:
       was_inferred_derived:
         description: Whether the data was inferred or derived from other data
         range: boolean
-        slot_uri: prov:wasDerivedFrom
       was_validated_verified:
         description: Whether the data was validated or verified in any way
         range: boolean

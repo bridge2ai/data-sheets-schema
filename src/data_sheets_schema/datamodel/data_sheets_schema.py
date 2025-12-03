@@ -1,5 +1,5 @@
-# Auto generated from data_sheets_schema_all.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-02T20:18:36
+# Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
+# Generation date: 2025-12-02T22:01:34
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -56,7 +56,8 @@ from rdflib import (
     URIRef
 )
 
-from linkml_runtime.utils.metamodelcore import Bool, Curie, Decimal, ElementIdentifier, NCName, NodeIdentifier, URI, URIorCURIE, XSDDate, XSDDateTime, XSDTime
+from linkml_runtime.linkml_model.types import Boolean, Datetime, Float, Integer, String, Uri, Uriorcurie
+from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDateTime
 
 metamodel_version = "1.7.0"
 version = None
@@ -67,9 +68,7 @@ B2AI_STANDARD = CurieNamespace('B2AI_STANDARD', 'https://w3id.org/bridge2ai/b2ai
 B2AI_SUBSTRATE = CurieNamespace('B2AI_SUBSTRATE', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 B2AI_TOPIC = CurieNamespace('B2AI_TOPIC', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 DUO = CurieNamespace('DUO', 'http://purl.obolibrary.org/obo/DUO_')
-BIBO = CurieNamespace('bibo', 'http://purl.org/ontology/bibo/')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/vocab/')
-CSVW = CurieNamespace('csvw', 'http://www.w3.org/ns/csvw#')
 D4DCOMPOSITION = CurieNamespace('d4dcomposition', 'https://w3id.org/bridge2ai/data-sheets-schema/composition#')
 D4DDATAGOVERNANCE = CurieNamespace('d4ddatagovernance', 'https://w3id.org/bridge2ai/data-sheets-schema/data-governance#')
 D4DDISTRIBUTION = CurieNamespace('d4ddistribution', 'https://w3id.org/bridge2ai/data-sheets-schema/distribution#')
@@ -85,176 +84,17 @@ DATASETS = CurieNamespace('datasets', 'https://w3id.org/linkml/report')
 DCAT = CurieNamespace('dcat', 'http://www.w3.org/ns/dcat#')
 DCTERMS = CurieNamespace('dcterms', 'http://purl.org/dc/terms/')
 EXAMPLE = CurieNamespace('example', 'https://example.org/')
-FOAF = CurieNamespace('foaf', 'http://xmlns.com/foaf/0.1/')
-FORMATS = CurieNamespace('formats', 'http://www.w3.org/ns/formats/')
-FRICTIONLESS = CurieNamespace('frictionless', 'https://specs.frictionlessdata.io/')
 LINKML = CurieNamespace('linkml', 'https://w3id.org/linkml/')
 MEDIATYPES = CurieNamespace('mediatypes', 'https://www.iana.org/assignments/media-types/')
-OSLC = CurieNamespace('oslc', 'http://open-services.net/ns/core#')
-PAV = CurieNamespace('pav', 'http://purl.org/pav/')
 PROV = CurieNamespace('prov', 'http://www.w3.org/ns/prov#')
 QUDT = CurieNamespace('qudt', 'http://qudt.org/schema/qudt/')
 SCHEMA = CurieNamespace('schema', 'http://schema.org/')
 SH = CurieNamespace('sh', 'https://w3id.org/shacl/')
-SHEX = CurieNamespace('shex', 'http://www.w3.org/ns/shex#')
 SKOS = CurieNamespace('skos', 'http://www.w3.org/2004/02/skos/core#')
-VOID = CurieNamespace('void', 'http://rdfs.org/ns/void#')
-XSD = CurieNamespace('xsd', 'http://www.w3.org/2001/XMLSchema#')
 DEFAULT_ = DATA_SHEETS_SCHEMA
 
 
 # Types
-class String(str):
-    """ A character string """
-    type_class_uri = XSD["string"]
-    type_class_curie = "xsd:string"
-    type_name = "string"
-    type_model_uri = DATA_SHEETS_SCHEMA.String
-
-
-class Integer(int):
-    """ An integer """
-    type_class_uri = XSD["integer"]
-    type_class_curie = "xsd:integer"
-    type_name = "integer"
-    type_model_uri = DATA_SHEETS_SCHEMA.Integer
-
-
-class Boolean(Bool):
-    """ A binary (true or false) value """
-    type_class_uri = XSD["boolean"]
-    type_class_curie = "xsd:boolean"
-    type_name = "boolean"
-    type_model_uri = DATA_SHEETS_SCHEMA.Boolean
-
-
-class Float(float):
-    """ A real number that conforms to the xsd:float specification """
-    type_class_uri = XSD["float"]
-    type_class_curie = "xsd:float"
-    type_name = "float"
-    type_model_uri = DATA_SHEETS_SCHEMA.Float
-
-
-class Double(float):
-    """ A real number that conforms to the xsd:double specification """
-    type_class_uri = XSD["double"]
-    type_class_curie = "xsd:double"
-    type_name = "double"
-    type_model_uri = DATA_SHEETS_SCHEMA.Double
-
-
-class Decimal(Decimal):
-    """ A real number with arbitrary precision that conforms to the xsd:decimal specification """
-    type_class_uri = XSD["decimal"]
-    type_class_curie = "xsd:decimal"
-    type_name = "decimal"
-    type_model_uri = DATA_SHEETS_SCHEMA.Decimal
-
-
-class Time(XSDTime):
-    """ A time object represents a (local) time of day, independent of any particular day """
-    type_class_uri = XSD["time"]
-    type_class_curie = "xsd:time"
-    type_name = "time"
-    type_model_uri = DATA_SHEETS_SCHEMA.Time
-
-
-class Date(XSDDate):
-    """ a date (year, month and day) in an idealized calendar """
-    type_class_uri = XSD["date"]
-    type_class_curie = "xsd:date"
-    type_name = "date"
-    type_model_uri = DATA_SHEETS_SCHEMA.Date
-
-
-class Datetime(XSDDateTime):
-    """ The combination of a date and time """
-    type_class_uri = XSD["dateTime"]
-    type_class_curie = "xsd:dateTime"
-    type_name = "datetime"
-    type_model_uri = DATA_SHEETS_SCHEMA.Datetime
-
-
-class DateOrDatetime(str):
-    """ Either a date or a datetime """
-    type_class_uri = LINKML["DateOrDatetime"]
-    type_class_curie = "linkml:DateOrDatetime"
-    type_name = "date_or_datetime"
-    type_model_uri = DATA_SHEETS_SCHEMA.DateOrDatetime
-
-
-class Uriorcurie(URIorCURIE):
-    """ a URI or a CURIE """
-    type_class_uri = XSD["anyURI"]
-    type_class_curie = "xsd:anyURI"
-    type_name = "uriorcurie"
-    type_model_uri = DATA_SHEETS_SCHEMA.Uriorcurie
-
-
-class Curie(Curie):
-    """ a compact URI """
-    type_class_uri = XSD["string"]
-    type_class_curie = "xsd:string"
-    type_name = "curie"
-    type_model_uri = DATA_SHEETS_SCHEMA.Curie
-
-
-class Uri(URI):
-    """ a complete URI """
-    type_class_uri = XSD["anyURI"]
-    type_class_curie = "xsd:anyURI"
-    type_name = "uri"
-    type_model_uri = DATA_SHEETS_SCHEMA.Uri
-
-
-class Ncname(NCName):
-    """ Prefix part of CURIE """
-    type_class_uri = XSD["string"]
-    type_class_curie = "xsd:string"
-    type_name = "ncname"
-    type_model_uri = DATA_SHEETS_SCHEMA.Ncname
-
-
-class Objectidentifier(ElementIdentifier):
-    """ A URI or CURIE that represents an object in the model. """
-    type_class_uri = SHEX["iri"]
-    type_class_curie = "shex:iri"
-    type_name = "objectidentifier"
-    type_model_uri = DATA_SHEETS_SCHEMA.Objectidentifier
-
-
-class Nodeidentifier(NodeIdentifier):
-    """ A URI, CURIE or BNODE that represents a node in a model. """
-    type_class_uri = SHEX["nonLiteral"]
-    type_class_curie = "shex:nonLiteral"
-    type_name = "nodeidentifier"
-    type_model_uri = DATA_SHEETS_SCHEMA.Nodeidentifier
-
-
-class Jsonpointer(str):
-    """ A string encoding a JSON Pointer. The value of the string MUST conform to JSON Point syntax and SHOULD dereference to a valid object within the current instance document when encoded in tree form. """
-    type_class_uri = XSD["string"]
-    type_class_curie = "xsd:string"
-    type_name = "jsonpointer"
-    type_model_uri = DATA_SHEETS_SCHEMA.Jsonpointer
-
-
-class Jsonpath(str):
-    """ A string encoding a JSON Path. The value of the string MUST conform to JSON Point syntax and SHOULD dereference to zero or more valid objects within the current instance document when encoded in tree form. """
-    type_class_uri = XSD["string"]
-    type_class_curie = "xsd:string"
-    type_name = "jsonpath"
-    type_model_uri = DATA_SHEETS_SCHEMA.Jsonpath
-
-
-class Sparqlpath(str):
-    """ A string encoding a SPARQL Property Path. The value of the string MUST conform to SPARQL syntax and SHOULD dereference to zero or more valid objects within the current instance document when encoded as RDF. """
-    type_class_uri = XSD["string"]
-    type_class_curie = "xsd:string"
-    type_name = "sparqlpath"
-    type_model_uri = DATA_SHEETS_SCHEMA.Sparqlpath
-
 
 # Class references
 class NamedThingId(URIorCURIE):
@@ -573,20 +413,12 @@ class Organization(NamedThing):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Organization
 
     id: Union[str, OrganizationId] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
             self.MissingRequiredField("id")
         if not isinstance(self.id, OrganizationId):
             self.id = OrganizationId(self.id)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -605,8 +437,6 @@ class DatasetProperty(NamedThing):
 
     id: Union[str, DatasetPropertyId] = None
     used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -617,12 +447,6 @@ class DatasetProperty(NamedThing):
         if not isinstance(self.used_software, list):
             self.used_software = [self.used_software] if self.used_software is not None else []
         self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -643,8 +467,6 @@ class Software(NamedThing):
     version: Optional[str] = None
     license: Optional[str] = None
     url: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -660,12 +482,6 @@ class Software(NamedThing):
 
         if self.url is not None and not isinstance(self.url, str):
             self.url = str(self.url)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -689,8 +505,6 @@ class Person(NamedThing):
     affiliation: Optional[Union[Union[str, OrganizationId], list[Union[str, OrganizationId]]]] = empty_list()
     email: Optional[str] = None
     orcid: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -707,12 +521,6 @@ class Person(NamedThing):
 
         if self.orcid is not None and not isinstance(self.orcid, str):
             self.orcid = str(self.orcid)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -750,8 +558,6 @@ class Information(NamedThing):
     title: Optional[str] = None
     version: Optional[str] = None
     was_derived_from: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -820,73 +626,6 @@ class Information(NamedThing):
         if self.was_derived_from is not None and not isinstance(self.was_derived_from, str):
             self.was_derived_from = str(self.was_derived_from)
 
-        if self.compression is not None and not isinstance(self.compression, CompressionEnum):
-            self.compression = CompressionEnum(self.compression)
-
-        if self.conforms_to is not None and not isinstance(self.conforms_to, str):
-            self.conforms_to = str(self.conforms_to)
-
-        if self.conforms_to_class is not None and not isinstance(self.conforms_to_class, str):
-            self.conforms_to_class = str(self.conforms_to_class)
-
-        if self.conforms_to_schema is not None and not isinstance(self.conforms_to_schema, str):
-            self.conforms_to_schema = str(self.conforms_to_schema)
-
-        if self.created_by is not None and not isinstance(self.created_by, str):
-            self.created_by = str(self.created_by)
-
-        if self.created_on is not None and not isinstance(self.created_on, XSDDateTime):
-            self.created_on = XSDDateTime(self.created_on)
-
-        if self.doi is not None and not isinstance(self.doi, str):
-            self.doi = str(self.doi)
-
-        if self.download_url is not None and not isinstance(self.download_url, URI):
-            self.download_url = URI(self.download_url)
-
-        if self.issued is not None and not isinstance(self.issued, XSDDateTime):
-            self.issued = XSDDateTime(self.issued)
-
-        if not isinstance(self.keywords, list):
-            self.keywords = [self.keywords] if self.keywords is not None else []
-        self.keywords = [v if isinstance(v, str) else str(v) for v in self.keywords]
-
-        if self.language is not None and not isinstance(self.language, str):
-            self.language = str(self.language)
-
-        if self.last_updated_on is not None and not isinstance(self.last_updated_on, XSDDateTime):
-            self.last_updated_on = XSDDateTime(self.last_updated_on)
-
-        if self.license is not None and not isinstance(self.license, str):
-            self.license = str(self.license)
-
-        if self.modified_by is not None and not isinstance(self.modified_by, str):
-            self.modified_by = str(self.modified_by)
-
-        if self.page is not None and not isinstance(self.page, str):
-            self.page = str(self.page)
-
-        if self.publisher is not None and not isinstance(self.publisher, URIorCURIE):
-            self.publisher = URIorCURIE(self.publisher)
-
-        if self.status is not None and not isinstance(self.status, str):
-            self.status = str(self.status)
-
-        if self.title is not None and not isinstance(self.title, str):
-            self.title = str(self.title)
-
-        if self.version is not None and not isinstance(self.version, str):
-            self.version = str(self.version)
-
-        if self.was_derived_from is not None and not isinstance(self.was_derived_from, str):
-            self.was_derived_from = str(self.was_derived_from)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -904,28 +643,6 @@ class DatasetCollection(Information):
 
     id: Union[str, DatasetCollectionId] = None
     resources: Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]] = empty_list()
-    compression: Optional[Union[str, "CompressionEnum"]] = None
-    conforms_to: Optional[str] = None
-    conforms_to_class: Optional[str] = None
-    conforms_to_schema: Optional[str] = None
-    created_by: Optional[str] = None
-    created_on: Optional[Union[str, XSDDateTime]] = None
-    doi: Optional[str] = None
-    download_url: Optional[Union[str, URI]] = None
-    issued: Optional[Union[str, XSDDateTime]] = None
-    keywords: Optional[Union[str, list[str]]] = empty_list()
-    language: Optional[str] = None
-    last_updated_on: Optional[Union[str, XSDDateTime]] = None
-    license: Optional[str] = None
-    modified_by: Optional[str] = None
-    page: Optional[str] = None
-    publisher: Optional[Union[str, URIorCURIE]] = None
-    status: Optional[str] = None
-    title: Optional[str] = None
-    version: Optional[str] = None
-    was_derived_from: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -936,73 +653,6 @@ class DatasetCollection(Information):
         if not isinstance(self.resources, list):
             self.resources = [self.resources] if self.resources is not None else []
         self.resources = [v if isinstance(v, DatasetId) else DatasetId(v) for v in self.resources]
-
-        if self.compression is not None and not isinstance(self.compression, CompressionEnum):
-            self.compression = CompressionEnum(self.compression)
-
-        if self.conforms_to is not None and not isinstance(self.conforms_to, str):
-            self.conforms_to = str(self.conforms_to)
-
-        if self.conforms_to_class is not None and not isinstance(self.conforms_to_class, str):
-            self.conforms_to_class = str(self.conforms_to_class)
-
-        if self.conforms_to_schema is not None and not isinstance(self.conforms_to_schema, str):
-            self.conforms_to_schema = str(self.conforms_to_schema)
-
-        if self.created_by is not None and not isinstance(self.created_by, str):
-            self.created_by = str(self.created_by)
-
-        if self.created_on is not None and not isinstance(self.created_on, XSDDateTime):
-            self.created_on = XSDDateTime(self.created_on)
-
-        if self.doi is not None and not isinstance(self.doi, str):
-            self.doi = str(self.doi)
-
-        if self.download_url is not None and not isinstance(self.download_url, URI):
-            self.download_url = URI(self.download_url)
-
-        if self.issued is not None and not isinstance(self.issued, XSDDateTime):
-            self.issued = XSDDateTime(self.issued)
-
-        if not isinstance(self.keywords, list):
-            self.keywords = [self.keywords] if self.keywords is not None else []
-        self.keywords = [v if isinstance(v, str) else str(v) for v in self.keywords]
-
-        if self.language is not None and not isinstance(self.language, str):
-            self.language = str(self.language)
-
-        if self.last_updated_on is not None and not isinstance(self.last_updated_on, XSDDateTime):
-            self.last_updated_on = XSDDateTime(self.last_updated_on)
-
-        if self.license is not None and not isinstance(self.license, str):
-            self.license = str(self.license)
-
-        if self.modified_by is not None and not isinstance(self.modified_by, str):
-            self.modified_by = str(self.modified_by)
-
-        if self.page is not None and not isinstance(self.page, str):
-            self.page = str(self.page)
-
-        if self.publisher is not None and not isinstance(self.publisher, URIorCURIE):
-            self.publisher = URIorCURIE(self.publisher)
-
-        if self.status is not None and not isinstance(self.status, str):
-            self.status = str(self.status)
-
-        if self.title is not None and not isinstance(self.title, str):
-            self.title = str(self.title)
-
-        if self.version is not None and not isinstance(self.version, str):
-            self.version = str(self.version)
-
-        if self.was_derived_from is not None and not isinstance(self.was_derived_from, str):
-            self.was_derived_from = str(self.was_derived_from)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -1083,28 +733,6 @@ class Dataset(Information):
     citation: Optional[str] = None
     parent_datasets: Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]] = empty_list()
     related_datasets: Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]] = empty_list()
-    compression: Optional[Union[str, "CompressionEnum"]] = None
-    conforms_to: Optional[str] = None
-    conforms_to_class: Optional[str] = None
-    conforms_to_schema: Optional[str] = None
-    created_by: Optional[str] = None
-    created_on: Optional[Union[str, XSDDateTime]] = None
-    doi: Optional[str] = None
-    download_url: Optional[Union[str, URI]] = None
-    issued: Optional[Union[str, XSDDateTime]] = None
-    keywords: Optional[Union[str, list[str]]] = empty_list()
-    language: Optional[str] = None
-    last_updated_on: Optional[Union[str, XSDDateTime]] = None
-    license: Optional[str] = None
-    modified_by: Optional[str] = None
-    page: Optional[str] = None
-    publisher: Optional[Union[str, URIorCURIE]] = None
-    status: Optional[str] = None
-    title: Optional[str] = None
-    version: Optional[str] = None
-    was_derived_from: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -1338,100 +966,6 @@ class Dataset(Information):
             self.related_datasets = [self.related_datasets] if self.related_datasets is not None else []
         self.related_datasets = [v if isinstance(v, DatasetRelationshipId) else DatasetRelationshipId(v) for v in self.related_datasets]
 
-        if self.bytes is not None and not isinstance(self.bytes, int):
-            self.bytes = int(self.bytes)
-
-        if self.dialect is not None and not isinstance(self.dialect, str):
-            self.dialect = str(self.dialect)
-
-        if self.encoding is not None and not isinstance(self.encoding, EncodingEnum):
-            self.encoding = EncodingEnum(self.encoding)
-
-        if self.format is not None and not isinstance(self.format, FormatEnum):
-            self.format = FormatEnum(self.format)
-
-        if self.hash is not None and not isinstance(self.hash, str):
-            self.hash = str(self.hash)
-
-        if self.md5 is not None and not isinstance(self.md5, str):
-            self.md5 = str(self.md5)
-
-        if self.media_type is not None and not isinstance(self.media_type, MediaTypeEnum):
-            self.media_type = MediaTypeEnum(self.media_type)
-
-        if self.path is not None and not isinstance(self.path, str):
-            self.path = str(self.path)
-
-        if self.sha256 is not None and not isinstance(self.sha256, str):
-            self.sha256 = str(self.sha256)
-
-        if self.compression is not None and not isinstance(self.compression, CompressionEnum):
-            self.compression = CompressionEnum(self.compression)
-
-        if self.conforms_to is not None and not isinstance(self.conforms_to, str):
-            self.conforms_to = str(self.conforms_to)
-
-        if self.conforms_to_class is not None and not isinstance(self.conforms_to_class, str):
-            self.conforms_to_class = str(self.conforms_to_class)
-
-        if self.conforms_to_schema is not None and not isinstance(self.conforms_to_schema, str):
-            self.conforms_to_schema = str(self.conforms_to_schema)
-
-        if self.created_by is not None and not isinstance(self.created_by, str):
-            self.created_by = str(self.created_by)
-
-        if self.created_on is not None and not isinstance(self.created_on, XSDDateTime):
-            self.created_on = XSDDateTime(self.created_on)
-
-        if self.doi is not None and not isinstance(self.doi, str):
-            self.doi = str(self.doi)
-
-        if self.download_url is not None and not isinstance(self.download_url, URI):
-            self.download_url = URI(self.download_url)
-
-        if self.issued is not None and not isinstance(self.issued, XSDDateTime):
-            self.issued = XSDDateTime(self.issued)
-
-        if not isinstance(self.keywords, list):
-            self.keywords = [self.keywords] if self.keywords is not None else []
-        self.keywords = [v if isinstance(v, str) else str(v) for v in self.keywords]
-
-        if self.language is not None and not isinstance(self.language, str):
-            self.language = str(self.language)
-
-        if self.last_updated_on is not None and not isinstance(self.last_updated_on, XSDDateTime):
-            self.last_updated_on = XSDDateTime(self.last_updated_on)
-
-        if self.license is not None and not isinstance(self.license, str):
-            self.license = str(self.license)
-
-        if self.modified_by is not None and not isinstance(self.modified_by, str):
-            self.modified_by = str(self.modified_by)
-
-        if self.page is not None and not isinstance(self.page, str):
-            self.page = str(self.page)
-
-        if self.publisher is not None and not isinstance(self.publisher, URIorCURIE):
-            self.publisher = URIorCURIE(self.publisher)
-
-        if self.status is not None and not isinstance(self.status, str):
-            self.status = str(self.status)
-
-        if self.title is not None and not isinstance(self.title, str):
-            self.title = str(self.title)
-
-        if self.version is not None and not isinstance(self.version, str):
-            self.version = str(self.version)
-
-        if self.was_derived_from is not None and not isinstance(self.was_derived_from, str):
-            self.was_derived_from = str(self.was_derived_from)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -1450,90 +984,6 @@ class DataSubset(Dataset):
     id: Union[str, DataSubsetId] = None
     is_data_split: Optional[Union[bool, Bool]] = None
     is_subpopulation: Optional[Union[bool, Bool]] = None
-    bytes: Optional[int] = None
-    dialect: Optional[str] = None
-    encoding: Optional[Union[str, "EncodingEnum"]] = None
-    format: Optional[Union[str, "FormatEnum"]] = None
-    hash: Optional[str] = None
-    md5: Optional[str] = None
-    media_type: Optional[Union[str, "MediaTypeEnum"]] = None
-    path: Optional[str] = None
-    sha256: Optional[str] = None
-    purposes: Optional[Union[Union[str, PurposeId], list[Union[str, PurposeId]]]] = empty_list()
-    tasks: Optional[Union[Union[str, TaskId], list[Union[str, TaskId]]]] = empty_list()
-    addressing_gaps: Optional[Union[Union[str, AddressingGapId], list[Union[str, AddressingGapId]]]] = empty_list()
-    creators: Optional[Union[Union[str, CreatorId], list[Union[str, CreatorId]]]] = empty_list()
-    funders: Optional[Union[Union[str, FundingMechanismId], list[Union[str, FundingMechanismId]]]] = empty_list()
-    subsets: Optional[Union[Union[str, DataSubsetId], list[Union[str, DataSubsetId]]]] = empty_list()
-    instances: Optional[Union[Union[str, InstanceId], list[Union[str, InstanceId]]]] = empty_list()
-    anomalies: Optional[Union[Union[str, DataAnomalyId], list[Union[str, DataAnomalyId]]]] = empty_list()
-    external_resources: Optional[Union[Union[str, ExternalResourceId], list[Union[str, ExternalResourceId]]]] = empty_list()
-    confidential_elements: Optional[Union[Union[str, ConfidentialityId], list[Union[str, ConfidentialityId]]]] = empty_list()
-    content_warnings: Optional[Union[Union[str, ContentWarningId], list[Union[str, ContentWarningId]]]] = empty_list()
-    subpopulations: Optional[Union[Union[str, SubpopulationId], list[Union[str, SubpopulationId]]]] = empty_list()
-    sensitive_elements: Optional[Union[Union[str, SensitiveElementId], list[Union[str, SensitiveElementId]]]] = empty_list()
-    acquisition_methods: Optional[Union[Union[str, InstanceAcquisitionId], list[Union[str, InstanceAcquisitionId]]]] = empty_list()
-    collection_mechanisms: Optional[Union[Union[str, CollectionMechanismId], list[Union[str, CollectionMechanismId]]]] = empty_list()
-    sampling_strategies: Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]] = empty_list()
-    data_collectors: Optional[Union[Union[str, DataCollectorId], list[Union[str, DataCollectorId]]]] = empty_list()
-    collection_timeframes: Optional[Union[Union[str, CollectionTimeframeId], list[Union[str, CollectionTimeframeId]]]] = empty_list()
-    ethical_reviews: Optional[Union[Union[str, EthicalReviewId], list[Union[str, EthicalReviewId]]]] = empty_list()
-    data_protection_impacts: Optional[Union[Union[str, DataProtectionImpactId], list[Union[str, DataProtectionImpactId]]]] = empty_list()
-    human_subject_research: Optional[Union[str, HumanSubjectResearchId]] = None
-    informed_consent: Optional[Union[Union[str, InformedConsentId], list[Union[str, InformedConsentId]]]] = empty_list()
-    participant_privacy: Optional[Union[Union[str, ParticipantPrivacyId], list[Union[str, ParticipantPrivacyId]]]] = empty_list()
-    participant_compensation: Optional[Union[str, HumanSubjectCompensationId]] = None
-    vulnerable_populations: Optional[Union[str, VulnerablePopulationsId]] = None
-    preprocessing_strategies: Optional[Union[Union[str, PreprocessingStrategyId], list[Union[str, PreprocessingStrategyId]]]] = empty_list()
-    cleaning_strategies: Optional[Union[Union[str, CleaningStrategyId], list[Union[str, CleaningStrategyId]]]] = empty_list()
-    labeling_strategies: Optional[Union[Union[str, LabelingStrategyId], list[Union[str, LabelingStrategyId]]]] = empty_list()
-    raw_sources: Optional[Union[Union[str, RawDataId], list[Union[str, RawDataId]]]] = empty_list()
-    existing_uses: Optional[Union[Union[str, ExistingUseId], list[Union[str, ExistingUseId]]]] = empty_list()
-    use_repository: Optional[Union[Union[str, UseRepositoryId], list[Union[str, UseRepositoryId]]]] = empty_list()
-    other_tasks: Optional[Union[Union[str, OtherTaskId], list[Union[str, OtherTaskId]]]] = empty_list()
-    future_use_impacts: Optional[Union[Union[str, FutureUseImpactId], list[Union[str, FutureUseImpactId]]]] = empty_list()
-    discouraged_uses: Optional[Union[Union[str, DiscouragedUseId], list[Union[str, DiscouragedUseId]]]] = empty_list()
-    intended_uses: Optional[Union[Union[str, IntendedUseId], list[Union[str, IntendedUseId]]]] = empty_list()
-    prohibited_uses: Optional[Union[Union[str, ProhibitedUseId], list[Union[str, ProhibitedUseId]]]] = empty_list()
-    distribution_formats: Optional[Union[Union[str, DistributionFormatId], list[Union[str, DistributionFormatId]]]] = empty_list()
-    distribution_dates: Optional[Union[Union[str, DistributionDateId], list[Union[str, DistributionDateId]]]] = empty_list()
-    license_and_use_terms: Optional[Union[str, LicenseAndUseTermsId]] = None
-    ip_restrictions: Optional[Union[str, IPRestrictionsId]] = None
-    regulatory_restrictions: Optional[Union[str, ExportControlRegulatoryRestrictionsId]] = None
-    maintainers: Optional[Union[Union[str, MaintainerId], list[Union[str, MaintainerId]]]] = empty_list()
-    errata: Optional[Union[Union[str, ErratumId], list[Union[str, ErratumId]]]] = empty_list()
-    updates: Optional[Union[str, UpdatePlanId]] = None
-    retention_limit: Optional[Union[str, RetentionLimitsId]] = None
-    version_access: Optional[Union[str, VersionAccessId]] = None
-    extension_mechanism: Optional[Union[str, ExtensionMechanismId]] = None
-    variables: Optional[Union[Union[str, VariableMetadataId], list[Union[str, VariableMetadataId]]]] = empty_list()
-    is_deidentified: Optional[Union[str, DeidentificationId]] = None
-    is_tabular: Optional[Union[bool, Bool]] = None
-    citation: Optional[str] = None
-    parent_datasets: Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]] = empty_list()
-    related_datasets: Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]] = empty_list()
-    compression: Optional[Union[str, "CompressionEnum"]] = None
-    conforms_to: Optional[str] = None
-    conforms_to_class: Optional[str] = None
-    conforms_to_schema: Optional[str] = None
-    created_by: Optional[str] = None
-    created_on: Optional[Union[str, XSDDateTime]] = None
-    doi: Optional[str] = None
-    download_url: Optional[Union[str, URI]] = None
-    issued: Optional[Union[str, XSDDateTime]] = None
-    keywords: Optional[Union[str, list[str]]] = empty_list()
-    language: Optional[str] = None
-    last_updated_on: Optional[Union[str, XSDDateTime]] = None
-    license: Optional[str] = None
-    modified_by: Optional[str] = None
-    page: Optional[str] = None
-    publisher: Optional[Union[str, URIorCURIE]] = None
-    status: Optional[str] = None
-    title: Optional[str] = None
-    version: Optional[str] = None
-    was_derived_from: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -1546,299 +996,6 @@ class DataSubset(Dataset):
 
         if self.is_subpopulation is not None and not isinstance(self.is_subpopulation, Bool):
             self.is_subpopulation = Bool(self.is_subpopulation)
-
-        if self.bytes is not None and not isinstance(self.bytes, int):
-            self.bytes = int(self.bytes)
-
-        if self.dialect is not None and not isinstance(self.dialect, str):
-            self.dialect = str(self.dialect)
-
-        if self.encoding is not None and not isinstance(self.encoding, EncodingEnum):
-            self.encoding = EncodingEnum(self.encoding)
-
-        if self.format is not None and not isinstance(self.format, FormatEnum):
-            self.format = FormatEnum(self.format)
-
-        if self.hash is not None and not isinstance(self.hash, str):
-            self.hash = str(self.hash)
-
-        if self.md5 is not None and not isinstance(self.md5, str):
-            self.md5 = str(self.md5)
-
-        if self.media_type is not None and not isinstance(self.media_type, MediaTypeEnum):
-            self.media_type = MediaTypeEnum(self.media_type)
-
-        if self.path is not None and not isinstance(self.path, str):
-            self.path = str(self.path)
-
-        if self.sha256 is not None and not isinstance(self.sha256, str):
-            self.sha256 = str(self.sha256)
-
-        if not isinstance(self.purposes, list):
-            self.purposes = [self.purposes] if self.purposes is not None else []
-        self.purposes = [v if isinstance(v, PurposeId) else PurposeId(v) for v in self.purposes]
-
-        if not isinstance(self.tasks, list):
-            self.tasks = [self.tasks] if self.tasks is not None else []
-        self.tasks = [v if isinstance(v, TaskId) else TaskId(v) for v in self.tasks]
-
-        if not isinstance(self.addressing_gaps, list):
-            self.addressing_gaps = [self.addressing_gaps] if self.addressing_gaps is not None else []
-        self.addressing_gaps = [v if isinstance(v, AddressingGapId) else AddressingGapId(v) for v in self.addressing_gaps]
-
-        if not isinstance(self.creators, list):
-            self.creators = [self.creators] if self.creators is not None else []
-        self.creators = [v if isinstance(v, CreatorId) else CreatorId(v) for v in self.creators]
-
-        if not isinstance(self.funders, list):
-            self.funders = [self.funders] if self.funders is not None else []
-        self.funders = [v if isinstance(v, FundingMechanismId) else FundingMechanismId(v) for v in self.funders]
-
-        if not isinstance(self.subsets, list):
-            self.subsets = [self.subsets] if self.subsets is not None else []
-        self.subsets = [v if isinstance(v, DataSubsetId) else DataSubsetId(v) for v in self.subsets]
-
-        if not isinstance(self.instances, list):
-            self.instances = [self.instances] if self.instances is not None else []
-        self.instances = [v if isinstance(v, InstanceId) else InstanceId(v) for v in self.instances]
-
-        if not isinstance(self.anomalies, list):
-            self.anomalies = [self.anomalies] if self.anomalies is not None else []
-        self.anomalies = [v if isinstance(v, DataAnomalyId) else DataAnomalyId(v) for v in self.anomalies]
-
-        if not isinstance(self.external_resources, list):
-            self.external_resources = [self.external_resources] if self.external_resources is not None else []
-        self.external_resources = [v if isinstance(v, ExternalResourceId) else ExternalResourceId(v) for v in self.external_resources]
-
-        if not isinstance(self.confidential_elements, list):
-            self.confidential_elements = [self.confidential_elements] if self.confidential_elements is not None else []
-        self.confidential_elements = [v if isinstance(v, ConfidentialityId) else ConfidentialityId(v) for v in self.confidential_elements]
-
-        if not isinstance(self.content_warnings, list):
-            self.content_warnings = [self.content_warnings] if self.content_warnings is not None else []
-        self.content_warnings = [v if isinstance(v, ContentWarningId) else ContentWarningId(v) for v in self.content_warnings]
-
-        if not isinstance(self.subpopulations, list):
-            self.subpopulations = [self.subpopulations] if self.subpopulations is not None else []
-        self.subpopulations = [v if isinstance(v, SubpopulationId) else SubpopulationId(v) for v in self.subpopulations]
-
-        if not isinstance(self.sensitive_elements, list):
-            self.sensitive_elements = [self.sensitive_elements] if self.sensitive_elements is not None else []
-        self.sensitive_elements = [v if isinstance(v, SensitiveElementId) else SensitiveElementId(v) for v in self.sensitive_elements]
-
-        if not isinstance(self.acquisition_methods, list):
-            self.acquisition_methods = [self.acquisition_methods] if self.acquisition_methods is not None else []
-        self.acquisition_methods = [v if isinstance(v, InstanceAcquisitionId) else InstanceAcquisitionId(v) for v in self.acquisition_methods]
-
-        if not isinstance(self.collection_mechanisms, list):
-            self.collection_mechanisms = [self.collection_mechanisms] if self.collection_mechanisms is not None else []
-        self.collection_mechanisms = [v if isinstance(v, CollectionMechanismId) else CollectionMechanismId(v) for v in self.collection_mechanisms]
-
-        if not isinstance(self.sampling_strategies, list):
-            self.sampling_strategies = [self.sampling_strategies] if self.sampling_strategies is not None else []
-        self.sampling_strategies = [v if isinstance(v, SamplingStrategyId) else SamplingStrategyId(v) for v in self.sampling_strategies]
-
-        if not isinstance(self.data_collectors, list):
-            self.data_collectors = [self.data_collectors] if self.data_collectors is not None else []
-        self.data_collectors = [v if isinstance(v, DataCollectorId) else DataCollectorId(v) for v in self.data_collectors]
-
-        if not isinstance(self.collection_timeframes, list):
-            self.collection_timeframes = [self.collection_timeframes] if self.collection_timeframes is not None else []
-        self.collection_timeframes = [v if isinstance(v, CollectionTimeframeId) else CollectionTimeframeId(v) for v in self.collection_timeframes]
-
-        if not isinstance(self.ethical_reviews, list):
-            self.ethical_reviews = [self.ethical_reviews] if self.ethical_reviews is not None else []
-        self.ethical_reviews = [v if isinstance(v, EthicalReviewId) else EthicalReviewId(v) for v in self.ethical_reviews]
-
-        if not isinstance(self.data_protection_impacts, list):
-            self.data_protection_impacts = [self.data_protection_impacts] if self.data_protection_impacts is not None else []
-        self.data_protection_impacts = [v if isinstance(v, DataProtectionImpactId) else DataProtectionImpactId(v) for v in self.data_protection_impacts]
-
-        if self.human_subject_research is not None and not isinstance(self.human_subject_research, HumanSubjectResearchId):
-            self.human_subject_research = HumanSubjectResearchId(self.human_subject_research)
-
-        if not isinstance(self.informed_consent, list):
-            self.informed_consent = [self.informed_consent] if self.informed_consent is not None else []
-        self.informed_consent = [v if isinstance(v, InformedConsentId) else InformedConsentId(v) for v in self.informed_consent]
-
-        if not isinstance(self.participant_privacy, list):
-            self.participant_privacy = [self.participant_privacy] if self.participant_privacy is not None else []
-        self.participant_privacy = [v if isinstance(v, ParticipantPrivacyId) else ParticipantPrivacyId(v) for v in self.participant_privacy]
-
-        if self.participant_compensation is not None and not isinstance(self.participant_compensation, HumanSubjectCompensationId):
-            self.participant_compensation = HumanSubjectCompensationId(self.participant_compensation)
-
-        if self.vulnerable_populations is not None and not isinstance(self.vulnerable_populations, VulnerablePopulationsId):
-            self.vulnerable_populations = VulnerablePopulationsId(self.vulnerable_populations)
-
-        if not isinstance(self.preprocessing_strategies, list):
-            self.preprocessing_strategies = [self.preprocessing_strategies] if self.preprocessing_strategies is not None else []
-        self.preprocessing_strategies = [v if isinstance(v, PreprocessingStrategyId) else PreprocessingStrategyId(v) for v in self.preprocessing_strategies]
-
-        if not isinstance(self.cleaning_strategies, list):
-            self.cleaning_strategies = [self.cleaning_strategies] if self.cleaning_strategies is not None else []
-        self.cleaning_strategies = [v if isinstance(v, CleaningStrategyId) else CleaningStrategyId(v) for v in self.cleaning_strategies]
-
-        if not isinstance(self.labeling_strategies, list):
-            self.labeling_strategies = [self.labeling_strategies] if self.labeling_strategies is not None else []
-        self.labeling_strategies = [v if isinstance(v, LabelingStrategyId) else LabelingStrategyId(v) for v in self.labeling_strategies]
-
-        if not isinstance(self.raw_sources, list):
-            self.raw_sources = [self.raw_sources] if self.raw_sources is not None else []
-        self.raw_sources = [v if isinstance(v, RawDataId) else RawDataId(v) for v in self.raw_sources]
-
-        if not isinstance(self.existing_uses, list):
-            self.existing_uses = [self.existing_uses] if self.existing_uses is not None else []
-        self.existing_uses = [v if isinstance(v, ExistingUseId) else ExistingUseId(v) for v in self.existing_uses]
-
-        if not isinstance(self.use_repository, list):
-            self.use_repository = [self.use_repository] if self.use_repository is not None else []
-        self.use_repository = [v if isinstance(v, UseRepositoryId) else UseRepositoryId(v) for v in self.use_repository]
-
-        if not isinstance(self.other_tasks, list):
-            self.other_tasks = [self.other_tasks] if self.other_tasks is not None else []
-        self.other_tasks = [v if isinstance(v, OtherTaskId) else OtherTaskId(v) for v in self.other_tasks]
-
-        if not isinstance(self.future_use_impacts, list):
-            self.future_use_impacts = [self.future_use_impacts] if self.future_use_impacts is not None else []
-        self.future_use_impacts = [v if isinstance(v, FutureUseImpactId) else FutureUseImpactId(v) for v in self.future_use_impacts]
-
-        if not isinstance(self.discouraged_uses, list):
-            self.discouraged_uses = [self.discouraged_uses] if self.discouraged_uses is not None else []
-        self.discouraged_uses = [v if isinstance(v, DiscouragedUseId) else DiscouragedUseId(v) for v in self.discouraged_uses]
-
-        if not isinstance(self.intended_uses, list):
-            self.intended_uses = [self.intended_uses] if self.intended_uses is not None else []
-        self.intended_uses = [v if isinstance(v, IntendedUseId) else IntendedUseId(v) for v in self.intended_uses]
-
-        if not isinstance(self.prohibited_uses, list):
-            self.prohibited_uses = [self.prohibited_uses] if self.prohibited_uses is not None else []
-        self.prohibited_uses = [v if isinstance(v, ProhibitedUseId) else ProhibitedUseId(v) for v in self.prohibited_uses]
-
-        if not isinstance(self.distribution_formats, list):
-            self.distribution_formats = [self.distribution_formats] if self.distribution_formats is not None else []
-        self.distribution_formats = [v if isinstance(v, DistributionFormatId) else DistributionFormatId(v) for v in self.distribution_formats]
-
-        if not isinstance(self.distribution_dates, list):
-            self.distribution_dates = [self.distribution_dates] if self.distribution_dates is not None else []
-        self.distribution_dates = [v if isinstance(v, DistributionDateId) else DistributionDateId(v) for v in self.distribution_dates]
-
-        if self.license_and_use_terms is not None and not isinstance(self.license_and_use_terms, LicenseAndUseTermsId):
-            self.license_and_use_terms = LicenseAndUseTermsId(self.license_and_use_terms)
-
-        if self.ip_restrictions is not None and not isinstance(self.ip_restrictions, IPRestrictionsId):
-            self.ip_restrictions = IPRestrictionsId(self.ip_restrictions)
-
-        if self.regulatory_restrictions is not None and not isinstance(self.regulatory_restrictions, ExportControlRegulatoryRestrictionsId):
-            self.regulatory_restrictions = ExportControlRegulatoryRestrictionsId(self.regulatory_restrictions)
-
-        if not isinstance(self.maintainers, list):
-            self.maintainers = [self.maintainers] if self.maintainers is not None else []
-        self.maintainers = [v if isinstance(v, MaintainerId) else MaintainerId(v) for v in self.maintainers]
-
-        if not isinstance(self.errata, list):
-            self.errata = [self.errata] if self.errata is not None else []
-        self.errata = [v if isinstance(v, ErratumId) else ErratumId(v) for v in self.errata]
-
-        if self.updates is not None and not isinstance(self.updates, UpdatePlanId):
-            self.updates = UpdatePlanId(self.updates)
-
-        if self.retention_limit is not None and not isinstance(self.retention_limit, RetentionLimitsId):
-            self.retention_limit = RetentionLimitsId(self.retention_limit)
-
-        if self.version_access is not None and not isinstance(self.version_access, VersionAccessId):
-            self.version_access = VersionAccessId(self.version_access)
-
-        if self.extension_mechanism is not None and not isinstance(self.extension_mechanism, ExtensionMechanismId):
-            self.extension_mechanism = ExtensionMechanismId(self.extension_mechanism)
-
-        if not isinstance(self.variables, list):
-            self.variables = [self.variables] if self.variables is not None else []
-        self.variables = [v if isinstance(v, VariableMetadataId) else VariableMetadataId(v) for v in self.variables]
-
-        if self.is_deidentified is not None and not isinstance(self.is_deidentified, DeidentificationId):
-            self.is_deidentified = DeidentificationId(self.is_deidentified)
-
-        if self.is_tabular is not None and not isinstance(self.is_tabular, Bool):
-            self.is_tabular = Bool(self.is_tabular)
-
-        if self.citation is not None and not isinstance(self.citation, str):
-            self.citation = str(self.citation)
-
-        if not isinstance(self.parent_datasets, list):
-            self.parent_datasets = [self.parent_datasets] if self.parent_datasets is not None else []
-        self.parent_datasets = [v if isinstance(v, DatasetId) else DatasetId(v) for v in self.parent_datasets]
-
-        if not isinstance(self.related_datasets, list):
-            self.related_datasets = [self.related_datasets] if self.related_datasets is not None else []
-        self.related_datasets = [v if isinstance(v, DatasetRelationshipId) else DatasetRelationshipId(v) for v in self.related_datasets]
-
-        if self.compression is not None and not isinstance(self.compression, CompressionEnum):
-            self.compression = CompressionEnum(self.compression)
-
-        if self.conforms_to is not None and not isinstance(self.conforms_to, str):
-            self.conforms_to = str(self.conforms_to)
-
-        if self.conforms_to_class is not None and not isinstance(self.conforms_to_class, str):
-            self.conforms_to_class = str(self.conforms_to_class)
-
-        if self.conforms_to_schema is not None and not isinstance(self.conforms_to_schema, str):
-            self.conforms_to_schema = str(self.conforms_to_schema)
-
-        if self.created_by is not None and not isinstance(self.created_by, str):
-            self.created_by = str(self.created_by)
-
-        if self.created_on is not None and not isinstance(self.created_on, XSDDateTime):
-            self.created_on = XSDDateTime(self.created_on)
-
-        if self.doi is not None and not isinstance(self.doi, str):
-            self.doi = str(self.doi)
-
-        if self.download_url is not None and not isinstance(self.download_url, URI):
-            self.download_url = URI(self.download_url)
-
-        if self.issued is not None and not isinstance(self.issued, XSDDateTime):
-            self.issued = XSDDateTime(self.issued)
-
-        if not isinstance(self.keywords, list):
-            self.keywords = [self.keywords] if self.keywords is not None else []
-        self.keywords = [v if isinstance(v, str) else str(v) for v in self.keywords]
-
-        if self.language is not None and not isinstance(self.language, str):
-            self.language = str(self.language)
-
-        if self.last_updated_on is not None and not isinstance(self.last_updated_on, XSDDateTime):
-            self.last_updated_on = XSDDateTime(self.last_updated_on)
-
-        if self.license is not None and not isinstance(self.license, str):
-            self.license = str(self.license)
-
-        if self.modified_by is not None and not isinstance(self.modified_by, str):
-            self.modified_by = str(self.modified_by)
-
-        if self.page is not None and not isinstance(self.page, str):
-            self.page = str(self.page)
-
-        if self.publisher is not None and not isinstance(self.publisher, URIorCURIE):
-            self.publisher = URIorCURIE(self.publisher)
-
-        if self.status is not None and not isinstance(self.status, str):
-            self.status = str(self.status)
-
-        if self.title is not None and not isinstance(self.title, str):
-            self.title = str(self.title)
-
-        if self.version is not None and not isinstance(self.version, str):
-            self.version = str(self.version)
-
-        if self.was_derived_from is not None and not isinstance(self.was_derived_from, str):
-            self.was_derived_from = str(self.was_derived_from)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -1887,16 +1044,13 @@ class Purpose(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Purpose"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Purpose"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Purpose"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Purpose"
     class_name: ClassVar[str] = "Purpose"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Purpose
 
     id: Union[str, PurposeId] = None
     response: Optional[str] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -1906,16 +1060,6 @@ class Purpose(DatasetProperty):
 
         if self.response is not None and not isinstance(self.response, str):
             self.response = str(self.response)
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -1927,16 +1071,13 @@ class Task(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Task"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Task"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Task"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Task"
     class_name: ClassVar[str] = "Task"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Task
 
     id: Union[str, TaskId] = None
     response: Optional[str] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -1946,16 +1087,6 @@ class Task(DatasetProperty):
 
         if self.response is not None and not isinstance(self.response, str):
             self.response = str(self.response)
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -1967,16 +1098,13 @@ class AddressingGap(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["AddressingGap"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:AddressingGap"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["AddressingGap"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:AddressingGap"
     class_name: ClassVar[str] = "AddressingGap"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.AddressingGap
 
     id: Union[str, AddressingGapId] = None
     response: Optional[str] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -1986,16 +1114,6 @@ class AddressingGap(DatasetProperty):
 
         if self.response is not None and not isinstance(self.response, str):
             self.response = str(self.response)
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -2008,8 +1126,8 @@ class Creator(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Creator"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Creator"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Creator"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Creator"
     class_name: ClassVar[str] = "Creator"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Creator
 
@@ -2017,9 +1135,6 @@ class Creator(DatasetProperty):
     principal_investigator: Optional[Union[str, PersonId]] = None
     affiliation: Optional[Union[str, OrganizationId]] = None
     credit_roles: Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2037,16 +1152,6 @@ class Creator(DatasetProperty):
             self.credit_roles = [self.credit_roles] if self.credit_roles is not None else []
         self.credit_roles = [v if isinstance(v, CRediTRoleEnum) else CRediTRoleEnum(v) for v in self.credit_roles]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -2058,17 +1163,14 @@ class FundingMechanism(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["FundingMechanism"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:FundingMechanism"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["FundingMechanism"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:FundingMechanism"
     class_name: ClassVar[str] = "FundingMechanism"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FundingMechanism
 
     id: Union[str, FundingMechanismId] = None
     grantor: Optional[Union[str, GrantorId]] = None
     grant: Optional[Union[str, GrantId]] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2082,16 +1184,6 @@ class FundingMechanism(DatasetProperty):
         if self.grant is not None and not isinstance(self.grant, GrantId):
             self.grant = GrantId(self.grant)
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -2103,26 +1195,18 @@ class Grantor(Organization):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Grantor"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Grantor"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Grantor"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Grantor"
     class_name: ClassVar[str] = "Grantor"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Grantor
 
     id: Union[str, GrantorId] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
             self.MissingRequiredField("id")
         if not isinstance(self.id, GrantorId):
             self.id = GrantorId(self.id)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -2135,15 +1219,13 @@ class Grant(NamedThing):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Grant"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Grant"
+    class_class_uri: ClassVar[URIRef] = D4DMOTIVATION["Grant"]
+    class_class_curie: ClassVar[str] = "d4dmotivation:Grant"
     class_name: ClassVar[str] = "Grant"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Grant
 
     id: Union[str, GrantId] = None
     grant_number: Optional[str] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2153,12 +1235,6 @@ class Grant(NamedThing):
 
         if self.grant_number is not None and not isinstance(self.grant_number, str):
             self.grant_number = str(self.grant_number)
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -2170,8 +1246,8 @@ class Instance(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Instance"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Instance"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Instance"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Instance"
     class_name: ClassVar[str] = "Instance"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Instance
 
@@ -2184,9 +1260,6 @@ class Instance(DatasetProperty):
     label_description: Optional[str] = None
     sampling_strategies: Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]] = empty_list()
     missing_information: Optional[Union[Union[str, MissingInfoId], list[Union[str, MissingInfoId]]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2220,16 +1293,6 @@ class Instance(DatasetProperty):
             self.missing_information = [self.missing_information] if self.missing_information is not None else []
         self.missing_information = [v if isinstance(v, MissingInfoId) else MissingInfoId(v) for v in self.missing_information]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -2241,8 +1304,8 @@ class SamplingStrategy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["SamplingStrategy"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:SamplingStrategy"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["SamplingStrategy"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:SamplingStrategy"
     class_name: ClassVar[str] = "SamplingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SamplingStrategy
 
@@ -2254,9 +1317,6 @@ class SamplingStrategy(DatasetProperty):
     representative_verification: Optional[Union[str, list[str]]] = empty_list()
     why_not_representative: Optional[Union[str, list[str]]] = empty_list()
     strategies: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2292,16 +1352,6 @@ class SamplingStrategy(DatasetProperty):
             self.strategies = [self.strategies] if self.strategies is not None else []
         self.strategies = [v if isinstance(v, str) else str(v) for v in self.strategies]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -2312,17 +1362,14 @@ class MissingInfo(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["MissingInfo"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:MissingInfo"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["MissingInfo"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:MissingInfo"
     class_name: ClassVar[str] = "MissingInfo"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.MissingInfo
 
     id: Union[str, MissingInfoId] = None
     missing: Optional[Union[str, list[str]]] = empty_list()
     why_missing: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2338,16 +1385,6 @@ class MissingInfo(DatasetProperty):
             self.why_missing = [self.why_missing] if self.why_missing is not None else []
         self.why_missing = [v if isinstance(v, str) else str(v) for v in self.why_missing]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -2358,15 +1395,13 @@ class Relationships(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Relationships"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Relationships"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Relationships"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Relationships"
     class_name: ClassVar[str] = "Relationships"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Relationships
 
     id: Union[str, RelationshipsId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2378,13 +1413,6 @@ class Relationships(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -2395,15 +1423,13 @@ class Splits(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Splits"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Splits"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Splits"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Splits"
     class_name: ClassVar[str] = "Splits"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Splits
 
     id: Union[str, SplitsId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2415,13 +1441,6 @@ class Splits(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -2432,15 +1451,13 @@ class DataAnomaly(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DataAnomaly"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DataAnomaly"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["DataAnomaly"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:DataAnomaly"
     class_name: ClassVar[str] = "DataAnomaly"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataAnomaly
 
     id: Union[str, DataAnomalyId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2451,13 +1468,6 @@ class DataAnomaly(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -2470,8 +1480,8 @@ class ExternalResource(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ExternalResource"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ExternalResource"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["ExternalResource"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:ExternalResource"
     class_name: ClassVar[str] = "ExternalResource"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExternalResource
 
@@ -2480,9 +1490,6 @@ class ExternalResource(DatasetProperty):
     future_guarantees: Optional[Union[str, list[str]]] = empty_list()
     archival: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
     restrictions: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2506,16 +1513,6 @@ class ExternalResource(DatasetProperty):
             self.restrictions = [self.restrictions] if self.restrictions is not None else []
         self.restrictions = [v if isinstance(v, str) else str(v) for v in self.restrictions]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -2527,16 +1524,14 @@ class Confidentiality(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Confidentiality"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Confidentiality"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Confidentiality"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Confidentiality"
     class_name: ClassVar[str] = "Confidentiality"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Confidentiality
 
     id: Union[str, ConfidentialityId] = None
     confidential_elements_present: Optional[Union[bool, Bool]] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2551,13 +1546,6 @@ class Confidentiality(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -2569,17 +1557,14 @@ class ContentWarning(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ContentWarning"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ContentWarning"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["ContentWarning"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:ContentWarning"
     class_name: ClassVar[str] = "ContentWarning"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ContentWarning
 
     id: Union[str, ContentWarningId] = None
     content_warnings_present: Optional[Union[bool, Bool]] = None
     warnings: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2594,16 +1579,6 @@ class ContentWarning(DatasetProperty):
             self.warnings = [self.warnings] if self.warnings is not None else []
         self.warnings = [v if isinstance(v, str) else str(v) for v in self.warnings]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -2615,8 +1590,8 @@ class Subpopulation(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Subpopulation"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Subpopulation"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Subpopulation"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Subpopulation"
     class_name: ClassVar[str] = "Subpopulation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Subpopulation
 
@@ -2624,9 +1599,6 @@ class Subpopulation(DatasetProperty):
     subpopulation_elements_present: Optional[Union[bool, Bool]] = None
     identification: Optional[Union[str, list[str]]] = empty_list()
     distribution: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2645,16 +1617,6 @@ class Subpopulation(DatasetProperty):
             self.distribution = [self.distribution] if self.distribution is not None else []
         self.distribution = [v if isinstance(v, str) else str(v) for v in self.distribution]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -2666,16 +1628,14 @@ class Deidentification(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Deidentification"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Deidentification"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["Deidentification"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:Deidentification"
     class_name: ClassVar[str] = "Deidentification"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Deidentification
 
     id: Union[str, DeidentificationId] = None
     identifiable_elements_present: Optional[Union[bool, Bool]] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2690,13 +1650,6 @@ class Deidentification(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -2708,16 +1661,14 @@ class SensitiveElement(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["SensitiveElement"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:SensitiveElement"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["SensitiveElement"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:SensitiveElement"
     class_name: ClassVar[str] = "SensitiveElement"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SensitiveElement
 
     id: Union[str, SensitiveElementId] = None
     sensitive_elements_present: Optional[Union[bool, Bool]] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2732,13 +1683,6 @@ class SensitiveElement(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -2750,8 +1694,8 @@ class DatasetRelationship(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DatasetRelationship"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DatasetRelationship"
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["DatasetRelationship"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:DatasetRelationship"
     class_name: ClassVar[str] = "DatasetRelationship"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetRelationship
 
@@ -2759,8 +1703,6 @@ class DatasetRelationship(DatasetProperty):
     target_dataset: str = None
     relationship_type: Union[str, "DatasetRelationshipTypeEnum"] = None
     description: Optional[str] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2781,13 +1723,6 @@ class DatasetRelationship(DatasetProperty):
         if self.description is not None and not isinstance(self.description, str):
             self.description = str(self.description)
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -2799,8 +1734,8 @@ class InstanceAcquisition(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["InstanceAcquisition"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:InstanceAcquisition"
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/InstanceAcquisition"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:collection/InstanceAcquisition"
     class_name: ClassVar[str] = "InstanceAcquisition"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.InstanceAcquisition
 
@@ -2810,8 +1745,6 @@ class InstanceAcquisition(DatasetProperty):
     was_reported_by_subjects: Optional[Union[bool, Bool]] = None
     was_inferred_derived: Optional[Union[bool, Bool]] = None
     was_validated_verified: Optional[Union[bool, Bool]] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2835,13 +1768,6 @@ class InstanceAcquisition(DatasetProperty):
         if self.was_validated_verified is not None and not isinstance(self.was_validated_verified, Bool):
             self.was_validated_verified = Bool(self.was_validated_verified)
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -2853,15 +1779,13 @@ class CollectionMechanism(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["CollectionMechanism"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:CollectionMechanism"
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/CollectionMechanism"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:collection/CollectionMechanism"
     class_name: ClassVar[str] = "CollectionMechanism"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionMechanism
 
     id: Union[str, CollectionMechanismId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2873,13 +1797,6 @@ class CollectionMechanism(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -2890,15 +1807,13 @@ class DataCollector(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DataCollector"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DataCollector"
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/DataCollector"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:collection/DataCollector"
     class_name: ClassVar[str] = "DataCollector"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataCollector
 
     id: Union[str, DataCollectorId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2909,13 +1824,6 @@ class DataCollector(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -2928,15 +1836,13 @@ class CollectionTimeframe(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["CollectionTimeframe"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:CollectionTimeframe"
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/CollectionTimeframe"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:collection/CollectionTimeframe"
     class_name: ClassVar[str] = "CollectionTimeframe"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionTimeframe
 
     id: Union[str, CollectionTimeframeId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2947,13 +1853,6 @@ class CollectionTimeframe(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -2966,15 +1865,13 @@ class DirectCollection(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DirectCollection"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DirectCollection"
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/DirectCollection"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:collection/DirectCollection"
     class_name: ClassVar[str] = "DirectCollection"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DirectCollection
 
     id: Union[str, DirectCollectionId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -2986,13 +1883,6 @@ class DirectCollection(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3003,15 +1893,13 @@ class PreprocessingStrategy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["PreprocessingStrategy"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:PreprocessingStrategy"
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["PreprocessingStrategy"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:PreprocessingStrategy"
     class_name: ClassVar[str] = "PreprocessingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.PreprocessingStrategy
 
     id: Union[str, PreprocessingStrategyId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3023,13 +1911,6 @@ class PreprocessingStrategy(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3040,15 +1921,13 @@ class CleaningStrategy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["CleaningStrategy"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:CleaningStrategy"
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["CleaningStrategy"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:CleaningStrategy"
     class_name: ClassVar[str] = "CleaningStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CleaningStrategy
 
     id: Union[str, CleaningStrategyId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3059,13 +1938,6 @@ class CleaningStrategy(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3078,8 +1950,8 @@ class LabelingStrategy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["LabelingStrategy"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:LabelingStrategy"
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["LabelingStrategy"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:LabelingStrategy"
     class_name: ClassVar[str] = "LabelingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LabelingStrategy
 
@@ -3089,8 +1961,6 @@ class LabelingStrategy(DatasetProperty):
     annotations_per_item: Optional[int] = None
     inter_annotator_agreement: Optional[str] = None
     annotator_demographics: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3115,13 +1985,6 @@ class LabelingStrategy(DatasetProperty):
             self.annotator_demographics = [self.annotator_demographics] if self.annotator_demographics is not None else []
         self.annotator_demographics = [v if isinstance(v, str) else str(v) for v in self.annotator_demographics]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3133,15 +1996,13 @@ class RawData(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["RawData"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:RawData"
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["RawData"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:RawData"
     class_name: ClassVar[str] = "RawData"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.RawData
 
     id: Union[str, RawDataId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3153,13 +2014,6 @@ class RawData(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3170,15 +2024,13 @@ class ExistingUse(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ExistingUse"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ExistingUse"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["ExistingUse"]
+    class_class_curie: ClassVar[str] = "d4duses:ExistingUse"
     class_name: ClassVar[str] = "ExistingUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExistingUse
 
     id: Union[str, ExistingUseId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3189,13 +2041,6 @@ class ExistingUse(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3208,15 +2053,13 @@ class UseRepository(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["UseRepository"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:UseRepository"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["UseRepository"]
+    class_class_curie: ClassVar[str] = "d4duses:UseRepository"
     class_name: ClassVar[str] = "UseRepository"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.UseRepository
 
     id: Union[str, UseRepositoryId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3228,13 +2071,6 @@ class UseRepository(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3245,15 +2081,13 @@ class OtherTask(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["OtherTask"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:OtherTask"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["OtherTask"]
+    class_class_curie: ClassVar[str] = "d4duses:OtherTask"
     class_name: ClassVar[str] = "OtherTask"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.OtherTask
 
     id: Union[str, OtherTaskId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3264,13 +2098,6 @@ class OtherTask(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3283,15 +2110,13 @@ class FutureUseImpact(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["FutureUseImpact"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:FutureUseImpact"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["FutureUseImpact"]
+    class_class_curie: ClassVar[str] = "d4duses:FutureUseImpact"
     class_name: ClassVar[str] = "FutureUseImpact"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FutureUseImpact
 
     id: Union[str, FutureUseImpactId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3303,13 +2128,6 @@ class FutureUseImpact(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3320,15 +2138,13 @@ class DiscouragedUse(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DiscouragedUse"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DiscouragedUse"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["DiscouragedUse"]
+    class_class_curie: ClassVar[str] = "d4duses:DiscouragedUse"
     class_name: ClassVar[str] = "DiscouragedUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DiscouragedUse
 
     id: Union[str, DiscouragedUseId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3339,13 +2155,6 @@ class DiscouragedUse(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3358,16 +2167,14 @@ class IntendedUse(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["IntendedUse"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:IntendedUse"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["IntendedUse"]
+    class_class_curie: ClassVar[str] = "d4duses:IntendedUse"
     class_name: ClassVar[str] = "IntendedUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.IntendedUse
 
     id: Union[str, IntendedUseId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
     use_category: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3383,13 +2190,6 @@ class IntendedUse(DatasetProperty):
             self.use_category = [self.use_category] if self.use_category is not None else []
         self.use_category = [v if isinstance(v, str) else str(v) for v in self.use_category]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3401,16 +2201,14 @@ class ProhibitedUse(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ProhibitedUse"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ProhibitedUse"
+    class_class_uri: ClassVar[URIRef] = D4DUSES["ProhibitedUse"]
+    class_class_curie: ClassVar[str] = "d4duses:ProhibitedUse"
     class_name: ClassVar[str] = "ProhibitedUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ProhibitedUse
 
     id: Union[str, ProhibitedUseId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
     prohibition_reason: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3426,13 +2224,6 @@ class ProhibitedUse(DatasetProperty):
             self.prohibition_reason = [self.prohibition_reason] if self.prohibition_reason is not None else []
         self.prohibition_reason = [v if isinstance(v, str) else str(v) for v in self.prohibition_reason]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3444,15 +2235,13 @@ class ThirdPartySharing(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ThirdPartySharing"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ThirdPartySharing"
+    class_class_uri: ClassVar[URIRef] = D4DDISTRIBUTION["ThirdPartySharing"]
+    class_class_curie: ClassVar[str] = "d4ddistribution:ThirdPartySharing"
     class_name: ClassVar[str] = "ThirdPartySharing"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ThirdPartySharing
 
     id: Union[str, ThirdPartySharingId] = None
     description: Optional[Union[bool, Bool]] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3462,13 +2251,6 @@ class ThirdPartySharing(DatasetProperty):
 
         if self.description is not None and not isinstance(self.description, Bool):
             self.description = Bool(self.description)
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3480,15 +2262,13 @@ class DistributionFormat(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DistributionFormat"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DistributionFormat"
+    class_class_uri: ClassVar[URIRef] = D4DDISTRIBUTION["DistributionFormat"]
+    class_class_curie: ClassVar[str] = "d4ddistribution:DistributionFormat"
     class_name: ClassVar[str] = "DistributionFormat"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionFormat
 
     id: Union[str, DistributionFormatId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3500,13 +2280,6 @@ class DistributionFormat(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3517,15 +2290,13 @@ class DistributionDate(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DistributionDate"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DistributionDate"
+    class_class_uri: ClassVar[URIRef] = D4DDISTRIBUTION["DistributionDate"]
+    class_class_curie: ClassVar[str] = "d4ddistribution:DistributionDate"
     class_name: ClassVar[str] = "DistributionDate"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionDate
 
     id: Union[str, DistributionDateId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3537,13 +2308,6 @@ class DistributionDate(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3554,15 +2318,13 @@ class Maintainer(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Maintainer"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Maintainer"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["Maintainer"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:Maintainer"
     class_name: ClassVar[str] = "Maintainer"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Maintainer
 
     id: Union[str, MaintainerId] = None
     description: Optional[Union[Union[str, "CreatorOrMaintainerEnum"], list[Union[str, "CreatorOrMaintainerEnum"]]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3574,13 +2336,6 @@ class Maintainer(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, CreatorOrMaintainerEnum) else CreatorOrMaintainerEnum(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3591,15 +2346,13 @@ class Erratum(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["Erratum"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:Erratum"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["Erratum"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:Erratum"
     class_name: ClassVar[str] = "Erratum"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Erratum
 
     id: Union[str, ErratumId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3610,13 +2363,6 @@ class Erratum(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3629,15 +2375,13 @@ class UpdatePlan(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["UpdatePlan"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:UpdatePlan"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["UpdatePlan"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:UpdatePlan"
     class_name: ClassVar[str] = "UpdatePlan"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.UpdatePlan
 
     id: Union[str, UpdatePlanId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3648,13 +2392,6 @@ class UpdatePlan(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3668,15 +2405,13 @@ class RetentionLimits(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["RetentionLimits"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:RetentionLimits"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["RetentionLimits"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:RetentionLimits"
     class_name: ClassVar[str] = "RetentionLimits"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.RetentionLimits
 
     id: Union[str, RetentionLimitsId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3687,13 +2422,6 @@ class RetentionLimits(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3706,15 +2434,13 @@ class VersionAccess(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["VersionAccess"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:VersionAccess"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["VersionAccess"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:VersionAccess"
     class_name: ClassVar[str] = "VersionAccess"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VersionAccess
 
     id: Union[str, VersionAccessId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3725,13 +2451,6 @@ class VersionAccess(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3744,15 +2463,13 @@ class ExtensionMechanism(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ExtensionMechanism"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ExtensionMechanism"
+    class_class_uri: ClassVar[URIRef] = D4DMAINTENANCE["ExtensionMechanism"]
+    class_class_curie: ClassVar[str] = "d4dmaintenance:ExtensionMechanism"
     class_name: ClassVar[str] = "ExtensionMechanism"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExtensionMechanism
 
     id: Union[str, ExtensionMechanismId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3763,13 +2480,6 @@ class ExtensionMechanism(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3783,8 +2493,8 @@ class EthicalReview(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["EthicalReview"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:EthicalReview"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["EthicalReview"]
+    class_class_curie: ClassVar[str] = "d4dethics:EthicalReview"
     class_name: ClassVar[str] = "EthicalReview"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.EthicalReview
 
@@ -3792,8 +2502,6 @@ class EthicalReview(DatasetProperty):
     description: Optional[Union[str, list[str]]] = empty_list()
     contact_person: Optional[Union[str, PersonId]] = None
     reviewing_organization: Optional[Union[str, OrganizationId]] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3811,13 +2519,6 @@ class EthicalReview(DatasetProperty):
         if self.reviewing_organization is not None and not isinstance(self.reviewing_organization, OrganizationId):
             self.reviewing_organization = OrganizationId(self.reviewing_organization)
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -3830,15 +2531,13 @@ class DataProtectionImpact(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["DataProtectionImpact"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:DataProtectionImpact"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["DataProtectionImpact"]
+    class_class_curie: ClassVar[str] = "d4dethics:DataProtectionImpact"
     class_name: ClassVar[str] = "DataProtectionImpact"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataProtectionImpact
 
     id: Union[str, DataProtectionImpactId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3849,13 +2548,6 @@ class DataProtectionImpact(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3868,15 +2560,13 @@ class CollectionNotification(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["CollectionNotification"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:CollectionNotification"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["CollectionNotification"]
+    class_class_curie: ClassVar[str] = "d4dethics:CollectionNotification"
     class_name: ClassVar[str] = "CollectionNotification"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionNotification
 
     id: Union[str, CollectionNotificationId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3887,13 +2577,6 @@ class CollectionNotification(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3906,15 +2589,13 @@ class CollectionConsent(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["CollectionConsent"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:CollectionConsent"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["CollectionConsent"]
+    class_class_curie: ClassVar[str] = "d4dethics:CollectionConsent"
     class_name: ClassVar[str] = "CollectionConsent"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionConsent
 
     id: Union[str, CollectionConsentId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3925,13 +2606,6 @@ class CollectionConsent(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3944,15 +2618,13 @@ class ConsentRevocation(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ConsentRevocation"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ConsentRevocation"
+    class_class_uri: ClassVar[URIRef] = D4DETHICS["ConsentRevocation"]
+    class_class_curie: ClassVar[str] = "d4dethics:ConsentRevocation"
     class_name: ClassVar[str] = "ConsentRevocation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ConsentRevocation
 
     id: Union[str, ConsentRevocationId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -3963,13 +2635,6 @@ class ConsentRevocation(DatasetProperty):
         if not isinstance(self.description, list):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -3982,8 +2647,8 @@ class HumanSubjectResearch(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["HumanSubjectResearch"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:HumanSubjectResearch"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["HumanSubjectResearch"]
+    class_class_curie: ClassVar[str] = "d4dhuman:HumanSubjectResearch"
     class_name: ClassVar[str] = "HumanSubjectResearch"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.HumanSubjectResearch
 
@@ -3993,9 +2658,6 @@ class HumanSubjectResearch(DatasetProperty):
     ethics_review_board: Optional[Union[str, list[str]]] = empty_list()
     special_populations: Optional[Union[str, list[str]]] = empty_list()
     regulatory_compliance: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4022,16 +2684,6 @@ class HumanSubjectResearch(DatasetProperty):
             self.regulatory_compliance = [self.regulatory_compliance] if self.regulatory_compliance is not None else []
         self.regulatory_compliance = [v if isinstance(v, str) else str(v) for v in self.regulatory_compliance]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -4042,8 +2694,8 @@ class InformedConsent(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["InformedConsent"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:InformedConsent"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["InformedConsent"]
+    class_class_curie: ClassVar[str] = "d4dhuman:InformedConsent"
     class_name: ClassVar[str] = "InformedConsent"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.InformedConsent
 
@@ -4053,9 +2705,6 @@ class InformedConsent(DatasetProperty):
     consent_documentation: Optional[Union[str, list[str]]] = empty_list()
     withdrawal_mechanism: Optional[Union[str, list[str]]] = empty_list()
     consent_scope: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4082,16 +2731,6 @@ class InformedConsent(DatasetProperty):
             self.consent_scope = [self.consent_scope] if self.consent_scope is not None else []
         self.consent_scope = [v if isinstance(v, str) else str(v) for v in self.consent_scope]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -4102,8 +2741,8 @@ class ParticipantPrivacy(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ParticipantPrivacy"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ParticipantPrivacy"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["ParticipantPrivacy"]
+    class_class_curie: ClassVar[str] = "d4dhuman:ParticipantPrivacy"
     class_name: ClassVar[str] = "ParticipantPrivacy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ParticipantPrivacy
 
@@ -4112,9 +2751,6 @@ class ParticipantPrivacy(DatasetProperty):
     reidentification_risk: Optional[Union[str, list[str]]] = empty_list()
     privacy_techniques: Optional[Union[str, list[str]]] = empty_list()
     data_linkage: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4138,16 +2774,6 @@ class ParticipantPrivacy(DatasetProperty):
             self.data_linkage = [self.data_linkage] if self.data_linkage is not None else []
         self.data_linkage = [v if isinstance(v, str) else str(v) for v in self.data_linkage]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -4158,8 +2784,8 @@ class HumanSubjectCompensation(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["HumanSubjectCompensation"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:HumanSubjectCompensation"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["HumanSubjectCompensation"]
+    class_class_curie: ClassVar[str] = "d4dhuman:HumanSubjectCompensation"
     class_name: ClassVar[str] = "HumanSubjectCompensation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.HumanSubjectCompensation
 
@@ -4168,9 +2794,6 @@ class HumanSubjectCompensation(DatasetProperty):
     compensation_type: Optional[Union[str, list[str]]] = empty_list()
     compensation_amount: Optional[Union[str, list[str]]] = empty_list()
     compensation_rationale: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4193,16 +2816,6 @@ class HumanSubjectCompensation(DatasetProperty):
             self.compensation_rationale = [self.compensation_rationale] if self.compensation_rationale is not None else []
         self.compensation_rationale = [v if isinstance(v, str) else str(v) for v in self.compensation_rationale]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -4213,8 +2826,8 @@ class VulnerablePopulations(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["VulnerablePopulations"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:VulnerablePopulations"
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["VulnerablePopulations"]
+    class_class_curie: ClassVar[str] = "d4dhuman:VulnerablePopulations"
     class_name: ClassVar[str] = "VulnerablePopulations"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VulnerablePopulations
 
@@ -4223,9 +2836,6 @@ class VulnerablePopulations(DatasetProperty):
     special_protections: Optional[Union[str, list[str]]] = empty_list()
     assent_procedures: Optional[Union[str, list[str]]] = empty_list()
     guardian_consent: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4248,16 +2858,6 @@ class VulnerablePopulations(DatasetProperty):
             self.guardian_consent = [self.guardian_consent] if self.guardian_consent is not None else []
         self.guardian_consent = [v if isinstance(v, str) else str(v) for v in self.guardian_consent]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
-
         super().__post_init__(**kwargs)
 
 
@@ -4269,8 +2869,8 @@ class LicenseAndUseTerms(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["LicenseAndUseTerms"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:LicenseAndUseTerms"
+    class_class_uri: ClassVar[URIRef] = D4DDATAGOVERNANCE["LicenseAndUseTerms"]
+    class_class_curie: ClassVar[str] = "d4ddatagovernance:LicenseAndUseTerms"
     class_name: ClassVar[str] = "LicenseAndUseTerms"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LicenseAndUseTerms
 
@@ -4278,8 +2878,6 @@ class LicenseAndUseTerms(DatasetProperty):
     description: Optional[Union[str, list[str]]] = empty_list()
     data_use_permission: Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]] = empty_list()
     contact_person: Optional[Union[str, PersonId]] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4298,13 +2896,6 @@ class LicenseAndUseTerms(DatasetProperty):
         if self.contact_person is not None and not isinstance(self.contact_person, PersonId):
             self.contact_person = PersonId(self.contact_person)
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -4317,15 +2908,13 @@ class IPRestrictions(DatasetProperty):
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["IPRestrictions"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:IPRestrictions"
+    class_class_uri: ClassVar[URIRef] = D4DDATAGOVERNANCE["IPRestrictions"]
+    class_class_curie: ClassVar[str] = "d4ddatagovernance:IPRestrictions"
     class_name: ClassVar[str] = "IPRestrictions"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.IPRestrictions
 
     id: Union[str, IPRestrictionsId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4337,13 +2926,6 @@ class IPRestrictions(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
         super().__post_init__(**kwargs)
 
 
@@ -4351,27 +2933,23 @@ class IPRestrictions(DatasetProperty):
 class ExportControlRegulatoryRestrictions(DatasetProperty):
     """
     Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? Includes
-    compliance tracking for regulations like GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and
-    provide a link or copy of any supporting documentation. Maps to DUO terms related to ethics approval, geographic
-    restrictions, and institutional requirements.
+    compliance tracking for regulations like HIPAA and other US regulations. If so, please describe these restrictions
+    and provide a link or copy of any supporting documentation. Maps to DUO terms related to ethics approval,
+    geographic restrictions, and institutional requirements.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
-    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["ExportControlRegulatoryRestrictions"]
-    class_class_curie: ClassVar[str] = "data_sheets_schema:ExportControlRegulatoryRestrictions"
+    class_class_uri: ClassVar[URIRef] = D4DDATAGOVERNANCE["ExportControlRegulatoryRestrictions"]
+    class_class_curie: ClassVar[str] = "d4ddatagovernance:ExportControlRegulatoryRestrictions"
     class_name: ClassVar[str] = "ExportControlRegulatoryRestrictions"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExportControlRegulatoryRestrictions
 
     id: Union[str, ExportControlRegulatoryRestrictionsId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    gdpr_compliant: Optional[Union[str, "ComplianceStatusEnum"]] = None
     hipaa_compliant: Optional[Union[str, "ComplianceStatusEnum"]] = None
-    eu_ai_act_risk_category: Optional[Union[str, "AIActRiskEnum"]] = None
     other_compliance: Optional[Union[str, list[str]]] = empty_list()
     confidentiality_level: Optional[Union[str, "ConfidentialityLevelEnum"]] = None
     governance_committee_contact: Optional[Union[str, PersonId]] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4383,14 +2961,8 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if self.gdpr_compliant is not None and not isinstance(self.gdpr_compliant, ComplianceStatusEnum):
-            self.gdpr_compliant = ComplianceStatusEnum(self.gdpr_compliant)
-
         if self.hipaa_compliant is not None and not isinstance(self.hipaa_compliant, ComplianceStatusEnum):
             self.hipaa_compliant = ComplianceStatusEnum(self.hipaa_compliant)
-
-        if self.eu_ai_act_risk_category is not None and not isinstance(self.eu_ai_act_risk_category, AIActRiskEnum):
-            self.eu_ai_act_risk_category = AIActRiskEnum(self.eu_ai_act_risk_category)
 
         if not isinstance(self.other_compliance, list):
             self.other_compliance = [self.other_compliance] if self.other_compliance is not None else []
@@ -4401,13 +2973,6 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
 
         if self.governance_committee_contact is not None and not isinstance(self.governance_committee_contact, PersonId):
             self.governance_committee_contact = PersonId(self.governance_committee_contact)
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
 
         super().__post_init__(**kwargs)
 
@@ -4440,9 +3005,6 @@ class VariableMetadata(DatasetProperty):
     measurement_technique: Optional[str] = None
     derivation: Optional[str] = None
     quality_notes: Optional[Union[str, list[str]]] = empty_list()
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
-    name: Optional[str] = None
-    description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -4497,16 +3059,6 @@ class VariableMetadata(DatasetProperty):
         if not isinstance(self.quality_notes, list):
             self.quality_notes = [self.quality_notes] if self.quality_notes is not None else []
         self.quality_notes = [v if isinstance(v, str) else str(v) for v in self.quality_notes]
-
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
-
-        if self.name is not None and not isinstance(self.name, str):
-            self.name = str(self.name)
-
-        if self.description is not None and not isinstance(self.description, str):
-            self.description = str(self.description)
 
         super().__post_init__(**kwargs)
 
@@ -4807,7 +3359,10 @@ class VersionTypeEnum(EnumDefinitionImpl):
             PermissibleValue(text="Windows-1258"))
 
 class CreatorOrMaintainerEnum(EnumDefinitionImpl):
-
+    """
+    Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to schema.org
+    organization types.
+    """
     data_subject = PermissibleValue(
         text="data_subject",
         description="A person whose information is recorded in the dataset.")
@@ -4834,7 +3389,7 @@ class CreatorOrMaintainerEnum(EnumDefinitionImpl):
         description="Non-profit organization responsible for dataset.")
     crowdsourced = PermissibleValue(
         text="crowdsourced",
-        description="Dataset created through crowdsourcing efforts.")
+        description="Dataset created through crowdsourcing efforts with multiple contributors.")
     automated_system = PermissibleValue(
         text="automated_system",
         description="Automated system or process responsible for dataset.")
@@ -4844,6 +3399,7 @@ class CreatorOrMaintainerEnum(EnumDefinitionImpl):
 
     _defn = EnumDefinition(
         name="CreatorOrMaintainerEnum",
+        description="""Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to schema.org organization types.""",
     )
 
 class Boolean(EnumDefinitionImpl):
@@ -4864,108 +3420,89 @@ class Boolean(EnumDefinitionImpl):
 
 class DatasetRelationshipTypeEnum(EnumDefinitionImpl):
     """
-    Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.
+    Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled
+    vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and
+    http://purl.org/dc/terms/
     """
     derives_from = PermissibleValue(
         text="derives_from",
-        description="""This dataset is derived from the target dataset through processing, analysis, or transformation.""")
+        description="""This dataset is derived from the target dataset through processing, analysis, or transformation. Equivalent to DataCite IsDerivedFrom.""")
     supplements = PermissibleValue(
         text="supplements",
-        description="This dataset supplements or adds to the target dataset.")
+        description="This dataset supplements or adds to the target dataset. Equivalent to DataCite IsSupplementTo.")
     is_supplemented_by = PermissibleValue(
         text="is_supplemented_by",
-        description="This dataset is supplemented by the target dataset.")
+        description="This dataset is supplemented by the target dataset. Equivalent to DataCite IsSupplementedBy.")
     is_version_of = PermissibleValue(
         text="is_version_of",
-        description="""This dataset is a version of the target dataset (e.g., updated, corrected, or revised version).""")
+        description="""This dataset is a version of the target dataset (e.g., updated, corrected, or revised version). Equivalent to DataCite IsVersionOf.""")
     is_new_version_of = PermissibleValue(
         text="is_new_version_of",
-        description="This dataset is a new version that replaces or updates the target dataset.")
+        description="""This dataset is a new version that replaces or updates the target dataset. Equivalent to DataCite IsNewVersionOf.""")
     replaces = PermissibleValue(
         text="replaces",
-        description="This dataset replaces or supersedes the target dataset.")
+        description="This dataset replaces or supersedes the target dataset. Equivalent to DataCite Obsoletes.")
     is_replaced_by = PermissibleValue(
         text="is_replaced_by",
-        description="This dataset is replaced or superseded by the target dataset.")
+        description="""This dataset is replaced or superseded by the target dataset. Equivalent to DataCite IsObsoletedBy.""")
     is_required_by = PermissibleValue(
         text="is_required_by",
-        description="This dataset is required by the target dataset.")
+        description="This dataset is required by the target dataset. Equivalent to DataCite IsRequiredBy.")
     requires = PermissibleValue(
         text="requires",
-        description="This dataset requires the target dataset.")
+        description="This dataset requires the target dataset. Equivalent to DataCite Requires.")
     is_part_of = PermissibleValue(
         text="is_part_of",
-        description="This dataset is part of the target dataset (e.g., subset, component).")
+        description="""This dataset is part of the target dataset (e.g., subset, component). Equivalent to DataCite IsPartOf.""")
     has_part = PermissibleValue(
         text="has_part",
-        description="This dataset has the target dataset as a part.")
+        description="This dataset has the target dataset as a part. Equivalent to DataCite HasPart.")
     is_referenced_by = PermissibleValue(
         text="is_referenced_by",
-        description="This dataset is referenced or cited by the target dataset.")
+        description="""This dataset is referenced or cited by the target dataset. Equivalent to DataCite IsReferencedBy.""")
     references = PermissibleValue(
         text="references",
-        description="This dataset references or cites the target dataset.")
+        description="This dataset references or cites the target dataset. Equivalent to DataCite References.")
     is_identical_to = PermissibleValue(
         text="is_identical_to",
-        description="This dataset is identical to the target dataset (e.g., mirror, copy).")
+        description="""This dataset is identical to the target dataset (e.g., mirror, copy). Equivalent to DataCite IsIdenticalTo.""")
 
     _defn = EnumDefinition(
         name="DatasetRelationshipTypeEnum",
-        description="""Standardized types of relationships between datasets, based on DataCite and Dublin Core relationship vocabularies.""",
+        description="""Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/""",
     )
 
 class ComplianceStatusEnum(EnumDefinitionImpl):
     """
-    Compliance status for regulatory frameworks
+    Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific
+    regulations (e.g., HIPAA, 45 CFR 46). These are workflow status values that may evolve as regulations are assessed
+    or as the dataset is modified.
     """
     compliant = PermissibleValue(
         text="compliant",
-        description="Dataset is compliant with the regulation")
+        description="Dataset is compliant with the regulation. All requirements are met and documented.")
     partially_compliant = PermissibleValue(
         text="partially_compliant",
-        description="Dataset is partially compliant, with known limitations")
+        description="""Dataset is partially compliant, with known limitations or gaps in compliance. Some but not all requirements are met.""")
     not_compliant = PermissibleValue(
         text="not_compliant",
-        description="Dataset does not comply with the regulation")
+        description="Dataset does not comply with the regulation. Significant requirements are not met.")
     not_applicable = PermissibleValue(
         text="not_applicable",
-        description="Regulation does not apply to this dataset")
+        description="Regulation does not apply to this dataset based on scope, jurisdiction, or subject matter.")
     under_review = PermissibleValue(
         text="under_review",
-        description="Compliance status is currently under review")
+        description="""Compliance status is currently under review or assessment. Final determination has not been made.""")
 
     _defn = EnumDefinition(
         name="ComplianceStatusEnum",
-        description="Compliance status for regulatory frameworks",
-    )
-
-class AIActRiskEnum(EnumDefinitionImpl):
-    """
-    Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/
-    """
-    minimal_risk = PermissibleValue(
-        text="minimal_risk",
-        description="""AI systems with minimal risk (e.g., AI-enabled video games, spam filters). No specific obligations.""")
-    limited_risk = PermissibleValue(
-        text="limited_risk",
-        description="""AI systems with limited risk subject to transparency obligations (e.g., chatbots, emotion recognition systems).""")
-    high_risk = PermissibleValue(
-        text="high_risk",
-        description="""AI systems with high risk to health, safety, or fundamental rights (e.g., AI in critical infrastructure, education, employment, law enforcement). Subject to strict requirements.""")
-    unacceptable_risk = PermissibleValue(
-        text="unacceptable_risk",
-        description="""AI systems with unacceptable risk that are prohibited (e.g., social scoring, real-time biometric identification in public spaces).""")
-
-    _defn = EnumDefinition(
-        name="AIActRiskEnum",
-        description="Risk categories under the EU AI Act. See https://artificialintelligenceact.eu/",
+        description="""Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.""",
     )
 
 class ConfidentialityLevelEnum(EnumDefinitionImpl):
     """
     Confidentiality classification levels for datasets indicating the degree of access restrictions and data
-    sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light
-    Protocol).
+    sensitivity.
     NOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to
     DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data).
     ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify
@@ -4983,7 +3520,7 @@ class ConfidentialityLevelEnum(EnumDefinitionImpl):
 
     _defn = EnumDefinition(
         name="ConfidentialityLevelEnum",
-        description="""Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity. Based on established information classification frameworks (ISO 27001, NIST SP 800-60, Traffic Light Protocol).
+        description="""Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.
 NOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted.""",
     )
 
@@ -5088,59 +3625,57 @@ class DataUsePermissionEnum(EnumDefinitionImpl):
 
 class VariableTypeEnum(EnumDefinitionImpl):
     """
-    Common data types for variables
+    Common data types for variables. Values are mapped to schema.org DataType vocabulary. See
+    https://schema.org/DataType
     """
     integer = PermissibleValue(
         text="integer",
-        description="Whole numbers")
+        description="Whole numbers.")
     float = PermissibleValue(
         text="float",
-        description="Floating-point numbers")
+        description="Floating-point numbers (single precision).")
     double = PermissibleValue(
         text="double",
-        description="Double-precision floating-point")
+        description="Double-precision floating-point numbers.")
     string = PermissibleValue(
         text="string",
-        description="Text strings")
+        description="Text strings.")
     boolean = PermissibleValue(
         text="boolean",
-        description="True/false values")
+        description="True/false values.")
     date = PermissibleValue(
         text="date",
-        description="Date values")
+        description="Date values (without time).")
     datetime = PermissibleValue(
         text="datetime",
-        description="Date and time values")
+        description="Date and time values.")
     categorical = PermissibleValue(
         text="categorical",
-        description="Categorical/factor variables with finite values")
+        description="""Categorical/factor variables with finite set of discrete values. Often used for nominal data (unordered categories).""")
     ordinal = PermissibleValue(
         text="ordinal",
-        description="Ordered categorical variables")
+        description="""Ordered categorical variables where values have a meaningful sequence (e.g., low/medium/high, strongly disagree/disagree/agree/strongly agree).""")
     identifier = PermissibleValue(
         text="identifier",
-        description="Unique identifiers or keys")
+        description="Unique identifiers or keys for records or entities.")
     json = PermissibleValue(
         text="json",
-        description="JSON-encoded data")
+        description="JSON-encoded data structures.")
     array = PermissibleValue(
         text="array",
-        description="Arrays or lists")
+        description="Arrays or lists of values. May contain elements of the same or different types.")
     object = PermissibleValue(
         text="object",
-        description="Complex structured objects")
+        description="Complex structured objects or nested data structures.")
 
     _defn = EnumDefinition(
         name="VariableTypeEnum",
-        description="Common data types for variables",
+        description="""Common data types for variables. Values are mapped to schema.org DataType vocabulary. See https://schema.org/DataType""",
     )
 
 # Slots
 class slots:
     pass
-
-slots.profile = Slot(uri=DATA_SHEETS_SCHEMA.profile, name="profile", curie=DATA_SHEETS_SCHEMA.curie('profile'),
-                   model_uri=DATA_SHEETS_SCHEMA.profile, domain=None, range=Optional[Union[str, URIorCURIE]])
 
 slots.same_as = Slot(uri=SCHEMA.sameAs, name="same_as", curie=SCHEMA.curie('sameAs'),
                    model_uri=DATA_SHEETS_SCHEMA.same_as, domain=None, range=Optional[Union[Union[str, URIorCURIE], list[Union[str, URIorCURIE]]]])
@@ -5163,7 +3698,7 @@ slots.issued = Slot(uri=DCTERMS.issued, name="issued", curie=DCTERMS.curie('issu
 slots.page = Slot(uri=DCAT.landingPage, name="page", curie=DCAT.curie('landingPage'),
                    model_uri=DATA_SHEETS_SCHEMA.page, domain=None, range=Optional[str])
 
-slots.dialect = Slot(uri=CSVW.dialect, name="dialect", curie=CSVW.curie('dialect'),
+slots.dialect = Slot(uri=DATA_SHEETS_SCHEMA.dialect, name="dialect", curie=DATA_SHEETS_SCHEMA.curie('dialect'),
                    model_uri=DATA_SHEETS_SCHEMA.dialect, domain=None, range=Optional[str])
 
 slots.bytes = Slot(uri=DCAT.byteSize, name="bytes", curie=DCAT.curie('byteSize'),
@@ -5211,103 +3746,33 @@ slots.license = Slot(uri=DCTERMS.license, name="license", curie=DCTERMS.curie('l
 slots.keywords = Slot(uri=DCAT.keyword, name="keywords", curie=DCAT.curie('keyword'),
                    model_uri=DATA_SHEETS_SCHEMA.keywords, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.version = Slot(uri=PAV.version, name="version", curie=PAV.curie('version'),
+slots.version = Slot(uri=DCTERMS.hasVersion, name="version", curie=DCTERMS.curie('hasVersion'),
                    model_uri=DATA_SHEETS_SCHEMA.version, domain=None, range=Optional[str])
 
-slots.created_by = Slot(uri=PAV.createdBy, name="created_by", curie=PAV.curie('createdBy'),
+slots.created_by = Slot(uri=DCTERMS.creator, name="created_by", curie=DCTERMS.curie('creator'),
                    model_uri=DATA_SHEETS_SCHEMA.created_by, domain=None, range=Optional[str])
 
-slots.created_on = Slot(uri=PAV.createdOn, name="created_on", curie=PAV.curie('createdOn'),
+slots.created_on = Slot(uri=DCTERMS.created, name="created_on", curie=DCTERMS.curie('created'),
                    model_uri=DATA_SHEETS_SCHEMA.created_on, domain=None, range=Optional[Union[str, XSDDateTime]])
 
-slots.last_updated_on = Slot(uri=PAV.lastUpdatedOn, name="last_updated_on", curie=PAV.curie('lastUpdatedOn'),
+slots.last_updated_on = Slot(uri=DCTERMS.modified, name="last_updated_on", curie=DCTERMS.curie('modified'),
                    model_uri=DATA_SHEETS_SCHEMA.last_updated_on, domain=None, range=Optional[Union[str, XSDDateTime]])
 
-slots.modified_by = Slot(uri=OSLC.modifiedBy, name="modified_by", curie=OSLC.curie('modifiedBy'),
+slots.modified_by = Slot(uri=DCTERMS.contributor, name="modified_by", curie=DCTERMS.curie('contributor'),
                    model_uri=DATA_SHEETS_SCHEMA.modified_by, domain=None, range=Optional[str])
 
-slots.status = Slot(uri=BIBO.status, name="status", curie=BIBO.curie('status'),
+slots.status = Slot(uri=DCTERMS.type, name="status", curie=DCTERMS.curie('type'),
                    model_uri=DATA_SHEETS_SCHEMA.status, domain=None, range=Optional[str])
 
 slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", curie=PROV.curie('wasDerivedFrom'),
                    model_uri=DATA_SHEETS_SCHEMA.was_derived_from, domain=None, range=Optional[str])
 
-slots.doi = Slot(uri=BIBO.doi, name="doi", curie=BIBO.curie('doi'),
+slots.doi = Slot(uri=DCTERMS.identifier, name="doi", curie=DCTERMS.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.doi, domain=None, range=Optional[str],
                    pattern=re.compile(r'10\.\d{4,}\/.+'))
 
 slots.datasetCollection__resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="datasetCollection__resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetCollection__resources, domain=None, range=Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]])
-
-slots.datasetCollection__compression = Slot(uri=DCAT.compressFormat, name="datasetCollection__compression", curie=DCAT.curie('compressFormat'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__compression, domain=None, range=Optional[Union[str, "CompressionEnum"]])
-
-slots.datasetCollection__conforms_to = Slot(uri=DCTERMS.conformsTo, name="datasetCollection__conforms_to", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__conforms_to, domain=None, range=Optional[str])
-
-slots.datasetCollection__conforms_to_class = Slot(uri=DCTERMS.conformsTo, name="datasetCollection__conforms_to_class", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__conforms_to_class, domain=None, range=Optional[str])
-
-slots.datasetCollection__conforms_to_schema = Slot(uri=DCTERMS.conformsTo, name="datasetCollection__conforms_to_schema", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__conforms_to_schema, domain=None, range=Optional[str])
-
-slots.datasetCollection__created_by = Slot(uri=PAV.createdBy, name="datasetCollection__created_by", curie=PAV.curie('createdBy'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__created_by, domain=None, range=Optional[str])
-
-slots.datasetCollection__created_on = Slot(uri=PAV.createdOn, name="datasetCollection__created_on", curie=PAV.curie('createdOn'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__created_on, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.datasetCollection__doi = Slot(uri=BIBO.doi, name="datasetCollection__doi", curie=BIBO.curie('doi'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__doi, domain=None, range=Optional[str],
-                   pattern=re.compile(r'10\.\d{4,}\/.+'))
-
-slots.datasetCollection__download_url = Slot(uri=DCAT.downloadURL, name="datasetCollection__download_url", curie=DCAT.curie('downloadURL'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__download_url, domain=None, range=Optional[Union[str, URI]])
-
-slots.datasetCollection__issued = Slot(uri=DCTERMS.issued, name="datasetCollection__issued", curie=DCTERMS.curie('issued'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__issued, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.datasetCollection__keywords = Slot(uri=DCAT.keyword, name="datasetCollection__keywords", curie=DCAT.curie('keyword'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__keywords, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.datasetCollection__language = Slot(uri=DCTERMS.language, name="datasetCollection__language", curie=DCTERMS.curie('language'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__language, domain=None, range=Optional[str])
-
-slots.datasetCollection__last_updated_on = Slot(uri=PAV.lastUpdatedOn, name="datasetCollection__last_updated_on", curie=PAV.curie('lastUpdatedOn'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__last_updated_on, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.datasetCollection__license = Slot(uri=DCTERMS.license, name="datasetCollection__license", curie=DCTERMS.curie('license'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__license, domain=None, range=Optional[str])
-
-slots.datasetCollection__modified_by = Slot(uri=OSLC.modifiedBy, name="datasetCollection__modified_by", curie=OSLC.curie('modifiedBy'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__modified_by, domain=None, range=Optional[str])
-
-slots.datasetCollection__page = Slot(uri=DCAT.landingPage, name="datasetCollection__page", curie=DCAT.curie('landingPage'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__page, domain=None, range=Optional[str])
-
-slots.datasetCollection__publisher = Slot(uri=DCTERMS.publisher, name="datasetCollection__publisher", curie=DCTERMS.curie('publisher'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__publisher, domain=None, range=Optional[Union[str, URIorCURIE]])
-
-slots.datasetCollection__status = Slot(uri=BIBO.status, name="datasetCollection__status", curie=BIBO.curie('status'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__status, domain=None, range=Optional[str])
-
-slots.datasetCollection__title = Slot(uri=DCTERMS.title, name="datasetCollection__title", curie=DCTERMS.curie('title'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__title, domain=None, range=Optional[str])
-
-slots.datasetCollection__version = Slot(uri=PAV.version, name="datasetCollection__version", curie=PAV.curie('version'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__version, domain=None, range=Optional[str])
-
-slots.datasetCollection__was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="datasetCollection__was_derived_from", curie=PROV.curie('wasDerivedFrom'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__was_derived_from, domain=None, range=Optional[str])
-
-slots.datasetCollection__id = Slot(uri=SCHEMA.identifier, name="datasetCollection__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__id, domain=None, range=URIRef)
-
-slots.datasetCollection__name = Slot(uri=SCHEMA.name, name="datasetCollection__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__name, domain=None, range=Optional[str])
-
-slots.datasetCollection__description = Slot(uri=SCHEMA.description, name="datasetCollection__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__description, domain=None, range=Optional[str])
 
 slots.dataset__purposes = Slot(uri=DATA_SHEETS_SCHEMA.purposes, name="dataset__purposes", curie=DATA_SHEETS_SCHEMA.curie('purposes'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__purposes, domain=None, range=Optional[Union[Union[str, PurposeId], list[Union[str, PurposeId]]]])
@@ -5468,364 +3933,11 @@ slots.dataset__parent_datasets = Slot(uri=SCHEMA.isPartOf, name="dataset__parent
 slots.dataset__related_datasets = Slot(uri=DATA_SHEETS_SCHEMA.related_datasets, name="dataset__related_datasets", curie=DATA_SHEETS_SCHEMA.curie('related_datasets'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__related_datasets, domain=None, range=Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]])
 
-slots.dataset__bytes = Slot(uri=DCAT.byteSize, name="dataset__bytes", curie=DCAT.curie('byteSize'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__bytes, domain=None, range=Optional[int])
-
-slots.dataset__dialect = Slot(uri=CSVW.dialect, name="dataset__dialect", curie=CSVW.curie('dialect'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__dialect, domain=None, range=Optional[str])
-
-slots.dataset__encoding = Slot(uri=DCAT.mediaType, name="dataset__encoding", curie=DCAT.curie('mediaType'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__encoding, domain=None, range=Optional[Union[str, "EncodingEnum"]])
-
-slots.dataset__format = Slot(uri=DCTERMS.format, name="dataset__format", curie=DCTERMS.curie('format'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__format, domain=None, range=Optional[Union[str, "FormatEnum"]])
-
-slots.dataset__hash = Slot(uri=DCTERMS.identifier, name="dataset__hash", curie=DCTERMS.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__hash, domain=None, range=Optional[str])
-
-slots.dataset__md5 = Slot(uri=DCTERMS.identifier, name="dataset__md5", curie=DCTERMS.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__md5, domain=None, range=Optional[str])
-
-slots.dataset__media_type = Slot(uri=DCAT.mediaType, name="dataset__media_type", curie=DCAT.curie('mediaType'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__media_type, domain=None, range=Optional[Union[str, "MediaTypeEnum"]])
-
-slots.dataset__path = Slot(uri=SCHEMA.contentUrl, name="dataset__path", curie=SCHEMA.curie('contentUrl'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__path, domain=None, range=Optional[str])
-
-slots.dataset__sha256 = Slot(uri=DCTERMS.identifier, name="dataset__sha256", curie=DCTERMS.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__sha256, domain=None, range=Optional[str])
-
-slots.dataset__compression = Slot(uri=DCAT.compressFormat, name="dataset__compression", curie=DCAT.curie('compressFormat'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__compression, domain=None, range=Optional[Union[str, "CompressionEnum"]])
-
-slots.dataset__conforms_to = Slot(uri=DCTERMS.conformsTo, name="dataset__conforms_to", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__conforms_to, domain=None, range=Optional[str])
-
-slots.dataset__conforms_to_class = Slot(uri=DCTERMS.conformsTo, name="dataset__conforms_to_class", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__conforms_to_class, domain=None, range=Optional[str])
-
-slots.dataset__conforms_to_schema = Slot(uri=DCTERMS.conformsTo, name="dataset__conforms_to_schema", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__conforms_to_schema, domain=None, range=Optional[str])
-
-slots.dataset__created_by = Slot(uri=PAV.createdBy, name="dataset__created_by", curie=PAV.curie('createdBy'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__created_by, domain=None, range=Optional[str])
-
-slots.dataset__created_on = Slot(uri=PAV.createdOn, name="dataset__created_on", curie=PAV.curie('createdOn'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__created_on, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.dataset__doi = Slot(uri=BIBO.doi, name="dataset__doi", curie=BIBO.curie('doi'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__doi, domain=None, range=Optional[str],
-                   pattern=re.compile(r'10\.\d{4,}\/.+'))
-
-slots.dataset__download_url = Slot(uri=DCAT.downloadURL, name="dataset__download_url", curie=DCAT.curie('downloadURL'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__download_url, domain=None, range=Optional[Union[str, URI]])
-
-slots.dataset__issued = Slot(uri=DCTERMS.issued, name="dataset__issued", curie=DCTERMS.curie('issued'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__issued, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.dataset__keywords = Slot(uri=DCAT.keyword, name="dataset__keywords", curie=DCAT.curie('keyword'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__keywords, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.dataset__language = Slot(uri=DCTERMS.language, name="dataset__language", curie=DCTERMS.curie('language'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__language, domain=None, range=Optional[str])
-
-slots.dataset__last_updated_on = Slot(uri=PAV.lastUpdatedOn, name="dataset__last_updated_on", curie=PAV.curie('lastUpdatedOn'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__last_updated_on, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.dataset__license = Slot(uri=DCTERMS.license, name="dataset__license", curie=DCTERMS.curie('license'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__license, domain=None, range=Optional[str])
-
-slots.dataset__modified_by = Slot(uri=OSLC.modifiedBy, name="dataset__modified_by", curie=OSLC.curie('modifiedBy'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__modified_by, domain=None, range=Optional[str])
-
-slots.dataset__page = Slot(uri=DCAT.landingPage, name="dataset__page", curie=DCAT.curie('landingPage'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__page, domain=None, range=Optional[str])
-
-slots.dataset__publisher = Slot(uri=DCTERMS.publisher, name="dataset__publisher", curie=DCTERMS.curie('publisher'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__publisher, domain=None, range=Optional[Union[str, URIorCURIE]])
-
-slots.dataset__status = Slot(uri=BIBO.status, name="dataset__status", curie=BIBO.curie('status'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__status, domain=None, range=Optional[str])
-
-slots.dataset__title = Slot(uri=DCTERMS.title, name="dataset__title", curie=DCTERMS.curie('title'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__title, domain=None, range=Optional[str])
-
-slots.dataset__version = Slot(uri=PAV.version, name="dataset__version", curie=PAV.curie('version'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__version, domain=None, range=Optional[str])
-
-slots.dataset__was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="dataset__was_derived_from", curie=PROV.curie('wasDerivedFrom'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__was_derived_from, domain=None, range=Optional[str])
-
-slots.dataset__id = Slot(uri=SCHEMA.identifier, name="dataset__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__id, domain=None, range=URIRef)
-
-slots.dataset__name = Slot(uri=SCHEMA.name, name="dataset__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__name, domain=None, range=Optional[str])
-
-slots.dataset__description = Slot(uri=SCHEMA.description, name="dataset__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__description, domain=None, range=Optional[str])
-
 slots.dataSubset__is_data_split = Slot(uri=DATA_SHEETS_SCHEMA.is_data_split, name="dataSubset__is_data_split", curie=DATA_SHEETS_SCHEMA.curie('is_data_split'),
                    model_uri=DATA_SHEETS_SCHEMA.dataSubset__is_data_split, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.dataSubset__is_subpopulation = Slot(uri=DATA_SHEETS_SCHEMA.is_subpopulation, name="dataSubset__is_subpopulation", curie=DATA_SHEETS_SCHEMA.curie('is_subpopulation'),
                    model_uri=DATA_SHEETS_SCHEMA.dataSubset__is_subpopulation, domain=None, range=Optional[Union[bool, Bool]])
-
-slots.dataSubset__bytes = Slot(uri=DCAT.byteSize, name="dataSubset__bytes", curie=DCAT.curie('byteSize'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__bytes, domain=None, range=Optional[int])
-
-slots.dataSubset__dialect = Slot(uri=CSVW.dialect, name="dataSubset__dialect", curie=CSVW.curie('dialect'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__dialect, domain=None, range=Optional[str])
-
-slots.dataSubset__encoding = Slot(uri=DCAT.mediaType, name="dataSubset__encoding", curie=DCAT.curie('mediaType'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__encoding, domain=None, range=Optional[Union[str, "EncodingEnum"]])
-
-slots.dataSubset__format = Slot(uri=DCTERMS.format, name="dataSubset__format", curie=DCTERMS.curie('format'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__format, domain=None, range=Optional[Union[str, "FormatEnum"]])
-
-slots.dataSubset__hash = Slot(uri=DCTERMS.identifier, name="dataSubset__hash", curie=DCTERMS.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__hash, domain=None, range=Optional[str])
-
-slots.dataSubset__md5 = Slot(uri=DCTERMS.identifier, name="dataSubset__md5", curie=DCTERMS.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__md5, domain=None, range=Optional[str])
-
-slots.dataSubset__media_type = Slot(uri=DCAT.mediaType, name="dataSubset__media_type", curie=DCAT.curie('mediaType'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__media_type, domain=None, range=Optional[Union[str, "MediaTypeEnum"]])
-
-slots.dataSubset__path = Slot(uri=SCHEMA.contentUrl, name="dataSubset__path", curie=SCHEMA.curie('contentUrl'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__path, domain=None, range=Optional[str])
-
-slots.dataSubset__sha256 = Slot(uri=DCTERMS.identifier, name="dataSubset__sha256", curie=DCTERMS.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__sha256, domain=None, range=Optional[str])
-
-slots.dataSubset__purposes = Slot(uri=DATA_SHEETS_SCHEMA.purposes, name="dataSubset__purposes", curie=DATA_SHEETS_SCHEMA.curie('purposes'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__purposes, domain=None, range=Optional[Union[Union[str, PurposeId], list[Union[str, PurposeId]]]])
-
-slots.dataSubset__tasks = Slot(uri=DATA_SHEETS_SCHEMA.tasks, name="dataSubset__tasks", curie=DATA_SHEETS_SCHEMA.curie('tasks'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__tasks, domain=None, range=Optional[Union[Union[str, TaskId], list[Union[str, TaskId]]]])
-
-slots.dataSubset__addressing_gaps = Slot(uri=DATA_SHEETS_SCHEMA.addressing_gaps, name="dataSubset__addressing_gaps", curie=DATA_SHEETS_SCHEMA.curie('addressing_gaps'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__addressing_gaps, domain=None, range=Optional[Union[Union[str, AddressingGapId], list[Union[str, AddressingGapId]]]])
-
-slots.dataSubset__creators = Slot(uri=DATA_SHEETS_SCHEMA.creators, name="dataSubset__creators", curie=DATA_SHEETS_SCHEMA.curie('creators'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__creators, domain=None, range=Optional[Union[Union[str, CreatorId], list[Union[str, CreatorId]]]])
-
-slots.dataSubset__funders = Slot(uri=DATA_SHEETS_SCHEMA.funders, name="dataSubset__funders", curie=DATA_SHEETS_SCHEMA.curie('funders'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__funders, domain=None, range=Optional[Union[Union[str, FundingMechanismId], list[Union[str, FundingMechanismId]]]])
-
-slots.dataSubset__subsets = Slot(uri=DCAT.distribution, name="dataSubset__subsets", curie=DCAT.curie('distribution'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__subsets, domain=None, range=Optional[Union[Union[str, DataSubsetId], list[Union[str, DataSubsetId]]]])
-
-slots.dataSubset__instances = Slot(uri=DATA_SHEETS_SCHEMA.instances, name="dataSubset__instances", curie=DATA_SHEETS_SCHEMA.curie('instances'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__instances, domain=None, range=Optional[Union[Union[str, InstanceId], list[Union[str, InstanceId]]]])
-
-slots.dataSubset__anomalies = Slot(uri=DATA_SHEETS_SCHEMA.anomalies, name="dataSubset__anomalies", curie=DATA_SHEETS_SCHEMA.curie('anomalies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__anomalies, domain=None, range=Optional[Union[Union[str, DataAnomalyId], list[Union[str, DataAnomalyId]]]])
-
-slots.dataSubset__external_resources = Slot(uri=DATA_SHEETS_SCHEMA.external_resources, name="dataSubset__external_resources", curie=DATA_SHEETS_SCHEMA.curie('external_resources'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__external_resources, domain=None, range=Optional[Union[Union[str, ExternalResourceId], list[Union[str, ExternalResourceId]]]])
-
-slots.dataSubset__confidential_elements = Slot(uri=DATA_SHEETS_SCHEMA.confidential_elements, name="dataSubset__confidential_elements", curie=DATA_SHEETS_SCHEMA.curie('confidential_elements'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__confidential_elements, domain=None, range=Optional[Union[Union[str, ConfidentialityId], list[Union[str, ConfidentialityId]]]])
-
-slots.dataSubset__content_warnings = Slot(uri=DATA_SHEETS_SCHEMA.content_warnings, name="dataSubset__content_warnings", curie=DATA_SHEETS_SCHEMA.curie('content_warnings'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__content_warnings, domain=None, range=Optional[Union[Union[str, ContentWarningId], list[Union[str, ContentWarningId]]]])
-
-slots.dataSubset__subpopulations = Slot(uri=DATA_SHEETS_SCHEMA.subpopulations, name="dataSubset__subpopulations", curie=DATA_SHEETS_SCHEMA.curie('subpopulations'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__subpopulations, domain=None, range=Optional[Union[Union[str, SubpopulationId], list[Union[str, SubpopulationId]]]])
-
-slots.dataSubset__sensitive_elements = Slot(uri=DATA_SHEETS_SCHEMA.sensitive_elements, name="dataSubset__sensitive_elements", curie=DATA_SHEETS_SCHEMA.curie('sensitive_elements'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__sensitive_elements, domain=None, range=Optional[Union[Union[str, SensitiveElementId], list[Union[str, SensitiveElementId]]]])
-
-slots.dataSubset__acquisition_methods = Slot(uri=DATA_SHEETS_SCHEMA.acquisition_methods, name="dataSubset__acquisition_methods", curie=DATA_SHEETS_SCHEMA.curie('acquisition_methods'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__acquisition_methods, domain=None, range=Optional[Union[Union[str, InstanceAcquisitionId], list[Union[str, InstanceAcquisitionId]]]])
-
-slots.dataSubset__collection_mechanisms = Slot(uri=DATA_SHEETS_SCHEMA.collection_mechanisms, name="dataSubset__collection_mechanisms", curie=DATA_SHEETS_SCHEMA.curie('collection_mechanisms'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__collection_mechanisms, domain=None, range=Optional[Union[Union[str, CollectionMechanismId], list[Union[str, CollectionMechanismId]]]])
-
-slots.dataSubset__sampling_strategies = Slot(uri=DATA_SHEETS_SCHEMA.sampling_strategies, name="dataSubset__sampling_strategies", curie=DATA_SHEETS_SCHEMA.curie('sampling_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__sampling_strategies, domain=None, range=Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]])
-
-slots.dataSubset__data_collectors = Slot(uri=DATA_SHEETS_SCHEMA.data_collectors, name="dataSubset__data_collectors", curie=DATA_SHEETS_SCHEMA.curie('data_collectors'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__data_collectors, domain=None, range=Optional[Union[Union[str, DataCollectorId], list[Union[str, DataCollectorId]]]])
-
-slots.dataSubset__collection_timeframes = Slot(uri=DATA_SHEETS_SCHEMA.collection_timeframes, name="dataSubset__collection_timeframes", curie=DATA_SHEETS_SCHEMA.curie('collection_timeframes'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__collection_timeframes, domain=None, range=Optional[Union[Union[str, CollectionTimeframeId], list[Union[str, CollectionTimeframeId]]]])
-
-slots.dataSubset__ethical_reviews = Slot(uri=DATA_SHEETS_SCHEMA.ethical_reviews, name="dataSubset__ethical_reviews", curie=DATA_SHEETS_SCHEMA.curie('ethical_reviews'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__ethical_reviews, domain=None, range=Optional[Union[Union[str, EthicalReviewId], list[Union[str, EthicalReviewId]]]])
-
-slots.dataSubset__data_protection_impacts = Slot(uri=DATA_SHEETS_SCHEMA.data_protection_impacts, name="dataSubset__data_protection_impacts", curie=DATA_SHEETS_SCHEMA.curie('data_protection_impacts'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__data_protection_impacts, domain=None, range=Optional[Union[Union[str, DataProtectionImpactId], list[Union[str, DataProtectionImpactId]]]])
-
-slots.dataSubset__human_subject_research = Slot(uri=DATA_SHEETS_SCHEMA.human_subject_research, name="dataSubset__human_subject_research", curie=DATA_SHEETS_SCHEMA.curie('human_subject_research'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__human_subject_research, domain=None, range=Optional[Union[str, HumanSubjectResearchId]])
-
-slots.dataSubset__informed_consent = Slot(uri=DATA_SHEETS_SCHEMA.informed_consent, name="dataSubset__informed_consent", curie=DATA_SHEETS_SCHEMA.curie('informed_consent'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__informed_consent, domain=None, range=Optional[Union[Union[str, InformedConsentId], list[Union[str, InformedConsentId]]]])
-
-slots.dataSubset__participant_privacy = Slot(uri=DATA_SHEETS_SCHEMA.participant_privacy, name="dataSubset__participant_privacy", curie=DATA_SHEETS_SCHEMA.curie('participant_privacy'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__participant_privacy, domain=None, range=Optional[Union[Union[str, ParticipantPrivacyId], list[Union[str, ParticipantPrivacyId]]]])
-
-slots.dataSubset__participant_compensation = Slot(uri=DATA_SHEETS_SCHEMA.participant_compensation, name="dataSubset__participant_compensation", curie=DATA_SHEETS_SCHEMA.curie('participant_compensation'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__participant_compensation, domain=None, range=Optional[Union[str, HumanSubjectCompensationId]])
-
-slots.dataSubset__vulnerable_populations = Slot(uri=DATA_SHEETS_SCHEMA.vulnerable_populations, name="dataSubset__vulnerable_populations", curie=DATA_SHEETS_SCHEMA.curie('vulnerable_populations'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__vulnerable_populations, domain=None, range=Optional[Union[str, VulnerablePopulationsId]])
-
-slots.dataSubset__preprocessing_strategies = Slot(uri=DATA_SHEETS_SCHEMA.preprocessing_strategies, name="dataSubset__preprocessing_strategies", curie=DATA_SHEETS_SCHEMA.curie('preprocessing_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__preprocessing_strategies, domain=None, range=Optional[Union[Union[str, PreprocessingStrategyId], list[Union[str, PreprocessingStrategyId]]]])
-
-slots.dataSubset__cleaning_strategies = Slot(uri=DATA_SHEETS_SCHEMA.cleaning_strategies, name="dataSubset__cleaning_strategies", curie=DATA_SHEETS_SCHEMA.curie('cleaning_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__cleaning_strategies, domain=None, range=Optional[Union[Union[str, CleaningStrategyId], list[Union[str, CleaningStrategyId]]]])
-
-slots.dataSubset__labeling_strategies = Slot(uri=DATA_SHEETS_SCHEMA.labeling_strategies, name="dataSubset__labeling_strategies", curie=DATA_SHEETS_SCHEMA.curie('labeling_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__labeling_strategies, domain=None, range=Optional[Union[Union[str, LabelingStrategyId], list[Union[str, LabelingStrategyId]]]])
-
-slots.dataSubset__raw_sources = Slot(uri=DATA_SHEETS_SCHEMA.raw_sources, name="dataSubset__raw_sources", curie=DATA_SHEETS_SCHEMA.curie('raw_sources'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__raw_sources, domain=None, range=Optional[Union[Union[str, RawDataId], list[Union[str, RawDataId]]]])
-
-slots.dataSubset__existing_uses = Slot(uri=DATA_SHEETS_SCHEMA.existing_uses, name="dataSubset__existing_uses", curie=DATA_SHEETS_SCHEMA.curie('existing_uses'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__existing_uses, domain=None, range=Optional[Union[Union[str, ExistingUseId], list[Union[str, ExistingUseId]]]])
-
-slots.dataSubset__use_repository = Slot(uri=DATA_SHEETS_SCHEMA.use_repository, name="dataSubset__use_repository", curie=DATA_SHEETS_SCHEMA.curie('use_repository'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__use_repository, domain=None, range=Optional[Union[Union[str, UseRepositoryId], list[Union[str, UseRepositoryId]]]])
-
-slots.dataSubset__other_tasks = Slot(uri=DATA_SHEETS_SCHEMA.other_tasks, name="dataSubset__other_tasks", curie=DATA_SHEETS_SCHEMA.curie('other_tasks'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__other_tasks, domain=None, range=Optional[Union[Union[str, OtherTaskId], list[Union[str, OtherTaskId]]]])
-
-slots.dataSubset__future_use_impacts = Slot(uri=DATA_SHEETS_SCHEMA.future_use_impacts, name="dataSubset__future_use_impacts", curie=DATA_SHEETS_SCHEMA.curie('future_use_impacts'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__future_use_impacts, domain=None, range=Optional[Union[Union[str, FutureUseImpactId], list[Union[str, FutureUseImpactId]]]])
-
-slots.dataSubset__discouraged_uses = Slot(uri=DATA_SHEETS_SCHEMA.discouraged_uses, name="dataSubset__discouraged_uses", curie=DATA_SHEETS_SCHEMA.curie('discouraged_uses'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__discouraged_uses, domain=None, range=Optional[Union[Union[str, DiscouragedUseId], list[Union[str, DiscouragedUseId]]]])
-
-slots.dataSubset__intended_uses = Slot(uri=DATA_SHEETS_SCHEMA.intended_uses, name="dataSubset__intended_uses", curie=DATA_SHEETS_SCHEMA.curie('intended_uses'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__intended_uses, domain=None, range=Optional[Union[Union[str, IntendedUseId], list[Union[str, IntendedUseId]]]])
-
-slots.dataSubset__prohibited_uses = Slot(uri=DATA_SHEETS_SCHEMA.prohibited_uses, name="dataSubset__prohibited_uses", curie=DATA_SHEETS_SCHEMA.curie('prohibited_uses'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__prohibited_uses, domain=None, range=Optional[Union[Union[str, ProhibitedUseId], list[Union[str, ProhibitedUseId]]]])
-
-slots.dataSubset__distribution_formats = Slot(uri=DATA_SHEETS_SCHEMA.distribution_formats, name="dataSubset__distribution_formats", curie=DATA_SHEETS_SCHEMA.curie('distribution_formats'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__distribution_formats, domain=None, range=Optional[Union[Union[str, DistributionFormatId], list[Union[str, DistributionFormatId]]]])
-
-slots.dataSubset__distribution_dates = Slot(uri=DATA_SHEETS_SCHEMA.distribution_dates, name="dataSubset__distribution_dates", curie=DATA_SHEETS_SCHEMA.curie('distribution_dates'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__distribution_dates, domain=None, range=Optional[Union[Union[str, DistributionDateId], list[Union[str, DistributionDateId]]]])
-
-slots.dataSubset__license_and_use_terms = Slot(uri=DATA_SHEETS_SCHEMA.license_and_use_terms, name="dataSubset__license_and_use_terms", curie=DATA_SHEETS_SCHEMA.curie('license_and_use_terms'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__license_and_use_terms, domain=None, range=Optional[Union[str, LicenseAndUseTermsId]])
-
-slots.dataSubset__ip_restrictions = Slot(uri=DATA_SHEETS_SCHEMA.ip_restrictions, name="dataSubset__ip_restrictions", curie=DATA_SHEETS_SCHEMA.curie('ip_restrictions'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__ip_restrictions, domain=None, range=Optional[Union[str, IPRestrictionsId]])
-
-slots.dataSubset__regulatory_restrictions = Slot(uri=DATA_SHEETS_SCHEMA.regulatory_restrictions, name="dataSubset__regulatory_restrictions", curie=DATA_SHEETS_SCHEMA.curie('regulatory_restrictions'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__regulatory_restrictions, domain=None, range=Optional[Union[str, ExportControlRegulatoryRestrictionsId]])
-
-slots.dataSubset__maintainers = Slot(uri=DATA_SHEETS_SCHEMA.maintainers, name="dataSubset__maintainers", curie=DATA_SHEETS_SCHEMA.curie('maintainers'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__maintainers, domain=None, range=Optional[Union[Union[str, MaintainerId], list[Union[str, MaintainerId]]]])
-
-slots.dataSubset__errata = Slot(uri=DATA_SHEETS_SCHEMA.errata, name="dataSubset__errata", curie=DATA_SHEETS_SCHEMA.curie('errata'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__errata, domain=None, range=Optional[Union[Union[str, ErratumId], list[Union[str, ErratumId]]]])
-
-slots.dataSubset__updates = Slot(uri=DATA_SHEETS_SCHEMA.updates, name="dataSubset__updates", curie=DATA_SHEETS_SCHEMA.curie('updates'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__updates, domain=None, range=Optional[Union[str, UpdatePlanId]])
-
-slots.dataSubset__retention_limit = Slot(uri=DATA_SHEETS_SCHEMA.retention_limit, name="dataSubset__retention_limit", curie=DATA_SHEETS_SCHEMA.curie('retention_limit'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__retention_limit, domain=None, range=Optional[Union[str, RetentionLimitsId]])
-
-slots.dataSubset__version_access = Slot(uri=DATA_SHEETS_SCHEMA.version_access, name="dataSubset__version_access", curie=DATA_SHEETS_SCHEMA.curie('version_access'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__version_access, domain=None, range=Optional[Union[str, VersionAccessId]])
-
-slots.dataSubset__extension_mechanism = Slot(uri=DATA_SHEETS_SCHEMA.extension_mechanism, name="dataSubset__extension_mechanism", curie=DATA_SHEETS_SCHEMA.curie('extension_mechanism'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__extension_mechanism, domain=None, range=Optional[Union[str, ExtensionMechanismId]])
-
-slots.dataSubset__variables = Slot(uri=SCHEMA.variableMeasured, name="dataSubset__variables", curie=SCHEMA.curie('variableMeasured'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__variables, domain=None, range=Optional[Union[Union[str, VariableMetadataId], list[Union[str, VariableMetadataId]]]])
-
-slots.dataSubset__is_deidentified = Slot(uri=DATA_SHEETS_SCHEMA.is_deidentified, name="dataSubset__is_deidentified", curie=DATA_SHEETS_SCHEMA.curie('is_deidentified'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__is_deidentified, domain=None, range=Optional[Union[str, DeidentificationId]])
-
-slots.dataSubset__is_tabular = Slot(uri=DATA_SHEETS_SCHEMA.is_tabular, name="dataSubset__is_tabular", curie=DATA_SHEETS_SCHEMA.curie('is_tabular'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__is_tabular, domain=None, range=Optional[Union[bool, Bool]])
-
-slots.dataSubset__citation = Slot(uri=SCHEMA.citation, name="dataSubset__citation", curie=SCHEMA.curie('citation'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__citation, domain=None, range=Optional[str])
-
-slots.dataSubset__parent_datasets = Slot(uri=SCHEMA.isPartOf, name="dataSubset__parent_datasets", curie=SCHEMA.curie('isPartOf'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__parent_datasets, domain=None, range=Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]])
-
-slots.dataSubset__related_datasets = Slot(uri=DATA_SHEETS_SCHEMA.related_datasets, name="dataSubset__related_datasets", curie=DATA_SHEETS_SCHEMA.curie('related_datasets'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__related_datasets, domain=None, range=Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]])
-
-slots.dataSubset__compression = Slot(uri=DCAT.compressFormat, name="dataSubset__compression", curie=DCAT.curie('compressFormat'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__compression, domain=None, range=Optional[Union[str, "CompressionEnum"]])
-
-slots.dataSubset__conforms_to = Slot(uri=DCTERMS.conformsTo, name="dataSubset__conforms_to", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__conforms_to, domain=None, range=Optional[str])
-
-slots.dataSubset__conforms_to_class = Slot(uri=DCTERMS.conformsTo, name="dataSubset__conforms_to_class", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__conforms_to_class, domain=None, range=Optional[str])
-
-slots.dataSubset__conforms_to_schema = Slot(uri=DCTERMS.conformsTo, name="dataSubset__conforms_to_schema", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__conforms_to_schema, domain=None, range=Optional[str])
-
-slots.dataSubset__created_by = Slot(uri=PAV.createdBy, name="dataSubset__created_by", curie=PAV.curie('createdBy'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__created_by, domain=None, range=Optional[str])
-
-slots.dataSubset__created_on = Slot(uri=PAV.createdOn, name="dataSubset__created_on", curie=PAV.curie('createdOn'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__created_on, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.dataSubset__doi = Slot(uri=BIBO.doi, name="dataSubset__doi", curie=BIBO.curie('doi'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__doi, domain=None, range=Optional[str],
-                   pattern=re.compile(r'10\.\d{4,}\/.+'))
-
-slots.dataSubset__download_url = Slot(uri=DCAT.downloadURL, name="dataSubset__download_url", curie=DCAT.curie('downloadURL'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__download_url, domain=None, range=Optional[Union[str, URI]])
-
-slots.dataSubset__issued = Slot(uri=DCTERMS.issued, name="dataSubset__issued", curie=DCTERMS.curie('issued'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__issued, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.dataSubset__keywords = Slot(uri=DCAT.keyword, name="dataSubset__keywords", curie=DCAT.curie('keyword'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__keywords, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.dataSubset__language = Slot(uri=DCTERMS.language, name="dataSubset__language", curie=DCTERMS.curie('language'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__language, domain=None, range=Optional[str])
-
-slots.dataSubset__last_updated_on = Slot(uri=PAV.lastUpdatedOn, name="dataSubset__last_updated_on", curie=PAV.curie('lastUpdatedOn'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__last_updated_on, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.dataSubset__license = Slot(uri=DCTERMS.license, name="dataSubset__license", curie=DCTERMS.curie('license'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__license, domain=None, range=Optional[str])
-
-slots.dataSubset__modified_by = Slot(uri=OSLC.modifiedBy, name="dataSubset__modified_by", curie=OSLC.curie('modifiedBy'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__modified_by, domain=None, range=Optional[str])
-
-slots.dataSubset__page = Slot(uri=DCAT.landingPage, name="dataSubset__page", curie=DCAT.curie('landingPage'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__page, domain=None, range=Optional[str])
-
-slots.dataSubset__publisher = Slot(uri=DCTERMS.publisher, name="dataSubset__publisher", curie=DCTERMS.curie('publisher'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__publisher, domain=None, range=Optional[Union[str, URIorCURIE]])
-
-slots.dataSubset__status = Slot(uri=BIBO.status, name="dataSubset__status", curie=BIBO.curie('status'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__status, domain=None, range=Optional[str])
-
-slots.dataSubset__title = Slot(uri=DCTERMS.title, name="dataSubset__title", curie=DCTERMS.curie('title'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__title, domain=None, range=Optional[str])
-
-slots.dataSubset__version = Slot(uri=PAV.version, name="dataSubset__version", curie=PAV.curie('version'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__version, domain=None, range=Optional[str])
-
-slots.dataSubset__was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="dataSubset__was_derived_from", curie=PROV.curie('wasDerivedFrom'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__was_derived_from, domain=None, range=Optional[str])
-
-slots.dataSubset__id = Slot(uri=SCHEMA.identifier, name="dataSubset__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__id, domain=None, range=URIRef)
-
-slots.dataSubset__name = Slot(uri=SCHEMA.name, name="dataSubset__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__name, domain=None, range=Optional[str])
-
-slots.dataSubset__description = Slot(uri=SCHEMA.description, name="dataSubset__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataSubset__description, domain=None, range=Optional[str])
 
 slots.namedThing__id = Slot(uri=SCHEMA.identifier, name="namedThing__id", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.namedThing__id, domain=None, range=URIRef)
@@ -5836,26 +3948,8 @@ slots.namedThing__name = Slot(uri=SCHEMA.name, name="namedThing__name", curie=SC
 slots.namedThing__description = Slot(uri=SCHEMA.description, name="namedThing__description", curie=SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.namedThing__description, domain=None, range=Optional[str])
 
-slots.organization__id = Slot(uri=SCHEMA.identifier, name="organization__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.organization__id, domain=None, range=URIRef)
-
-slots.organization__name = Slot(uri=SCHEMA.name, name="organization__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.organization__name, domain=None, range=Optional[str])
-
-slots.organization__description = Slot(uri=SCHEMA.description, name="organization__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.organization__description, domain=None, range=Optional[str])
-
 slots.datasetProperty__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="datasetProperty__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetProperty__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.datasetProperty__id = Slot(uri=SCHEMA.identifier, name="datasetProperty__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__id, domain=None, range=URIRef)
-
-slots.datasetProperty__name = Slot(uri=SCHEMA.name, name="datasetProperty__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__name, domain=None, range=Optional[str])
-
-slots.datasetProperty__description = Slot(uri=SCHEMA.description, name="datasetProperty__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__description, domain=None, range=Optional[str])
 
 slots.software__version = Slot(uri=SCHEMA.softwareVersion, name="software__version", curie=SCHEMA.curie('softwareVersion'),
                    model_uri=DATA_SHEETS_SCHEMA.software__version, domain=None, range=Optional[str])
@@ -5866,15 +3960,6 @@ slots.software__license = Slot(uri=SCHEMA.license, name="software__license", cur
 slots.software__url = Slot(uri=SCHEMA.url, name="software__url", curie=SCHEMA.curie('url'),
                    model_uri=DATA_SHEETS_SCHEMA.software__url, domain=None, range=Optional[str])
 
-slots.software__id = Slot(uri=SCHEMA.identifier, name="software__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.software__id, domain=None, range=URIRef)
-
-slots.software__name = Slot(uri=SCHEMA.name, name="software__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.software__name, domain=None, range=Optional[str])
-
-slots.software__description = Slot(uri=SCHEMA.description, name="software__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.software__description, domain=None, range=Optional[str])
-
 slots.person__affiliation = Slot(uri=SCHEMA.affiliation, name="person__affiliation", curie=SCHEMA.curie('affiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.person__affiliation, domain=None, range=Optional[Union[Union[str, OrganizationId], list[Union[str, OrganizationId]]]])
 
@@ -5884,85 +3969,6 @@ slots.person__email = Slot(uri=SCHEMA.email, name="person__email", curie=SCHEMA.
 slots.person__orcid = Slot(uri=SCHEMA.identifier, name="person__orcid", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.person__orcid, domain=None, range=Optional[str],
                    pattern=re.compile(r'^\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$'))
-
-slots.person__id = Slot(uri=SCHEMA.identifier, name="person__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.person__id, domain=None, range=URIRef)
-
-slots.person__name = Slot(uri=SCHEMA.name, name="person__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.person__name, domain=None, range=Optional[str])
-
-slots.person__description = Slot(uri=SCHEMA.description, name="person__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.person__description, domain=None, range=Optional[str])
-
-slots.information__compression = Slot(uri=DCAT.compressFormat, name="information__compression", curie=DCAT.curie('compressFormat'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__compression, domain=None, range=Optional[Union[str, "CompressionEnum"]])
-
-slots.information__conforms_to = Slot(uri=DCTERMS.conformsTo, name="information__conforms_to", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__conforms_to, domain=None, range=Optional[str])
-
-slots.information__conforms_to_class = Slot(uri=DCTERMS.conformsTo, name="information__conforms_to_class", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__conforms_to_class, domain=None, range=Optional[str])
-
-slots.information__conforms_to_schema = Slot(uri=DCTERMS.conformsTo, name="information__conforms_to_schema", curie=DCTERMS.curie('conformsTo'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__conforms_to_schema, domain=None, range=Optional[str])
-
-slots.information__created_by = Slot(uri=PAV.createdBy, name="information__created_by", curie=PAV.curie('createdBy'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__created_by, domain=None, range=Optional[str])
-
-slots.information__created_on = Slot(uri=PAV.createdOn, name="information__created_on", curie=PAV.curie('createdOn'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__created_on, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.information__doi = Slot(uri=BIBO.doi, name="information__doi", curie=BIBO.curie('doi'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__doi, domain=None, range=Optional[str],
-                   pattern=re.compile(r'10\.\d{4,}\/.+'))
-
-slots.information__download_url = Slot(uri=DCAT.downloadURL, name="information__download_url", curie=DCAT.curie('downloadURL'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__download_url, domain=None, range=Optional[Union[str, URI]])
-
-slots.information__issued = Slot(uri=DCTERMS.issued, name="information__issued", curie=DCTERMS.curie('issued'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__issued, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.information__keywords = Slot(uri=DCAT.keyword, name="information__keywords", curie=DCAT.curie('keyword'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__keywords, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.information__language = Slot(uri=DCTERMS.language, name="information__language", curie=DCTERMS.curie('language'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__language, domain=None, range=Optional[str])
-
-slots.information__last_updated_on = Slot(uri=PAV.lastUpdatedOn, name="information__last_updated_on", curie=PAV.curie('lastUpdatedOn'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__last_updated_on, domain=None, range=Optional[Union[str, XSDDateTime]])
-
-slots.information__license = Slot(uri=DCTERMS.license, name="information__license", curie=DCTERMS.curie('license'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__license, domain=None, range=Optional[str])
-
-slots.information__modified_by = Slot(uri=OSLC.modifiedBy, name="information__modified_by", curie=OSLC.curie('modifiedBy'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__modified_by, domain=None, range=Optional[str])
-
-slots.information__page = Slot(uri=DCAT.landingPage, name="information__page", curie=DCAT.curie('landingPage'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__page, domain=None, range=Optional[str])
-
-slots.information__publisher = Slot(uri=DCTERMS.publisher, name="information__publisher", curie=DCTERMS.curie('publisher'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__publisher, domain=None, range=Optional[Union[str, URIorCURIE]])
-
-slots.information__status = Slot(uri=BIBO.status, name="information__status", curie=BIBO.curie('status'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__status, domain=None, range=Optional[str])
-
-slots.information__title = Slot(uri=DCTERMS.title, name="information__title", curie=DCTERMS.curie('title'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__title, domain=None, range=Optional[str])
-
-slots.information__version = Slot(uri=PAV.version, name="information__version", curie=PAV.curie('version'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__version, domain=None, range=Optional[str])
-
-slots.information__was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="information__was_derived_from", curie=PROV.curie('wasDerivedFrom'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__was_derived_from, domain=None, range=Optional[str])
-
-slots.information__id = Slot(uri=SCHEMA.identifier, name="information__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__id, domain=None, range=URIRef)
-
-slots.information__name = Slot(uri=SCHEMA.name, name="information__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__name, domain=None, range=Optional[str])
-
-slots.information__description = Slot(uri=SCHEMA.description, name="information__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.information__description, domain=None, range=Optional[str])
 
 slots.formatDialect__comment_prefix = Slot(uri=DATA_SHEETS_SCHEMA.comment_prefix, name="formatDialect__comment_prefix", curie=DATA_SHEETS_SCHEMA.curie('comment_prefix'),
                    model_uri=DATA_SHEETS_SCHEMA.formatDialect__comment_prefix, domain=None, range=Optional[str])
@@ -5982,47 +3988,11 @@ slots.formatDialect__quote_char = Slot(uri=DATA_SHEETS_SCHEMA.quote_char, name="
 slots.purpose__response = Slot(uri=DCTERMS.description, name="purpose__response", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.purpose__response, domain=None, range=Optional[str])
 
-slots.purpose__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="purpose__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.purpose__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.purpose__id = Slot(uri=SCHEMA.identifier, name="purpose__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.purpose__id, domain=None, range=URIRef)
-
-slots.purpose__name = Slot(uri=SCHEMA.name, name="purpose__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.purpose__name, domain=None, range=Optional[str])
-
-slots.purpose__description = Slot(uri=SCHEMA.description, name="purpose__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.purpose__description, domain=None, range=Optional[str])
-
 slots.task__response = Slot(uri=DCTERMS.description, name="task__response", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.task__response, domain=None, range=Optional[str])
 
-slots.task__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="task__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.task__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.task__id = Slot(uri=SCHEMA.identifier, name="task__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.task__id, domain=None, range=URIRef)
-
-slots.task__name = Slot(uri=SCHEMA.name, name="task__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.task__name, domain=None, range=Optional[str])
-
-slots.task__description = Slot(uri=SCHEMA.description, name="task__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.task__description, domain=None, range=Optional[str])
-
 slots.addressingGap__response = Slot(uri=DCTERMS.description, name="addressingGap__response", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.addressingGap__response, domain=None, range=Optional[str])
-
-slots.addressingGap__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="addressingGap__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.addressingGap__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.addressingGap__id = Slot(uri=SCHEMA.identifier, name="addressingGap__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.addressingGap__id, domain=None, range=URIRef)
-
-slots.addressingGap__name = Slot(uri=SCHEMA.name, name="addressingGap__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.addressingGap__name, domain=None, range=Optional[str])
-
-slots.addressingGap__description = Slot(uri=SCHEMA.description, name="addressingGap__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.addressingGap__description, domain=None, range=Optional[str])
 
 slots.creator__principal_investigator = Slot(uri=DCTERMS.creator, name="creator__principal_investigator", curie=DCTERMS.curie('creator'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[Union[str, PersonId]])
@@ -6030,20 +4000,8 @@ slots.creator__principal_investigator = Slot(uri=DCTERMS.creator, name="creator_
 slots.creator__affiliation = Slot(uri=SCHEMA.affiliation, name="creator__affiliation", curie=SCHEMA.curie('affiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__affiliation, domain=None, range=Optional[Union[str, OrganizationId]])
 
-slots.creator__credit_roles = Slot(uri=DATA_SHEETS_SCHEMA.credit_roles, name="creator__credit_roles", curie=DATA_SHEETS_SCHEMA.curie('credit_roles'),
+slots.creator__credit_roles = Slot(uri=D4DMOTIVATION.credit_roles, name="creator__credit_roles", curie=D4DMOTIVATION.curie('credit_roles'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__credit_roles, domain=None, range=Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]])
-
-slots.creator__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="creator__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.creator__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.creator__id = Slot(uri=SCHEMA.identifier, name="creator__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.creator__id, domain=None, range=URIRef)
-
-slots.creator__name = Slot(uri=SCHEMA.name, name="creator__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.creator__name, domain=None, range=Optional[str])
-
-slots.creator__description = Slot(uri=SCHEMA.description, name="creator__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.creator__description, domain=None, range=Optional[str])
 
 slots.fundingMechanism__grantor = Slot(uri=SCHEMA.funder, name="fundingMechanism__grantor", curie=SCHEMA.curie('funder'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grantor, domain=None, range=Optional[Union[str, GrantorId]])
@@ -6051,38 +4009,8 @@ slots.fundingMechanism__grantor = Slot(uri=SCHEMA.funder, name="fundingMechanism
 slots.fundingMechanism__grant = Slot(uri=SCHEMA.funding, name="fundingMechanism__grant", curie=SCHEMA.curie('funding'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grant, domain=None, range=Optional[Union[str, GrantId]])
 
-slots.fundingMechanism__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="fundingMechanism__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.fundingMechanism__id = Slot(uri=SCHEMA.identifier, name="fundingMechanism__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__id, domain=None, range=URIRef)
-
-slots.fundingMechanism__name = Slot(uri=SCHEMA.name, name="fundingMechanism__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__name, domain=None, range=Optional[str])
-
-slots.fundingMechanism__description = Slot(uri=SCHEMA.description, name="fundingMechanism__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__description, domain=None, range=Optional[str])
-
-slots.grantor__id = Slot(uri=SCHEMA.identifier, name="grantor__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.grantor__id, domain=None, range=URIRef)
-
-slots.grantor__name = Slot(uri=SCHEMA.name, name="grantor__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.grantor__name, domain=None, range=Optional[str])
-
-slots.grantor__description = Slot(uri=SCHEMA.description, name="grantor__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.grantor__description, domain=None, range=Optional[str])
-
 slots.grant__grant_number = Slot(uri=SCHEMA.identifier, name="grant__grant_number", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])
-
-slots.grant__id = Slot(uri=SCHEMA.identifier, name="grant__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.grant__id, domain=None, range=URIRef)
-
-slots.grant__name = Slot(uri=SCHEMA.name, name="grant__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.grant__name, domain=None, range=Optional[str])
-
-slots.grant__description = Slot(uri=SCHEMA.description, name="grant__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.grant__description, domain=None, range=Optional[str])
 
 slots.instance__data_topic = Slot(uri=DCAT.theme, name="instance__data_topic", curie=DCAT.curie('theme'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__data_topic, domain=None, range=Optional[Union[str, URIorCURIE]])
@@ -6096,62 +4024,38 @@ slots.instance__data_substrate = Slot(uri=DCTERMS.format, name="instance__data_s
 slots.instance__counts = Slot(uri=SCHEMA.numberOfItems, name="instance__counts", curie=SCHEMA.curie('numberOfItems'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__counts, domain=None, range=Optional[int])
 
-slots.instance__label = Slot(uri=DATA_SHEETS_SCHEMA.label, name="instance__label", curie=DATA_SHEETS_SCHEMA.curie('label'),
+slots.instance__label = Slot(uri=D4DCOMPOSITION.label, name="instance__label", curie=D4DCOMPOSITION.curie('label'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.instance__label_description = Slot(uri=SCHEMA.description, name="instance__label_description", curie=SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label_description, domain=None, range=Optional[str])
 
-slots.instance__sampling_strategies = Slot(uri=DATA_SHEETS_SCHEMA.sampling_strategies, name="instance__sampling_strategies", curie=DATA_SHEETS_SCHEMA.curie('sampling_strategies'),
+slots.instance__sampling_strategies = Slot(uri=D4DCOMPOSITION.sampling_strategies, name="instance__sampling_strategies", curie=D4DCOMPOSITION.curie('sampling_strategies'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__sampling_strategies, domain=None, range=Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]])
 
-slots.instance__missing_information = Slot(uri=DATA_SHEETS_SCHEMA.missing_information, name="instance__missing_information", curie=DATA_SHEETS_SCHEMA.curie('missing_information'),
+slots.instance__missing_information = Slot(uri=D4DCOMPOSITION.missing_information, name="instance__missing_information", curie=D4DCOMPOSITION.curie('missing_information'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__missing_information, domain=None, range=Optional[Union[Union[str, MissingInfoId], list[Union[str, MissingInfoId]]]])
 
-slots.instance__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="instance__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.instance__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.instance__id = Slot(uri=SCHEMA.identifier, name="instance__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.instance__id, domain=None, range=URIRef)
-
-slots.instance__name = Slot(uri=SCHEMA.name, name="instance__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.instance__name, domain=None, range=Optional[str])
-
-slots.instance__description = Slot(uri=SCHEMA.description, name="instance__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.instance__description, domain=None, range=Optional[str])
-
-slots.samplingStrategy__is_sample = Slot(uri=DATA_SHEETS_SCHEMA.is_sample, name="samplingStrategy__is_sample", curie=DATA_SHEETS_SCHEMA.curie('is_sample'),
+slots.samplingStrategy__is_sample = Slot(uri=D4DCOMPOSITION.is_sample, name="samplingStrategy__is_sample", curie=D4DCOMPOSITION.curie('is_sample'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_sample, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.samplingStrategy__is_random = Slot(uri=DATA_SHEETS_SCHEMA.is_random, name="samplingStrategy__is_random", curie=DATA_SHEETS_SCHEMA.curie('is_random'),
+slots.samplingStrategy__is_random = Slot(uri=D4DCOMPOSITION.is_random, name="samplingStrategy__is_random", curie=D4DCOMPOSITION.curie('is_random'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_random, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.samplingStrategy__source_data = Slot(uri=DATA_SHEETS_SCHEMA.source_data, name="samplingStrategy__source_data", curie=DATA_SHEETS_SCHEMA.curie('source_data'),
+slots.samplingStrategy__source_data = Slot(uri=D4DCOMPOSITION.source_data, name="samplingStrategy__source_data", curie=D4DCOMPOSITION.curie('source_data'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__source_data, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.samplingStrategy__is_representative = Slot(uri=DATA_SHEETS_SCHEMA.is_representative, name="samplingStrategy__is_representative", curie=DATA_SHEETS_SCHEMA.curie('is_representative'),
+slots.samplingStrategy__is_representative = Slot(uri=D4DCOMPOSITION.is_representative, name="samplingStrategy__is_representative", curie=D4DCOMPOSITION.curie('is_representative'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_representative, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.samplingStrategy__representative_verification = Slot(uri=DATA_SHEETS_SCHEMA.representative_verification, name="samplingStrategy__representative_verification", curie=DATA_SHEETS_SCHEMA.curie('representative_verification'),
+slots.samplingStrategy__representative_verification = Slot(uri=D4DCOMPOSITION.representative_verification, name="samplingStrategy__representative_verification", curie=D4DCOMPOSITION.curie('representative_verification'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__representative_verification, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.samplingStrategy__why_not_representative = Slot(uri=DATA_SHEETS_SCHEMA.why_not_representative, name="samplingStrategy__why_not_representative", curie=DATA_SHEETS_SCHEMA.curie('why_not_representative'),
+slots.samplingStrategy__why_not_representative = Slot(uri=D4DCOMPOSITION.why_not_representative, name="samplingStrategy__why_not_representative", curie=D4DCOMPOSITION.curie('why_not_representative'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__why_not_representative, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.samplingStrategy__strategies = Slot(uri=DATA_SHEETS_SCHEMA.strategies, name="samplingStrategy__strategies", curie=DATA_SHEETS_SCHEMA.curie('strategies'),
+slots.samplingStrategy__strategies = Slot(uri=D4DCOMPOSITION.strategies, name="samplingStrategy__strategies", curie=D4DCOMPOSITION.curie('strategies'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__strategies, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.samplingStrategy__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="samplingStrategy__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.samplingStrategy__id = Slot(uri=SCHEMA.identifier, name="samplingStrategy__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__id, domain=None, range=URIRef)
-
-slots.samplingStrategy__name = Slot(uri=SCHEMA.name, name="samplingStrategy__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__name, domain=None, range=Optional[str])
-
-slots.samplingStrategy__description = Slot(uri=SCHEMA.description, name="samplingStrategy__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__description, domain=None, range=Optional[str])
 
 slots.missingInfo__missing = Slot(uri=DCTERMS.description, name="missingInfo__missing", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__missing, domain=None, range=Optional[Union[str, list[str]]])
@@ -6159,53 +4063,14 @@ slots.missingInfo__missing = Slot(uri=DCTERMS.description, name="missingInfo__mi
 slots.missingInfo__why_missing = Slot(uri=DCTERMS.description, name="missingInfo__why_missing", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__why_missing, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.missingInfo__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="missingInfo__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.missingInfo__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.missingInfo__id = Slot(uri=SCHEMA.identifier, name="missingInfo__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.missingInfo__id, domain=None, range=URIRef)
-
-slots.missingInfo__name = Slot(uri=SCHEMA.name, name="missingInfo__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.missingInfo__name, domain=None, range=Optional[str])
-
-slots.missingInfo__description = Slot(uri=SCHEMA.description, name="missingInfo__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.missingInfo__description, domain=None, range=Optional[str])
-
 slots.relationships__description = Slot(uri=DCTERMS.description, name="relationships__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.relationships__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.relationships__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="relationships__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.relationships__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.relationships__id = Slot(uri=SCHEMA.identifier, name="relationships__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.relationships__id, domain=None, range=URIRef)
-
-slots.relationships__name = Slot(uri=SCHEMA.name, name="relationships__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.relationships__name, domain=None, range=Optional[str])
 
 slots.splits__description = Slot(uri=DCTERMS.description, name="splits__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.splits__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.splits__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="splits__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.splits__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.splits__id = Slot(uri=SCHEMA.identifier, name="splits__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.splits__id, domain=None, range=URIRef)
-
-slots.splits__name = Slot(uri=SCHEMA.name, name="splits__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.splits__name, domain=None, range=Optional[str])
-
 slots.dataAnomaly__description = Slot(uri=DCTERMS.description, name="dataAnomaly__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.dataAnomaly__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="dataAnomaly__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.dataAnomaly__id = Slot(uri=SCHEMA.identifier, name="dataAnomaly__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__id, domain=None, range=URIRef)
-
-slots.dataAnomaly__name = Slot(uri=SCHEMA.name, name="dataAnomaly__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__name, domain=None, range=Optional[str])
 
 slots.externalResource__external_resources = Slot(uri=DCTERMS.references, name="externalResource__external_resources", curie=DCTERMS.curie('references'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__external_resources, domain=None, range=Optional[Union[str, list[str]]])
@@ -6213,58 +4078,25 @@ slots.externalResource__external_resources = Slot(uri=DCTERMS.references, name="
 slots.externalResource__future_guarantees = Slot(uri=DCTERMS.description, name="externalResource__future_guarantees", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__future_guarantees, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.externalResource__archival = Slot(uri=DATA_SHEETS_SCHEMA.archival, name="externalResource__archival", curie=DATA_SHEETS_SCHEMA.curie('archival'),
+slots.externalResource__archival = Slot(uri=D4DCOMPOSITION.archival, name="externalResource__archival", curie=D4DCOMPOSITION.curie('archival'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__archival, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
 slots.externalResource__restrictions = Slot(uri=DCTERMS.accessRights, name="externalResource__restrictions", curie=DCTERMS.curie('accessRights'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__restrictions, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.externalResource__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="externalResource__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.externalResource__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.externalResource__id = Slot(uri=SCHEMA.identifier, name="externalResource__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.externalResource__id, domain=None, range=URIRef)
-
-slots.externalResource__name = Slot(uri=SCHEMA.name, name="externalResource__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.externalResource__name, domain=None, range=Optional[str])
-
-slots.externalResource__description = Slot(uri=SCHEMA.description, name="externalResource__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.externalResource__description, domain=None, range=Optional[str])
-
-slots.confidentiality__confidential_elements_present = Slot(uri=DATA_SHEETS_SCHEMA.confidential_elements_present, name="confidentiality__confidential_elements_present", curie=DATA_SHEETS_SCHEMA.curie('confidential_elements_present'),
+slots.confidentiality__confidential_elements_present = Slot(uri=D4DCOMPOSITION.confidential_elements_present, name="confidentiality__confidential_elements_present", curie=D4DCOMPOSITION.curie('confidential_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.confidentiality__confidential_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.confidentiality__description = Slot(uri=DCTERMS.description, name="confidentiality__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.confidentiality__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.confidentiality__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="confidentiality__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.confidentiality__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.confidentiality__id = Slot(uri=SCHEMA.identifier, name="confidentiality__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.confidentiality__id, domain=None, range=URIRef)
-
-slots.confidentiality__name = Slot(uri=SCHEMA.name, name="confidentiality__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.confidentiality__name, domain=None, range=Optional[str])
-
-slots.contentWarning__content_warnings_present = Slot(uri=DATA_SHEETS_SCHEMA.content_warnings_present, name="contentWarning__content_warnings_present", curie=DATA_SHEETS_SCHEMA.curie('content_warnings_present'),
+slots.contentWarning__content_warnings_present = Slot(uri=D4DCOMPOSITION.content_warnings_present, name="contentWarning__content_warnings_present", curie=D4DCOMPOSITION.curie('content_warnings_present'),
                    model_uri=DATA_SHEETS_SCHEMA.contentWarning__content_warnings_present, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.contentWarning__warnings = Slot(uri=DCTERMS.description, name="contentWarning__warnings", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.contentWarning__warnings, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.contentWarning__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="contentWarning__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.contentWarning__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.contentWarning__id = Slot(uri=SCHEMA.identifier, name="contentWarning__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.contentWarning__id, domain=None, range=URIRef)
-
-slots.contentWarning__name = Slot(uri=SCHEMA.name, name="contentWarning__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.contentWarning__name, domain=None, range=Optional[str])
-
-slots.contentWarning__description = Slot(uri=SCHEMA.description, name="contentWarning__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.contentWarning__description, domain=None, range=Optional[str])
-
-slots.subpopulation__subpopulation_elements_present = Slot(uri=DATA_SHEETS_SCHEMA.subpopulation_elements_present, name="subpopulation__subpopulation_elements_present", curie=DATA_SHEETS_SCHEMA.curie('subpopulation_elements_present'),
+slots.subpopulation__subpopulation_elements_present = Slot(uri=D4DCOMPOSITION.subpopulation_elements_present, name="subpopulation__subpopulation_elements_present", curie=D4DCOMPOSITION.curie('subpopulation_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__subpopulation_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.subpopulation__identification = Slot(uri=DCTERMS.description, name="subpopulation__identification", curie=DCTERMS.curie('description'),
@@ -6273,161 +4105,59 @@ slots.subpopulation__identification = Slot(uri=DCTERMS.description, name="subpop
 slots.subpopulation__distribution = Slot(uri=DCTERMS.description, name="subpopulation__distribution", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__distribution, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.subpopulation__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="subpopulation__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.subpopulation__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.subpopulation__id = Slot(uri=SCHEMA.identifier, name="subpopulation__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.subpopulation__id, domain=None, range=URIRef)
-
-slots.subpopulation__name = Slot(uri=SCHEMA.name, name="subpopulation__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.subpopulation__name, domain=None, range=Optional[str])
-
-slots.subpopulation__description = Slot(uri=SCHEMA.description, name="subpopulation__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.subpopulation__description, domain=None, range=Optional[str])
-
-slots.deidentification__identifiable_elements_present = Slot(uri=DATA_SHEETS_SCHEMA.identifiable_elements_present, name="deidentification__identifiable_elements_present", curie=DATA_SHEETS_SCHEMA.curie('identifiable_elements_present'),
+slots.deidentification__identifiable_elements_present = Slot(uri=D4DCOMPOSITION.identifiable_elements_present, name="deidentification__identifiable_elements_present", curie=D4DCOMPOSITION.curie('identifiable_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__identifiable_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.deidentification__description = Slot(uri=DCTERMS.description, name="deidentification__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.deidentification__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="deidentification__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.deidentification__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.deidentification__id = Slot(uri=SCHEMA.identifier, name="deidentification__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.deidentification__id, domain=None, range=URIRef)
-
-slots.deidentification__name = Slot(uri=SCHEMA.name, name="deidentification__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.deidentification__name, domain=None, range=Optional[str])
-
-slots.sensitiveElement__sensitive_elements_present = Slot(uri=DATA_SHEETS_SCHEMA.sensitive_elements_present, name="sensitiveElement__sensitive_elements_present", curie=DATA_SHEETS_SCHEMA.curie('sensitive_elements_present'),
+slots.sensitiveElement__sensitive_elements_present = Slot(uri=D4DCOMPOSITION.sensitive_elements_present, name="sensitiveElement__sensitive_elements_present", curie=D4DCOMPOSITION.curie('sensitive_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__sensitive_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.sensitiveElement__description = Slot(uri=DCTERMS.description, name="sensitiveElement__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.sensitiveElement__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="sensitiveElement__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.sensitiveElement__id = Slot(uri=SCHEMA.identifier, name="sensitiveElement__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__id, domain=None, range=URIRef)
-
-slots.sensitiveElement__name = Slot(uri=SCHEMA.name, name="sensitiveElement__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__name, domain=None, range=Optional[str])
-
-slots.datasetRelationship__target_dataset = Slot(uri=DATA_SHEETS_SCHEMA.target_dataset, name="datasetRelationship__target_dataset", curie=DATA_SHEETS_SCHEMA.curie('target_dataset'),
+slots.datasetRelationship__target_dataset = Slot(uri=D4DCOMPOSITION.target_dataset, name="datasetRelationship__target_dataset", curie=D4DCOMPOSITION.curie('target_dataset'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__target_dataset, domain=None, range=str)
 
-slots.datasetRelationship__relationship_type = Slot(uri=DATA_SHEETS_SCHEMA.relationship_type, name="datasetRelationship__relationship_type", curie=DATA_SHEETS_SCHEMA.curie('relationship_type'),
+slots.datasetRelationship__relationship_type = Slot(uri=D4DCOMPOSITION.relationship_type, name="datasetRelationship__relationship_type", curie=D4DCOMPOSITION.curie('relationship_type'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__relationship_type, domain=None, range=Union[str, "DatasetRelationshipTypeEnum"])
 
-slots.datasetRelationship__description = Slot(uri=DATA_SHEETS_SCHEMA.description, name="datasetRelationship__description", curie=DATA_SHEETS_SCHEMA.curie('description'),
+slots.datasetRelationship__description = Slot(uri=D4DCOMPOSITION.description, name="datasetRelationship__description", curie=D4DCOMPOSITION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__description, domain=None, range=Optional[str])
-
-slots.datasetRelationship__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="datasetRelationship__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.datasetRelationship__id = Slot(uri=SCHEMA.identifier, name="datasetRelationship__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__id, domain=None, range=URIRef)
-
-slots.datasetRelationship__name = Slot(uri=SCHEMA.name, name="datasetRelationship__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__name, domain=None, range=Optional[str])
 
 slots.instanceAcquisition__description = Slot(uri=DCTERMS.description, name="instanceAcquisition__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.instanceAcquisition__was_directly_observed = Slot(uri=DATA_SHEETS_SCHEMA.was_directly_observed, name="instanceAcquisition__was_directly_observed", curie=DATA_SHEETS_SCHEMA.curie('was_directly_observed'),
+slots.instanceAcquisition__was_directly_observed = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_directly_observed'], name="instanceAcquisition__was_directly_observed", curie=DATA_SHEETS_SCHEMA.curie('collection/was_directly_observed'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_directly_observed, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.instanceAcquisition__was_reported_by_subjects = Slot(uri=DATA_SHEETS_SCHEMA.was_reported_by_subjects, name="instanceAcquisition__was_reported_by_subjects", curie=DATA_SHEETS_SCHEMA.curie('was_reported_by_subjects'),
+slots.instanceAcquisition__was_reported_by_subjects = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_reported_by_subjects'], name="instanceAcquisition__was_reported_by_subjects", curie=DATA_SHEETS_SCHEMA.curie('collection/was_reported_by_subjects'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_reported_by_subjects, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.instanceAcquisition__was_inferred_derived = Slot(uri=PROV.wasDerivedFrom, name="instanceAcquisition__was_inferred_derived", curie=PROV.curie('wasDerivedFrom'),
+slots.instanceAcquisition__was_inferred_derived = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_inferred_derived'], name="instanceAcquisition__was_inferred_derived", curie=DATA_SHEETS_SCHEMA.curie('collection/was_inferred_derived'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_inferred_derived, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.instanceAcquisition__was_validated_verified = Slot(uri=DATA_SHEETS_SCHEMA.was_validated_verified, name="instanceAcquisition__was_validated_verified", curie=DATA_SHEETS_SCHEMA.curie('was_validated_verified'),
+slots.instanceAcquisition__was_validated_verified = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_validated_verified'], name="instanceAcquisition__was_validated_verified", curie=DATA_SHEETS_SCHEMA.curie('collection/was_validated_verified'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_validated_verified, domain=None, range=Optional[Union[bool, Bool]])
-
-slots.instanceAcquisition__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="instanceAcquisition__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.instanceAcquisition__id = Slot(uri=SCHEMA.identifier, name="instanceAcquisition__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__id, domain=None, range=URIRef)
-
-slots.instanceAcquisition__name = Slot(uri=SCHEMA.name, name="instanceAcquisition__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__name, domain=None, range=Optional[str])
 
 slots.collectionMechanism__description = Slot(uri=DCTERMS.description, name="collectionMechanism__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.collectionMechanism__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.collectionMechanism__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="collectionMechanism__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionMechanism__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.collectionMechanism__id = Slot(uri=SCHEMA.identifier, name="collectionMechanism__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionMechanism__id, domain=None, range=URIRef)
-
-slots.collectionMechanism__name = Slot(uri=SCHEMA.name, name="collectionMechanism__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionMechanism__name, domain=None, range=Optional[str])
-
 slots.dataCollector__description = Slot(uri=DCTERMS.description, name="dataCollector__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.dataCollector__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.dataCollector__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="dataCollector__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataCollector__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.dataCollector__id = Slot(uri=SCHEMA.identifier, name="dataCollector__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataCollector__id, domain=None, range=URIRef)
-
-slots.dataCollector__name = Slot(uri=SCHEMA.name, name="dataCollector__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataCollector__name, domain=None, range=Optional[str])
 
 slots.collectionTimeframe__description = Slot(uri=DCTERMS.temporal, name="collectionTimeframe__description", curie=DCTERMS.curie('temporal'),
                    model_uri=DATA_SHEETS_SCHEMA.collectionTimeframe__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.collectionTimeframe__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="collectionTimeframe__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionTimeframe__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.collectionTimeframe__id = Slot(uri=SCHEMA.identifier, name="collectionTimeframe__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionTimeframe__id, domain=None, range=URIRef)
-
-slots.collectionTimeframe__name = Slot(uri=SCHEMA.name, name="collectionTimeframe__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionTimeframe__name, domain=None, range=Optional[str])
-
 slots.directCollection__description = Slot(uri=DCTERMS.source, name="directCollection__description", curie=DCTERMS.curie('source'),
                    model_uri=DATA_SHEETS_SCHEMA.directCollection__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.directCollection__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="directCollection__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.directCollection__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.directCollection__id = Slot(uri=SCHEMA.identifier, name="directCollection__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.directCollection__id, domain=None, range=URIRef)
-
-slots.directCollection__name = Slot(uri=SCHEMA.name, name="directCollection__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.directCollection__name, domain=None, range=Optional[str])
 
 slots.preprocessingStrategy__description = Slot(uri=DCTERMS.description, name="preprocessingStrategy__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.preprocessingStrategy__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="preprocessingStrategy__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.preprocessingStrategy__id = Slot(uri=SCHEMA.identifier, name="preprocessingStrategy__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__id, domain=None, range=URIRef)
-
-slots.preprocessingStrategy__name = Slot(uri=SCHEMA.name, name="preprocessingStrategy__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__name, domain=None, range=Optional[str])
-
 slots.cleaningStrategy__description = Slot(uri=DCTERMS.description, name="cleaningStrategy__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.cleaningStrategy__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="cleaningStrategy__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.cleaningStrategy__id = Slot(uri=SCHEMA.identifier, name="cleaningStrategy__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__id, domain=None, range=URIRef)
-
-slots.cleaningStrategy__name = Slot(uri=SCHEMA.name, name="cleaningStrategy__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__name, domain=None, range=Optional[str])
 
 slots.labelingStrategy__description = Slot(uri=DCTERMS.description, name="labelingStrategy__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
@@ -6435,233 +4165,71 @@ slots.labelingStrategy__description = Slot(uri=DCTERMS.description, name="labeli
 slots.labelingStrategy__annotation_platform = Slot(uri=SCHEMA.instrument, name="labelingStrategy__annotation_platform", curie=SCHEMA.curie('instrument'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__annotation_platform, domain=None, range=Optional[str])
 
-slots.labelingStrategy__annotations_per_item = Slot(uri=DATA_SHEETS_SCHEMA.annotations_per_item, name="labelingStrategy__annotations_per_item", curie=DATA_SHEETS_SCHEMA.curie('annotations_per_item'),
+slots.labelingStrategy__annotations_per_item = Slot(uri=D4DPREPROCESSING.annotations_per_item, name="labelingStrategy__annotations_per_item", curie=D4DPREPROCESSING.curie('annotations_per_item'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__annotations_per_item, domain=None, range=Optional[int])
 
 slots.labelingStrategy__inter_annotator_agreement = Slot(uri=SCHEMA.measurementMethod, name="labelingStrategy__inter_annotator_agreement", curie=SCHEMA.curie('measurementMethod'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__inter_annotator_agreement, domain=None, range=Optional[str])
 
-slots.labelingStrategy__annotator_demographics = Slot(uri=DATA_SHEETS_SCHEMA.annotator_demographics, name="labelingStrategy__annotator_demographics", curie=DATA_SHEETS_SCHEMA.curie('annotator_demographics'),
+slots.labelingStrategy__annotator_demographics = Slot(uri=D4DPREPROCESSING.annotator_demographics, name="labelingStrategy__annotator_demographics", curie=D4DPREPROCESSING.curie('annotator_demographics'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__annotator_demographics, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.labelingStrategy__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="labelingStrategy__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.labelingStrategy__id = Slot(uri=SCHEMA.identifier, name="labelingStrategy__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__id, domain=None, range=URIRef)
-
-slots.labelingStrategy__name = Slot(uri=SCHEMA.name, name="labelingStrategy__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__name, domain=None, range=Optional[str])
-
-slots.rawData__description = Slot(uri=PROV.wasDerivedFrom, name="rawData__description", curie=PROV.curie('wasDerivedFrom'),
+slots.rawData__description = Slot(uri=D4DPREPROCESSING.description, name="rawData__description", curie=D4DPREPROCESSING.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.rawData__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.rawData__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="rawData__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.rawData__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.rawData__id = Slot(uri=SCHEMA.identifier, name="rawData__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.rawData__id, domain=None, range=URIRef)
-
-slots.rawData__name = Slot(uri=SCHEMA.name, name="rawData__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.rawData__name, domain=None, range=Optional[str])
 
 slots.existingUse__description = Slot(uri=DCTERMS.description, name="existingUse__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.existingUse__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.existingUse__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="existingUse__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.existingUse__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.existingUse__id = Slot(uri=SCHEMA.identifier, name="existingUse__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.existingUse__id, domain=None, range=URIRef)
-
-slots.existingUse__name = Slot(uri=SCHEMA.name, name="existingUse__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.existingUse__name, domain=None, range=Optional[str])
-
 slots.useRepository__description = Slot(uri=SCHEMA.url, name="useRepository__description", curie=SCHEMA.curie('url'),
                    model_uri=DATA_SHEETS_SCHEMA.useRepository__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.useRepository__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="useRepository__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.useRepository__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.useRepository__id = Slot(uri=SCHEMA.identifier, name="useRepository__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.useRepository__id, domain=None, range=URIRef)
-
-slots.useRepository__name = Slot(uri=SCHEMA.name, name="useRepository__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.useRepository__name, domain=None, range=Optional[str])
 
 slots.otherTask__description = Slot(uri=DCTERMS.description, name="otherTask__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.otherTask__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.otherTask__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="otherTask__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.otherTask__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.otherTask__id = Slot(uri=SCHEMA.identifier, name="otherTask__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.otherTask__id, domain=None, range=URIRef)
-
-slots.otherTask__name = Slot(uri=SCHEMA.name, name="otherTask__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.otherTask__name, domain=None, range=Optional[str])
-
 slots.futureUseImpact__description = Slot(uri=DCTERMS.description, name="futureUseImpact__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.futureUseImpact__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.futureUseImpact__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="futureUseImpact__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.futureUseImpact__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.futureUseImpact__id = Slot(uri=SCHEMA.identifier, name="futureUseImpact__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.futureUseImpact__id, domain=None, range=URIRef)
-
-slots.futureUseImpact__name = Slot(uri=SCHEMA.name, name="futureUseImpact__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.futureUseImpact__name, domain=None, range=Optional[str])
 
 slots.discouragedUse__description = Slot(uri=DCTERMS.description, name="discouragedUse__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.discouragedUse__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.discouragedUse__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="discouragedUse__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.discouragedUse__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.discouragedUse__id = Slot(uri=SCHEMA.identifier, name="discouragedUse__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.discouragedUse__id, domain=None, range=URIRef)
-
-slots.discouragedUse__name = Slot(uri=SCHEMA.name, name="discouragedUse__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.discouragedUse__name, domain=None, range=Optional[str])
-
 slots.intendedUse__description = Slot(uri=DCTERMS.description, name="intendedUse__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.intendedUse__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.intendedUse__use_category = Slot(uri=DATA_SHEETS_SCHEMA.use_category, name="intendedUse__use_category", curie=DATA_SHEETS_SCHEMA.curie('use_category'),
+slots.intendedUse__use_category = Slot(uri=D4DUSES.use_category, name="intendedUse__use_category", curie=D4DUSES.curie('use_category'),
                    model_uri=DATA_SHEETS_SCHEMA.intendedUse__use_category, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.intendedUse__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="intendedUse__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.intendedUse__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.intendedUse__id = Slot(uri=SCHEMA.identifier, name="intendedUse__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.intendedUse__id, domain=None, range=URIRef)
-
-slots.intendedUse__name = Slot(uri=SCHEMA.name, name="intendedUse__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.intendedUse__name, domain=None, range=Optional[str])
 
 slots.prohibitedUse__description = Slot(uri=DCTERMS.description, name="prohibitedUse__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.prohibitedUse__prohibition_reason = Slot(uri=DATA_SHEETS_SCHEMA.prohibition_reason, name="prohibitedUse__prohibition_reason", curie=DATA_SHEETS_SCHEMA.curie('prohibition_reason'),
+slots.prohibitedUse__prohibition_reason = Slot(uri=D4DUSES.prohibition_reason, name="prohibitedUse__prohibition_reason", curie=D4DUSES.curie('prohibition_reason'),
                    model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__prohibition_reason, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.prohibitedUse__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="prohibitedUse__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.prohibitedUse__id = Slot(uri=SCHEMA.identifier, name="prohibitedUse__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__id, domain=None, range=URIRef)
-
-slots.prohibitedUse__name = Slot(uri=SCHEMA.name, name="prohibitedUse__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__name, domain=None, range=Optional[str])
 
 slots.thirdPartySharing__description = Slot(uri=DCTERMS.accessRights, name="thirdPartySharing__description", curie=DCTERMS.curie('accessRights'),
                    model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__description, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.thirdPartySharing__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="thirdPartySharing__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.thirdPartySharing__id = Slot(uri=SCHEMA.identifier, name="thirdPartySharing__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__id, domain=None, range=URIRef)
-
-slots.thirdPartySharing__name = Slot(uri=SCHEMA.name, name="thirdPartySharing__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__name, domain=None, range=Optional[str])
-
 slots.distributionFormat__description = Slot(uri=DCAT.accessURL, name="distributionFormat__description", curie=DCAT.curie('accessURL'),
                    model_uri=DATA_SHEETS_SCHEMA.distributionFormat__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.distributionFormat__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="distributionFormat__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.distributionFormat__id = Slot(uri=SCHEMA.identifier, name="distributionFormat__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__id, domain=None, range=URIRef)
-
-slots.distributionFormat__name = Slot(uri=SCHEMA.name, name="distributionFormat__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__name, domain=None, range=Optional[str])
 
 slots.distributionDate__description = Slot(uri=DCTERMS.available, name="distributionDate__description", curie=DCTERMS.curie('available'),
                    model_uri=DATA_SHEETS_SCHEMA.distributionDate__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.distributionDate__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="distributionDate__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionDate__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.distributionDate__id = Slot(uri=SCHEMA.identifier, name="distributionDate__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionDate__id, domain=None, range=URIRef)
-
-slots.distributionDate__name = Slot(uri=SCHEMA.name, name="distributionDate__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionDate__name, domain=None, range=Optional[str])
-
 slots.maintainer__description = Slot(uri=SCHEMA.maintainer, name="maintainer__description", curie=SCHEMA.curie('maintainer'),
                    model_uri=DATA_SHEETS_SCHEMA.maintainer__description, domain=None, range=Optional[Union[Union[str, "CreatorOrMaintainerEnum"], list[Union[str, "CreatorOrMaintainerEnum"]]]])
-
-slots.maintainer__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="maintainer__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.maintainer__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.maintainer__id = Slot(uri=SCHEMA.identifier, name="maintainer__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.maintainer__id, domain=None, range=URIRef)
-
-slots.maintainer__name = Slot(uri=SCHEMA.name, name="maintainer__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.maintainer__name, domain=None, range=Optional[str])
 
 slots.erratum__description = Slot(uri=DCTERMS.description, name="erratum__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.erratum__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.erratum__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="erratum__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.erratum__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.erratum__id = Slot(uri=SCHEMA.identifier, name="erratum__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.erratum__id, domain=None, range=URIRef)
-
-slots.erratum__name = Slot(uri=SCHEMA.name, name="erratum__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.erratum__name, domain=None, range=Optional[str])
-
-slots.updatePlan__description = Slot(uri=PAV.lastUpdateOn, name="updatePlan__description", curie=PAV.curie('lastUpdateOn'),
+slots.updatePlan__description = Slot(uri=DCTERMS.modified, name="updatePlan__description", curie=DCTERMS.curie('modified'),
                    model_uri=DATA_SHEETS_SCHEMA.updatePlan__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.updatePlan__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="updatePlan__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.updatePlan__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.updatePlan__id = Slot(uri=SCHEMA.identifier, name="updatePlan__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.updatePlan__id, domain=None, range=URIRef)
-
-slots.updatePlan__name = Slot(uri=SCHEMA.name, name="updatePlan__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.updatePlan__name, domain=None, range=Optional[str])
 
 slots.retentionLimits__description = Slot(uri=DCTERMS.description, name="retentionLimits__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.retentionLimits__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.retentionLimits__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="retentionLimits__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.retentionLimits__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.retentionLimits__id = Slot(uri=SCHEMA.identifier, name="retentionLimits__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.retentionLimits__id, domain=None, range=URIRef)
-
-slots.retentionLimits__name = Slot(uri=SCHEMA.name, name="retentionLimits__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.retentionLimits__name, domain=None, range=Optional[str])
-
-slots.versionAccess__description = Slot(uri=PAV.previousVersion, name="versionAccess__description", curie=PAV.curie('previousVersion'),
+slots.versionAccess__description = Slot(uri=DCTERMS.isVersionOf, name="versionAccess__description", curie=DCTERMS.curie('isVersionOf'),
                    model_uri=DATA_SHEETS_SCHEMA.versionAccess__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.versionAccess__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="versionAccess__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.versionAccess__id = Slot(uri=SCHEMA.identifier, name="versionAccess__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__id, domain=None, range=URIRef)
-
-slots.versionAccess__name = Slot(uri=SCHEMA.name, name="versionAccess__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__name, domain=None, range=Optional[str])
 
 slots.extensionMechanism__description = Slot(uri=DCTERMS.description, name="extensionMechanism__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.extensionMechanism__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="extensionMechanism__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.extensionMechanism__id = Slot(uri=SCHEMA.identifier, name="extensionMechanism__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__id, domain=None, range=URIRef)
-
-slots.extensionMechanism__name = Slot(uri=SCHEMA.name, name="extensionMechanism__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__name, domain=None, range=Optional[str])
 
 slots.ethicalReview__description = Slot(uri=DCTERMS.description, name="ethicalReview__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__description, domain=None, range=Optional[Union[str, list[str]]])
@@ -6672,188 +4240,83 @@ slots.ethicalReview__contact_person = Slot(uri=SCHEMA.contactPoint, name="ethica
 slots.ethicalReview__reviewing_organization = Slot(uri=SCHEMA.provider, name="ethicalReview__reviewing_organization", curie=SCHEMA.curie('provider'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__reviewing_organization, domain=None, range=Optional[Union[str, OrganizationId]])
 
-slots.ethicalReview__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="ethicalReview__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.ethicalReview__id = Slot(uri=SCHEMA.identifier, name="ethicalReview__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__id, domain=None, range=URIRef)
-
-slots.ethicalReview__name = Slot(uri=SCHEMA.name, name="ethicalReview__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__name, domain=None, range=Optional[str])
-
 slots.dataProtectionImpact__description = Slot(uri=DCTERMS.description, name="dataProtectionImpact__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.dataProtectionImpact__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="dataProtectionImpact__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.dataProtectionImpact__id = Slot(uri=SCHEMA.identifier, name="dataProtectionImpact__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__id, domain=None, range=URIRef)
-
-slots.dataProtectionImpact__name = Slot(uri=SCHEMA.name, name="dataProtectionImpact__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__name, domain=None, range=Optional[str])
 
 slots.collectionNotification__description = Slot(uri=DCTERMS.description, name="collectionNotification__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.collectionNotification__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.collectionNotification__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="collectionNotification__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionNotification__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.collectionNotification__id = Slot(uri=SCHEMA.identifier, name="collectionNotification__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionNotification__id, domain=None, range=URIRef)
-
-slots.collectionNotification__name = Slot(uri=SCHEMA.name, name="collectionNotification__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionNotification__name, domain=None, range=Optional[str])
-
 slots.collectionConsent__description = Slot(uri=DCTERMS.description, name="collectionConsent__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.collectionConsent__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.collectionConsent__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="collectionConsent__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionConsent__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.collectionConsent__id = Slot(uri=SCHEMA.identifier, name="collectionConsent__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionConsent__id, domain=None, range=URIRef)
-
-slots.collectionConsent__name = Slot(uri=SCHEMA.name, name="collectionConsent__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionConsent__name, domain=None, range=Optional[str])
 
 slots.consentRevocation__description = Slot(uri=DCTERMS.description, name="consentRevocation__description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.consentRevocation__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.consentRevocation__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="consentRevocation__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.consentRevocation__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.consentRevocation__id = Slot(uri=SCHEMA.identifier, name="consentRevocation__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.consentRevocation__id, domain=None, range=URIRef)
-
-slots.consentRevocation__name = Slot(uri=SCHEMA.name, name="consentRevocation__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.consentRevocation__name, domain=None, range=Optional[str])
-
-slots.humanSubjectResearch__involves_human_subjects = Slot(uri=DATA_SHEETS_SCHEMA.involves_human_subjects, name="humanSubjectResearch__involves_human_subjects", curie=DATA_SHEETS_SCHEMA.curie('involves_human_subjects'),
+slots.humanSubjectResearch__involves_human_subjects = Slot(uri=D4DHUMAN.involves_human_subjects, name="humanSubjectResearch__involves_human_subjects", curie=D4DHUMAN.curie('involves_human_subjects'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__involves_human_subjects, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.humanSubjectResearch__irb_approval = Slot(uri=DATA_SHEETS_SCHEMA.irb_approval, name="humanSubjectResearch__irb_approval", curie=DATA_SHEETS_SCHEMA.curie('irb_approval'),
+slots.humanSubjectResearch__irb_approval = Slot(uri=D4DHUMAN.irb_approval, name="humanSubjectResearch__irb_approval", curie=D4DHUMAN.curie('irb_approval'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__irb_approval, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectResearch__ethics_review_board = Slot(uri=DATA_SHEETS_SCHEMA.ethics_review_board, name="humanSubjectResearch__ethics_review_board", curie=DATA_SHEETS_SCHEMA.curie('ethics_review_board'),
+slots.humanSubjectResearch__ethics_review_board = Slot(uri=D4DHUMAN.ethics_review_board, name="humanSubjectResearch__ethics_review_board", curie=D4DHUMAN.curie('ethics_review_board'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__ethics_review_board, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectResearch__special_populations = Slot(uri=DATA_SHEETS_SCHEMA.special_populations, name="humanSubjectResearch__special_populations", curie=DATA_SHEETS_SCHEMA.curie('special_populations'),
+slots.humanSubjectResearch__special_populations = Slot(uri=D4DHUMAN.special_populations, name="humanSubjectResearch__special_populations", curie=D4DHUMAN.curie('special_populations'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__special_populations, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectResearch__regulatory_compliance = Slot(uri=DATA_SHEETS_SCHEMA.regulatory_compliance, name="humanSubjectResearch__regulatory_compliance", curie=DATA_SHEETS_SCHEMA.curie('regulatory_compliance'),
+slots.humanSubjectResearch__regulatory_compliance = Slot(uri=D4DHUMAN.regulatory_compliance, name="humanSubjectResearch__regulatory_compliance", curie=D4DHUMAN.curie('regulatory_compliance'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__regulatory_compliance, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectResearch__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="humanSubjectResearch__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.humanSubjectResearch__id = Slot(uri=SCHEMA.identifier, name="humanSubjectResearch__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__id, domain=None, range=URIRef)
-
-slots.humanSubjectResearch__name = Slot(uri=SCHEMA.name, name="humanSubjectResearch__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__name, domain=None, range=Optional[str])
-
-slots.humanSubjectResearch__description = Slot(uri=SCHEMA.description, name="humanSubjectResearch__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__description, domain=None, range=Optional[str])
-
-slots.informedConsent__consent_obtained = Slot(uri=DATA_SHEETS_SCHEMA.consent_obtained, name="informedConsent__consent_obtained", curie=DATA_SHEETS_SCHEMA.curie('consent_obtained'),
+slots.informedConsent__consent_obtained = Slot(uri=D4DHUMAN.consent_obtained, name="informedConsent__consent_obtained", curie=D4DHUMAN.curie('consent_obtained'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_obtained, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.informedConsent__consent_type = Slot(uri=DATA_SHEETS_SCHEMA.consent_type, name="informedConsent__consent_type", curie=DATA_SHEETS_SCHEMA.curie('consent_type'),
+slots.informedConsent__consent_type = Slot(uri=D4DHUMAN.consent_type, name="informedConsent__consent_type", curie=D4DHUMAN.curie('consent_type'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_type, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.informedConsent__consent_documentation = Slot(uri=DATA_SHEETS_SCHEMA.consent_documentation, name="informedConsent__consent_documentation", curie=DATA_SHEETS_SCHEMA.curie('consent_documentation'),
+slots.informedConsent__consent_documentation = Slot(uri=D4DHUMAN.consent_documentation, name="informedConsent__consent_documentation", curie=D4DHUMAN.curie('consent_documentation'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_documentation, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.informedConsent__withdrawal_mechanism = Slot(uri=DATA_SHEETS_SCHEMA.withdrawal_mechanism, name="informedConsent__withdrawal_mechanism", curie=DATA_SHEETS_SCHEMA.curie('withdrawal_mechanism'),
+slots.informedConsent__withdrawal_mechanism = Slot(uri=D4DHUMAN.withdrawal_mechanism, name="informedConsent__withdrawal_mechanism", curie=D4DHUMAN.curie('withdrawal_mechanism'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__withdrawal_mechanism, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.informedConsent__consent_scope = Slot(uri=DATA_SHEETS_SCHEMA.consent_scope, name="informedConsent__consent_scope", curie=DATA_SHEETS_SCHEMA.curie('consent_scope'),
+slots.informedConsent__consent_scope = Slot(uri=D4DHUMAN.consent_scope, name="informedConsent__consent_scope", curie=D4DHUMAN.curie('consent_scope'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_scope, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.informedConsent__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="informedConsent__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.informedConsent__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.informedConsent__id = Slot(uri=SCHEMA.identifier, name="informedConsent__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.informedConsent__id, domain=None, range=URIRef)
-
-slots.informedConsent__name = Slot(uri=SCHEMA.name, name="informedConsent__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.informedConsent__name, domain=None, range=Optional[str])
-
-slots.informedConsent__description = Slot(uri=SCHEMA.description, name="informedConsent__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.informedConsent__description, domain=None, range=Optional[str])
-
-slots.participantPrivacy__anonymization_method = Slot(uri=DATA_SHEETS_SCHEMA.anonymization_method, name="participantPrivacy__anonymization_method", curie=DATA_SHEETS_SCHEMA.curie('anonymization_method'),
+slots.participantPrivacy__anonymization_method = Slot(uri=D4DHUMAN.anonymization_method, name="participantPrivacy__anonymization_method", curie=D4DHUMAN.curie('anonymization_method'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__anonymization_method, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.participantPrivacy__reidentification_risk = Slot(uri=DATA_SHEETS_SCHEMA.reidentification_risk, name="participantPrivacy__reidentification_risk", curie=DATA_SHEETS_SCHEMA.curie('reidentification_risk'),
+slots.participantPrivacy__reidentification_risk = Slot(uri=D4DHUMAN.reidentification_risk, name="participantPrivacy__reidentification_risk", curie=D4DHUMAN.curie('reidentification_risk'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__reidentification_risk, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.participantPrivacy__privacy_techniques = Slot(uri=DATA_SHEETS_SCHEMA.privacy_techniques, name="participantPrivacy__privacy_techniques", curie=DATA_SHEETS_SCHEMA.curie('privacy_techniques'),
+slots.participantPrivacy__privacy_techniques = Slot(uri=D4DHUMAN.privacy_techniques, name="participantPrivacy__privacy_techniques", curie=D4DHUMAN.curie('privacy_techniques'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__privacy_techniques, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.participantPrivacy__data_linkage = Slot(uri=DATA_SHEETS_SCHEMA.data_linkage, name="participantPrivacy__data_linkage", curie=DATA_SHEETS_SCHEMA.curie('data_linkage'),
+slots.participantPrivacy__data_linkage = Slot(uri=D4DHUMAN.data_linkage, name="participantPrivacy__data_linkage", curie=D4DHUMAN.curie('data_linkage'),
                    model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__data_linkage, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.participantPrivacy__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="participantPrivacy__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.participantPrivacy__id = Slot(uri=SCHEMA.identifier, name="participantPrivacy__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__id, domain=None, range=URIRef)
-
-slots.participantPrivacy__name = Slot(uri=SCHEMA.name, name="participantPrivacy__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__name, domain=None, range=Optional[str])
-
-slots.participantPrivacy__description = Slot(uri=SCHEMA.description, name="participantPrivacy__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__description, domain=None, range=Optional[str])
-
-slots.humanSubjectCompensation__compensation_provided = Slot(uri=DATA_SHEETS_SCHEMA.compensation_provided, name="humanSubjectCompensation__compensation_provided", curie=DATA_SHEETS_SCHEMA.curie('compensation_provided'),
+slots.humanSubjectCompensation__compensation_provided = Slot(uri=D4DHUMAN.compensation_provided, name="humanSubjectCompensation__compensation_provided", curie=D4DHUMAN.curie('compensation_provided'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_provided, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.humanSubjectCompensation__compensation_type = Slot(uri=DATA_SHEETS_SCHEMA.compensation_type, name="humanSubjectCompensation__compensation_type", curie=DATA_SHEETS_SCHEMA.curie('compensation_type'),
+slots.humanSubjectCompensation__compensation_type = Slot(uri=D4DHUMAN.compensation_type, name="humanSubjectCompensation__compensation_type", curie=D4DHUMAN.curie('compensation_type'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_type, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectCompensation__compensation_amount = Slot(uri=DATA_SHEETS_SCHEMA.compensation_amount, name="humanSubjectCompensation__compensation_amount", curie=DATA_SHEETS_SCHEMA.curie('compensation_amount'),
+slots.humanSubjectCompensation__compensation_amount = Slot(uri=D4DHUMAN.compensation_amount, name="humanSubjectCompensation__compensation_amount", curie=D4DHUMAN.curie('compensation_amount'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_amount, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectCompensation__compensation_rationale = Slot(uri=DATA_SHEETS_SCHEMA.compensation_rationale, name="humanSubjectCompensation__compensation_rationale", curie=DATA_SHEETS_SCHEMA.curie('compensation_rationale'),
+slots.humanSubjectCompensation__compensation_rationale = Slot(uri=D4DHUMAN.compensation_rationale, name="humanSubjectCompensation__compensation_rationale", curie=D4DHUMAN.curie('compensation_rationale'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_rationale, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.humanSubjectCompensation__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="humanSubjectCompensation__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.humanSubjectCompensation__id = Slot(uri=SCHEMA.identifier, name="humanSubjectCompensation__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__id, domain=None, range=URIRef)
-
-slots.humanSubjectCompensation__name = Slot(uri=SCHEMA.name, name="humanSubjectCompensation__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__name, domain=None, range=Optional[str])
-
-slots.humanSubjectCompensation__description = Slot(uri=SCHEMA.description, name="humanSubjectCompensation__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__description, domain=None, range=Optional[str])
-
-slots.vulnerablePopulations__vulnerable_groups_included = Slot(uri=DATA_SHEETS_SCHEMA.vulnerable_groups_included, name="vulnerablePopulations__vulnerable_groups_included", curie=DATA_SHEETS_SCHEMA.curie('vulnerable_groups_included'),
+slots.vulnerablePopulations__vulnerable_groups_included = Slot(uri=D4DHUMAN.vulnerable_groups_included, name="vulnerablePopulations__vulnerable_groups_included", curie=D4DHUMAN.curie('vulnerable_groups_included'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__vulnerable_groups_included, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.vulnerablePopulations__special_protections = Slot(uri=DATA_SHEETS_SCHEMA.special_protections, name="vulnerablePopulations__special_protections", curie=DATA_SHEETS_SCHEMA.curie('special_protections'),
+slots.vulnerablePopulations__special_protections = Slot(uri=D4DHUMAN.special_protections, name="vulnerablePopulations__special_protections", curie=D4DHUMAN.curie('special_protections'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__special_protections, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.vulnerablePopulations__assent_procedures = Slot(uri=DATA_SHEETS_SCHEMA.assent_procedures, name="vulnerablePopulations__assent_procedures", curie=DATA_SHEETS_SCHEMA.curie('assent_procedures'),
+slots.vulnerablePopulations__assent_procedures = Slot(uri=D4DHUMAN.assent_procedures, name="vulnerablePopulations__assent_procedures", curie=D4DHUMAN.curie('assent_procedures'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__assent_procedures, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.vulnerablePopulations__guardian_consent = Slot(uri=DATA_SHEETS_SCHEMA.guardian_consent, name="vulnerablePopulations__guardian_consent", curie=DATA_SHEETS_SCHEMA.curie('guardian_consent'),
+slots.vulnerablePopulations__guardian_consent = Slot(uri=D4DHUMAN.guardian_consent, name="vulnerablePopulations__guardian_consent", curie=D4DHUMAN.curie('guardian_consent'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__guardian_consent, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.vulnerablePopulations__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="vulnerablePopulations__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.vulnerablePopulations__id = Slot(uri=SCHEMA.identifier, name="vulnerablePopulations__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__id, domain=None, range=URIRef)
-
-slots.vulnerablePopulations__name = Slot(uri=SCHEMA.name, name="vulnerablePopulations__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__name, domain=None, range=Optional[str])
-
-slots.vulnerablePopulations__description = Slot(uri=SCHEMA.description, name="vulnerablePopulations__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__description, domain=None, range=Optional[str])
 
 slots.licenseAndUseTerms__description = Slot(uri=DCTERMS.license, name="licenseAndUseTerms__description", curie=DCTERMS.curie('license'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__description, domain=None, range=Optional[Union[str, list[str]]])
@@ -6864,56 +4327,23 @@ slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="l
 slots.licenseAndUseTerms__contact_person = Slot(uri=SCHEMA.contactPoint, name="licenseAndUseTerms__contact_person", curie=SCHEMA.curie('contactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.licenseAndUseTerms__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="licenseAndUseTerms__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.licenseAndUseTerms__id = Slot(uri=SCHEMA.identifier, name="licenseAndUseTerms__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__id, domain=None, range=URIRef)
-
-slots.licenseAndUseTerms__name = Slot(uri=SCHEMA.name, name="licenseAndUseTerms__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__name, domain=None, range=Optional[str])
-
 slots.iPRestrictions__description = Slot(uri=DCTERMS.rights, name="iPRestrictions__description", curie=DCTERMS.curie('rights'),
                    model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__description, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.iPRestrictions__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="iPRestrictions__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.iPRestrictions__id = Slot(uri=SCHEMA.identifier, name="iPRestrictions__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__id, domain=None, range=URIRef)
-
-slots.iPRestrictions__name = Slot(uri=SCHEMA.name, name="iPRestrictions__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__name, domain=None, range=Optional[str])
 
 slots.exportControlRegulatoryRestrictions__description = Slot(uri=DCTERMS.accessRights, name="exportControlRegulatoryRestrictions__description", curie=DCTERMS.curie('accessRights'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.exportControlRegulatoryRestrictions__gdpr_compliant = Slot(uri=DATA_SHEETS_SCHEMA.gdpr_compliant, name="exportControlRegulatoryRestrictions__gdpr_compliant", curie=DATA_SHEETS_SCHEMA.curie('gdpr_compliant'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__gdpr_compliant, domain=None, range=Optional[Union[str, "ComplianceStatusEnum"]])
-
-slots.exportControlRegulatoryRestrictions__hipaa_compliant = Slot(uri=DATA_SHEETS_SCHEMA.hipaa_compliant, name="exportControlRegulatoryRestrictions__hipaa_compliant", curie=DATA_SHEETS_SCHEMA.curie('hipaa_compliant'),
+slots.exportControlRegulatoryRestrictions__hipaa_compliant = Slot(uri=D4DDATAGOVERNANCE.hipaa_compliant, name="exportControlRegulatoryRestrictions__hipaa_compliant", curie=D4DDATAGOVERNANCE.curie('hipaa_compliant'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__hipaa_compliant, domain=None, range=Optional[Union[str, "ComplianceStatusEnum"]])
 
-slots.exportControlRegulatoryRestrictions__eu_ai_act_risk_category = Slot(uri=DATA_SHEETS_SCHEMA.eu_ai_act_risk_category, name="exportControlRegulatoryRestrictions__eu_ai_act_risk_category", curie=DATA_SHEETS_SCHEMA.curie('eu_ai_act_risk_category'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__eu_ai_act_risk_category, domain=None, range=Optional[Union[str, "AIActRiskEnum"]])
-
-slots.exportControlRegulatoryRestrictions__other_compliance = Slot(uri=DATA_SHEETS_SCHEMA.other_compliance, name="exportControlRegulatoryRestrictions__other_compliance", curie=DATA_SHEETS_SCHEMA.curie('other_compliance'),
+slots.exportControlRegulatoryRestrictions__other_compliance = Slot(uri=D4DDATAGOVERNANCE.other_compliance, name="exportControlRegulatoryRestrictions__other_compliance", curie=D4DDATAGOVERNANCE.curie('other_compliance'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__other_compliance, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.exportControlRegulatoryRestrictions__confidentiality_level = Slot(uri=DATA_SHEETS_SCHEMA.confidentiality_level, name="exportControlRegulatoryRestrictions__confidentiality_level", curie=DATA_SHEETS_SCHEMA.curie('confidentiality_level'),
+slots.exportControlRegulatoryRestrictions__confidentiality_level = Slot(uri=D4DDATAGOVERNANCE.confidentiality_level, name="exportControlRegulatoryRestrictions__confidentiality_level", curie=D4DDATAGOVERNANCE.curie('confidentiality_level'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__confidentiality_level, domain=None, range=Optional[Union[str, "ConfidentialityLevelEnum"]])
 
 slots.exportControlRegulatoryRestrictions__governance_committee_contact = Slot(uri=SCHEMA.contactPoint, name="exportControlRegulatoryRestrictions__governance_committee_contact", curie=SCHEMA.curie('contactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__governance_committee_contact, domain=None, range=Optional[Union[str, PersonId]])
-
-slots.exportControlRegulatoryRestrictions__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="exportControlRegulatoryRestrictions__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.exportControlRegulatoryRestrictions__id = Slot(uri=SCHEMA.identifier, name="exportControlRegulatoryRestrictions__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__id, domain=None, range=URIRef)
-
-slots.exportControlRegulatoryRestrictions__name = Slot(uri=SCHEMA.name, name="exportControlRegulatoryRestrictions__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__name, domain=None, range=Optional[str])
 
 slots.variableMetadata__variable_name = Slot(uri=SCHEMA.name, name="variableMetadata__variable_name", curie=SCHEMA.curie('name'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__variable_name, domain=None, range=str)
@@ -6924,7 +4354,7 @@ slots.variableMetadata__data_type = Slot(uri=SCHEMA.DataType, name="variableMeta
 slots.variableMetadata__unit = Slot(uri=QUDT.unit, name="variableMetadata__unit", curie=QUDT.curie('unit'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__unit, domain=None, range=Optional[Union[str, URIorCURIE]])
 
-slots.variableMetadata__missing_value_code = Slot(uri=CSVW.null, name="variableMetadata__missing_value_code", curie=CSVW.curie('null'),
+slots.variableMetadata__missing_value_code = Slot(uri=D4DVARIABLES.missing_value_code, name="variableMetadata__missing_value_code", curie=D4DVARIABLES.curie('missing_value_code'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__missing_value_code, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.variableMetadata__minimum_value = Slot(uri=SCHEMA.minValue, name="variableMetadata__minimum_value", curie=SCHEMA.curie('minValue'),
@@ -6939,33 +4369,20 @@ slots.variableMetadata__categories = Slot(uri=SCHEMA.valueReference, name="varia
 slots.variableMetadata__examples = Slot(uri=SKOS.example, name="variableMetadata__examples", curie=SKOS.curie('example'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__examples, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.variableMetadata__is_identifier = Slot(uri=CSVW.primaryKey, name="variableMetadata__is_identifier", curie=CSVW.curie('primaryKey'),
+slots.variableMetadata__is_identifier = Slot(uri=SCHEMA.identifier, name="variableMetadata__is_identifier", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__is_identifier, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.variableMetadata__is_sensitive = Slot(uri=DATA_SHEETS_SCHEMA.is_sensitive, name="variableMetadata__is_sensitive", curie=DATA_SHEETS_SCHEMA.curie('is_sensitive'),
+slots.variableMetadata__is_sensitive = Slot(uri=D4DVARIABLES.is_sensitive, name="variableMetadata__is_sensitive", curie=D4DVARIABLES.curie('is_sensitive'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__is_sensitive, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.variableMetadata__precision = Slot(uri=DATA_SHEETS_SCHEMA.precision, name="variableMetadata__precision", curie=DATA_SHEETS_SCHEMA.curie('precision'),
+slots.variableMetadata__precision = Slot(uri=D4DVARIABLES.precision, name="variableMetadata__precision", curie=D4DVARIABLES.curie('precision'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__precision, domain=None, range=Optional[int])
 
 slots.variableMetadata__measurement_technique = Slot(uri=SCHEMA.measurementTechnique, name="variableMetadata__measurement_technique", curie=SCHEMA.curie('measurementTechnique'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__measurement_technique, domain=None, range=Optional[str])
 
-slots.variableMetadata__derivation = Slot(uri=PROV.wasDerivedFrom, name="variableMetadata__derivation", curie=PROV.curie('wasDerivedFrom'),
+slots.variableMetadata__derivation = Slot(uri=D4DVARIABLES.derivation, name="variableMetadata__derivation", curie=D4DVARIABLES.curie('derivation'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__derivation, domain=None, range=Optional[str])
 
-slots.variableMetadata__quality_notes = Slot(uri=DATA_SHEETS_SCHEMA.quality_notes, name="variableMetadata__quality_notes", curie=DATA_SHEETS_SCHEMA.curie('quality_notes'),
+slots.variableMetadata__quality_notes = Slot(uri=D4DVARIABLES.quality_notes, name="variableMetadata__quality_notes", curie=D4DVARIABLES.curie('quality_notes'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__quality_notes, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.variableMetadata__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="variableMetadata__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.variableMetadata__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
-
-slots.variableMetadata__id = Slot(uri=SCHEMA.identifier, name="variableMetadata__id", curie=SCHEMA.curie('identifier'),
-                   model_uri=DATA_SHEETS_SCHEMA.variableMetadata__id, domain=None, range=URIRef)
-
-slots.variableMetadata__name = Slot(uri=SCHEMA.name, name="variableMetadata__name", curie=SCHEMA.curie('name'),
-                   model_uri=DATA_SHEETS_SCHEMA.variableMetadata__name, domain=None, range=Optional[str])
-
-slots.variableMetadata__description = Slot(uri=SCHEMA.description, name="variableMetadata__description", curie=SCHEMA.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.variableMetadata__description, domain=None, range=Optional[str])
-

@@ -11,27 +11,19 @@ see_also:
   - "https://bridge2ai.github.io/data-sheets-schema"
 
 prefixes:
-  bibo: http://purl.org/ontology/bibo/
   biolink: https://w3id.org/biolink/vocab/
-  csvw: http://www.w3.org/ns/csvw#
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
   datasets: https://w3id.org/linkml/report
   dcat: http://www.w3.org/ns/dcat#
   dcterms: http://purl.org/dc/terms/
   example: https://example.org/
-  foaf: http://xmlns.com/foaf/0.1/
-  formats: http://www.w3.org/ns/formats/
-  frictionless: https://specs.frictionlessdata.io/
   linkml: https://w3id.org/linkml/
   mediatypes: https://www.iana.org/assignments/media-types/
-  oslc: http://open-services.net/ns/core#
-  pav: http://purl.org/pav/
   prov: http://www.w3.org/ns/prov#
   qudt: http://qudt.org/schema/qudt/
   schema: http://schema.org/
   sh: https://w3id.org/shacl/
   skos: http://www.w3.org/2004/02/skos/core#
-  void: http://rdfs.org/ns/void#
   AIO: https://w3id.org/aio/
 
 default_prefix: data_sheets_schema
@@ -53,8 +45,8 @@ subsets:
       The questions in this section are intended to provide dataset consumers
       with the information they need to make informed decisions about using the
       dataset for their chosen tasks. Some of the questions are designed to
-      elicit information about compliance with the EU's General Data Protection
-      Regulation (GDPR) or comparable regulations in other jurisdictions.
+      elicit information about compliance with applicable data protection
+      regulations and privacy requirements.
   Collection:
     description: >-
       The questions in this section are designed to elicit information that may
@@ -116,8 +108,6 @@ classes:
   Organization:
     is_a: NamedThing
     class_uri: schema:Organization
-    exact_mappings:
-      - foaf:Organization
     description: >-
       Represents a group or organization.
 
@@ -158,8 +148,6 @@ classes:
       rather than on the Person directly, since roles vary by dataset.
     is_a: NamedThing
     class_uri: schema:Person
-    exact_mappings:
-      - foaf:Person
     attributes:
       affiliation:
         description: >-
@@ -251,7 +239,6 @@ slots:
     slot_uri: dcat:landingPage
 
   dialect:
-    slot_uri: csvw:dialect
 
   bytes:
     description: Size of the data in bytes.
@@ -260,8 +247,6 @@ slots:
 
   path:
     slot_uri: schema:contentUrl
-    close_mappings:
-      - frictionless:path
 
   download_url:
     description: >-
@@ -272,8 +257,6 @@ slots:
     slot_uri: dcat:downloadURL
     exact_mappings:
       - schema:url
-    close_mappings:
-      - frictionless:path
 
   format:
     description: >-
@@ -299,7 +282,6 @@ slots:
     range: MediaTypeEnum
     slot_uri: dcat:mediaType
     exact_mappings:
-      - frictionless:mediatype
       - schema:encodingFormat
 
   hash:
@@ -331,37 +313,33 @@ slots:
     slot_uri: dcat:keyword
 
   version:
-    slot_uri: pav:version
+    slot_uri: dcterms:hasVersion
 
   created_by:
-    slot_uri: pav:createdBy
+    slot_uri: dcterms:creator
 
   created_on:
-    slot_uri: pav:createdOn
+    slot_uri: dcterms:created
     range: datetime
 
   last_updated_on:
-    slot_uri: pav:lastUpdatedOn
+    slot_uri: dcterms:modified
     range: datetime
 
   modified_by:
-    slot_uri: oslc:modifiedBy
-    exact_mappings:
-      - pav:lastUpdateBy
+    slot_uri: dcterms:contributor
 
   status:
-    slot_uri: bibo:status
+    slot_uri: dcterms:type
 
   was_derived_from:
     slot_uri: prov:wasDerivedFrom
     exact_mappings:
-      - pav:derivedFrom
+      - dcterms:source
 
   doi:
     description: digital object identifier
-    slot_uri: bibo:doi
-    exact_mappings:
-      - dcterms:identifier
+    slot_uri: dcterms:identifier
     pattern: "10\\.\\d{4,}\\/.+"
 
 ## SHARED ENUMS ##
@@ -573,25 +551,49 @@ enums:
       Windows-1258:
 
   CreatorOrMaintainerEnum:
+    description: >-
+      Types of agents (persons or organizations) involved in dataset creation or
+      maintenance. Mapped to schema.org organization types.
     permissible_values:
       data_subject:
-        description: A person whose information is recorded in the dataset.
+        description: >-
+          A person whose information is recorded in the dataset.
       third_party:
-        description: A third party not involved in the direct creation or maintenance.
+        description: >-
+          A third party not involved in the direct creation or maintenance.
       researcher:
-        description: A researcher involved in dataset creation or maintenance.
+        description: >-
+          A researcher involved in dataset creation or maintenance.
+        broad_mappings:
+          - schema:Person
       industry:
-        description: Industry professional involved in dataset creation or maintenance.
+        description: >-
+          Industry professional involved in dataset creation or maintenance.
+        broad_mappings:
+          - schema:Person
       academic_institution:
-        description: Academic institution responsible for dataset.
+        description: >-
+          Academic institution responsible for dataset.
+        broad_mappings:
+          - schema:EducationalOrganization
       government_agency:
-        description: Government agency responsible for dataset.
+        description: >-
+          Government agency responsible for dataset.
+        broad_mappings:
+          - schema:GovernmentOrganization
       commercial_entity:
-        description: Commercial entity responsible for dataset.
+        description: >-
+          Commercial entity responsible for dataset.
+        broad_mappings:
+          - schema:Corporation
       non_profit_organization:
-        description: Non-profit organization responsible for dataset.
+        description: >-
+          Non-profit organization responsible for dataset.
+        broad_mappings:
+          - schema:Organization
       crowdsourced:
-        description: Dataset created through crowdsourcing efforts.
+        description: >-
+          Dataset created through crowdsourcing efforts with multiple contributors.
       automated_system:
         description: Automated system or process responsible for dataset.
       other:
