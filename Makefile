@@ -243,9 +243,9 @@ examples/%.json: src/data/examples/%.yaml
 examples/%.ttl: src/data/examples/%.yaml
 	$(RUN) linkml-convert -P EXAMPLE=http://example.org/ -s $(SOURCE_SCHEMA_PATH) -C Person $< -o $@
 
-test-examples: examples/output
+test-examples: full-schema examples/output
 
-examples/output: src/data_sheets_schema/schema/data_sheets_schema.yaml
+examples/output: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
 	mkdir -p $@
 	$(RUN) linkml-run-examples \
 		--output-formats json \

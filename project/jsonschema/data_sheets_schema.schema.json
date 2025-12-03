@@ -58,7 +58,7 @@
             "type": "object"
         },
         "BiasTypeEnum": {
-            "description": "Types of bias that may be present in datasets",
+            "description": "Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO) bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO",
             "enum": [
                 "selection_bias",
                 "measurement_bias",
