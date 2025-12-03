@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-02T12:31:45
+# Generation date: 2025-12-02T18:55:00
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -69,7 +69,6 @@ B2AI_SUBSTRATE = CurieNamespace('B2AI_SUBSTRATE', 'https://w3id.org/bridge2ai/b2
 B2AI_TOPIC = CurieNamespace('B2AI_TOPIC', 'https://w3id.org/bridge2ai/b2ai-standards-registry/')
 DUO = CurieNamespace('DUO', 'http://purl.obolibrary.org/obo/DUO_')
 BIOLINK = CurieNamespace('biolink', 'https://w3id.org/biolink/vocab/')
-CSVW = CurieNamespace('csvw', 'http://www.w3.org/ns/csvw#')
 D4DCOMPOSITION = CurieNamespace('d4dcomposition', 'https://w3id.org/bridge2ai/data-sheets-schema/composition#')
 D4DDATAGOVERNANCE = CurieNamespace('d4ddatagovernance', 'https://w3id.org/bridge2ai/data-sheets-schema/data-governance#')
 D4DDISTRIBUTION = CurieNamespace('d4ddistribution', 'https://w3id.org/bridge2ai/data-sheets-schema/distribution#')
@@ -85,7 +84,6 @@ DATASETS = CurieNamespace('datasets', 'https://w3id.org/linkml/report')
 DCAT = CurieNamespace('dcat', 'http://www.w3.org/ns/dcat#')
 DCTERMS = CurieNamespace('dcterms', 'http://purl.org/dc/terms/')
 EXAMPLE = CurieNamespace('example', 'https://example.org/')
-FRICTIONLESS = CurieNamespace('frictionless', 'https://specs.frictionlessdata.io/')
 LINKML = CurieNamespace('linkml', 'https://w3id.org/linkml/')
 MEDIATYPES = CurieNamespace('mediatypes', 'https://www.iana.org/assignments/media-types/')
 PROV = CurieNamespace('prov', 'http://www.w3.org/ns/prov#')
@@ -2935,9 +2933,9 @@ class IPRestrictions(DatasetProperty):
 class ExportControlRegulatoryRestrictions(DatasetProperty):
     """
     Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? Includes
-    compliance tracking for regulations like GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and
-    provide a link or copy of any supporting documentation. Maps to DUO terms related to ethics approval, geographic
-    restrictions, and institutional requirements.
+    compliance tracking for regulations like HIPAA and other US regulations. If so, please describe these restrictions
+    and provide a link or copy of any supporting documentation. Maps to DUO terms related to ethics approval,
+    geographic restrictions, and institutional requirements.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -2948,9 +2946,7 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
 
     id: Union[str, ExportControlRegulatoryRestrictionsId] = None
     description: Optional[Union[str, list[str]]] = empty_list()
-    gdpr_compliant: Optional[Union[str, "ComplianceStatusEnum"]] = None
     hipaa_compliant: Optional[Union[str, "ComplianceStatusEnum"]] = None
-    eu_ai_act_risk_category: Optional[Union[str, "AIActRiskEnum"]] = None
     other_compliance: Optional[Union[str, list[str]]] = empty_list()
     confidentiality_level: Optional[Union[str, "ConfidentialityLevelEnum"]] = None
     governance_committee_contact: Optional[Union[str, PersonId]] = None
@@ -2965,14 +2961,8 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
             self.description = [self.description] if self.description is not None else []
         self.description = [v if isinstance(v, str) else str(v) for v in self.description]
 
-        if self.gdpr_compliant is not None and not isinstance(self.gdpr_compliant, ComplianceStatusEnum):
-            self.gdpr_compliant = ComplianceStatusEnum(self.gdpr_compliant)
-
         if self.hipaa_compliant is not None and not isinstance(self.hipaa_compliant, ComplianceStatusEnum):
             self.hipaa_compliant = ComplianceStatusEnum(self.hipaa_compliant)
-
-        if self.eu_ai_act_risk_category is not None and not isinstance(self.eu_ai_act_risk_category, AIActRiskEnum):
-            self.eu_ai_act_risk_category = AIActRiskEnum(self.eu_ai_act_risk_category)
 
         if not isinstance(self.other_compliance, list):
             self.other_compliance = [self.other_compliance] if self.other_compliance is not None else []
@@ -3485,8 +3475,8 @@ class DatasetRelationshipTypeEnum(EnumDefinitionImpl):
 class ComplianceStatusEnum(EnumDefinitionImpl):
     """
     Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific
-    regulations (e.g., GDPR, HIPAA, EU AI Act). These are workflow status values that may evolve as regulations are
-    assessed or as the dataset is modified.
+    regulations (e.g., HIPAA, 45 CFR 46). These are workflow status values that may evolve as regulations are assessed
+    or as the dataset is modified.
     """
     compliant = PermissibleValue(
         text="compliant",
@@ -3506,31 +3496,7 @@ class ComplianceStatusEnum(EnumDefinitionImpl):
 
     _defn = EnumDefinition(
         name="ComplianceStatusEnum",
-        description="""Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., GDPR, HIPAA, EU AI Act). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.""",
-    )
-
-class AIActRiskEnum(EnumDefinitionImpl):
-    """
-    Risk categories under the EU Artificial Intelligence Act (Regulation (EU) 2024/1689). The AI Act establishes a
-    risk-based regulatory framework with four categories. See https://artificialintelligenceact.eu/ and
-    https://eur-lex.europa.eu/eli/reg/2024/1689/oj
-    """
-    minimal_risk = PermissibleValue(
-        text="minimal_risk",
-        description="""AI systems with minimal risk (e.g., AI-enabled video games, spam filters). No specific obligations beyond general transparency for certain AI systems (Article 50). Represents the majority of AI systems on the EU market.""")
-    limited_risk = PermissibleValue(
-        text="limited_risk",
-        description="""AI systems with limited risk subject to transparency obligations (e.g., chatbots, emotion recognition systems, biometric categorization, deepfakes). Must comply with specific transparency requirements to enable users to make informed decisions (Article 50).""")
-    high_risk = PermissibleValue(
-        text="high_risk",
-        description="""AI systems with high risk to health, safety, or fundamental rights as defined in Annex III (e.g., AI in critical infrastructure, education, employment, law enforcement, migration, justice). Subject to strict requirements including conformity assessment, risk management, data governance, transparency, human oversight, and accuracy (Articles 6-51).""")
-    unacceptable_risk = PermissibleValue(
-        text="unacceptable_risk",
-        description="""AI systems with unacceptable risk that are prohibited under Article 5 (e.g., social scoring by public authorities, exploitation of vulnerabilities, real-time remote biometric identification in public spaces for law enforcement with limited exceptions). These AI practices are banned in the EU.""")
-
-    _defn = EnumDefinition(
-        name="AIActRiskEnum",
-        description="""Risk categories under the EU Artificial Intelligence Act (Regulation (EU) 2024/1689). The AI Act establishes a risk-based regulatory framework with four categories. See https://artificialintelligenceact.eu/ and https://eur-lex.europa.eu/eli/reg/2024/1689/oj""",
+        description="""Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.""",
     )
 
 class ConfidentialityLevelEnum(EnumDefinitionImpl):
@@ -3732,7 +3698,7 @@ slots.issued = Slot(uri=DCTERMS.issued, name="issued", curie=DCTERMS.curie('issu
 slots.page = Slot(uri=DCAT.landingPage, name="page", curie=DCAT.curie('landingPage'),
                    model_uri=DATA_SHEETS_SCHEMA.page, domain=None, range=Optional[str])
 
-slots.dialect = Slot(uri=CSVW.dialect, name="dialect", curie=CSVW.curie('dialect'),
+slots.dialect = Slot(uri=DATA_SHEETS_SCHEMA.dialect, name="dialect", curie=DATA_SHEETS_SCHEMA.curie('dialect'),
                    model_uri=DATA_SHEETS_SCHEMA.dialect, domain=None, range=Optional[str])
 
 slots.bytes = Slot(uri=DCAT.byteSize, name="bytes", curie=DCAT.curie('byteSize'),
@@ -4367,14 +4333,8 @@ slots.iPRestrictions__description = Slot(uri=DCTERMS.rights, name="iPRestriction
 slots.exportControlRegulatoryRestrictions__description = Slot(uri=DCTERMS.accessRights, name="exportControlRegulatoryRestrictions__description", curie=DCTERMS.curie('accessRights'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__description, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.exportControlRegulatoryRestrictions__gdpr_compliant = Slot(uri=D4DDATAGOVERNANCE.gdpr_compliant, name="exportControlRegulatoryRestrictions__gdpr_compliant", curie=D4DDATAGOVERNANCE.curie('gdpr_compliant'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__gdpr_compliant, domain=None, range=Optional[Union[str, "ComplianceStatusEnum"]])
-
 slots.exportControlRegulatoryRestrictions__hipaa_compliant = Slot(uri=D4DDATAGOVERNANCE.hipaa_compliant, name="exportControlRegulatoryRestrictions__hipaa_compliant", curie=D4DDATAGOVERNANCE.curie('hipaa_compliant'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__hipaa_compliant, domain=None, range=Optional[Union[str, "ComplianceStatusEnum"]])
-
-slots.exportControlRegulatoryRestrictions__eu_ai_act_risk_category = Slot(uri=D4DDATAGOVERNANCE.eu_ai_act_risk_category, name="exportControlRegulatoryRestrictions__eu_ai_act_risk_category", curie=D4DDATAGOVERNANCE.curie('eu_ai_act_risk_category'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__eu_ai_act_risk_category, domain=None, range=Optional[Union[str, "AIActRiskEnum"]])
 
 slots.exportControlRegulatoryRestrictions__other_compliance = Slot(uri=D4DDATAGOVERNANCE.other_compliance, name="exportControlRegulatoryRestrictions__other_compliance", curie=D4DDATAGOVERNANCE.curie('other_compliance'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__other_compliance, domain=None, range=Optional[Union[str, list[str]]])

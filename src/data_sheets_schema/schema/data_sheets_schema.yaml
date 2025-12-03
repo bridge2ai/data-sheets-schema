@@ -11,13 +11,11 @@ see_also:
 prefixes:
   AIO: https://w3id.org/aio/
   biolink: https://w3id.org/biolink/vocab/
-  csvw: http://www.w3.org/ns/csvw#
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
   datasets: https://w3id.org/linkml/report
   dcat: http://www.w3.org/ns/dcat#
   dcterms: http://purl.org/dc/terms/
   example: https://example.org/
-  frictionless: https://specs.frictionlessdata.io/
   linkml: https://w3id.org/linkml/
   mediatypes: https://www.iana.org/assignments/media-types/
   prov: http://www.w3.org/ns/prov#

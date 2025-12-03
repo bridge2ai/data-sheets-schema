@@ -32,10 +32,6 @@
       "prefix_reference": "https://w3id.org/biolink/vocab/"
     },
     {
-      "prefix_prefix": "csvw",
-      "prefix_reference": "http://www.w3.org/ns/csvw#"
-    },
-    {
       "prefix_prefix": "data_sheets_schema",
       "prefix_reference": "https://w3id.org/bridge2ai/data-sheets-schema/"
     },
@@ -54,10 +50,6 @@
     {
       "prefix_prefix": "example",
       "prefix_reference": "https://example.org/"
-    },
-    {
-      "prefix_prefix": "frictionless",
-      "prefix_reference": "https://specs.frictionlessdata.io/"
     },
     {
       "prefix_prefix": "linkml",
@@ -113,7 +105,7 @@
     {
       "name": "Composition",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/Composition",
-      "description": "The questions in this section are intended to provide dataset consumers with the information they need to make informed decisions about using the dataset for their chosen tasks. Some of the questions are designed to elicit information about compliance with the EU's General Data Protection Regulation (GDPR) or comparable regulations in other jurisdictions.",
+      "description": "The questions in this section are intended to provide dataset consumers with the information they need to make informed decisions about using the dataset for their chosen tasks. Some of the questions are designed to elicit information about compliance with applicable data protection regulations and privacy requirements.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "@type": "SubsetDefinition"
     },
@@ -1116,7 +1108,7 @@
     {
       "name": "ComplianceStatusEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ComplianceStatusEnum",
-      "description": "Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., GDPR, HIPAA, EU AI Act). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.",
+      "description": "Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "permissible_values": [
         {
@@ -1144,45 +1136,6 @@
         {
           "text": "under_review",
           "description": "Compliance status is currently under review or assessment. Final determination has not been made."
-        }
-      ]
-    },
-    {
-      "name": "AIActRiskEnum",
-      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#AIActRiskEnum",
-      "description": "Risk categories under the EU Artificial Intelligence Act (Regulation (EU) 2024/1689). The AI Act establishes a risk-based regulatory framework with four categories. See https://artificialintelligenceact.eu/ and https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
-      "permissible_values": [
-        {
-          "text": "minimal_risk",
-          "description": "AI systems with minimal risk (e.g., AI-enabled video games, spam filters). No specific obligations beyond general transparency for certain AI systems (Article 50). Represents the majority of AI systems on the EU market.",
-          "related_mappings": [
-            "EUAIAct:Article50"
-          ]
-        },
-        {
-          "text": "limited_risk",
-          "description": "AI systems with limited risk subject to transparency obligations (e.g., chatbots, emotion recognition systems, biometric categorization, deepfakes). Must comply with specific transparency requirements to enable users to make informed decisions (Article 50).",
-          "related_mappings": [
-            "EUAIAct:Article50",
-            "EUAIAct:TitleIV"
-          ]
-        },
-        {
-          "text": "high_risk",
-          "description": "AI systems with high risk to health, safety, or fundamental rights as defined in Annex III (e.g., AI in critical infrastructure, education, employment, law enforcement, migration, justice). Subject to strict requirements including conformity assessment, risk management, data governance, transparency, human oversight, and accuracy (Articles 6-51).",
-          "related_mappings": [
-            "EUAIAct:Article6",
-            "EUAIAct:AnnexIII",
-            "EUAIAct:TitleIII"
-          ]
-        },
-        {
-          "text": "unacceptable_risk",
-          "description": "AI systems with unacceptable risk that are prohibited under Article 5 (e.g., social scoring by public authorities, exploitation of vulnerabilities, real-time remote biometric identification in public spaces for law enforcement with limited exceptions). These AI practices are banned in the EU.",
-          "related_mappings": [
-            "EUAIAct:Article5"
-          ]
         }
       ]
     },
@@ -1541,10 +1494,7 @@
       "name": "dialect",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/dialect",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
-      "mappings": [
-        "http://www.w3.org/ns/csvw#dialect"
-      ],
-      "slot_uri": "http://www.w3.org/ns/csvw#dialect",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/dialect",
       "owner": "Dataset",
       "domain_of": [
         "Dataset"
@@ -4350,7 +4300,7 @@
     },
     {
       "name": "humanSubjectResearch__regulatory_compliance",
-      "description": "What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, GDPR, HIPAA)?\n",
+      "description": "What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#regulatory_compliance",
       "alias": "regulatory_compliance",
@@ -4697,19 +4647,6 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "exportControlRegulatoryRestrictions__gdpr_compliant",
-      "description": "Indicates compliance with the EU General Data Protection Regulation (GDPR). GDPR applies to processing of personal data of individuals in the EU.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#gdpr_compliant",
-      "alias": "gdpr_compliant",
-      "owner": "ExportControlRegulatoryRestrictions",
-      "domain_of": [
-        "ExportControlRegulatoryRestrictions"
-      ],
-      "range": "ComplianceStatusEnum",
-      "@type": "SlotDefinition"
-    },
-    {
       "name": "exportControlRegulatoryRestrictions__hipaa_compliant",
       "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
@@ -4720,19 +4657,6 @@
         "ExportControlRegulatoryRestrictions"
       ],
       "range": "ComplianceStatusEnum",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "exportControlRegulatoryRestrictions__eu_ai_act_risk_category",
-      "description": "Risk category under the EU AI Act. The EU AI Act classifies AI systems into risk categories: minimal, limited, high, and unacceptable. High-risk AI systems face strict requirements.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#eu_ai_act_risk_category",
-      "alias": "eu_ai_act_risk_category",
-      "owner": "ExportControlRegulatoryRestrictions",
-      "domain_of": [
-        "ExportControlRegulatoryRestrictions"
-      ],
-      "range": "AIActRiskEnum",
       "@type": "SlotDefinition"
     },
     {
@@ -7528,7 +7452,7 @@
         },
         {
           "name": "regulatory_compliance",
-          "description": "What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, GDPR, HIPAA)?\n",
+          "description": "What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?\n",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -7824,7 +7748,7 @@
     {
       "name": "ExportControlRegulatoryRestrictions",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#ExportControlRegulatoryRestrictions",
-      "description": "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? Includes compliance tracking for regulations like GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and provide a link or copy of any supporting documentation. Maps to DUO terms related to ethics approval, geographic restrictions, and institutional requirements.\n",
+      "description": "Do any export controls or other regulatory restrictions apply to the dataset or to individual instances? Includes compliance tracking for regulations like HIPAA and other US regulations. If so, please describe these restrictions and provide a link or copy of any supporting documentation. Maps to DUO terms related to ethics approval, geographic restrictions, and institutional requirements.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "is_a": "DatasetProperty",
       "slots": [
@@ -7832,9 +7756,7 @@
         "namedThing__name",
         "datasetProperty__used_software",
         "exportControlRegulatoryRestrictions__description",
-        "exportControlRegulatoryRestrictions__gdpr_compliant",
         "exportControlRegulatoryRestrictions__hipaa_compliant",
-        "exportControlRegulatoryRestrictions__eu_ai_act_risk_category",
         "exportControlRegulatoryRestrictions__other_compliance",
         "exportControlRegulatoryRestrictions__confidentiality_level",
         "exportControlRegulatoryRestrictions__governance_committee_contact"
@@ -7855,21 +7777,9 @@
           "@type": "SlotDefinition"
         },
         {
-          "name": "gdpr_compliant",
-          "description": "Indicates compliance with the EU General Data Protection Regulation (GDPR). GDPR applies to processing of personal data of individuals in the EU.",
-          "range": "ComplianceStatusEnum",
-          "@type": "SlotDefinition"
-        },
-        {
           "name": "hipaa_compliant",
           "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States.",
           "range": "ComplianceStatusEnum",
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "eu_ai_act_risk_category",
-          "description": "Risk category under the EU AI Act. The EU AI Act classifies AI systems into risk categories: minimal, limited, high, and unacceptable. High-risk AI systems face strict requirements.",
-          "range": "AIActRiskEnum",
           "@type": "SlotDefinition"
         },
         {
@@ -8048,9 +7958,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-12-02T12:31:34",
-  "source_file_size": 11839,
-  "generation_date": "2025-12-02T12:31:44",
+  "source_file_date": "2025-12-02T18:53:18",
+  "source_file_size": 11753,
+  "generation_date": "2025-12-02T18:54:59",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

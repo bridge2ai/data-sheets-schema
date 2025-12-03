@@ -12,13 +12,11 @@ see_also:
 
 prefixes:
   biolink: https://w3id.org/biolink/vocab/
-  csvw: http://www.w3.org/ns/csvw#
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
   datasets: https://w3id.org/linkml/report
   dcat: http://www.w3.org/ns/dcat#
   dcterms: http://purl.org/dc/terms/
   example: https://example.org/
-  frictionless: https://specs.frictionlessdata.io/
   linkml: https://w3id.org/linkml/
   mediatypes: https://www.iana.org/assignments/media-types/
   prov: http://www.w3.org/ns/prov#
@@ -47,8 +45,8 @@ subsets:
       The questions in this section are intended to provide dataset consumers
       with the information they need to make informed decisions about using the
       dataset for their chosen tasks. Some of the questions are designed to
-      elicit information about compliance with the EU's General Data Protection
-      Regulation (GDPR) or comparable regulations in other jurisdictions.
+      elicit information about compliance with applicable data protection
+      regulations and privacy requirements.
   Collection:
     description: >-
       The questions in this section are designed to elicit information that may
@@ -241,7 +239,6 @@ slots:
     slot_uri: dcat:landingPage
 
   dialect:
-    slot_uri: csvw:dialect
 
   bytes:
     description: Size of the data in bytes.

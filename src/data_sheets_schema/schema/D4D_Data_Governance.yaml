@@ -97,7 +97,7 @@ classes:
     description: >
       Do any export controls or other regulatory restrictions apply to the dataset
       or to individual instances? Includes compliance tracking for regulations like
-      GDPR, HIPAA, and EU AI Act. If so, please describe these restrictions and
+      HIPAA and other US regulations. If so, please describe these restrictions and
       provide a link or copy of any supporting documentation. Maps to DUO terms
       related to ethics approval, geographic restrictions, and institutional requirements.
     is_a: DatasetProperty
@@ -111,22 +111,11 @@ classes:
           - DUO:0000021  # IRB - ethics approval required
           - DUO:0000022  # GS - geographic restriction
           - DUO:0000028  # IS - institution specific
-      gdpr_compliant:
-        description: >-
-          Indicates compliance with the EU General Data Protection Regulation (GDPR).
-          GDPR applies to processing of personal data of individuals in the EU.
-        range: ComplianceStatusEnum
       hipaa_compliant:
         description: >-
           Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA).
           HIPAA applies to protected health information in the United States.
         range: ComplianceStatusEnum
-      eu_ai_act_risk_category:
-        description: >-
-          Risk category under the EU AI Act. The EU AI Act classifies AI systems
-          into risk categories: minimal, limited, high, and unacceptable.
-          High-risk AI systems face strict requirements.
-        range: AIActRiskEnum
       other_compliance:
         description: >-
           Other regulatory compliance frameworks applicable to this dataset
@@ -154,7 +143,7 @@ enums:
   ComplianceStatusEnum:
     description: >-
       Compliance status for regulatory frameworks. Indicates the extent to which
-      a dataset complies with specific regulations (e.g., GDPR, HIPAA, EU AI Act).
+      a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46).
       These are workflow status values that may evolve as regulations are assessed
       or as the dataset is modified.
     permissible_values:
@@ -182,48 +171,6 @@ enums:
         description: >-
           Compliance status is currently under review or assessment. Final
           determination has not been made.
-
-  AIActRiskEnum:
-    description: >-
-      Risk categories under the EU Artificial Intelligence Act (Regulation (EU) 2024/1689).
-      The AI Act establishes a risk-based regulatory framework with four categories.
-      See https://artificialintelligenceact.eu/ and https://eur-lex.europa.eu/eli/reg/2024/1689/oj
-    permissible_values:
-      minimal_risk:
-        description: >-
-          AI systems with minimal risk (e.g., AI-enabled video games, spam filters).
-          No specific obligations beyond general transparency for certain AI systems
-          (Article 50). Represents the majority of AI systems on the EU market.
-        related_mappings:
-          - EUAIAct:Article50
-      limited_risk:
-        description: >-
-          AI systems with limited risk subject to transparency obligations
-          (e.g., chatbots, emotion recognition systems, biometric categorization,
-          deepfakes). Must comply with specific transparency requirements to enable
-          users to make informed decisions (Article 50).
-        related_mappings:
-          - EUAIAct:Article50
-          - EUAIAct:TitleIV
-      high_risk:
-        description: >-
-          AI systems with high risk to health, safety, or fundamental rights as
-          defined in Annex III (e.g., AI in critical infrastructure, education,
-          employment, law enforcement, migration, justice). Subject to strict
-          requirements including conformity assessment, risk management, data
-          governance, transparency, human oversight, and accuracy (Articles 6-51).
-        related_mappings:
-          - EUAIAct:Article6
-          - EUAIAct:AnnexIII
-          - EUAIAct:TitleIII
-      unacceptable_risk:
-        description: >-
-          AI systems with unacceptable risk that are prohibited under Article 5
-          (e.g., social scoring by public authorities, exploitation of vulnerabilities,
-          real-time remote biometric identification in public spaces for law enforcement
-          with limited exceptions). These AI practices are banned in the EU.
-        related_mappings:
-          - EUAIAct:Article5
 
   ConfidentialityLevelEnum:
     description: >-

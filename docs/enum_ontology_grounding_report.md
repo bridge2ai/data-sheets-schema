@@ -409,6 +409,14 @@ This hierarchical structure enables fine-grained bias classification while maint
 - **Documentation updates** (Phase 7):
   - Updated status overview to reflect optimization
   - Noted which enums were simplified vs removed entirely
+- **Removed AIActRiskEnum** (Phase 9):
+  - Removed entire AIActRiskEnum with 4 EU AI Act risk categories
+  - Removed `eu_ai_act_risk_category` field from ExportControlRegulatoryRestrictions
+  - Rationale: "stay US-centric" per expert feedback
+  - Result: ComplianceStatusEnum now references HIPAA and 45 CFR 46 instead of GDPR/EU AI Act
+- **Prefix cleanup** (Phase 10):
+  - Note: Frictionless and CSVW prefixes were removed but no enums were affected
+  - This phase impacted prefix declarations and slot mappings, not enum ontology grounding
 
 **2025-12-01**:
 - Initial enumeration inventory completed

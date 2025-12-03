@@ -485,6 +485,18 @@ The D4D schema team monitors the following for updates:
   - Generalized regulatory compliance fields
 - **Phase 7**: Updated standards documentation (this file)
 - **Phase 8**: All tests pass with optimized mappings
+- **Phase 9**: Removed GDPR and EU AI Act (US-Centric Focus):
+  - Removed `gdpr_compliant` field from ExportControlRegulatoryRestrictions
+  - Removed `eu_ai_act_risk_category` field from ExportControlRegulatoryRestrictions
+  - Removed entire `AIActRiskEnum` enum (4 risk categories: minimal, limited, high, unacceptable)
+  - Updated all descriptions mentioning GDPR/EU AI Act to reference US regulations (HIPAA, 45 CFR 46)
+  - Rationale: "stay US-centric" per expert feedback
+- **Phase 10**: Completed Frictionless & CSVW cleanup:
+  - Removed `frictionless` prefix from D4D_Base_import.yaml and data_sheets_schema.yaml
+  - Removed `csvw` prefix from D4D_Base_import.yaml and data_sheets_schema.yaml
+  - Removed `csvw:dialect` mapping from dialect slot in D4D_Base_import.yaml
+  - Rationale: "wouldn't worry about mapping to it" (Frictionless), "more granular than D4D needs" (CSVW)
+- **Phase 11**: Validation and regeneration successful
 
 **Rationale for Changes**:
 - Eliminate redundancy (PAV overlaps with Dublin Core, FOAF overlaps with schema.org)
