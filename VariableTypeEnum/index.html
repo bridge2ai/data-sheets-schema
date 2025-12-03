@@ -332,7 +332,7 @@
 
 
 <h1 id="enum-variabletypeenum">Enum: VariableTypeEnum</h1>
-<p><em>Common data types for variables</em></p>
+<p><em>Common data types for variables. Values are mapped to schema.org DataType vocabulary. See https://schema.org/DataType</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/VariableTypeEnum">data_sheets_schema:VariableTypeEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
@@ -352,12 +352,12 @@
 <tr>
 <td>float</td>
 <td>None</td>
-<td>Floating-point numbers</td>
+<td>Floating-point numbers (single precision)</td>
 </tr>
 <tr>
 <td>double</td>
 <td>None</td>
-<td>Double-precision floating-point</td>
+<td>Double-precision floating-point numbers</td>
 </tr>
 <tr>
 <td>string</td>
@@ -372,7 +372,7 @@
 <tr>
 <td>date</td>
 <td>None</td>
-<td>Date values</td>
+<td>Date values (without time)</td>
 </tr>
 <tr>
 <td>datetime</td>
@@ -382,32 +382,32 @@
 <tr>
 <td>categorical</td>
 <td>None</td>
-<td>Categorical/factor variables with finite values</td>
+<td>Categorical/factor variables with finite set of discrete values</td>
 </tr>
 <tr>
 <td>ordinal</td>
 <td>None</td>
-<td>Ordered categorical variables</td>
+<td>Ordered categorical variables where values have a meaningful sequence (e</td>
 </tr>
 <tr>
 <td>identifier</td>
 <td>None</td>
-<td>Unique identifiers or keys</td>
+<td>Unique identifiers or keys for records or entities</td>
 </tr>
 <tr>
 <td>json</td>
 <td>None</td>
-<td>JSON-encoded data</td>
+<td>JSON-encoded data structures</td>
 </tr>
 <tr>
 <td>array</td>
 <td>None</td>
-<td>Arrays or lists</td>
+<td>Arrays or lists of values</td>
 </tr>
 <tr>
 <td>object</td>
 <td>None</td>
-<td>Complex structured objects</td>
+<td>Complex structured objects or nested data structures</td>
 </tr>
 </tbody>
 </table>
@@ -435,49 +435,80 @@
 <details>
 
 <pre><code class="language-yaml">name: VariableTypeEnum
-description: Common data types for variables
+description: Common data types for variables. Values are mapped to schema.org DataType
+  vocabulary. See https://schema.org/DataType
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 permissible_values:
   integer:
     text: integer
-    description: Whole numbers
+    description: Whole numbers.
+    broad_mappings:
+    - schema:Integer
   float:
     text: float
-    description: Floating-point numbers
+    description: Floating-point numbers (single precision).
+    broad_mappings:
+    - schema:Float
   double:
     text: double
-    description: Double-precision floating-point
+    description: Double-precision floating-point numbers.
+    broad_mappings:
+    - schema:Number
   string:
     text: string
-    description: Text strings
+    description: Text strings.
+    broad_mappings:
+    - schema:Text
   boolean:
     text: boolean
-    description: True/false values
+    description: True/false values.
+    broad_mappings:
+    - schema:Boolean
   date:
     text: date
-    description: Date values
+    description: Date values (without time).
+    broad_mappings:
+    - schema:Date
   datetime:
     text: datetime
-    description: Date and time values
+    description: Date and time values.
+    broad_mappings:
+    - schema:DateTime
   categorical:
     text: categorical
-    description: Categorical/factor variables with finite values
+    description: Categorical/factor variables with finite set of discrete values.
+      Often used for nominal data (unordered categories).
+    broad_mappings:
+    - schema:Text
   ordinal:
     text: ordinal
-    description: Ordered categorical variables
+    description: Ordered categorical variables where values have a meaningful sequence
+      (e.g., low/medium/high, strongly disagree/disagree/agree/strongly agree).
+    broad_mappings:
+    - schema:Text
   identifier:
     text: identifier
-    description: Unique identifiers or keys
+    description: Unique identifiers or keys for records or entities.
+    broad_mappings:
+    - schema:Text
+    - schema:identifier
   json:
     text: json
-    description: JSON-encoded data
+    description: JSON-encoded data structures.
+    broad_mappings:
+    - schema:Text
   array:
     text: array
-    description: Arrays or lists
+    description: Arrays or lists of values. May contain elements of the same or different
+      types.
+    broad_mappings:
+    - schema:ItemList
   object:
     text: object
-    description: Complex structured objects
+    description: Complex structured objects or nested data structures.
+    broad_mappings:
+    - schema:StructuredValue
 
 </code></pre>
 

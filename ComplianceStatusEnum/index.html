@@ -332,7 +332,7 @@
 
 
 <h1 id="enum-compliancestatusenum">Enum: ComplianceStatusEnum</h1>
-<p><em>Compliance status for regulatory frameworks</em></p>
+<p><em>Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/ComplianceStatusEnum">data_sheets_schema:ComplianceStatusEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
@@ -352,7 +352,7 @@
 <tr>
 <td>partially_compliant</td>
 <td>None</td>
-<td>Dataset is partially compliant, with known limitations</td>
+<td>Dataset is partially compliant, with known limitations or gaps in compliance</td>
 </tr>
 <tr>
 <td>not_compliant</td>
@@ -362,12 +362,12 @@
 <tr>
 <td>not_applicable</td>
 <td>None</td>
-<td>Regulation does not apply to this dataset</td>
+<td>Regulation does not apply to this dataset based on scope, jurisdiction, or su...</td>
 </tr>
 <tr>
 <td>under_review</td>
 <td>None</td>
-<td>Compliance status is currently under review</td>
+<td>Compliance status is currently under review or assessment</td>
 </tr>
 </tbody>
 </table>
@@ -380,10 +380,6 @@
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><a href="../gdpr_compliant/">gdpr_compliant</a></td>
-<td>Indicates compliance with the EU General Data Protection Regulation (GDPR)</td>
-</tr>
 <tr>
 <td><a href="../hipaa_compliant/">hipaa_compliant</a></td>
 <td>Indicates compliance with the Health Insurance Portability and Accountability...</td>
@@ -399,25 +395,37 @@
 <details>
 
 <pre><code class="language-yaml">name: ComplianceStatusEnum
-description: Compliance status for regulatory frameworks
+description: Compliance status for regulatory frameworks. Indicates the extent to
+  which a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46). These
+  are workflow status values that may evolve as regulations are assessed or as the
+  dataset is modified.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 permissible_values:
   compliant:
     text: compliant
-    description: Dataset is compliant with the regulation
+    description: Dataset is compliant with the regulation. All requirements are met
+      and documented.
+    broad_mappings:
+    - dcterms:conformsTo
   partially_compliant:
     text: partially_compliant
-    description: Dataset is partially compliant, with known limitations
+    description: Dataset is partially compliant, with known limitations or gaps in
+      compliance. Some but not all requirements are met.
+    broad_mappings:
+    - dcterms:conformsTo
   not_compliant:
     text: not_compliant
-    description: Dataset does not comply with the regulation
+    description: Dataset does not comply with the regulation. Significant requirements
+      are not met.
   not_applicable:
     text: not_applicable
-    description: Regulation does not apply to this dataset
+    description: Regulation does not apply to this dataset based on scope, jurisdiction,
+      or subject matter.
   under_review:
     text: under_review
-    description: Compliance status is currently under review
+    description: Compliance status is currently under review or assessment. Final
+      determination has not been made.
 
 </code></pre>
 

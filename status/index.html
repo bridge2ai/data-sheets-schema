@@ -339,7 +339,7 @@
 
 
 <h1 id="slot-status">Slot: status</h1>
-<p>URI: <a href="http://purl.org/ontology/bibo/status">bibo:status</a>
+<p>URI: <a href="http://purl.org/dc/terms/type">dcterms:type</a>
 Alias: status</p>
 <!-- no inheritance hierarchy -->
 
@@ -354,11 +354,6 @@ Alias: status</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DataSubset/">DataSubset</a></td>
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
@@ -366,6 +361,11 @@ Alias: status</p>
 <tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -395,7 +395,7 @@ Alias: status</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>bibo:status</td>
+<td>dcterms:type</td>
 </tr>
 <tr>
 <td>native</td>
@@ -409,7 +409,7 @@ Alias: status</p>
 <pre><code class="language-yaml">name: status
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: bibo:status
+slot_uri: dcterms:type
 alias: status
 domain_of:
 - Information

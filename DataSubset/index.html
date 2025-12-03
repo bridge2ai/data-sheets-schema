@@ -1562,7 +1562,6 @@ attributes:
     name: dialect
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: csvw:dialect
     alias: dialect
     owner: DataSubset
     domain_of:
@@ -1618,7 +1617,6 @@ attributes:
     description: The media type of the data. This should be a MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
-    - frictionless:mediatype
     - schema:encodingFormat
     rank: 1000
     slot_uri: dcat:mediaType
@@ -1630,8 +1628,6 @@ attributes:
   path:
     name: path
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    close_mappings:
-    - frictionless:path
     rank: 1000
     slot_uri: schema:contentUrl
     alias: path
@@ -2248,7 +2244,7 @@ attributes:
     name: created_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:createdBy
+    slot_uri: dcterms:creator
     alias: created_by
     owner: DataSubset
     domain_of:
@@ -2258,7 +2254,7 @@ attributes:
     name: created_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:createdOn
+    slot_uri: dcterms:created
     alias: created_on
     owner: DataSubset
     domain_of:
@@ -2268,10 +2264,8 @@ attributes:
     name: doi
     description: digital object identifier
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - dcterms:identifier
     rank: 1000
-    slot_uri: bibo:doi
+    slot_uri: dcterms:identifier
     alias: doi
     owner: DataSubset
     domain_of:
@@ -2286,8 +2280,6 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:url
-    close_mappings:
-    - frictionless:path
     rank: 1000
     slot_uri: dcat:downloadURL
     alias: download_url
@@ -2333,7 +2325,7 @@ attributes:
     name: last_updated_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:lastUpdatedOn
+    slot_uri: dcterms:modified
     alias: last_updated_on
     owner: DataSubset
     domain_of:
@@ -2353,10 +2345,8 @@ attributes:
   modified_by:
     name: modified_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - pav:lastUpdateBy
     rank: 1000
-    slot_uri: oslc:modifiedBy
+    slot_uri: dcterms:contributor
     alias: modified_by
     owner: DataSubset
     domain_of:
@@ -2386,7 +2376,7 @@ attributes:
     name: status
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: bibo:status
+    slot_uri: dcterms:type
     alias: status
     owner: DataSubset
     domain_of:
@@ -2407,7 +2397,7 @@ attributes:
     name: version
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:version
+    slot_uri: dcterms:hasVersion
     alias: version
     owner: DataSubset
     domain_of:
@@ -2418,7 +2408,7 @@ attributes:
     name: was_derived_from
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
-    - pav:derivedFrom
+    - dcterms:source
     rank: 1000
     slot_uri: prov:wasDerivedFrom
     alias: was_derived_from

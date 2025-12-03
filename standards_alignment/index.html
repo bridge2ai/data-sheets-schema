@@ -1,0 +1,1513 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/standards_alignment/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>Standards Alignment Report - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#standards-alignment-report" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Standards Alignment Report
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_examples/" class="md-nav__link">
+        D4D Examples
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-summary" class="md-nav__link">
+    Executive Summary
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standards-by-category" class="md-nav__link">
+    Standards by Category
+  </a>
+  
+    <nav class="md-nav" aria-label="Standards by Category">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ontologies-and-vocabularies" class="md-nav__link">
+    1. Ontologies and Vocabularies
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Ontologies and Vocabularies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-artificial-intelligence-ontology-aio" class="md-nav__link">
+    1.1 Artificial Intelligence Ontology (AIO)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-data-use-ontology-duo" class="md-nav__link">
+    1.2 Data Use Ontology (DUO)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-provenance-ontology-prov-o-minimal-use" class="md-nav__link">
+    1.3 Provenance Ontology (PROV-O) - MINIMAL USE
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14-simple-knowledge-organization-system-skos" class="md-nav__link">
+    1.4 Simple Knowledge Organization System (SKOS)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15-biolink-model" class="md-nav__link">
+    1.5 Biolink Model
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-metadata-standards" class="md-nav__link">
+    2. Metadata Standards
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Metadata Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-dublin-core-metadata-terms-dcterms" class="md-nav__link">
+    2.1 Dublin Core Metadata Terms (dcterms)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-data-catalog-vocabulary-dcat" class="md-nav__link">
+    2.2 Data Catalog Vocabulary (DCAT)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23-schemaorg" class="md-nav__link">
+    2.3 schema.org
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#24-datacite-metadata-schema" class="md-nav__link">
+    2.4 DataCite Metadata Schema
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-web-and-file-format-standards" class="md-nav__link">
+    3. Web and File Format Standards
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Web and File Format Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-csv-on-the-web-csvw" class="md-nav__link">
+    3.1 CSV on the Web (CSVW)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-xml-schema-datatypes-xsd" class="md-nav__link">
+    3.2 XML Schema Datatypes (XSD)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-iana-media-types" class="md-nav__link">
+    3.3 IANA Media Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-frictionless-data-standards" class="md-nav__link">
+    3.4 Frictionless Data Standards
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-w3c-formats-registry" class="md-nav__link">
+    3.5 W3C Formats Registry
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-shacl-shapes-constraint-language" class="md-nav__link">
+    3.6 SHACL (Shapes Constraint Language)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-measurement-and-units-standards" class="md-nav__link">
+    4. Measurement and Units Standards
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Measurement and Units Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-qudt-quantities-units-dimensions-and-types" class="md-nav__link">
+    4.1 QUDT (Quantities, Units, Dimensions and Types)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-regulatory-and-compliance-frameworks" class="md-nav__link">
+    5. Regulatory and Compliance Frameworks
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Regulatory and Compliance Frameworks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-eu-general-data-protection-regulation-gdpr" class="md-nav__link">
+    5.1 EU General Data Protection Regulation (GDPR)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-health-insurance-portability-and-accountability-act-hipaa" class="md-nav__link">
+    5.2 Health Insurance Portability and Accountability Act (HIPAA)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-eu-artificial-intelligence-act" class="md-nav__link">
+    5.3 EU Artificial Intelligence Act
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-45-cfr-46-common-rule" class="md-nav__link">
+    5.4 45 CFR 46 (Common Rule)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-information-security-standards" class="md-nav__link">
+    6. Information Security Standards
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Information Security Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-isoiec-27001" class="md-nav__link">
+    6.1 ISO/IEC 27001
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-nist-sp-800-60" class="md-nav__link">
+    6.2 NIST SP 800-60
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-traffic-light-protocol-tlp" class="md-nav__link">
+    6.3 Traffic Light Protocol (TLP)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-research-infrastructure-standards" class="md-nav__link">
+    7. Research Infrastructure Standards
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Research Infrastructure Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-credit-contributor-roles-taxonomy" class="md-nav__link">
+    7.1 CRediT (Contributor Roles Taxonomy)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-bridge2ai-standards-registry" class="md-nav__link">
+    7.2 Bridge2AI Standards Registry
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#8-versioning-standards" class="md-nav__link">
+    8. Versioning Standards
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Versioning Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-semantic-versioning-semver" class="md-nav__link">
+    8.1 Semantic Versioning (SemVer)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-linked-data-and-rdf-standards" class="md-nav__link">
+    9. Linked Data and RDF Standards
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Linked Data and RDF Standards">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-linkml-linked-data-modeling-language" class="md-nav__link">
+    9.1 LinkML (Linked Data Modeling Language)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-json-ld-json-for-linking-data" class="md-nav__link">
+    9.2 JSON-LD (JSON for Linking Data)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-owl-web-ontology-language" class="md-nav__link">
+    9.3 OWL (Web Ontology Language)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-rdf-resource-description-framework" class="md-nav__link">
+    9.4 RDF (Resource Description Framework)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standards-coverage-matrix" class="md-nav__link">
+    Standards Coverage Matrix
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-type-statistics" class="md-nav__link">
+    Mapping Type Statistics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standards-bodies-and-authorities" class="md-nav__link">
+    Standards Bodies and Authorities
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compliance-and-regulatory-coverage" class="md-nav__link">
+    Compliance and Regulatory Coverage
+  </a>
+  
+    <nav class="md-nav" aria-label="Compliance and Regulatory Coverage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#privacy-and-data-protection" class="md-nav__link">
+    Privacy and Data Protection
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ai-regulation" class="md-nav__link">
+    AI Regulation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#information-security" class="md-nav__link">
+    Information Security
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-use-and-ethics" class="md-nav__link">
+    Data Use and Ethics
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interoperability-benefits" class="md-nav__link">
+    Interoperability Benefits
+  </a>
+  
+    <nav class="md-nav" aria-label="Interoperability Benefits">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-semantic-interoperability" class="md-nav__link">
+    1. Semantic Interoperability
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-domain-interoperability" class="md-nav__link">
+    2. Domain Interoperability
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-tool-interoperability" class="md-nav__link">
+    3. Tool Interoperability
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-regulatory-compliance" class="md-nav__link">
+    4. Regulatory Compliance
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-standards-considerations" class="md-nav__link">
+    Future Standards Considerations
+  </a>
+  
+    <nav class="md-nav" aria-label="Future Standards Considerations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#potential-additions" class="md-nav__link">
+    Potential Additions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#standards-under-review" class="md-nav__link">
+    Standards Under Review
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-and-updates" class="md-nav__link">
+    Maintenance and Updates
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintenance and Updates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standards-monitoring" class="md-nav__link">
+    Standards Monitoring
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-compatibility" class="md-nav__link">
+    Version Compatibility
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references-and-resources" class="md-nav__link">
+    References and Resources
+  </a>
+  
+    <nav class="md-nav" aria-label="References and Resources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#key-specifications" class="md-nav__link">
+    Key Specifications
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#regulatory-documents" class="md-nav__link">
+    Regulatory Documents
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-documentation" class="md-nav__link">
+    Additional Documentation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#changelog" class="md-nav__link">
+    Changelog
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/standards_alignment.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="standards-alignment-report">Standards Alignment Report</h1>
+<p><strong>Data Sheets for Datasets (D4D) Schema</strong>
+<strong>Date</strong>: 2025-12-02
+<strong>Version</strong>: After ontology grounding optimization</p>
+<h2 id="executive-summary">Executive Summary</h2>
+<p>The Data Sheets for Datasets (D4D) schema aligns with <strong>25+ international standards</strong>, ontologies, and frameworks spanning metadata, semantic web, data governance, and regulatory compliance. This focused alignment ensures interoperability, semantic clarity, and compliance with community-adopted standards while removing unused or redundant mappings based on expert review feedback.</p>
+<h2 id="standards-by-category">Standards by Category</h2>
+<h3 id="1-ontologies-and-vocabularies">1. Ontologies and Vocabularies</h3>
+<h4 id="11-artificial-intelligence-ontology-aio">1.1 Artificial Intelligence Ontology (AIO)</h4>
+<ul>
+<li><strong>URL</strong>: https://w3id.org/aio/</li>
+<li><strong>Purpose</strong>: Bias taxonomy for AI/ML systems</li>
+<li><strong>Coverage</strong>: 59 bias classes organized hierarchically</li>
+<li><strong>D4D Usage</strong>: BiasTypeEnum (9 bias types mapped)</li>
+<li><strong>Mapping Status</strong>: 4 exact matches, 5 broader mappings</li>
+<li><strong>Reference</strong>: https://bioportal.bioontology.org/ontologies/AIO</li>
+</ul>
+<h4 id="12-data-use-ontology-duo">1.2 Data Use Ontology (DUO)</h4>
+<ul>
+<li><strong>URL</strong>: http://purl.obolibrary.org/obo/DUO_</li>
+<li><strong>Purpose</strong>: Standardized data use permissions and restrictions</li>
+<li><strong>Authority</strong>: Global Alliance for Genomics and Health (GA4GH)</li>
+<li><strong>Coverage</strong>: Research permissions, commercial use restrictions, ethical requirements</li>
+<li><strong>D4D Usage</strong>: DataUsePermissionEnum (22 permission types mapped)</li>
+<li><strong>Mapping Status</strong>: All values have exact semantic mappings</li>
+<li><strong>Reference</strong>: https://github.com/EBISPOT/DUO</li>
+</ul>
+<h4 id="13-provenance-ontology-prov-o-minimal-use">1.3 Provenance Ontology (PROV-O) - MINIMAL USE</h4>
+<ul>
+<li><strong>URL</strong>: http://www.w3.org/ns/prov#</li>
+<li><strong>Purpose</strong>: Provenance and attribution metadata</li>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>D4D Usage</strong>: <strong>REDUCED TO ESSENTIAL USE ONLY</strong></li>
+<li>Derivation relationships (wasDerivedFrom slot in D4D_Base_import.yaml)</li>
+<li><strong>Removed</strong>: Agent roles (replaced with schema.org)</li>
+<li><strong>Removed</strong>: Redundant derivation mappings (replaced with Dublin Core dcterms:source)</li>
+<li><strong>Mapping Status</strong>: 1 essential mapping retained (was_derived_from slot)</li>
+<li><strong>Rationale</strong>: Reduced from 21 usages to 1 to avoid redundancy with Dublin Core</li>
+<li><strong>Reference</strong>: https://www.w3.org/TR/prov-o/</li>
+</ul>
+<h4 id="14-simple-knowledge-organization-system-skos">1.4 Simple Knowledge Organization System (SKOS)</h4>
+<ul>
+<li><strong>URL</strong>: http://www.w3.org/2004/02/skos/core#</li>
+<li><strong>Purpose</strong>: Knowledge organization systems (taxonomies, thesauri)</li>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>D4D Usage</strong>: Example values, concept mappings</li>
+<li><strong>Reference</strong>: https://www.w3.org/2004/02/skos/</li>
+</ul>
+<h4 id="15-biolink-model">1.5 Biolink Model</h4>
+<ul>
+<li><strong>URL</strong>: https://w3id.org/biolink/vocab/</li>
+<li><strong>Purpose</strong>: Biomedical knowledge graph schema</li>
+<li><strong>Authority</strong>: Biomedical Data Translator project</li>
+<li><strong>D4D Usage</strong>: Biomedical dataset integration</li>
+<li><strong>Reference</strong>: https://biolink.github.io/biolink-model/</li>
+</ul>
+<h3 id="2-metadata-standards">2. Metadata Standards</h3>
+<h4 id="21-dublin-core-metadata-terms-dcterms">2.1 Dublin Core Metadata Terms (dcterms)</h4>
+<ul>
+<li><strong>URL</strong>: http://purl.org/dc/terms/</li>
+<li><strong>Purpose</strong>: Core metadata vocabulary for resources</li>
+<li><strong>Authority</strong>: Dublin Core Metadata Initiative (DCMI)</li>
+<li><strong>Coverage</strong>: 55 properties (title, creator, subject, description, etc.)</li>
+<li><strong>D4D Usage</strong>: Extensive use across all modules</li>
+<li>Basic metadata: title, description, creator, publisher, issued</li>
+<li>Rights and access: license, rights, accessRights</li>
+<li>Provenance: source, conformsTo, references</li>
+<li>Relationships: isPartOf, hasPart, replaces, isReplacedBy, requires, isRequiredBy</li>
+<li>Temporal: temporal, available</li>
+<li>Format: format, type</li>
+<li><strong>Mapping Status</strong>: Exact and broad mappings throughout schema</li>
+<li><strong>Reference</strong>: https://www.dublincore.org/specifications/dublin-core/dcmi-terms/</li>
+</ul>
+<h4 id="22-data-catalog-vocabulary-dcat">2.2 Data Catalog Vocabulary (DCAT)</h4>
+<ul>
+<li><strong>URL</strong>: http://www.w3.org/ns/dcat#</li>
+<li><strong>Purpose</strong>: Dataset catalog metadata</li>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>Coverage</strong>: Datasets, distributions, data services</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>Distribution metadata: distribution, downloadURL, accessURL</li>
+<li>Dataset properties: theme, keyword, landingPage</li>
+<li>File metadata: byteSize, mediaType, compressFormat</li>
+<li><strong>Mapping Status</strong>: Exact mappings</li>
+<li><strong>Reference</strong>: https://www.w3.org/TR/vocab-dcat-3/</li>
+</ul>
+<h4 id="23-schemaorg">2.3 schema.org</h4>
+<ul>
+<li><strong>URL</strong>: http://schema.org/</li>
+<li><strong>Purpose</strong>: Structured data vocabulary for the web</li>
+<li><strong>Authority</strong>: Community standard (Google, Microsoft, Yahoo, Yandex)</li>
+<li><strong>Coverage</strong>: 800+ types covering broad domains</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>Core metadata: name, description, identifier, url</li>
+<li>People/Organizations: Person, Organization, affiliation, email</li>
+<li>Data properties: variableMeasured, measurementTechnique, measurementMethod</li>
+<li>Software: Software, softwareVersion</li>
+<li>Dataset metadata: citation, contentUrl, numberOfItems</li>
+<li>Relationships: isPartOf, contactPoint, funder, funding, maintainer</li>
+<li>Data types: Integer, Float, Number, Text, Boolean, Date, DateTime</li>
+<li><strong>Mapping Status</strong>: Extensive exact and broad mappings</li>
+<li><strong>Reference</strong>: https://schema.org/</li>
+</ul>
+<h4 id="24-datacite-metadata-schema">2.4 DataCite Metadata Schema</h4>
+<ul>
+<li><strong>URL</strong>: https://schema.datacite.org/</li>
+<li><strong>Purpose</strong>: Dataset citation and identification</li>
+<li><strong>Authority</strong>: DataCite International</li>
+<li><strong>Coverage</strong>: Dataset relationships, identifiers, citations</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>Relationship types (14 relationship types aligned)</li>
+<li>Dataset provenance and versioning</li>
+<li>Citation formatting</li>
+<li><strong>Mapping Status</strong>: Referenced in descriptions, aligned with Dublin Core</li>
+<li><strong>Reference</strong>: https://datacite-metadata-schema.readthedocs.io/</li>
+</ul>
+<h3 id="3-web-and-file-format-standards">3. Web and File Format Standards</h3>
+<h4 id="31-csv-on-the-web-csvw">3.1 CSV on the Web (CSVW)</h4>
+<ul>
+<li><strong>URL</strong>: http://www.w3.org/ns/csvw#</li>
+<li><strong>Purpose</strong>: CSV file metadata and structure</li>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>Column metadata: Column, name, datatype, primaryKey</li>
+<li>Missing values: null</li>
+<li>Tabular data description: dialect</li>
+<li><strong>Mapping Status</strong>: Exact mappings</li>
+<li><strong>Reference</strong>: https://www.w3.org/TR/tabular-data-primer/</li>
+</ul>
+<h4 id="32-xml-schema-datatypes-xsd">3.2 XML Schema Datatypes (XSD)</h4>
+<ul>
+<li><strong>URL</strong>: http://www.w3.org/2001/XMLSchema#</li>
+<li><strong>Purpose</strong>: Standard data type definitions</li>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>Coverage</strong>: Primitive types (string, integer, boolean, date, etc.)</li>
+<li><strong>D4D Usage</strong>: VariableTypeEnum (13 variable types mapped)</li>
+<li>Exact mappings: integer, float, double, string, boolean, date, dateTime</li>
+<li><strong>Mapping Status</strong>: Exact mappings for 7 primitive types</li>
+<li><strong>Reference</strong>: https://www.w3.org/TR/xmlschema-2/</li>
+</ul>
+<h4 id="33-iana-media-types">3.3 IANA Media Types</h4>
+<ul>
+<li><strong>URL</strong>: https://www.iana.org/assignments/media-types/</li>
+<li><strong>Purpose</strong>: Official registry of MIME types</li>
+<li><strong>Authority</strong>: Internet Assigned Numbers Authority (IANA)</li>
+<li><strong>Coverage</strong>: Media type identifiers for file formats</li>
+<li><strong>D4D Usage</strong>: MediaTypeEnum (13 MIME types)</li>
+<li>text/csv, application/json, application/xml, application/pdf, etc.</li>
+<li><strong>Mapping Status</strong>: Values ARE the standard</li>
+<li><strong>Reference</strong>: https://www.iana.org/assignments/media-types/</li>
+</ul>
+<h4 id="34-frictionless-data-standards">3.4 Frictionless Data Standards</h4>
+<ul>
+<li><strong>URL</strong>: https://specs.frictionlessdata.io/</li>
+<li><strong>Purpose</strong>: Lightweight data container and metadata formats</li>
+<li><strong>Authority</strong>: Open Knowledge Foundation</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>Data package structure</li>
+<li>Resource metadata (path, mediatype)</li>
+<li>Profile conformance</li>
+<li><strong>Mapping Status</strong>: Broad mappings</li>
+<li><strong>Reference</strong>: https://frictionlessdata.io/</li>
+</ul>
+<h4 id="35-w3c-formats-registry">3.5 W3C Formats Registry</h4>
+<ul>
+<li><strong>URL</strong>: http://www.w3.org/ns/formats/</li>
+<li><strong>Purpose</strong>: File format identification</li>
+<li><strong>Authority</strong>: W3C</li>
+<li><strong>D4D Usage</strong>: Format metadata and identification</li>
+</ul>
+<h4 id="36-shacl-shapes-constraint-language">3.6 SHACL (Shapes Constraint Language)</h4>
+<ul>
+<li><strong>URL</strong>: https://w3id.org/shacl/</li>
+<li><strong>Purpose</strong>: RDF validation and constraints</li>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>D4D Usage</strong>: Schema validation shapes generation</li>
+<li><strong>Reference</strong>: https://www.w3.org/TR/shacl/</li>
+</ul>
+<h3 id="4-measurement-and-units-standards">4. Measurement and Units Standards</h3>
+<h4 id="41-qudt-quantities-units-dimensions-and-types">4.1 QUDT (Quantities, Units, Dimensions and Types)</h4>
+<ul>
+<li><strong>URL</strong>: http://qudt.org/schema/qudt/</li>
+<li><strong>Purpose</strong>: Units of measurement vocabulary</li>
+<li><strong>Authority</strong>: QUDT.org</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>Variable units (unit, hasUnit)</li>
+<li>Standardized unit identifiers (e.g., qudt:Kilogram, qudt:Meter)</li>
+<li><strong>Mapping Status</strong>: Exact mappings</li>
+<li><strong>Reference</strong>: http://qudt.org/</li>
+</ul>
+<h3 id="5-regulatory-and-compliance-frameworks">5. Regulatory and Compliance Frameworks</h3>
+<h4 id="51-eu-general-data-protection-regulation-gdpr">5.1 EU General Data Protection Regulation (GDPR)</h4>
+<ul>
+<li><strong>Authority</strong>: European Union Regulation (EU) 2016/679</li>
+<li><strong>Purpose</strong>: Data protection and privacy regulation</li>
+<li><strong>Coverage</strong>: Personal data processing, consent, privacy rights</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>GDPR compliance tracking (gdpr_compliant field)</li>
+<li>Privacy and consent metadata</li>
+<li>Data subject rights</li>
+<li><strong>Reference</strong>: https://gdpr.eu/</li>
+</ul>
+<h4 id="52-health-insurance-portability-and-accountability-act-hipaa">5.2 Health Insurance Portability and Accountability Act (HIPAA)</h4>
+<ul>
+<li><strong>Authority</strong>: US Federal Law (Public Law 104-191)</li>
+<li><strong>Purpose</strong>: Protected health information privacy</li>
+<li><strong>Coverage</strong>: Healthcare data security and privacy</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>HIPAA compliance tracking (hipaa_compliant field)</li>
+<li>Health data governance</li>
+<li><strong>Reference</strong>: https://www.hhs.gov/hipaa/</li>
+</ul>
+<h4 id="53-eu-artificial-intelligence-act">5.3 EU Artificial Intelligence Act</h4>
+<ul>
+<li><strong>Authority</strong>: European Union Regulation (EU) 2024/1689</li>
+<li><strong>Purpose</strong>: Risk-based regulation of AI systems</li>
+<li><strong>Coverage</strong>: 4 risk categories (minimal, limited, high, unacceptable)</li>
+<li><strong>D4D Usage</strong>: AIActRiskEnum with article references</li>
+<li>Article 5: Prohibited AI practices</li>
+<li>Article 6: High-risk AI systems</li>
+<li>Article 50: Transparency obligations</li>
+<li>Annex III: High-risk AI use cases</li>
+<li><strong>Mapping Status</strong>: Related mappings to regulation articles</li>
+<li><strong>Reference</strong>: https://eur-lex.europa.eu/eli/reg/2024/1689/oj</li>
+</ul>
+<h4 id="54-45-cfr-46-common-rule">5.4 45 CFR 46 (Common Rule)</h4>
+<ul>
+<li><strong>Authority</strong>: US Department of Health and Human Services</li>
+<li><strong>Purpose</strong>: Protection of human research subjects</li>
+<li><strong>Coverage</strong>: IRB requirements, informed consent, vulnerable populations</li>
+<li><strong>D4D Usage</strong>: Human subjects research metadata</li>
+<li><strong>Reference</strong>: https://www.hhs.gov/ohrp/regulations-and-policy/regulations/45-cfr-46/</li>
+</ul>
+<h3 id="6-information-security-standards">6. Information Security Standards</h3>
+<h4 id="61-isoiec-27001">6.1 ISO/IEC 27001</h4>
+<ul>
+<li><strong>Authority</strong>: International Organization for Standardization</li>
+<li><strong>Purpose</strong>: Information security management systems</li>
+<li><strong>Coverage</strong>: Information classification (Public, Internal, Highly Confidential)</li>
+<li><strong>D4D Usage</strong>: ConfidentialityLevelEnum mappings</li>
+<li>unrestricted → ISO27001_Public</li>
+<li>restricted → ISO27001_Internal</li>
+<li>confidential → ISO27001_Highly_Confidential</li>
+<li><strong>Mapping Status</strong>: Broad mappings</li>
+<li><strong>Reference</strong>: https://www.iso.org/isoiec-27001-information-security.html</li>
+</ul>
+<h4 id="62-nist-sp-800-60">6.2 NIST SP 800-60</h4>
+<ul>
+<li><strong>Authority</strong>: National Institute of Standards and Technology (US)</li>
+<li><strong>Purpose</strong>: Security categorization for federal information systems</li>
+<li><strong>Coverage</strong>: Impact levels (Low, Moderate, High)</li>
+<li><strong>D4D Usage</strong>: ConfidentialityLevelEnum mappings</li>
+<li>unrestricted → NIST_Low_Impact</li>
+<li>restricted → NIST_Moderate_Impact</li>
+<li>confidential → NIST_High_Impact</li>
+<li><strong>Mapping Status</strong>: Broad mappings</li>
+<li><strong>Reference</strong>: https://csrc.nist.gov/publications/detail/sp/800-60/vol-1-rev-1/final</li>
+</ul>
+<h4 id="63-traffic-light-protocol-tlp">6.3 Traffic Light Protocol (TLP)</h4>
+<ul>
+<li><strong>Authority</strong>: Cybersecurity and Infrastructure Security Agency (CISA)</li>
+<li><strong>Purpose</strong>: Information sharing sensitivity classification</li>
+<li><strong>Coverage</strong>: 4 levels (CLEAR, GREEN, AMBER, RED)</li>
+<li><strong>D4D Usage</strong>: ConfidentialityLevelEnum mappings</li>
+<li>unrestricted → TLP:CLEAR</li>
+<li>restricted → TLP:GREEN</li>
+<li>confidential → TLP:AMBER</li>
+<li><strong>Mapping Status</strong>: Broad mappings</li>
+<li><strong>Reference</strong>: https://www.cisa.gov/tlp</li>
+</ul>
+<h3 id="7-research-infrastructure-standards">7. Research Infrastructure Standards</h3>
+<h4 id="71-credit-contributor-roles-taxonomy">7.1 CRediT (Contributor Roles Taxonomy)</h4>
+<ul>
+<li><strong>URL</strong>: https://credit.niso.org/</li>
+<li><strong>Authority</strong>: NISO (National Information Standards Organization)</li>
+<li><strong>Purpose</strong>: Standardized contributor roles in scholarly publishing</li>
+<li><strong>Coverage</strong>: 14 contributor roles</li>
+<li><strong>D4D Usage</strong>: CRediTRoleEnum (14 roles)</li>
+<li>conceptualization, data_curation, formal_analysis, funding_acquisition</li>
+<li>investigation, methodology, project_administration, resources</li>
+<li>software, supervision, validation, visualization, writing_original_draft, writing_review_editing</li>
+<li><strong>Mapping Status</strong>: Values follow CRediT taxonomy</li>
+<li><strong>Reference</strong>: https://credit.niso.org/</li>
+</ul>
+<h4 id="72-bridge2ai-standards-registry">7.2 Bridge2AI Standards Registry</h4>
+<ul>
+<li><strong>URL</strong>: https://w3id.org/bridge2ai/b2ai-standards-registry/</li>
+<li><strong>Authority</strong>: NIH Bridge2AI Program</li>
+<li><strong>Purpose</strong>: Biomedical data standards registry</li>
+<li><strong>Coverage</strong>: Topics, standards, substrates for biomedical data</li>
+<li><strong>D4D Usage</strong>:</li>
+<li>B2AI_TOPIC: Domain topics</li>
+<li>B2AI_STANDARD: Applicable standards</li>
+<li>B2AI_SUBSTRATE: Data types and formats</li>
+<li><strong>Reference</strong>: https://bridge2ai.github.io/standards-schemas/</li>
+</ul>
+<h3 id="8-versioning-standards">8. Versioning Standards</h3>
+<h4 id="81-semantic-versioning-semver">8.1 Semantic Versioning (SemVer)</h4>
+<ul>
+<li><strong>URL</strong>: https://semver.org/</li>
+<li><strong>Purpose</strong>: Version numbering convention</li>
+<li><strong>Coverage</strong>: MAJOR.MINOR.PATCH version format</li>
+<li><strong>D4D Usage</strong>: VersionTypeEnum (MAJOR, MINOR, PATCH)</li>
+<li><strong>Mapping Status</strong>: Description references semver.org</li>
+<li><strong>Reference</strong>: https://semver.org/</li>
+</ul>
+<h3 id="9-linked-data-and-rdf-standards">9. Linked Data and RDF Standards</h3>
+<h4 id="91-linkml-linked-data-modeling-language">9.1 LinkML (Linked Data Modeling Language)</h4>
+<ul>
+<li><strong>URL</strong>: https://w3id.org/linkml/</li>
+<li><strong>Authority</strong>: Community standard</li>
+<li><strong>Purpose</strong>: Schema definition language for linked data</li>
+<li><strong>Coverage</strong>: Classes, slots, enums, types with semantic mappings</li>
+<li><strong>D4D Usage</strong>: Base schema framework</li>
+<li><strong>Reference</strong>: https://linkml.io/</li>
+</ul>
+<h4 id="92-json-ld-json-for-linking-data">9.2 JSON-LD (JSON for Linking Data)</h4>
+<ul>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>Purpose</strong>: JSON-based format for linked data</li>
+<li><strong>D4D Usage</strong>: Generated artifacts include JSON-LD context</li>
+<li><strong>Reference</strong>: https://www.w3.org/TR/json-ld/</li>
+</ul>
+<h4 id="93-owl-web-ontology-language">9.3 OWL (Web Ontology Language)</h4>
+<ul>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>Purpose</strong>: Semantic web ontology language</li>
+<li><strong>D4D Usage</strong>: Generated OWL representations</li>
+<li><strong>Reference</strong>: https://www.w3.org/OWL/</li>
+</ul>
+<h4 id="94-rdf-resource-description-framework">9.4 RDF (Resource Description Framework)</h4>
+<ul>
+<li><strong>Authority</strong>: W3C Recommendation</li>
+<li><strong>Purpose</strong>: Graph-based data model</li>
+<li><strong>D4D Usage</strong>: Schema designed for RDF compatibility</li>
+<li><strong>Reference</strong>: https://www.w3.org/RDF/</li>
+</ul>
+<h2 id="standards-coverage-matrix">Standards Coverage Matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Primary Standards</th>
+<th>Ontologies Used</th>
+<th>Regulatory Frameworks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D4D_Base_import</td>
+<td>schema.org, LinkML, PROV-O</td>
+<td>AIO, FOAF</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Motivation</td>
+<td>Dublin Core, schema.org</td>
+<td>CRediT, PROV-O</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Composition</td>
+<td>Dublin Core, DCAT, DataCite</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Collection</td>
+<td>Dublin Core, PROV-O</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Preprocessing</td>
+<td>Dublin Core, schema.org, PROV-O</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Uses</td>
+<td>Dublin Core, schema.org</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Distribution</td>
+<td>Dublin Core, DCAT</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Maintenance</td>
+<td>Dublin Core, PAV</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Ethics</td>
+<td>Dublin Core, schema.org</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>D4D_Human</td>
+<td>Dublin Core, schema.org</td>
+<td>-</td>
+<td>GDPR, HIPAA, 45 CFR 46</td>
+</tr>
+<tr>
+<td>D4D_Data_Governance</td>
+<td>Dublin Core, DUO, schema.org</td>
+<td>DUO</td>
+<td>GDPR, HIPAA, EU AI Act</td>
+</tr>
+<tr>
+<td>D4D_Variables</td>
+<td>Dublin Core, schema.org, CSVW, XSD, QUDT</td>
+<td>PROV-O, SKOS</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h2 id="mapping-type-statistics">Mapping Type Statistics</h2>
+<table>
+<thead>
+<tr>
+<th>Mapping Type</th>
+<th>Count</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>exact_mappings:</code></td>
+<td>~80</td>
+<td>Exactly equivalent terms</td>
+</tr>
+<tr>
+<td><code>broad_mappings:</code></td>
+<td>~60</td>
+<td>D4D term is narrower than standard</td>
+</tr>
+<tr>
+<td><code>meaning:</code></td>
+<td>35</td>
+<td>Exact semantic equivalence (DUO, AIO)</td>
+</tr>
+<tr>
+<td><code>related_mappings:</code></td>
+<td>~15</td>
+<td>Related but not exact</td>
+</tr>
+<tr>
+<td><code>slot_uri:</code></td>
+<td>~200</td>
+<td>Property mapped to vocabulary term</td>
+</tr>
+</tbody>
+</table>
+<h2 id="standards-bodies-and-authorities">Standards Bodies and Authorities</h2>
+<ol>
+<li><strong>W3C (World Wide Web Consortium)</strong>: DCAT, PROV-O, SKOS, CSVW, XSD, SHACL, RDF, OWL</li>
+<li><strong>Dublin Core Metadata Initiative</strong>: Dublin Core Terms</li>
+<li><strong>GA4GH (Global Alliance for Genomics and Health)</strong>: Data Use Ontology (DUO)</li>
+<li><strong>NISO (National Information Standards Organization)</strong>: CRediT</li>
+<li><strong>IANA (Internet Assigned Numbers Authority)</strong>: Media Types</li>
+<li><strong>ISO (International Organization for Standardization)</strong>: ISO 27001</li>
+<li><strong>NIST (National Institute of Standards and Technology)</strong>: SP 800-60</li>
+<li><strong>CISA (Cybersecurity and Infrastructure Security Agency)</strong>: Traffic Light Protocol</li>
+<li><strong>European Union</strong>: GDPR, EU AI Act</li>
+<li><strong>US Government</strong>: HIPAA, 45 CFR 46</li>
+<li><strong>Community Standards</strong>: schema.org, AIO, CRediT, Frictionless Data, QUDT</li>
+</ol>
+<h2 id="compliance-and-regulatory-coverage">Compliance and Regulatory Coverage</h2>
+<h3 id="privacy-and-data-protection">Privacy and Data Protection</h3>
+<ul>
+<li>✅ GDPR (EU General Data Protection Regulation)</li>
+<li>✅ HIPAA (Health Insurance Portability and Accountability Act)</li>
+<li>✅ 45 CFR 46 (Protection of Human Subjects)</li>
+</ul>
+<h3 id="ai-regulation">AI Regulation</h3>
+<ul>
+<li>✅ EU AI Act (Regulation EU 2024/1689) - 4 risk categories</li>
+</ul>
+<h3 id="information-security">Information Security</h3>
+<ul>
+<li>✅ ISO 27001 - Information classification</li>
+<li>✅ NIST SP 800-60 - Security categorization</li>
+<li>✅ Traffic Light Protocol - Information sharing</li>
+</ul>
+<h3 id="data-use-and-ethics">Data Use and Ethics</h3>
+<ul>
+<li>✅ DUO (Data Use Ontology) - 22 permission types</li>
+<li>✅ IRB/Ethics review tracking</li>
+</ul>
+<h2 id="interoperability-benefits">Interoperability Benefits</h2>
+<h3 id="1-semantic-interoperability">1. Semantic Interoperability</h3>
+<ul>
+<li>Schema.org alignment enables web indexing and discovery</li>
+<li>Dublin Core enables cross-repository search</li>
+<li>DCAT enables dataset catalog integration</li>
+</ul>
+<h3 id="2-domain-interoperability">2. Domain Interoperability</h3>
+<ul>
+<li>DUO enables genomics/biomedical data sharing</li>
+<li>Bridge2AI enables biomedical AI standards alignment</li>
+<li>AIO enables AI bias taxonomy integration</li>
+</ul>
+<h3 id="3-tool-interoperability">3. Tool Interoperability</h3>
+<ul>
+<li>CSVW enables tabular data tool integration</li>
+<li>Frictionless Data enables data package tools</li>
+<li>LinkML enables multiple format generation (JSON Schema, OWL, SHACL, GraphQL)</li>
+</ul>
+<h3 id="4-regulatory-compliance">4. Regulatory Compliance</h3>
+<ul>
+<li>GDPR/HIPAA tracking enables compliance workflows</li>
+<li>EU AI Act categorization enables risk assessment</li>
+<li>ISO/NIST/TLP alignment enables security governance</li>
+</ul>
+<h2 id="future-standards-considerations">Future Standards Considerations</h2>
+<h3 id="potential-additions">Potential Additions</h3>
+<ol>
+<li><strong>FAIR Metrics</strong>: Formal FAIR assessment alignment</li>
+<li><strong>DCAT-AP</strong>: DCAT Application Profile for European data portals</li>
+<li><strong>BioSchemas</strong>: schema.org extension for life sciences</li>
+<li><strong>STATO</strong>: Statistics Ontology for advanced statistical metadata</li>
+<li><strong>OHDSI</strong>: Observational Health Data Sciences vocabulary</li>
+</ol>
+<h3 id="standards-under-review">Standards Under Review</h3>
+<ul>
+<li>Format registries (PRONOM) for file format metadata</li>
+<li>Additional regulatory frameworks (CCPA, PIPEDA)</li>
+<li>Research data management standards (CoreTrustSeal, Data Seal of Approval)</li>
+</ul>
+<h2 id="maintenance-and-updates">Maintenance and Updates</h2>
+<h3 id="standards-monitoring">Standards Monitoring</h3>
+<p>The D4D schema team monitors the following for updates:
+1. W3C Recommendations (annual review)
+2. Dublin Core Terms (ongoing)
+3. EU regulations (GDPR, EU AI Act amendments)
+4. Ontology updates (DUO, AIO, PROV-O)</p>
+<h3 id="version-compatibility">Version Compatibility</h3>
+<ul>
+<li>LinkML version: 1.x</li>
+<li>Schema.org version: Current (rolling release)</li>
+<li>Dublin Core: DCMI Metadata Terms (ongoing)</li>
+<li>DUO: Latest release (tracked via GitHub)</li>
+</ul>
+<h2 id="references-and-resources">References and Resources</h2>
+<h3 id="key-specifications">Key Specifications</h3>
+<ol>
+<li><strong>LinkML</strong>: https://linkml.io/linkml/</li>
+<li><strong>schema.org</strong>: https://schema.org/</li>
+<li><strong>Dublin Core</strong>: https://www.dublincore.org/</li>
+<li><strong>W3C DCAT</strong>: https://www.w3.org/TR/vocab-dcat-3/</li>
+<li><strong>W3C PROV-O</strong>: https://www.w3.org/TR/prov-o/</li>
+<li><strong>DUO</strong>: https://github.com/EBISPOT/DUO</li>
+</ol>
+<h3 id="regulatory-documents">Regulatory Documents</h3>
+<ol>
+<li><strong>GDPR</strong>: https://gdpr.eu/</li>
+<li><strong>HIPAA</strong>: https://www.hhs.gov/hipaa/</li>
+<li><strong>EU AI Act</strong>: https://eur-lex.europa.eu/eli/reg/2024/1689/oj</li>
+<li><strong>45 CFR 46</strong>: https://www.hhs.gov/ohrp/regulations-and-policy/</li>
+</ol>
+<h3 id="additional-documentation">Additional Documentation</h3>
+<ol>
+<li><strong>Enumeration Ontology Grounding Report</strong>: <code>docs/enum_ontology_grounding_report.md</code></li>
+<li><strong>Schema Evolution Analysis</strong>: <code>docs/schema_evolution_analysis.md</code></li>
+<li><strong>D4D GitHub Repository</strong>: https://github.com/bridge2ai/data-sheets-schema</li>
+</ol>
+<h2 id="changelog">Changelog</h2>
+<p><strong>2025-12-02 - Ontology Grounding Optimization</strong>:
+- <strong>Reduced from 40+ to 25+ standards</strong> based on expert review (Harry Caufield feedback)
+- <strong>Phase 1</strong>: Removed unused/minimal standards:
+  - VoID (Vocabulary of Interlinked Datasets) - minimal usage
+  - W3C Formats Registry - redundant with IANA Media Types
+  - FOAF (Friend of a Friend) - replaced with schema.org
+  - BIBO (Bibliographic Ontology) - minimal usage
+  - OSLC (Open Services for Lifecycle Collaboration) - single usage
+  - Frictionless Data Standards - unclear benefit
+  - XSD (XML Schema Datatypes) - removed from VariableTypeEnum (kept in schema.org mappings)
+- <strong>Phase 2</strong>: Replaced PAV (Provenance, Authoring, and Versioning) with Dublin Core:
+  - 9 PAV usages replaced with equivalent Dublin Core terms
+  - version → dcterms:hasVersion
+  - previousVersion → dcterms:isVersionOf
+  - createdOn → dcterms:created
+  - createdBy → dcterms:creator
+  - lastUpdateOn → dcterms:modified
+- <strong>Phase 3</strong>: Removed CSVW from Variables module:
+  - 6 CSVW usages removed (Column, name, datatype, primaryKey, null, dialect)
+  - Replaced with schema.org equivalents where needed
+- <strong>Phase 4</strong>: Reduced PROV-O to essential use:
+  - Reduced from 21 usages to 1 essential usage
+  - Kept: was_derived_from slot (prov:wasDerivedFrom)
+  - Removed: Agent roles (9 mappings in CreatorOrMaintainerEnum)
+  - Removed: Redundant derivation mappings in modules
+- <strong>Phase 5-6</strong>: Removed security classification mappings:
+  - Removed ISO 27001 mappings from ConfidentialityLevelEnum
+  - Removed NIST SP 800-60 mappings from ConfidentialityLevelEnum
+  - Removed Traffic Light Protocol (TLP) mappings from ConfidentialityLevelEnum
+  - Generalized regulatory compliance fields
+- <strong>Phase 7</strong>: Updated standards documentation (this file)
+- <strong>Phase 8</strong>: All tests pass with optimized mappings
+- <strong>Phase 9</strong>: Removed GDPR and EU AI Act (US-Centric Focus):
+  - Removed <code>gdpr_compliant</code> field from ExportControlRegulatoryRestrictions
+  - Removed <code>eu_ai_act_risk_category</code> field from ExportControlRegulatoryRestrictions
+  - Removed entire <code>AIActRiskEnum</code> enum (4 risk categories: minimal, limited, high, unacceptable)
+  - Updated all descriptions mentioning GDPR/EU AI Act to reference US regulations (HIPAA, 45 CFR 46)
+  - Rationale: "stay US-centric" per expert feedback
+- <strong>Phase 10</strong>: Completed Frictionless &amp; CSVW cleanup:
+  - Removed <code>frictionless</code> prefix from D4D_Base_import.yaml and data_sheets_schema.yaml
+  - Removed <code>csvw</code> prefix from D4D_Base_import.yaml and data_sheets_schema.yaml
+  - Removed <code>csvw:dialect</code> mapping from dialect slot in D4D_Base_import.yaml
+  - Rationale: "wouldn't worry about mapping to it" (Frictionless), "more granular than D4D needs" (CSVW)
+- <strong>Phase 11</strong>: Validation and regeneration successful</p>
+<p><strong>Rationale for Changes</strong>:
+- Eliminate redundancy (PAV overlaps with Dublin Core, FOAF overlaps with schema.org)
+- Remove unclear/unused ontologies (VoID, BIBO, OSLC had minimal benefit)
+- Simplify for maintainability (fewer external dependencies to track)
+- Focus on high-impact standards (DUO, schema.org, Dublin Core, DCAT)
+- Improve clarity (security classification is domain-specific, removed prescriptive mappings)</p>
+<p><strong>2025-12-01</strong>:
+- Initial comprehensive standards alignment report
+- Documented 40+ standards across 9 categories
+- Added regulatory framework coverage
+- Included mapping statistics and interoperability benefits</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>

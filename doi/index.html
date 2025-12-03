@@ -340,7 +340,7 @@
 
 <h1 id="slot-doi">Slot: doi</h1>
 <p><em>digital object identifier</em></p>
-<p>URI: <a href="http://purl.org/ontology/bibo/doi">bibo:doi</a>
+<p>URI: <a href="http://purl.org/dc/terms/identifier">dcterms:identifier</a>
 Alias: doi</p>
 <!-- no inheritance hierarchy -->
 
@@ -355,11 +355,6 @@ Alias: doi</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DataSubset/">DataSubset</a></td>
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
@@ -367,6 +362,11 @@ Alias: doi</p>
 <tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -401,15 +401,11 @@ Alias: doi</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>bibo:doi</td>
+<td>dcterms:identifier</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:doi</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>dcterms:identifier</td>
 </tr>
 </tbody>
 </table>
@@ -419,10 +415,8 @@ Alias: doi</p>
 <pre><code class="language-yaml">name: doi
 description: digital object identifier
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- dcterms:identifier
 rank: 1000
-slot_uri: bibo:doi
+slot_uri: dcterms:identifier
 alias: doi
 domain_of:
 - Information

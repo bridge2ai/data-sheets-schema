@@ -339,7 +339,7 @@
 
 
 <h1 id="slot-modified_by">Slot: modified_by</h1>
-<p>URI: <a href="http://open-services.net/ns/core#modifiedBy">oslc:modifiedBy</a>
+<p>URI: <a href="http://purl.org/dc/terms/contributor">dcterms:contributor</a>
 Alias: modified_by</p>
 <!-- no inheritance hierarchy -->
 
@@ -354,11 +354,6 @@ Alias: modified_by</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DataSubset/">DataSubset</a></td>
 <td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
@@ -366,6 +361,11 @@ Alias: modified_by</p>
 <tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
@@ -395,15 +395,11 @@ Alias: modified_by</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>oslc:modifiedBy</td>
+<td>dcterms:contributor</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:modified_by</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>pav:lastUpdateBy</td>
 </tr>
 </tbody>
 </table>
@@ -412,10 +408,8 @@ Alias: modified_by</p>
 
 <pre><code class="language-yaml">name: modified_by
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- pav:lastUpdateBy
 rank: 1000
-slot_uri: oslc:modifiedBy
+slot_uri: dcterms:contributor
 alias: modified_by
 domain_of:
 - Information

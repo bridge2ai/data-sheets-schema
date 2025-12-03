@@ -6,11 +6,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://bridge2ai.github.io/data-sheets-schema/AIActRiskEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/AddressingGap/</loc>
          <lastmod>2025-12-03</lastmod>
          <changefreq>daily</changefreq>
@@ -971,11 +966,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://bridge2ai.github.io/data-sheets-schema/eu_ai_act_risk_category/</loc>
-         <lastmod>2025-12-03</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/examples/</loc>
          <lastmod>2025-12-03</lastmod>
          <changefreq>daily</changefreq>
@@ -1012,11 +1002,6 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/future_use_impacts/</loc>
-         <lastmod>2025-12-03</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://bridge2ai.github.io/data-sheets-schema/gdpr_compliant/</loc>
          <lastmod>2025-12-03</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -1492,6 +1477,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/special_protections/</loc>
+         <lastmod>2025-12-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/standards_alignment/</loc>
          <lastmod>2025-12-03</lastmod>
          <changefreq>daily</changefreq>
     </url>

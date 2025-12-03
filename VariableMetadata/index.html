@@ -454,7 +454,7 @@
 </tr>
 <tr>
 <td>exact</td>
-<td>csvw:Column, schema:PropertyValue</td>
+<td>schema:PropertyValue</td>
 </tr>
 </tbody>
 </table>
@@ -468,7 +468,6 @@ description: Metadata describing an individual variable, field, or column in a d
   attributes.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 exact_mappings:
-- csvw:Column
 - schema:PropertyValue
 is_a: DatasetProperty
 attributes:
@@ -479,7 +478,6 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     exact_mappings:
     - schema:name
-    - csvw:name
     rank: 1000
     slot_uri: schema:name
     domain_of:
@@ -492,7 +490,6 @@ attributes:
       date, categorical). Use standard type names when possible.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     exact_mappings:
-    - csvw:datatype
     - schema:DataType
     rank: 1000
     slot_uri: schema:DataType
@@ -518,7 +515,6 @@ attributes:
       "NA", "-999", "null", "". Multiple codes may be specified.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: csvw:null
     domain_of:
     - VariableMetadata
     range: string
@@ -570,7 +566,7 @@ attributes:
       key for records in the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: csvw:primaryKey
+    slot_uri: schema:identifier
     domain_of:
     - VariableMetadata
     range: boolean
@@ -607,7 +603,6 @@ attributes:
       variables, if applicable.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: prov:wasDerivedFrom
     domain_of:
     - VariableMetadata
     range: string
@@ -633,7 +628,6 @@ description: Metadata describing an individual variable, field, or column in a d
   attributes.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 exact_mappings:
-- csvw:Column
 - schema:PropertyValue
 is_a: DatasetProperty
 attributes:
@@ -644,7 +638,6 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     exact_mappings:
     - schema:name
-    - csvw:name
     rank: 1000
     slot_uri: schema:name
     alias: variable_name
@@ -659,7 +652,6 @@ attributes:
       date, categorical). Use standard type names when possible.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     exact_mappings:
-    - csvw:datatype
     - schema:DataType
     rank: 1000
     slot_uri: schema:DataType
@@ -689,7 +681,6 @@ attributes:
       "NA", "-999", "null", "". Multiple codes may be specified.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: csvw:null
     alias: missing_value_code
     owner: VariableMetadata
     domain_of:
@@ -751,7 +742,7 @@ attributes:
       key for records in the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: csvw:primaryKey
+    slot_uri: schema:identifier
     alias: is_identifier
     owner: VariableMetadata
     domain_of:
@@ -796,7 +787,6 @@ attributes:
       variables, if applicable.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: prov:wasDerivedFrom
     alias: derivation
     owner: VariableMetadata
     domain_of:
