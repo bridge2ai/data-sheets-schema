@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-02T22:01:34
+# Generation date: 2025-12-03T21:12:14
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -642,7 +642,7 @@ class DatasetCollection(Information):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetCollection
 
     id: Union[str, DatasetCollectionId] = None
-    resources: Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]] = empty_list()
+    resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]] = empty_dict()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -650,9 +650,7 @@ class DatasetCollection(Information):
         if not isinstance(self.id, DatasetCollectionId):
             self.id = DatasetCollectionId(self.id)
 
-        if not isinstance(self.resources, list):
-            self.resources = [self.resources] if self.resources is not None else []
-        self.resources = [v if isinstance(v, DatasetId) else DatasetId(v) for v in self.resources]
+        self._normalize_inlined_as_list(slot_name="resources", slot_type=Dataset, key_name="id", keyed=True)
 
         super().__post_init__(**kwargs)
 
@@ -733,6 +731,7 @@ class Dataset(Information):
     citation: Optional[str] = None
     parent_datasets: Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]] = empty_list()
     related_datasets: Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]] = empty_list()
+    resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]] = empty_dict()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -965,6 +964,8 @@ class Dataset(Information):
         if not isinstance(self.related_datasets, list):
             self.related_datasets = [self.related_datasets] if self.related_datasets is not None else []
         self.related_datasets = [v if isinstance(v, DatasetRelationshipId) else DatasetRelationshipId(v) for v in self.related_datasets]
+
+        self._normalize_inlined_as_list(slot_name="resources", slot_type=Dataset, key_name="id", keyed=True)
 
         super().__post_init__(**kwargs)
 
@@ -3772,7 +3773,7 @@ slots.doi = Slot(uri=DCTERMS.identifier, name="doi", curie=DCTERMS.curie('identi
                    pattern=re.compile(r'10\.\d{4,}\/.+'))
 
 slots.datasetCollection__resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="datasetCollection__resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__resources, domain=None, range=Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__resources, domain=None, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
 
 slots.dataset__purposes = Slot(uri=DATA_SHEETS_SCHEMA.purposes, name="dataset__purposes", curie=DATA_SHEETS_SCHEMA.curie('purposes'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__purposes, domain=None, range=Optional[Union[Union[str, PurposeId], list[Union[str, PurposeId]]]])
@@ -3932,6 +3933,9 @@ slots.dataset__parent_datasets = Slot(uri=SCHEMA.isPartOf, name="dataset__parent
 
 slots.dataset__related_datasets = Slot(uri=DATA_SHEETS_SCHEMA.related_datasets, name="dataset__related_datasets", curie=DATA_SHEETS_SCHEMA.curie('related_datasets'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__related_datasets, domain=None, range=Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]])
+
+slots.dataset__resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="dataset__resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__resources, domain=None, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
 
 slots.dataSubset__is_data_split = Slot(uri=DATA_SHEETS_SCHEMA.is_data_split, name="dataSubset__is_data_split", curie=DATA_SHEETS_SCHEMA.curie('is_data_split'),
                    model_uri=DATA_SHEETS_SCHEMA.dataSubset__is_data_split, domain=None, range=Optional[Union[bool, Bool]])

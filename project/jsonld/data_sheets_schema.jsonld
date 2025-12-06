@@ -1879,6 +1879,8 @@
       ],
       "range": "Dataset",
       "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
       "@type": "SlotDefinition"
     },
     {
@@ -2590,6 +2592,22 @@
       ],
       "range": "DatasetRelationship",
       "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__resources",
+      "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
+      "alias": "resources",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "Dataset",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
       "@type": "SlotDefinition"
     },
     {
@@ -4980,6 +4998,7 @@
           "name": "resources",
           "range": "Dataset",
           "multivalued": true,
+          "inlined_as_list": true,
           "@type": "SlotDefinition"
         }
       ],
@@ -5089,7 +5108,8 @@
         "dataset__is_tabular",
         "dataset__citation",
         "dataset__parent_datasets",
-        "dataset__related_datasets"
+        "dataset__related_datasets",
+        "dataset__resources"
       ],
       "slot_usage": {},
       "attributes": [
@@ -5424,6 +5444,14 @@
           "range": "DatasetRelationship",
           "multivalued": true,
           "@type": "SlotDefinition"
+        },
+        {
+          "name": "resources",
+          "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+          "range": "Dataset",
+          "multivalued": true,
+          "inlined_as_list": true,
+          "@type": "SlotDefinition"
         }
       ],
       "class_uri": "http://www.w3.org/ns/dcat#Distribution",
@@ -5521,6 +5549,7 @@
         "dataset__citation",
         "dataset__parent_datasets",
         "dataset__related_datasets",
+        "dataset__resources",
         "dataSubset__is_data_split",
         "dataSubset__is_subpopulation"
       ],
@@ -7958,9 +7987,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-12-02T21:59:18",
-  "source_file_size": 11753,
-  "generation_date": "2025-12-02T22:01:33",
+  "source_file_date": "2025-12-03T21:12:01",
+  "source_file_size": 12045,
+  "generation_date": "2025-12-03T21:12:13",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

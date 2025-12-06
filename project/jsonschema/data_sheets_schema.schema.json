@@ -1235,6 +1235,16 @@
                         "null"
                     ]
                 },
+                "resources": {
+                    "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+                    "items": {
+                        "$ref": "#/$defs/Dataset"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "retention_limit": {
                     "type": [
                         "string",
@@ -1923,6 +1933,16 @@
                         "null"
                     ]
                 },
+                "resources": {
+                    "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+                    "items": {
+                        "$ref": "#/$defs/Dataset"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "retention_limit": {
                     "type": [
                         "string",
@@ -2179,7 +2199,7 @@
                 },
                 "resources": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Dataset"
                     },
                     "type": [
                         "array",
@@ -5474,7 +5494,7 @@
         },
         "resources": {
             "items": {
-                "type": "string"
+                "$ref": "#/$defs/Dataset"
             },
             "type": [
                 "array",

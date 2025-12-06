@@ -76,6 +76,7 @@ classes:
       resources:
         range: Dataset
         multivalued: true
+        inlined_as_list: true
 
   # TODO: consider how to distinguish between metadata only vs
   # instances where data file is present (and we can extract metadata)
@@ -304,6 +305,13 @@ classes:
           is version of). Use DatasetRelationship class to specify relationship types.
         range: DatasetRelationship
         multivalued: true
+      resources:
+        description: >-
+          Sub-resources or component datasets that are part of this dataset.
+          Allows datasets to contain nested resource structures.
+        range: Dataset
+        multivalued: true
+        inlined_as_list: true
 
   DataSubset:
     description: >-
