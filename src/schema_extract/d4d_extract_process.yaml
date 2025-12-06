@@ -1,0 +1,663 @@
+id: https://w3id.org/bridge2ai/d4d-extract-process
+name: d4d_extract_process
+description: >-
+  Schema for tracking D4D (Datasheets for Datasets) extraction processes.
+  Captures comprehensive provenance and reproducibility metadata for AI-assisted
+  metadata extraction from dataset documentation.
+
+  The primary entity is D4DExtraction, which represents a single extraction run
+  producing D4D YAML output from input documents. It tracks all parameters needed
+  for reproducibility: model settings, schema version, prompts, and input hashes.
+
+prefixes:
+  linkml: https://w3id.org/linkml/
+  d4d_extract: https://w3id.org/bridge2ai/d4d-extract-process/
+  xsd: http://www.w3.org/2001/XMLSchema#
+  rdf: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+  rdfs: http://www.w3.org/2000/01/rdf-schema#
+  dcterms: http://purl.org/dc/terms/
+  prov: http://www.w3.org/ns/prov#
+  schema: http://schema.org/
+
+imports:
+  - linkml:types
+
+default_prefix: d4d_extract
+default_range: string
+
+# ==============================================================================
+# Slots (reusable attributes)
+# ==============================================================================
+
+slots:
+  id:
+    identifier: true
+    description: Unique identifier for this entity
+    slot_uri: schema:identifier
+
+  timestamp:
+    range: datetime
+    description: ISO 8601 timestamp of when this event occurred
+    slot_uri: prov:generatedAtTime
+
+  sha256_hash:
+    range: string
+    description: SHA-256 cryptographic hash for content verification
+    pattern: "^[a-f0-9]{64}$"
+
+  filename:
+    range: string
+    description: Name of the file
+    slot_uri: schema:name
+
+  file_path:
+    range: string
+    description: Path to the file (relative or absolute)
+
+  size_bytes:
+    range: integer
+    minimum_value: 0
+    description: Size of the file in bytes
+    slot_uri: schema:contentSize
+
+  version:
+    range: string
+    description: Version string
+    slot_uri: schema:version
+
+  description:
+    range: string
+    description: Human-readable description
+    slot_uri: dcterms:description
+
+  notes:
+    range: string
+    description: Additional notes or comments
+    multivalued: true
+
+# ==============================================================================
+# Classes
+# ==============================================================================
+
+classes:
+
+  D4DExtraction:
+    description: >-
+      Complete record of a D4D extraction process. This is the root entity
+      that captures all metadata needed to reproduce the extraction.
+
+      Tracks: input documents, schema version, LLM configuration, prompts,
+      output files, and full provenance chain.
+    tree_root: true
+    slots:
+      - id
+      - description
+      - notes
+    attributes:
+      extraction_metadata:
+        range: ExtractionMetadata
+        required: true
+        inlined: true
+        description: Core metadata about the extraction run
+      input_document:
+        range: InputDocument
+        required: true
+        inlined: true
+        description: Information about the input document(s) processed
+      datasheets_schema:
+        range: DataSheetsSchema
+        required: true
+        inlined: true
+        description: Schema used for D4D generation
+      llm_model:
+        range: LLMModel
+        required: true
+        inlined: true
+        description: LLM model configuration
+      prompts:
+        range: Prompts
+        required: true
+        inlined: true
+        description: Prompt files and their hashes
+      output:
+        range: OutputDocument
+        inlined: true
+        description: Information about the generated output
+      reproducibility:
+        range: ReproducibilitySettings
+        required: true
+        inlined: true
+        description: Settings for reproducibility verification
+      provenance:
+        range: Provenance
+        required: true
+        inlined: true
+        description: Provenance and attribution information
+      validation_results:
+        range: ValidationResults
+        inlined: true
+        description: Results from schema validation
+      comparison:
+        range: ComparisonMetrics
+        inlined: true
+        description: Comparison with other extraction methods
+
+  ExtractionMetadata:
+    description: >-
+      Core metadata about an extraction run including timing and identification.
+    attributes:
+      extraction_id:
+        range: string
+        required: true
+        description: Unique identifier for this extraction run (e.g., UUID or hash-based)
+      extraction_type:
+        range: ExtractionTypeEnum
+        required: true
+        description: Type of extraction performed
+      timestamp:
+        range: datetime
+        required: true
+        description: When the extraction started
+      completed_at:
+        range: datetime
+        description: When the extraction completed
+      processing_time_seconds:
+        range: float
+        minimum_value: 0
+        description: Total processing time in seconds
+      status:
+        range: ExtractionStatusEnum
+        required: true
+        description: Current status of the extraction
+
+  InputDocument:
+    description: >-
+      Information about the input document(s) used for D4D extraction.
+      May be a single file or concatenated from multiple sources.
+    attributes:
+      filename:
+        range: string
+        required: true
+        description: Name of the input file
+      file_path:
+        range: string
+        required: true
+        description: Path to the input file
+      size_bytes:
+        range: integer
+        minimum_value: 0
+        required: true
+        description: Size of the input file in bytes
+      sha256_hash:
+        range: string
+        required: true
+        pattern: "^[a-f0-9]{64}$"
+        description: SHA-256 hash of the input file for verification
+      project:
+        range: string
+        required: true
+        description: Project name (e.g., AI_READI, CHORUS, CM4AI, VOICE)
+      source_type:
+        range: SourceTypeEnum
+        required: true
+        description: Whether this is a single file or concatenated from multiple
+      source_files_count:
+        range: integer
+        minimum_value: 1
+        description: Number of source files (if concatenated)
+      source_files:
+        range: SourceFile
+        multivalued: true
+        inlined_as_list: true
+        description: Individual source files (if concatenated)
+      encoding:
+        range: string
+        description: File encoding (e.g., UTF-8, UTF-8-sig, latin-1)
+      content_type:
+        range: string
+        description: MIME type or content format
+
+  SourceFile:
+    description: >-
+      A single source file that was concatenated into the input document.
+    attributes:
+      filename:
+        range: string
+        required: true
+        description: Name of the source file
+      file_path:
+        range: string
+        description: Original path to the source file
+      size_bytes:
+        range: integer
+        minimum_value: 0
+        description: Size of the source file in bytes
+      sha256_hash:
+        range: string
+        pattern: "^[a-f0-9]{64}$"
+        description: SHA-256 hash of the source file
+      order:
+        range: integer
+        minimum_value: 1
+        description: Order in the concatenated output (1-based)
+
+  DataSheetsSchema:
+    description: >-
+      Information about the D4D schema used for extraction.
+      Critical for reproducibility - schema changes affect output structure.
+    attributes:
+      version:
+        range: string
+        required: true
+        description: Schema version string
+      source:
+        range: SchemaSourceEnum
+        required: true
+        description: Where the schema was loaded from
+      path:
+        range: string
+        required: true
+        description: Path or URL to the schema file
+      sha256_hash:
+        range: string
+        required: true
+        pattern: "^[a-f0-9]{64}$"
+        description: SHA-256 hash of the schema file
+      loaded_at:
+        range: datetime
+        description: When the schema was loaded
+      git_commit:
+        range: string
+        description: Git commit hash if loaded from repository
+
+  LLMModel:
+    description: >-
+      Configuration of the LLM used for extraction.
+      Temperature=0.0 is critical for deterministic output.
+    attributes:
+      provider:
+        range: LLMProviderEnum
+        required: true
+        description: LLM provider (anthropic, openai, etc.)
+      model_name:
+        range: string
+        required: true
+        description: Full model identifier (e.g., anthropic:claude-sonnet-4-5-20250929)
+      model_version:
+        range: string
+        required: true
+        description: Specific model version (date-pinned for reproducibility)
+      temperature:
+        range: float
+        required: true
+        minimum_value: 0.0
+        maximum_value: 2.0
+        description: Sampling temperature (0.0 for maximum determinism)
+      max_tokens:
+        range: integer
+        minimum_value: 1
+        description: Maximum tokens in response
+      top_p:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        description: Top-p (nucleus) sampling parameter
+      random_seed:
+        range: integer
+        description: Random seed if supported by the model
+      is_deterministic:
+        range: boolean
+        required: true
+        description: Whether settings ensure deterministic output (temperature=0)
+
+  Prompts:
+    description: >-
+      Information about the prompt files used for extraction.
+      External versioned prompts enable reproducibility tracking.
+    attributes:
+      prompts_directory:
+        range: string
+        required: true
+        description: Directory containing prompt files
+      system_prompt:
+        range: PromptFile
+        required: true
+        inlined: true
+        description: System prompt configuration
+      user_prompt:
+        range: PromptFile
+        required: true
+        inlined: true
+        description: User prompt template configuration
+      additional_prompts:
+        range: PromptFile
+        multivalued: true
+        inlined_as_list: true
+        description: Any additional prompt files used
+
+  PromptFile:
+    description: >-
+      A single prompt file with its content hash for verification.
+    attributes:
+      filename:
+        range: string
+        required: true
+        description: Name of the prompt file
+      file_path:
+        range: string
+        required: true
+        description: Path to the prompt file
+      sha256_hash:
+        range: string
+        required: true
+        pattern: "^[a-f0-9]{64}$"
+        description: SHA-256 hash of the prompt file
+      prompt_type:
+        range: PromptTypeEnum
+        required: true
+        description: Type of prompt (system, user, etc.)
+      version:
+        range: string
+        description: Version of the prompt if versioned separately
+
+  OutputDocument:
+    description: >-
+      Information about the generated D4D YAML output.
+    attributes:
+      filename:
+        range: string
+        required: true
+        description: Name of the output file
+      file_path:
+        range: string
+        required: true
+        description: Path to the output file
+      size_bytes:
+        range: integer
+        minimum_value: 0
+        description: Size of the output file in bytes
+      sha256_hash:
+        range: string
+        pattern: "^[a-f0-9]{64}$"
+        description: SHA-256 hash of the output file
+      format:
+        range: OutputFormatEnum
+        required: true
+        description: Output format (YAML, JSON, etc.)
+      metadata_file:
+        range: string
+        description: Path to the accompanying metadata file
+      fields_populated:
+        range: integer
+        minimum_value: 0
+        description: Number of D4D fields populated in output
+      total_fields:
+        range: integer
+        minimum_value: 0
+        description: Total number of D4D fields in schema
+
+  ReproducibilitySettings:
+    description: >-
+      Settings and commands needed to reproduce the extraction.
+    attributes:
+      command:
+        range: string
+        required: true
+        description: Command to reproduce this extraction
+      environment_variables:
+        range: EnvironmentVariable
+        multivalued: true
+        inlined_as_list: true
+        description: Required environment variables
+      deterministic_settings:
+        range: boolean
+        required: true
+        description: Whether all settings ensure determinism
+      verification_command:
+        range: string
+        description: Command to verify reproduction (e.g., diff command)
+      platform:
+        range: string
+        description: Platform where extraction was performed
+      python_version:
+        range: string
+        description: Python version used
+
+  EnvironmentVariable:
+    description: >-
+      An environment variable required for reproduction.
+    attributes:
+      name:
+        range: string
+        required: true
+        description: Variable name (e.g., ANTHROPIC_API_KEY)
+      required:
+        range: boolean
+        required: true
+        description: Whether this variable is required
+      description:
+        range: string
+        description: Description of the variable's purpose
+      sensitive:
+        range: boolean
+        description: Whether the value should not be logged
+
+  Provenance:
+    description: >-
+      Provenance and attribution information for the extraction.
+    attributes:
+      extraction_performed_by:
+        range: string
+        required: true
+        description: Script or tool that performed the extraction
+      extraction_requested_at:
+        range: datetime
+        description: When extraction was requested
+      extraction_requested_by:
+        range: string
+        description: User or system that requested extraction
+      git_commit:
+        range: string
+        description: Git commit hash of the extraction code
+      git_branch:
+        range: string
+        description: Git branch of the extraction code
+      git_repository:
+        range: string
+        description: Git repository URL
+      notes:
+        range: string
+        description: Additional provenance notes
+      parent_extraction_id:
+        range: string
+        description: ID of parent extraction (if this is a re-run or derivative)
+
+  ValidationResults:
+    description: >-
+      Results from validating the generated D4D YAML against the schema.
+    attributes:
+      validated:
+        range: boolean
+        required: true
+        description: Whether validation was performed
+      validation_passed:
+        range: boolean
+        description: Whether validation passed
+      validation_command:
+        range: string
+        description: Command used for validation
+      validation_timestamp:
+        range: datetime
+        description: When validation was performed
+      error_count:
+        range: integer
+        minimum_value: 0
+        description: Number of validation errors
+      warning_count:
+        range: integer
+        minimum_value: 0
+        description: Number of validation warnings
+      errors:
+        range: ValidationError
+        multivalued: true
+        inlined_as_list: true
+        description: List of validation errors
+      warnings:
+        range: ValidationError
+        multivalued: true
+        inlined_as_list: true
+        description: List of validation warnings
+
+  ValidationError:
+    description: >-
+      A single validation error or warning.
+    attributes:
+      field:
+        range: string
+        description: Field that caused the error
+      message:
+        range: string
+        required: true
+        description: Error message
+      severity:
+        range: ValidationSeverityEnum
+        required: true
+        description: Severity level
+
+  ComparisonMetrics:
+    description: >-
+      Metrics comparing this extraction to other methods or previous runs.
+    attributes:
+      compared_to:
+        range: string
+        description: What this extraction was compared to
+      comparison_type:
+        range: ComparisonTypeEnum
+        description: Type of comparison performed
+      identical_to_previous:
+        range: boolean
+        description: Whether output is identical to previous run (reproducibility check)
+      fields_difference_count:
+        range: integer
+        minimum_value: 0
+        description: Number of fields that differ from comparison target
+      completeness_score:
+        range: float
+        minimum_value: 0.0
+        maximum_value: 1.0
+        description: Fraction of schema fields populated
+      comparison_notes:
+        range: string
+        description: Notes on comparison results
+
+# ==============================================================================
+# Enums
+# ==============================================================================
+
+enums:
+
+  ExtractionTypeEnum:
+    description: Type of D4D extraction process
+    permissible_values:
+      individual_gpt5:
+        description: Extraction from individual files using GPT-5
+      individual_claude:
+        description: Extraction from individual files using Claude
+      concatenated_gpt5:
+        description: Synthesis from concatenated files using GPT-5
+      concatenated_claude_api:
+        description: Synthesis from concatenated files using Claude API (temperature=0)
+      concatenated_claude_assistant:
+        description: Direct synthesis by Claude Code assistant
+      manual_curation:
+        description: Manual curation by human expert
+
+  ExtractionStatusEnum:
+    description: Status of the extraction process
+    permissible_values:
+      pending:
+        description: Extraction not yet started
+      in_progress:
+        description: Extraction currently running
+      completed:
+        description: Extraction completed successfully
+      failed:
+        description: Extraction failed with errors
+      validation_failed:
+        description: Extraction completed but validation failed
+
+  SourceTypeEnum:
+    description: Type of input source
+    permissible_values:
+      single_file:
+        description: Single input file
+      concatenated:
+        description: Multiple files concatenated together
+      url:
+        description: Content fetched from URL
+
+  SchemaSourceEnum:
+    description: Source of the D4D schema
+    permissible_values:
+      local:
+        description: Local file in repository
+      github:
+        description: Fetched from GitHub
+      url:
+        description: Fetched from arbitrary URL
+
+  LLMProviderEnum:
+    description: LLM service provider
+    permissible_values:
+      anthropic:
+        description: Anthropic (Claude models)
+      openai:
+        description: OpenAI (GPT models)
+      google:
+        description: Google (Gemini models)
+      local:
+        description: Local/self-hosted model
+
+  PromptTypeEnum:
+    description: Type of prompt file
+    permissible_values:
+      system:
+        description: System prompt defining behavior
+      user:
+        description: User prompt template with placeholders
+      assistant:
+        description: Assistant prompt or few-shot examples
+      context:
+        description: Additional context or instructions
+
+  OutputFormatEnum:
+    description: Output file format
+    permissible_values:
+      yaml:
+        description: YAML format
+      json:
+        description: JSON format
+      jsonld:
+        description: JSON-LD format
+
+  ValidationSeverityEnum:
+    description: Severity of validation issues
+    permissible_values:
+      error:
+        description: Error - must be fixed
+      warning:
+        description: Warning - should be reviewed
+      info:
+        description: Informational note
+
+  ComparisonTypeEnum:
+    description: Type of comparison performed
+    permissible_values:
+      reproducibility:
+        description: Comparison with previous run of same method
+      cross_method:
+        description: Comparison between different extraction methods
+      cross_model:
+        description: Comparison between different LLM models
+      ground_truth:
+        description: Comparison with manually curated ground truth
