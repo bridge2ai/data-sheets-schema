@@ -1,0 +1,20 @@
+---
+Prompt Name: D4D Concatenated Documents User Prompt Template
+Version: 1.0.0
+Last Updated: 2025-11-15
+Purpose: User prompt template for D4D extraction from concatenated documents
+Variables: {project_name}, {input_filename}, {content}
+---
+
+Please analyze the following concatenated document and synthesize a comprehensive D4D YAML document.
+
+This concatenated document contains multiple files related to the same dataset project.
+
+Project: {project_name}
+
+Source file: {input_filename}
+
+Concatenated content to analyze:
+{content}
+
+Generate a single, comprehensive D4D YAML document that synthesizes all the information from the concatenated files above. Merge complementary information and create the most complete dataset documentation possible.

@@ -2,6 +2,8 @@
 """
 D4D Agent Wrapper - Processes downloaded files and generates D4D YAML metadata
 using either OpenAI or Anthropic API.
+
+Metadata output conforms to: src/schema_extract/d4d_extract_process.yaml
 """
 import asyncio
 import json
@@ -14,6 +16,9 @@ import argparse
 import yaml
 from dotenv import load_dotenv
 
+# Add the schema_extract directory to path for metadata imports
+sys.path.insert(0, str(Path(__file__).parent.parent / "schema_extract"))
+
 # Add the aurelian src directory to path for D4D agent imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "aurelian" / "src"))
 
@@ -25,6 +30,13 @@ except ImportError as e:
     print(f"Error importing D4D agent components: {e}")
     print("Make sure you have installed the aurelian dependencies and the path is correct.")
     sys.exit(1)
+
+try:
+    from d4d_extract_metadata import D4DExtractionMetadata
+except ImportError:
+    # Fallback if import fails - metadata will not be schema-conformant
+    D4DExtractionMetadata = None
+    print("Warning: Could not import D4DExtractionMetadata. Metadata will use legacy format.")
 
 
 class D4DAgentWrapper:
@@ -141,13 +153,30 @@ Generate only valid YAML output without any additional commentary. Ensure all re
         """Process a single file with the D4D agent."""
         try:
             print(f"    📄 Processing: {file_path.name}")
-            
+
+            # Initialize metadata tracker if available
+            metadata = None
+            if D4DExtractionMetadata is not None:
+                metadata = D4DExtractionMetadata()
+                extraction_type = f"individual_{self.model_provider}"
+                if self.model_provider == "openai":
+                    extraction_type = "individual_gpt5"
+                elif self.model_provider == "anthropic":
+                    extraction_type = "individual_claude"
+                metadata.set_extraction_type(extraction_type)
+                metadata.set_description(f"D4D extraction from {file_path.name} for {column}")
+                metadata.set_input_document(
+                    file_path=file_path,
+                    project=column,
+                    source_type="single_file"
+                )
+
             # Read file content
             content = self.read_file_content(file_path)
-            
+
             if len(content) < 50:  # Skip very short files
                 return False, "Content too short"
-            
+
             # Prepare prompt for D4D agent
             prompt = f"""
 Please analyze the following content and extract dataset metadata following the D4D schema.
@@ -161,39 +190,85 @@ Content to analyze:
 
 Generate a complete D4D YAML document based on this content.
 """
-            
+
+            # Set model metadata if tracking
+            if metadata:
+                if self.model_provider == "openai":
+                    metadata.set_llm_model(
+                        provider="openai",
+                        model_version="gpt-5",
+                        temperature=1.0,  # Default, not deterministic
+                        max_tokens=4096
+                    )
+                else:
+                    metadata.set_llm_model(
+                        provider="anthropic",
+                        model_version="claude-3-5-sonnet-20241022",
+                        temperature=1.0,  # Default, not deterministic
+                        max_tokens=4096
+                    )
+
             # Configure D4D agent
             config = D4DConfig()
-            
+
             # Run the agent
             result = await self.d4d_agent.run(prompt, deps=config)
-            
+
             # Extract YAML from result
             yaml_content = result.output.strip()
-            
+
             # Clean up the output - remove any markdown formatting
             if yaml_content.startswith('```yaml'):
                 yaml_content = yaml_content[7:]
             if yaml_content.endswith('```'):
                 yaml_content = yaml_content[:-3]
             yaml_content = yaml_content.strip()
-            
+
             # Validate YAML
+            is_valid = True
             try:
                 yaml.safe_load(yaml_content)
             except yaml.YAMLError as e:
+                is_valid = False
+                if metadata:
+                    metadata.set_validation_results(validated=True, passed=False,
+                        errors=[{"message": str(e), "severity": "error"}])
                 return False, f"Invalid YAML generated: {e}"
-            
+
             # Save YAML file
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(yaml_content)
-            
+
+            # Save schema-conformant metadata if available
+            if metadata:
+                metadata.set_output(
+                    output_path=output_path,
+                    content=yaml_content,
+                    format="yaml"
+                )
+                metadata.set_validation_results(validated=True, passed=is_valid)
+                metadata.set_provenance(
+                    performed_by="d4d_agent_wrapper.py",
+                    notes=f"Extracted from {file_path.name} using pydantic-ai D4D agent"
+                )
+                metadata.set_reproducibility(
+                    command=f"python src/download/d4d_agent_wrapper.py -i {self.input_dir} -o {self.output_dir} --model {self.model_provider}"
+                )
+                metadata.complete(status="completed")
+
+                # Save metadata file
+                metadata_path = output_path.with_suffix('.yaml').with_stem(output_path.stem + '_metadata')
+                metadata.save(metadata_path)
+
             print(f"      ✅ Generated: {output_path.name}")
             return True, "Success"
-            
+
         except Exception as e:
             error_msg = str(e)
             print(f"      ❌ Failed: {error_msg}")
+            if metadata:
+                metadata.add_note(f"Error: {error_msg}")
+                metadata.complete(status="failed")
             return False, error_msg
     
     async def process_column(self, column_dir: Path) -> Dict:

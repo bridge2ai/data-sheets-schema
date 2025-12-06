@@ -1,0 +1,17 @@
+---
+Prompt Name: D4D User Prompt - URL Mode
+Version: 2.0.0
+Last Updated: 2025-12-03
+Purpose: User prompt template for D4D extraction from URLs (agent fetches content via tools)
+Mode: URL Mode (agent uses tools to fetch content)
+Variables: project_name, urls
+Author: Claude Code
+---
+
+Please extract D4D metadata from the following dataset documentation source(s).
+
+Project: {project_name}
+
+Documentation URL(s): {urls}
+
+Fetch the content from the provided URL(s), analyze all documentation, and generate a single comprehensive D4D YAML document that follows the schema exactly. If multiple URLs are provided, assume they all describe the same dataset and synthesize information from all sources.

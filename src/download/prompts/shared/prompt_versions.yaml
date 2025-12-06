@@ -1,0 +1,176 @@
+---
+# D4D Prompt Version Tracking
+# This file tracks versions, changes, and compatibility for all D4D prompts
+
+prompt_set_name: "D4D Unified Prompts"
+prompt_set_version: "2.0.0"
+last_updated: "2025-12-03"
+author: "Claude Code (claude-sonnet-4-5-20250929)"
+repository: "bridge2ai/data-sheets-schema"
+
+# Prompt Files
+prompts:
+  system_prompt:
+    filename: "d4d_system_prompt.txt"
+    version: "2.0.0"
+    last_updated: "2025-12-03"
+    description: "Unified system prompt combining best of Aurelian and Claude approaches"
+    changes:
+      - "Initial unified version"
+      - "Combines Aurelian's clarity with Claude's detailed extraction checklist"
+      - "Mode-agnostic (works for URL mode and content mode)"
+      - "Added explicit ID generation guidance to address validation issues"
+      - "Enhanced null value handling instructions"
+    compatible_models:
+      - "openai:gpt-5"
+      - "anthropic:claude-sonnet-4-5-20250929"
+      - "anthropic:claude-opus-20240229"
+    compatible_modes:
+      - "url"
+      - "content"
+    replaces:
+      - "aurelian/src/aurelian/agents/d4d/d4d_agent.py (inline prompt)"
+      - "src/download/prompts/d4d_concatenated_system_prompt.txt (v1.0.0)"
+
+  user_prompt_content_mode:
+    filename: "d4d_user_prompt_content_mode.txt"
+    version: "2.0.0"
+    last_updated: "2025-12-03"
+    description: "User prompt template for content mode (pre-loaded documentation)"
+    mode: "content"
+    template_variables:
+      - "project_name"
+      - "input_filename"
+      - "content"
+    replaces:
+      - "src/download/prompts/d4d_concatenated_user_prompt.txt (v1.0.0)"
+
+  user_prompt_url_mode:
+    filename: "d4d_user_prompt_url_mode.txt"
+    version: "2.0.0"
+    last_updated: "2025-12-03"
+    description: "User prompt template for URL mode (agent fetches via tools)"
+    mode: "url"
+    template_variables:
+      - "project_name"
+      - "urls"
+    changes:
+      - "Initial URL mode template"
+      - "Designed for pydantic-ai tool-based content fetching"
+
+# Schema Configuration
+schema:
+  default_source: "local"  # "local" or "github"
+  local_path: "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+  github_url: "https://raw.githubusercontent.com/bridge2ai/data-sheets-schema/main/src/data_sheets_schema/schema/data_sheets_schema.yaml"
+  notes: "Local schema is preferred for reproducibility (per user requirement)"
+
+# Model Settings
+model_settings:
+  deterministic:
+    temperature: 0.0
+    max_tokens: 16000
+    notes: "Recommended settings for reproducible D4D extraction"
+
+  exploratory:
+    temperature: 0.3
+    max_tokens: 16000
+    notes: "Optional settings for exploratory extraction (less deterministic)"
+
+# Compatibility Matrix
+compatibility:
+  approaches:
+    aurelian:
+      model: "openai:gpt-5"
+      execution_mode: "url"  # Can also use "content"
+      schema_source: "local"  # Changed from "github" per user requirement
+      deterministic: true  # New - was false in original
+      prompt_set: "shared"  # Changed from "inline"
+
+    claude_deterministic:
+      model: "anthropic:claude-sonnet-4-5-20250929"
+      execution_mode: "content"
+      schema_source: "local"
+      deterministic: true
+      prompt_set: "shared"  # Changed from "claude"
+
+    gpt5_individual:
+      model: "openai:gpt-5"
+      execution_mode: "content"
+      schema_source: "local"  # Changed from "github"
+      deterministic: true  # New - was false
+      prompt_set: "shared"  # Changed from "inline"
+
+# Validation Status
+validation:
+  testing_status: "in_progress"
+  tested_combinations:
+    - model: "openai:gpt-5"
+      prompt_set: "shared"
+      mode: "content"
+      schema_source: "local"
+      status: "pending"
+
+    - model: "anthropic:claude-sonnet-4-5-20250929"
+      prompt_set: "shared"
+      mode: "content"
+      schema_source: "local"
+      status: "pending"
+
+# Legacy Prompt Sets (Backward Compatibility)
+legacy:
+  aurelian:
+    location: "aurelian/src/aurelian/agents/d4d/d4d_agent.py"
+    version: "1.0.0"
+    status: "deprecated_but_functional"
+    migration_path: "Use shared prompts with D4DPromptLoader"
+
+  claude:
+    location: "src/download/prompts/claude/"
+    version: "1.0.0"
+    status: "deprecated_but_functional"
+    migration_path: "Use shared prompts with D4DPromptLoader"
+
+# Migration Guide
+migration:
+  from_aurelian:
+    steps:
+      - "Set schema_source='local' in D4DConfig (new default)"
+      - "Optionally set prompt_set='shared' for improved prompts"
+      - "Consider enabling deterministic=True for reproducibility"
+      - "Existing workflows continue to work unchanged"
+
+  from_claude:
+    steps:
+      - "Optionally set prompt_set='shared' for unified prompts"
+      - "No other changes needed - already using local schema and deterministic mode"
+
+# Known Issues and Solutions
+known_issues:
+  missing_id_fields:
+    description: "LLMs omit required 'id' fields in nested objects (Purpose, Task, Creator, etc.)"
+    root_cause: "Prompts lacked explicit ID generation guidance"
+    solution: "v2.0.0 system prompt includes ID generation instructions"
+    status: "addressed_in_v2"
+    validation_needed: true
+
+# Changelog
+changelog:
+  "2.0.0":
+    date: "2025-12-03"
+    changes:
+      - "Initial unified prompt set"
+      - "Combined best of Aurelian and Claude approaches"
+      - "Added ID generation guidance"
+      - "Made mode-agnostic (URL and content modes)"
+      - "Changed default schema source to local (per user requirement)"
+      - "Added deterministic mode as default recommendation"
+    breaking_changes: false
+    migration_required: false
+
+  "1.0.0":
+    date: "2025-11-15"
+    changes:
+      - "Original Aurelian inline prompts"
+      - "Original Claude external prompts"
+    notes: "Legacy versions - still functional"

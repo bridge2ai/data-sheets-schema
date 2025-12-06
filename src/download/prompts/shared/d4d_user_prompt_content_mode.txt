@@ -1,0 +1,20 @@
+---
+Prompt Name: D4D User Prompt - Content Mode
+Version: 2.0.0
+Last Updated: 2025-12-03
+Purpose: User prompt template for D4D extraction from pre-loaded content
+Mode: Content Mode (documentation is embedded in prompt)
+Variables: project_name, input_filename, content
+Author: Claude Code
+---
+
+Please analyze the following documentation and generate a comprehensive D4D YAML document.
+
+Project: {project_name}
+
+Source file: {input_filename}
+
+Documentation to analyze:
+{content}
+
+Generate a single, comprehensive D4D YAML document that extracts all available information from the documentation above. Follow the D4D schema exactly and create the most complete dataset documentation possible.
