@@ -2,6 +2,25 @@
 
 This guide provides practical examples for using the `d4d-rubric10` and `d4d-rubric20` quality evaluation agents in Claude Code.
 
+## How These Agents Work
+
+**Conversational Evaluation - No API Key Required**
+
+These agents work **directly within Claude Code conversations** - no external API calls or configuration needed:
+
+1. **You ask** the agent to evaluate D4D files (conversational prompts)
+2. **Agent reads** D4D YAML files using Read tool
+3. **Agent applies** rubric criteria and assesses quality
+4. **Agent returns** structured results with scores, evidence, recommendations
+5. **Agent saves** results to files if requested
+
+**No ANTHROPIC_API_KEY required** - you're already using Claude Code!
+
+**Reproducibility:**
+- Temperature: 0.0 (fully deterministic)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Same D4D file → Same quality score every time
+
 ## Quick Reference
 
 **Invoke agents with conversational prompts:**
@@ -9,6 +28,7 @@ This guide provides practical examples for using the `d4d-rubric10` and `d4d-rub
 - "Run rubric20 assessment on [file]"
 - "Score [file] using rubric10"
 - "Assess quality of [file] with rubric20"
+- "Evaluate all projects with both rubrics"
 
 **Agent Names:**
 - `d4d-rubric10` - 10-element hierarchical quality rubric (50 points max)
@@ -137,16 +157,25 @@ Claude: I'll evaluate all three VOICE D4D files with rubric10 and provide a comp
 
 ---
 
-### Example 4: Evaluate All Projects with Both Rubrics
+### Example 4: Evaluate All Projects with Both Rubrics (Conversational Batch)
 
 ```
-User: Evaluate all four projects (AI_READI, CHORUS, CM4AI, VOICE) using both rubric10 and rubric20
+User: Evaluate all four projects (AI_READI, CHORUS, CM4AI, VOICE) across all
+methods (curated, gpt5, claudecode_agent, claudecode_assistant) using both
+rubric10 and rubric20 and save results to data/evaluation_llm/
 
-Claude: I'll run comprehensive evaluation using both rubrics across all projects.
+Claude: I'll run comprehensive evaluation using both rubrics across all projects
+and methods. This will evaluate:
+- 4 projects × 4 methods = 16 concatenated files
+- 2 rubrics per file = 32 total evaluations
 
-[Agent evaluates 4 projects × 3 methods × 2 rubrics = 24 evaluations]
+I'll iterate through files systematically and save all results to data/evaluation_llm/
 
-✅ Complete Evaluation Finished
+[Agent reads and evaluates files sequentially using Read tool]
+[Agent generates JSON results for each evaluation]
+[Agent saves results to data/evaluation_llm/rubric10/ and data/evaluation_llm/rubric20/]
+
+✅ Complete Evaluation Finished (32 evaluations completed)
 
 **Summary by Rubric10:**
 
@@ -526,11 +555,14 @@ Run rubric10 on VOICE and export results to JSON
 
 ## Common Questions
 
+### Q: Do I need an API key to use these agents?
+**A:** **No!** These agents work conversationally within Claude Code - no API key required. You're already using Claude Code, so just ask the agent to evaluate files. External scripts (Makefile targets) are optional for CI/CD automation only.
+
 ### Q: How long does evaluation take?
-**A:** 30-60 seconds per file (LLM needs to read and assess ~100+ fields)
+**A:** 30-60 seconds per file conversationally. The agent reads the file, applies rubric criteria, and generates structured results in real-time.
 
 ### Q: Can I evaluate multiple files at once?
-**A:** Yes - the agent can evaluate multiple files sequentially and provide comparison tables
+**A:** Yes - just ask conversationally! Example: "Evaluate all VOICE files with rubric10". The agent will iterate through files sequentially and provide comparison tables.
 
 ### Q: What if my D4D file is in a different format?
 **A:** The agent handles both:
@@ -553,10 +585,18 @@ Run rubric10 on VOICE and export results to JSON
 Both are valid - rubric10 is simpler, rubric20 is more nuanced.
 
 ### Q: Can I save the evaluation results?
-**A:** Yes - results are automatically saved to:
+**A:** Yes - just ask! Example: "Save results to data/evaluation_llm/". The agent will save:
 - JSON: `data/evaluation_llm/rubric*/detailed_analysis/{PROJECT}_{METHOD}_evaluation.json`
 - Markdown: `data/evaluation_llm/rubric*/summary_report.md`
 - CSV: `data/evaluation_llm/rubric*/scores.csv`
+
+### Q: Are evaluations reproducible?
+**A:** **Yes - fully reproducible!** The agents use:
+- Temperature: 0.0 (fully deterministic)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Version-controlled rubrics: `data/rubric/rubric10.txt`, `rubric20.txt`
+
+Same D4D file → Same quality score every time, whether evaluated conversationally or via scripts.
 
 ---
 
@@ -572,25 +612,47 @@ Both are valid - rubric10 is simpler, rubric20 is more nuanced.
 
 ---
 
-## Batch Processing (Makefile)
+## Conversational Batch Evaluation
 
-For systematic evaluation of many files, use Makefile commands:
+**Primary Method: Just Ask the Agent to Evaluate Multiple Files**
+
+You don't need Makefile commands or scripts - just ask conversationally:
+
+```
+User: Evaluate all four projects (AI_READI, CHORUS, CM4AI, VOICE) across
+all methods (curated, gpt5, claudecode_agent, claudecode_assistant) using
+both rubric10 and rubric20 and save results to data/evaluation_llm/
+```
+
+The agent will:
+1. Iterate through all files systematically
+2. Evaluate each file using Read tool
+3. Generate structured JSON results
+4. Save to requested directory
+5. Provide summary comparison tables
+
+**No API key, no scripts, no configuration needed** - pure conversational workflow!
+
+---
+
+## Optional: External Automation (Makefile)
+
+**For CI/CD pipelines or external scripting only** (requires ANTHROPIC_API_KEY):
 
 ```bash
-# Evaluate all D4D files with rubric10
-make evaluate-d4d-llm-rubric10
+# OPTIONAL - External automation mode (not primary workflow)
+# Requires: export ANTHROPIC_API_KEY=sk-ant-...
 
-# Evaluate all D4D files with rubric20
-make evaluate-d4d-llm-rubric20
+# Batch evaluate via Python script
+make evaluate-d4d-llm-batch-concatenated
 
-# Evaluate with both rubrics
-make evaluate-d4d-llm-both
+# Preview what would be evaluated
+make evaluate-d4d-llm-batch-dry-run
 
 # Compare LLM vs presence-based evaluation
 make compare-evaluations
-
-# View summary reports
-make eval-llm-summary
 ```
+
+**Note:** Most users should use conversational evaluation instead. External scripts are only for automated pipelines.
 
 See `CLAUDE.md` for complete Makefile documentation.
