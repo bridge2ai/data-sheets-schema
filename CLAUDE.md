@@ -858,6 +858,31 @@ Recommendations:
 
 **Batch Evaluation (via Makefile):**
 ```bash
+# RECOMMENDED: Reproducible batch evaluation of all concatenated files
+make evaluate-d4d-llm-batch-concatenated
+# Evaluates: AI_READI, CHORUS, CM4AI, VOICE
+# Methods: curated, gpt5, claudecode_agent, claudecode_assistant
+# Time: ~25 minutes, Cost: ~$6
+
+# Dry run (preview files without evaluating)
+make evaluate-d4d-llm-batch-dry-run
+
+# Evaluate all individual D4D files (~85 files)
+make evaluate-d4d-llm-batch-individual
+# Time: ~2 hours, Cost: ~$34
+
+# Evaluate individual files for specific project/method
+make evaluate-d4d-llm-batch-individual-filtered PROJECT=VOICE
+make evaluate-d4d-llm-batch-individual-filtered METHOD=claudecode_agent
+
+# Complete evaluation (concatenated + individual)
+make evaluate-d4d-llm-batch-all
+# Time: ~2.5 hours, Cost: ~$40
+
+# ─────────────────────────────────────────────────
+# Legacy single-file evaluation targets:
+# ─────────────────────────────────────────────────
+
 # Evaluate with rubric10
 make evaluate-d4d-llm-rubric10
 
@@ -880,6 +905,14 @@ make eval-llm-summary
 # Clean results
 make clean-eval-llm
 ```
+
+**Reproducibility:**
+- Temperature: 0.0 (fully deterministic)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Same D4D file → Same quality score every time
+- Rubrics: Version-controlled in `data/rubric/`
+- Prompts: Version-controlled in `src/download/prompts/`
+- Scripts: `src/evaluation/batch_evaluate_*.sh`
 
 ### LLM Evaluation Features
 

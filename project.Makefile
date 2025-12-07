@@ -1299,3 +1299,88 @@ clean-eval-llm:
 	@echo "Cleaning LLM evaluation results..."
 	rm -rf $(EVAL_LLM_DIR)
 	@echo "✅ LLM evaluation results cleaned!"
+
+# ==================================================================================
+# LLM Evaluation - Batch Processing (Reproducible Workflows)
+# ==================================================================================
+
+# Batch evaluate all concatenated D4D files
+evaluate-d4d-llm-batch-concatenated:
+	@echo "Running batch LLM evaluation on concatenated D4D files..."
+	@echo "This will evaluate all projects (AI_READI, CHORUS, CM4AI, VOICE)"
+	@echo "across all methods (curated, gpt5, claudecode_agent, claudecode_assistant)"
+	@echo "with both rubrics (rubric10, rubric20)"
+	@echo ""
+	@if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+		echo "❌ ERROR: ANTHROPIC_API_KEY environment variable is not set"; \
+		echo ""; \
+		echo "Please set your Anthropic API key:"; \
+		echo "  export ANTHROPIC_API_KEY=sk-ant-your-key-here"; \
+		echo ""; \
+		exit 1; \
+	fi
+	./src/evaluation/batch_evaluate_concatenated.sh --output-dir $(EVAL_LLM_DIR)
+
+# Batch evaluate with dry-run (preview what would be evaluated)
+evaluate-d4d-llm-batch-dry-run:
+	@echo "Dry run: showing files that would be evaluated..."
+	./src/evaluation/batch_evaluate_concatenated.sh --dry-run
+
+# Batch evaluate all individual D4D files
+evaluate-d4d-llm-batch-individual:
+	@echo "⚠️  WARNING: This will evaluate ~85 individual D4D files"
+	@echo "   Estimated time: ~2 hours"
+	@echo "   Estimated cost: ~$$34"
+	@echo ""
+	@if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+		echo "❌ ERROR: ANTHROPIC_API_KEY environment variable is not set"; \
+		echo ""; \
+		echo "Please set your Anthropic API key:"; \
+		echo "  export ANTHROPIC_API_KEY=sk-ant-your-key-here"; \
+		echo ""; \
+		exit 1; \
+	fi
+	./src/evaluation/batch_evaluate_individual.sh --output-dir data/evaluation_llm_individual
+
+# Batch evaluate individual files (specific project or method)
+evaluate-d4d-llm-batch-individual-filtered:
+	@echo "Evaluating individual D4D files with filters..."
+	@if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+		echo "❌ ERROR: ANTHROPIC_API_KEY environment variable is not set"; \
+		exit 1; \
+	fi
+	@if [ -n "$(PROJECT)" ]; then \
+		./src/evaluation/batch_evaluate_individual.sh --project $(PROJECT) --output-dir data/evaluation_llm_individual; \
+	elif [ -n "$(METHOD)" ]; then \
+		./src/evaluation/batch_evaluate_individual.sh --method $(METHOD) --output-dir data/evaluation_llm_individual; \
+	else \
+		echo "❌ ERROR: Specify PROJECT=name or METHOD=name"; \
+		echo "Example: make evaluate-d4d-llm-batch-individual-filtered PROJECT=VOICE"; \
+		echo "Example: make evaluate-d4d-llm-batch-individual-filtered METHOD=claudecode_agent"; \
+		exit 1; \
+	fi
+
+# Complete batch evaluation (concatenated + individual)
+evaluate-d4d-llm-batch-all:
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "COMPLETE BATCH LLM EVALUATION"
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "This will run:"
+	@echo "  1. Concatenated files (~15 files, ~25 min, ~$$6)"
+	@echo "  2. Individual files (~85 files, ~2 hours, ~$$34)"
+	@echo "  Total: ~100 files, ~2.5 hours, ~$$40"
+	@echo ""
+	@if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+		echo "❌ ERROR: ANTHROPIC_API_KEY environment variable is not set"; \
+		exit 1; \
+	fi
+	@read -p "Proceed with complete evaluation? [y/N] " -n 1 -r; \
+	echo ""; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		$(MAKE) evaluate-d4d-llm-batch-concatenated && \
+		$(MAKE) evaluate-d4d-llm-batch-individual; \
+	else \
+		echo "Evaluation cancelled"; \
+		exit 1; \
+	fi

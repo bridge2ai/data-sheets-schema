@@ -438,6 +438,34 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 2. Provides comparative analysis
 3. Highlights differences in metadata quality across methods
 
+## Reproducibility
+
+**This agent provides fully reproducible evaluations:**
+- Same D4D file → Same quality score every time
+- Temperature: 0.0 (fully deterministic)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Rubric: Version-controlled in `data/rubric/rubric10.txt`
+- Prompt: Version-controlled in `src/download/prompts/rubric10_system_prompt.md`
+
+**For batch reproducible evaluation:**
+```bash
+# Evaluate all concatenated D4D files
+make evaluate-d4d-llm-batch-concatenated
+
+# Dry run (preview what would be evaluated)
+make evaluate-d4d-llm-batch-dry-run
+
+# Evaluate all individual D4D files
+make evaluate-d4d-llm-batch-individual
+```
+
+See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
+
+## Requirements
+
+- **API Key:** `ANTHROPIC_API_KEY` environment variable must be set
+- **Installation:** `poetry add anthropic` (or `pip install anthropic`)
+
 ## Notes
 
 - **Temperature Setting:** This agent uses temperature=0.0 for fully deterministic, reproducible quality assessments
