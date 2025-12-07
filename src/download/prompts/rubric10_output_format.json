@@ -1,0 +1,126 @@
+{
+  "rubric": "rubric10",
+  "version": "1.0",
+  "d4d_file": "VOICE_d4d.yaml",
+  "project": "VOICE",
+  "method": "claudecode",
+  "evaluation_timestamp": "2025-12-06T15:30:00Z",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "llm_as_judge"
+  },
+  "overall_score": {
+    "total_points": 38.5,
+    "max_points": 50,
+    "percentage": 77.0
+  },
+  "elements": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, etc.)",
+          "score": 1,
+          "evidence": "doi: https://doi.org/10.13026/249v-w155",
+          "quality_note": "DOI present and properly formatted"
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information",
+          "quality_note": "Clear, descriptive title with comprehensive 400+ character description"
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: [Bridge2AI, voice biomarker, speech, health, voice disorders, neurological disorders, mood disorders, respiratory disorders, spectrogram, MFCC, acoustic features, PhysioNet]",
+          "quality_note": "12 relevant keywords covering domain, methods, and platform"
+        },
+        {
+          "name": "Dataset Landing Page or Platform URL",
+          "score": 1,
+          "evidence": "page: https://physionet.org/content/b2ai-voice/1.1/",
+          "quality_note": "Active landing page URL on PhysioNet platform"
+        },
+        {
+          "name": "Associated Project or Program (e.g., Bridge2AI, AIM-AHEAD)",
+          "score": 1,
+          "evidence": "keywords includes 'Bridge2AI'",
+          "quality_note": "Clear association with Bridge2AI project"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "sub_elements": [
+        {
+          "name": "Access Mechanism Defined (e.g., open, restricted, registered)",
+          "score": 1,
+          "evidence": "license_and_use_terms: Bridge2AI Voice Registered Access License",
+          "quality_note": "Explicitly states registered access requirement"
+        },
+        {
+          "name": "Data Use Agreement Required?",
+          "score": 1,
+          "evidence": "Requires signing Bridge2AI Voice Registered Access Agreement",
+          "quality_note": "DUA clearly identified with specific name"
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 1,
+          "evidence": "distribution_formats.access_urls: https://physionet.org/content/b2ai-voice/1.1/",
+          "quality_note": "Direct PhysioNet download URL provided"
+        },
+        {
+          "name": "File Formats Specified",
+          "score": 1,
+          "evidence": "Dataset available in Parquet, TSV, and JSON formats",
+          "quality_note": "Multiple standard formats listed"
+        },
+        {
+          "name": "External Links to Similar or Related Datasets",
+          "score": 0,
+          "evidence": "No external_resources with related dataset links found",
+          "quality_note": "Missing links to related voice or Bridge2AI datasets"
+        }
+      ],
+      "element_score": 4,
+      "element_max": 5
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Excellent dataset identification with DOI, comprehensive description, and 12 relevant keywords",
+      "Clear access mechanisms via PhysioNet registered access with explicit DUA requirements",
+      "Well-documented ethical oversight with IRB approval and HIPAA Safe Harbor deidentification",
+      "Comprehensive version history with multiple releases (v1.0, v1.1, v2.0.0, v2.0.1) and change notes",
+      "Strong community integration via PhysioNet platform and Bridge2AI program association"
+    ],
+    "weaknesses": [
+      "Missing funding agency and grant award details in funding_and_acknowledgements section",
+      "Limited documentation of specific collection sites and institutional affiliations",
+      "No external publication DOIs or formal citations in references section",
+      "Processing code repositories not linked (openSMILE, Parselmouth pipelines)",
+      "Sampling bias and representativeness not explicitly discussed in limitations section"
+    ],
+    "recommendations": [
+      "Add funding_and_acknowledgements.funding with NIH grant details (Bridge2AI program grant)",
+      "Include collection_process.setting with specific site names (UVA, USF, etc.) and locations",
+      "Link to related publications via DOIs in references and external_resources fields",
+      "Add limitations section discussing selection bias, generalizability constraints, and population representativeness",
+      "Provide GitHub repository links for preprocessing code (openSMILE configs, Parselmouth scripts, Whisper pipelines)"
+    ]
+  },
+  "metadata": {
+    "evaluator_id": "550e8400-e29b-41d4-a716-446655440000",
+    "rubric_hash": "sha256:abc123...",
+    "d4d_file_hash": "sha256:def456..."
+  }
+}
