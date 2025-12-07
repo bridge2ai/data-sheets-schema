@@ -438,6 +438,28 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 2. Provides comparative analysis
 3. Highlights differences in metadata quality across methods
 
+## How This Agent Works
+
+**Conversational Evaluation (Primary Mode - No API Key Required)**
+
+This agent works directly within Claude Code conversations:
+
+1. **User invokes agent:** "Evaluate VOICE_d4d.yaml with rubric10"
+2. **Agent reads D4D file** using the Read tool
+3. **Agent applies rubric criteria** and generates evaluation
+4. **Agent returns JSON results** with scores, evidence, recommendations
+5. **Agent can save results** to files if requested
+
+**No external API calls needed** - you're already using Claude Code!
+
+**For batch evaluation:** Simply ask the agent to evaluate multiple files:
+```
+"Evaluate all VOICE D4D files (curated, gpt5, claudecode_agent, claudecode_assistant)
+using rubric10 and save results to data/evaluation_llm/"
+```
+
+The agent will iterate through files, evaluate each one, and save results.
+
 ## Reproducibility
 
 **This agent provides fully reproducible evaluations:**
@@ -445,26 +467,17 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 - Temperature: 0.0 (fully deterministic)
 - Model: claude-sonnet-4-5-20250929 (date-pinned)
 - Rubric: Version-controlled in `data/rubric/rubric10.txt`
-- Prompt: Version-controlled in `src/download/prompts/rubric10_system_prompt.md`
+- All within Claude Code conversation
 
-**For batch reproducible evaluation:**
+**Optional: Batch Scripts for External Automation**
+
+If you need to run evaluations outside Claude Code (CI/CD, scripting):
 ```bash
-# Evaluate all concatenated D4D files
+# Requires ANTHROPIC_API_KEY for external API calls
 make evaluate-d4d-llm-batch-concatenated
-
-# Dry run (preview what would be evaluated)
-make evaluate-d4d-llm-batch-dry-run
-
-# Evaluate all individual D4D files
-make evaluate-d4d-llm-batch-individual
 ```
 
 See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive usage examples.
-
-## Requirements
-
-- **API Key:** `ANTHROPIC_API_KEY` environment variable must be set
-- **Installation:** `poetry add anthropic` (or `pip install anthropic`)
 
 ## Notes
 

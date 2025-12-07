@@ -811,7 +811,9 @@ The repository includes LLM-as-judge evaluation agents that provide quality-base
 
 ### LLM Evaluation Agents
 
-Two specialized agents for quality assessment:
+**Conversational quality evaluation - No API key required**
+
+Two specialized agents for quality assessment that work directly within Claude Code conversations:
 
 **d4d-rubric10** (`.claude/agents/d4d-rubric10.md`):
 - Evaluates using the 10-element hierarchical rubric
@@ -827,7 +829,7 @@ Two specialized agents for quality assessment:
 
 ### Usage Examples
 
-**Interactive Evaluation (via agents):**
+**PRIMARY MODE: Conversational Evaluation (No API Key Required)**
 ```
 User: Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with d4d-rubric10
 
@@ -856,9 +858,21 @@ Recommendations:
 - Understanding quality vs presence gaps
 - Actionable improvement recommendations
 
-**Batch Evaluation (via Makefile):**
+**Batch Conversational Evaluation:**
+```
+User: Evaluate all four projects (AI_READI, CHORUS, CM4AI, VOICE) across
+all methods (curated, gpt5, claudecode_agent, claudecode_assistant) using
+both rubric10 and rubric20 and save results to data/evaluation_llm/
+```
+
+The agent will iterate through all files, evaluate each one, and save structured results.
+
+**OPTIONAL: External Automation (via Makefile - Requires ANTHROPIC_API_KEY):**
 ```bash
-# RECOMMENDED: Reproducible batch evaluation of all concatenated files
+# For CI/CD or external scripting only
+# Requires: export ANTHROPIC_API_KEY=sk-ant-...
+
+# Batch evaluation of all concatenated files
 make evaluate-d4d-llm-batch-concatenated
 # Evaluates: AI_READI, CHORUS, CM4AI, VOICE
 # Methods: curated, gpt5, claudecode_agent, claudecode_assistant
@@ -911,8 +925,8 @@ make clean-eval-llm
 - Model: claude-sonnet-4-5-20250929 (date-pinned)
 - Same D4D file → Same quality score every time
 - Rubrics: Version-controlled in `data/rubric/`
-- Prompts: Version-controlled in `src/download/prompts/`
-- Scripts: `src/evaluation/batch_evaluate_*.sh`
+- **No API key needed for conversational use** (you're already using Claude Code)
+- External scripts (optional): `src/evaluation/batch_evaluate_*.sh`
 
 ### LLM Evaluation Features
 
