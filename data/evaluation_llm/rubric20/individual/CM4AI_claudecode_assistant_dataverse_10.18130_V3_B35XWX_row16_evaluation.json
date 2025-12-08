@@ -1,0 +1,456 @@
+{
+  "rubric": "rubric20",
+  "version": "1.0",
+  "d4d_file": "data/d4d_individual/claudecode_assistant/CM4AI/dataverse_10.18130_V3_B35XWX_row16_d4d.yaml",
+  "project": "CM4AI",
+  "method": "claudecode_assistant",
+  "type": "individual",
+  "evaluation_timestamp": "2025-12-07T21:19:12.202639",
+  "model": {
+    "name": "hybrid-heuristic-evaluator",
+    "temperature": "N/A",
+    "evaluation_type": "rule_based_with_quality_heuristics"
+  },
+  "overall_score": {
+    "total_points": 28,
+    "max_points": 84,
+    "percentage": 33.3
+  },
+  "categories": {
+    "Structural Completeness": {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated",
+          "score": 3,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "id: doi:10.18130/V3/B35XWX",
+          "quality_note": "4/5 fields filled (~70%)"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Narrative fields have meaningful content length",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "description: This dataset is the March 2025 Data Release of Cell Maps for Artificial Intellig...",
+          "quality_note": "Avg 391 chars (>200)"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords provided",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "keywords: 12 items",
+          "quality_note": "12 keywords (\u22658)"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number of files and file type diversity",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 3 items",
+          "quality_note": "1 file type only: JSON"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or dimensional metadata",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "subsets: 5 items",
+          "quality_note": "Pass: Numeric dimensions/sizes found"
+        }
+      ],
+      "category_score": 14,
+      "category_max": 21
+    },
+    "Metadata Quality & Content": {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "page: https://doi.org/10.18130/V3/B35XWX",
+          "quality_note": "Pass: Persistent identifier found"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Presence of funding sources, grants, sponsors",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "funders: 1 items",
+          "quality_note": "Agency + award + acknowledgements"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Deidentification methods, IRB approvals, ethical sourcing",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: deidentification_and_privacy, ethics, ethical_reviews, is_deidentified, informed_consent",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "description": "Access policy and license clearly defined",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: access_and_licensing, license_and_use_terms",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Standard formats, ontologies, schema conformance",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 3 items",
+          "quality_note": "Non-standard or unspecified format"
+        }
+      ],
+      "category_score": 6,
+      "category_max": 21
+    },
+    "Technical Documentation": {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Preprocessing libraries or tools documented",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: software_and_tools, preprocessing_strategies, cleaning_strategies",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Participant recruitment and data acquisition described",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: collection_process, acquisition_methods, collection_mechanisms, sampling_strategies",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Multiple version records with dates",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: release_notes, versions_available_on_platform, updates, version_access",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Formal citations or DOI-linked references",
+          "score": 3,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "external_resources: 1 items",
+          "quality_note": "One DOI cited"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Demographics, diversity, subgroup details",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "instances: 2 items",
+          "quality_note": "No human subject information"
+        }
+      ],
+      "category_score": 3,
+      "category_max": 25
+    },
+    "FAIRness & Accessibility": {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Persistent URLs for access and documentation",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "page: https://doi.org/10.18130/V3/B35XWX",
+          "quality_note": "Pass: External URLs present"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "How users can obtain the dataset",
+          "score": 3,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 3 items",
+          "quality_note": "Partially described"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "description": "License clearly defined with reuse terms",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: license_and_use_terms",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Change logs or provenance tracking",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: updates, version_access, release_notes",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "description": "Cross-platform dataset links",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "external_resources: 1 items",
+          "quality_note": "Pass: Cross-platform links (Dataverse, doi.org)"
+        }
+      ],
+      "category_score": 5,
+      "category_max": 17
+    }
+  },
+  "questions": [
+    {
+      "id": 1,
+      "name": "Field Completeness",
+      "description": "Proportion of mandatory schema fields populated",
+      "score": 3,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "id: doi:10.18130/V3/B35XWX",
+      "quality_note": "4/5 fields filled (~70%)"
+    },
+    {
+      "id": 2,
+      "name": "Entry Length Adequacy",
+      "description": "Narrative fields have meaningful content length",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "description: This dataset is the March 2025 Data Release of Cell Maps for Artificial Intellig...",
+      "quality_note": "Avg 391 chars (>200)"
+    },
+    {
+      "id": 3,
+      "name": "Keyword Diversity",
+      "description": "Number of unique keywords provided",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "keywords: 12 items",
+      "quality_note": "12 keywords (\u22658)"
+    },
+    {
+      "id": 4,
+      "name": "File Enumeration and Type Variety",
+      "description": "Number of files and file type diversity",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 3 items",
+      "quality_note": "1 file type only: JSON"
+    },
+    {
+      "id": 5,
+      "name": "Data File Size Availability",
+      "description": "Presence of file size or dimensional metadata",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "subsets: 5 items",
+      "quality_note": "Pass: Numeric dimensions/sizes found"
+    },
+    {
+      "id": 6,
+      "name": "Dataset Identification Metadata",
+      "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "page: https://doi.org/10.18130/V3/B35XWX",
+      "quality_note": "Pass: Persistent identifier found"
+    },
+    {
+      "id": 7,
+      "name": "Funding and Acknowledgements Completeness",
+      "description": "Presence of funding sources, grants, sponsors",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "funders: 1 items",
+      "quality_note": "Agency + award + acknowledgements"
+    },
+    {
+      "id": 8,
+      "name": "Ethical and Privacy Declarations",
+      "description": "Deidentification methods, IRB approvals, ethical sourcing",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: deidentification_and_privacy, ethics, ethical_reviews, is_deidentified, informed_consent",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 9,
+      "name": "Access Requirements Documentation",
+      "description": "Access policy and license clearly defined",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: access_and_licensing, license_and_use_terms",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 10,
+      "name": "Interoperability and Standardization",
+      "description": "Standard formats, ontologies, schema conformance",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 3 items",
+      "quality_note": "Non-standard or unspecified format"
+    },
+    {
+      "id": 11,
+      "name": "Tool and Software Transparency",
+      "description": "Preprocessing libraries or tools documented",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: software_and_tools, preprocessing_strategies, cleaning_strategies",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 12,
+      "name": "Collection Protocol Clarity",
+      "description": "Participant recruitment and data acquisition described",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: collection_process, acquisition_methods, collection_mechanisms, sampling_strategies",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 13,
+      "name": "Version History Documentation",
+      "description": "Multiple version records with dates",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: release_notes, versions_available_on_platform, updates, version_access",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 14,
+      "name": "Associated Publications",
+      "description": "Formal citations or DOI-linked references",
+      "score": 3,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "external_resources: 1 items",
+      "quality_note": "One DOI cited"
+    },
+    {
+      "id": 15,
+      "name": "Human Subject Representation",
+      "description": "Demographics, diversity, subgroup details",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "instances: 2 items",
+      "quality_note": "No human subject information"
+    },
+    {
+      "id": 16,
+      "name": "Findability (Persistent Links)",
+      "description": "Persistent URLs for access and documentation",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "page: https://doi.org/10.18130/V3/B35XWX",
+      "quality_note": "Pass: External URLs present"
+    },
+    {
+      "id": 17,
+      "name": "Accessibility (Access Mechanism)",
+      "description": "How users can obtain the dataset",
+      "score": 3,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 3 items",
+      "quality_note": "Partially described"
+    },
+    {
+      "id": 18,
+      "name": "Reusability (License Clarity)",
+      "description": "License clearly defined with reuse terms",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: license_and_use_terms",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 19,
+      "name": "Data Integrity and Provenance",
+      "description": "Change logs or provenance tracking",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: updates, version_access, release_notes",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 20,
+      "name": "Interlinking Across Platforms",
+      "description": "Cross-platform dataset links",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "external_resources: 1 items",
+      "quality_note": "Pass: Cross-platform links (Dataverse, doi.org)"
+    }
+  ],
+  "metadata": {
+    "evaluator_id": "batch-hybrid-evaluator",
+    "rubric_hash": "sha256-rubric20",
+    "d4d_file_hash": "57b7a0ac5745eef3161040139d9fd59eeca70b9ad35a2274174b1a243fda59f1"
+  }
+}

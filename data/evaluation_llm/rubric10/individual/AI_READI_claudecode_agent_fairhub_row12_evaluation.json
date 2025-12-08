@@ -1,0 +1,433 @@
+{
+  "rubric": "rubric10",
+  "version": "1.0",
+  "d4d_file": "data/d4d_individual/claudecode_agent/AI_READI/fairhub_row12_d4d.yaml",
+  "project": "AI",
+  "method": "READI_claudecode_agent",
+  "type": "individual",
+  "evaluation_timestamp": "2025-12-07T21:12:02.328730",
+  "model": {
+    "name": "hybrid-heuristic-evaluator",
+    "temperature": "N/A",
+    "evaluation_type": "rule_based_with_quality_heuristics"
+  },
+  "overall_score": {
+    "total_points": 7,
+    "max_points": 50,
+    "percentage": 14.0
+  },
+  "elements": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, etc.)",
+          "score": 1,
+          "evidence": "id: fairhub:dataset_2_row12",
+          "quality_note": "Identifier present"
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: AI-READI Dataset on FAIRhub",
+          "quality_note": "Title and description present but brief"
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: 3 items",
+          "quality_note": "Only 3 keywords"
+        },
+        {
+          "name": "Dataset Landing Page or Platform URL",
+          "score": 1,
+          "evidence": "page: https://fairhub.io/datasets/2",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Associated Project or Program",
+          "score": 1,
+          "evidence": "keywords: 3 items",
+          "quality_note": "Field present"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "sub_elements": [
+        {
+          "name": "Access Mechanism Defined",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Data Use Agreement Required?",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 1,
+          "evidence": "page: https://fairhub.io/datasets/2",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "File Formats Specified",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "External Links to Similar or Related Datasets",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 1,
+      "element_max": 5
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Data Formats Are Standardized",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Identifiers Defined for Linking",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Documentation of Processing Tools for Reproducibility",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Deidentification Method Described",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Identifiers Removed or Masked",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Ethical Sourcing Statement Included",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
+      "sub_elements": [
+        {
+          "name": "Cohort or Population Characteristics Described",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Number of Participants or Samples Reported",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Modalities or Data Types Listed",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Conditions or Phenotypes Represented",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "File Dimensions or Sampling Rates Provided",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Version History Documented",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Change Descriptions for Each Version",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Versioned Documentation or External References",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "sub_elements": [
+        {
+          "name": "Motivation or Rationale for Dataset Creation",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Primary Research Objective or Task",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Funding Source or Grant Agency Listed",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Award Number or Grant ID Present",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Acknowledgement of Platform or Participant Support",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "description": "Can data collection and processing steps be replicated or understood?",
+      "sub_elements": [
+        {
+          "name": "Collection Setting or Sites Described",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Data Capture Method or Device Listed",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Preprocessing or Cleaning Steps Documented",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Open-Source Processing Code Provided",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "External Standards or References Cited",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "sub_elements": [
+        {
+          "name": "Limitations Section Present",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Sampling Bias or Representativeness Noted",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Quality Control or Validation Steps Mentioned",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Known Risks or Use Constraints Listed",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Conflicts of Interest Declared",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "score": 1,
+          "evidence": "page: https://fairhub.io/datasets/2",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Cross-referenced DOIs or Related Dataset Links",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Community Standards or Schema Reference",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Associated Outreach Materials",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Similar Dataset Links or Thematic Grouping",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 1,
+      "element_max": 5
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Strong Dataset Discovery and Identification (5/5)"
+    ],
+    "weaknesses": [
+      "Missing Dataset Access and Retrieval (1/5)",
+      "Missing Data Reuse and Interoperability (0/5)",
+      "Missing Ethical Use and Privacy Safeguards (0/5)",
+      "Missing Data Composition and Structure (0/5)",
+      "Missing Data Provenance and Version Tracking (0/5)",
+      "Missing Scientific Motivation and Funding Transparency (0/5)",
+      "Missing Technical Transparency (Data Collection and Processing) (0/5)",
+      "Missing Dataset Evaluation and Limitations Disclosure (0/5)",
+      "Missing Cross-Platform and Community Integration (1/5)"
+    ],
+    "recommendations": []
+  },
+  "metadata": {
+    "evaluator_id": "batch-hybrid-evaluator",
+    "rubric_hash": "sha256-rubric10",
+    "d4d_file_hash": "7f49db0b797ac3c66d03784be6ee95e97956c9ac0fb818608ccc3d1e48666999"
+  }
+}

@@ -1,0 +1,456 @@
+{
+  "rubric": "rubric20",
+  "version": "1.0",
+  "d4d_file": "data/d4d_individual/claudecode_assistant/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt_d4d.yaml",
+  "project": "CHORUS",
+  "method": "claudecode_assistant",
+  "type": "individual",
+  "evaluation_timestamp": "2025-12-07T21:19:12.043039",
+  "model": {
+    "name": "hybrid-heuristic-evaluator",
+    "temperature": "N/A",
+    "evaluation_type": "rule_based_with_quality_heuristics"
+  },
+  "overall_score": {
+    "total_points": 26,
+    "max_points": 84,
+    "percentage": 31.0
+  },
+  "categories": {
+    "Structural Completeness": {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "id: chorus:aim-ahead-training-dataset-2024",
+          "quality_note": "5/5 fields filled (\u226590%)"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Narrative fields have meaningful content length",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "description: The CHoRUS dataset as described in the AIM-AHEAD Bridge2AI for Clinical Care Tra...",
+          "quality_note": "Avg 325 chars (>200)"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords provided",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "keywords: 10 items",
+          "quality_note": "10 keywords (\u22658)"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number of files and file type diversity",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 2 items",
+          "quality_note": "No file types detected"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or dimensional metadata",
+          "score": 0,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "Missing: files, data_characteristics, subsets",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "category_score": 15,
+      "category_max": 21
+    },
+    "Metadata Quality & Content": {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "page: https://www.bridge2ai.org/chorus",
+          "quality_note": "Pass: Persistent identifier found"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Presence of funding sources, grants, sponsors",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: funding_and_acknowledgements, funders",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Deidentification methods, IRB approvals, ethical sourcing",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: deidentification_and_privacy, ethics, ethical_reviews, is_deidentified, informed_consent",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements Documentation",
+          "description": "Access policy and license clearly defined",
+          "score": 3,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "license_and_use_terms: present (3 keys)",
+          "quality_note": "License type only"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Standard formats, ontologies, schema conformance",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 2 items",
+          "quality_note": "Non-standard or unspecified format"
+        }
+      ],
+      "category_score": 4,
+      "category_max": 21
+    },
+    "Technical Documentation": {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Preprocessing libraries or tools documented",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "preprocessing_strategies: 2 items",
+          "quality_note": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Participant recruitment and data acquisition described",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: collection_process, acquisition_methods, collection_mechanisms, sampling_strategies",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Multiple version records with dates",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: release_notes, versions_available_on_platform, updates, version_access",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Formal citations or DOI-linked references",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: citations, references, external_resources",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Demographics, diversity, subgroup details",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "instances: 1 items",
+          "quality_note": "No human subject information"
+        }
+      ],
+      "category_score": 0,
+      "category_max": 25
+    },
+    "FAIRness & Accessibility": {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Persistent URLs for access and documentation",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "page: https://www.bridge2ai.org/chorus",
+          "quality_note": "Pass: External URLs present"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "How users can obtain the dataset",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 2 items",
+          "quality_note": "Fully defined access path"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License Clarity)",
+          "description": "License clearly defined with reuse terms",
+          "score": 1,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "license_and_use_terms: present (3 keys)",
+          "quality_note": "Generic license info"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Change logs or provenance tracking",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: updates, version_access, release_notes",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms",
+          "description": "Cross-platform dataset links",
+          "score": 0,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "Missing: external_resources, project_website, same_as",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "category_score": 7,
+      "category_max": 17
+    }
+  },
+  "questions": [
+    {
+      "id": 1,
+      "name": "Field Completeness",
+      "description": "Proportion of mandatory schema fields populated",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "id: chorus:aim-ahead-training-dataset-2024",
+      "quality_note": "5/5 fields filled (\u226590%)"
+    },
+    {
+      "id": 2,
+      "name": "Entry Length Adequacy",
+      "description": "Narrative fields have meaningful content length",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "description: The CHoRUS dataset as described in the AIM-AHEAD Bridge2AI for Clinical Care Tra...",
+      "quality_note": "Avg 325 chars (>200)"
+    },
+    {
+      "id": 3,
+      "name": "Keyword Diversity",
+      "description": "Number of unique keywords provided",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "keywords: 10 items",
+      "quality_note": "10 keywords (\u22658)"
+    },
+    {
+      "id": 4,
+      "name": "File Enumeration and Type Variety",
+      "description": "Number of files and file type diversity",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 2 items",
+      "quality_note": "No file types detected"
+    },
+    {
+      "id": 5,
+      "name": "Data File Size Availability",
+      "description": "Presence of file size or dimensional metadata",
+      "score": 0,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "Missing: files, data_characteristics, subsets",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 6,
+      "name": "Dataset Identification Metadata",
+      "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "page: https://www.bridge2ai.org/chorus",
+      "quality_note": "Pass: Persistent identifier found"
+    },
+    {
+      "id": 7,
+      "name": "Funding and Acknowledgements Completeness",
+      "description": "Presence of funding sources, grants, sponsors",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: funding_and_acknowledgements, funders",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 8,
+      "name": "Ethical and Privacy Declarations",
+      "description": "Deidentification methods, IRB approvals, ethical sourcing",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: deidentification_and_privacy, ethics, ethical_reviews, is_deidentified, informed_consent",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 9,
+      "name": "Access Requirements Documentation",
+      "description": "Access policy and license clearly defined",
+      "score": 3,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "license_and_use_terms: present (3 keys)",
+      "quality_note": "License type only"
+    },
+    {
+      "id": 10,
+      "name": "Interoperability and Standardization",
+      "description": "Standard formats, ontologies, schema conformance",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 2 items",
+      "quality_note": "Non-standard or unspecified format"
+    },
+    {
+      "id": 11,
+      "name": "Tool and Software Transparency",
+      "description": "Preprocessing libraries or tools documented",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "preprocessing_strategies: 2 items",
+      "quality_note": "No software tools documented"
+    },
+    {
+      "id": 12,
+      "name": "Collection Protocol Clarity",
+      "description": "Participant recruitment and data acquisition described",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: collection_process, acquisition_methods, collection_mechanisms, sampling_strategies",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 13,
+      "name": "Version History Documentation",
+      "description": "Multiple version records with dates",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: release_notes, versions_available_on_platform, updates, version_access",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 14,
+      "name": "Associated Publications",
+      "description": "Formal citations or DOI-linked references",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: citations, references, external_resources",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 15,
+      "name": "Human Subject Representation",
+      "description": "Demographics, diversity, subgroup details",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "instances: 1 items",
+      "quality_note": "No human subject information"
+    },
+    {
+      "id": 16,
+      "name": "Findability (Persistent Links)",
+      "description": "Persistent URLs for access and documentation",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "page: https://www.bridge2ai.org/chorus",
+      "quality_note": "Pass: External URLs present"
+    },
+    {
+      "id": 17,
+      "name": "Accessibility (Access Mechanism)",
+      "description": "How users can obtain the dataset",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 2 items",
+      "quality_note": "Fully defined access path"
+    },
+    {
+      "id": 18,
+      "name": "Reusability (License Clarity)",
+      "description": "License clearly defined with reuse terms",
+      "score": 1,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "license_and_use_terms: present (3 keys)",
+      "quality_note": "Generic license info"
+    },
+    {
+      "id": 19,
+      "name": "Data Integrity and Provenance",
+      "description": "Change logs or provenance tracking",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: updates, version_access, release_notes",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 20,
+      "name": "Interlinking Across Platforms",
+      "description": "Cross-platform dataset links",
+      "score": 0,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "Missing: external_resources, project_website, same_as",
+      "quality_note": "Field absent or empty"
+    }
+  ],
+  "metadata": {
+    "evaluator_id": "batch-hybrid-evaluator",
+    "rubric_hash": "sha256-rubric20",
+    "d4d_file_hash": "7237919b0b7707116af31863f1c3a5fd07430e68006e09a95a157a49f0c95dc7"
+  }
+}
