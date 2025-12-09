@@ -168,6 +168,7 @@ class D4DPromptLoader:
         depth = 0
         
         # Search upward until we hit the filesystem root or max depth
+        # Note: At filesystem root, current == current.parent
         while current != current.parent and depth < max_depth:
             marker_path = current / marker_file
             if marker_path.exists():
