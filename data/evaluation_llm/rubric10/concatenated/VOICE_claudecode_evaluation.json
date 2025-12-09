@@ -5,16 +5,16 @@
   "project": "VOICE",
   "method": "claudecode",
   "type": "concatenated",
-  "evaluation_timestamp": "2025-12-07T21:12:02.236301",
+  "evaluation_timestamp": "2025-12-08T18:57:38.148792",
   "model": {
     "name": "hybrid-heuristic-evaluator",
     "temperature": "N/A",
     "evaluation_type": "rule_based_with_quality_heuristics"
   },
   "overall_score": {
-    "total_points": 34,
+    "total_points": 37,
     "max_points": 50,
-    "percentage": 68.0
+    "percentage": 74.0
   },
   "elements": [
     {
@@ -41,13 +41,13 @@
           "quality_note": "12 keywords provided"
         },
         {
-          "name": "Dataset Landing Page or Platform URL",
+          "name": "Landing Page and Resources",
           "score": 1,
           "evidence": "page: https://physionet.org/content/b2ai-voice/1.1/",
           "quality_note": "Field present"
         },
         {
-          "name": "Associated Project or Program",
+          "name": "Hierarchical Structure",
           "score": 1,
           "evidence": "keywords: 12 items",
           "quality_note": "Field present"
@@ -62,13 +62,13 @@
       "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
       "sub_elements": [
         {
-          "name": "Access Mechanism Defined",
+          "name": "Access Policy and IP Restrictions",
           "score": 1,
           "evidence": "license_and_use_terms: present (dict with 2 keys)",
           "quality_note": "Field present"
         },
         {
-          "name": "Data Use Agreement Required?",
+          "name": "Regulatory Restrictions and Confidentiality",
           "score": 1,
           "evidence": "license_and_use_terms: present (dict with 2 keys)",
           "quality_note": "Field present"
@@ -80,13 +80,13 @@
           "quality_note": "Field present"
         },
         {
-          "name": "File Formats Specified",
+          "name": "Distribution Formats and File Types",
           "score": 1,
           "evidence": "distribution_formats: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "External Links to Similar or Related Datasets",
+          "name": "Related Datasets and External Resources",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
@@ -103,7 +103,7 @@
         {
           "name": "License Terms Allow Reuse",
           "score": 1,
-          "evidence": "license_and_use_terms.description: Bridge2AI Voice Registered Access License. Only registered users who sign the specified data use agr...",
+          "evidence": "license_and_use_terms: present (dict with 2 keys)",
           "quality_note": "Field present"
         },
         {
@@ -113,25 +113,25 @@
           "quality_note": "Field present"
         },
         {
-          "name": "Schema or Ontology Conformance Stated",
+          "name": "Schema or Ontology Conformance",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "Identifiers Defined for Linking",
+          "name": "Variable Metadata with Identifiers",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "Documentation of Processing Tools for Reproducibility",
-          "score": 0,
-          "evidence": "Field absent or empty",
-          "quality_note": "Field absent or empty"
+          "name": "Use Guidance Provided",
+          "score": 1,
+          "evidence": "discouraged_uses: 1 items",
+          "quality_note": "Field present"
         }
       ],
-      "element_score": 2,
+      "element_score": 3,
       "element_max": 5
     },
     {
@@ -152,19 +152,19 @@
           "quality_note": "Field present"
         },
         {
-          "name": "Identifiers Removed or Masked",
+          "name": "Privacy Protections Beyond Deidentification",
           "score": 1,
           "evidence": "is_deidentified: present (dict with 1 keys)",
           "quality_note": "Field present"
         },
         {
-          "name": "Informed Consent Obtained from Participants",
+          "name": "Informed Consent Obtained",
           "score": 1,
           "evidence": "informed_consent: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Ethical Sourcing Statement Included",
+          "name": "Vulnerable Populations and Compensation",
           "score": 1,
           "evidence": "purposes: 1 items",
           "quality_note": "Field present"
@@ -179,37 +179,37 @@
       "description": "Can the dataset's structure, modality, and population be understood from metadata?",
       "sub_elements": [
         {
-          "name": "Cohort or Population Characteristics Described",
+          "name": "Cohort or Subpopulations Described",
           "score": 1,
           "evidence": "subpopulations: 4 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Number of Participants or Samples Reported",
+          "name": "Number of Instances or Samples",
           "score": 1,
           "evidence": "instances: 1 items",
           "quality_note": "Participant/sample counts found: 12,523 recordings"
         },
         {
-          "name": "Modalities or Data Types Listed",
+          "name": "Variable Metadata and Tabular Flag",
           "score": 1,
           "evidence": "instances: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Conditions or Phenotypes Represented",
+          "name": "Data Topics or Conditions",
           "score": 1,
-          "evidence": "subpopulations: 4 items",
+          "evidence": "instances: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "File Dimensions or Sampling Rates Provided",
-          "score": 0,
-          "evidence": "Field absent or empty",
-          "quality_note": "Field absent or empty"
+          "name": "Data Quality Issues and Anomalies",
+          "score": 1,
+          "evidence": "sampling_strategies: 1 items",
+          "quality_note": "Field present"
         }
       ],
-      "element_score": 4,
+      "element_score": 5,
       "element_max": 5
     },
     {
@@ -218,31 +218,31 @@
       "description": "Can a user determine dataset versions, update history, and provenance?",
       "sub_elements": [
         {
-          "name": "Dataset Version Number Provided",
+          "name": "Dataset Version Number",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "Version History Documented",
+          "name": "Version Access Methods",
+          "score": 1,
+          "evidence": "version_access: present (dict with 3 keys)",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Change Descriptions and Errata",
           "score": 1,
           "evidence": "updates: present (dict with 2 keys)",
           "quality_note": "Field present"
         },
         {
-          "name": "Change Descriptions for Each Version",
+          "name": "Update Schedule or Frequency",
           "score": 1,
           "evidence": "updates: present (dict with 2 keys)",
           "quality_note": "Field present"
         },
         {
-          "name": "Update Schedule or Frequency Indicated",
-          "score": 1,
-          "evidence": "updates: present (dict with 2 keys)",
-          "quality_note": "Field present"
-        },
-        {
-          "name": "Versioned Documentation or External References",
+          "name": "Provenance and Source Derivation",
           "score": 1,
           "evidence": "version_access: present (dict with 3 keys)",
           "quality_note": "Field present"
@@ -257,31 +257,31 @@
       "description": "Does the metadata clearly state why the dataset exists and who funded it?",
       "sub_elements": [
         {
-          "name": "Motivation or Rationale for Dataset Creation",
+          "name": "Motivation or Purpose",
           "score": 1,
           "evidence": "purposes: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Primary Research Objective or Task",
+          "name": "Primary Research Objectives or Tasks",
           "score": 1,
           "evidence": "tasks: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Funding Source or Grant Agency Listed",
+          "name": "Funding Sources and Mechanisms",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "Award Number or Grant ID Present",
+          "name": "Grant IDs or Award Numbers",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "Acknowledgement of Platform or Participant Support",
+          "name": "Creators and Acknowledgements",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
@@ -296,31 +296,31 @@
       "description": "Can data collection and processing steps be replicated or understood?",
       "sub_elements": [
         {
-          "name": "Collection Setting or Sites Described",
-          "score": 1,
-          "evidence": "data_collectors: 1 items",
-          "quality_note": "Field present"
-        },
-        {
-          "name": "Data Capture Method or Device Listed",
+          "name": "Collection Mechanisms and Settings",
           "score": 1,
           "evidence": "collection_mechanisms: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Preprocessing or Cleaning Steps Documented",
+          "name": "Data Acquisition Methods",
+          "score": 1,
+          "evidence": "acquisition_methods: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling",
           "score": 1,
           "evidence": "preprocessing_strategies: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Open-Source Processing Code Provided",
+          "name": "Software and Tools Documented",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "External Standards or References Cited",
+          "name": "External Standards and Resources",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
@@ -335,37 +335,37 @@
       "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
       "sub_elements": [
         {
-          "name": "Limitations Section Present",
+          "name": "Known Limitations Documented",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "Sampling Bias or Representativeness Noted",
+          "name": "Systematic Biases Identified",
           "score": 1,
           "evidence": "sampling_strategies: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Quality Control or Validation Steps Mentioned",
+          "name": "Data Anomalies and Quality Issues",
           "score": 1,
           "evidence": "cleaning_strategies: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Known Risks or Use Constraints Listed",
+          "name": "Sensitive Content and Warnings",
           "score": 1,
           "evidence": "discouraged_uses: 1 items",
           "quality_note": "Field present"
         },
         {
-          "name": "Conflicts of Interest Declared",
-          "score": 0,
-          "evidence": "Field absent or empty",
-          "quality_note": "Field absent or empty"
+          "name": "Ethical Review Details",
+          "score": 1,
+          "evidence": "ethical_reviews: 1 items",
+          "quality_note": "Field present"
         }
       ],
-      "element_score": 3,
+      "element_score": 4,
       "element_max": 5
     },
     {
@@ -374,31 +374,31 @@
       "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
       "sub_elements": [
         {
-          "name": "Dataset Published on a Recognized Platform",
+          "name": "Dataset Published on Recognized Platform",
           "score": 1,
           "evidence": "page: https://physionet.org/content/b2ai-voice/1.1/",
           "quality_note": "Field present"
         },
         {
-          "name": "Cross-referenced DOIs or Related Dataset Links",
+          "name": "Citation and DOI for Cross-referencing",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "Community Standards or Schema Reference",
+          "name": "Community Standards or Schema Conformance",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
         },
         {
-          "name": "Associated Outreach Materials",
+          "name": "Outreach Materials and Documentation Links",
           "score": 1,
-          "evidence": "distribution_formats: 1 items",
+          "evidence": "page: https://physionet.org/content/b2ai-voice/1.1/",
           "quality_note": "Field present"
         },
         {
-          "name": "Similar Dataset Links or Thematic Grouping",
+          "name": "Related Datasets with Typed Relationships",
           "score": 0,
           "evidence": "Field absent or empty",
           "quality_note": "Field absent or empty"
@@ -413,8 +413,9 @@
       "Strong Dataset Discovery and Identification (5/5)",
       "Strong Dataset Access and Retrieval (4/5)",
       "Strong Ethical Use and Privacy Safeguards (5/5)",
-      "Strong Data Composition and Structure (4/5)",
-      "Strong Data Provenance and Version Tracking (4/5)"
+      "Strong Data Composition and Structure (5/5)",
+      "Strong Data Provenance and Version Tracking (4/5)",
+      "Strong Dataset Evaluation and Limitations Disclosure (4/5)"
     ],
     "weaknesses": [],
     "recommendations": []
