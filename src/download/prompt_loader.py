@@ -63,7 +63,7 @@ class D4DPromptLoader:
         Args:
             prompts_dir: Directory containing prompt files (defaults to src/download/prompts)
             prompt_set: Which prompt set to use: "shared", "aurelian", or "claude"
-            schema_source: Where to load schema from: "local", "github", or custom path
+            schema_source: Where to load schema from: "local" (default local path), "github" (remote URL), or a custom file path string. Any value other than "local" or "github" is treated as a file path.
             schema_path: Custom path to schema file (overrides default)
             cache_schema: Whether to cache schema after first load
         """
