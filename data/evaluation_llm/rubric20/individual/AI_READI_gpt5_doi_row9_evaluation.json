@@ -2,8 +2,8 @@
   "rubric": "rubric20",
   "version": "1.0",
   "d4d_file": "data/d4d_individual/gpt5/AI_READI/doi_row9_d4d.yaml",
-  "project": "AI",
-  "method": "READI_gpt5",
+  "project": "AI_READI",
+  "method": "gpt5",
   "type": "individual",
   "evaluation_timestamp": "2025-12-08T19:16:57.782082",
   "model": {

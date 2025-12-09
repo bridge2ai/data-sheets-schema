@@ -2,8 +2,8 @@
   "rubric": "rubric20",
   "version": "1.0",
   "d4d_file": "data/d4d_individual/claudecode_assistant/AI_READI/doi_row9_d4d.yaml",
-  "project": "AI",
-  "method": "READI_claudecode_assistant",
+  "project": "AI_READI",
+  "method": "claudecode_assistant",
   "type": "individual",
   "evaluation_timestamp": "2025-12-08T19:16:57.835070",
   "model": {

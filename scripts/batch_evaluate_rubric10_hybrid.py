@@ -400,8 +400,13 @@ def main():
     concat_count = 0
     for key, file_path in inventory["concatenated_files"].items():
         parts = key.split('_')
-        project = parts[0]
-        method = '_'.join(parts[1:-1])
+        # Handle AI_READI which has underscore in project name
+        if parts[0] == "AI" and parts[1] == "READI":
+            project = "AI_READI"
+            method = '_'.join(parts[2:-1])
+        else:
+            project = parts[0]
+            method = '_'.join(parts[1:-1])
 
         file_full_path = BASE_DIR / file_path
 
@@ -439,8 +444,13 @@ def main():
 
     for key, file_list in inventory["individual_files"].items():
         parts = key.split('_')
-        project = parts[0]
-        method = '_'.join(parts[1:-1])
+        # Handle AI_READI which has underscore in project name
+        if parts[0] == "AI" and parts[1] == "READI":
+            project = "AI_READI"
+            method = '_'.join(parts[2:-1])
+        else:
+            project = parts[0]
+            method = '_'.join(parts[1:-1])
 
         for file_path in file_list:
             file_full_path = BASE_DIR / file_path

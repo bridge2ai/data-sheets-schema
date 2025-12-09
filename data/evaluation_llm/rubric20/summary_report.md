@@ -1,6 +1,6 @@
 # Rubric20 Detailed Evaluation Report
 
-**Generated:** 2025-12-08 19:17:04
+**Generated:** 2025-12-08 19:22:43
 **Total Evaluations:** 127
 
 ## Executive Summary
@@ -12,23 +12,27 @@
 ## Method Comparison
 
 ### gpt5
-- Files evaluated: 12
-- Average score: 11.5/84 (13.7%)
+- Files evaluated: 21
+- Average score: 9.4/84 (11.2%)
 
 ### claudecode
-- Files evaluated: 3
-- Average score: 38.7/84 (46.0%)
+- Files evaluated: 4
+- Average score: 41.2/84 (49.1%)
 
 ### claudecode_agent
-- Files evaluated: 36
-- Average score: 20.0/84 (23.8%)
+- Files evaluated: 51
+- Average score: 17.8/84 (21.2%)
 
 ### claudecode_assistant
-- Files evaluated: 36
-- Average score: 17.4/84 (20.7%)
+- Files evaluated: 51
+- Average score: 15.8/84 (18.8%)
 
 
 ## Project Comparison
+
+### AI_READI
+- Files evaluated: 40
+- Average score: 11.8/84 (14.1%)
 
 ### CHORUS
 - Files evaluated: 30

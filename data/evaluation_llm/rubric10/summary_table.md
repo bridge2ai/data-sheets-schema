@@ -1,6 +1,6 @@
 # Rubric10 Evaluation Summary
 
-**Generated:** 2025-12-08 18:57:46
+**Generated:** 2025-12-08 19:22:43
 
 **Total Evaluations:** 127
 
@@ -8,6 +8,10 @@
 
 | Project | Method | Score | Percentage | Elements Passing | Top Element | Weakest Element |
 |---------|--------|-------|------------|------------------|-------------|-----------------|
+| AI_READI | gpt5 | 3/50 | 6.0% | 1/10 | Dataset Discovery and Ide (3/5) | Dataset Access and Retrie (0/5) |
+| AI_READI | claudecode | 34/50 | 68.0% | 8/10 | Dataset Discovery and Ide (5/5) | Ethical Use and Privacy S (1/5) |
+| AI_READI | claudecode_agent | 38/50 | 76.0% | 9/10 | Dataset Discovery and Ide (5/5) | Ethical Use and Privacy S (2/5) |
+| AI_READI | claudecode_assistant | 39/50 | 78.0% | 9/10 | Dataset Discovery and Ide (5/5) | Scientific Motivation and (2/5) |
 | CHORUS | gpt5 | 5/50 | 10.0% | 1/10 | Dataset Discovery and Ide (5/5) | Dataset Access and Retrie (0/5) |
 | CHORUS | claudecode | 18/50 | 36.0% | 2/10 | Dataset Discovery and Ide (5/5) | Data Provenance and Versi (0/5) |
 | CHORUS | claudecode_agent | 35/50 | 70.0% | 8/10 | Dataset Discovery and Ide (5/5) | Ethical Use and Privacy S (2/5) |
@@ -25,6 +29,9 @@
 
 | Project | Method | Avg Score | Files | Avg Percentage | Avg Elements Passing |
 |---------|--------|-----------|-------|----------------|----------------------|
+| AI_READI | gpt5 | 8.9/50 | 8 | 17.8% | 1.8/10 |
+| AI_READI | claudecode_agent | 9.1/50 | 14 | 18.3% | 1.1/10 |
+| AI_READI | claudecode_assistant | 9.8/50 | 14 | 19.6% | 1.0/10 |
 | CHORUS | gpt5 | 9.0/50 | 2 | 18.0% | 1.0/10 |
 | CHORUS | claudecode_agent | 24.5/50 | 12 | 49.0% | 4.0/10 |
 | CHORUS | claudecode_assistant | 14.8/50 | 12 | 29.7% | 2.1/10 |
