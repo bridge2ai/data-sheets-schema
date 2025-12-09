@@ -1,6 +1,8 @@
 # D4D Rubric Agent Usage Examples
 
-This guide provides practical examples for using the `d4d-rubric10` and `d4d-rubric20` quality evaluation agents in Claude Code.
+This guide provides practical examples for using the D4D rubric evaluation agents in Claude Code:
+- **Standard agents:** `d4d-rubric10`, `d4d-rubric20` - Quality-based evaluation
+- **Semantic agents:** `d4d-rubric10-semantic`, `d4d-rubric20-semantic` - Enhanced with semantic analysis, correctness validation, and consistency checking
 
 ## How These Agents Work
 
@@ -24,15 +26,22 @@ These agents work **directly within Claude Code conversations** - no external AP
 ## Quick Reference
 
 **Invoke agents with conversational prompts:**
+
+**Standard Quality Agents:**
 - "Evaluate [file] with rubric10"
 - "Run rubric20 assessment on [file]"
 - "Score [file] using rubric10"
-- "Assess quality of [file] with rubric20"
-- "Evaluate all projects with both rubrics"
+
+**Semantic Analysis Agents:**
+- "Evaluate [file] with rubric10-semantic"
+- "Run semantic analysis using rubric20-semantic"
+- "Check [file] consistency and correctness with rubric10-semantic"
 
 **Agent Names:**
 - `d4d-rubric10` - 10-element hierarchical quality rubric (50 points max)
 - `d4d-rubric20` - 20-question detailed rubric (84 points max)
+- `d4d-rubric10-semantic` - Rubric10 + semantic analysis, correctness, consistency
+- `d4d-rubric20-semantic` - Rubric20 + semantic analysis, correctness, consistency
 
 ---
 
@@ -632,6 +641,261 @@ The agent will:
 5. Provide summary comparison tables
 
 **No API key, no scripts, no configuration needed** - pure conversational workflow!
+
+---
+
+## Semantic Evaluation Agents
+
+### Overview
+
+The **semantic agents** (`d4d-rubric10-semantic` and `d4d-rubric20-semantic`) extend the standard quality evaluators with enhanced semantic analysis capabilities:
+
+| Aspect | Standard Agents | Semantic Agents |
+|--------|----------------|-----------------|
+| Quality Assessment | ✅ | ✅ |
+| Field Presence Detection | ✅ | ✅ |
+| Content Meaningfulness | ✅ | ✅ |
+| **Semantic Understanding** | ❌ | ✅ |
+| **Correctness Validation** | ❌ | ✅ |
+| **Consistency Checking** | ❌ | ✅ |
+| **Identifier Plausibility** | ❌ | ✅ |
+| **Cross-field Logic** | ❌ | ✅ |
+
+### When to Use Semantic Agents
+
+**Use Standard Agents (rubric10, rubric20) when:**
+- You need quick quality assessment
+- You want to check metadata completeness
+- You're comparing generation methods
+
+**Use Semantic Agents (rubric10-semantic, rubric20-semantic) when:**
+- You need deep validation before publication
+- You want to detect consistency issues
+- You need to verify identifier correctness
+- You're checking for logical contradictions
+- You want comprehensive quality + accuracy assessment
+
+### Semantic Analysis Capabilities
+
+#### 1. Semantic Understanding Check
+```
+❌ STANDARD: Sees "Participants: 100" → Scores 1 (present)
+✅ SEMANTIC: Sees "Participants: 100" → Checks if description mentions participant selection criteria, demographics alignment
+
+Example Issue Detected:
+- Description claims "diverse cohort across age ranges"
+- But composition.population only lists "adults 18-65"
+- SEMANTIC flags inconsistency: diversity claim not reflected in age range
+```
+
+#### 2. Correctness Validation
+```
+❌ STANDARD: Sees DOI "10.99999/fake" → Scores 1 (present)
+✅ SEMANTIC: Sees DOI "10.99999/fake" → Flags prefix as not matching known registrars
+
+Validated Formats:
+- DOI: Must match 10.XXXX/... AND prefix must be known (PhysioNet: 10.13026, Zenodo: 10.5281)
+- Grant Numbers: NIH format (OT2OD032742), NSF format (DBI-1234567)
+- RRIDs: Must match RRID:SCR_XXXXX or RRID:AB_XXXXX
+- URLs: Proper structure and plausible domains
+```
+
+#### 3. Cross-Field Consistency Checking
+```
+❌ STANDARD: Each field scored independently
+✅ SEMANTIC: Checks logical relationships between fields
+
+Consistency Rules Checked:
+- IF human_subject_research=True → EXPECT ethics.irb_approval AND collection_process.consent
+- IF is_deidentified=True → EXPECT deidentification_and_privacy.approach AND examples_of_identifiers_removed
+- IF funders present → EXPECT funding_and_acknowledgements.funding.agency matches
+- IF DOI present → EXPECT publicly accessible landing page
+```
+
+#### 4. Content Accuracy Assessment
+```
+❌ STANDARD: IRB field populated → Scores 1
+✅ SEMANTIC: IRB field populated → Checks if institution makes sense for project scope
+
+Plausibility Checks:
+- Ethics claims: Do IRB institutions match project scope?
+- Deidentification methods: Is HIPAA Safe Harbor appropriate for health data?
+- Funding patterns: Does grant OT2OD032742 follow NIH format?
+- Temporal logic: Collection dates before processing dates before publication?
+```
+
+### Example: Standard vs Semantic
+
+#### Input D4D File (Hypothetical)
+```yaml
+human_subject_research: True
+ethics: {}  # Empty ethics section
+doi: "10.99999/test"
+funding_and_acknowledgements:
+  funding:
+    award_number: "ABC123"  # Not a valid NIH/NSF format
+```
+
+#### Standard Agent Output
+```json
+{
+  "overall_score": {
+    "total_points": 35,
+    "max_points": 50,
+    "percentage": 70.0
+  },
+  "assessment": {
+    "weaknesses": [
+      "Missing ethics.irb_approval details"
+    ]
+  }
+}
+```
+
+#### Semantic Agent Output
+```json
+{
+  "overall_score": {
+    "total_points": 28,
+    "max_points": 50,
+    "percentage": 56.0
+  },
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency",
+        "severity": "high",
+        "description": "human_subject_research=True but no IRB approval details found",
+        "fields_involved": ["human_subject_research", "ethics.irb_approval"],
+        "recommendation": "Add ethics.irb_approval with institutional approval details"
+      },
+      {
+        "type": "correctness",
+        "severity": "medium",
+        "description": "DOI prefix 10.99999 does not match known registrars",
+        "fields_involved": ["doi"],
+        "recommendation": "Verify DOI is registered with DataCite or Crossref"
+      },
+      {
+        "type": "correctness",
+        "severity": "medium",
+        "description": "Grant number ABC123 does not follow NIH or NSF format",
+        "fields_involved": ["funding_and_acknowledgements.funding.award_number"],
+        "recommendation": "Verify grant number format matches funding agency pattern"
+      }
+    ],
+    "consistency_checks": {
+      "passed": 12,
+      "failed": 3,
+      "warnings": 2
+    },
+    "correctness_validations": {
+      "doi_format": "invalid_prefix",
+      "grant_number_format": "invalid",
+      "rrid_format": "not_present"
+    }
+  }
+}
+```
+
+**Key Difference:** Semantic agent detected 3 critical issues that standard agent missed, reducing score from 70% to 56% - a more accurate reflection of data quality.
+
+### Usage Examples
+
+#### Example 1: Detect Consistency Issues
+```
+User: Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with rubric10-semantic
+
+Claude: [Evaluates file with semantic analysis]
+
+✅ Rubric10-Semantic Evaluation Complete
+
+**Overall Score: 36.5/50 (73.0%)**
+
+**Semantic Analysis:**
+
+Issues Detected (2):
+1. [CONSISTENCY] human_subject_research=True but no informed consent details
+   - Fields: human_subject_research, collection_process.consent
+   - Severity: high
+   - Fix: Add collection_process.consent with consent procedures
+
+2. [CORRECTNESS] Grant number format unusual for NIH
+   - Fields: funding_and_acknowledgements.funding.award_number: "1OT2OD032742"
+   - Severity: low
+   - Note: Leading "1" is uncommon in NIH format but potentially valid
+```
+
+#### Example 2: Compare Standard vs Semantic
+```
+User: Compare rubric10 vs rubric10-semantic results for CM4AI. Show me what semantic analysis caught that standard evaluation missed.
+
+Claude: [Evaluates with both agents]
+
+📊 Comparison: Standard vs Semantic for CM4AI
+
+| Metric | Standard (rubric10) | Semantic (rubric10-semantic) | Delta |
+|--------|---------------------|------------------------------|-------|
+| Score | 33/50 (66.0%) | 31/50 (62.0%) | -4.0% |
+
+**What Semantic Caught:**
+
+1. **Consistency Issue (not detected by standard):**
+   - is_deidentified=True but deidentification method not specified
+   - Standard: Scored both fields independently as present/absent
+   - Semantic: Detected logical inconsistency
+
+2. **Correctness Issue (not detected by standard):**
+   - DOI prefix 10.99999 does not match known registrars
+   - Standard: Checked only format (10.XXXX/...), passed
+   - Semantic: Checked prefix plausibility, flagged as suspicious
+
+**Conclusion:** Semantic analysis provides deeper validation, catching 2 issues standard evaluation missed.
+```
+
+### Semantic Agent Output Format
+
+The semantic agents include an additional `semantic_analysis` section in their JSON output:
+
+```json
+{
+  "rubric": "rubric10-semantic",
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency|correctness|semantic",
+        "severity": "high|medium|low",
+        "description": "...",
+        "fields_involved": ["field1", "field2"],
+        "recommendation": "..."
+      }
+    ],
+    "semantic_insights": [
+      "Positive finding 1",
+      "Positive finding 2"
+    ],
+    "consistency_checks": {
+      "passed": 15,
+      "failed": 2,
+      "warnings": 3
+    },
+    "correctness_validations": {
+      "doi_format": "valid|invalid|not_present",
+      "grant_number_format": "valid|invalid|not_present",
+      "rrid_format": "valid|invalid|not_present",
+      "url_validity": "all_valid|some_invalid|not_present"
+    }
+  },
+  ...
+}
+```
+
+### Recommendations
+
+1. **Use standard agents first** for quick quality assessment across many files
+2. **Use semantic agents** for final validation before dataset publication
+3. **Compare results** to see what additional issues semantic analysis detects
+4. **Fix semantic issues** before releasing datasets publicly
 
 ---
 
