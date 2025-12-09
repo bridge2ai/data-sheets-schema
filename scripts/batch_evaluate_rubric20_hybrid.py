@@ -30,8 +30,8 @@ RUBRIC20_QUESTIONS = {
     1: {
         "category": "Structural Completeness",
         "name": "Field Completeness",
-        "description": "Proportion of mandatory schema fields populated",
-        "fields": ["id", "title", "description", "keywords", "license_and_use_terms"],
+        "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+        "fields": ["id", "title", "description", "keywords", "license_and_use_terms", "doi", "page", "creators", "purposes", "instances", "resources", "parent_datasets", "variables", "confidentiality_level"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -54,16 +54,16 @@ RUBRIC20_QUESTIONS = {
     4: {
         "category": "Structural Completeness",
         "name": "File Enumeration and Type Variety",
-        "description": "Number of files and file type diversity",
-        "fields": ["files", "distribution_formats", "subsets"],
+        "description": "Number of distribution formats and file type diversity",
+        "fields": ["distribution_formats", "format", "media_type", "bytes", "files", "subsets"],
         "score_type": "numeric",
         "max_score": 5
     },
     5: {
         "category": "Structural Completeness",
         "name": "Data File Size Availability",
-        "description": "Presence of file size or dimensional metadata",
-        "fields": ["files", "data_characteristics", "subsets"],
+        "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
+        "fields": ["bytes", "instances", "files", "data_characteristics", "subsets"],
         "score_type": "pass_fail",
         "max_score": 1
     },
@@ -80,32 +80,32 @@ RUBRIC20_QUESTIONS = {
     7: {
         "category": "Metadata Quality & Content",
         "name": "Funding and Acknowledgements Completeness",
-        "description": "Presence of funding sources, grants, sponsors",
-        "fields": ["funding_and_acknowledgements", "funders"],
+        "description": "Funding sources, grants, sponsors, and creator affiliations",
+        "fields": ["funders", "creators", "funding_and_acknowledgements"],
         "score_type": "numeric",
         "max_score": 5
     },
     8: {
         "category": "Metadata Quality & Content",
         "name": "Ethical and Privacy Declarations",
-        "description": "Deidentification methods, IRB approvals, ethical sourcing",
-        "fields": ["deidentification_and_privacy", "ethics", "ethical_reviews", "is_deidentified", "informed_consent"],
+        "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
+        "fields": ["ethical_reviews", "human_subject_research", "is_deidentified", "participant_privacy", "participant_compensation", "vulnerable_populations", "informed_consent", "deidentification_and_privacy", "ethics"],
         "score_type": "numeric",
         "max_score": 5
     },
     9: {
         "category": "Metadata Quality & Content",
-        "name": "Access Requirements Documentation",
-        "description": "Access policy and license clearly defined",
-        "fields": ["access_and_licensing", "license_and_use_terms"],
+        "name": "Access Requirements and Governance Documentation",
+        "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
+        "fields": ["license_and_use_terms", "ip_restrictions", "regulatory_restrictions", "confidentiality_level", "access_and_licensing"],
         "score_type": "numeric",
         "max_score": 5
     },
     10: {
         "category": "Metadata Quality & Content",
         "name": "Interoperability and Standardization",
-        "description": "Standard formats, ontologies, schema conformance",
-        "fields": ["data_characteristics.data_formats", "conforms_to", "distribution_formats"],
+        "description": "Standard formats, encoding, ontologies, schema conformance",
+        "fields": ["format", "encoding", "conforms_to", "conforms_to_schema", "distribution_formats", "data_characteristics.data_formats"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -114,40 +114,40 @@ RUBRIC20_QUESTIONS = {
     11: {
         "category": "Technical Documentation",
         "name": "Tool and Software Transparency",
-        "description": "Preprocessing libraries or tools documented",
-        "fields": ["software_and_tools", "preprocessing_strategies", "cleaning_strategies"],
+        "description": "Preprocessing, cleaning, labeling strategies with software tools",
+        "fields": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies", "software_and_tools"],
         "score_type": "numeric",
         "max_score": 5
     },
     12: {
         "category": "Technical Documentation",
         "name": "Collection Protocol Clarity",
-        "description": "Participant recruitment and data acquisition described",
-        "fields": ["collection_process", "acquisition_methods", "collection_mechanisms", "sampling_strategies"],
+        "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
+        "fields": ["acquisition_methods", "collection_mechanisms", "data_collectors", "collection_timeframes", "collection_process", "sampling_strategies"],
         "score_type": "numeric",
         "max_score": 5
     },
     13: {
         "category": "Technical Documentation",
         "name": "Version History Documentation",
-        "description": "Multiple version records with dates",
-        "fields": ["release_notes", "versions_available_on_platform", "updates", "version_access"],
+        "description": "Version info, version access, errata, update plans, release notes",
+        "fields": ["version", "version_access", "errata", "updates", "release_notes", "versions_available_on_platform"],
         "score_type": "numeric",
         "max_score": 5
     },
     14: {
         "category": "Technical Documentation",
         "name": "Associated Publications",
-        "description": "Formal citations or DOI-linked references",
-        "fields": ["citations", "references", "external_resources"],
+        "description": "Citations or DOI-linked references",
+        "fields": ["citation", "external_resources", "citations", "references"],
         "score_type": "numeric",
         "max_score": 5
     },
     15: {
         "category": "Technical Documentation",
         "name": "Human Subject Representation",
-        "description": "Demographics, diversity, subgroup details",
-        "fields": ["composition.population", "subpopulations", "instances"],
+        "description": "Demographics, subpopulations, vulnerable population protections",
+        "fields": ["subpopulations", "instances", "vulnerable_populations", "composition.population"],
         "score_type": "numeric",
         "max_score": 5
     },
@@ -156,40 +156,40 @@ RUBRIC20_QUESTIONS = {
     16: {
         "category": "FAIRness & Accessibility",
         "name": "Findability (Persistent Links)",
-        "description": "Persistent URLs for access and documentation",
-        "fields": ["page", "download_url", "external_resources"],
+        "description": "Persistent identifiers (DOI, ID) and URLs for access",
+        "fields": ["page", "doi", "id", "download_url", "external_resources"],
         "score_type": "pass_fail",
         "max_score": 1
     },
     17: {
         "category": "FAIRness & Accessibility",
         "name": "Accessibility (Access Mechanism)",
-        "description": "How users can obtain the dataset",
-        "fields": ["distribution_formats", "access_and_licensing", "license_and_use_terms"],
+        "description": "Download URL, distribution formats, access policy",
+        "fields": ["download_url", "distribution_formats", "license_and_use_terms", "access_and_licensing"],
         "score_type": "numeric",
         "max_score": 5
     },
     18: {
         "category": "FAIRness & Accessibility",
-        "name": "Reusability (License Clarity)",
-        "description": "License clearly defined with reuse terms",
-        "fields": ["license_and_use_terms"],
+        "name": "Reusability (License and Use Guidance)",
+        "description": "License with explicit use guidance (intended/prohibited/discouraged)",
+        "fields": ["license_and_use_terms", "intended_uses", "prohibited_uses", "discouraged_uses"],
         "score_type": "numeric",
         "max_score": 5
     },
     19: {
         "category": "FAIRness & Accessibility",
         "name": "Data Integrity and Provenance",
-        "description": "Change logs or provenance tracking",
-        "fields": ["updates", "version_access", "release_notes"],
+        "description": "Version access, errata, updates, source derivation, parent datasets",
+        "fields": ["version_access", "errata", "updates", "was_derived_from", "parent_datasets", "release_notes"],
         "score_type": "numeric",
         "max_score": 5
     },
     20: {
         "category": "FAIRness & Accessibility",
-        "name": "Interlinking Across Platforms",
-        "description": "Cross-platform dataset links",
-        "fields": ["external_resources", "project_website", "same_as"],
+        "name": "Interlinking Across Platforms and Datasets",
+        "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
+        "fields": ["external_resources", "related_datasets", "parent_datasets", "resources", "project_website", "same_as"],
         "score_type": "pass_fail",
         "max_score": 1
     }

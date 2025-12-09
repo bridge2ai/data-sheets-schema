@@ -32,107 +32,107 @@ RUBRIC10_ELEMENTS = {
             {"name": "Persistent Identifier (DOI, RRID, etc.)", "fields": ["doi", "rrid", "id"]},
             {"name": "Dataset Title and Description Completeness", "fields": ["title", "description"]},
             {"name": "Keywords or Tags for Searchability", "fields": ["keywords"]},
-            {"name": "Dataset Landing Page or Platform URL", "fields": ["page", "external_resources"]},
-            {"name": "Associated Project or Program", "fields": ["project", "keywords"]}
+            {"name": "Landing Page and Resources", "fields": ["page", "resources", "external_resources"]},
+            {"name": "Hierarchical Structure", "fields": ["parent_datasets", "related_datasets", "project", "keywords"]}
         ]
     },
     2: {
         "name": "Dataset Access and Retrieval",
         "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
         "sub_elements": [
-            {"name": "Access Mechanism Defined", "fields": ["access_and_licensing.access_policy", "license_and_use_terms"]},
-            {"name": "Data Use Agreement Required?", "fields": ["access_and_licensing.data_use_agreement", "license_and_use_terms"]},
-            {"name": "Download URL or Platform Link Available", "fields": ["distribution_formats", "download_url", "page"]},
-            {"name": "File Formats Specified", "fields": ["data_characteristics.data_formats", "files.listing.type", "distribution_formats"]},
-            {"name": "External Links to Similar or Related Datasets", "fields": ["external_resources", "project_website"]}
+            {"name": "Access Policy and IP Restrictions", "fields": ["license_and_use_terms", "ip_restrictions", "access_and_licensing.access_policy"]},
+            {"name": "Regulatory Restrictions and Confidentiality", "fields": ["regulatory_restrictions", "confidentiality_level", "access_and_licensing.data_use_agreement", "license_and_use_terms"]},
+            {"name": "Download URL or Platform Link Available", "fields": ["download_url", "distribution_formats", "page"]},
+            {"name": "Distribution Formats and File Types", "fields": ["distribution_formats", "format", "media_type", "data_characteristics.data_formats", "files.listing.type"]},
+            {"name": "Related Datasets and External Resources", "fields": ["related_datasets", "external_resources", "project_website"]}
         ]
     },
     3: {
         "name": "Data Reuse and Interoperability",
         "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
         "sub_elements": [
-            {"name": "License Terms Allow Reuse", "fields": ["license_and_use_terms.description", "license_and_use_terms"]},
-            {"name": "Data Formats Are Standardized", "fields": ["data_characteristics.data_formats", "distribution_formats"]},
-            {"name": "Schema or Ontology Conformance Stated", "fields": ["conforms_to"]},
-            {"name": "Identifiers Defined for Linking", "fields": ["data_characteristics.identifiers_in_files"]},
-            {"name": "Documentation of Processing Tools for Reproducibility", "fields": ["software_and_tools", "open_source_code"]}
+            {"name": "License Terms Allow Reuse", "fields": ["license_and_use_terms", "license_and_use_terms.description"]},
+            {"name": "Data Formats Are Standardized", "fields": ["format", "encoding", "distribution_formats", "data_characteristics.data_formats"]},
+            {"name": "Schema or Ontology Conformance", "fields": ["conforms_to", "conforms_to_schema"]},
+            {"name": "Variable Metadata with Identifiers", "fields": ["variables", "data_characteristics.identifiers_in_files"]},
+            {"name": "Use Guidance Provided", "fields": ["intended_uses", "prohibited_uses", "discouraged_uses", "software_and_tools", "open_source_code"]}
         ]
     },
     4: {
         "name": "Ethical Use and Privacy Safeguards",
         "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
         "sub_elements": [
-            {"name": "IRB or Ethics Review Documented", "fields": ["ethics.irb_approval", "ethical_reviews"]},
-            {"name": "Deidentification Method Described", "fields": ["deidentification_and_privacy.approach", "is_deidentified"]},
-            {"name": "Identifiers Removed or Masked", "fields": ["deidentification_and_privacy.examples_of_identifiers_removed", "is_deidentified"]},
-            {"name": "Informed Consent Obtained from Participants", "fields": ["collection_process.consent", "informed_consent"]},
-            {"name": "Ethical Sourcing Statement Included", "fields": ["ethics.ethical_position", "purposes"]}
+            {"name": "IRB or Ethics Review Documented", "fields": ["ethical_reviews", "human_subject_research", "ethics.irb_approval"]},
+            {"name": "Deidentification Method Described", "fields": ["is_deidentified", "deidentification_and_privacy.approach"]},
+            {"name": "Privacy Protections Beyond Deidentification", "fields": ["participant_privacy", "deidentification_and_privacy.examples_of_identifiers_removed", "is_deidentified"]},
+            {"name": "Informed Consent Obtained", "fields": ["informed_consent", "collection_process.consent"]},
+            {"name": "Vulnerable Populations and Compensation", "fields": ["vulnerable_populations", "participant_compensation", "ethics.ethical_position", "purposes"]}
         ]
     },
     5: {
         "name": "Data Composition and Structure",
         "description": "Can the dataset's structure, modality, and population be understood from metadata?",
         "sub_elements": [
-            {"name": "Cohort or Population Characteristics Described", "fields": ["composition.population", "subpopulations", "instances"]},
-            {"name": "Number of Participants or Samples Reported", "fields": ["composition.population.participants", "instances"]},
-            {"name": "Modalities or Data Types Listed", "fields": ["data_characteristics.modalities", "instances"]},
-            {"name": "Conditions or Phenotypes Represented", "fields": ["composition.condition_groups", "subpopulations"]},
-            {"name": "File Dimensions or Sampling Rates Provided", "fields": ["data_characteristics.sampling_and_dimensions"]}
+            {"name": "Cohort or Subpopulations Described", "fields": ["subpopulations", "composition.population", "instances"]},
+            {"name": "Number of Instances or Samples", "fields": ["instances", "composition.population.participants"]},
+            {"name": "Variable Metadata and Tabular Flag", "fields": ["variables", "is_tabular", "data_characteristics.modalities", "instances"]},
+            {"name": "Data Topics or Conditions", "fields": ["instances", "composition.condition_groups", "subpopulations"]},
+            {"name": "Data Quality Issues and Anomalies", "fields": ["anomalies", "sampling_strategies", "data_characteristics.sampling_and_dimensions"]}
         ]
     },
     6: {
         "name": "Data Provenance and Version Tracking",
         "description": "Can a user determine dataset versions, update history, and provenance?",
         "sub_elements": [
-            {"name": "Dataset Version Number Provided", "fields": ["dataset_version", "version"]},
-            {"name": "Version History Documented", "fields": ["release_notes", "updates"]},
-            {"name": "Change Descriptions for Each Version", "fields": ["release_notes.notes", "updates"]},
-            {"name": "Update Schedule or Frequency Indicated", "fields": ["updates"]},
-            {"name": "Versioned Documentation or External References", "fields": ["version_access", "external_resources"]}
+            {"name": "Dataset Version Number", "fields": ["version", "dataset_version"]},
+            {"name": "Version Access Methods", "fields": ["version_access", "release_notes", "updates"]},
+            {"name": "Change Descriptions and Errata", "fields": ["errata", "updates", "release_notes.notes"]},
+            {"name": "Update Schedule or Frequency", "fields": ["updates"]},
+            {"name": "Provenance and Source Derivation", "fields": ["was_derived_from", "release_notes", "version_access", "external_resources"]}
         ]
     },
     7: {
         "name": "Scientific Motivation and Funding Transparency",
         "description": "Does the metadata clearly state why the dataset exists and who funded it?",
         "sub_elements": [
-            {"name": "Motivation or Rationale for Dataset Creation", "fields": ["motivation", "purposes"]},
-            {"name": "Primary Research Objective or Task", "fields": ["intended_uses.primary", "tasks"]},
-            {"name": "Funding Source or Grant Agency Listed", "fields": ["funding_and_acknowledgements.funding.agency", "funders"]},
-            {"name": "Award Number or Grant ID Present", "fields": ["funding_and_acknowledgements.funding.award_number", "funders"]},
-            {"name": "Acknowledgement of Platform or Participant Support", "fields": ["funding_and_acknowledgements.acknowledgements", "funders"]}
+            {"name": "Motivation or Purpose", "fields": ["purposes", "motivation"]},
+            {"name": "Primary Research Objectives or Tasks", "fields": ["tasks", "intended_uses.primary"]},
+            {"name": "Funding Sources and Mechanisms", "fields": ["funders", "funding_and_acknowledgements.funding.agency"]},
+            {"name": "Grant IDs or Award Numbers", "fields": ["funders", "funding_and_acknowledgements.funding.award_number"]},
+            {"name": "Creators and Acknowledgements", "fields": ["creators", "funders", "funding_and_acknowledgements.acknowledgements"]}
         ]
     },
     8: {
         "name": "Technical Transparency (Data Collection and Processing)",
         "description": "Can data collection and processing steps be replicated or understood?",
         "sub_elements": [
-            {"name": "Collection Setting or Sites Described", "fields": ["collection_process.setting", "data_collectors", "acquisition_methods"]},
-            {"name": "Data Capture Method or Device Listed", "fields": ["collection_process.data_capture", "collection_mechanisms", "acquisition_methods"]},
-            {"name": "Preprocessing or Cleaning Steps Documented", "fields": ["preprocessing_and_derived_data.raw_audio_processing", "preprocessing_strategies", "cleaning_strategies"]},
-            {"name": "Open-Source Processing Code Provided", "fields": ["software_and_tools.preprocessing_code", "open_source_code"]},
-            {"name": "External Standards or References Cited", "fields": ["references", "external_resources"]}
+            {"name": "Collection Mechanisms and Settings", "fields": ["collection_mechanisms", "data_collectors", "collection_process.setting", "acquisition_methods"]},
+            {"name": "Data Acquisition Methods", "fields": ["acquisition_methods", "collection_mechanisms", "collection_process.data_capture"]},
+            {"name": "Preprocessing, Cleaning, and Labeling", "fields": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies", "preprocessing_and_derived_data.raw_audio_processing"]},
+            {"name": "Software and Tools Documented", "fields": ["software_and_tools", "software_and_tools.preprocessing_code", "open_source_code"]},
+            {"name": "External Standards and Resources", "fields": ["external_resources", "conforms_to", "references"]}
         ]
     },
     9: {
         "name": "Dataset Evaluation and Limitations Disclosure",
         "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
         "sub_elements": [
-            {"name": "Limitations Section Present", "fields": ["limitations"]},
-            {"name": "Sampling Bias or Representativeness Noted", "fields": ["composition.population", "sampling_and_dimensions", "sampling_strategies", "anomalies"]},
-            {"name": "Quality Control or Validation Steps Mentioned", "fields": ["preprocessing_and_derived_data", "data_quality", "cleaning_strategies"]},
-            {"name": "Known Risks or Use Constraints Listed", "fields": ["intended_uses.usage_notes", "discouraged_uses", "future_use_impacts"]},
-            {"name": "Conflicts of Interest Declared", "fields": ["ethics.conflicts_of_interest"]}
+            {"name": "Known Limitations Documented", "fields": ["known_limitations", "limitations"]},
+            {"name": "Systematic Biases Identified", "fields": ["known_biases", "composition.population", "sampling_and_dimensions", "sampling_strategies"]},
+            {"name": "Data Anomalies and Quality Issues", "fields": ["anomalies", "preprocessing_and_derived_data", "data_quality", "cleaning_strategies"]},
+            {"name": "Sensitive Content and Warnings", "fields": ["sensitive_elements", "content_warnings", "intended_uses.usage_notes", "discouraged_uses", "future_use_impacts"]},
+            {"name": "Ethical Review Details", "fields": ["ethical_reviews", "ethics.conflicts_of_interest"]}
         ]
     },
     10: {
         "name": "Cross-Platform and Community Integration",
         "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
         "sub_elements": [
-            {"name": "Dataset Published on a Recognized Platform", "fields": ["publisher", "access_and_licensing.platform", "page", "maintainers"]},
-            {"name": "Cross-referenced DOIs or Related Dataset Links", "fields": ["external_resources", "references", "same_as"]},
-            {"name": "Community Standards or Schema Reference", "fields": ["conforms_to"]},
-            {"name": "Associated Outreach Materials", "fields": ["external_resources", "distribution_formats"]},
-            {"name": "Similar Dataset Links or Thematic Grouping", "fields": ["project", "related_datasets"]}
+            {"name": "Dataset Published on Recognized Platform", "fields": ["publisher", "access_and_licensing.platform", "page", "maintainers"]},
+            {"name": "Citation and DOI for Cross-referencing", "fields": ["citation", "doi", "external_resources", "references", "same_as"]},
+            {"name": "Community Standards or Schema Conformance", "fields": ["conforms_to"]},
+            {"name": "Outreach Materials and Documentation Links", "fields": ["external_resources", "page", "distribution_formats"]},
+            {"name": "Related Datasets with Typed Relationships", "fields": ["related_datasets", "project"]}
         ]
     }
 }
