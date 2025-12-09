@@ -87,7 +87,7 @@ tasks: [...]
 **Details:** The deeply nested Dataset object with ~50 D4D fields is failing JSON Schema validation
 **Likely Cause:** Some field values don't match expected schema types or structures
 
-###CHORUS (2 errors)
+### CHORUS (2 errors)
 **Error Types:**
 1. Resource 0: JSON Schema validation failure
 2. Resource 1: JSON Schema validation failure
