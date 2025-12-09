@@ -232,8 +232,13 @@ class D4DPromptLoader:
         else:
             # Treat as custom file path
             custom_path = Path(self.schema_source)
-            content, file_hash = self._load_schema_local(custom_path)
-            self._schema_hash = file_hash
+            if not custom_path.is_file():
+                raise FileNotFoundError(
+                    f"Custom schema_source '{self.schema_source}' does not correspond to a valid file path. "
+                    f"Please check the path and try again."
+                )
+            content, custom_file_hash = self._load_schema_local(custom_path)
+            self._schema_hash = custom_file_hash
 
         # Cache if enabled
         if self.cache_schema:
