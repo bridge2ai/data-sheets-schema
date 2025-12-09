@@ -541,6 +541,180 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 }
 ```
 
+## Batch Evaluation Summary Output
+
+When evaluating **multiple D4D files** (batch mode), generate a comprehensive summary conforming to the **D4D_Evaluation_Summary schema** at:
+`src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml`
+
+**Summary output file:** `evaluation_summary.yaml`
+
+### Required Structure (EvaluationSummary class)
+
+```yaml
+id: rubric20_semantic_evaluation_<timestamp>
+rubric_type: rubric20
+rubric_description: "20-question detailed rubric with semantic analysis: 4 categories (Structural Completeness, Metadata Quality, Technical Documentation, FAIRness), 0-5 scoring + pass/fail, maximum 84 points, enhanced with correctness validation, consistency checking, and semantic understanding"
+total_files_evaluated: 8
+evaluation_date: "<ISO 8601 date>"
+
+overall_performance:
+  average_score: 52.3
+  max_score: 84
+  average_percentage: 62.3
+  best_score: 68.0
+  worst_score: 38.5
+  best_performer:
+    file: AI_READI_d4d.yaml
+    method: claudecode_agent
+    project: AI_READI
+    score: 68.0
+    percentage: 81.0
+  worst_performer:
+    file: CHORUS_d4d.yaml
+    method: gpt5
+    project: CHORUS
+    score: 38.5
+    percentage: 45.8
+
+method_comparison:
+  - method: claudecode_agent
+    file_count: 4
+    average_score: 56.2
+    average_percentage: 66.9
+    rank: 1
+  - method: claudecode_assistant
+    file_count: 4
+    average_score: 48.4
+    average_percentage: 57.6
+    rank: 2
+
+project_comparison:
+  - project: AI_READI
+    file_count: 2
+    average_score: 61.5
+    average_percentage: 73.2
+    rank: 1
+  - project: CM4AI
+    file_count: 2
+    average_score: 54.8
+    average_percentage: 65.2
+    rank: 2
+
+category_performance:
+  - category_id: "1"
+    category_name: "Structural Completeness and Core Metadata"
+    average_score: 15.8
+    max_score: 24
+    average_percentage: 65.8
+  - category_id: "2"
+    category_name: "Metadata Quality and Detail"
+    average_score: 14.2
+    max_score: 22
+    average_percentage: 64.5
+  - category_id: "3"
+    category_name: "Technical Documentation and Reproducibility"
+    average_score: 12.5
+    max_score: 25
+    average_percentage: 50.0
+  - category_id: "4"
+    category_name: "FAIRness and Accessibility"
+    average_score: 9.8
+    max_score: 13
+    average_percentage: 75.4
+
+common_strengths:
+  - description: "Strong structural completeness with semantically validated fields"
+    frequency: 7
+  - description: "Consistent FAIR compliance with verified persistent identifiers"
+    frequency: 6
+  - description: "Well-documented access mechanisms with licensing consistency"
+    frequency: 6
+
+common_weaknesses:
+  - description: "Limited technical documentation with cross-field consistency issues"
+    frequency: 6
+    severity: high
+  - description: "Missing or incorrectly formatted funding grant numbers"
+    frequency: 5
+    severity: high
+  - description: "Ethics documentation present but lacks IRB-consent alignment"
+    frequency: 5
+    severity: high
+
+key_insights:
+  - insight: "Semantic evaluation identified 52 issues not detected by standard quality assessment"
+    impact: high
+  - insight: "Consistency checking revealed 21 cross-field logic problems, primarily in ethics/privacy"
+    impact: high
+  - insight: "Correctness validation found 15 identifier format issues requiring manual review"
+    impact: high
+  - insight: "FAIRness category scores highest (75.4%) but with 10% identifier plausibility issues"
+    impact: high
+  - insight: "Technical Documentation weakest (50.0%) due to missing reproducibility details"
+    impact: high
+  - insight: "Agent methods outperform GPT-5 by 9.3 percentage points"
+    impact: medium
+
+# Semantic Analysis Summary (specific to semantic evaluation)
+semantic_analysis_summary:
+  total_issues_detected: 52
+  issue_breakdown:
+    consistency: 21
+    correctness: 15
+    semantic_understanding: 11
+    content_accuracy: 5
+
+  common_consistency_issues:
+    - description: "human_subject_research=True but missing IRB documentation"
+      frequency: 6
+      affected_categories: ["Category 1: Structural Completeness", "Category 2: Metadata Quality"]
+    - description: "deidentification claimed but approach not specified"
+      frequency: 5
+      affected_categories: ["Category 2: Metadata Quality"]
+    - description: "licensing terms inconsistent with access restrictions"
+      frequency: 4
+      affected_categories: ["Category 4: FAIRness"]
+    - description: "Funding agency mentioned but grant number format invalid"
+      frequency: 3
+      affected_categories: ["Category 1: Structural Completeness"]
+
+  common_correctness_issues:
+    - description: "DOI format valid but registrar prefix unusual/unverified"
+      frequency: 4
+      affected_categories: ["Category 4: FAIRness"]
+    - description: "Grant number format non-standard for funding agency (NIH/NSF)"
+      frequency: 3
+      affected_categories: ["Category 1: Structural Completeness"]
+    - description: "RRID identifiers not following standard format (RRID:SCR_*, RRID:AB_*)"
+      frequency: 2
+      affected_categories: ["Category 3: Technical Documentation"]
+    - description: "URL validity check failed for external resources"
+      frequency: 2
+      affected_categories: ["Category 4: FAIRness"]
+
+  semantic_quality_insights:
+    - "Description specificity varies widely: 23-87% semantic density across files"
+    - "Ethics documentation structurally present but lacks semantic depth (75% of files)"
+    - "Funding information complete but grant validation reveals format issues (60% non-standard)"
+    - "Technical documentation often generic without specific tool versions or parameters"
+    - "Deidentification methods mentioned but consistency with data type needs validation"
+    - "Category 4 (FAIRness) benefits most from semantic validation (identifier verification)"
+```
+
+### Additional Output Files
+
+1. **CSV Summary:** `all_scores.csv`
+   - Columns: project, method, file, total_score, percentage, cat1_score, cat2_score, cat3_score, cat4_score, consistency_passed, consistency_failed, issues_detected
+
+2. **Markdown Report:** `summary_report.md`
+   - Executive summary with scoring tables
+   - Semantic analysis highlights by issue type
+   - Method and project performance analysis
+   - Category-level performance with semantic insights
+   - Consistency and correctness issue patterns by category
+   - Question-by-question semantic quality assessment
+   - Recommendations for improving semantic coherence
+
 ## Scoring Summary
 
 **Maximum Possible Score:** 84 points

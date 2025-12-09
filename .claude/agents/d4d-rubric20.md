@@ -464,6 +464,129 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 }
 ```
 
+## Batch Evaluation Summary Output
+
+When evaluating **multiple D4D files** (batch mode), generate a comprehensive summary conforming to the **D4D_Evaluation_Summary schema** at:
+`src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml`
+
+**Summary output file:** `evaluation_summary.yaml`
+
+### Required Structure (EvaluationSummary class)
+
+```yaml
+id: rubric20_evaluation_<timestamp>
+rubric_type: rubric20
+rubric_description: "20-question detailed rubric with 4 categories (Structural Completeness, Metadata Quality, Technical Documentation, FAIRness), 0-5 scoring scale + pass/fail, maximum 84 points"
+total_files_evaluated: 8
+evaluation_date: "<ISO 8601 date>"
+
+overall_performance:
+  average_score: 52.3
+  max_score: 84
+  average_percentage: 62.3
+  best_score: 68.0
+  worst_score: 38.5
+  best_performer:
+    file: AI_READI_d4d.yaml
+    method: claudecode_agent
+    project: AI_READI
+    score: 68.0
+    percentage: 81.0
+  worst_performer:
+    file: CHORUS_d4d.yaml
+    method: gpt5
+    project: CHORUS
+    score: 38.5
+    percentage: 45.8
+
+method_comparison:
+  - method: claudecode_agent
+    file_count: 4
+    average_score: 56.2
+    average_percentage: 66.9
+    rank: 1
+  - method: claudecode_assistant
+    file_count: 4
+    average_score: 48.4
+    average_percentage: 57.6
+    rank: 2
+
+project_comparison:
+  - project: AI_READI
+    file_count: 2
+    average_score: 61.5
+    average_percentage: 73.2
+    rank: 1
+  - project: CM4AI
+    file_count: 2
+    average_score: 54.8
+    average_percentage: 65.2
+    rank: 2
+
+category_performance:
+  - category_id: "1"
+    category_name: "Structural Completeness and Core Metadata"
+    average_score: 15.8
+    max_score: 24
+    average_percentage: 65.8
+  - category_id: "2"
+    category_name: "Metadata Quality and Detail"
+    average_score: 14.2
+    max_score: 22
+    average_percentage: 64.5
+  - category_id: "3"
+    category_name: "Technical Documentation and Reproducibility"
+    average_score: 12.5
+    max_score: 25
+    average_percentage: 50.0
+  - category_id: "4"
+    category_name: "FAIRness and Accessibility"
+    average_score: 9.8
+    max_score: 13
+    average_percentage: 75.4
+
+common_strengths:
+  - description: "Strong structural completeness (≥90% fields populated)"
+    frequency: 7
+  - description: "Clear FAIR compliance with persistent identifiers"
+    frequency: 6
+  - description: "Well-documented access mechanisms and licensing"
+    frequency: 6
+
+common_weaknesses:
+  - description: "Limited technical documentation of collection protocols"
+    frequency: 6
+    severity: high
+  - description: "Missing funding details and grant numbers"
+    frequency: 5
+    severity: high
+  - description: "No associated publication DOIs or citations"
+    frequency: 5
+    severity: medium
+
+key_insights:
+  - insight: "FAIRness category scores highest (75.4% average) across all methods"
+    impact: high
+  - insight: "Technical Documentation weakest area (50.0% average)"
+    impact: high
+  - insight: "Agent methods show 9+ percentage point advantage over GPT-5"
+    impact: medium
+  - insight: "Category 1 and 4 consistently outperform Categories 2 and 3"
+    impact: medium
+```
+
+### Additional Output Files
+
+1. **CSV Summary:** `all_scores.csv`
+   - Columns: project, method, file, total_score, percentage, cat1_score, cat2_score, cat3_score, cat4_score
+
+2. **Markdown Report:** `summary_report.md`
+   - Executive summary with scoring tables
+   - Method and project performance analysis
+   - Category-level performance breakdown
+   - Question-by-question insights
+   - Recommendations for improvement
+
 ## Scoring Summary
 
 **Maximum Possible Score:** 84 points

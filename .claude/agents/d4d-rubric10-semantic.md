@@ -492,6 +492,160 @@ Return your evaluation as a **JSON object** with this EXACT structure:
 }
 ```
 
+## Batch Evaluation Summary Output
+
+When evaluating **multiple D4D files** (batch mode), generate a comprehensive summary conforming to the **D4D_Evaluation_Summary schema** at:
+`src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml`
+
+**Summary output file:** `evaluation_summary.yaml`
+
+### Required Structure (EvaluationSummary class)
+
+```yaml
+id: rubric10_semantic_evaluation_<timestamp>
+rubric_type: rubric10
+rubric_description: "10-element hierarchical rubric with semantic analysis: binary scoring (0/1), maximum 50 points, enhanced with correctness validation, consistency checking, and semantic understanding assessment"
+total_files_evaluated: 8
+evaluation_date: "<ISO 8601 date>"
+
+overall_performance:
+  average_score: 35.2
+  max_score: 50
+  average_percentage: 70.4
+  best_score: 42.0
+  worst_score: 28.0
+  best_performer:
+    file: AI_READI_d4d.yaml
+    method: claudecode_agent
+    project: AI_READI
+    score: 42.0
+    percentage: 84.0
+  worst_performer:
+    file: CHORUS_d4d.yaml
+    method: gpt5
+    project: CHORUS
+    score: 28.0
+    percentage: 56.0
+
+method_comparison:
+  - method: claudecode_agent
+    file_count: 4
+    average_score: 37.5
+    average_percentage: 75.0
+    rank: 1
+  - method: claudecode_assistant
+    file_count: 4
+    average_score: 32.8
+    average_percentage: 65.6
+    rank: 2
+
+project_comparison:
+  - project: AI_READI
+    file_count: 2
+    average_score: 39.0
+    average_percentage: 78.0
+    rank: 1
+  - project: CM4AI
+    file_count: 2
+    average_score: 36.5
+    average_percentage: 73.0
+    rank: 2
+
+element_performance:
+  - element_id: "1"
+    element_name: "Dataset Discovery and Identification"
+    average_score: 4.2
+    max_score: 5
+    average_percentage: 84.0
+  - element_id: "2"
+    element_name: "Terms of Reuse"
+    average_score: 4.5
+    max_score: 5
+    average_percentage: 90.0
+  # ... (10 elements total)
+
+common_strengths:
+  - description: "Strong persistent identifier presence with valid DOI formats"
+    frequency: 7
+  - description: "Consistent ethics documentation (IRB + deidentification alignment)"
+    frequency: 6
+  - description: "Semantically rich descriptions with specific details"
+    frequency: 6
+
+common_weaknesses:
+  - description: "Missing funding details with inconsistent grant number formats"
+    frequency: 6
+    severity: high
+  - description: "Cross-field consistency issues (human subjects vs IRB approval)"
+    frequency: 5
+    severity: high
+  - description: "Generic descriptions lacking semantic specificity"
+    frequency: 4
+    severity: medium
+
+key_insights:
+  - insight: "Semantic evaluation detected 45 issues not caught by standard quality checks"
+    impact: high
+  - insight: "Consistency checking identified 18 cross-field logic problems"
+    impact: high
+  - insight: "DOI/grant validation found 12 format or plausibility issues"
+    impact: high
+  - insight: "Agent methods outperform GPT-5 by 10-15 percentage points"
+    impact: high
+  - insight: "Discovery elements score highest but 15% have identifier plausibility issues"
+    impact: medium
+
+# Semantic Analysis Summary (specific to semantic evaluation)
+semantic_analysis_summary:
+  total_issues_detected: 45
+  issue_breakdown:
+    consistency: 18
+    correctness: 12
+    semantic_understanding: 10
+    content_accuracy: 5
+
+  common_consistency_issues:
+    - description: "human_subject_research=True but no IRB approval details"
+      frequency: 6
+      affected_elements: ["Element 4: Ethics"]
+    - description: "is_deidentified=True but deidentification method not specified"
+      frequency: 4
+      affected_elements: ["Element 4: Ethics", "Element 7: Data Protection"]
+    - description: "Funding mentioned but no grant numbers in funding_and_acknowledgements"
+      frequency: 3
+      affected_elements: ["Element 8: Provenance"]
+
+  common_correctness_issues:
+    - description: "DOI prefix not matching known registrars (PhysioNet, Zenodo, DataVerse)"
+      frequency: 3
+      affected_elements: ["Element 1: Discovery"]
+    - description: "Grant number format non-standard for NIH/NSF patterns"
+      frequency: 2
+      affected_elements: ["Element 8: Provenance"]
+    - description: "RRID identifiers missing or malformed"
+      frequency: 2
+      affected_elements: ["Element 1: Discovery", "Element 9: Technical Transparency"]
+
+  semantic_quality_insights:
+    - "Description semantic density ranges from 35% to 92% (specific vs generic)"
+    - "Ethics documentation often present but lacks semantic depth (process descriptions)"
+    - "Funding information structurally complete but grant validation reveals format issues"
+    - "Deidentification methods mentioned but consistency with data type needs validation"
+```
+
+### Additional Output Files
+
+1. **CSV Summary:** `all_scores.csv`
+   - Columns: project, method, file, total_score, percentage, consistency_passed, consistency_failed, issues_detected
+
+2. **Markdown Report:** `summary_report.md`
+   - Executive summary with comparison tables
+   - Semantic analysis highlights (issues detected by type)
+   - Method and project performance breakdown
+   - Element-level analysis with semantic insights
+   - Consistency and correctness issue patterns
+   - Recommendations for improving semantic quality
+
 ## Key Principles
 
 1. **Quality over Presence:** Don't just check if a field exists—assess whether it provides meaningful, actionable information.
