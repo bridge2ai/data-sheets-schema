@@ -1267,6 +1267,12 @@ evaluate-d4d-llm-both:
 		--output-dir $(EVAL_LLM_DIR)
 	@echo "✅ LLM evaluation complete! Results in $(EVAL_LLM_DIR)"
 
+# Generate Grand Challenge × Approach comparison table (TSV + Markdown)
+gen-gc-approach-table:
+	@echo "📊 Generating Grand Challenge × Approach comparison table..."
+	python3 scripts/generate_gc_approach_comparison.py
+	@echo "✅ Tables generated: data/evaluation_llm/gc_approach_comparison.{tsv,md}"
+
 # Compare LLM vs presence-based evaluation
 compare-evaluations:
 	@echo "📊 Comparing LLM-based vs presence-based evaluation..."
