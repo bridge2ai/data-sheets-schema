@@ -2,6 +2,7 @@
 
 ## Complete Evaluation Results
 
+**Rubric10** and **Rubric20** refer to two distinct evaluation rubrics used to assess project performance. "Rubric10" consists of 50 criteria, while "Rubric20" consists of 84 criteria. The scores are presented in the format "X/Y", where X is the number of criteria met and Y is the total number of criteria for that rubric. The columns "R10%" and "R20%" show the percentage of criteria met for each rubric.
 | Project | Rubric10 | Rubric20 | R10% | R20% |
 |------|------|------|------|------|
 | AI_READI - gpt5 | 3/50 | 3/84 | 6.0% | 3.6% |
