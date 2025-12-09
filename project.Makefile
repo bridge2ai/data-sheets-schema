@@ -1267,11 +1267,58 @@ evaluate-d4d-llm-both:
 		--output-dir $(EVAL_LLM_DIR)
 	@echo "✅ LLM evaluation complete! Results in $(EVAL_LLM_DIR)"
 
+# Evaluate all D4D files with Rubric10 (hybrid heuristic)
+evaluate-rubric10-all:
+	@echo "🔍 Evaluating all D4D files with Rubric10 (hybrid heuristic)..."
+	python3 scripts/batch_evaluate_rubric10_hybrid.py \
+		--base-dir data \
+		--projects AI_READI CHORUS CM4AI VOICE \
+		--methods gpt5 claudecode_agent claudecode_assistant \
+		--output-dir data/evaluation_llm/rubric10 \
+		--individual
+	@echo "✅ Rubric10 evaluation complete!"
+	@echo "Generating summaries..."
+	python3 scripts/summarize_rubric10_results.py
+	@echo "✅ Summaries created: data/evaluation_llm/rubric10/summary_*.md"
+
+# Evaluate all D4D files with Rubric20 (hybrid heuristic)
+evaluate-rubric20-all:
+	@echo "🔍 Evaluating all D4D files with Rubric20 (hybrid heuristic)..."
+	python3 scripts/batch_evaluate_rubric20_hybrid.py \
+		--base-dir data \
+		--projects AI_READI CHORUS CM4AI VOICE \
+		--methods gpt5 claudecode_agent claudecode_assistant \
+		--output-dir data/evaluation_llm/rubric20 \
+		--individual
+	@echo "✅ Rubric20 evaluation complete!"
+	@echo "Generating summaries..."
+	python3 scripts/summarize_rubric20_results.py
+	@echo "✅ Summaries created: data/evaluation_llm/rubric20/summary_*.md"
+
+# Evaluate with both rubrics (complete evaluation pipeline)
+evaluate-rubrics-all: evaluate-rubric10-all evaluate-rubric20-all
+	@echo "✅ All rubric evaluations complete!"
+
 # Generate Grand Challenge × Approach comparison table (TSV + Markdown)
 gen-gc-approach-table:
 	@echo "📊 Generating Grand Challenge × Approach comparison table..."
 	python3 scripts/generate_gc_approach_comparison.py
 	@echo "✅ Tables generated: data/evaluation_llm/gc_approach_comparison.{tsv,md}"
+
+# Complete evaluation pipeline: evaluate + generate tables
+evaluate-and-report: evaluate-rubrics-all gen-gc-approach-table
+	@echo ""
+	@echo "========================================"
+	@echo "✅ Complete Evaluation Pipeline Finished!"
+	@echo "========================================"
+	@echo "Results:"
+	@echo "  - Rubric10 evaluations: data/evaluation_llm/rubric10/"
+	@echo "  - Rubric20 evaluations: data/evaluation_llm/rubric20/"
+	@echo "  - Summary tables: data/evaluation_llm/rubric*/summary_*.md"
+	@echo "  - GC × Approach table: data/evaluation_llm/gc_approach_comparison.{tsv,md}"
+	@echo ""
+	@echo "View results:"
+	@echo "  cat data/evaluation_llm/gc_approach_comparison.md"
 
 # Compare LLM vs presence-based evaluation
 compare-evaluations:
