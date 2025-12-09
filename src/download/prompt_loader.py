@@ -188,7 +188,7 @@ class D4DPromptLoader:
         if requests is None:
             raise ImportError(
                 "requests library is required for GitHub schema loading. "
-                "Install with: pip install requests"
+                "Install with: poetry add requests"
             )
 
         if url is None:
