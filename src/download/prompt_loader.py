@@ -29,6 +29,7 @@ Last Updated: 2025-12-03
 """
 
 import hashlib
+import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -113,39 +114,43 @@ class D4DPromptLoader:
         Searches upward from prompts directory for pyproject.toml marker file.
         Falls back to D4D_PROJECT_ROOT environment variable if marker not found.
         """
-        import os
+        # First try marker file search (primary method)
+        project_root = self._find_project_root(self.prompts_dir, marker_file="pyproject.toml")
         
-        # First try environment variable
-        env_root = os.environ.get('D4D_PROJECT_ROOT')
-        if env_root:
-            project_root = Path(env_root)
-            if not project_root.exists():
-                raise FileNotFoundError(
-                    f"D4D_PROJECT_ROOT environment variable points to non-existent path: {env_root}"
-                )
-        else:
-            # Search upward for pyproject.toml marker file
-            project_root = self._find_project_root(self.prompts_dir, marker_file="pyproject.toml")
-            if project_root is None:
+        # Fall back to environment variable if marker not found
+        if project_root is None:
+            env_root = os.environ.get('D4D_PROJECT_ROOT')
+            if env_root:
+                project_root = Path(env_root)
+                if not project_root.exists():
+                    raise FileNotFoundError(
+                        f"D4D_PROJECT_ROOT environment variable points to non-existent path: {env_root}"
+                    )
+            else:
                 raise FileNotFoundError(
                     "Could not find project root. Searched upward from prompts directory for 'pyproject.toml' marker file. "
                     "Set D4D_PROJECT_ROOT environment variable to explicitly specify project root."
                 )
         
         # Try primary schema path (merged schema)
-        schema_path = project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema_all.yaml"
+        primary_path = project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema_all.yaml"
         
-        if not schema_path.exists():
-            # Try alternative path (main schema with imports)
-            schema_path = project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema.yaml"
-            
-        if not schema_path.exists():
-            raise FileNotFoundError(
-                f"Schema file not found in project root: {project_root}. "
-                f"Expected at: {project_root / 'src' / 'data_sheets_schema' / 'schema' / 'data_sheets_schema_all.yaml'}"
-            )
-
-        return schema_path
+        if primary_path.exists():
+            return primary_path
+        
+        # Try alternative path (main schema with imports)
+        alternative_path = project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema.yaml"
+        
+        if alternative_path.exists():
+            return alternative_path
+        
+        # Neither path exists - provide helpful error
+        raise FileNotFoundError(
+            f"Schema file not found in project root: {project_root}. "
+            f"Tried both:\n"
+            f"  - {primary_path}\n"
+            f"  - {alternative_path}"
+        )
     
     def _find_project_root(self, start_path: Path, marker_file: str = "pyproject.toml") -> Optional[Path]:
         """
