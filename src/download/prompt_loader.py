@@ -119,7 +119,7 @@ class D4DPromptLoader:
         
         # Fall back to environment variable if marker not found
         if project_root is None:
-            env_root = os.environ.get('D4D_PROJECT_ROOT')
+            env_root = os.getenv('D4D_PROJECT_ROOT')
             if env_root:
                 project_root = Path(env_root)
                 if not project_root.exists():
@@ -128,7 +128,7 @@ class D4DPromptLoader:
                     )
             else:
                 raise FileNotFoundError(
-                    "Could not find project root. Searched upward from prompts directory for 'pyproject.toml' marker file. "
+                    f"Could not find project root. Searched upward from '{self.prompts_dir}' for 'pyproject.toml' marker file. "
                     "Set D4D_PROJECT_ROOT environment variable to explicitly specify project root."
                 )
         
@@ -152,30 +152,34 @@ class D4DPromptLoader:
             f"  - {alternative_path}"
         )
     
-    def _find_project_root(self, start_path: Path, marker_file: str = "pyproject.toml") -> Optional[Path]:
+    def _find_project_root(self, start_path: Path, marker_file: str = "pyproject.toml", max_depth: int = 30) -> Optional[Path]:
         """
         Search upward from start_path to find project root containing marker_file.
         
         Args:
             start_path: Directory to start searching from
             marker_file: Name of marker file to search for (default: pyproject.toml)
+            max_depth: Maximum number of levels to search upward (default: 30)
             
         Returns:
             Path to project root if found, None otherwise
         """
         current = start_path.resolve()
+        depth = 0
         
-        # Search upward until we hit the filesystem root
-        while current != current.parent:
+        # Search upward until we hit the filesystem root or max depth
+        while current != current.parent and depth < max_depth:
             marker_path = current / marker_file
             if marker_path.exists():
                 return current
             current = current.parent
+            depth += 1
         
-        # Check the filesystem root itself
-        marker_path = current / marker_file
-        if marker_path.exists():
-            return current
+        # Check the filesystem root itself (if we haven't exceeded max_depth)
+        if depth < max_depth:
+            marker_path = current / marker_file
+            if marker_path.exists():
+                return current
             
         return None
 
