@@ -5,16 +5,16 @@
   "project": "AI",
   "method": "READI_claudecode_agent",
   "type": "concatenated",
-  "evaluation_timestamp": "2025-12-07T21:19:11.710383",
+  "evaluation_timestamp": "2025-12-08T19:16:57.592653",
   "model": {
     "name": "hybrid-heuristic-evaluator",
     "temperature": "N/A",
     "evaluation_type": "rule_based_with_quality_heuristics"
   },
   "overall_score": {
-    "total_points": 60,
+    "total_points": 58,
     "max_points": 84,
-    "percentage": 71.4
+    "percentage": 69.0
   },
   "categories": {
     "Structural Completeness": {
@@ -23,12 +23,12 @@
         {
           "id": 1,
           "name": "Field Completeness",
-          "description": "Proportion of mandatory schema fields populated",
-          "score": 5,
+          "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+          "score": 0,
           "max_score": 5,
           "score_type": "numeric",
           "evidence": "id: https://fairhub.io/datasets/2",
-          "quality_note": "5/5 fields filled (\u226590%)"
+          "quality_note": "9/14 fields filled (\u226440%)"
         },
         {
           "id": 2,
@@ -53,7 +53,7 @@
         {
           "id": 4,
           "name": "File Enumeration and Type Variety",
-          "description": "Number of files and file type diversity",
+          "description": "Number of distribution formats and file type diversity",
           "score": 3,
           "max_score": 5,
           "score_type": "numeric",
@@ -63,15 +63,15 @@
         {
           "id": 5,
           "name": "Data File Size Availability",
-          "description": "Presence of file size or dimensional metadata",
+          "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
           "score": 0,
           "max_score": 1,
           "score_type": "pass_fail",
-          "evidence": "subsets: 3 items",
+          "evidence": "instances: 1 items",
           "quality_note": "Fail: No file size/dimension metadata"
         }
       ],
-      "category_score": 18,
+      "category_score": 13,
       "category_max": 21
     },
     "Metadata Quality & Content": {
@@ -90,7 +90,7 @@
         {
           "id": 7,
           "name": "Funding and Acknowledgements Completeness",
-          "description": "Presence of funding sources, grants, sponsors",
+          "description": "Funding sources, grants, sponsors, and creator affiliations",
           "score": 5,
           "max_score": 5,
           "score_type": "numeric",
@@ -100,17 +100,17 @@
         {
           "id": 8,
           "name": "Ethical and Privacy Declarations",
-          "description": "Deidentification methods, IRB approvals, ethical sourcing",
-          "score": 0,
+          "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
+          "score": 3,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: deidentification_and_privacy, ethics, ethical_reviews, is_deidentified, informed_consent",
-          "quality_note": "Field absent or empty"
+          "evidence": "human_subject_research: present (7 keys)",
+          "quality_note": "Partial ethics documentation"
         },
         {
           "id": 9,
-          "name": "Access Requirements Documentation",
-          "description": "Access policy and license clearly defined",
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
           "score": 3,
           "max_score": 5,
           "score_type": "numeric",
@@ -120,7 +120,7 @@
         {
           "id": 10,
           "name": "Interoperability and Standardization",
-          "description": "Standard formats, ontologies, schema conformance",
+          "description": "Standard formats, encoding, ontologies, schema conformance",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
@@ -128,7 +128,7 @@
           "quality_note": "Non-standard or unspecified format"
         }
       ],
-      "category_score": 9,
+      "category_score": 12,
       "category_max": 21
     },
     "Technical Documentation": {
@@ -137,7 +137,7 @@
         {
           "id": 11,
           "name": "Tool and Software Transparency",
-          "description": "Preprocessing libraries or tools documented",
+          "description": "Preprocessing, cleaning, labeling strategies with software tools",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
@@ -147,7 +147,7 @@
         {
           "id": 12,
           "name": "Collection Protocol Clarity",
-          "description": "Participant recruitment and data acquisition described",
+          "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
           "score": 3,
           "max_score": 5,
           "score_type": "numeric",
@@ -157,17 +157,17 @@
         {
           "id": 13,
           "name": "Version History Documentation",
-          "description": "Multiple version records with dates",
+          "description": "Version info, version access, errata, update plans, release notes",
           "score": 5,
           "max_score": 5,
           "score_type": "numeric",
           "evidence": "updates: present (5 keys)",
-          "quality_note": "\u22652 versions with details: v2.0.0, v1.0.0, v3.0.0"
+          "quality_note": "\u22652 versions with details: v1.0.0, v3.0.0, v2.0.0"
         },
         {
           "id": 14,
           "name": "Associated Publications",
-          "description": "Formal citations or DOI-linked references",
+          "description": "Citations or DOI-linked references",
           "score": 5,
           "max_score": 5,
           "score_type": "numeric",
@@ -177,7 +177,7 @@
         {
           "id": 15,
           "name": "Human Subject Representation",
-          "description": "Demographics, diversity, subgroup details",
+          "description": "Demographics, subpopulations, vulnerable population protections",
           "score": 5,
           "max_score": 5,
           "score_type": "numeric",
@@ -194,7 +194,7 @@
         {
           "id": 16,
           "name": "Findability (Persistent Links)",
-          "description": "Persistent URLs for access and documentation",
+          "description": "Persistent identifiers (DOI, ID) and URLs for access",
           "score": 1,
           "max_score": 1,
           "score_type": "pass_fail",
@@ -204,7 +204,7 @@
         {
           "id": 17,
           "name": "Accessibility (Access Mechanism)",
-          "description": "How users can obtain the dataset",
+          "description": "Download URL, distribution formats, access policy",
           "score": 5,
           "max_score": 5,
           "score_type": "numeric",
@@ -213,8 +213,8 @@
         },
         {
           "id": 18,
-          "name": "Reusability (License Clarity)",
-          "description": "License clearly defined with reuse terms",
+          "name": "Reusability (License and Use Guidance)",
+          "description": "License with explicit use guidance (intended/prohibited/discouraged)",
           "score": 5,
           "max_score": 5,
           "score_type": "numeric",
@@ -224,7 +224,7 @@
         {
           "id": 19,
           "name": "Data Integrity and Provenance",
-          "description": "Change logs or provenance tracking",
+          "description": "Version access, errata, updates, source derivation, parent datasets",
           "score": 3,
           "max_score": 5,
           "score_type": "numeric",
@@ -233,13 +233,13 @@
         },
         {
           "id": 20,
-          "name": "Interlinking Across Platforms",
-          "description": "Cross-platform dataset links",
+          "name": "Interlinking Across Platforms and Datasets",
+          "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
           "score": 1,
           "max_score": 1,
           "score_type": "pass_fail",
           "evidence": "external_resources: 9 items",
-          "quality_note": "Pass: Cross-platform links (zenodo, fairhub, FAIRhub, Zenodo, doi.org)"
+          "quality_note": "Pass: Cross-platform links (zenodo, FAIRhub, Zenodo, doi.org, fairhub)"
         }
       ],
       "category_score": 15,
@@ -250,12 +250,12 @@
     {
       "id": 1,
       "name": "Field Completeness",
-      "description": "Proportion of mandatory schema fields populated",
-      "score": 5,
+      "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+      "score": 0,
       "max_score": 5,
       "score_type": "numeric",
       "evidence": "id: https://fairhub.io/datasets/2",
-      "quality_note": "5/5 fields filled (\u226590%)"
+      "quality_note": "9/14 fields filled (\u226440%)"
     },
     {
       "id": 2,
@@ -280,7 +280,7 @@
     {
       "id": 4,
       "name": "File Enumeration and Type Variety",
-      "description": "Number of files and file type diversity",
+      "description": "Number of distribution formats and file type diversity",
       "score": 3,
       "max_score": 5,
       "score_type": "numeric",
@@ -290,11 +290,11 @@
     {
       "id": 5,
       "name": "Data File Size Availability",
-      "description": "Presence of file size or dimensional metadata",
+      "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
       "score": 0,
       "max_score": 1,
       "score_type": "pass_fail",
-      "evidence": "subsets: 3 items",
+      "evidence": "instances: 1 items",
       "quality_note": "Fail: No file size/dimension metadata"
     },
     {
@@ -310,7 +310,7 @@
     {
       "id": 7,
       "name": "Funding and Acknowledgements Completeness",
-      "description": "Presence of funding sources, grants, sponsors",
+      "description": "Funding sources, grants, sponsors, and creator affiliations",
       "score": 5,
       "max_score": 5,
       "score_type": "numeric",
@@ -320,17 +320,17 @@
     {
       "id": 8,
       "name": "Ethical and Privacy Declarations",
-      "description": "Deidentification methods, IRB approvals, ethical sourcing",
-      "score": 0,
+      "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
+      "score": 3,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: deidentification_and_privacy, ethics, ethical_reviews, is_deidentified, informed_consent",
-      "quality_note": "Field absent or empty"
+      "evidence": "human_subject_research: present (7 keys)",
+      "quality_note": "Partial ethics documentation"
     },
     {
       "id": 9,
-      "name": "Access Requirements Documentation",
-      "description": "Access policy and license clearly defined",
+      "name": "Access Requirements and Governance Documentation",
+      "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
       "score": 3,
       "max_score": 5,
       "score_type": "numeric",
@@ -340,7 +340,7 @@
     {
       "id": 10,
       "name": "Interoperability and Standardization",
-      "description": "Standard formats, ontologies, schema conformance",
+      "description": "Standard formats, encoding, ontologies, schema conformance",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
@@ -350,7 +350,7 @@
     {
       "id": 11,
       "name": "Tool and Software Transparency",
-      "description": "Preprocessing libraries or tools documented",
+      "description": "Preprocessing, cleaning, labeling strategies with software tools",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
@@ -360,7 +360,7 @@
     {
       "id": 12,
       "name": "Collection Protocol Clarity",
-      "description": "Participant recruitment and data acquisition described",
+      "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
       "score": 3,
       "max_score": 5,
       "score_type": "numeric",
@@ -370,17 +370,17 @@
     {
       "id": 13,
       "name": "Version History Documentation",
-      "description": "Multiple version records with dates",
+      "description": "Version info, version access, errata, update plans, release notes",
       "score": 5,
       "max_score": 5,
       "score_type": "numeric",
       "evidence": "updates: present (5 keys)",
-      "quality_note": "\u22652 versions with details: v2.0.0, v1.0.0, v3.0.0"
+      "quality_note": "\u22652 versions with details: v1.0.0, v3.0.0, v2.0.0"
     },
     {
       "id": 14,
       "name": "Associated Publications",
-      "description": "Formal citations or DOI-linked references",
+      "description": "Citations or DOI-linked references",
       "score": 5,
       "max_score": 5,
       "score_type": "numeric",
@@ -390,7 +390,7 @@
     {
       "id": 15,
       "name": "Human Subject Representation",
-      "description": "Demographics, diversity, subgroup details",
+      "description": "Demographics, subpopulations, vulnerable population protections",
       "score": 5,
       "max_score": 5,
       "score_type": "numeric",
@@ -400,7 +400,7 @@
     {
       "id": 16,
       "name": "Findability (Persistent Links)",
-      "description": "Persistent URLs for access and documentation",
+      "description": "Persistent identifiers (DOI, ID) and URLs for access",
       "score": 1,
       "max_score": 1,
       "score_type": "pass_fail",
@@ -410,7 +410,7 @@
     {
       "id": 17,
       "name": "Accessibility (Access Mechanism)",
-      "description": "How users can obtain the dataset",
+      "description": "Download URL, distribution formats, access policy",
       "score": 5,
       "max_score": 5,
       "score_type": "numeric",
@@ -419,8 +419,8 @@
     },
     {
       "id": 18,
-      "name": "Reusability (License Clarity)",
-      "description": "License clearly defined with reuse terms",
+      "name": "Reusability (License and Use Guidance)",
+      "description": "License with explicit use guidance (intended/prohibited/discouraged)",
       "score": 5,
       "max_score": 5,
       "score_type": "numeric",
@@ -430,7 +430,7 @@
     {
       "id": 19,
       "name": "Data Integrity and Provenance",
-      "description": "Change logs or provenance tracking",
+      "description": "Version access, errata, updates, source derivation, parent datasets",
       "score": 3,
       "max_score": 5,
       "score_type": "numeric",
@@ -439,13 +439,13 @@
     },
     {
       "id": 20,
-      "name": "Interlinking Across Platforms",
-      "description": "Cross-platform dataset links",
+      "name": "Interlinking Across Platforms and Datasets",
+      "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
       "score": 1,
       "max_score": 1,
       "score_type": "pass_fail",
       "evidence": "external_resources: 9 items",
-      "quality_note": "Pass: Cross-platform links (zenodo, fairhub, FAIRhub, Zenodo, doi.org)"
+      "quality_note": "Pass: Cross-platform links (zenodo, FAIRhub, Zenodo, doi.org, fairhub)"
     }
   ],
   "metadata": {

@@ -5,16 +5,16 @@
   "project": "VOICE",
   "method": "claudecode_agent",
   "type": "individual",
-  "evaluation_timestamp": "2025-12-07T21:19:12.241493",
+  "evaluation_timestamp": "2025-12-08T19:16:58.141479",
   "model": {
     "name": "hybrid-heuristic-evaluator",
     "temperature": "N/A",
     "evaluation_type": "rule_based_with_quality_heuristics"
   },
   "overall_score": {
-    "total_points": 24,
+    "total_points": 21,
     "max_points": 84,
-    "percentage": 28.6
+    "percentage": 25.0
   },
   "categories": {
     "Structural Completeness": {
@@ -23,12 +23,12 @@
         {
           "id": 1,
           "name": "Field Completeness",
-          "description": "Proportion of mandatory schema fields populated",
-          "score": 3,
+          "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+          "score": 0,
           "max_score": 5,
           "score_type": "numeric",
           "evidence": "id: https://doi.org/10.13026/249v-w155",
-          "quality_note": "4/5 fields filled (~70%)"
+          "quality_note": "7/14 fields filled (\u226440%)"
         },
         {
           "id": 2,
@@ -53,7 +53,7 @@
         {
           "id": 4,
           "name": "File Enumeration and Type Variety",
-          "description": "Number of files and file type diversity",
+          "description": "Number of distribution formats and file type diversity",
           "score": 3,
           "max_score": 5,
           "score_type": "numeric",
@@ -63,7 +63,7 @@
         {
           "id": 5,
           "name": "Data File Size Availability",
-          "description": "Presence of file size or dimensional metadata",
+          "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
           "score": 0,
           "max_score": 1,
           "score_type": "pass_fail",
@@ -71,7 +71,7 @@
           "quality_note": "Fail: No file size/dimension metadata"
         }
       ],
-      "category_score": 12,
+      "category_score": 9,
       "category_max": 21
     },
     "Metadata Quality & Content": {
@@ -90,7 +90,7 @@
         {
           "id": 7,
           "name": "Funding and Acknowledgements Completeness",
-          "description": "Presence of funding sources, grants, sponsors",
+          "description": "Funding sources, grants, sponsors, and creator affiliations",
           "score": 5,
           "max_score": 5,
           "score_type": "numeric",
@@ -100,7 +100,7 @@
         {
           "id": 8,
           "name": "Ethical and Privacy Declarations",
-          "description": "Deidentification methods, IRB approvals, ethical sourcing",
+          "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
           "score": 5,
           "max_score": 5,
           "score_type": "numeric",
@@ -109,22 +109,22 @@
         },
         {
           "id": 9,
-          "name": "Access Requirements Documentation",
-          "description": "Access policy and license clearly defined",
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: access_and_licensing, license_and_use_terms",
+          "evidence": "Missing: license_and_use_terms, ip_restrictions, regulatory_restrictions, confidentiality_level, access_and_licensing",
           "quality_note": "Field absent or empty"
         },
         {
           "id": 10,
           "name": "Interoperability and Standardization",
-          "description": "Standard formats, ontologies, schema conformance",
+          "description": "Standard formats, encoding, ontologies, schema conformance",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: data_characteristics.data_formats, conforms_to, distribution_formats",
+          "evidence": "Missing: format, encoding, conforms_to, conforms_to_schema, distribution_formats, data_characteristics.data_formats",
           "quality_note": "Field absent or empty"
         }
       ],
@@ -137,51 +137,51 @@
         {
           "id": 11,
           "name": "Tool and Software Transparency",
-          "description": "Preprocessing libraries or tools documented",
+          "description": "Preprocessing, cleaning, labeling strategies with software tools",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: software_and_tools, preprocessing_strategies, cleaning_strategies",
+          "evidence": "Missing: preprocessing_strategies, cleaning_strategies, labeling_strategies, software_and_tools",
           "quality_note": "Field absent or empty"
         },
         {
           "id": 12,
           "name": "Collection Protocol Clarity",
-          "description": "Participant recruitment and data acquisition described",
+          "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: collection_process, acquisition_methods, collection_mechanisms, sampling_strategies",
+          "evidence": "Missing: acquisition_methods, collection_mechanisms, data_collectors, collection_timeframes, collection_process, sampling_strategies",
           "quality_note": "Field absent or empty"
         },
         {
           "id": 13,
           "name": "Version History Documentation",
-          "description": "Multiple version records with dates",
+          "description": "Version info, version access, errata, update plans, release notes",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: release_notes, versions_available_on_platform, updates, version_access",
-          "quality_note": "Field absent or empty"
+          "evidence": "version: 1.1",
+          "quality_note": "No version info"
         },
         {
           "id": 14,
           "name": "Associated Publications",
-          "description": "Formal citations or DOI-linked references",
+          "description": "Citations or DOI-linked references",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: citations, references, external_resources",
+          "evidence": "Missing: citation, external_resources, citations, references",
           "quality_note": "Field absent or empty"
         },
         {
           "id": 15,
           "name": "Human Subject Representation",
-          "description": "Demographics, diversity, subgroup details",
+          "description": "Demographics, subpopulations, vulnerable population protections",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: composition.population, subpopulations, instances",
+          "evidence": "Missing: subpopulations, instances, vulnerable_populations, composition.population",
           "quality_note": "Field absent or empty"
         }
       ],
@@ -194,7 +194,7 @@
         {
           "id": 16,
           "name": "Findability (Persistent Links)",
-          "description": "Persistent URLs for access and documentation",
+          "description": "Persistent identifiers (DOI, ID) and URLs for access",
           "score": 1,
           "max_score": 1,
           "score_type": "pass_fail",
@@ -204,41 +204,41 @@
         {
           "id": 17,
           "name": "Accessibility (Access Mechanism)",
-          "description": "How users can obtain the dataset",
+          "description": "Download URL, distribution formats, access policy",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: distribution_formats, access_and_licensing, license_and_use_terms",
+          "evidence": "Missing: download_url, distribution_formats, license_and_use_terms, access_and_licensing",
           "quality_note": "Field absent or empty"
         },
         {
           "id": 18,
-          "name": "Reusability (License Clarity)",
-          "description": "License clearly defined with reuse terms",
+          "name": "Reusability (License and Use Guidance)",
+          "description": "License with explicit use guidance (intended/prohibited/discouraged)",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: license_and_use_terms",
+          "evidence": "Missing: license_and_use_terms, intended_uses, prohibited_uses, discouraged_uses",
           "quality_note": "Field absent or empty"
         },
         {
           "id": 19,
           "name": "Data Integrity and Provenance",
-          "description": "Change logs or provenance tracking",
+          "description": "Version access, errata, updates, source derivation, parent datasets",
           "score": 0,
           "max_score": 5,
           "score_type": "numeric",
-          "evidence": "Missing: updates, version_access, release_notes",
+          "evidence": "Missing: version_access, errata, updates, was_derived_from, parent_datasets, release_notes",
           "quality_note": "Field absent or empty"
         },
         {
           "id": 20,
-          "name": "Interlinking Across Platforms",
-          "description": "Cross-platform dataset links",
+          "name": "Interlinking Across Platforms and Datasets",
+          "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
           "score": 0,
           "max_score": 1,
           "score_type": "pass_fail",
-          "evidence": "Missing: external_resources, project_website, same_as",
+          "evidence": "Missing: external_resources, related_datasets, parent_datasets, resources, project_website, same_as",
           "quality_note": "Field absent or empty"
         }
       ],
@@ -250,12 +250,12 @@
     {
       "id": 1,
       "name": "Field Completeness",
-      "description": "Proportion of mandatory schema fields populated",
-      "score": 3,
+      "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+      "score": 0,
       "max_score": 5,
       "score_type": "numeric",
       "evidence": "id: https://doi.org/10.13026/249v-w155",
-      "quality_note": "4/5 fields filled (~70%)"
+      "quality_note": "7/14 fields filled (\u226440%)"
     },
     {
       "id": 2,
@@ -280,7 +280,7 @@
     {
       "id": 4,
       "name": "File Enumeration and Type Variety",
-      "description": "Number of files and file type diversity",
+      "description": "Number of distribution formats and file type diversity",
       "score": 3,
       "max_score": 5,
       "score_type": "numeric",
@@ -290,7 +290,7 @@
     {
       "id": 5,
       "name": "Data File Size Availability",
-      "description": "Presence of file size or dimensional metadata",
+      "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
       "score": 0,
       "max_score": 1,
       "score_type": "pass_fail",
@@ -310,7 +310,7 @@
     {
       "id": 7,
       "name": "Funding and Acknowledgements Completeness",
-      "description": "Presence of funding sources, grants, sponsors",
+      "description": "Funding sources, grants, sponsors, and creator affiliations",
       "score": 5,
       "max_score": 5,
       "score_type": "numeric",
@@ -320,7 +320,7 @@
     {
       "id": 8,
       "name": "Ethical and Privacy Declarations",
-      "description": "Deidentification methods, IRB approvals, ethical sourcing",
+      "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
       "score": 5,
       "max_score": 5,
       "score_type": "numeric",
@@ -329,78 +329,78 @@
     },
     {
       "id": 9,
-      "name": "Access Requirements Documentation",
-      "description": "Access policy and license clearly defined",
+      "name": "Access Requirements and Governance Documentation",
+      "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: access_and_licensing, license_and_use_terms",
+      "evidence": "Missing: license_and_use_terms, ip_restrictions, regulatory_restrictions, confidentiality_level, access_and_licensing",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 10,
       "name": "Interoperability and Standardization",
-      "description": "Standard formats, ontologies, schema conformance",
+      "description": "Standard formats, encoding, ontologies, schema conformance",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: data_characteristics.data_formats, conforms_to, distribution_formats",
+      "evidence": "Missing: format, encoding, conforms_to, conforms_to_schema, distribution_formats, data_characteristics.data_formats",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 11,
       "name": "Tool and Software Transparency",
-      "description": "Preprocessing libraries or tools documented",
+      "description": "Preprocessing, cleaning, labeling strategies with software tools",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: software_and_tools, preprocessing_strategies, cleaning_strategies",
+      "evidence": "Missing: preprocessing_strategies, cleaning_strategies, labeling_strategies, software_and_tools",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 12,
       "name": "Collection Protocol Clarity",
-      "description": "Participant recruitment and data acquisition described",
+      "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: collection_process, acquisition_methods, collection_mechanisms, sampling_strategies",
+      "evidence": "Missing: acquisition_methods, collection_mechanisms, data_collectors, collection_timeframes, collection_process, sampling_strategies",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 13,
       "name": "Version History Documentation",
-      "description": "Multiple version records with dates",
+      "description": "Version info, version access, errata, update plans, release notes",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: release_notes, versions_available_on_platform, updates, version_access",
-      "quality_note": "Field absent or empty"
+      "evidence": "version: 1.1",
+      "quality_note": "No version info"
     },
     {
       "id": 14,
       "name": "Associated Publications",
-      "description": "Formal citations or DOI-linked references",
+      "description": "Citations or DOI-linked references",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: citations, references, external_resources",
+      "evidence": "Missing: citation, external_resources, citations, references",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 15,
       "name": "Human Subject Representation",
-      "description": "Demographics, diversity, subgroup details",
+      "description": "Demographics, subpopulations, vulnerable population protections",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: composition.population, subpopulations, instances",
+      "evidence": "Missing: subpopulations, instances, vulnerable_populations, composition.population",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 16,
       "name": "Findability (Persistent Links)",
-      "description": "Persistent URLs for access and documentation",
+      "description": "Persistent identifiers (DOI, ID) and URLs for access",
       "score": 1,
       "max_score": 1,
       "score_type": "pass_fail",
@@ -410,41 +410,41 @@
     {
       "id": 17,
       "name": "Accessibility (Access Mechanism)",
-      "description": "How users can obtain the dataset",
+      "description": "Download URL, distribution formats, access policy",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: distribution_formats, access_and_licensing, license_and_use_terms",
+      "evidence": "Missing: download_url, distribution_formats, license_and_use_terms, access_and_licensing",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 18,
-      "name": "Reusability (License Clarity)",
-      "description": "License clearly defined with reuse terms",
+      "name": "Reusability (License and Use Guidance)",
+      "description": "License with explicit use guidance (intended/prohibited/discouraged)",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: license_and_use_terms",
+      "evidence": "Missing: license_and_use_terms, intended_uses, prohibited_uses, discouraged_uses",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 19,
       "name": "Data Integrity and Provenance",
-      "description": "Change logs or provenance tracking",
+      "description": "Version access, errata, updates, source derivation, parent datasets",
       "score": 0,
       "max_score": 5,
       "score_type": "numeric",
-      "evidence": "Missing: updates, version_access, release_notes",
+      "evidence": "Missing: version_access, errata, updates, was_derived_from, parent_datasets, release_notes",
       "quality_note": "Field absent or empty"
     },
     {
       "id": 20,
-      "name": "Interlinking Across Platforms",
-      "description": "Cross-platform dataset links",
+      "name": "Interlinking Across Platforms and Datasets",
+      "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
       "score": 0,
       "max_score": 1,
       "score_type": "pass_fail",
-      "evidence": "Missing: external_resources, project_website, same_as",
+      "evidence": "Missing: external_resources, related_datasets, parent_datasets, resources, project_website, same_as",
       "quality_note": "Field absent or empty"
     }
   ],
