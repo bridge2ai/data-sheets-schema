@@ -1,0 +1,1063 @@
+{
+  "evaluation_metadata": {
+    "file_evaluated": "data/d4d_concatenated/claudecode/AI_READI_d4d.yaml",
+    "rubric_version": "2.0",
+    "rubric_type": "rubric10-semantic",
+    "evaluation_date": "2025-12-09",
+    "evaluator": "Claude Sonnet 4.5",
+    "temperature": 0.0,
+    "evaluation_mode": "semantic_enhanced"
+  },
+  "dataset_metadata": {
+    "id": "https://fairhub.io/datasets/2",
+    "name": "AI-READI Dataset",
+    "title": "Flagship Dataset of Type 2 Diabetes from the AI-READI Project"
+  },
+  "element_scores": [
+    {
+      "element_id": 1,
+      "element_name": "Dataset Discovery and Identification",
+      "score": 4,
+      "max_score": 5,
+      "percentage": 80.0,
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "score": 1,
+          "fields_checked": ["doi", "rrid", "id"],
+          "fields_present": ["id"],
+          "values_found": {
+            "id": "https://fairhub.io/datasets/2"
+          },
+          "semantic_validation": {
+            "id_format": "valid_uri",
+            "id_resolvable": "assumed_yes",
+            "doi_present": false,
+            "rrid_present": false
+          },
+          "notes": "Valid URI identifier present. No DOI or RRID found in the file."
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "fields_checked": ["title", "description"],
+          "fields_present": ["title", "description"],
+          "values_found": {
+            "title": "Flagship Dataset of Type 2 Diabetes from the AI-READI Project",
+            "description_length": 599
+          },
+          "semantic_validation": {
+            "title_informative": true,
+            "description_comprehensive": true,
+            "description_word_count": 87,
+            "includes_key_concepts": ["Type 2 Diabetes", "AI/ML", "multi-domain", "harmonized"]
+          },
+          "notes": "Comprehensive title and description with clear scope and purpose."
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "fields_checked": ["keywords"],
+          "fields_present": ["keywords"],
+          "values_found": {
+            "keywords_count": 18,
+            "keywords": ["Type 2 Diabetes", "T2DM", "AI-READI", "Machine Learning", "multimodal", "harmonized", "multi-site", "survey data", "clinical data", "imaging data", "wearable device data", "ECG", "retinal images", "blood glucose", "laboratory results", "environmental data", "FAIR principles", "Healthsheet"]
+          },
+          "semantic_validation": {
+            "keyword_coverage": "excellent",
+            "domain_specific": true,
+            "methodology_keywords": true,
+            "data_type_keywords": true
+          },
+          "notes": "Comprehensive keyword list covering disease, methods, data types, and standards."
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "score": 1,
+          "fields_checked": ["page", "resources"],
+          "fields_present": ["page"],
+          "values_found": {
+            "page": "https://fairhub.io/datasets/2"
+          },
+          "semantic_validation": {
+            "page_url_valid": true,
+            "page_matches_id": true,
+            "resources_field_present": false
+          },
+          "notes": "Landing page URL present and matches dataset ID. No hierarchical resources field found."
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "score": 0,
+          "fields_checked": ["parent_datasets", "related_datasets"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "parent_datasets_present": false,
+            "related_datasets_present": false,
+            "external_resources_present": true,
+            "external_resources_count": 3
+          },
+          "notes": "No parent_datasets or related_datasets fields. External resources present but not typed relationships."
+        }
+      ]
+    },
+    {
+      "element_id": 2,
+      "element_name": "Dataset Access and Retrieval",
+      "score": 4,
+      "max_score": 5,
+      "percentage": 80.0,
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "score": 1,
+          "fields_checked": ["license_and_use_terms", "ip_restrictions"],
+          "fields_present": ["license_and_use_terms"],
+          "values_found": {
+            "license_and_use_terms": "Present with description and license_terms"
+          },
+          "semantic_validation": {
+            "license_terms_specific": true,
+            "dual_access_model": true,
+            "public_data_license": "mentioned",
+            "controlled_access_dua": "mentioned",
+            "ip_restrictions_present": false
+          },
+          "notes": "Clear dual-access model with public license and controlled DUA. No explicit IP restrictions field."
+        },
+        {
+          "name": "Regulatory Restrictions and Confidentiality Level Specified",
+          "score": 1,
+          "fields_checked": ["regulatory_restrictions", "confidentiality_level"],
+          "fields_present": [],
+          "values_found": {
+            "confidential_elements": "Present with PHI details",
+            "sensitive_elements": "Present with demographic and health data"
+          },
+          "semantic_validation": {
+            "regulatory_restrictions_field_absent": true,
+            "confidentiality_level_field_absent": true,
+            "confidential_elements_documented": true,
+            "sensitive_elements_documented": true,
+            "phi_mentioned": true
+          },
+          "notes": "No explicit regulatory_restrictions or confidentiality_level fields, but confidential and sensitive elements well documented including PHI."
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 0,
+          "fields_checked": ["download_url"],
+          "fields_present": [],
+          "values_found": {
+            "access_urls_in_distribution": ["https://fairhub.io/datasets/2"],
+            "page": "https://fairhub.io/datasets/2"
+          },
+          "semantic_validation": {
+            "download_url_field_absent": true,
+            "access_url_in_distribution_formats": true,
+            "landing_page_available": true
+          },
+          "notes": "No explicit download_url field at top level. Access URL provided in distribution_formats section."
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "score": 1,
+          "fields_checked": ["distribution_formats", "format", "media_type"],
+          "fields_present": ["distribution_formats"],
+          "values_found": {
+            "distribution_formats": "Present with description and access_urls"
+          },
+          "semantic_validation": {
+            "distribution_formats_present": true,
+            "format_field_absent": true,
+            "media_type_field_absent": true,
+            "access_mechanism_described": true
+          },
+          "notes": "Distribution formats described with dual access model. No specific format or media_type fields."
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "score": 1,
+          "fields_checked": ["related_datasets", "external_resources"],
+          "fields_present": ["external_resources"],
+          "values_found": {
+            "external_resources_count": 3,
+            "external_resources": [
+              {
+                "name": "AI-READI Dataset Documentation",
+                "urls": ["https://docs.aireadi.org", "https://fairhub.io/datasets/2"]
+              },
+              {
+                "name": "Related Publications",
+                "dois": ["10.1038/s42255-024-01165-x", "10.1136/bmjopen-2024-097449"]
+              },
+              {
+                "name": "Zenodo Archive",
+                "doi": "10.5281/zenodo.10642459"
+              }
+            ]
+          },
+          "semantic_validation": {
+            "external_resources_present": true,
+            "dois_in_external_resources": true,
+            "doi_format_validation": {
+              "10.1038/s42255-024-01165-x": "valid",
+              "10.1136/bmjopen-2024-097449": "valid",
+              "10.5281/zenodo.10642459": "valid"
+            },
+            "related_datasets_field_absent": true
+          },
+          "notes": "Excellent external resources with valid DOIs. No related_datasets field but strong documentation linkage."
+        }
+      ]
+    },
+    {
+      "element_id": 3,
+      "element_name": "Data Reuse and Interoperability",
+      "score": 2,
+      "max_score": 5,
+      "percentage": 40.0,
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "score": 1,
+          "fields_checked": ["license_and_use_terms"],
+          "fields_present": ["license_and_use_terms"],
+          "values_found": {
+            "license_and_use_terms": "Public data with license, full dataset with DUA"
+          },
+          "semantic_validation": {
+            "license_permits_reuse": true,
+            "license_type_specified": false,
+            "reuse_conditions_clear": true
+          },
+          "notes": "License structure supports reuse but specific license type not named."
+        },
+        {
+          "name": "Data Formats Are Standardized (encoding, format)",
+          "score": 0,
+          "fields_checked": ["format", "encoding"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "format_field_absent": true,
+            "encoding_field_absent": true,
+            "format_mentioned_in_description": false
+          },
+          "notes": "No format or encoding fields present."
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "score": 0,
+          "fields_checked": ["conforms_to", "conforms_to_schema"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "conforms_to_absent": true,
+            "conforms_to_schema_absent": true,
+            "standards_mentioned": false
+          },
+          "notes": "No schema or ontology conformance fields."
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "score": 0,
+          "fields_checked": ["variables"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "variables_field_absent": true,
+            "data_domains_described": true
+          },
+          "notes": "No variables field. Data domains described in instances but without variable-level metadata."
+        },
+        {
+          "name": "Use Guidance Provided (intended, prohibited uses)",
+          "score": 1,
+          "fields_checked": ["intended_uses", "prohibited_uses", "discouraged_uses"],
+          "fields_present": ["discouraged_uses"],
+          "values_found": {
+            "future_use_impacts": "Present with bias and privacy considerations",
+            "discouraged_uses": "Present with license adherence requirements"
+          },
+          "semantic_validation": {
+            "intended_uses_absent": true,
+            "prohibited_uses_absent": true,
+            "discouraged_uses_present": true,
+            "use_guidance_comprehensive": false
+          },
+          "notes": "Discouraged uses present. Future use impacts documented. Missing intended_uses and prohibited_uses fields."
+        }
+      ]
+    },
+    {
+      "element_id": 4,
+      "element_name": "Ethical Use and Privacy Safeguards",
+      "score": 2,
+      "max_score": 5,
+      "percentage": 40.0,
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "score": 0,
+          "fields_checked": ["ethical_reviews", "human_subject_research"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "ethical_reviews_absent": true,
+            "human_subject_research_absent": true,
+            "human_subjects_implied": true
+          },
+          "notes": "No ethical_reviews or human_subject_research fields despite clear human subjects research."
+        },
+        {
+          "name": "Deidentification Method Described",
+          "score": 0,
+          "fields_checked": ["is_deidentified"],
+          "fields_present": [],
+          "values_found": {
+            "controlled_access_elements": "PHI documented in confidential_elements"
+          },
+          "semantic_validation": {
+            "is_deidentified_absent": true,
+            "phi_present": true,
+            "deidentification_implied": false
+          },
+          "notes": "No is_deidentified field. Controlled access with PHI suggests partial deidentification."
+        },
+        {
+          "name": "Privacy Protections Beyond Deidentification",
+          "score": 1,
+          "fields_checked": ["participant_privacy"],
+          "fields_present": [],
+          "values_found": {
+            "confidential_elements": "PHI under controlled access",
+            "sensitive_elements": "Demographics, genetic data, health records"
+          },
+          "semantic_validation": {
+            "participant_privacy_absent": true,
+            "confidential_elements_present": true,
+            "sensitive_elements_present": true,
+            "access_controls_documented": true
+          },
+          "notes": "No participant_privacy field but strong confidentiality documentation with controlled access."
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "score": 0,
+          "fields_checked": ["informed_consent"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "informed_consent_absent": true,
+            "consent_implied": false
+          },
+          "notes": "No informed_consent field documented."
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "score": 1,
+          "fields_checked": ["vulnerable_populations", "participant_compensation"],
+          "fields_present": [],
+          "values_found": {
+            "subpopulations": "T2DM stratified by severity"
+          },
+          "semantic_validation": {
+            "vulnerable_populations_absent": true,
+            "participant_compensation_absent": true,
+            "diabetes_population_noted": true,
+            "chronic_disease_vulnerability": "possible"
+          },
+          "notes": "No explicit vulnerable_populations or compensation fields. T2DM population may include vulnerable individuals."
+        }
+      ]
+    },
+    {
+      "element_id": 5,
+      "element_name": "Data Composition and Structure",
+      "score": 4,
+      "max_score": 5,
+      "percentage": 80.0,
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "score": 1,
+          "fields_checked": ["subpopulations"],
+          "fields_present": ["subpopulations"],
+          "values_found": {
+            "subpopulations": "T2DM stratified by severity, ongoing enrollment"
+          },
+          "semantic_validation": {
+            "subpopulations_present": true,
+            "stratification_clear": true,
+            "demographics_in_controlled_access": true
+          },
+          "notes": "Clear subpopulation description with diabetes severity stratification."
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "score": 1,
+          "fields_checked": ["instances"],
+          "fields_present": ["instances"],
+          "values_found": {
+            "instances": "Individual participants with multi-domain measurements"
+          },
+          "semantic_validation": {
+            "instances_described": true,
+            "instance_count_absent": true,
+            "instance_type_clear": true
+          },
+          "notes": "Instance type (participants) clear but no specific count provided."
+        },
+        {
+          "name": "Variable-Level Metadata and Tabular Flag",
+          "score": 0,
+          "fields_checked": ["variables", "is_tabular"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "variables_absent": true,
+            "is_tabular_absent": true,
+            "data_domains_described": true
+          },
+          "notes": "No variable metadata or tabular flag. Data domains described in instances."
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "score": 1,
+          "fields_checked": ["instances"],
+          "fields_present": ["instances"],
+          "values_found": {
+            "primary_condition": "Type 2 Diabetes Mellitus",
+            "data_domains": ["survey", "clinical", "imaging", "wearable", "environmental", "lab results", "ECG", "blood glucose"]
+          },
+          "semantic_validation": {
+            "condition_clear": true,
+            "multi_domain": true,
+            "domain_count": 8
+          },
+          "notes": "Excellent topic and condition representation with multi-domain coverage."
+        },
+        {
+          "name": "Data Quality Issues and Anomalies Documented",
+          "score": 1,
+          "fields_checked": ["anomalies", "sampling_strategies"],
+          "fields_present": ["anomalies", "sampling_strategies"],
+          "values_found": {
+            "anomalies": "Unbalanced distribution in early releases",
+            "sampling_strategies": "Targeted recruitment for diabetes severity balance"
+          },
+          "semantic_validation": {
+            "anomalies_present": true,
+            "anomalies_specific": true,
+            "sampling_documented": true,
+            "sampling_rationale": true
+          },
+          "notes": "Clear documentation of data quality issues with enrollment imbalance and sampling strategy."
+        }
+      ]
+    },
+    {
+      "element_id": 6,
+      "element_name": "Data Provenance and Version Tracking",
+      "score": 3,
+      "max_score": 5,
+      "percentage": 60.0,
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "score": 0,
+          "fields_checked": ["version"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "version_field_absent": true,
+            "version_mentioned_in_docs": true
+          },
+          "notes": "No version field at dataset level. Version mentioned in documentation context (v1.0.0, v2.0.0)."
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "score": 1,
+          "fields_checked": ["version_access"],
+          "fields_present": ["version_access"],
+          "values_found": {
+            "version_access": "Documentation version dropdown available"
+          },
+          "semantic_validation": {
+            "version_access_present": true,
+            "access_mechanism_described": true
+          },
+          "notes": "Version access documented via documentation version dropdown."
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "score": 0,
+          "fields_checked": ["errata", "updates"],
+          "fields_present": ["updates"],
+          "values_found": {
+            "updates": "Periodic releases planned, documentation versioned with dataset"
+          },
+          "semantic_validation": {
+            "errata_absent": true,
+            "updates_present": true,
+            "change_descriptions_absent": true
+          },
+          "notes": "Update plan present but no errata or specific change descriptions."
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "score": 1,
+          "fields_checked": ["updates"],
+          "fields_present": ["updates"],
+          "values_found": {
+            "updates": "Periodic data releases as enrollment continues"
+          },
+          "semantic_validation": {
+            "update_schedule_present": true,
+            "frequency_specific": false,
+            "ongoing_enrollment": true
+          },
+          "notes": "Update schedule indicated as periodic with ongoing enrollment."
+        },
+        {
+          "name": "Provenance and Source Derivation Documented",
+          "score": 1,
+          "fields_checked": ["was_derived_from", "release_notes"],
+          "fields_present": [],
+          "values_found": {
+            "data_sources": "3 harmonized collection sites",
+            "provenance_metadata": "Generated by Claude Code from concatenated sources"
+          },
+          "semantic_validation": {
+            "was_derived_from_absent": true,
+            "release_notes_absent": true,
+            "collection_sites_documented": true,
+            "generation_provenance_present": true
+          },
+          "notes": "Data collection provenance (3 sites) documented. No was_derived_from or release_notes fields."
+        }
+      ]
+    },
+    {
+      "element_id": 7,
+      "element_name": "Scientific Motivation and Funding Transparency",
+      "score": 2,
+      "max_score": 5,
+      "percentage": 40.0,
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "score": 1,
+          "fields_checked": ["purposes"],
+          "fields_present": ["purposes"],
+          "values_found": {
+            "purposes": "Understand salutogenesis in T2DM using AI/ML"
+          },
+          "semantic_validation": {
+            "purposes_present": true,
+            "purpose_clear": true,
+            "scientific_rationale": true
+          },
+          "notes": "Clear scientific purpose focused on salutogenesis and AI/ML research."
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "score": 1,
+          "fields_checked": ["tasks"],
+          "fields_present": ["tasks"],
+          "values_found": {
+            "tasks": "Enable AI/ML analyses not feasible with existing sources"
+          },
+          "semantic_validation": {
+            "tasks_present": true,
+            "tasks_specific": true,
+            "gap_addressed": true
+          },
+          "notes": "Research tasks clearly defined with gap analysis."
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "score": 0,
+          "fields_checked": ["funders"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "funders_absent": true,
+            "project_name_suggests_funding": true
+          },
+          "notes": "No funders field. 'AI-READI' project name suggests NIH funding but not explicitly documented."
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "score": 0,
+          "fields_checked": ["funders"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "grant_ids_absent": true
+          },
+          "notes": "No grant IDs or award numbers documented."
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "score": 0,
+          "fields_checked": ["creators", "funders"],
+          "fields_present": [],
+          "values_found": {
+            "maintainers": "AI-READI Project Team"
+          },
+          "semantic_validation": {
+            "creators_absent": true,
+            "maintainers_present": true,
+            "acknowledgements_absent": true
+          },
+          "notes": "No creators or acknowledgements. Maintainers listed as 'AI-READI Project Team'."
+        }
+      ]
+    },
+    {
+      "element_id": 8,
+      "element_name": "Technical Transparency (Data Collection and Processing)",
+      "score": 4,
+      "max_score": 5,
+      "percentage": 80.0,
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "score": 1,
+          "fields_checked": ["collection_mechanisms"],
+          "fields_present": ["collection_mechanisms"],
+          "values_found": {
+            "collection_mechanisms": "Multi-modal hardware, clinical procedures, software-driven capture"
+          },
+          "semantic_validation": {
+            "collection_mechanisms_present": true,
+            "mechanisms_detailed": true,
+            "hardware_specified": true,
+            "procedures_specified": true
+          },
+          "notes": "Comprehensive collection mechanism documentation including hardware and procedures."
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "score": 1,
+          "fields_checked": ["acquisition_methods"],
+          "fields_present": ["acquisition_methods"],
+          "values_found": {
+            "acquisition_methods": "Direct observation, subject reporting, imaging, wearables, environmental sensors"
+          },
+          "semantic_validation": {
+            "acquisition_methods_present": true,
+            "methods_diverse": true,
+            "observation_types_clear": true
+          },
+          "notes": "Multiple acquisition methods clearly documented with observation types."
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling Strategies",
+          "score": 1,
+          "fields_checked": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "fields_present": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "values_found": {
+            "preprocessing_strategies": "Domain-specific processing and harmonization",
+            "cleaning_strategies": "Cross-site harmonization",
+            "labeling_strategies": "Domain-specific labeling per protocols"
+          },
+          "semantic_validation": {
+            "all_strategies_present": true,
+            "harmonization_emphasized": true,
+            "domain_specific": true
+          },
+          "notes": "All three processing strategies documented with emphasis on cross-site harmonization."
+        },
+        {
+          "name": "Software and Tools Documented",
+          "score": 0,
+          "fields_checked": ["software_and_tools"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "software_and_tools_absent": true,
+            "tools_implied": true
+          },
+          "notes": "No software_and_tools field. Tools implied (retinal imaging, ECG devices) but not explicitly listed."
+        },
+        {
+          "name": "External Standards and Resources Referenced",
+          "score": 1,
+          "fields_checked": ["external_resources", "conforms_to"],
+          "fields_present": ["external_resources"],
+          "values_found": {
+            "external_resources_count": 3,
+            "fair_principles_keyword": true
+          },
+          "semantic_validation": {
+            "external_resources_present": true,
+            "conforms_to_absent": true,
+            "fair_mentioned": true,
+            "healthsheet_mentioned": true
+          },
+          "notes": "External resources documented. FAIR principles and Healthsheet mentioned in keywords."
+        }
+      ]
+    },
+    {
+      "element_id": 9,
+      "element_name": "Dataset Evaluation and Limitations Disclosure",
+      "score": 2,
+      "max_score": 5,
+      "percentage": 40.0,
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "score": 0,
+          "fields_checked": ["known_limitations"],
+          "fields_present": [],
+          "values_found": {
+            "anomalies_as_limitations": "Unbalanced early releases documented"
+          },
+          "semantic_validation": {
+            "known_limitations_absent": true,
+            "limitations_in_anomalies": true
+          },
+          "notes": "No known_limitations field. Limitations documented via anomalies field."
+        },
+        {
+          "name": "Systematic Biases Identified and Described",
+          "score": 0,
+          "fields_checked": ["known_biases"],
+          "fields_present": [],
+          "values_found": {
+            "potential_bias_mentioned": "Future use impacts mention potential bias from unbalanced releases"
+          },
+          "semantic_validation": {
+            "known_biases_absent": true,
+            "bias_acknowledged": true
+          },
+          "notes": "No known_biases field. Bias acknowledged in future_use_impacts section."
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "score": 1,
+          "fields_checked": ["anomalies"],
+          "fields_present": ["anomalies"],
+          "values_found": {
+            "anomalies": "Unbalanced distribution across diabetes severity groups in early releases"
+          },
+          "semantic_validation": {
+            "anomalies_present": true,
+            "anomalies_specific": true,
+            "impact_described": true
+          },
+          "notes": "Data anomalies clearly documented with specific details about enrollment imbalance."
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "score": 1,
+          "fields_checked": ["sensitive_elements", "content_warnings"],
+          "fields_present": ["sensitive_elements"],
+          "values_found": {
+            "sensitive_elements": "Demographics, genetic data, health records, traffic/accident reports",
+            "confidential_elements": "PHI including health records, medications, genetic data"
+          },
+          "semantic_validation": {
+            "sensitive_elements_present": true,
+            "content_warnings_absent": true,
+            "confidential_elements_present": true,
+            "sensitivity_comprehensive": true
+          },
+          "notes": "Sensitive elements thoroughly documented. No content_warnings field but confidential elements provide similar function."
+        },
+        {
+          "name": "Ethical Review Details Including Conflicts",
+          "score": 0,
+          "fields_checked": ["ethical_reviews"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "ethical_reviews_absent": true,
+            "human_subjects_research_evident": true
+          },
+          "notes": "No ethical_reviews field despite clear human subjects research context."
+        }
+      ]
+    },
+    {
+      "element_id": 10,
+      "element_name": "Cross-Platform and Community Integration",
+      "score": 3,
+      "max_score": 5,
+      "percentage": 60.0,
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "score": 1,
+          "fields_checked": ["publisher"],
+          "fields_present": [],
+          "values_found": {
+            "platform": "FAIRhub",
+            "zenodo_archive": true
+          },
+          "semantic_validation": {
+            "publisher_absent": true,
+            "platform_recognized": true,
+            "fairhub_platform": true,
+            "zenodo_archive": true
+          },
+          "notes": "No publisher field but published on FAIRhub (recognized platform) with Zenodo archive."
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "score": 1,
+          "fields_checked": ["citation", "doi"],
+          "fields_present": [],
+          "values_found": {
+            "dois_in_external_resources": ["10.1038/s42255-024-01165-x", "10.1136/bmjopen-2024-097449", "10.5281/zenodo.10642459"]
+          },
+          "semantic_validation": {
+            "citation_field_absent": true,
+            "doi_field_absent": true,
+            "dois_in_resources": true,
+            "doi_count": 3,
+            "all_dois_valid": true
+          },
+          "notes": "No citation or doi fields at top level. Three valid DOIs provided in external resources."
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "score": 0,
+          "fields_checked": ["conforms_to"],
+          "fields_present": [],
+          "values_found": {
+            "fair_principles_mentioned": true,
+            "healthsheet_mentioned": true
+          },
+          "semantic_validation": {
+            "conforms_to_absent": true,
+            "fair_mentioned": true,
+            "healthsheet_mentioned": true,
+            "standards_implied": true
+          },
+          "notes": "No conforms_to field. FAIR principles and Healthsheet mentioned in keywords suggesting standards awareness."
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "score": 1,
+          "fields_checked": ["external_resources", "page"],
+          "fields_present": ["external_resources", "page"],
+          "values_found": {
+            "documentation_site": "https://docs.aireadi.org",
+            "landing_page": "https://fairhub.io/datasets/2",
+            "external_resources_count": 3
+          },
+          "semantic_validation": {
+            "documentation_comprehensive": true,
+            "multiple_access_points": true,
+            "github_referenced": true
+          },
+          "notes": "Excellent documentation links including dedicated docs site, landing page, and GitHub."
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "score": 0,
+          "fields_checked": ["related_datasets"],
+          "fields_present": [],
+          "values_found": {},
+          "semantic_validation": {
+            "related_datasets_absent": true,
+            "external_resources_present": true
+          },
+          "notes": "No related_datasets field with typed relationships."
+        }
+      ]
+    }
+  ],
+  "semantic_analysis": {
+    "identifier_validation": {
+      "primary_id": {
+        "value": "https://fairhub.io/datasets/2",
+        "type": "URI",
+        "format_valid": true,
+        "resolvable": "assumed_yes"
+      },
+      "doi_analysis": {
+        "dataset_doi_present": false,
+        "related_dois": [
+          {
+            "doi": "10.1038/s42255-024-01165-x",
+            "type": "Nature Metabolism publication",
+            "format_valid": true,
+            "prefix": "10.1038",
+            "publisher": "Nature"
+          },
+          {
+            "doi": "10.1136/bmjopen-2024-097449",
+            "type": "BMJ Open publication",
+            "format_valid": true,
+            "prefix": "10.1136",
+            "publisher": "BMJ"
+          },
+          {
+            "doi": "10.5281/zenodo.10642459",
+            "type": "Zenodo archive",
+            "format_valid": true,
+            "prefix": "10.5281",
+            "publisher": "Zenodo"
+          }
+        ],
+        "doi_validation_summary": "All 3 DOIs follow valid format (10.prefix/suffix). No dataset-level DOI."
+      },
+      "grant_validation": {
+        "funders_present": false,
+        "grant_ids_present": false,
+        "project_suggests_nih_funding": true,
+        "notes": "AI-READI is known NIH Bridge2AI project but grant details not documented in file"
+      }
+    },
+    "consistency_checks": {
+      "id_page_consistency": {
+        "id_matches_page": true,
+        "id": "https://fairhub.io/datasets/2",
+        "page": "https://fairhub.io/datasets/2",
+        "status": "consistent"
+      },
+      "access_model_consistency": {
+        "public_subset_documented": true,
+        "controlled_access_documented": true,
+        "license_terms_match_subsets": true,
+        "status": "consistent"
+      },
+      "multi_site_consistency": {
+        "sites_mentioned_in_description": true,
+        "sites_mentioned_in_collection": true,
+        "site_count": 3,
+        "harmonization_documented": true,
+        "status": "consistent"
+      },
+      "enrollment_status_consistency": {
+        "ongoing_enrollment_mentioned": true,
+        "anomalies_reference_enrollment": true,
+        "updates_reference_enrollment": true,
+        "status": "consistent"
+      },
+      "diabetes_focus_consistency": {
+        "title_mentions_diabetes": true,
+        "description_mentions_diabetes": true,
+        "keywords_include_diabetes": true,
+        "subpopulations_diabetes_based": true,
+        "status": "highly_consistent"
+      }
+    },
+    "semantic_understanding": {
+      "dataset_type": "clinical_research_multimodal",
+      "disease_focus": "Type 2 Diabetes Mellitus (T2DM)",
+      "research_paradigm": "AI/ML_driven_salutogenesis",
+      "data_modalities": [
+        "survey",
+        "clinical_measurements",
+        "laboratory_tests",
+        "retinal_imaging",
+        "ECG",
+        "wearable_devices",
+        "environmental_sensors",
+        "blood_glucose"
+      ],
+      "modality_count": 8,
+      "fairness_considerations": {
+        "stratification_by_severity": true,
+        "targeted_recruitment": true,
+        "acknowledged_imbalance": true,
+        "controlled_access_for_sensitive": true
+      },
+      "completeness_profile": {
+        "strong_areas": [
+          "data_composition",
+          "technical_transparency",
+          "data_collection_documentation",
+          "external_resources",
+          "access_model"
+        ],
+        "weak_areas": [
+          "funding_transparency",
+          "ethical_review_documentation",
+          "variable_metadata",
+          "format_specifications",
+          "schema_conformance"
+        ],
+        "missing_critical_fields": [
+          "funders",
+          "ethical_reviews",
+          "variables",
+          "doi",
+          "version",
+          "format",
+          "conforms_to"
+        ]
+      },
+      "schema_alignment": {
+        "uses_d4d_schema": true,
+        "schema_compliance": "partial",
+        "class_based_structure": true,
+        "missing_recommended_classes": [
+          "FundingMechanism",
+          "EthicalReview",
+          "VariableMetadata",
+          "Software"
+        ]
+      }
+    },
+    "quality_indicators": {
+      "documentation_quality": "high",
+      "identifier_quality": "medium",
+      "metadata_completeness": "medium_high",
+      "reproducibility_support": "high",
+      "fairness_documentation": "high",
+      "ethical_documentation": "low",
+      "funding_transparency": "absent"
+    }
+  },
+  "summary": {
+    "total_score": 31,
+    "max_possible_score": 50,
+    "percentage": 62.0,
+    "elements_evaluated": 10,
+    "sub_elements_evaluated": 50,
+    "sub_elements_passed": 31,
+    "sub_elements_failed": 19,
+    "grade": "C+",
+    "strengths": [
+      "Comprehensive data composition documentation (80%)",
+      "Excellent technical transparency (80%)",
+      "Strong discovery and identification (80%)",
+      "Clear access and retrieval documentation (80%)",
+      "Well-documented external resources with valid DOIs",
+      "Consistent metadata across multiple sections",
+      "Clear dual-access model with privacy protections",
+      "Multi-modal data coverage (8 domains)"
+    ],
+    "weaknesses": [
+      "Missing funding information entirely (40%)",
+      "No ethical review documentation (40%)",
+      "Limited interoperability metadata (40%)",
+      "No variable-level metadata",
+      "Missing dataset DOI at top level",
+      "No version number specified",
+      "No schema conformance declarations",
+      "Missing creators and acknowledgements"
+    ],
+    "recommendations": [
+      "Add funders field with NIH Bridge2AI grant information",
+      "Document ethical_reviews with IRB approval details",
+      "Include variable-level metadata for key measurements",
+      "Add dataset DOI at top level (separate from publication DOIs)",
+      "Specify version number explicitly",
+      "Add conforms_to field for FAIR, Healthsheet, or other standards",
+      "Include format and encoding specifications",
+      "Document creators and acknowledgements",
+      "Add informed_consent details",
+      "Include software_and_tools used for data collection"
+    ]
+  }
+}
