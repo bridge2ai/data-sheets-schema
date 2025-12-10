@@ -7,11 +7,6 @@ on:
       - main
     paths:
       - 'src/html/output/*'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'src/html/output/*'
 
 env:
   IGNORE_UNCHANGED: true
