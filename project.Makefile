@@ -17,6 +17,72 @@ D4D_HTML_DIR = data/d4d_html
 # Projects
 PROJECTS = AI_READI CHORUS CM4AI VOICE
 
+# Bridge2AI source documentation Google Sheet
+# Note: Use CSV export URL format for the extractor script
+# Updated 2024-12-05 to new sheet (old sheet was marked OBSOLETE)
+BRIDGE2AI_SHEET_ID = 1jBD6sTp6TDemy6v75PGAHSVz5yfIAXZ8zdDPbmOGATM
+BRIDGE2AI_SHEET_URL = https://docs.google.com/spreadsheets/d/$(BRIDGE2AI_SHEET_ID)/export?format=csv
+
+# ============================================================================
+# D4D Pipeline: Step 0 - Download source documents
+# ============================================================================
+
+# Download source documents from Bridge2AI Google Sheet
+# This populates data/raw/{PROJECT}/ with HTML, PDF, JSON files
+# Note: The sheet exports as CSV with columns: CM4AI, VOICE, AI-READI, CHORUS
+download-sources:
+	@echo "Downloading source documents from Bridge2AI Google Sheet..."
+	@echo "Sheet ID: $(BRIDGE2AI_SHEET_ID)"
+	@echo "CSV URL: $(BRIDGE2AI_SHEET_URL)"
+	@echo ""
+	@echo "📄 Columns: CM4AI, VOICE, AI-READI, CHORUS"
+	@echo ""
+	@mkdir -p $(RAW_DIR)
+	$(RUN) python -m src.download.organized_dataset_extractor \
+		"$(BRIDGE2AI_SHEET_URL)" \
+		-o $(RAW_DIR)
+	@echo ""
+	@echo "✅ Download complete! Files saved to $(RAW_DIR)/"
+	@echo "Run 'make data-status' to see results"
+
+# Dry run - analyze sheet without downloading
+download-sources-dry-run:
+	@echo "Analyzing Bridge2AI Google Sheet (dry run)..."
+	$(RUN) python -m src.download.enhanced_sheet_downloader \
+		"$(BRIDGE2AI_SHEET_URL)" \
+		--dry-run
+
+# Download from a custom sheet URL
+# Usage: make download-sheet SHEET_URL="https://docs.google.com/spreadsheets/d/..."
+download-sheet:
+ifndef SHEET_URL
+	$(error SHEET_URL is not defined. Usage: make download-sheet SHEET_URL="https://...")
+endif
+	@echo "Downloading from custom sheet: $(SHEET_URL)"
+	@mkdir -p $(RAW_DIR)
+	$(RUN) python -m src.download.organized_dataset_extractor \
+		"$(SHEET_URL)" \
+		-o $(RAW_DIR)
+
+# ============================================================================
+# D4D Pipeline: Step 1 - Preprocess source documents
+# ============================================================================
+
+# Preprocess raw sources into text-ready format for D4D generation
+# - .txt, .json, .md: Copied as-is
+# - .pdf: Extracted to text using pdfminer
+# - .html: Skipped (downloader already creates .txt versions)
+preprocess-sources:
+	$(RUN) python src/download/preprocess_sources.py \
+		-i $(RAW_DIR) \
+		-o $(PREPROCESSED_INDIVIDUAL_DIR) \
+		-p $(PROJECTS)
+
+# Full download + preprocess pipeline
+download-and-preprocess:
+	$(MAKE) download-sources
+	$(MAKE) preprocess-sources
+
 # Generate minimal example files for all classes
 # For each file in the list, populate it with an id field
 gen-minimal-examples:
@@ -783,6 +849,147 @@ extract-d4d-concat-all-claude:
 	@python3 src/download/process_d4d_deterministic.py --all
 
 # ============================================================================
+# D4D Pipeline: Interactive Claude Code Approaches (Slash Commands)
+# ============================================================================
+
+# D4D Agent Approach - Uses Task tool with parallel agents
+# This is an interactive Claude Code approach using the /d4d-agent slash command
+# Usage: make d4d-agent PROJECT=AI_READI (or run /d4d-agent in Claude Code)
+#
+# IMPLEMENTATION NOTES:
+# - Uses Task tool with subagent_type='general-purpose' for parallel processing
+# - Reads preprocessed source documents
+# - Outputs to data/d4d_concatenated/claudecode_agent/
+# - Requires running in Claude Code session
+#
+d4d-agent:
+ifndef PROJECT
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo "  D4D Agent Approach"
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "This is an INTERACTIVE Claude Code approach."
+	@echo "Use the /d4d-agent slash command in Claude Code, or specify a project:"
+	@echo ""
+	@echo "Usage: make d4d-agent PROJECT=AI_READI"
+	@echo ""
+	@echo "Projects available:"
+	@for project in $(PROJECTS); do \
+		input_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
+		if [ -f "$$input_file" ]; then \
+			size=$$(ls -lh "$$input_file" | awk '{print $$5}'); \
+			echo "  ✓ $$project ($$size)"; \
+		else \
+			echo "  ✗ $$project (no input file)"; \
+		fi; \
+	done
+	@echo ""
+	@echo "Or run in Claude Code: /d4d-agent"
+else
+	@echo "Setting up D4D Agent extraction for $(PROJECT)..."
+	@mkdir -p $(D4D_CONCAT_DIR)/claudecode_agent
+	@input_file="$(PREPROCESSED_CONCAT_DIR)/$(PROJECT)_preprocessed.txt"; \
+	output_file="$(D4D_CONCAT_DIR)/claudecode_agent/$(PROJECT)_d4d.yaml"; \
+	if [ -f "$$input_file" ]; then \
+		echo ""; \
+		echo "Input:  $$input_file"; \
+		echo "Output: $$output_file"; \
+		echo ""; \
+		echo "To generate D4D, run in Claude Code:"; \
+		echo "  /d4d-agent"; \
+		echo ""; \
+		echo "Or read the input and follow the prompt:"; \
+		echo "  1. Read: $$input_file"; \
+		echo "  2. Read: src/data_sheets_schema/schema/data_sheets_schema_all.yaml"; \
+		echo "  3. Extract D4D metadata using Task tool with parallel agents"; \
+		echo "  4. Validate and save to: $$output_file"; \
+	else \
+		echo "❌ Error: Input file not found: $$input_file"; \
+		echo "Run 'make concat-preprocessed' first"; \
+		exit 1; \
+	fi
+endif
+
+# D4D Assistant Approach - Uses in-session synthesis following GitHub Actions workflow
+# This is an interactive Claude Code approach using the /d4d-assistant slash command
+# Usage: make d4d-assistant PROJECT=AI_READI (or run /d4d-assistant in Claude Code)
+#
+# IMPLEMENTATION NOTES:
+# - Uses in-session synthesis following .github/workflows/d4d_assistant_create.md
+# - Sequential processing with Read tool
+# - Outputs to data/d4d_concatenated/claudecode_assistant/
+# - Requires running in Claude Code session
+#
+d4d-assistant:
+ifndef PROJECT
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo "  D4D Assistant Approach"
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "This is an INTERACTIVE Claude Code approach."
+	@echo "Use the /d4d-assistant slash command in Claude Code, or specify a project:"
+	@echo ""
+	@echo "Usage: make d4d-assistant PROJECT=AI_READI"
+	@echo ""
+	@echo "Projects available:"
+	@for project in $(PROJECTS); do \
+		input_file="$(PREPROCESSED_CONCAT_DIR)/$${project}_preprocessed.txt"; \
+		if [ -f "$$input_file" ]; then \
+			size=$$(ls -lh "$$input_file" | awk '{print $$5}'); \
+			echo "  ✓ $$project ($$size)"; \
+		else \
+			echo "  ✗ $$project (no input file)"; \
+		fi; \
+	done
+	@echo ""
+	@echo "Or run in Claude Code: /d4d-assistant"
+else
+	@echo "Setting up D4D Assistant extraction for $(PROJECT)..."
+	@mkdir -p $(D4D_CONCAT_DIR)/claudecode_assistant
+	@input_file="$(PREPROCESSED_CONCAT_DIR)/$(PROJECT)_preprocessed.txt"; \
+	output_file="$(D4D_CONCAT_DIR)/claudecode_assistant/$(PROJECT)_d4d.yaml"; \
+	if [ -f "$$input_file" ]; then \
+		echo ""; \
+		echo "Input:  $$input_file"; \
+		echo "Output: $$output_file"; \
+		echo ""; \
+		echo "To generate D4D, run in Claude Code:"; \
+		echo "  /d4d-assistant"; \
+		echo ""; \
+		echo "Or follow the workflow manually:"; \
+		echo "  1. Read: .github/workflows/d4d_assistant_create.md"; \
+		echo "  2. Read: $$input_file"; \
+		echo "  3. Read: src/data_sheets_schema/schema/data_sheets_schema_all.yaml"; \
+		echo "  4. Extract D4D metadata following the workflow"; \
+		echo "  5. Validate and save to: $$output_file"; \
+	else \
+		echo "❌ Error: Input file not found: $$input_file"; \
+		echo "Run 'make concat-preprocessed' first"; \
+		exit 1; \
+	fi
+endif
+
+# Run D4D Agent approach for all projects (interactive)
+d4d-agent-all:
+	@echo "D4D Agent approach for all projects..."
+	@echo ""
+	@mkdir -p $(D4D_CONCAT_DIR)/claudecode_agent
+	@for project in $(PROJECTS); do \
+		$(MAKE) d4d-agent PROJECT=$$project; \
+		echo ""; \
+	done
+
+# Run D4D Assistant approach for all projects (interactive)
+d4d-assistant-all:
+	@echo "D4D Assistant approach for all projects..."
+	@echo ""
+	@mkdir -p $(D4D_CONCAT_DIR)/claudecode_assistant
+	@for project in $(PROJECTS); do \
+		$(MAKE) d4d-assistant PROJECT=$$project; \
+		echo ""; \
+	done
+
+# ============================================================================
 # D4D Pipeline: Step 5 - Validate D4D YAML files
 # ============================================================================
 
@@ -1001,3 +1208,232 @@ clean-eval-individual:
 	@echo "Cleaning individual evaluation results..."
 	rm -rf $(EVAL_DIR)_individual
 	@echo "✅ Individual evaluation results cleaned!"
+
+# ============================================================================
+# D4D Pipeline: LLM-based Evaluation (Quality Assessment)
+# ============================================================================
+
+# Directories for LLM evaluation
+EVAL_LLM_DIR = data/evaluation_llm
+
+# LLM-based evaluation of single file
+evaluate-d4d-llm:
+ifndef FILE
+	$(error FILE is not defined. Usage: make evaluate-d4d-llm FILE=data/d4d_concatenated/claudecode/VOICE_d4d.yaml PROJECT=VOICE METHOD=claudecode)
+endif
+ifndef PROJECT
+	$(error PROJECT is not defined)
+endif
+ifndef METHOD
+	$(error METHOD is not defined)
+endif
+	@echo "🔍 Evaluating $(FILE) with LLM-as-judge..."
+	@mkdir -p $(EVAL_LLM_DIR)
+	$(RUN) python src/evaluation/evaluate_d4d_llm.py \
+		--file $(FILE) \
+		--project $(PROJECT) \
+		--method $(METHOD) \
+		--rubric $(RUBRIC) \
+		--output-dir $(EVAL_LLM_DIR)
+	@echo "✅ LLM evaluation complete!"
+
+# Batch evaluation with rubric10
+evaluate-d4d-llm-rubric10:
+	@echo "🔍 Evaluating all D4D files with Rubric10 (LLM)..."
+	@mkdir -p $(EVAL_LLM_DIR)/rubric10
+	$(RUN) python src/evaluation/evaluate_d4d_llm.py \
+		--all \
+		--rubric rubric10 \
+		--output-dir $(EVAL_LLM_DIR)
+	@echo "✅ Rubric10 LLM evaluation complete! Results in $(EVAL_LLM_DIR)/rubric10"
+
+# Batch evaluation with rubric20
+evaluate-d4d-llm-rubric20:
+	@echo "🔍 Evaluating all D4D files with Rubric20 (LLM)..."
+	@mkdir -p $(EVAL_LLM_DIR)/rubric20
+	$(RUN) python src/evaluation/evaluate_d4d_llm.py \
+		--all \
+		--rubric rubric20 \
+		--output-dir $(EVAL_LLM_DIR)
+	@echo "✅ Rubric20 LLM evaluation complete! Results in $(EVAL_LLM_DIR)/rubric20"
+
+# Evaluate with both rubrics
+evaluate-d4d-llm-both:
+	@echo "🔍 Evaluating all D4D files with both rubrics (LLM)..."
+	@mkdir -p $(EVAL_LLM_DIR)
+	$(RUN) python src/evaluation/evaluate_d4d_llm.py \
+		--all \
+		--rubric both \
+		--output-dir $(EVAL_LLM_DIR)
+	@echo "✅ LLM evaluation complete! Results in $(EVAL_LLM_DIR)"
+
+# Evaluate all D4D files with Rubric10 (hybrid heuristic)
+evaluate-rubric10-all:
+	@echo "🔍 Evaluating all D4D files with Rubric10 (hybrid heuristic)..."
+	python3 scripts/batch_evaluate_rubric10_hybrid.py \
+		--base-dir data \
+		--projects AI_READI CHORUS CM4AI VOICE \
+		--methods gpt5 claudecode_agent claudecode_assistant \
+		--output-dir data/evaluation_llm/rubric10 \
+		--individual
+	@echo "✅ Rubric10 evaluation complete!"
+	@echo "Generating summaries..."
+	python3 scripts/summarize_rubric10_results.py
+	@echo "✅ Summaries created: data/evaluation_llm/rubric10/summary_*.md"
+
+# Evaluate all D4D files with Rubric20 (hybrid heuristic)
+evaluate-rubric20-all:
+	@echo "🔍 Evaluating all D4D files with Rubric20 (hybrid heuristic)..."
+	python3 scripts/batch_evaluate_rubric20_hybrid.py \
+		--base-dir data \
+		--projects AI_READI CHORUS CM4AI VOICE \
+		--methods gpt5 claudecode_agent claudecode_assistant \
+		--output-dir data/evaluation_llm/rubric20 \
+		--individual
+	@echo "✅ Rubric20 evaluation complete!"
+	@echo "Generating summaries..."
+	python3 scripts/summarize_rubric20_results.py
+	@echo "✅ Summaries created: data/evaluation_llm/rubric20/summary_*.md"
+
+# Evaluate with both rubrics (complete evaluation pipeline)
+evaluate-rubrics-all: evaluate-rubric10-all evaluate-rubric20-all
+	@echo "✅ All rubric evaluations complete!"
+
+# Generate Grand Challenge × Approach comparison table (TSV + Markdown)
+gen-gc-approach-table:
+	@echo "📊 Generating Grand Challenge × Approach comparison table..."
+	python3 scripts/generate_gc_approach_comparison.py
+	@echo "✅ Tables generated: data/evaluation_llm/gc_approach_comparison.{tsv,md}"
+
+# Complete evaluation pipeline: evaluate + generate tables
+evaluate-and-report: evaluate-rubrics-all gen-gc-approach-table
+	@echo ""
+	@echo "========================================"
+	@echo "✅ Complete Evaluation Pipeline Finished!"
+	@echo "========================================"
+	@echo "Results:"
+	@echo "  - Rubric10 evaluations: data/evaluation_llm/rubric10/"
+	@echo "  - Rubric20 evaluations: data/evaluation_llm/rubric20/"
+	@echo "  - Summary tables: data/evaluation_llm/rubric*/summary_*.md"
+	@echo "  - GC × Approach table: data/evaluation_llm/gc_approach_comparison.{tsv,md}"
+	@echo ""
+	@echo "View results:"
+	@echo "  cat data/evaluation_llm/gc_approach_comparison.md"
+
+# Compare LLM vs presence-based evaluation
+compare-evaluations:
+	@echo "📊 Comparing LLM-based vs presence-based evaluation..."
+	$(RUN) python src/evaluation/compare_evaluation_methods.py \
+		--llm-dir $(EVAL_LLM_DIR) \
+		--presence-dir $(EVAL_DIR) \
+		--output-dir data/evaluation_comparison
+	@echo "✅ Comparison complete! Results in data/evaluation_comparison"
+
+# View LLM evaluation summaries
+eval-llm-summary:
+	@echo "📋 LLM-based Evaluation Summary (Rubric10):"
+	@echo "==========================================="
+	@if [ -f "$(EVAL_LLM_DIR)/rubric10/summary_report.md" ]; then \
+		cat $(EVAL_LLM_DIR)/rubric10/summary_report.md; \
+	else \
+		echo "No rubric10 summary found. Run 'make evaluate-d4d-llm-rubric10' first."; \
+	fi
+	@echo ""
+	@echo "📋 LLM-based Evaluation Summary (Rubric20):"
+	@echo "==========================================="
+	@if [ -f "$(EVAL_LLM_DIR)/rubric20/summary_report.md" ]; then \
+		cat $(EVAL_LLM_DIR)/rubric20/summary_report.md; \
+	else \
+		echo "No rubric20 summary found. Run 'make evaluate-d4d-llm-rubric20' first."; \
+	fi
+
+# Clean LLM evaluation results
+clean-eval-llm:
+	@echo "Cleaning LLM evaluation results..."
+	rm -rf $(EVAL_LLM_DIR)
+	@echo "✅ LLM evaluation results cleaned!"
+
+# ==================================================================================
+# LLM Evaluation - Batch Processing (Reproducible Workflows)
+# ==================================================================================
+
+# Batch evaluate all concatenated D4D files
+evaluate-d4d-llm-batch-concatenated:
+	@echo "Running batch LLM evaluation on concatenated D4D files..."
+	@echo "This will evaluate all projects (AI_READI, CHORUS, CM4AI, VOICE)"
+	@echo "across all methods (curated, gpt5, claudecode_agent, claudecode_assistant)"
+	@echo "with both rubrics (rubric10, rubric20)"
+	@echo ""
+	@if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+		echo "❌ ERROR: ANTHROPIC_API_KEY environment variable is not set"; \
+		echo ""; \
+		echo "Please set your Anthropic API key:"; \
+		echo "  export ANTHROPIC_API_KEY=sk-ant-your-key-here"; \
+		echo ""; \
+		exit 1; \
+	fi
+	./src/evaluation/batch_evaluate_concatenated.sh --output-dir $(EVAL_LLM_DIR)
+
+# Batch evaluate with dry-run (preview what would be evaluated)
+evaluate-d4d-llm-batch-dry-run:
+	@echo "Dry run: showing files that would be evaluated..."
+	./src/evaluation/batch_evaluate_concatenated.sh --dry-run
+
+# Batch evaluate all individual D4D files
+evaluate-d4d-llm-batch-individual:
+	@echo "⚠️  WARNING: This will evaluate ~85 individual D4D files"
+	@echo "   Estimated time: ~2 hours"
+	@echo "   Estimated cost: ~$$34"
+	@echo ""
+	@if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+		echo "❌ ERROR: ANTHROPIC_API_KEY environment variable is not set"; \
+		echo ""; \
+		echo "Please set your Anthropic API key:"; \
+		echo "  export ANTHROPIC_API_KEY=sk-ant-your-key-here"; \
+		echo ""; \
+		exit 1; \
+	fi
+	./src/evaluation/batch_evaluate_individual.sh --output-dir data/evaluation_llm_individual
+
+# Batch evaluate individual files (specific project or method)
+evaluate-d4d-llm-batch-individual-filtered:
+	@echo "Evaluating individual D4D files with filters..."
+	@if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+		echo "❌ ERROR: ANTHROPIC_API_KEY environment variable is not set"; \
+		exit 1; \
+	fi
+	@if [ -n "$(PROJECT)" ]; then \
+		./src/evaluation/batch_evaluate_individual.sh --project $(PROJECT) --output-dir data/evaluation_llm_individual; \
+	elif [ -n "$(METHOD)" ]; then \
+		./src/evaluation/batch_evaluate_individual.sh --method $(METHOD) --output-dir data/evaluation_llm_individual; \
+	else \
+		echo "❌ ERROR: Specify PROJECT=name or METHOD=name"; \
+		echo "Example: make evaluate-d4d-llm-batch-individual-filtered PROJECT=VOICE"; \
+		echo "Example: make evaluate-d4d-llm-batch-individual-filtered METHOD=claudecode_agent"; \
+		exit 1; \
+	fi
+
+# Complete batch evaluation (concatenated + individual)
+evaluate-d4d-llm-batch-all:
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo "COMPLETE BATCH LLM EVALUATION"
+	@echo "═══════════════════════════════════════════════════════════"
+	@echo ""
+	@echo "This will run:"
+	@echo "  1. Concatenated files (~15 files, ~25 min, ~$$6)"
+	@echo "  2. Individual files (~85 files, ~2 hours, ~$$34)"
+	@echo "  Total: ~100 files, ~2.5 hours, ~$$40"
+	@echo ""
+	@if [ -z "$$ANTHROPIC_API_KEY" ]; then \
+		echo "❌ ERROR: ANTHROPIC_API_KEY environment variable is not set"; \
+		exit 1; \
+	fi
+	@read -p "Proceed with complete evaluation? [y/N] " -n 1 -r; \
+	echo ""; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		$(MAKE) evaluate-d4d-llm-batch-concatenated && \
+		$(MAKE) evaluate-d4d-llm-batch-individual; \
+	else \
+		echo "Evaluation cancelled"; \
+		exit 1; \
+	fi

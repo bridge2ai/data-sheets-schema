@@ -1,0 +1,339 @@
+rubric_type: rubric10
+rubric_description: "10-element hierarchical rubric with 5 sub-elements each (50 total sub-elements, max 50 points, binary 0/1 scoring)"
+
+total_files_evaluated: 127
+concatenated_file_count: 16
+individual_file_count: 111
+
+overall_performance:
+  average_score: 13.4
+  average_percentage: 26.9
+  max_score: 50
+  best_score: 36.0
+  best_percentage: 72.0
+  best_performer: "AI_READI/claudecode_assistant (concatenated)"
+  worst_score: 0.0
+  worst_percentage: 0.0
+  worst_performer: "VOICE/gpt5 (concatenated - empty file)"
+
+method_comparison:
+  - method: claudecode
+    input_type: concatenated
+    file_count: 3
+    average_score: 27.0
+    average_percentage: 54.0
+    max_score: 50
+    best_score: 34.0
+    worst_score: 17.0
+    rank: 1
+
+  - method: claudecode_agent
+    file_count: 36
+    average_score: 15.8
+    average_percentage: 31.6
+    max_score: 50
+    best_score: 35.0
+    worst_score: 6.0
+    rank: 2
+
+  - method: claudecode_assistant
+    file_count: 36
+    average_score: 14.3
+    average_percentage: 28.6
+    max_score: 50
+    best_score: 36.0
+    worst_score: 6.0
+    rank: 3
+
+  - method: gpt5
+    file_count: 12
+    average_score: 11.3
+    average_percentage: 22.7
+    max_score: 50
+    best_score: 27.0
+    worst_score: 0.0
+    rank: 4
+
+project_comparison:
+  - project: CHORUS
+    file_count: 30
+    average_score: 18.1
+    average_percentage: 36.1
+    max_score: 50
+    rank: 1
+
+  - project: VOICE
+    file_count: 25
+    average_score: 13.8
+    average_percentage: 27.5
+    max_score: 50
+    rank: 2
+
+  - project: CM4AI
+    file_count: 32
+    average_score: 13.0
+    average_percentage: 25.9
+    max_score: 50
+    rank: 3
+
+  - project: AI_READI
+    file_count: 40
+    average_score: 12.5
+    average_percentage: 25.0
+    max_score: 50
+    rank: 4
+
+top_performers:
+  - rank: 1
+    project: VOICE
+    method: claudecode_agent
+    input_type: concatenated
+    score: 35.0
+    percentage: 70.0
+    max_score: 50
+    elements_passing: 8
+
+  - rank: 2
+    project: CM4AI
+    method: claudecode_agent
+    input_type: concatenated
+    score: 34.0
+    percentage: 68.0
+    max_score: 50
+    elements_passing: 6
+
+  - rank: 3
+    project: VOICE
+    method: claudecode
+    input_type: concatenated
+    score: 34.0
+    percentage: 68.0
+    max_score: 50
+    elements_passing: 7
+
+  - rank: 4
+    project: VOICE
+    method: claudecode_assistant
+    input_type: concatenated
+    score: 34.0
+    percentage: 68.0
+    max_score: 50
+    elements_passing: 7
+
+  - rank: 5
+    project: CHORUS
+    method: claudecode_agent
+    input_type: concatenated
+    score: 32.0
+    percentage: 64.0
+    max_score: 50
+    elements_passing: 7
+
+  - rank: 6
+    project: CHORUS
+    method: claudecode_assistant
+    input_type: concatenated
+    score: 32.0
+    percentage: 64.0
+    max_score: 50
+    elements_passing: 7
+
+element_performance:
+  - element_id: 1
+    element_name: "Dataset Discovery and Identification"
+    max_score: 5
+    average_score: 3.2
+    average_percentage: 64.0
+    strength_level: strongest
+    description: "DOI/RRID, title/description, keywords, version, contact information"
+
+  - element_id: 7
+    element_name: "Scientific Motivation and Funding"
+    max_score: 5
+    average_score: 2.1
+    average_percentage: 42.0
+    strength_level: strong
+    description: "Research purpose, funding sources, grant information"
+
+  - element_id: 10
+    element_name: "System Integration and Community Use"
+    max_score: 5
+    average_score: 1.9
+    average_percentage: 38.0
+    strength_level: weak
+    description: "Integration patterns, community adoption, ecosystem fit"
+
+  - element_id: 2
+    element_name: "Dataset Access and Retrieval"
+    max_score: 5
+    average_score: 1.8
+    average_percentage: 36.0
+    strength_level: weak
+    description: "Access methods, retrieval mechanisms, download procedures"
+
+  - element_id: 3
+    element_name: "Data Reuse and Interoperability"
+    max_score: 5
+    average_score: 1.6
+    average_percentage: 32.0
+    strength_level: weak
+    description: "Reuse guidelines, format compatibility, standard adherence"
+
+  - element_id: 8
+    element_name: "Technical Transparency and Methods"
+    max_score: 5
+    average_score: 1.5
+    average_percentage: 30.0
+    strength_level: weak
+    description: "Collection methods, processing pipeline, quality control"
+
+  - element_id: 9
+    element_name: "Limitations and Warnings"
+    max_score: 5
+    average_score: 1.4
+    average_percentage: 28.0
+    strength_level: weak
+    description: "Known limitations, usage warnings, boundary conditions"
+
+  - element_id: 4
+    element_name: "Ethical Use and Privacy Safeguards"
+    max_score: 5
+    average_score: 1.2
+    average_percentage: 24.0
+    strength_level: weakest
+    description: "Privacy protection, ethical guidelines, consent procedures"
+
+  - element_id: 5
+    element_name: "Data Composition and Structure"
+    max_score: 5
+    average_score: 1.1
+    average_percentage: 22.0
+    strength_level: weakest
+    description: "Data organization, file structure, schema documentation"
+
+  - element_id: 6
+    element_name: "Data Provenance and Version Control"
+    max_score: 5
+    average_score: 0.8
+    average_percentage: 16.0
+    strength_level: weakest
+    description: "Version history, change tracking, lineage documentation"
+
+common_strengths:
+  - strength_type: comprehensive
+    description: "Dataset Discovery and Identification (Element 1)"
+    frequency: frequently
+    affected_element_or_question: "Element 1"
+    typical_score: "4-5/5"
+
+  - strength_type: comprehensive
+    description: "Scientific motivation clearly documented with funding sources"
+    frequency: frequently
+    affected_element_or_question: "Element 7"
+    typical_score: "3-4/5"
+
+common_weaknesses:
+  - weakness_type: missing_field
+    description: "Data Provenance and Version Control (Element 6)"
+    frequency: frequently
+    affected_element_or_question: "Element 6"
+    typical_score: "0/5"
+
+  - weakness_type: incomplete_content
+    description: "Ethical Use and Privacy Safeguards (Element 4)"
+    frequency: frequently
+    affected_element_or_question: "Element 4"
+    typical_score: "1/5"
+
+  - weakness_type: incomplete_content
+    description: "Data Reuse and Interoperability (Element 3)"
+    frequency: sometimes
+    affected_element_or_question: "Element 3"
+    typical_score: "2/5"
+
+  - weakness_type: missing_field
+    description: "Dataset Access and Retrieval mechanisms"
+    frequency: sometimes
+    affected_element_or_question: "Element 2"
+    typical_score: "0-2/5"
+
+key_insights:
+  - insight_type: method_comparison
+    title: "Claude Code Advantage Over GPT-5"
+    description: "Claude Code concatenated methods average 54-68% vs GPT-5's 22.7%"
+    supporting_data:
+      - "claudecode: 27.0/50 (54.0%)"
+      - "gpt5: 11.3/50 (22.7%)"
+    comparison_metric: "2.4× better performance"
+
+  - insight_type: synthesis_advantage
+    title: "Synthesis Capability is Key Differentiator"
+    description: "Concatenated files (requiring synthesis) show significantly better performance than individual files for Claude Code methods"
+    supporting_data:
+      - "Claude Code concatenated: 30-35/50 (60-70%)"
+      - "Claude Code individual: 9-15/50 (18-30%)"
+      - "GPT-5 concatenated: 4-27/50 (8-54%, highly variable)"
+
+  - insight_type: performance_gap
+    title: "No 80%+ Scores Achieved"
+    description: "Unlike rubric20, no rubric10 evaluations exceeded 80%, with highest at 72% (AI_READI/claudecode_assistant)"
+    supporting_data:
+      - "Best score: 36/50 (72%)"
+      - "Indicates room for improvement across all D4D generation methods"
+
+  - insight_type: common_pattern
+    title: "Consistent Gaps in Version Control and Ethics"
+    description: "All methods struggle with version control documentation and ethical use guidelines"
+    supporting_data:
+      - "Element 6 (Provenance): 0.8/5 avg (16%)"
+      - "Element 4 (Ethics): 1.2/5 avg (24%)"
+
+  - insight_type: improvement_opportunity
+    title: "Individual File Generation Needs Improvement"
+    description: "Individual file performance significantly lags concatenated, suggesting need for better single-source extraction"
+    supporting_data:
+      - "Best individual avg: 22.5/50 (45.0%) - CHORUS/claudecode_agent"
+      - "Most individual files: 9-15/50 (18-30%)"
+
+input_type_comparison:
+  concatenated_performance:
+    input_type: concatenated
+    file_count: 16
+    average_score: 25.3
+    average_percentage: 50.6
+    score_range: "0-36/50 (0-72%)"
+    best_method: claudecode
+
+  individual_performance:
+    input_type: individual
+    file_count: 111
+    average_score: 12.1
+    average_percentage: 24.2
+    score_range: "0-48/50 (0-96% - outlier)"
+    best_method: claudecode_agent
+
+  synthesis_advantage: "Concatenated files require synthesis from multiple sources, which is Claude Code's key strength. Individual files from single sources show lower scores, indicating synthesis capability is crucial for high-quality D4D generation."
+
+files_generated:
+  - file_path: "data/evaluation_llm/rubric10/all_scores.csv"
+    file_type: csv
+    description: "127 rows with element-by-element scores for all files"
+    row_count: 127
+
+  - file_path: "data/evaluation_llm/rubric10/summary_table.md"
+    file_type: markdown
+    description: "Comparison tables with element passing counts and rankings"
+
+  - file_path: "data/evaluation_llm/rubric10/summary_report.md"
+    file_type: markdown
+    description: "Executive summary with method/project breakdown and analysis"
+
+  - file_path: "data/evaluation_llm/rubric10/concatenated/"
+    file_type: json
+    description: "16 evaluation JSONs with detailed per-element analysis for concatenated files"
+    row_count: 16
+
+  - file_path: "data/evaluation_llm/rubric10/individual/"
+    file_type: json
+    description: "111 evaluation JSONs with detailed per-element analysis for individual files"
+    row_count: 111

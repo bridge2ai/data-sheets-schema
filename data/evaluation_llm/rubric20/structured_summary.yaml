@@ -1,0 +1,330 @@
+rubric_type: rubric20
+rubric_description: "20-question detailed rubric organized in 4 categories with mixed scoring (16 numeric 0-5 questions + 4 pass/fail questions, max 84 points)"
+
+total_files_evaluated: 127
+concatenated_file_count: 16
+individual_file_count: 111
+
+overall_performance:
+  average_score: 18.8
+  average_percentage: 22.4
+  max_score: 84
+  best_score: 63.0
+  best_percentage: 75.0
+  best_performer: "VOICE/claudecode_agent (concatenated)"
+  worst_score: 0.0
+  worst_percentage: 0.0
+  worst_performer: "VOICE/gpt5 (concatenated - empty file)"
+
+method_comparison:
+  - method: claudecode
+    input_type: concatenated
+    file_count: 3
+    average_score: 43.0
+    average_percentage: 51.2
+    max_score: 84
+    best_score: 59.0
+    worst_score: 19.0
+    rank: 1
+
+  - method: claudecode_agent
+    file_count: 36
+    average_score: 23.2
+    average_percentage: 27.6
+    max_score: 84
+    best_score: 63.0
+    worst_score: 0.0
+    rank: 2
+
+  - method: claudecode_assistant
+    file_count: 36
+    average_score: 19.7
+    average_percentage: 23.5
+    max_score: 84
+    best_score: 61.0
+    worst_score: 4.0
+    rank: 3
+
+  - method: gpt5
+    file_count: 12
+    average_score: 13.8
+    average_percentage: 16.4
+    max_score: 84
+    best_score: 33.0
+    worst_score: 0.0
+    rank: 4
+
+project_comparison:
+  - project: CHORUS
+    file_count: 30
+    average_score: 23.0
+    average_percentage: 27.4
+    max_score: 84
+    rank: 1
+
+  - project: CM4AI
+    file_count: 32
+    average_score: 20.3
+    average_percentage: 24.1
+    max_score: 84
+    rank: 2
+
+  - project: VOICE
+    file_count: 25
+    average_score: 20.0
+    average_percentage: 23.8
+    max_score: 84
+    rank: 3
+
+  - project: AI_READI
+    file_count: 40
+    average_score: 16.2
+    average_percentage: 19.3
+    max_score: 84
+    rank: 4
+
+top_performers:
+  - rank: 1
+    project: VOICE
+    method: claudecode_agent
+    input_type: concatenated
+    score: 63.0
+    percentage: 75.0
+    max_score: 84
+    file_name: "VOICE_d4d.yaml"
+
+  - rank: 2
+    project: AI_READI
+    method: claudecode_assistant
+    input_type: concatenated
+    score: 61.0
+    percentage: 72.6
+    max_score: 84
+    file_name: "AI_READI_d4d.yaml"
+
+  - rank: 3
+    project: VOICE
+    method: claudecode
+    input_type: concatenated
+    score: 59.0
+    percentage: 70.2
+    max_score: 84
+    file_name: "VOICE_d4d.yaml"
+
+  - rank: 4
+    project: VOICE
+    method: claudecode_assistant
+    input_type: concatenated
+    score: 59.0
+    percentage: 70.2
+    max_score: 84
+    file_name: "VOICE_d4d.yaml"
+
+  - rank: 5
+    project: CM4AI
+    method: claudecode_agent
+    input_type: concatenated
+    score: 58.0
+    percentage: 69.0
+    max_score: 84
+    file_name: "CM4AI_d4d.yaml"
+
+  - rank: 6
+    project: AI_READI
+    method: claudecode_agent
+    input_type: concatenated
+    score: 60.0
+    percentage: 71.4
+    max_score: 84
+    file_name: "AI_READI_d4d.yaml"
+
+  - rank: 7
+    project: AI_READI
+    method: claudecode
+    input_type: concatenated
+    score: 54.0
+    percentage: 64.3
+    max_score: 84
+    file_name: "AI_READI_d4d.yaml"
+
+  - rank: 8
+    project: CM4AI
+    method: claudecode
+    input_type: concatenated
+    score: 51.0
+    percentage: 60.7
+    max_score: 84
+    file_name: "CM4AI_d4d.yaml"
+
+category_performance:
+  - category_id: 1
+    category_name: "Structural Completeness"
+    max_score: 20
+    average_score: 9.9
+    average_percentage: 49.5
+    rank: 1
+    question_count: 5
+
+  - category_id: 4
+    category_name: "FAIRness & Accessibility"
+    max_score: 20
+    average_score: 3.3
+    average_percentage: 16.5
+    rank: 2
+    question_count: 5
+
+  - category_id: 2
+    category_name: "Metadata Quality & Content"
+    max_score: 20
+    average_score: 3.0
+    average_percentage: 15.0
+    rank: 3
+    question_count: 5
+
+  - category_id: 3
+    category_name: "Technical Documentation"
+    max_score: 20
+    average_score: 2.6
+    average_percentage: 13.0
+    rank: 4
+    question_count: 5
+
+common_strengths:
+  - strength_type: comprehensive
+    description: "Field Completeness (Q1) - 70-90% of schema fields populated"
+    frequency: frequently
+    affected_element_or_question: "Q1"
+    typical_score: "3-5/5"
+
+  - strength_type: high_quality
+    description: "Entry Length Adequacy (Q2) - Descriptions meet length requirements"
+    frequency: frequently
+    affected_element_or_question: "Q2"
+    typical_score: "3-5/5"
+
+  - strength_type: comprehensive
+    description: "Dataset Discovery and Identification - Persistent identifiers present"
+    frequency: frequently
+    affected_element_or_question: "Q1, Category 1"
+    typical_score: "5/5 for DOI presence"
+
+common_weaknesses:
+  - weakness_type: missing_field
+    description: "File Enumeration and Variety (Q4) - Lack of detailed file type information"
+    frequency: always
+    affected_element_or_question: "Q4"
+    typical_score: "0/5"
+
+  - weakness_type: missing_field
+    description: "Data File Size Availability (Q5) - No numeric file size or dimension metadata"
+    frequency: frequently
+    affected_element_or_question: "Q5"
+    typical_score: "0/1 (fail)"
+
+  - weakness_type: incomplete_content
+    description: "Version History (Q13) - Limited version tracking and change documentation"
+    frequency: frequently
+    affected_element_or_question: "Q13"
+    typical_score: "0-1/5"
+
+  - weakness_type: missing_field
+    description: "Associated Publications (Q14) - Few DOIs or publication references"
+    frequency: sometimes
+    affected_element_or_question: "Q14"
+    typical_score: "0-2/5"
+
+  - weakness_type: incomplete_content
+    description: "Technical Documentation (Category 3) - Overall weak technical detail"
+    frequency: frequently
+    affected_element_or_question: "Category 3"
+    typical_score: "2.6/20 avg (13%)"
+
+key_insights:
+  - insight_type: method_comparison
+    title: "Claude Code Maintains Performance Advantage"
+    description: "Claude Code concatenated methods average 51.2% vs GPT-5's 16.4% on the more detailed rubric20"
+    supporting_data:
+      - "claudecode: 43.0/84 (51.2%)"
+      - "gpt5: 13.8/84 (16.4%)"
+    comparison_metric: "3.1× better performance"
+
+  - insight_type: performance_gap
+    title: "Category Performance Varies Widely"
+    description: "Structural Completeness (49.5%) significantly outperforms other categories, with Technical Documentation weakest at 13.0%"
+    supporting_data:
+      - "Category 1 (Structural): 9.9/20 (49.5%)"
+      - "Category 4 (FAIRness): 3.3/20 (16.5%)"
+      - "Category 2 (Metadata): 3.0/20 (15.0%)"
+      - "Category 3 (Technical): 2.6/20 (13.0%)"
+
+  - insight_type: common_pattern
+    title: "File-Level Metadata Consistently Missing"
+    description: "Q4 (File Enumeration) and Q5 (File Size) score 0 for most files, indicating systematic gap in file-level documentation"
+    supporting_data:
+      - "Q4: 0/5 for majority of files"
+      - "Q5: Fail for majority of files"
+
+  - insight_type: method_comparison
+    title: "Rubric20 Shows Similar Method Rankings to Rubric10"
+    description: "Both rubrics rank methods identically: claudecode > claudecode_agent > claudecode_assistant > gpt5"
+    supporting_data:
+      - "Rubric10: claudecode 54.0%, gpt5 22.7%"
+      - "Rubric20: claudecode 51.2%, gpt5 16.4%"
+      - "Consistent 2-3× performance gap"
+
+  - insight_type: improvement_opportunity
+    title: "Technical Documentation Needs Attention"
+    description: "Category 3 (Technical Documentation) shows poorest performance at 13.0%, indicating need for better technical detail capture"
+    supporting_data:
+      - "Category 3 avg: 2.6/20 (13%)"
+      - "Includes Q11-Q15: preprocessing, sampling, quality control, version history, publications"
+
+  - insight_type: synthesis_advantage
+    title: "Top Performers All Use Concatenated Synthesis"
+    description: "All top 8 performers (>60%) are concatenated files, demonstrating synthesis advantage"
+    supporting_data:
+      - "Top 8 all concatenated: 51-63/84 (60.7-75.0%)"
+      - "Best individual file: 38/84 (45.2%)"
+
+input_type_comparison:
+  concatenated_performance:
+    input_type: concatenated
+    file_count: 16
+    average_score: 38.4
+    average_percentage: 45.7
+    score_range: "0-63/84 (0-75%)"
+    best_method: claudecode
+
+  individual_performance:
+    input_type: individual
+    file_count: 111
+    average_score: 16.1
+    average_percentage: 19.2
+    score_range: "0-48/84 (0-57.1%)"
+    best_method: gpt5
+
+  synthesis_advantage: "Concatenated files require synthesis from multiple complementary sources, enabling more comprehensive metadata capture. Individual files limited to single-source information show significantly lower scores across all categories."
+
+files_generated:
+  - file_path: "data/evaluation_llm/rubric20/all_scores.csv"
+    file_type: csv
+    description: "127 rows with detailed question-by-question and category scores"
+    row_count: 127
+
+  - file_path: "data/evaluation_llm/rubric20/summary_table.md"
+    file_type: markdown
+    description: "Comparison tables with category breakdowns, top/weakest questions per file"
+
+  - file_path: "data/evaluation_llm/rubric20/summary_report.md"
+    file_type: markdown
+    description: "Executive summary with method/project/category analysis and performance rankings"
+
+  - file_path: "data/evaluation_llm/rubric20/concatenated/"
+    file_type: json
+    description: "16 evaluation JSONs with detailed question-by-question analysis and category breakdowns"
+    row_count: 16
+
+  - file_path: "data/evaluation_llm/rubric20/individual/"
+    file_type: json
+    description: "111 evaluation JSONs with detailed question-by-question analysis for individual files"
+    row_count: 111

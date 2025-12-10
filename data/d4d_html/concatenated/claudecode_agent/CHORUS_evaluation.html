@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubric10-Semantic Evaluation: Unknown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .metadata {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metadata-label {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .metadata-value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-large {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .element {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .element-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .element-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .element-score {
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: #ecf0f1;
+        }
+
+        .score-high { background: #2ecc71; color: white; }
+        .score-medium { background: #f39c12; color: white; }
+        .score-low { background: #e74c3c; color: white; }
+
+        .sub-element {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .sub-element:last-child {
+            border-bottom: none;
+        }
+
+        .sub-element-name {
+            font-weight: 500;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .sub-element-score {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .score-1 { background: #2ecc71; color: white; }
+        .score-0 { background: #e74c3c; color: white; }
+
+        .detail {
+            margin-top: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-right: 5px;
+        }
+
+        .semantic-section {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .validation-item {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #3498db;
+        }
+
+        .gap-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .gap-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .gap-item.medium {
+            border-left-color: #f39c12;
+        }
+
+        .gap-item.low {
+            border-left-color: #95a5a6;
+        }
+
+        .strength {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .weakness {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .recommendation-section {
+            margin-top: 20px;
+        }
+
+        .recommendation-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #e7f3ff;
+            border-radius: 4px;
+            border-left: 3px solid #2196f3;
+        }
+
+        .recommendation-item.critical {
+            background: #fee;
+            border-left-color: #e74c3c;
+        }
+
+        .recommendation-item.important {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e8ed;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rubric10-Semantic Evaluation Report</h1>
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <div class="metadata-label">Dataset</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Generation Method</div>
+                    <div class="metadata-value">claudecode_agent</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Evaluator</div>
+                    <div class="metadata-value">Claude Sonnet 4.5</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Rubric Type</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Temperature</div>
+                    <div class="metadata-value">0.0</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Evaluation Date</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="score-card">
+            <div class="score-large">26/50</div>
+            <div class="score-subtitle">0.0% Overall Score</div>
+        </div>
+
+        <h2>Element Scores</h2>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 10: Element 10 Community Integration</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 1: Element 1 Discovery And Identification</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 2: Element 2 Access And Retrieval</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 3: Element 3 Reuse And Interoperability</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 4: Element 4 Ethical Privacy Safeguards</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 5: Element 5 Composition And Structure</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 6: Element 6 Provenance Version Tracking</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 7: Element 7 Motivation Funding Transparency</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 8: Element 8 Technical Transparency</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 9: Element 9 Limitations Disclosure</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+        </div>
+
+        <h2>Semantic Analysis</h2>
+
+        <div class="semantic-section">
+            <h3>Identifier Validation</h3>
+            <div class="validation-grid">
+
+            </div>
+        </div>
+
+        <h3>Strengths</h3>
+        <ul class="gap-list">
+
+            <li class="gap-item strength">Comprehensive multi-modal data composition with 9 well-documented subsets</li>
+
+            <li class="gap-item strength">Exceptional ethical framework documentation with patient-focused principles</li>
+
+            <li class="gap-item strength">Detailed technical transparency across collection, preprocessing, and cleaning</li>
+
+            <li class="gap-item strength">Strong external resources linking (8 URLs across GitHub and project sites)</li>
+
+            <li class="gap-item strength">Clear data governance with controlled access and licensing terms</li>
+
+            <li class="gap-item strength">Social Determinants of Health integration throughout metadata</li>
+
+            <li class="gap-item strength">Specific numeric details (23,400 admissions, 14 hospitals, 20-center network)</li>
+
+            <li class="gap-item strength">International standards usage (OMOP, WFDB, DICOM, OHNLP) well-documented</li>
+
+        </ul>
+
+        <h3>Weaknesses</h3>
+        <ul class="gap-list">
+
+            <li class="gap-item weakness">Missing persistent scholarly identifier (no DOI or RRID)</li>
+
+            <li class="gap-item weakness">No structured funding information (no funders field with grant IDs)</li>
+
+            <li class="gap-item weakness">No structured creator metadata (authors/contributors with affiliations)</li>
+
+            <li class="gap-item weakness">Missing critical interoperability fields (conforms_to, variables, format, encoding)</li>
+
+            <li class="gap-item weakness">No version number for dataset tracking</li>
+
+            <li class="gap-item weakness">No known_limitations or known_biases documented</li>
+
+            <li class="gap-item weakness">Missing structured ethical fields (is_deidentified, participant_privacy, informed_consent)</li>
+
+            <li class="gap-item weakness">No dataset relationships or hierarchy (related_datasets, parent_datasets)</li>
+
+            <li class="gap-item weakness">No citation or publisher for scholarly integration</li>
+
+            <li class="gap-item weakness">No download_url (access through enclave only)</li>
+
+        </ul>
+
+        <h2>Recommendations</h2>
+
+        <div class="recommendation-section">
+            <h3>Recommendations</h3>
+
+            <div class="recommendation-item">Obtain DOI for persistent identification and citation</div>
+
+            <div class="recommendation-item">Add structured funders field with Bridge2AI grant information</div>
+
+            <div class="recommendation-item">Create creators field with program leads and institutional affiliations</div>
+
+            <div class="recommendation-item">Add conforms_to field listing OMOP, WFDB, DICOM, OHNLP, OHDSI standards</div>
+
+            <div class="recommendation-item">Populate variables field with schema-level metadata for key data elements</div>
+
+            <div class="recommendation-item">Document known_limitations of retrospective clinical data collection</div>
+
+            <div class="recommendation-item">Add is_deidentified structured field with method details (currently in descriptions)</div>
+
+            <div class="recommendation-item">Create related_datasets linking to other Bridge2AI datasets</div>
+
+            <div class="recommendation-item">Generate recommended citation and publish on recognized platform</div>
+
+            <div class="recommendation-item">Assign version number aligned with dataset releases</div>
+
+            <div class="recommendation-item">Add format/encoding/media_type structured fields for each data modality</div>
+
+            <div class="recommendation-item">Document known_biases in multi-center clinical data</div>
+
+        </div>
+
+        <div class="timestamp">
+            Generated on 2025-12-09 18:26:55 using Bridge2AI Data Sheets Schema
+        </div>
+    </div>
+</body>
+</html>

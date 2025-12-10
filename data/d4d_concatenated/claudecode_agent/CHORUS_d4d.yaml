@@ -1,0 +1,385 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Agent Deterministic
+# Source: data/preprocessed/concatenated/CHORUS_preprocessed.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-05
+
+id: https://chorus4ai.org/
+name: CHoRUS Dataset
+title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI
+description: >
+  The CHoRUS Network dataset is a diverse, high-resolution, ethically sourced, AI-ready
+  clinical dataset designed to address the grand challenge of improving recovery from acute
+  illness. This multi-center collaboration spans 20 academic centers (14 as data acquisition
+  centers) and provides harmonized multi-modal data including electronic health records (EHR),
+  waveform telemetry, medical imaging, and clinical text data. The dataset is designed with
+  patient-focused ethics principles, accounting for Social Determinants of Health, managing
+  privacy and bias concerns, and providing unified data standards to enable AI/ML research
+  for clinical care. As of November 2024, the dataset covers 14 different hospitals with
+  23,400 unique admissions. Access is federated and controlled, with data stored in a secure
+  collaborative cloud environment using OMOP and other international standards. Program leads
+  include Eric Rosenthal (MGH), Azra Bihorac (UF), Xiaoqian Jiang (UT Health), Yulia Strekalova (UF),
+  Parisa Rashidi (UF), and Andrew Williams (Tufts). Contact dbold@emory.edu or
+  jared.houghtaling@tuftsmedicine.org for data access.
+page: https://chorus4ai.org/
+language: en
+keywords:
+  - CHoRUS
+  - Bridge2AI
+  - clinical care
+  - acute illness
+  - recovery
+  - AI-ready
+  - OMOP
+  - EHR
+  - waveform telemetry
+  - medical imaging
+  - clinical text
+  - multi-modal
+  - multi-center
+  - FAIR
+  - health equity
+  - Social Determinants of Health
+  - ethical AI
+  - OHDSI
+  - federated access
+  - controlled access
+
+# Motivation
+purposes:
+  - description: >
+      Develop the most diverse, high-resolution, ethically sourced, AI-ready dataset to
+      answer the grand challenge of improving recovery from acute illness across diverse
+      patient populations, with specific attention to diversity, equity, and ethical sourcing
+      through patient-focused frameworks accounting for Social Determinants of Health.
+
+tasks:
+  - description: >
+      Support AI/ML model development and validation for clinical care applications,
+      particularly for prediction and decision support related to acute illness recovery,
+      with emphasis on diverse patient populations and multi-modal data integration across
+      EHR, waveforms, imaging, and clinical text.
+
+addressing_gaps:
+  - description: >
+      Existing clinical datasets often lack diversity, multi-modal integration, or ethical
+      frameworks addressing bias and Social Determinants of Health. CHoRUS fills this gap
+      by providing diverse, high-resolution multi-modal clinical data (EHR, waveforms, imaging,
+      text) harmonized across 14 hospitals with explicit ethical frameworks and partnership
+      with AIM-AHEAD to address health disparities.
+
+# Composition
+instances:
+  - description: >
+      Individual hospital admissions for patients experiencing acute illness. Each admission
+      represents an instance with associated multi-modal data including demographics, diagnoses,
+      procedures, medications, nursing flowsheets, clinical notes (tokenized via OHNLP),
+      imaging (DICOM), waveform telemetry (WFDB format), and EEG data (EDF+/Persyst). As of
+      November 2024, the dataset includes 23,400 unique admissions from 14 hospitals. Data
+      types follow international standards including OMOP for structured EHR data, WFDB for
+      waveforms, DICOM for imaging, and OHNLP for clinical text.
+
+subsets:
+  - id: chorus:subset-demographics
+    name: Demographics
+    description: Patient demographic information in OMOP format with controlled access via collaborative cloud enclave
+  - id: chorus:subset-diagnoses
+    name: Diagnoses
+    description: Physician-documented diagnoses in OMOP format with controlled access
+  - id: chorus:subset-procedures
+    name: Procedures
+    description: Physician-documented procedures in OMOP format with controlled access
+  - id: chorus:subset-medications
+    name: Medication Administration
+    description: >
+      Time-stamped medication dosing records upon each infusion change or dose administration,
+      in OMOP format with controlled access
+  - id: chorus:subset-nursing
+    name: Nursing Flowsheets
+    description: High-frequency nursing documentation in OMOP format (with extensions) with controlled access
+  - id: chorus:subset-notes
+    name: Clinical Notes
+    description: >
+      Clinical notes extracted and tokenized using OHNLP toolkit, with tokens stored in enclave
+      (full text local at sites), following OHNLP open source schema, controlled access
+  - id: chorus:subset-imaging
+    name: Imaging
+    description: >
+      Medical imaging from PACS in DICOM format (de-identification in progress), planned for
+      controlled access with DICOM schema metadata
+  - id: chorus:subset-waveforms
+    name: Waveform Telemetry
+    description: >
+      Bedside monitor waveform data via gateway/middleware in WFDB format, controlled access,
+      PhysioNet extended schema, DOI 10.1007/s12028-024-02007
+  - id: chorus:subset-eeg
+    name: EEG Waveforms
+    description: >
+      Hospital database EEG data in EDF+ and Persyst formats (extraction in progress), planned
+      for controlled access with EDF+/Persyst schema metadata
+
+sampling_strategies:
+  - description: >
+      Multi-center retrospective data acquisition from 14 academic medical centers serving as
+      data acquisition sites (within 20-center CHoRUS collaboration network). Federated sampling
+      enables balanced and diverse cohort representation. Patient-focused ethical approaches
+      account for Social Determinants of Health.
+
+subpopulations:
+  - description: >
+      Patients admitted to participating hospitals experiencing acute illness conditions
+      requiring intensive monitoring and treatment. Multi-center sampling provides diversity
+      across geographic regions and patient demographics.
+
+anomalies:
+  - description: >
+      Dataset is actively growing with retrospective data collection ongoing across contributing
+      sites. Data delivery statuses vary by site. Imaging de-identification and EEG extraction
+      are in progress (as of November 2024).
+    anomaly_details:
+      - Retrospective data collection ongoing with variable site-specific timelines
+      - Imaging de-identification in progress
+      - EEG extraction in process
+      - Dataset size and composition evolving
+
+external_resources:
+  - name: CHoRUS GitHub Organization
+    description: >
+      Active repositories providing software, tooling, semantic mappings, standard operating
+      protocols, and project management resources
+    external_resources:
+      - https://github.com/chorus-ai
+      - https://github.com/chorus-ai/Chorus_SOP
+      - https://github.com/chorus-ai/chorus-mapping
+      - https://github.com/chorus-ai/chorus-developer
+  - name: CHoRUS Project Website
+    description: Official Bridge2AI CHoRUS project website
+    external_resources:
+      - https://www.bridge2ai.org/chorus
+      - https://chorus4ai.org
+
+confidential_elements:
+  - description: >
+      Dataset contains protected health information requiring controlled access agreements
+      and secure enclave storage. All data modalities under controlled access with licensing
+      agreements required.
+    confidential_elements_present: true
+    confidentiality_details:
+      - All data modalities require controlled access via licensing agreements
+      - OMOP and waveform data stored in secure collaborative cloud enclave
+      - Clinical note tokens in enclave (full text retained locally at sites)
+      - De-identification protocols applied across all modalities
+
+sensitive_elements:
+  - description: >
+      Contains sensitive patient-level clinical information including demographics, diagnoses,
+      procedures, medications, clinical notes, imaging, and physiological monitoring data.
+      Privacy managed through de-identification, controlled access, and secure enclave storage.
+    sensitive_elements_present: true
+    sensitivity_details:
+      - Patient demographics and clinical histories
+      - Detailed medication and treatment records
+      - Clinical notes with patient narratives
+      - Medical imaging and physiological waveforms
+      - HIPAA-compliant de-identification
+      - Privacy scan tools for medical records
+
+# Collection
+acquisition_methods:
+  - description: >
+      Retrospective extraction of clinical data from hospital information systems across
+      14 contributing data acquisition centers. Multi-modal data synchronized by admission
+      identifiers following CHoRUS standard operating protocols.
+    was_directly_observed: true
+    acquisition_details:
+      - Retrospective data extraction from hospital information systems
+      - Direct capture from electronic health records, monitoring devices, imaging systems
+      - Automated ETL pipelines with manual clinical validation
+      - Multi-modal data synchronized by admission identifiers
+
+collection_mechanisms:
+  - description: >
+      Automated extraction from electronic health record systems with transformation to OMOP
+      common data model. Waveform capture from bedside monitors via gateway/middleware. DICOM
+      imaging retrieval from PACS. Clinical text processed via OHNLP toolkit.
+    mechanism_details:
+      - Automated ETL pipelines for structured EHR to OMOP transformation
+      - Manual validation by clinical collaborators for semantic mappings
+      - Waveform gateway/middleware integration to WFDB format
+      - PACS integration for DICOM retrieval with de-identification pipeline
+      - OHNLP toolkit for clinical text extraction and tokenization
+
+data_collectors:
+  - description: >
+      14 academic medical centers contributing as data acquisition sites within 20-center
+      CHoRUS Network collaboration. Data site managers coordinate extraction; Standards teams
+      validate semantic mappings; Data Acquisition teams manage site-specific pipelines;
+      Tooling teams provide software and infrastructure support.
+    collector_details:
+      - 14 data acquisition centers across 20 academic medical center collaboration
+      - Site-specific data managers coordinate extraction and contribution
+      - Cross-site Standards, Data Acquisition, and Tooling teams
+
+collection_timeframes:
+  - description: >
+      Retrospective data collection from historical hospital admissions with ongoing contributions
+      from sites as data extraction pipelines complete. As of November 2024, dataset includes
+      23,400 unique admissions from 14 hospitals.
+    timeframe_details:
+      - "Retrospective data from historical hospital admissions"
+      - "As of November 2024: 23,400 admissions from 14 hospitals"
+      - "Ongoing site contributions with variable delivery timelines"
+
+# Preprocessing
+preprocessing_strategies:
+  - description: >
+      Transformation of source EHR data to OMOP (Observational Medical Outcomes Partnership)
+      common data model to harmonize data across contributing sites. Waveform telemetry converted
+      to WFDB format following PhysioNet schema. Clinical notes processed with OHNLP toolkit.
+      Imaging de-identification in progress.
+    preprocessing_details:
+      - ETL pipelines transform site EHR formats to OMOP with extensions
+      - OMOP schema harmonization enables cross-site queries
+      - Waveform conversion to WFDB format with PhysioNet schema
+      - OHNLP toolkit tokenization of clinical notes
+      - Imaging de-identification pipeline development
+
+cleaning_strategies:
+  - description: >
+      Data validation and quality checks ensure completeness across modalities and sites.
+      Site characterization reports generated and returned for iterative quality improvement.
+    cleaning_details:
+      - Characterization reports generated for contributing sites
+      - Data quality metrics tracked via project management systems
+      - Clinical validation of semantic mappings
+      - Iterative feedback loops for quality improvement
+
+labeling_strategies:
+  - description: >
+      Visualization and annotation environment planned to label data with prediction targets
+      important for AI/ML model development. Annotation infrastructure in development with
+      target labels to be defined by research community.
+    labeling_details:
+      - Annotation environment in development
+      - Collaborative labeling infrastructure planned
+      - Target labels for prediction tasks to be community-defined
+
+# Uses
+existing_uses:
+  - examples:
+      - "Training activities and publications using CHoRUS dataset (as of November 2024)"
+      - "AIM-AHEAD Bridge2AI for Clinical Care Training Program (Cohort I, January-August 2025)"
+
+intended_uses:
+  - description: >
+      Development and validation of AI/ML models for clinical care applications, particularly
+      focused on improving recovery from acute illness. Multi-modal data integration for
+      comprehensive patient modeling. Federated learning approaches across diverse hospital sites.
+      Ethical AI development accounting for bias and health equity.
+
+future_use_impacts:
+  - description: >
+      Dataset diversity and multi-modal coverage enable health equity research addressing
+      health disparities through AI/ML on diverse clinical populations. Social Determinants
+      of Health incorporated into data model. Partnership with AIM-AHEAD expands access to
+      underrepresented researchers.
+    impact_details:
+      - Multi-center diversity supports generalizability
+      - Social Determinants of Health considerations
+      - Health equity focus through AIM-AHEAD partnership
+      - Ethics expertise on bias and privacy from BRIDGE Center
+
+discouraged_uses:
+  - description: >
+      Re-identification of individual patients from de-identified data is prohibited and violates
+      data use agreements. Applications perpetuating bias, discrimination, or harm to patient
+      populations are discouraged.
+    discouragement_details:
+      - Re-identification prohibited under licensing agreements
+      - Ethical frameworks emphasize fairness and equity
+      - Training programs include ethics and policy modules
+
+# Distribution
+distribution_formats:
+  - description: >
+      OMOP format for structured EHR data (SQL database in collaborative cloud enclave, OHDSI
+      compatible). WFDB format for waveform data (PhysioNet schema). DICOM format for medical
+      imaging (de-identification in progress). OHNLP tokens for clinical notes (full text local).
+    access_urls:
+      - https://chorus4ai.org
+      - https://www.bridge2ai.org/chorus
+
+distribution_dates:
+  - description: >
+      Dataset available for access as of November 2024 with ongoing retrospective data collection
+      expanding dataset. Site-specific delivery timelines tracked via GitHub-based project
+      management.
+
+license: MIT License for open source software repositories; Controlled access licensing for clinical data
+license_and_use_terms:
+  description: >
+    Data access requires signed licensing agreement, institutional affiliation, and registration
+    with institutional email. Open source software repositories on GitHub use MIT License.
+    Re-identification prohibited. Controlled access via secure collaborative cloud enclave.
+  license_terms:
+    - Signed licensing agreement required for data access
+    - Institutional email address required (not personal)
+    - Registration form with name, email, and institution
+    - GitHub software repositories under MIT License
+    - Re-identification prohibited
+    - Controlled access via secure Azure cloud enclave
+
+# Maintenance
+maintainers:
+  - name: CHoRUS Program Leadership Team
+    description: >
+      Program leads coordinate dataset maintenance: Eric Rosenthal (MGH), Azra Bihorac (UF),
+      Xiaoqian Jiang (UT Health), Yulia Strekalova (UF), Parisa Rashidi (UF), Andrew Williams (Tufts)
+    maintainer_details:
+      - Coordination across Standards, Data Acquisition, and Tooling teams
+      - GitHub-based project management and status tracking
+      - Site support via discussions and helpdesk
+
+updates:
+  description: >
+    Retrospective data collection ongoing with periodic updates as sites complete extraction
+    and contribution. Project management tracks site delivery timelines. GitHub repositories
+    actively maintained with documentation and code updates.
+  update_details:
+    - Regular status updates from contributing sites via GitHub and Google Forms
+    - Iterative data quality improvements via characterization reports
+    - GitHub repositories for documentation, code, and SOP updates
+    - Central task tracking via GitHub Projects
+
+version_access:
+  description: >
+    Dataset versioning and access managed through collaborative cloud enclave. GitHub repositories
+    track software versions and documentation updates.
+  version_details:
+    - Collaborative cloud enclave for data version management
+    - GitHub version control for software and documentation
+    - Site characterization reports track data evolution
+
+# Ethics and Human Subjects
+human_subject_research:
+  involves_human_subjects: true
+  irb_approval:
+    - Retrospective clinical data collection under institutional oversight at contributing academic medical centers
+    - Multi-site IRB approvals at data acquisition centers
+  ethics_review_board:
+    - Institutional oversight at 14 data acquisition academic medical centers
+    - Patient-focused ethical frameworks guide data governance
+    - BRIDGE Center provides ethics expertise on AI/ML biases and privacy
+
+data_protection_impacts:
+  - description: >
+      Patient-focused efforts determine ethical and legal approaches to manage privacy and bias,
+      accounting for Social Determinants of Health. De-identification protocols across all modalities.
+      Controlled access via licensing. BRIDGE Center ethics expertise on bias and privacy preservation.
+    impact_details:
+      - HIPAA-compliant de-identification (Safe Harbor or Expert Determination)
+      - Privacy scan tools validate de-identification
+      - Social Determinants of Health in data model
+      - Bias monitoring and mitigation strategies
+      - Controlled access with audit trails
+      - Partnership with AIM-AHEAD for health equity focus

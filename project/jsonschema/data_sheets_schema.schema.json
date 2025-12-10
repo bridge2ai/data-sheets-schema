@@ -5,18 +5,21 @@
             "description": "Was there a specific gap that needed to be filled by creation of the dataset?",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -32,7 +35,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -40,9 +43,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "AddressingGap",
             "type": "object"
         },
@@ -97,8 +97,8 @@
             "additionalProperties": false,
             "description": "Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?",
             "properties": {
-                "description": {
-                    "description": "Explanation of any data cleaning steps performed.",
+                "cleaning_details": {
+                    "description": "Details on data cleaning procedures applied.\n",
                     "items": {
                         "type": "string"
                     },
@@ -107,12 +107,22 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -121,7 +131,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -129,9 +139,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "CleaningStrategy",
             "type": "object"
         },
@@ -139,8 +146,8 @@
             "additionalProperties": false,
             "description": "Did the individuals in question consent to the collection and use of their data? If so, how was consent requested and provided, and what language did individuals consent to?",
             "properties": {
-                "description": {
-                    "description": "Details about how consent was sought, provided, and documented.",
+                "consent_details": {
+                    "description": "Details on how consent was requested, provided, and documented.\n",
                     "items": {
                         "type": "string"
                     },
@@ -149,12 +156,22 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -163,7 +180,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -171,9 +188,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "CollectionConsent",
             "type": "object"
         },
@@ -182,7 +196,21 @@
             "description": "What mechanisms or procedures were used to collect the data (e.g., hardware, manual curation, software APIs)? Also covers how these mechanisms were validated.",
             "properties": {
                 "description": {
-                    "description": "Free-text description of the collection mechanism(s)",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "mechanism_details": {
+                    "description": "Details on mechanisms or procedures used to collect the data.\n",
                     "items": {
                         "type": "string"
                     },
@@ -191,12 +219,8 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -205,7 +229,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -213,9 +237,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "CollectionMechanism",
             "type": "object"
         },
@@ -224,7 +245,28 @@
             "description": "Were the individuals in question notified about the data collection? If so, please describe (or show with screenshots, etc.) how notice was provided, and reproduce the language of the notification itself if possible.",
             "properties": {
                 "description": {
-                    "description": "Details about any notification provided to individuals whose data was collected.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "notification_details": {
+                    "description": "Details on how individuals were notified about data collection.\n",
                     "items": {
                         "type": "string"
                     },
@@ -233,21 +275,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -255,9 +286,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "CollectionNotification",
             "type": "object"
         },
@@ -266,7 +294,44 @@
             "description": "Over what timeframe was the data collected, and does this timeframe match the creation timeframe of the underlying data?",
             "properties": {
                 "description": {
-                    "description": "Free-text description of the data collection timeframe",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "end_date": {
+                    "description": "End date of data collection",
+                    "format": "date",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "start_date": {
+                    "description": "Start date of data collection",
+                    "format": "date",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "timeframe_details": {
+                    "description": "Details on the collection timeframe and relationship to data creation dates.\n",
                     "items": {
                         "type": "string"
                     },
@@ -275,21 +340,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -297,9 +351,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "CollectionTimeframe",
             "type": "object"
         },
@@ -340,7 +391,8 @@
                         "null"
                     ]
                 },
-                "description": {
+                "confidentiality_details": {
+                    "description": "Details on confidential data elements and handling procedures.\n",
                     "items": {
                         "type": "string"
                     },
@@ -349,12 +401,22 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -363,7 +425,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -371,9 +433,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Confidentiality",
             "type": "object"
         },
@@ -392,7 +451,28 @@
             "description": "If consent was obtained, were the consenting individuals provided with a mechanism to revoke their consent in the future or for certain uses? If so, please describe.",
             "properties": {
                 "description": {
-                    "description": "Information about any consent-revocation mechanism offered to data subjects.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "revocation_details": {
+                    "description": "Details on consent revocation mechanisms and procedures.\n",
                     "items": {
                         "type": "string"
                     },
@@ -401,21 +481,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -423,9 +492,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ConsentRevocation",
             "type": "object"
         },
@@ -441,18 +507,21 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -461,7 +530,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -478,9 +547,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ContentWarning",
             "type": "object"
         },
@@ -488,10 +554,13 @@
             "additionalProperties": false,
             "description": "Who created the dataset (e.g., which team, research group) and on behalf of which entity (e.g., company, institution, organization)? This may also be considered a team.",
             "properties": {
-                "affiliation": {
-                    "description": "Organization(s) with which the creator or team is affiliated.",
+                "affiliations": {
+                    "description": "Organizations with which the creator or team is affiliated.",
+                    "items": {
+                        "$ref": "#/$defs/Organization"
+                    },
                     "type": [
-                        "string",
+                        "array",
                         "null"
                     ]
                 },
@@ -506,18 +575,21 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -533,7 +605,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -541,9 +613,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Creator",
             "type": "object"
         },
@@ -569,7 +638,8 @@
             "additionalProperties": false,
             "description": "Are there any errors, sources of noise, or redundancies in the dataset?",
             "properties": {
-                "description": {
+                "anomaly_details": {
+                    "description": "Details on errors, noise sources, or redundancies in the dataset.\n",
                     "items": {
                         "type": "string"
                     },
@@ -578,12 +648,22 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -592,7 +672,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -600,9 +680,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "DataAnomaly",
             "type": "object"
         },
@@ -610,8 +687,8 @@
             "additionalProperties": false,
             "description": "Who was involved in the data collection (e.g., students, crowdworkers, contractors), and how they were compensated.",
             "properties": {
-                "description": {
-                    "description": "Free-text details about the data collectors and compensation",
+                "collector_details": {
+                    "description": "Details on who collected the data and their compensation.\n",
                     "items": {
                         "type": "string"
                     },
@@ -620,12 +697,29 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "role": {
+                    "description": "Role of the data collector (e.g., researcher, crowdworker)",
                     "type": [
                         "string",
                         "null"
@@ -634,7 +728,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -642,9 +736,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "DataCollector",
             "type": "object"
         },
@@ -653,7 +744,21 @@
             "description": "Has an analysis of the potential impact of the dataset and its use on data subjects (e.g., a data protection impact analysis) been conducted? If so, please provide a description of this analysis, including the outcomes, and any supporting documentation.",
             "properties": {
                 "description": {
-                    "description": "Details of the data protection impact analysis, if conducted.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "impact_details": {
+                    "description": "Details on data protection impact analysis, outcomes, and documentation.\n",
                     "items": {
                         "type": "string"
                     },
@@ -662,12 +767,8 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -676,7 +777,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -684,9 +785,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "DataProtectionImpact",
             "type": "object"
         },
@@ -696,7 +794,7 @@
             "properties": {
                 "acquisition_methods": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/InstanceAcquisition"
                     },
                     "type": [
                         "array",
@@ -705,7 +803,7 @@
                 },
                 "addressing_gaps": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/AddressingGap"
                     },
                     "type": [
                         "array",
@@ -714,7 +812,7 @@
                 },
                 "anomalies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DataAnomaly"
                     },
                     "type": [
                         "array",
@@ -737,7 +835,7 @@
                 },
                 "cleaning_strategies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/CleaningStrategy"
                     },
                     "type": [
                         "array",
@@ -746,7 +844,7 @@
                 },
                 "collection_mechanisms": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/CollectionMechanism"
                     },
                     "type": [
                         "array",
@@ -755,7 +853,7 @@
                 },
                 "collection_timeframes": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/CollectionTimeframe"
                     },
                     "type": [
                         "array",
@@ -768,7 +866,7 @@
                 },
                 "confidential_elements": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Confidentiality"
                     },
                     "type": [
                         "array",
@@ -795,7 +893,7 @@
                 },
                 "content_warnings": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ContentWarning"
                     },
                     "type": [
                         "array",
@@ -817,7 +915,7 @@
                 },
                 "creators": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Creator"
                     },
                     "type": [
                         "array",
@@ -826,7 +924,7 @@
                 },
                 "data_collectors": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DataCollector"
                     },
                     "type": [
                         "array",
@@ -835,7 +933,7 @@
                 },
                 "data_protection_impacts": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DataProtectionImpact"
                     },
                     "type": [
                         "array",
@@ -857,7 +955,7 @@
                 },
                 "discouraged_uses": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DiscouragedUse"
                     },
                     "type": [
                         "array",
@@ -866,7 +964,7 @@
                 },
                 "distribution_dates": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DistributionDate"
                     },
                     "type": [
                         "array",
@@ -875,7 +973,7 @@
                 },
                 "distribution_formats": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DistributionFormat"
                     },
                     "type": [
                         "array",
@@ -903,7 +1001,7 @@
                 },
                 "errata": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Erratum"
                     },
                     "type": [
                         "array",
@@ -912,7 +1010,7 @@
                 },
                 "ethical_reviews": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/EthicalReview"
                     },
                     "type": [
                         "array",
@@ -921,7 +1019,7 @@
                 },
                 "existing_uses": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ExistingUse"
                     },
                     "type": [
                         "array",
@@ -929,14 +1027,19 @@
                     ]
                 },
                 "extension_mechanism": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ExtensionMechanism"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "external_resources": {
+                    "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ExternalResource"
                     },
                     "type": [
                         "array",
@@ -949,7 +1052,7 @@
                 },
                 "funders": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/FundingMechanism"
                     },
                     "type": [
                         "array",
@@ -958,7 +1061,7 @@
                 },
                 "future_use_impacts": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/FutureUseImpact"
                     },
                     "type": [
                         "array",
@@ -973,11 +1076,15 @@
                     ]
                 },
                 "human_subject_research": {
-                    "description": "Information about whether dataset involves human subjects research, including IRB approval, ethics review, and regulatory compliance.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/HumanSubjectResearch"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Information about whether dataset involves human subjects research, including IRB approval, ethics review, and regulatory compliance."
                 },
                 "id": {
                     "description": "A unique identifier for a thing.",
@@ -986,7 +1093,7 @@
                 "informed_consent": {
                     "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/InformedConsent"
                     },
                     "type": [
                         "array",
@@ -995,7 +1102,7 @@
                 },
                 "instances": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Instance"
                     },
                     "type": [
                         "array",
@@ -1005,7 +1112,7 @@
                 "intended_uses": {
                     "description": "Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/IntendedUse"
                     },
                     "type": [
                         "array",
@@ -1013,9 +1120,13 @@
                     ]
                 },
                 "ip_restrictions": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/IPRestrictions"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "is_data_split": {
@@ -1026,9 +1137,13 @@
                     ]
                 },
                 "is_deidentified": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Deidentification"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "is_subpopulation": {
@@ -1060,9 +1175,29 @@
                         "null"
                     ]
                 },
+                "known_biases": {
+                    "description": "Known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
+                    "items": {
+                        "$ref": "#/$defs/DatasetBias"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "known_limitations": {
+                    "description": "Known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
+                    "items": {
+                        "$ref": "#/$defs/DatasetLimitation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "labeling_strategies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/LabelingStrategy"
                     },
                     "type": [
                         "array",
@@ -1090,14 +1225,18 @@
                     ]
                 },
                 "license_and_use_terms": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/LicenseAndUseTerms"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "maintainers": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Maintainer"
                     },
                     "type": [
                         "array",
@@ -1130,7 +1269,7 @@
                 },
                 "other_tasks": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/OtherTask"
                     },
                     "type": [
                         "array",
@@ -1146,7 +1285,7 @@
                 "parent_datasets": {
                     "description": "Parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Dataset"
                     },
                     "type": [
                         "array",
@@ -1154,16 +1293,20 @@
                     ]
                 },
                 "participant_compensation": {
-                    "description": "Compensation or incentives provided to human research participants.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/HumanSubjectCompensation"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Compensation or incentives provided to human research participants."
                 },
                 "participant_privacy": {
                     "description": "Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ParticipantPrivacy"
                     },
                     "type": [
                         "array",
@@ -1178,7 +1321,7 @@
                 },
                 "preprocessing_strategies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/PreprocessingStrategy"
                     },
                     "type": [
                         "array",
@@ -1188,7 +1331,7 @@
                 "prohibited_uses": {
                     "description": "Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ProhibitedUse"
                     },
                     "type": [
                         "array",
@@ -1203,7 +1346,7 @@
                 },
                 "purposes": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Purpose"
                     },
                     "type": [
                         "array",
@@ -1212,7 +1355,7 @@
                 },
                 "raw_sources": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/RawData"
                     },
                     "type": [
                         "array",
@@ -1220,15 +1363,29 @@
                     ]
                 },
                 "regulatory_restrictions": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ExportControlRegulatoryRestrictions"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "related_datasets": {
                     "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DatasetRelationship"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "resources": {
+                    "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+                    "items": {
+                        "$ref": "#/$defs/Dataset"
                     },
                     "type": [
                         "array",
@@ -1236,14 +1393,18 @@
                     ]
                 },
                 "retention_limit": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/RetentionLimits"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "sampling_strategies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/SamplingStrategy"
                     },
                     "type": [
                         "array",
@@ -1252,7 +1413,7 @@
                 },
                 "sensitive_elements": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/SensitiveElement"
                     },
                     "type": [
                         "array",
@@ -1274,7 +1435,7 @@
                 },
                 "subpopulations": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Subpopulation"
                     },
                     "type": [
                         "array",
@@ -1283,7 +1444,7 @@
                 },
                 "subsets": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DataSubset"
                     },
                     "type": [
                         "array",
@@ -1292,7 +1453,7 @@
                 },
                 "tasks": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Task"
                     },
                     "type": [
                         "array",
@@ -1307,14 +1468,18 @@
                     ]
                 },
                 "updates": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/UpdatePlan"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "use_repository": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/UseRepository"
                     },
                     "type": [
                         "array",
@@ -1324,7 +1489,7 @@
                 "variables": {
                     "description": "Metadata describing individual variables, fields, or columns in the dataset.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/VariableMetadata"
                     },
                     "type": [
                         "array",
@@ -1338,17 +1503,25 @@
                     ]
                 },
                 "version_access": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/VersionAccess"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "vulnerable_populations": {
-                    "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/VulnerablePopulations"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
                 },
                 "was_derived_from": {
                     "type": [
@@ -1398,7 +1571,7 @@
             "properties": {
                 "acquisition_methods": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/InstanceAcquisition"
                     },
                     "type": [
                         "array",
@@ -1407,7 +1580,7 @@
                 },
                 "addressing_gaps": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/AddressingGap"
                     },
                     "type": [
                         "array",
@@ -1416,7 +1589,7 @@
                 },
                 "anomalies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DataAnomaly"
                     },
                     "type": [
                         "array",
@@ -1439,7 +1612,7 @@
                 },
                 "cleaning_strategies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/CleaningStrategy"
                     },
                     "type": [
                         "array",
@@ -1448,7 +1621,7 @@
                 },
                 "collection_mechanisms": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/CollectionMechanism"
                     },
                     "type": [
                         "array",
@@ -1457,7 +1630,7 @@
                 },
                 "collection_timeframes": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/CollectionTimeframe"
                     },
                     "type": [
                         "array",
@@ -1470,7 +1643,7 @@
                 },
                 "confidential_elements": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Confidentiality"
                     },
                     "type": [
                         "array",
@@ -1497,7 +1670,7 @@
                 },
                 "content_warnings": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ContentWarning"
                     },
                     "type": [
                         "array",
@@ -1519,7 +1692,7 @@
                 },
                 "creators": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Creator"
                     },
                     "type": [
                         "array",
@@ -1528,7 +1701,7 @@
                 },
                 "data_collectors": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DataCollector"
                     },
                     "type": [
                         "array",
@@ -1537,7 +1710,7 @@
                 },
                 "data_protection_impacts": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DataProtectionImpact"
                     },
                     "type": [
                         "array",
@@ -1559,7 +1732,7 @@
                 },
                 "discouraged_uses": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DiscouragedUse"
                     },
                     "type": [
                         "array",
@@ -1568,7 +1741,7 @@
                 },
                 "distribution_dates": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DistributionDate"
                     },
                     "type": [
                         "array",
@@ -1577,7 +1750,7 @@
                 },
                 "distribution_formats": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DistributionFormat"
                     },
                     "type": [
                         "array",
@@ -1605,7 +1778,7 @@
                 },
                 "errata": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Erratum"
                     },
                     "type": [
                         "array",
@@ -1614,7 +1787,7 @@
                 },
                 "ethical_reviews": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/EthicalReview"
                     },
                     "type": [
                         "array",
@@ -1623,7 +1796,7 @@
                 },
                 "existing_uses": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ExistingUse"
                     },
                     "type": [
                         "array",
@@ -1631,14 +1804,19 @@
                     ]
                 },
                 "extension_mechanism": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ExtensionMechanism"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "external_resources": {
+                    "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ExternalResource"
                     },
                     "type": [
                         "array",
@@ -1651,7 +1829,7 @@
                 },
                 "funders": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/FundingMechanism"
                     },
                     "type": [
                         "array",
@@ -1660,7 +1838,7 @@
                 },
                 "future_use_impacts": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/FutureUseImpact"
                     },
                     "type": [
                         "array",
@@ -1675,11 +1853,15 @@
                     ]
                 },
                 "human_subject_research": {
-                    "description": "Information about whether dataset involves human subjects research, including IRB approval, ethics review, and regulatory compliance.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/HumanSubjectResearch"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Information about whether dataset involves human subjects research, including IRB approval, ethics review, and regulatory compliance."
                 },
                 "id": {
                     "description": "A unique identifier for a thing.",
@@ -1688,7 +1870,7 @@
                 "informed_consent": {
                     "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/InformedConsent"
                     },
                     "type": [
                         "array",
@@ -1697,7 +1879,7 @@
                 },
                 "instances": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Instance"
                     },
                     "type": [
                         "array",
@@ -1707,7 +1889,7 @@
                 "intended_uses": {
                     "description": "Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/IntendedUse"
                     },
                     "type": [
                         "array",
@@ -1715,15 +1897,23 @@
                     ]
                 },
                 "ip_restrictions": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/IPRestrictions"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "is_deidentified": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/Deidentification"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "is_tabular": {
@@ -1748,9 +1938,29 @@
                         "null"
                     ]
                 },
+                "known_biases": {
+                    "description": "Known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).",
+                    "items": {
+                        "$ref": "#/$defs/DatasetBias"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "known_limitations": {
+                    "description": "Known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
+                    "items": {
+                        "$ref": "#/$defs/DatasetLimitation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "labeling_strategies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/LabelingStrategy"
                     },
                     "type": [
                         "array",
@@ -1778,14 +1988,18 @@
                     ]
                 },
                 "license_and_use_terms": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/LicenseAndUseTerms"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "maintainers": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Maintainer"
                     },
                     "type": [
                         "array",
@@ -1818,7 +2032,7 @@
                 },
                 "other_tasks": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/OtherTask"
                     },
                     "type": [
                         "array",
@@ -1834,7 +2048,7 @@
                 "parent_datasets": {
                     "description": "Parent datasets that this dataset is part of or derived from. Enables hierarchical dataset composition (hasPart/isPartOf relationships).",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Dataset"
                     },
                     "type": [
                         "array",
@@ -1842,16 +2056,20 @@
                     ]
                 },
                 "participant_compensation": {
-                    "description": "Compensation or incentives provided to human research participants.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/HumanSubjectCompensation"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Compensation or incentives provided to human research participants."
                 },
                 "participant_privacy": {
                     "description": "Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ParticipantPrivacy"
                     },
                     "type": [
                         "array",
@@ -1866,7 +2084,7 @@
                 },
                 "preprocessing_strategies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/PreprocessingStrategy"
                     },
                     "type": [
                         "array",
@@ -1876,7 +2094,7 @@
                 "prohibited_uses": {
                     "description": "Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/ProhibitedUse"
                     },
                     "type": [
                         "array",
@@ -1891,7 +2109,7 @@
                 },
                 "purposes": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Purpose"
                     },
                     "type": [
                         "array",
@@ -1900,7 +2118,7 @@
                 },
                 "raw_sources": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/RawData"
                     },
                     "type": [
                         "array",
@@ -1908,15 +2126,29 @@
                     ]
                 },
                 "regulatory_restrictions": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/ExportControlRegulatoryRestrictions"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "related_datasets": {
                     "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DatasetRelationship"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "resources": {
+                    "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+                    "items": {
+                        "$ref": "#/$defs/Dataset"
                     },
                     "type": [
                         "array",
@@ -1924,14 +2156,18 @@
                     ]
                 },
                 "retention_limit": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/RetentionLimits"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "sampling_strategies": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/SamplingStrategy"
                     },
                     "type": [
                         "array",
@@ -1940,7 +2176,7 @@
                 },
                 "sensitive_elements": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/SensitiveElement"
                     },
                     "type": [
                         "array",
@@ -1962,7 +2198,7 @@
                 },
                 "subpopulations": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Subpopulation"
                     },
                     "type": [
                         "array",
@@ -1971,7 +2207,7 @@
                 },
                 "subsets": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/DataSubset"
                     },
                     "type": [
                         "array",
@@ -1980,7 +2216,7 @@
                 },
                 "tasks": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Task"
                     },
                     "type": [
                         "array",
@@ -1995,14 +2231,18 @@
                     ]
                 },
                 "updates": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/UpdatePlan"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "use_repository": {
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/UseRepository"
                     },
                     "type": [
                         "array",
@@ -2012,7 +2252,7 @@
                 "variables": {
                     "description": "Metadata describing individual variables, fields, or columns in the dataset.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/VariableMetadata"
                     },
                     "type": [
                         "array",
@@ -2026,17 +2266,25 @@
                     ]
                 },
                 "version_access": {
-                    "type": [
-                        "string",
-                        "null"
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/VersionAccess"
+                        },
+                        {
+                            "type": "null"
+                        }
                     ]
                 },
                 "vulnerable_populations": {
-                    "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/VulnerablePopulations"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
                 },
                 "was_derived_from": {
                     "type": [
@@ -2049,6 +2297,73 @@
                 "id"
             ],
             "title": "Dataset",
+            "type": "object"
+        },
+        "DatasetBias": {
+            "additionalProperties": false,
+            "description": "Documents known biases present in the dataset. Biases are systematic errors or prejudices that may affect the representativeness or fairness of the data. Distinct from anomalies (data quality issues) and limitations (scope constraints).",
+            "properties": {
+                "affected_subsets": {
+                    "description": "Specific subsets or features of the dataset affected by this bias.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "bias_description": {
+                    "description": "Detailed description of how this bias manifests in the dataset, including affected populations, features, or outcomes.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "bias_type": {
+                    "$ref": "#/$defs/BiasTypeEnum",
+                    "description": "The type of bias identified, using standardized categories from the Artificial Intelligence Ontology (AIO).\n"
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "mitigation_strategy": {
+                    "description": "Steps taken or recommended to mitigate this bias.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "DatasetBias",
             "type": "object"
         },
         "DatasetCollection": {
@@ -2178,8 +2493,9 @@
                     ]
                 },
                 "resources": {
+                    "description": "Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Dataset"
                     },
                     "type": [
                         "array",
@@ -2218,23 +2534,51 @@
             "title": "DatasetCollection",
             "type": "object"
         },
-        "DatasetProperty": {
+        "DatasetLimitation": {
             "additionalProperties": false,
-            "description": "Represents a single property of a dataset, or a set of related properties.",
+            "description": "Documents known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "limitation_description": {
+                    "description": "Detailed description of the limitation and its implications.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "limitation_type": {
+                    "$ref": "#/$defs/LimitationTypeEnum",
+                    "description": "Category of limitation (e.g., scope, coverage, temporal, methodological).\n"
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "recommended_mitigation": {
+                    "description": "Recommended approaches for users to address this limitation.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "scope_impact": {
+                    "description": "How this limitation affects the scope or applicability of the dataset.\n",
                     "type": [
                         "string",
                         "null"
@@ -2243,7 +2587,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2251,9 +2595,45 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
+            "title": "DatasetLimitation",
+            "type": "object"
+        },
+        "DatasetProperty": {
+            "additionalProperties": false,
+            "description": "Represents a single property of a dataset, or a set of related properties.",
+            "properties": {
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
             "title": "DatasetProperty",
             "type": "object"
         },
@@ -2269,11 +2649,14 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2290,7 +2673,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2300,8 +2683,7 @@
             },
             "required": [
                 "target_dataset",
-                "relationship_type",
-                "id"
+                "relationship_type"
             ],
             "title": "DatasetRelationship",
             "type": "object"
@@ -2331,7 +2713,8 @@
             "additionalProperties": false,
             "description": "Is it possible to identify individuals in the dataset, either directly or indirectly (in combination with other data)?",
             "properties": {
-                "description": {
+                "deidentification_details": {
+                    "description": "Details on de-identification procedures and residual risks.\n",
                     "items": {
                         "type": "string"
                     },
@@ -2340,9 +2723,19 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "identifiable_elements_present": {
                     "description": "Indicates whether data subjects can be identified.",
@@ -2351,8 +2744,25 @@
                         "null"
                     ]
                 },
+                "identifiers_removed": {
+                    "description": "List of identifier types removed during de-identification.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "method": {
+                    "description": "Method used for de-identification (e.g., HIPAA Safe Harbor).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2361,7 +2771,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2369,9 +2779,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Deidentification",
             "type": "object"
         },
@@ -2379,8 +2786,8 @@
             "additionalProperties": false,
             "description": "Indicates whether the data was collected directly from the individuals in question or obtained via third parties/other sources.",
             "properties": {
-                "description": {
-                    "description": "Free-text description of data collection source(s)",
+                "collection_details": {
+                    "description": "Details on direct vs. indirect collection methods and sources.\n",
                     "items": {
                         "type": "string"
                     },
@@ -2389,12 +2796,29 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "is_direct": {
+                    "description": "Whether collection was direct from individuals",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2403,7 +2827,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2411,9 +2835,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "DirectCollection",
             "type": "object"
         },
@@ -2422,7 +2843,14 @@
             "description": "Are there tasks for which the dataset should not be used?",
             "properties": {
                 "description": {
-                    "description": "Description of tasks or contexts in which dataset use is discouraged.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "discouragement_details": {
+                    "description": "Details on tasks for which the dataset should not be used.\n",
                     "items": {
                         "type": "string"
                     },
@@ -2432,11 +2860,14 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2445,7 +2876,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2453,9 +2884,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "DiscouragedUse",
             "type": "object"
         },
@@ -2464,6 +2892,27 @@
             "description": "When will the dataset be distributed?",
             "properties": {
                 "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "release_dates": {
                     "description": "Dates or timeframe for dataset release. Could be a one-time release date or multiple scheduled releases.\n",
                     "items": {
                         "type": "string"
@@ -2473,21 +2922,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2495,9 +2933,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "DistributionDate",
             "type": "object"
         },
@@ -2505,7 +2940,7 @@
             "additionalProperties": false,
             "description": "How will the dataset be distributed (e.g., tarball on a website, API, GitHub)?",
             "properties": {
-                "description": {
+                "access_urls": {
                     "description": "Details of the distribution channel(s) or format(s).",
                     "items": {
                         "type": "string"
@@ -2515,12 +2950,22 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2529,7 +2974,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2537,9 +2982,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "DistributionFormat",
             "type": "object"
         },
@@ -2589,7 +3031,14 @@
             "description": "Is there an erratum? If so, please provide a link or other access point.",
             "properties": {
                 "description": {
-                    "description": "Description or reference to the erratum, including details on known issues and how they may be corrected.\n",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "erratum_details": {
+                    "description": "Details on any errata or corrections to the dataset.\n",
                     "items": {
                         "type": "string"
                     },
@@ -2598,12 +3047,22 @@
                         "null"
                     ]
                 },
+                "erratum_url": {
+                    "description": "URL or access point for the erratum.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2612,7 +3071,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2620,9 +3079,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Erratum",
             "type": "object"
         },
@@ -2638,23 +3094,33 @@
                     ]
                 },
                 "description": {
-                    "description": "Short summary or details about the ethical review process(es).",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "review_details": {
+                    "description": "Details on ethical review processes, outcomes, and supporting documentation.\n",
                     "items": {
                         "type": "string"
                     },
                     "type": [
                         "array",
-                        "null"
-                    ]
-                },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
                         "null"
                     ]
                 },
@@ -2668,7 +3134,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2676,9 +3142,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "EthicalReview",
             "type": "object"
         },
@@ -2687,7 +3150,14 @@
             "description": "Has the dataset been used for any tasks already?",
             "properties": {
                 "description": {
-                    "description": "List or summary of known/previous uses of the dataset.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "examples": {
+                    "description": "List of examples of known/previous uses of the dataset.",
                     "items": {
                         "type": "string"
                     },
@@ -2697,11 +3167,14 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2710,7 +3183,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2718,9 +3191,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ExistingUse",
             "type": "object"
         },
@@ -2733,12 +3203,9 @@
                     "description": "Confidentiality classification of the dataset indicating level of access restrictions and sensitivity."
                 },
                 "description": {
-                    "description": "Export or regulatory restrictions on the dataset.",
-                    "items": {
-                        "type": "string"
-                    },
+                    "description": "A human-readable description for this property.",
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
@@ -2754,11 +3221,14 @@
                     "description": "Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States."
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2774,8 +3244,8 @@
                         "null"
                     ]
                 },
-                "used_software": {
-                    "description": "What software was used as part of this dataset property?",
+                "regulatory_restrictions": {
+                    "description": "Export or regulatory restrictions on the dataset.",
                     "items": {
                         "type": "string"
                     },
@@ -2783,11 +3253,18 @@
                         "array",
                         "null"
                     ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ExportControlRegulatoryRestrictions",
             "type": "object"
         },
@@ -2795,8 +3272,22 @@
             "additionalProperties": false,
             "description": "If others want to extend/augment/build on/contribute to the dataset, is there a mechanism for them to do so? If so, please describe how those contributions are validated and communicated.",
             "properties": {
+                "contribution_url": {
+                    "description": "URL for contribution guidelines or process.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "description": {
-                    "description": "Details on processes or tools that facilitate extensions, augmentations, or third-party contributions, including any review/approval workflows.\n",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "extension_details": {
+                    "description": "Details on extension mechanisms, contribution validation, and communication.\n",
                     "items": {
                         "type": "string"
                     },
@@ -2806,11 +3297,14 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2819,7 +3313,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2827,9 +3321,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ExtensionMechanism",
             "type": "object"
         },
@@ -2848,7 +3339,7 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2875,11 +3366,14 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -2898,7 +3392,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -2906,9 +3400,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ExternalResource",
             "type": "object"
         },
@@ -2980,14 +3471,7 @@
             "description": "Who funded the creation of the dataset? If there is an associated grant, please provide the name of the grantor and the grant name and number.",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "grant": {
-                    "description": "Name/identifier of the specific grant mechanism supporting dataset creation.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3000,12 +3484,25 @@
                         "null"
                     ]
                 },
+                "grants": {
+                    "description": "Grant mechanisms supporting dataset creation. Multiple grants may fund a single dataset.",
+                    "items": {
+                        "$ref": "#/$defs/Grant"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3014,7 +3511,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3022,9 +3519,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "FundingMechanism",
             "type": "object"
         },
@@ -3033,7 +3527,21 @@
             "description": "Is there anything about the dataset's composition or collection that might impact future uses or create risks/harm (e.g., unfair treatment, legal or financial risks)? If so, describe these impacts and any mitigation strategies.",
             "properties": {
                 "description": {
-                    "description": "Details regarding the possible future impacts or risks of use.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "impact_details": {
+                    "description": "Details on potential impacts, risks, and mitigation strategies.\n",
                     "items": {
                         "type": "string"
                     },
@@ -3042,12 +3550,8 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3056,7 +3560,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3064,9 +3568,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "FutureUseImpact",
             "type": "object"
         },
@@ -3177,18 +3678,21 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3197,7 +3701,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3205,9 +3709,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "HumanSubjectCompensation",
             "type": "object"
         },
@@ -3216,7 +3717,7 @@
             "description": "Information about whether the dataset involves human subjects research and what regulatory or ethical review processes were followed.",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3233,8 +3734,11 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "involves_human_subjects": {
                     "description": "Does this dataset involve human subjects research?",
@@ -3254,7 +3758,7 @@
                     ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3283,7 +3787,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3291,9 +3795,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "HumanSubjectResearch",
             "type": "object"
         },
@@ -3302,6 +3803,27 @@
             "description": "Have any third parties imposed IP-based or other restrictions on the data associated with the instances? If so, describe them and note any relevant fees or licensing terms. Maps to DUO terms related to commercial/non-profit use restrictions (NCU, NPU, NPUNCU).",
             "properties": {
                 "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "restrictions": {
                     "description": "Explanation of third-party IP restrictions.",
                     "items": {
                         "type": "string"
@@ -3311,21 +3833,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3333,9 +3844,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "IPRestrictions",
             "type": "object"
         },
@@ -3539,18 +4047,21 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3559,7 +4070,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3577,9 +4088,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "InformedConsent",
             "type": "object"
         },
@@ -3609,15 +4117,18 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "instance_type": {
                     "description": "Multiple types of instances? (e.g., movies, users, and ratings).\n",
@@ -3643,7 +4154,7 @@
                 "missing_information": {
                     "description": "References to one or more MissingInfo objects describing missing data.\n",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/MissingInfo"
                     },
                     "type": [
                         "array",
@@ -3651,7 +4162,7 @@
                     ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3660,7 +4171,7 @@
                 "sampling_strategies": {
                     "description": "References to one or more SamplingStrategy objects.\n",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/SamplingStrategy"
                     },
                     "type": [
                         "array",
@@ -3670,7 +4181,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3678,9 +4189,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Instance",
             "type": "object"
         },
@@ -3688,8 +4196,8 @@
             "additionalProperties": false,
             "description": "Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects, inferred).",
             "properties": {
-                "description": {
-                    "description": "Free-text description of the acquisition process",
+                "acquisition_details": {
+                    "description": "Details on how data was acquired for each instance.\n",
                     "items": {
                         "type": "string"
                     },
@@ -3698,12 +4206,22 @@
                         "null"
                     ]
                 },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3712,7 +4230,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3748,9 +4266,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "InstanceAcquisition",
             "type": "object"
         },
@@ -3759,7 +4274,14 @@
             "description": "Explicit statement of intended uses for this dataset. Complements FutureUseImpact by focusing on positive, recommended applications rather than risks. Aligns with RO-Crate \"Intended Use\" field.",
             "properties": {
                 "description": {
-                    "description": "Description of recommended and intended uses for this dataset. May include specific tasks, research questions, or application domains.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "examples": {
+                    "description": "List of example intended uses for this dataset.",
                     "items": {
                         "type": "string"
                     },
@@ -3769,11 +4291,21 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "usage_notes": {
+                    "description": "Notes or caveats about using the dataset for intended purposes.",
                     "type": [
                         "string",
                         "null"
@@ -3792,7 +4324,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3800,9 +4332,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "IntendedUse",
             "type": "object"
         },
@@ -3835,18 +4364,18 @@
                     ]
                 },
                 "description": {
-                    "description": "Explanation of any labeling steps performed.",
-                    "items": {
-                        "type": "string"
-                    },
+                    "description": "A human-readable description for this property.",
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "inter_annotator_agreement": {
                     "description": "Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percent agreement). Include both the metric name and value.",
@@ -3855,8 +4384,18 @@
                         "null"
                     ]
                 },
+                "labeling_details": {
+                    "description": "Details on labeling/annotation procedures and quality metrics.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3865,7 +4404,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3873,9 +4412,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "LabelingStrategy",
             "type": "object"
         },
@@ -3901,6 +4437,20 @@
                     ]
                 },
                 "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "license_terms": {
                     "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
                     "items": {
                         "type": "string"
@@ -3910,12 +4460,8 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -3924,7 +4470,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -3932,39 +4478,43 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "LicenseAndUseTerms",
             "type": "object"
+        },
+        "LimitationTypeEnum": {
+            "description": "Types of limitations that may affect dataset use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
+            "enum": [
+                "scope_limitation",
+                "temporal_limitation",
+                "coverage_limitation",
+                "methodological_limitation",
+                "representativeness_limitation",
+                "resolution_limitation",
+                "integration_limitation"
+            ],
+            "title": "LimitationTypeEnum",
+            "type": "string"
         },
         "Maintainer": {
             "additionalProperties": false,
             "description": "Who will be supporting/hosting/maintaining the dataset?",
             "properties": {
                 "description": {
-                    "description": "Name or role of the maintainer, possibly referencing CreatorOrMaintainerEnum or other details.\n",
-                    "items": {
-                        "$ref": "#/$defs/CreatorOrMaintainerEnum"
-                    },
-                    "type": [
-                        "array",
-                        "null"
-                    ]
-                },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
-                "used_software": {
-                    "description": "What software was used as part of this dataset property?",
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "maintainer_details": {
+                    "description": "Details on who will support, host, or maintain the dataset.\n",
                     "items": {
                         "type": "string"
                     },
@@ -3972,11 +4522,29 @@
                         "array",
                         "null"
                     ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "role": {
+                    "$ref": "#/$defs/CreatorOrMaintainerEnum",
+                    "description": "Role of the maintainer (e.g., researcher, platform, organization).\n"
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Maintainer",
             "type": "object"
         },
@@ -4011,15 +4579,18 @@
             "description": "Is any information missing from individual instances? (e.g., unavailable data)",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "missing": {
                     "description": "Description of the missing data fields or elements.\n",
@@ -4032,7 +4603,7 @@
                     ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4041,7 +4612,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4059,9 +4630,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "MissingInfo",
             "type": "object"
         },
@@ -4078,7 +4646,10 @@
                 },
                 "id": {
                     "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
                     "description": "A human-readable name for a thing.",
@@ -4128,7 +4699,28 @@
             "description": "What other tasks could the dataset be used for?",
             "properties": {
                 "description": {
-                    "description": "Potential additional tasks or domains for dataset usage.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "task_details": {
+                    "description": "Details on other potential tasks the dataset could be used for.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4137,21 +4729,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4159,9 +4740,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "OtherTask",
             "type": "object"
         },
@@ -4190,18 +4768,21 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4230,7 +4811,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4238,9 +4819,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ParticipantPrivacy",
             "type": "object"
         },
@@ -4303,7 +4881,28 @@
             "description": "Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?",
             "properties": {
                 "description": {
-                    "description": "Explanation of any preprocessing steps performed on the data.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "preprocessing_details": {
+                    "description": "Details on preprocessing steps applied to the data.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4312,21 +4911,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4334,9 +4922,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "PreprocessingStrategy",
             "type": "object"
         },
@@ -4345,21 +4930,21 @@
             "description": "Explicit statement of prohibited or forbidden uses for this dataset. Stronger than DiscouragedUse - these are uses that are explicitly not permitted by license, ethics, or policy. Aligns with RO-Crate \"Prohibited Uses\" field.",
             "properties": {
                 "description": {
-                    "description": "Description of explicitly prohibited uses for this dataset. May include specific tasks, applications, or domains that are forbidden by license terms, data use agreements, or ethical constraints.",
-                    "items": {
-                        "type": "string"
-                    },
+                    "description": "A human-readable description for this property.",
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4378,7 +4963,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4386,9 +4971,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ProhibitedUse",
             "type": "object"
         },
@@ -4397,18 +4979,21 @@
             "description": "For what purpose was the dataset created?",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4424,7 +5009,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4432,9 +5017,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Purpose",
             "type": "object"
         },
@@ -4442,8 +5024,36 @@
             "additionalProperties": false,
             "description": "Was the \"raw\" data saved in addition to the preprocessed/cleaned/labeled data? If so, please provide a link or other access point to the \"raw\" data.",
             "properties": {
+                "access_url": {
+                    "description": "URL or access point for the raw data.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "description": {
-                    "description": "Details about the availability or location of raw data.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "raw_data_details": {
+                    "description": "Details on raw data availability and access procedures.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4452,21 +5062,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4474,9 +5073,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "RawData",
             "type": "object"
         },
@@ -4485,7 +5081,28 @@
             "description": "Are relationships between individual instances made explicit (e.g., users' movie ratings, social network links)?",
             "properties": {
                 "description": {
-                    "description": "Explanation of how these relationships are represented.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "relationship_details": {
+                    "description": "Details on relationships between instances (e.g., graph edges, ratings).\n",
                     "items": {
                         "type": "string"
                     },
@@ -4494,21 +5111,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4516,9 +5122,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Relationships",
             "type": "object"
         },
@@ -4527,7 +5130,28 @@
             "description": "If the dataset relates to people, are there applicable limits on the retention of their data (e.g., were individuals told their data would be deleted after a certain time)? If so, please describe these limits and how they will be enforced.",
             "properties": {
                 "description": {
-                    "description": "Policies or regulations around data retention, including any enforcement mechanisms or responsibilities.\n",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "retention_details": {
+                    "description": "Details on data retention limits and enforcement procedures.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4536,12 +5160,8 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
+                "retention_period": {
+                    "description": "Time period for data retention.",
                     "type": [
                         "string",
                         "null"
@@ -4550,7 +5170,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4558,9 +5178,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "RetentionLimits",
             "type": "object"
         },
@@ -4569,15 +5186,18 @@
             "description": "Does the dataset contain all possible instances, or is it a sample (not necessarily random) of instances from a larger set? If so, how representative is it?",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "is_random": {
                     "description": "Indicates whether the sample is random.",
@@ -4610,7 +5230,7 @@
                     ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4649,7 +5269,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4667,9 +5287,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "SamplingStrategy",
             "type": "object"
         },
@@ -4678,20 +5295,21 @@
             "description": "Does the dataset contain data that might be considered sensitive (e.g., race, sexual orientation, religion, biometrics)?",
             "properties": {
                 "description": {
-                    "items": {
-                        "type": "string"
-                    },
+                    "description": "A human-readable description for this property.",
                     "type": [
-                        "array",
+                        "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4704,8 +5322,8 @@
                         "null"
                     ]
                 },
-                "used_software": {
-                    "description": "What software was used as part of this dataset property?",
+                "sensitivity_details": {
+                    "description": "Details on sensitive data elements present and handling procedures.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4713,11 +5331,18 @@
                         "array",
                         "null"
                     ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "SensitiveElement",
             "type": "object"
         },
@@ -4773,6 +5398,28 @@
             "description": "Are there recommended data splits (e.g., training, validation, testing)? If so, how are they defined and why?",
             "properties": {
                 "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "split_details": {
+                    "description": "Details on recommended data splits and their rationale.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4781,21 +5428,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4803,9 +5439,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Splits",
             "type": "object"
         },
@@ -4814,7 +5447,7 @@
             "description": "Does the dataset identify any subpopulations (e.g., by age, gender)? If so, how are they identified and what are their distributions?",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4830,8 +5463,11 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "identification": {
                     "items": {
@@ -4843,7 +5479,7 @@
                     ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4859,7 +5495,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4867,9 +5503,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Subpopulation",
             "type": "object"
         },
@@ -4878,18 +5511,21 @@
             "description": "Was there a specific task in mind for the dataset's application?",
             "properties": {
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4905,7 +5541,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4913,9 +5549,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "Task",
             "type": "object"
         },
@@ -4924,18 +5557,28 @@
             "description": "Will the dataset be distributed to third parties outside of the entity (e.g., company, institution, organization) on behalf of which the dataset was created?",
             "properties": {
                 "description": {
-                    "description": "Boolean or textual explanation regarding distribution to parties external to the dataset-creating entity.\n",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "is_shared": {
+                    "description": "Boolean indicating whether the dataset is distributed to parties external to the dataset-creating entity.\n",
                     "type": [
                         "boolean",
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -4944,7 +5587,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4952,9 +5595,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "ThirdPartySharing",
             "type": "object"
         },
@@ -4963,7 +5603,35 @@
             "description": "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, how often, by whom, and how will these updates be communicated?",
             "properties": {
                 "description": {
-                    "description": "Details on the dataset's update policy, schedule, responsible parties, and communication channels (e.g., mailing list, GitHub releases).\n",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "frequency": {
+                    "description": "How often updates are planned (e.g., quarterly, annually).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "update_details": {
+                    "description": "Details on update plans, responsible parties, and communication methods.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4972,21 +5640,10 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -4994,9 +5651,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "UpdatePlan",
             "type": "object"
         },
@@ -5005,7 +5659,28 @@
             "description": "Is there a repository that links to any or all papers or systems that use the dataset? If so, provide a link or other access point.",
             "properties": {
                 "description": {
-                    "description": "Reference(s) to a repository of known dataset uses.",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "repository_details": {
+                    "description": "Details on the repository of known dataset uses.\n",
                     "items": {
                         "type": "string"
                     },
@@ -5014,12 +5689,8 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
+                "repository_url": {
+                    "description": "URL to a repository of known dataset uses.",
                     "type": [
                         "string",
                         "null"
@@ -5028,7 +5699,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -5036,9 +5707,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "UseRepository",
             "type": "object"
         },
@@ -5068,7 +5736,7 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
@@ -5085,8 +5753,11 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "is_identifier": {
                     "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
@@ -5134,7 +5805,7 @@
                     ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -5167,7 +5838,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -5180,8 +5851,7 @@
                 }
             },
             "required": [
-                "variable_name",
-                "id"
+                "variable_name"
             ],
             "title": "VariableMetadata",
             "type": "object"
@@ -5211,7 +5881,45 @@
             "description": "Will older versions of the dataset continue to be supported/hosted/maintained? If so, how? If not, how will obsolescence be communicated to dataset consumers?",
             "properties": {
                 "description": {
-                    "description": "Explanation of whether and how previous dataset versions remain accessible, including versioning policies and deprecation announcements.\n",
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "latest_version_doi": {
+                    "description": "DOI or URL of the latest dataset version.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "version_details": {
+                    "description": "Details on version support policies and obsolescence communication.\n",
                     "items": {
                         "type": "string"
                     },
@@ -5220,19 +5928,8 @@
                         "null"
                     ]
                 },
-                "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "A human-readable name for a thing.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "used_software": {
-                    "description": "What software was used as part of this dataset property?",
+                "versions_available": {
+                    "description": "List of available versions with metadata.",
                     "items": {
                         "type": "string"
                     },
@@ -5242,9 +5939,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "VersionAccess",
             "type": "object"
         },
@@ -5282,7 +5976,7 @@
                     ]
                 },
                 "description": {
-                    "description": "A human-readable description for a thing.",
+                    "description": "A human-readable description for this property.",
                     "type": [
                         "string",
                         "null"
@@ -5299,11 +5993,14 @@
                     ]
                 },
                 "id": {
-                    "description": "A unique identifier for a thing.",
-                    "type": "string"
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 },
                 "name": {
-                    "description": "A human-readable name for a thing.",
+                    "description": "A human-readable name for this property.",
                     "type": [
                         "string",
                         "null"
@@ -5322,7 +6019,7 @@
                 "used_software": {
                     "description": "What software was used as part of this dataset property?",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/$defs/Software"
                     },
                     "type": [
                         "array",
@@ -5337,9 +6034,6 @@
                     ]
                 }
             },
-            "required": [
-                "id"
-            ],
             "title": "VulnerablePopulations",
             "type": "object"
         }
@@ -5473,8 +6167,9 @@
             ]
         },
         "resources": {
+            "description": "Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.",
             "items": {
-                "type": "string"
+                "$ref": "#/$defs/Dataset"
             },
             "type": [
                 "array",

@@ -1,0 +1,428 @@
+{
+  "rubric": "rubric10",
+  "version": "1.0",
+  "d4d_file": "data/d4d_individual/claudecode_agent/CHORUS/github_chorus_ai_row9.txt_d4d.yaml",
+  "project": "CHORUS",
+  "method": "claudecode_agent",
+  "type": "individual",
+  "evaluation_timestamp": "2025-12-08T18:57:38.278592",
+  "model": {
+    "name": "hybrid-heuristic-evaluator",
+    "temperature": "N/A",
+    "evaluation_type": "rule_based_with_quality_heuristics"
+  },
+  "overall_score": {
+    "total_points": 18,
+    "max_points": 50,
+    "percentage": 36.0
+  },
+  "elements": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "description": "Can a user or system discover and uniquely identify this dataset?",
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, etc.)",
+          "score": 1,
+          "evidence": "id: chorus:github-org-documentation-v3",
+          "quality_note": "Identifier present"
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "evidence": "title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI",
+          "quality_note": "Comprehensive title and description (466 chars)"
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "evidence": "keywords: 10 items",
+          "quality_note": "10 keywords provided"
+        },
+        {
+          "name": "Landing Page and Resources",
+          "score": 1,
+          "evidence": "page: https://chorus4ai.org/",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Hierarchical Structure",
+          "score": 1,
+          "evidence": "keywords: 10 items",
+          "quality_note": "Field present"
+        }
+      ],
+      "element_score": 5,
+      "element_max": 5
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Regulatory Restrictions and Confidentiality",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 1,
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Distribution Formats and File Types",
+          "score": 1,
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Related Datasets and External Resources",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Data Formats Are Standardized",
+          "score": 1,
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Schema or Ontology Conformance",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Variable Metadata with Identifiers",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Use Guidance Provided",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 1,
+      "element_max": 5
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Deidentification Method Described",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Privacy Protections Beyond Deidentification",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Informed Consent Obtained",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Vulnerable Populations and Compensation",
+          "score": 1,
+          "evidence": "purposes: 1 items",
+          "quality_note": "Field present"
+        }
+      ],
+      "element_score": 1,
+      "element_max": 5
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Described",
+          "score": 1,
+          "evidence": "instances: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Number of Instances or Samples",
+          "score": 0,
+          "evidence": "instances: 1 items",
+          "quality_note": ""
+        },
+        {
+          "name": "Variable Metadata and Tabular Flag",
+          "score": 1,
+          "evidence": "instances: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Data Topics or Conditions",
+          "score": 1,
+          "evidence": "instances: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Data Quality Issues and Anomalies",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 3,
+      "element_max": 5
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "description": "Can a user determine dataset versions, update history, and provenance?",
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Version Access Methods",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Change Descriptions and Errata",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Update Schedule or Frequency",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Provenance and Source Derivation",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose",
+          "score": 1,
+          "evidence": "purposes: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "score": 1,
+          "evidence": "tasks: 3 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Funding Sources and Mechanisms",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Grant IDs or Award Numbers",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Creators and Acknowledgements",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "description": "Can data collection and processing steps be replicated or understood?",
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings",
+          "score": 1,
+          "evidence": "data_collectors: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Data Acquisition Methods",
+          "score": 1,
+          "evidence": "acquisition_methods: 1 items",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Software and Tools Documented",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "External Standards and Resources",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Systematic Biases Identified",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Data Anomalies and Quality Issues",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Sensitive Content and Warnings",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Ethical Review Details",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 0,
+      "element_max": 5
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
+      "sub_elements": [
+        {
+          "name": "Dataset Published on Recognized Platform",
+          "score": 1,
+          "evidence": "page: https://chorus4ai.org/",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "score": 1,
+          "evidence": "page: https://chorus4ai.org/",
+          "quality_note": "Field present"
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "score": 0,
+          "evidence": "Field absent or empty",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "element_score": 2,
+      "element_max": 5
+    }
+  ],
+  "assessment": {
+    "strengths": [
+      "Strong Dataset Discovery and Identification (5/5)"
+    ],
+    "weaknesses": [
+      "Missing Data Reuse and Interoperability (1/5)",
+      "Missing Ethical Use and Privacy Safeguards (1/5)",
+      "Missing Data Provenance and Version Tracking (0/5)",
+      "Missing Dataset Evaluation and Limitations Disclosure (0/5)"
+    ],
+    "recommendations": []
+  },
+  "metadata": {
+    "evaluator_id": "batch-hybrid-evaluator",
+    "rubric_hash": "sha256-rubric10",
+    "d4d_file_hash": "b56deb6f4226b9dfa64abca8e98744a293b00503ea80857066d621b323d943e7"
+  }
+}

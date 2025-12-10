@@ -45,7 +45,7 @@ classes:
       licensing terms and any fees.
     is_a: DatasetProperty
     attributes:
-      description:
+      license_terms:
         description: >
           Description of the dataset's license and terms of use (including
           links, costs, or usage constraints).
@@ -83,7 +83,7 @@ classes:
       use restrictions (NCU, NPU, NPUNCU).
     is_a: DatasetProperty
     attributes:
-      description:
+      restrictions:
         description: "Explanation of third-party IP restrictions."
         range: string
         multivalued: true
@@ -102,7 +102,7 @@ classes:
       related to ethics approval, geographic restrictions, and institutional requirements.
     is_a: DatasetProperty
     attributes:
-      description:
+      regulatory_restrictions:
         description: "Export or regulatory restrictions on the dataset."
         range: string
         multivalued: true

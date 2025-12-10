@@ -45,11 +45,6 @@ classes:
       supporting documentation.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Short summary or details about the ethical review process(es)."
-        range: string
-        multivalued: true
-        slot_uri: dcterms:description
       contact_person:
         description: >-
           Contact person for questions about ethical review. Provides structured
@@ -67,6 +62,12 @@ classes:
         slot_uri: schema:provider
         exact_mappings:
           - schema:provider
+      review_details:
+        description: >
+          Details on ethical review processes, outcomes, and supporting documentation.
+        range: string
+        multivalued: true
+        slot_uri: dcterms:description
 
 
   DataProtectionImpact:
@@ -76,8 +77,9 @@ classes:
       description of this analysis, including the outcomes, and any supporting documentation.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Details of the data protection impact analysis, if conducted."
+      impact_details:
+        description: >
+          Details on data protection impact analysis, outcomes, and documentation.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -90,8 +92,9 @@ classes:
       language of the notification itself if possible.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Details about any notification provided to individuals whose data was collected."
+      notification_details:
+        description: >
+          Details on how individuals were notified about data collection.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -104,8 +107,9 @@ classes:
       consent to?
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Details about how consent was sought, provided, and documented."
+      consent_details:
+        description: >
+          Details on how consent was requested, provided, and documented.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -117,8 +121,9 @@ classes:
       to revoke their consent in the future or for certain uses? If so, please describe.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Information about any consent-revocation mechanism offered to data subjects."
+      revocation_details:
+        description: >
+          Details on consent revocation mechanisms and procedures.
         range: string
         multivalued: true
         slot_uri: dcterms:description

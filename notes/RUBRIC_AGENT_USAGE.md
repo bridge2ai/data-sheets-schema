@@ -1,0 +1,922 @@
+# D4D Rubric Agent Usage Examples
+
+This guide provides practical examples for using the D4D rubric evaluation agents in Claude Code:
+- **Standard agents:** `d4d-rubric10`, `d4d-rubric20` - Quality-based evaluation
+- **Semantic agents:** `d4d-rubric10-semantic`, `d4d-rubric20-semantic` - Enhanced with semantic analysis, correctness validation, and consistency checking
+
+## How These Agents Work
+
+**Conversational Evaluation - No API Key Required**
+
+These agents work **directly within Claude Code conversations** - no external API calls or configuration needed:
+
+1. **You ask** the agent to evaluate D4D files (conversational prompts)
+2. **Agent reads** D4D YAML files using Read tool
+3. **Agent applies** rubric criteria and assesses quality
+4. **Agent returns** structured results with scores, evidence, recommendations
+5. **Agent saves** results to files if requested
+
+**No ANTHROPIC_API_KEY required** - you're already using Claude Code!
+
+**Reproducibility:**
+- Temperature: 0.0 (fully deterministic)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Same D4D file → Same quality score every time
+
+## Quick Reference
+
+**Invoke agents with conversational prompts:**
+
+**Standard Quality Agents:**
+- "Evaluate [file] with rubric10"
+- "Run rubric20 assessment on [file]"
+- "Score [file] using rubric10"
+
+**Semantic Analysis Agents:**
+- "Evaluate [file] with rubric10-semantic"
+- "Run semantic analysis using rubric20-semantic"
+- "Check [file] consistency and correctness with rubric10-semantic"
+
+**Agent Names:**
+- `d4d-rubric10` - 10-element hierarchical quality rubric (50 points max)
+- `d4d-rubric20` - 20-question detailed rubric (84 points max)
+- `d4d-rubric10-semantic` - Rubric10 + semantic analysis, correctness, consistency
+- `d4d-rubric20-semantic` - Rubric20 + semantic analysis, correctness, consistency
+
+---
+
+## Basic Usage Examples
+
+### Example 1: Evaluate Single File with Rubric10
+
+```
+User: Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with rubric10
+
+Claude: I'll evaluate the VOICE D4D file using the rubric10 quality assessment.
+
+[Agent reads file, applies rubric10 criteria, returns evaluation]
+
+✅ Rubric10 Evaluation Complete
+
+**Overall Score: 38.5/50 (77.0%)**
+
+**Strengths:**
+- Comprehensive ethical documentation with IRB approval and HIPAA Safe Harbor deidentification
+- Clear access mechanisms via PhysioNet registered access with explicit DUA requirements
+- Detailed preprocessing pipeline with specific tools (openSMILE, Parselmouth, Whisper)
+- Well-documented version history with multiple releases and change notes
+- Strong community integration via PhysioNet and Bridge2AI platforms
+
+**Weaknesses:**
+- Missing funding agency and award number details
+- Limited documentation of collection site specifics
+- No external publication DOIs or related dataset cross-references
+- Sampling bias not discussed in limitations
+- Processing code repositories not linked
+
+**Recommendations:**
+- Add funding_and_acknowledgements section with NIH grant details
+- Include collection_process.setting with specific site names
+- Link to related publications in references field
+- Add limitations section discussing selection bias
+- Provide GitHub repository links for preprocessing code
+
+**Detailed Results:** data/evaluation_llm/rubric10/detailed_analysis/VOICE_claudecode_evaluation.json
+```
+
+---
+
+### Example 2: Evaluate Single File with Rubric20
+
+```
+User: Run rubric20 assessment on data/d4d_concatenated/claudecode/CM4AI_d4d.yaml
+
+Claude: I'll evaluate the CM4AI D4D file using the rubric20 detailed quality assessment.
+
+[Agent reads file, applies rubric20 criteria across 4 categories]
+
+✅ Rubric20 Evaluation Complete
+
+**Overall Score: 68.2/84 (81.2%)**
+
+**Category Breakdown:**
+- Structural Completeness: 21/21 (100%)
+- Metadata Quality & Content: 14/22 (63.6%)
+- Technical Documentation: 16/25 (64.0%)
+- FAIRness & Accessibility: 17/17 (100%)
+
+**Top Strengths:**
+- Perfect structural completeness with all mandatory fields populated
+- Excellent FAIR compliance (100% on findability and accessibility)
+- Comprehensive keyword diversity (12 unique keywords)
+- Clear license terms and access mechanisms
+
+**Critical Gaps:**
+- No funding information (Question 7: 0/5)
+- Missing associated publications (Question 14: 0/5)
+- Limited interoperability documentation (Question 10: 3/5)
+- No cross-platform interlinking (Question 20: 0/1)
+
+**Detailed Results:** data/evaluation_llm/rubric20/detailed_analysis/CM4AI_claudecode_evaluation.json
+```
+
+---
+
+### Example 3: Compare Multiple Methods
+
+```
+User: Can you evaluate all VOICE D4D files (curated, gpt5, claudecode) using rubric10 and compare the results?
+
+Claude: I'll evaluate all three VOICE D4D files with rubric10 and provide a comparison.
+
+[Agent evaluates 3 files sequentially]
+
+✅ Rubric10 Comparison for VOICE Project
+
+| Method | Score | Percentage | Rank |
+|--------|-------|------------|------|
+| claudecode | 38.5/50 | 77.0% | 🥇 Best |
+| curated | 13.0/50 | 26.0% | 🥈 Second |
+| gpt5 | 5.0/50 | 10.0% | 🥉 Third |
+
+**Key Findings:**
+
+**Claude Code (77.0%) - Best Performance:**
+- Strong across all 10 elements
+- Excels in ethics (5/5), access (5/5), composition (5/5)
+- Weaknesses: motivation (3/5), provenance (3/5)
+
+**Curated (26.0%) - Moderate Performance:**
+- Good ethics documentation (4/5)
+- Missing discovery metadata (2/5)
+- Lacks technical transparency (1/5)
+
+**GPT-5 (10.0%) - Poor Performance:**
+- Minimal metadata coverage
+- Only basic fields populated
+- Missing most quality details
+
+**Conclusion:** Claude Code generates significantly more comprehensive D4D metadata (7.7× better than GPT-5, 3× better than curated).
+
+**Detailed Results:**
+- data/evaluation_llm/rubric10/detailed_analysis/VOICE_claudecode_evaluation.json
+- data/evaluation_llm/rubric10/detailed_analysis/VOICE_curated_evaluation.json
+- data/evaluation_llm/rubric10/detailed_analysis/VOICE_gpt5_evaluation.json
+```
+
+---
+
+### Example 4: Evaluate All Projects with Both Rubrics (Conversational Batch)
+
+```
+User: Evaluate all four projects (AI_READI, CHORUS, CM4AI, VOICE) across all
+methods (curated, gpt5, claudecode_agent, claudecode_assistant) using both
+rubric10 and rubric20 and save results to data/evaluation_llm/
+
+Claude: I'll run comprehensive evaluation using both rubrics across all projects
+and methods. This will evaluate:
+- 4 projects × 4 methods = 16 concatenated files
+- 2 rubrics per file = 32 total evaluations
+
+I'll iterate through files systematically and save all results to data/evaluation_llm/
+
+[Agent reads and evaluates files sequentially using Read tool]
+[Agent generates JSON results for each evaluation]
+[Agent saves results to data/evaluation_llm/rubric10/ and data/evaluation_llm/rubric20/]
+
+✅ Complete Evaluation Finished (32 evaluations completed)
+
+**Summary by Rubric10:**
+
+| Project | claudecode | curated | gpt5 |
+|---------|-----------|---------|------|
+| AI_READI | 24% | 22% | 10% |
+| CHORUS | 22% | N/A | 8% |
+| CM4AI | 26% | 16% | 18% |
+| VOICE | 77% | 26% | 10% |
+| **Average** | **37.3%** | **21.3%** | **11.5%** |
+
+**Summary by Rubric20:**
+
+| Project | claudecode | curated | gpt5 |
+|---------|-----------|---------|------|
+| AI_READI | 46% | 49% | 17% |
+| CHORUS | 37% | N/A | 14% |
+| CM4AI | 45% | 30% | 21% |
+| VOICE | 81% | 46% | 17% |
+| **Average** | **52.3%** | **41.7%** | **17.3%** |
+
+**Key Insights:**
+- Claude Code outperforms GPT-5 by 3.24× (rubric10) and 3.03× (rubric20)
+- VOICE dataset has exceptional quality across all methods
+- Most common gaps: funding details, publications, version history
+
+**All Results:** data/evaluation_llm/
+```
+
+---
+
+## Advanced Usage Examples
+
+### Example 5: Evaluate and Get Actionable Recommendations
+
+```
+User: Evaluate data/d4d_concatenated/claudecode/CHORUS_d4d.yaml with rubric20 and give me specific actions to improve the score
+
+Claude: I'll evaluate CHORUS with rubric20 and identify specific improvement actions.
+
+[Agent evaluates file and analyzes gaps]
+
+✅ CHORUS Rubric20 Evaluation: 31.2/84 (37.1%)
+
+**Immediate Actions to Improve Score:**
+
+**Priority 1 - Add Missing Critical Fields (+15 points potential):**
+1. Add `funding_and_acknowledgements.funding` with NIH grant OT2OD032720
+   - Impact: Question 7 goes from 0→5 (+5 points)
+
+2. Add `references` section with CHORUS publication DOIs
+   - Impact: Question 14 goes from 0→5 (+5 points)
+
+3. Add `version_access` with version history and release notes
+   - Impact: Question 13 goes from 0→5 (+5 points)
+
+**Priority 2 - Enhance Existing Fields (+12 points potential):**
+4. Expand `collection_process.setting` with specific site names and locations
+   - Current: "Multiple clinical sites"
+   - Target: "Massachusetts General Hospital, University of Florida, UT Health..."
+   - Impact: Question 12 goes from 2→5 (+3 points)
+
+5. Add `software_and_tools` with version numbers and GitHub links
+   - Current: Tool names only
+   - Target: "openSMILE 3.0 (github.com/audeering/opensmile)"
+   - Impact: Question 11 goes from 2→5 (+3 points)
+
+6. Add `conforms_to` field with schema references
+   - Target: "schema.org/Dataset, DCAT"
+   - Impact: Question 10 goes from 1→4 (+3 points)
+
+**Priority 3 - Add Quality Documentation (+8 points potential):**
+7. Add `limitations` section discussing known biases
+   - Impact: Question 9 from incomplete to complete
+
+8. Add `external_resources` with cross-platform links
+   - Impact: Question 20 goes from 0→1 (+1 point)
+
+**Expected Score After All Improvements:** 31.2 + 15 + 12 + 8 = **66.2/84 (78.8%)**
+```
+
+---
+
+### Example 6: Identify Quality vs Presence Gaps
+
+```
+User: I ran presence detection on VOICE and got 92% but you scored it 77% on rubric10. Why the difference?
+
+Claude: I'll analyze the gap between presence detection and quality assessment for VOICE.
+
+[Agent compares presence scores with quality scores]
+
+✅ Presence vs Quality Gap Analysis for VOICE
+
+**Overall Gap: 92% presence → 77% quality = -15 percentage points**
+
+**Fields Where Presence ≠ Quality:**
+
+1. **Funding Information (Element 7)**
+   - Presence score: 1 (field exists)
+   - Quality score: 0.6 (partial - 3/5 sub-elements)
+   - Gap explanation:
+     - `project` field mentions "Bridge2AI" ✓
+     - `keywords` includes project name ✓
+     - Missing: Funding agency name ✗
+     - Missing: Grant award number ✗
+     - Missing: Acknowledgements section ✗
+
+2. **Version History (Element 6)**
+   - Presence score: 1 (field exists)
+   - Quality score: 0.6 (partial - 3/5 sub-elements)
+   - Gap explanation:
+     - `dataset_version` present ("1.1") ✓
+     - Version list in `version_access` ✓
+     - `release_notes` present ✓
+     - Missing: Detailed change descriptions ✗
+     - Missing: Update schedule/frequency ✗
+
+3. **Technical Transparency (Element 8)**
+   - Presence score: 1 (field exists)
+   - Quality score: 0.6 (partial - 3/5 sub-elements)
+   - Gap explanation:
+     - `collection_process.setting` mentions "clinical sites" ✓
+     - `software_and_tools` lists tools ✓
+     - `preprocessing_and_derived_data` describes pipeline ✓
+     - Missing: Specific site names and protocols ✗
+     - Missing: GitHub repository links ✗
+
+**The Lesson:**
+Presence detection checks IF fields exist.
+Quality assessment checks HOW WELL fields are filled.
+
+Your VOICE file has good coverage (92% of fields present) but could have richer content in several areas to reach the full 100% quality score.
+```
+
+---
+
+### Example 7: Evaluate Before Publication
+
+```
+User: I'm about to publish the CM4AI dataset. Can you run both rubrics and tell me if it's ready?
+
+Claude: I'll perform a pre-publication quality check using both rubrics.
+
+[Agent evaluates with both rubric10 and rubric20]
+
+✅ CM4AI Pre-Publication Quality Check
+
+**Rubric10 Score: 26% (13.0/50)**
+**Rubric20 Score: 45% (37.8/84)**
+
+**Publication Readiness Assessment: ⚠️ NOT READY**
+
+**CRITICAL Issues (must fix before publication):**
+
+❌ **No Funding Information**
+- Missing: Funding agency, grant number, acknowledgements
+- Impact: Fails NIH data sharing requirements
+- Fix: Add funding_and_acknowledgements section
+
+❌ **Missing License Terms**
+- Missing: Clear reuse license (CC BY, CC0, etc.)
+- Impact: Users don't know if they can reuse the data
+- Fix: Add license_and_use_terms.description
+
+❌ **No IRB/Ethics Documentation**
+- Missing: IRB approval information
+- Impact: Cannot verify ethical compliance
+- Fix: Add ethics.irb_approval
+
+❌ **Missing Persistent Identifier**
+- Missing: DOI or other persistent ID
+- Impact: Dataset cannot be reliably cited
+- Fix: Register DOI via Zenodo/DataCite
+
+**HIGH Priority Issues (should fix):**
+
+⚠️ **Limited Access Documentation**
+- Present but incomplete: access_policy field exists but lacks details
+- Fix: Specify exact access mechanism (open/registered/restricted)
+
+⚠️ **No Version History**
+- Missing: Release notes and versioning
+- Fix: Add version_access and release_notes
+
+⚠️ **Missing Associated Publications**
+- Missing: Links to papers describing the dataset
+- Fix: Add references section with DOIs
+
+**Recommended Publication Workflow:**
+
+1. **Fix CRITICAL issues** → Re-run evaluation → Should reach ~65%
+2. **Fix HIGH priority issues** → Re-run evaluation → Should reach ~75%
+3. **Review rubric20 detailed report** → Address remaining gaps
+4. **Final evaluation** → Target: ≥80% on both rubrics
+5. **Publish** → Dataset meets quality standards
+
+**Estimated Time to Publication-Ready:** 2-4 days
+
+Want me to generate a checklist with specific field additions needed?
+```
+
+---
+
+### Example 8: Track Improvements Over Time
+
+```
+User: I updated the AI_READI file based on your recommendations last week. Can you re-evaluate with rubric20 and compare to the previous score?
+
+Claude: I'll evaluate the updated AI_READI file and compare to your baseline.
+
+[Agent evaluates current file and compares to cached previous evaluation]
+
+✅ AI_READI Improvement Tracking - Rubric20
+
+**Previous Score (2025-11-20):** 38.7/84 (46.1%)
+**Current Score (2025-12-06):** 52.3/84 (62.3%)
+
+**Improvement: +13.6 points (+16.2 percentage points)** 🎉
+
+**What Improved:**
+
+✅ **Added Funding Information (+5 points)**
+- Question 7: 0/5 → 5/5
+- Added: NIH grant OT2OD032744, Bridge2AI program acknowledgement
+
+✅ **Enhanced Version History (+3 points)**
+- Question 13: 2/5 → 5/5
+- Added: Detailed release notes with specific changes per version
+
+✅ **Added Associated Publications (+4 points)**
+- Question 14: 0/5 → 4/5
+- Added: 2 publication DOIs in references field
+
+✅ **Improved Collection Documentation (+2 points)**
+- Question 12: 2/5 → 4/5
+- Added: Specific collection sites and institutional affiliations
+
+✅ **Minor improvements across other fields (+1.6 points)**
+- Better keyword diversity
+- More complete limitations documentation
+
+**Remaining Gaps (to reach 80%+ target):**
+
+Still Missing (17.7 points available):
+- Schema conformance documentation (Question 10: currently 2/5)
+- Cross-platform interlinking (Question 20: currently 0/1)
+- Software version numbers (Question 11: currently 3/5)
+- More detailed human subject representation (Question 15: currently 4/5)
+
+**Next Steps to Reach 80%:**
+Add these 4 items → Would reach 68.0/84 (81.0%)
+
+Great progress! You've addressed the major gaps. Ready to tackle the remaining items?
+```
+
+---
+
+## Agent Invocation Patterns
+
+### Direct File Path
+```
+Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with rubric10
+```
+
+### Relative Path
+```
+Run rubric20 on ./data/d4d_concatenated/gpt5/CM4AI_d4d.yaml
+```
+
+### Just Filename (if context is clear)
+```
+Score CHORUS_d4d.yaml using rubric10
+```
+
+### Multiple Files
+```
+Evaluate both AI_READI_d4d.yaml and CHORUS_d4d.yaml with rubric20
+```
+
+### Comparison Request
+```
+Compare claudecode vs gpt5 for VOICE using rubric10
+```
+
+### With Specific Output Request
+```
+Run rubric10 on VOICE and export results to JSON
+```
+
+---
+
+## Understanding Agent Output
+
+### Rubric10 Output Structure
+
+```json
+{
+  "overall_score": {
+    "total_points": 38.5,
+    "max_points": 50,
+    "percentage": 77.0
+  },
+  "elements": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "element_score": 5,
+      "element_max": 5,
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier",
+          "score": 1,
+          "evidence": "doi: https://doi.org/10.13026/249v-w155",
+          "quality_note": "DOI present and properly formatted"
+        },
+        ...
+      ]
+    },
+    ...
+  ],
+  "assessment": {
+    "strengths": [...],
+    "weaknesses": [...],
+    "recommendations": [...]
+  }
+}
+```
+
+**Key Fields:**
+- `overall_score.percentage` - Main quality metric (0-100%)
+- `elements[].element_score` - Score for each of 10 elements (0-5)
+- `sub_elements[].score` - Binary score per criterion (0 or 1)
+- `evidence` - Actual field values from D4D file
+- `quality_note` - Explanation of scoring decision
+
+### Rubric20 Output Structure
+
+```json
+{
+  "overall_score": {
+    "total_points": 72.5,
+    "max_points": 84,
+    "percentage": 86.3
+  },
+  "categories": [
+    {
+      "name": "Structural Completeness",
+      "category_score": 21,
+      "category_max": 21,
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "score_type": "numeric",
+          "score": 5,
+          "max_score": 5,
+          "score_label": "≥90% fields populated",
+          "evidence": "id, title, description, keywords, license all present",
+          "quality_note": "All mandatory fields comprehensively populated"
+        },
+        ...
+      ]
+    },
+    ...
+  ]
+}
+```
+
+**Key Differences from Rubric10:**
+- `categories` instead of `elements` (4 categories vs 10 elements)
+- `score_type` field ("numeric" or "pass_fail")
+- `score_label` describing quality level
+- Numeric questions use 0-5 scale (not binary 0/1)
+
+---
+
+## Common Questions
+
+### Q: Do I need an API key to use these agents?
+**A:** **No!** These agents work conversationally within Claude Code - no API key required. You're already using Claude Code, so just ask the agent to evaluate files. External scripts (Makefile targets) are optional for CI/CD automation only.
+
+### Q: How long does evaluation take?
+**A:** 30-60 seconds per file conversationally. The agent reads the file, applies rubric criteria, and generates structured results in real-time.
+
+### Q: Can I evaluate multiple files at once?
+**A:** Yes - just ask conversationally! Example: "Evaluate all VOICE files with rubric10". The agent will iterate through files sequentially and provide comparison tables.
+
+### Q: What if my D4D file is in a different format?
+**A:** The agent handles both:
+- Flat D4D schema (used by GPT-5 and Claude Code)
+- DatasetCollection schema (used by curated files)
+
+### Q: How do I interpret the percentage scores?
+**A:** Quality levels:
+- 80-100%: Excellent - Publication-ready
+- 60-79%: Very Good - Minor improvements needed
+- 40-59%: Good - Several gaps to address
+- 20-39%: Fair - Significant work required
+- 0-19%: Poor - Major revision needed
+
+### Q: Why do rubric10 and rubric20 give different percentages?
+**A:** They measure different things:
+- **Rubric10**: Hierarchical coverage across 10 metadata dimensions
+- **Rubric20**: Detailed FAIR compliance with quality gradations
+
+Both are valid - rubric10 is simpler, rubric20 is more nuanced.
+
+### Q: Can I save the evaluation results?
+**A:** Yes - just ask! Example: "Save results to data/evaluation_llm/". The agent will save:
+- JSON: `data/evaluation_llm/rubric*/detailed_analysis/{PROJECT}_{METHOD}_evaluation.json`
+- Markdown: `data/evaluation_llm/rubric*/summary_report.md`
+- CSV: `data/evaluation_llm/rubric*/scores.csv`
+
+### Q: Are evaluations reproducible?
+**A:** **Yes - fully reproducible!** The agents use:
+- Temperature: 0.0 (fully deterministic)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Version-controlled rubrics: `data/rubric/rubric10.txt`, `rubric20.txt`
+
+Same D4D file → Same quality score every time, whether evaluated conversationally or via scripts.
+
+---
+
+## Tips for Best Results
+
+1. **Start with Rubric10** - Simpler, faster, good overview
+2. **Use Rubric20 for deep dives** - More detailed, identifies specific gaps
+3. **Evaluate before major releases** - Catch issues early
+4. **Track improvements over time** - Re-evaluate after making changes
+5. **Compare methods** - Evaluate curated, gpt5, and claudecode side-by-side
+6. **Read the recommendations** - Agent provides specific, actionable fixes
+7. **Check the evidence** - See exactly which fields were assessed
+
+---
+
+## Conversational Batch Evaluation
+
+**Primary Method: Just Ask the Agent to Evaluate Multiple Files**
+
+You don't need Makefile commands or scripts - just ask conversationally:
+
+```
+User: Evaluate all four projects (AI_READI, CHORUS, CM4AI, VOICE) across
+all methods (curated, gpt5, claudecode_agent, claudecode_assistant) using
+both rubric10 and rubric20 and save results to data/evaluation_llm/
+```
+
+The agent will:
+1. Iterate through all files systematically
+2. Evaluate each file using Read tool
+3. Generate structured JSON results
+4. Save to requested directory
+5. Provide summary comparison tables
+
+**No API key, no scripts, no configuration needed** - pure conversational workflow!
+
+---
+
+## Semantic Evaluation Agents
+
+### Overview
+
+The **semantic agents** (`d4d-rubric10-semantic` and `d4d-rubric20-semantic`) extend the standard quality evaluators with enhanced semantic analysis capabilities:
+
+| Aspect | Standard Agents | Semantic Agents |
+|--------|----------------|-----------------|
+| Quality Assessment | ✅ | ✅ |
+| Field Presence Detection | ✅ | ✅ |
+| Content Meaningfulness | ✅ | ✅ |
+| **Semantic Understanding** | ❌ | ✅ |
+| **Correctness Validation** | ❌ | ✅ |
+| **Consistency Checking** | ❌ | ✅ |
+| **Identifier Plausibility** | ❌ | ✅ |
+| **Cross-field Logic** | ❌ | ✅ |
+
+### When to Use Semantic Agents
+
+**Use Standard Agents (rubric10, rubric20) when:**
+- You need quick quality assessment
+- You want to check metadata completeness
+- You're comparing generation methods
+
+**Use Semantic Agents (rubric10-semantic, rubric20-semantic) when:**
+- You need deep validation before publication
+- You want to detect consistency issues
+- You need to verify identifier correctness
+- You're checking for logical contradictions
+- You want comprehensive quality + accuracy assessment
+
+### Semantic Analysis Capabilities
+
+#### 1. Semantic Understanding Check
+```
+❌ STANDARD: Sees "Participants: 100" → Scores 1 (present)
+✅ SEMANTIC: Sees "Participants: 100" → Checks if description mentions participant selection criteria, demographics alignment
+
+Example Issue Detected:
+- Description claims "diverse cohort across age ranges"
+- But composition.population only lists "adults 18-65"
+- SEMANTIC flags inconsistency: diversity claim not reflected in age range
+```
+
+#### 2. Correctness Validation
+```
+❌ STANDARD: Sees DOI "10.99999/fake" → Scores 1 (present)
+✅ SEMANTIC: Sees DOI "10.99999/fake" → Flags prefix as not matching known registrars
+
+Validated Formats:
+- DOI: Must match 10.XXXX/... AND prefix must be known (PhysioNet: 10.13026, Zenodo: 10.5281)
+- Grant Numbers: NIH format (OT2OD032742), NSF format (DBI-1234567)
+- RRIDs: Must match RRID:SCR_XXXXX or RRID:AB_XXXXX
+- URLs: Proper structure and plausible domains
+```
+
+#### 3. Cross-Field Consistency Checking
+```
+❌ STANDARD: Each field scored independently
+✅ SEMANTIC: Checks logical relationships between fields
+
+Consistency Rules Checked:
+- IF human_subject_research=True → EXPECT ethics.irb_approval AND collection_process.consent
+- IF is_deidentified=True → EXPECT deidentification_and_privacy.approach AND examples_of_identifiers_removed
+- IF funders present → EXPECT funding_and_acknowledgements.funding.agency matches
+- IF DOI present → EXPECT publicly accessible landing page
+```
+
+#### 4. Content Accuracy Assessment
+```
+❌ STANDARD: IRB field populated → Scores 1
+✅ SEMANTIC: IRB field populated → Checks if institution makes sense for project scope
+
+Plausibility Checks:
+- Ethics claims: Do IRB institutions match project scope?
+- Deidentification methods: Is HIPAA Safe Harbor appropriate for health data?
+- Funding patterns: Does grant OT2OD032742 follow NIH format?
+- Temporal logic: Collection dates before processing dates before publication?
+```
+
+### Example: Standard vs Semantic
+
+#### Input D4D File (Hypothetical)
+```yaml
+human_subject_research: True
+ethics: {}  # Empty ethics section
+doi: "10.99999/test"
+funding_and_acknowledgements:
+  funding:
+    award_number: "ABC123"  # Not a valid NIH/NSF format
+```
+
+#### Standard Agent Output
+```json
+{
+  "overall_score": {
+    "total_points": 35,
+    "max_points": 50,
+    "percentage": 70.0
+  },
+  "assessment": {
+    "weaknesses": [
+      "Missing ethics.irb_approval details"
+    ]
+  }
+}
+```
+
+#### Semantic Agent Output
+```json
+{
+  "overall_score": {
+    "total_points": 28,
+    "max_points": 50,
+    "percentage": 56.0
+  },
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency",
+        "severity": "high",
+        "description": "human_subject_research=True but no IRB approval details found",
+        "fields_involved": ["human_subject_research", "ethics.irb_approval"],
+        "recommendation": "Add ethics.irb_approval with institutional approval details"
+      },
+      {
+        "type": "correctness",
+        "severity": "medium",
+        "description": "DOI prefix 10.99999 does not match known registrars",
+        "fields_involved": ["doi"],
+        "recommendation": "Verify DOI is registered with DataCite or Crossref"
+      },
+      {
+        "type": "correctness",
+        "severity": "medium",
+        "description": "Grant number ABC123 does not follow NIH or NSF format",
+        "fields_involved": ["funding_and_acknowledgements.funding.award_number"],
+        "recommendation": "Verify grant number format matches funding agency pattern"
+      }
+    ],
+    "consistency_checks": {
+      "passed": 12,
+      "failed": 3,
+      "warnings": 2
+    },
+    "correctness_validations": {
+      "doi_format": "invalid_prefix",
+      "grant_number_format": "invalid",
+      "rrid_format": "not_present"
+    }
+  }
+}
+```
+
+**Key Difference:** Semantic agent detected 3 critical issues that standard agent missed, reducing score from 70% to 56% - a more accurate reflection of data quality.
+
+### Usage Examples
+
+#### Example 1: Detect Consistency Issues
+```
+User: Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with rubric10-semantic
+
+Claude: [Evaluates file with semantic analysis]
+
+✅ Rubric10-Semantic Evaluation Complete
+
+**Overall Score: 36.5/50 (73.0%)**
+
+**Semantic Analysis:**
+
+Issues Detected (2):
+1. [CONSISTENCY] human_subject_research=True but no informed consent details
+   - Fields: human_subject_research, collection_process.consent
+   - Severity: high
+   - Fix: Add collection_process.consent with consent procedures
+
+2. [CORRECTNESS] Grant number format unusual for NIH
+   - Fields: funding_and_acknowledgements.funding.award_number: "1OT2OD032742"
+   - Severity: low
+   - Note: Leading "1" is uncommon in NIH format but potentially valid
+```
+
+#### Example 2: Compare Standard vs Semantic
+```
+User: Compare rubric10 vs rubric10-semantic results for CM4AI. Show me what semantic analysis caught that standard evaluation missed.
+
+Claude: [Evaluates with both agents]
+
+📊 Comparison: Standard vs Semantic for CM4AI
+
+| Metric | Standard (rubric10) | Semantic (rubric10-semantic) | Delta |
+|--------|---------------------|------------------------------|-------|
+| Score | 33/50 (66.0%) | 31/50 (62.0%) | -4.0% |
+
+**What Semantic Caught:**
+
+1. **Consistency Issue (not detected by standard):**
+   - is_deidentified=True but deidentification method not specified
+   - Standard: Scored both fields independently as present/absent
+   - Semantic: Detected logical inconsistency
+
+2. **Correctness Issue (not detected by standard):**
+   - DOI prefix 10.99999 does not match known registrars
+   - Standard: Checked only format (10.XXXX/...), passed
+   - Semantic: Checked prefix plausibility, flagged as suspicious
+
+**Conclusion:** Semantic analysis provides deeper validation, catching 2 issues standard evaluation missed.
+```
+
+### Semantic Agent Output Format
+
+The semantic agents include an additional `semantic_analysis` section in their JSON output:
+
+```json
+{
+  "rubric": "rubric10-semantic",
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "consistency|correctness|semantic",
+        "severity": "high|medium|low",
+        "description": "...",
+        "fields_involved": ["field1", "field2"],
+        "recommendation": "..."
+      }
+    ],
+    "semantic_insights": [
+      "Positive finding 1",
+      "Positive finding 2"
+    ],
+    "consistency_checks": {
+      "passed": 15,
+      "failed": 2,
+      "warnings": 3
+    },
+    "correctness_validations": {
+      "doi_format": "valid|invalid|not_present",
+      "grant_number_format": "valid|invalid|not_present",
+      "rrid_format": "valid|invalid|not_present",
+      "url_validity": "all_valid|some_invalid|not_present"
+    }
+  },
+  ...
+}
+```
+
+### Recommendations
+
+1. **Use standard agents first** for quick quality assessment across many files
+2. **Use semantic agents** for final validation before dataset publication
+3. **Compare results** to see what additional issues semantic analysis detects
+4. **Fix semantic issues** before releasing datasets publicly
+
+---
+
+## Optional: External Automation (Makefile)
+
+**For CI/CD pipelines or external scripting only** (requires ANTHROPIC_API_KEY):
+
+```bash
+# OPTIONAL - External automation mode (not primary workflow)
+# Requires: export ANTHROPIC_API_KEY=sk-ant-...
+
+# Batch evaluate via Python script
+make evaluate-d4d-llm-batch-concatenated
+
+# Preview what would be evaluated
+make evaluate-d4d-llm-batch-dry-run
+
+# Compare LLM vs presence-based evaluation
+make compare-evaluations
+```
+
+**Note:** Most users should use conversational evaluation instead. External scripts are only for automated pipelines.
+
+See `CLAUDE.md` for complete Makefile documentation.

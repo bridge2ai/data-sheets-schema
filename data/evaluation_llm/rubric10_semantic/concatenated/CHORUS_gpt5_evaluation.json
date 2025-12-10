@@ -1,0 +1,888 @@
+{
+  "metadata": {
+    "evaluation_date": "2025-12-09",
+    "evaluator": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "rubric_version": "2.0",
+    "rubric_type": "rubric10-semantic",
+    "evaluated_file": "data/d4d_concatenated/gpt5/CHORUS_d4d.yaml",
+    "project": "CHORUS",
+    "generator": "gpt5"
+  },
+  "summary": {
+    "total_score": 7,
+    "max_score": 50,
+    "percentage": 14.0,
+    "elements_passed": 0,
+    "elements_partial": 7,
+    "elements_failed": 3
+  },
+  "element_scores": [
+    {
+      "element_id": 1,
+      "element_name": "Dataset Discovery and Identification",
+      "score": 4,
+      "max_score": 5,
+      "percentage": 80.0,
+      "status": "partial"
+    },
+    {
+      "element_id": 2,
+      "element_name": "Dataset Access and Retrieval",
+      "score": 1,
+      "max_score": 5,
+      "percentage": 20.0,
+      "status": "partial"
+    },
+    {
+      "element_id": 3,
+      "element_name": "Data Reuse and Interoperability",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "status": "failed"
+    },
+    {
+      "element_id": 4,
+      "element_name": "Ethical Use and Privacy Safeguards",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "status": "failed"
+    },
+    {
+      "element_id": 5,
+      "element_name": "Data Composition and Structure",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "status": "failed"
+    },
+    {
+      "element_id": 6,
+      "element_name": "Data Provenance and Version Tracking",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "status": "failed"
+    },
+    {
+      "element_id": 7,
+      "element_name": "Scientific Motivation and Funding Transparency",
+      "score": 1,
+      "max_score": 5,
+      "percentage": 20.0,
+      "status": "partial"
+    },
+    {
+      "element_id": 8,
+      "element_name": "Technical Transparency (Data Collection and Processing)",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "status": "failed"
+    },
+    {
+      "element_id": 9,
+      "element_name": "Dataset Evaluation and Limitations Disclosure",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "status": "failed"
+    },
+    {
+      "element_id": 10,
+      "element_name": "Cross-Platform and Community Integration",
+      "score": 1,
+      "max_score": 5,
+      "percentage": 20.0,
+      "status": "partial"
+    }
+  ],
+  "detailed_scores": [
+    {
+      "element_id": 1,
+      "element_name": "Dataset Discovery and Identification",
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "fields": ["doi", "rrid", "id"],
+          "score": 1,
+          "rationale": "ID present at top level ('chorus-equitable-ai-document-collection') and for both resources. No DOI or RRID present.",
+          "semantic_validation": {
+            "id_format_valid": true,
+            "id_follows_conventions": true,
+            "doi_present": false,
+            "rrid_present": false,
+            "findings": "ID uses kebab-case convention, descriptive and valid. Missing DOI/RRID for academic citation."
+          }
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "fields": ["title", "description"],
+          "score": 1,
+          "rationale": "Both title and description present at top level. Title is clear, description explains it's a synthesized collection of CHORUS documents.",
+          "semantic_validation": {
+            "title_length": 49,
+            "description_length": 258,
+            "title_informative": true,
+            "description_adequate": true,
+            "findings": "Title and description are adequate for a document collection. Description explains synthesis of multiple PDFs."
+          }
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "fields": ["keywords"],
+          "score": 1,
+          "rationale": "Keywords present at top level (8 keywords: CHORUS, Equitable AI, Bridge2AI, AIM-AHEAD, Clinical care, Informational webinar, GitHub, PDF) and for both resources.",
+          "semantic_validation": {
+            "keyword_count": 8,
+            "keywords_relevant": true,
+            "keywords_specific": true,
+            "findings": "Good keyword coverage including project names, topics, and document types. Keywords repeated appropriately in nested resources."
+          }
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "fields": ["page", "resources"],
+          "score": 1,
+          "rationale": "Resources field present with 2 nested dataset objects (PDFs). No landing page URL present.",
+          "semantic_validation": {
+            "resources_present": true,
+            "resource_count": 2,
+            "page_url_present": false,
+            "hierarchical_structure": true,
+            "findings": "Hierarchical structure present with 2 PDF resources. Missing landing page URL for dataset collection discoverability."
+          }
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "fields": ["parent_datasets", "related_datasets"],
+          "score": 0,
+          "rationale": "Neither parent_datasets nor related_datasets fields present. No explicit dataset relationships defined.",
+          "semantic_validation": {
+            "parent_datasets_present": false,
+            "related_datasets_present": false,
+            "relationship_types_defined": false,
+            "findings": "No explicit parent-child or typed relationships defined. Resources field provides implicit hierarchy but lacks formal relationship metadata."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 2,
+      "element_name": "Dataset Access and Retrieval",
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "fields": ["license_and_use_terms", "ip_restrictions"],
+          "score": 0,
+          "rationale": "No license_and_use_terms or ip_restrictions fields present at any level.",
+          "semantic_validation": {
+            "license_present": false,
+            "ip_restrictions_present": false,
+            "findings": "Critical gap: No licensing information means reuse rights are unclear. No IP restrictions documented."
+          }
+        },
+        {
+          "name": "Regulatory Restrictions and Confidentiality Level Specified",
+          "fields": ["regulatory_restrictions", "confidentiality_level"],
+          "score": 0,
+          "rationale": "No regulatory_restrictions or confidentiality_level fields present.",
+          "semantic_validation": {
+            "regulatory_restrictions_present": false,
+            "confidentiality_level_present": false,
+            "findings": "No regulatory or confidentiality information provided. Cannot determine if data has export controls or sensitivity levels."
+          }
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "fields": ["download_url"],
+          "score": 0,
+          "rationale": "No download_url field present at any level. Path field present for one resource but not a downloadable URL.",
+          "semantic_validation": {
+            "download_url_present": false,
+            "download_url_valid": false,
+            "path_field_present": true,
+            "findings": "One resource has path field ('aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf') but no download URL. Cannot access files."
+          }
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "fields": ["distribution_formats", "format", "media_type"],
+          "score": 1,
+          "rationale": "Both resources have distribution_formats and media_type='application/pdf'. Format structure includes name and description.",
+          "semantic_validation": {
+            "distribution_formats_present": true,
+            "media_type_present": true,
+            "media_type_valid": true,
+            "format_count": 1,
+            "findings": "Media type 'application/pdf' is valid MIME type. Distribution format structure includes descriptive text. Only PDF format available."
+          }
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "fields": ["related_datasets", "external_resources"],
+          "score": 0,
+          "rationale": "No related_datasets or external_resources fields present.",
+          "semantic_validation": {
+            "related_datasets_present": false,
+            "external_resources_present": false,
+            "findings": "No linkage to related datasets or external documentation. Limits discoverability of connected resources."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 3,
+      "element_name": "Data Reuse and Interoperability",
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "fields": ["license_and_use_terms"],
+          "score": 0,
+          "rationale": "No license_and_use_terms field present.",
+          "semantic_validation": {
+            "license_present": false,
+            "findings": "Cannot determine reuse rights without licensing information. Critical gap for data reuse."
+          }
+        },
+        {
+          "name": "Data Formats Are Standardized (encoding, format)",
+          "fields": ["format", "encoding"],
+          "score": 0,
+          "rationale": "Media_type present but no format or encoding fields. Distribution_formats describes PDF but lacks technical encoding details.",
+          "semantic_validation": {
+            "format_present": false,
+            "encoding_present": false,
+            "media_type_standardized": true,
+            "findings": "PDF media type is standardized, but missing character encoding and specific format version information."
+          }
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "fields": ["conforms_to", "conforms_to_schema"],
+          "score": 0,
+          "rationale": "No conforms_to or conforms_to_schema fields present.",
+          "semantic_validation": {
+            "conforms_to_present": false,
+            "conforms_to_schema_present": false,
+            "findings": "No schema or ontology conformance declared. Cannot verify metadata standard compliance."
+          }
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "fields": ["variables"],
+          "score": 0,
+          "rationale": "No variables field present. Document collection, not structured data.",
+          "semantic_validation": {
+            "variables_present": false,
+            "findings": "Not applicable for document collection (PDFs). Variable metadata expected for tabular/structured datasets."
+          }
+        },
+        {
+          "name": "Use Guidance Provided (intended, prohibited uses)",
+          "fields": ["intended_uses", "prohibited_uses", "discouraged_uses"],
+          "score": 0,
+          "rationale": "No use guidance fields present. Purposes field present for one resource but is generic informational text, not structured use guidance.",
+          "semantic_validation": {
+            "intended_uses_present": false,
+            "prohibited_uses_present": false,
+            "discouraged_uses_present": false,
+            "purposes_present": true,
+            "findings": "Purposes field provides context ('Informational webinar material') but lacks structured use guidance. Cannot determine appropriate use cases."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 4,
+      "element_name": "Ethical Use and Privacy Safeguards",
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "fields": ["ethical_reviews", "human_subject_research"],
+          "score": 0,
+          "rationale": "No ethical_reviews or human_subject_research fields present.",
+          "semantic_validation": {
+            "ethical_reviews_present": false,
+            "human_subject_research_present": false,
+            "findings": "No ethics documentation. Cannot determine if human subjects research protocols were followed."
+          }
+        },
+        {
+          "name": "Deidentification Method Described",
+          "fields": ["is_deidentified"],
+          "score": 0,
+          "rationale": "No is_deidentified field present.",
+          "semantic_validation": {
+            "is_deidentified_present": false,
+            "findings": "No deidentification information. Cannot assess privacy protections for any potential human subjects data."
+          }
+        },
+        {
+          "name": "Privacy Protections Beyond Deidentification",
+          "fields": ["participant_privacy"],
+          "score": 0,
+          "rationale": "No participant_privacy field present.",
+          "semantic_validation": {
+            "participant_privacy_present": false,
+            "findings": "No privacy protection measures documented beyond potential deidentification."
+          }
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "fields": ["informed_consent"],
+          "score": 0,
+          "rationale": "No informed_consent field present.",
+          "semantic_validation": {
+            "informed_consent_present": false,
+            "findings": "No informed consent documentation. Cannot verify participant consent protocols."
+          }
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "fields": ["vulnerable_populations", "participant_compensation"],
+          "score": 0,
+          "rationale": "No vulnerable_populations or participant_compensation fields present.",
+          "semantic_validation": {
+            "vulnerable_populations_present": false,
+            "participant_compensation_present": false,
+            "findings": "No vulnerable population considerations or compensation information documented."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 5,
+      "element_name": "Data Composition and Structure",
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "fields": ["subpopulations"],
+          "score": 0,
+          "rationale": "No subpopulations field present.",
+          "semantic_validation": {
+            "subpopulations_present": false,
+            "findings": "Document collection does not describe population characteristics. Not applicable for PDF collection."
+          }
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "fields": ["instances"],
+          "score": 0,
+          "rationale": "No instances field present.",
+          "semantic_validation": {
+            "instances_present": false,
+            "resource_count": 2,
+            "findings": "No instance count. Resource count (2 PDFs) present but not in instances field. Not applicable for document collection."
+          }
+        },
+        {
+          "name": "Variable-Level Metadata and Tabular Flag",
+          "fields": ["variables", "is_tabular"],
+          "score": 0,
+          "rationale": "No variables or is_tabular fields present.",
+          "semantic_validation": {
+            "variables_present": false,
+            "is_tabular_present": false,
+            "findings": "Not applicable for document collection. Variable metadata expected for structured datasets."
+          }
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "fields": ["instances"],
+          "score": 0,
+          "rationale": "No instances field. Topics inferred from keywords but not explicitly structured.",
+          "semantic_validation": {
+            "instances_present": false,
+            "topics_in_keywords": true,
+            "findings": "Topics present in keywords (CHORUS, Equitable AI, Bridge2AI) but not in structured instances field."
+          }
+        },
+        {
+          "name": "Data Quality Issues and Anomalies Documented",
+          "fields": ["anomalies", "sampling_strategies"],
+          "score": 0,
+          "rationale": "No anomalies or sampling_strategies fields present.",
+          "semantic_validation": {
+            "anomalies_present": false,
+            "sampling_strategies_present": false,
+            "findings": "No data quality or anomaly information. No sampling strategy documented."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 6,
+      "element_name": "Data Provenance and Version Tracking",
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "fields": ["version"],
+          "score": 0,
+          "rationale": "No version field present.",
+          "semantic_validation": {
+            "version_present": false,
+            "findings": "No version information. Cannot track dataset revisions or updates."
+          }
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "fields": ["version_access"],
+          "score": 0,
+          "rationale": "No version_access field present.",
+          "semantic_validation": {
+            "version_access_present": false,
+            "findings": "No documentation of how to access different versions."
+          }
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "fields": ["errata", "updates"],
+          "score": 0,
+          "rationale": "No errata or updates fields present.",
+          "semantic_validation": {
+            "errata_present": false,
+            "updates_present": false,
+            "findings": "No change log or errata documentation. Cannot track corrections or modifications."
+          }
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "fields": ["updates"],
+          "score": 0,
+          "rationale": "No updates field present.",
+          "semantic_validation": {
+            "updates_present": false,
+            "findings": "No update schedule or frequency information. Cannot anticipate future revisions."
+          }
+        },
+        {
+          "name": "Provenance and Source Derivation Documented",
+          "fields": ["was_derived_from", "release_notes"],
+          "score": 0,
+          "rationale": "No was_derived_from or release_notes fields present. Description mentions synthesis but lacks formal provenance.",
+          "semantic_validation": {
+            "was_derived_from_present": false,
+            "release_notes_present": false,
+            "provenance_in_description": true,
+            "findings": "Description indicates synthesis of documents but lacks structured provenance metadata. No release notes."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 7,
+      "element_name": "Scientific Motivation and Funding Transparency",
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "fields": ["purposes"],
+          "score": 1,
+          "rationale": "Purposes field present for one resource with informational text about webinar material.",
+          "semantic_validation": {
+            "purposes_present": true,
+            "purpose_count": 1,
+            "purpose_adequate": false,
+            "findings": "One resource has purposes field ('Informational webinar material related to Bridge2AI for Clinical Care (CHORUS)'). Limited detail about collection motivation."
+          }
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "fields": ["tasks"],
+          "score": 0,
+          "rationale": "No tasks field present.",
+          "semantic_validation": {
+            "tasks_present": false,
+            "findings": "No research tasks or objectives documented. Cannot understand intended research use cases."
+          }
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "fields": ["funders"],
+          "score": 0,
+          "rationale": "No funders field present.",
+          "semantic_validation": {
+            "funders_present": false,
+            "funding_in_keywords": true,
+            "findings": "Keywords reference AIM-AHEAD and Bridge2AI (funding programs) but no structured funder metadata. Cannot identify grant details."
+          }
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "fields": ["funders"],
+          "score": 0,
+          "rationale": "No funders field, therefore no grant IDs or award numbers.",
+          "semantic_validation": {
+            "grant_ids_present": false,
+            "findings": "No grant identifiers present. Cannot link to funding databases or verify funding provenance."
+          }
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "fields": ["creators", "funders"],
+          "score": 0,
+          "rationale": "No creators or funders fields present.",
+          "semantic_validation": {
+            "creators_present": false,
+            "funders_present": false,
+            "findings": "No creator attribution or acknowledgements. Cannot identify dataset authors or contributors."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 8,
+      "element_name": "Technical Transparency (Data Collection and Processing)",
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "fields": ["collection_mechanisms"],
+          "score": 0,
+          "rationale": "No collection_mechanisms field present.",
+          "semantic_validation": {
+            "collection_mechanisms_present": false,
+            "findings": "No documentation of how documents were collected or selected for inclusion."
+          }
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "fields": ["acquisition_methods"],
+          "score": 0,
+          "rationale": "No acquisition_methods field present.",
+          "semantic_validation": {
+            "acquisition_methods_present": false,
+            "findings": "No acquisition methodology documented. Cannot understand document sourcing process."
+          }
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling Strategies",
+          "fields": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "score": 0,
+          "rationale": "No preprocessing_strategies, cleaning_strategies, or labeling_strategies fields present.",
+          "semantic_validation": {
+            "preprocessing_strategies_present": false,
+            "cleaning_strategies_present": false,
+            "labeling_strategies_present": false,
+            "findings": "No preprocessing or curation information. Cannot assess document preparation methods."
+          }
+        },
+        {
+          "name": "Software and Tools Documented",
+          "fields": ["software_and_tools"],
+          "score": 0,
+          "rationale": "No software_and_tools field present.",
+          "semantic_validation": {
+            "software_and_tools_present": false,
+            "findings": "No software or tools documented. Cannot understand technical infrastructure for collection/processing."
+          }
+        },
+        {
+          "name": "External Standards and Resources Referenced",
+          "fields": ["external_resources", "conforms_to"],
+          "score": 0,
+          "rationale": "No external_resources or conforms_to fields present.",
+          "semantic_validation": {
+            "external_resources_present": false,
+            "conforms_to_present": false,
+            "findings": "No external standards or supporting documentation linked. Limits contextual understanding."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 9,
+      "element_name": "Dataset Evaluation and Limitations Disclosure",
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "fields": ["known_limitations"],
+          "score": 0,
+          "rationale": "No known_limitations field present.",
+          "semantic_validation": {
+            "known_limitations_present": false,
+            "findings": "No limitations documented. Users cannot assess completeness or known gaps in collection."
+          }
+        },
+        {
+          "name": "Systematic Biases Identified and Described",
+          "fields": ["known_biases"],
+          "score": 0,
+          "rationale": "No known_biases field present.",
+          "semantic_validation": {
+            "known_biases_present": false,
+            "findings": "No bias assessment documented. Cannot evaluate potential selection or representation biases."
+          }
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "fields": ["anomalies"],
+          "score": 0,
+          "rationale": "No anomalies field present. One resource notes 'Source content text not available; metadata inferred from file name'.",
+          "semantic_validation": {
+            "anomalies_present": false,
+            "quality_issues_in_description": true,
+            "findings": "One resource description mentions missing source content, but not in structured anomalies field. Quality issue acknowledged informally."
+          }
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "fields": ["sensitive_elements", "content_warnings"],
+          "score": 0,
+          "rationale": "No sensitive_elements or content_warnings fields present.",
+          "semantic_validation": {
+            "sensitive_elements_present": false,
+            "content_warnings_present": false,
+            "findings": "No content warnings or sensitivity information. Cannot assess potential ethical concerns."
+          }
+        },
+        {
+          "name": "Ethical Review Details Including Conflicts",
+          "fields": ["ethical_reviews"],
+          "score": 0,
+          "rationale": "No ethical_reviews field present.",
+          "semantic_validation": {
+            "ethical_reviews_present": false,
+            "findings": "No ethical review documentation or conflict of interest disclosures."
+          }
+        }
+      ]
+    },
+    {
+      "element_id": 10,
+      "element_name": "Cross-Platform and Community Integration",
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "fields": ["publisher"],
+          "score": 0,
+          "rationale": "No publisher field present.",
+          "semantic_validation": {
+            "publisher_present": false,
+            "findings": "No publisher information. Cannot determine platform or institutional affiliation."
+          }
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "fields": ["citation", "doi"],
+          "score": 0,
+          "rationale": "No citation or doi fields present.",
+          "semantic_validation": {
+            "citation_present": false,
+            "doi_present": false,
+            "findings": "No citation or DOI. Cannot properly attribute or cross-reference in academic literature."
+          }
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "fields": ["conforms_to"],
+          "score": 0,
+          "rationale": "No conforms_to field present.",
+          "semantic_validation": {
+            "conforms_to_present": false,
+            "findings": "No community standards declared. Cannot verify metadata standard compliance."
+          }
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "fields": ["external_resources", "page"],
+          "score": 1,
+          "rationale": "No external_resources or page fields present, but keywords mention 'GitHub' indicating potential documentation.",
+          "semantic_validation": {
+            "external_resources_present": false,
+            "page_present": false,
+            "documentation_referenced": true,
+            "findings": "Keywords reference GitHub suggesting documentation exists, but no structured links provided. Partial credit for implicit reference."
+          }
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "fields": ["related_datasets"],
+          "score": 0,
+          "rationale": "No related_datasets field present.",
+          "semantic_validation": {
+            "related_datasets_present": false,
+            "relationship_types_defined": false,
+            "findings": "No typed relationships to other datasets. Limits discoverability of related resources."
+          }
+        }
+      ]
+    }
+  ],
+  "semantic_analysis": {
+    "format_validation": {
+      "yaml_valid": true,
+      "schema_fields_present": [
+        "id",
+        "name",
+        "title",
+        "description",
+        "keywords",
+        "resources"
+      ],
+      "schema_fields_missing": [
+        "doi",
+        "rrid",
+        "page",
+        "license_and_use_terms",
+        "ip_restrictions",
+        "regulatory_restrictions",
+        "confidentiality_level",
+        "download_url",
+        "related_datasets",
+        "external_resources",
+        "format",
+        "encoding",
+        "conforms_to",
+        "conforms_to_schema",
+        "variables",
+        "intended_uses",
+        "prohibited_uses",
+        "discouraged_uses",
+        "ethical_reviews",
+        "human_subject_research",
+        "is_deidentified",
+        "participant_privacy",
+        "informed_consent",
+        "vulnerable_populations",
+        "participant_compensation",
+        "subpopulations",
+        "instances",
+        "is_tabular",
+        "anomalies",
+        "sampling_strategies",
+        "version",
+        "version_access",
+        "errata",
+        "updates",
+        "was_derived_from",
+        "release_notes",
+        "tasks",
+        "funders",
+        "creators",
+        "collection_mechanisms",
+        "acquisition_methods",
+        "preprocessing_strategies",
+        "cleaning_strategies",
+        "labeling_strategies",
+        "software_and_tools",
+        "known_limitations",
+        "known_biases",
+        "sensitive_elements",
+        "content_warnings",
+        "publisher",
+        "citation",
+        "parent_datasets"
+      ]
+    },
+    "identifier_validation": {
+      "id_format": "kebab-case",
+      "id_pattern_valid": true,
+      "doi_validation": {
+        "doi_present": false,
+        "doi_format_valid": null,
+        "doi_pattern": null
+      },
+      "rrid_validation": {
+        "rrid_present": false,
+        "rrid_format_valid": null,
+        "rrid_pattern": null
+      },
+      "grant_validation": {
+        "grants_present": false,
+        "grant_formats": []
+      }
+    },
+    "consistency_checks": {
+      "keyword_consistency": {
+        "top_level_keywords": 8,
+        "resource_keywords_present": true,
+        "keyword_overlap": true,
+        "findings": "Keywords consistently applied across top level and resources. Good thematic consistency."
+      },
+      "description_consistency": {
+        "descriptions_present": true,
+        "description_quality": "adequate",
+        "findings": "Descriptions present at all levels. Top-level explains synthesis, resource-level provides specifics."
+      },
+      "format_consistency": {
+        "media_types": ["application/pdf"],
+        "media_type_valid": true,
+        "format_standardized": true,
+        "findings": "Consistent PDF media type across all resources. Valid MIME type."
+      }
+    },
+    "semantic_understanding": {
+      "dataset_type": "document_collection",
+      "data_modality": "PDF documents",
+      "primary_topic": "CHORUS Equitable AI",
+      "domain": "Healthcare AI / Clinical informatics",
+      "completeness_assessment": "minimal",
+      "key_strengths": [
+        "Clear hierarchical structure with nested resources",
+        "Consistent keyword usage and thematic organization",
+        "Valid PDF media type specification",
+        "Descriptive identifiers and titles",
+        "Acknowledgment of data quality issues (missing content)"
+      ],
+      "critical_gaps": [
+        "No licensing information - reuse rights unclear",
+        "No download URLs - cannot access files",
+        "No version tracking or provenance metadata",
+        "No funding or creator attribution",
+        "No ethical review or privacy documentation",
+        "Missing all structured data composition fields",
+        "No technical transparency (collection/processing methods)",
+        "No limitations or bias assessment",
+        "No publisher or citation information",
+        "Missing DOI for academic citation"
+      ],
+      "improvement_priorities": [
+        "Add license_and_use_terms for reuse clarity",
+        "Provide download_url for file access",
+        "Document funders and creators for attribution",
+        "Add DOI for academic citation",
+        "Include version and provenance metadata",
+        "Add page URL for landing page",
+        "Document collection methodology",
+        "Assess and document limitations"
+      ]
+    },
+    "rubric_specific_findings": {
+      "discovery_adequate": true,
+      "access_severely_limited": true,
+      "reuse_impossible_without_license": true,
+      "ethics_not_assessed": true,
+      "composition_not_applicable": true,
+      "provenance_missing": true,
+      "motivation_minimal": true,
+      "technical_transparency_absent": true,
+      "limitations_undocumented": true,
+      "integration_minimal": true,
+      "overall_assessment": "This is a minimal metadata record for a document collection. It provides basic discovery information (IDs, titles, keywords) but lacks critical fields for access (download URLs, licensing), reuse (license terms, use guidance), provenance (version, derivation), and scholarly integration (DOI, citation, publisher). The dataset is fundamentally incomplete for most D4D purposes beyond basic cataloging."
+    }
+  },
+  "recommendations": {
+    "immediate_priorities": [
+      "Add license_and_use_terms to clarify reuse rights",
+      "Provide download_url or access URLs for resources",
+      "Add DOI if this collection is citable",
+      "Document creators and funders for attribution"
+    ],
+    "secondary_improvements": [
+      "Add version field to track revisions",
+      "Include was_derived_from to document provenance",
+      "Add page field for landing page URL",
+      "Document purposes at top level, not just one resource",
+      "Add known_limitations to acknowledge gaps"
+    ],
+    "long_term_enhancements": [
+      "Consider publisher field for institutional affiliation",
+      "Add related_datasets to link to other CHORUS resources",
+      "Document collection_mechanisms to explain sourcing",
+      "Add conforms_to for metadata standard compliance",
+      "Include external_resources for supporting documentation"
+    ]
+  }
+}

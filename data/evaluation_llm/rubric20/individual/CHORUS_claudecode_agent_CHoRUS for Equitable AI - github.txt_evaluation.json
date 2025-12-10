@@ -1,0 +1,456 @@
+{
+  "rubric": "rubric20",
+  "version": "1.0",
+  "d4d_file": "data/d4d_individual/claudecode_agent/CHORUS/CHoRUS for Equitable AI - github.txt_d4d.yaml",
+  "project": "CHORUS",
+  "method": "claudecode_agent",
+  "type": "individual",
+  "evaluation_timestamp": "2025-12-08T19:16:57.861987",
+  "model": {
+    "name": "hybrid-heuristic-evaluator",
+    "temperature": "N/A",
+    "evaluation_type": "rule_based_with_quality_heuristics"
+  },
+  "overall_score": {
+    "total_points": 18,
+    "max_points": 84,
+    "percentage": 21.4
+  },
+  "categories": {
+    "Structural Completeness": {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "id: chorus:github-org-documentation",
+          "quality_note": "7/14 fields filled (\u226440%)"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Narrative fields have meaningful content length",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "description: The CHoRUS Network develops diverse, high-resolution, ethically sourced, AI-read...",
+          "quality_note": "Avg 319 chars (>200)"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords provided",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "keywords: 10 items",
+          "quality_note": "10 keywords (\u22658)"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number of distribution formats and file type diversity",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "No file types detected"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
+          "score": 0,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "instances: 1 items",
+          "quality_note": "Fail: No file size/dimension metadata"
+        }
+      ],
+      "category_score": 10,
+      "category_max": 21
+    },
+    "Metadata Quality & Content": {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "page: https://chorus4ai.org/",
+          "quality_note": "Pass: Persistent identifier found"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Funding sources, grants, sponsors, and creator affiliations",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: funders, creators, funding_and_acknowledgements",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: ethical_reviews, human_subject_research, is_deidentified, participant_privacy, participant_compensation, vulnerable_populations, informed_consent, deidentification_and_privacy, ethics",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: license_and_use_terms, ip_restrictions, regulatory_restrictions, confidentiality_level, access_and_licensing",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Standard formats, encoding, ontologies, schema conformance",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "Non-standard or unspecified format"
+        }
+      ],
+      "category_score": 1,
+      "category_max": 21
+    },
+    "Technical Documentation": {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Preprocessing, cleaning, labeling strategies with software tools",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: preprocessing_strategies, cleaning_strategies, labeling_strategies, software_and_tools",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
+          "score": 3,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "acquisition_methods: 1 items",
+          "quality_note": "Partial description"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Version info, version access, errata, update plans, release notes",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: version, version_access, errata, updates, release_notes, versions_available_on_platform",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Citations or DOI-linked references",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: citation, external_resources, citations, references",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Demographics, subpopulations, vulnerable population protections",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "instances: 1 items",
+          "quality_note": "No human subject information"
+        }
+      ],
+      "category_score": 3,
+      "category_max": 25
+    },
+    "FAIRness & Accessibility": {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Persistent identifiers (DOI, ID) and URLs for access",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "page: https://chorus4ai.org/",
+          "quality_note": "Pass: External URLs present"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Download URL, distribution formats, access policy",
+          "score": 3,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "Partially described"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License and Use Guidance)",
+          "description": "License with explicit use guidance (intended/prohibited/discouraged)",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: license_and_use_terms, intended_uses, prohibited_uses, discouraged_uses",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Version access, errata, updates, source derivation, parent datasets",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: version_access, errata, updates, was_derived_from, parent_datasets, release_notes",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms and Datasets",
+          "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
+          "score": 0,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "Missing: external_resources, related_datasets, parent_datasets, resources, project_website, same_as",
+          "quality_note": "Field absent or empty"
+        }
+      ],
+      "category_score": 4,
+      "category_max": 17
+    }
+  },
+  "questions": [
+    {
+      "id": 1,
+      "name": "Field Completeness",
+      "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "id: chorus:github-org-documentation",
+      "quality_note": "7/14 fields filled (\u226440%)"
+    },
+    {
+      "id": 2,
+      "name": "Entry Length Adequacy",
+      "description": "Narrative fields have meaningful content length",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "description: The CHoRUS Network develops diverse, high-resolution, ethically sourced, AI-read...",
+      "quality_note": "Avg 319 chars (>200)"
+    },
+    {
+      "id": 3,
+      "name": "Keyword Diversity",
+      "description": "Number of unique keywords provided",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "keywords: 10 items",
+      "quality_note": "10 keywords (\u22658)"
+    },
+    {
+      "id": 4,
+      "name": "File Enumeration and Type Variety",
+      "description": "Number of distribution formats and file type diversity",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 1 items",
+      "quality_note": "No file types detected"
+    },
+    {
+      "id": 5,
+      "name": "Data File Size Availability",
+      "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
+      "score": 0,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "instances: 1 items",
+      "quality_note": "Fail: No file size/dimension metadata"
+    },
+    {
+      "id": 6,
+      "name": "Dataset Identification Metadata",
+      "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "page: https://chorus4ai.org/",
+      "quality_note": "Pass: Persistent identifier found"
+    },
+    {
+      "id": 7,
+      "name": "Funding and Acknowledgements Completeness",
+      "description": "Funding sources, grants, sponsors, and creator affiliations",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: funders, creators, funding_and_acknowledgements",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 8,
+      "name": "Ethical and Privacy Declarations",
+      "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: ethical_reviews, human_subject_research, is_deidentified, participant_privacy, participant_compensation, vulnerable_populations, informed_consent, deidentification_and_privacy, ethics",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 9,
+      "name": "Access Requirements and Governance Documentation",
+      "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: license_and_use_terms, ip_restrictions, regulatory_restrictions, confidentiality_level, access_and_licensing",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 10,
+      "name": "Interoperability and Standardization",
+      "description": "Standard formats, encoding, ontologies, schema conformance",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 1 items",
+      "quality_note": "Non-standard or unspecified format"
+    },
+    {
+      "id": 11,
+      "name": "Tool and Software Transparency",
+      "description": "Preprocessing, cleaning, labeling strategies with software tools",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: preprocessing_strategies, cleaning_strategies, labeling_strategies, software_and_tools",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 12,
+      "name": "Collection Protocol Clarity",
+      "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
+      "score": 3,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "acquisition_methods: 1 items",
+      "quality_note": "Partial description"
+    },
+    {
+      "id": 13,
+      "name": "Version History Documentation",
+      "description": "Version info, version access, errata, update plans, release notes",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: version, version_access, errata, updates, release_notes, versions_available_on_platform",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 14,
+      "name": "Associated Publications",
+      "description": "Citations or DOI-linked references",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: citation, external_resources, citations, references",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 15,
+      "name": "Human Subject Representation",
+      "description": "Demographics, subpopulations, vulnerable population protections",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "instances: 1 items",
+      "quality_note": "No human subject information"
+    },
+    {
+      "id": 16,
+      "name": "Findability (Persistent Links)",
+      "description": "Persistent identifiers (DOI, ID) and URLs for access",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "page: https://chorus4ai.org/",
+      "quality_note": "Pass: External URLs present"
+    },
+    {
+      "id": 17,
+      "name": "Accessibility (Access Mechanism)",
+      "description": "Download URL, distribution formats, access policy",
+      "score": 3,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 1 items",
+      "quality_note": "Partially described"
+    },
+    {
+      "id": 18,
+      "name": "Reusability (License and Use Guidance)",
+      "description": "License with explicit use guidance (intended/prohibited/discouraged)",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: license_and_use_terms, intended_uses, prohibited_uses, discouraged_uses",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 19,
+      "name": "Data Integrity and Provenance",
+      "description": "Version access, errata, updates, source derivation, parent datasets",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: version_access, errata, updates, was_derived_from, parent_datasets, release_notes",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 20,
+      "name": "Interlinking Across Platforms and Datasets",
+      "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
+      "score": 0,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "Missing: external_resources, related_datasets, parent_datasets, resources, project_website, same_as",
+      "quality_note": "Field absent or empty"
+    }
+  ],
+  "metadata": {
+    "evaluator_id": "batch-hybrid-evaluator",
+    "rubric_hash": "sha256-rubric20",
+    "d4d_file_hash": "ecdc1a410dc5748c6da54508f501edfb30c2a6524bc584605fd7a3c1d3f3b2f2"
+  }
+}

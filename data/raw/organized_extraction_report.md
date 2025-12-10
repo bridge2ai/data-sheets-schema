@@ -1,78 +1,89 @@
 # Organized Dataset Extraction Report
 
-Generated: 2025-09-08 22:05:44
+Generated: 2025-12-05 21:37:25
 
 ## Summary by Type
 
-- **DOI**: 3
-- **Web Page**: 2
+- **PDF**: 4
+- **Web Page**: 13
 - **FAIRhub Dataset**: 2
 - **Dataverse Dataset**: 2
-- **PDF**: 1
-- **GitHub Repository**: 1
-- **Health Data Nexus**: 1
 - **PhysioNet Dataset**: 1
+- **GitHub Repository**: 2
 
 ## Downloads by Column
 
 ### AI-READI
 Directory: `AI_READI/`
 
-#### DOI (2)
+#### PDF (2)
 
-- ✅ Row 2: `doi_row2.json`
-  - DOI: 10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449
-- ✅ Row 9: `doi_row9.json`
-  - DOI: 10.5281/zenodo.10642459
+- ✅ Row 2: `e097449.full_row2.pdf`
+- ✅ Row 3: `s42255-024-01165-x_row3.pdf`
 
-#### Web Page (2)
+#### Web Page (4)
 
-- ✅ Row 8: `docs_aireadi_org_docs-2_row8.html`
-  - Title: About | Documentation for the AI-READI Dataset
-- ✅ Row 11: `docs_google_com_document-d_row11.html`
-  - Title: APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025.docx - Google Docs
+- ✅ Row 7: `reporter_nih_gov_project-details-10471118_row7.html`
+- ✅ Row 10: `docs_aireadi_org_docs-2_row10.html`
+- ✅ Row 11: `zenodo_org_records-10642459_row11.html`
+- ✅ Row 13: `docs_google_com_document-d_row13.html`
 
 #### FAIRhub Dataset (2)
 
-- ✅ Row 10: `fairhub_row10.json`
-- ✅ Row 13: `fairhub_row13.json`
+- ✅ Row 12: `fairhub_row12.json`
+- ✅ Row 16: `fairhub_row16.json`
 
 ### CM4AI
 Directory: `CM4AI/`
 
-#### DOI (1)
+#### PDF (1)
 
-- ✅ Row 3: `doi_row3.json`
-  - DOI: 10.1101/2024.05.21.589311
+- ❌ Row 4: Failed - 403 Client Error: Forbidden for url: https://www.biorxiv.org/content/10.1101/2024.05.21.589311v1.full.pdf
+
+#### Web Page (2)
+
+- ✅ Row 7: `reporter_nih_gov_project-details-11211616_row7.html`
+- ✅ Row 15: `creativecommons_org_licenses-by-nc-sa_row15.html`
 
 #### Dataverse Dataset (2)
 
-- ✅ Row 13: `dataverse_10.18130_V3_B35XWX_row13.html`
-  - Title: Cell Maps for Artificial Intelligence
+- ✅ Row 16: `dataverse_10.18130_V3_B35XWX_row16.html`
   - DOI: doi:10.18130/V3/B35XWX
-- ✅ Row 16: `dataverse_10.18130_V3_F3TD5R_row16.html`
-  - Title: Log In
+- ✅ Row 19: `dataverse_10.18130_V3_F3TD5R_row19.html`
   - DOI: doi:10.18130/V3/F3TD5R
-
-### CHORUS
-Directory: `CHORUS/`
-
-#### PDF (1)
-
-- ✅ Row 7: `aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf`
-
-#### GitHub Repository (1)
-
-- ❌ Row 8: Failed - Unknown error
 
 ### VOICE
 Directory: `VOICE/`
 
-#### Health Data Nexus (1)
+#### Web Page (6)
 
-- ✅ Row 13: `healthnexus_row13.json`
+- ✅ Row 5: `drive_google_com_file-d_row5.html`
+- ✅ Row 7: `reporter_nih_gov_project-details-11376382_row7.html`
+- ✅ Row 10: `docs_b2ai-voice_org_row10.html`
+- ✅ Row 13: `docs_google_com_document-d_row13.html`
+- ✅ Row 14: `drive_google_com_file-d_row14.html`
+- ✅ Row 22: `docs_b2ai-voice_org_row22.html`
 
 #### PhysioNet Dataset (1)
 
-- ✅ Row 14: `physionet_b2ai-voice_1.1_row14.html`
+- ✅ Row 17: `physionet_b2ai-voice_1.1_row17.html`
+
+#### GitHub Repository (1)
+
+- ✅ Row 22: `github_eipm_bridge2ai-docs_row22.json`
+
+### CHORUS
+Directory: `CHORUS/`
+
+#### Web Page (1)
+
+- ✅ Row 7: `reporter_nih_gov_project-details-10472824_row7.html`
+
+#### PDF (1)
+
+- ✅ Row 9: `aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.pdf`
+
+#### GitHub Repository (1)
+
+- ❌ Row 10: Failed - Unknown error
 
