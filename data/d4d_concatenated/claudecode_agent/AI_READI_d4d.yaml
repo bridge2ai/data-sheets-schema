@@ -1,0 +1,677 @@
+# D4D Datasheet for AI-READI Dataset
+# Generation Method: Claude Code Agent Deterministic
+# Source: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-05
+
+id: https://fairhub.io/datasets/2
+name: AI-READI
+title: Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)
+description: >
+  The AI-READI is a flagship dataset consisting of multimodal data collected from 4,000 individuals
+  with and without Type 2 Diabetes Mellitus (T2DM), harmonized across 3 data collection sites
+  (Birmingham, Alabama; San Diego, California; Seattle, Washington). The dataset was designed
+  with future AI/Machine Learning studies in mind, including recruitment sampling procedures
+  aimed at achieving approximately equal distribution of participants across diabetes severity
+  (triple-balanced by race/ethnicity, biological sex, and T2DM severity), as well as a
+  multi-domain data acquisition protocol (survey data, physical measurements, clinical data,
+  imaging data, wearable device data, environmental sensors, biospecimens) to enable downstream
+  AI/ML analyses that may not be feasible with existing data sources such as claims or electronic
+  health records data. The goal is to better understand salutogenesis (the pathway from disease
+  to health) in T2DM. The study follows FAIR principles and incorporates ethical and equitable
+  data collection and management practices.
+page: https://fairhub.io/datasets/2
+language: en
+keywords:
+  - Type 2 Diabetes Mellitus
+  - T2DM
+  - AI-READI
+  - Machine Learning
+  - Artificial Intelligence
+  - multimodal dataset
+  - harmonized data
+  - multi-site study
+  - salutogenesis
+  - FAIR principles
+  - retinal imaging
+  - continuous glucose monitoring
+  - wearable devices
+  - biorepository
+  - biospecimens
+  - triple-balanced sampling
+  - health equity
+  - Bridge2AI
+  - cross-sectional study
+
+# Motivation
+purposes:
+  - id: purpose-001
+    name: Understanding T2DM salutogenesis
+    description: >
+      Better understand salutogenesis (the pathway from disease to health) in Type 2 Diabetes
+      Mellitus using a hypothesis-agnostic, harmonized, multi-domain dataset designed specifically
+      for AI/ML research. The dataset aims to provide critical insights into how individuals can
+      transition from diabetes toward health resilience.
+  - id: purpose-002
+    name: Establishing AI/ML data standards
+    description: >
+      Establish standards, best practices, and guidelines for collection, preparation, and
+      sharing of medical/health data sets targeted for AI/ML applications. This includes
+      guidance from bioethicists on ethical and equitable data collection and management
+      practices, with adherence to FAIR principles.
+  - id: purpose-003
+    name: Addressing demographic inequities in T2DM research
+    description: >
+      Address the lack of racial and ethnic diversity in T2DM research by creating a dataset
+      that is triple-balanced across race/ethnicity (Asian, Black, Hispanic, White), biological
+      sex (male, female), and diabetes severity (no diabetes, pre-diabetes/lifestyle-controlled,
+      medication-controlled, insulin-controlled).
+
+tasks:
+  - id: task-001
+    name: Enable multi-domain AI/ML analyses for T2DM
+    description: >
+      Enable downstream AI/ML analyses across survey, clinical, imaging, wearable device,
+      environmental, and biospecimen domains related to T2DM that may not be feasible with
+      existing data sources such as claims or electronic health records data alone. The
+      multimodal nature of the data supports complex machine learning model development.
+  - id: task-002
+    name: Develop unbiased AI/ML models
+    description: >
+      Support the development of unbiased machine learning models through balanced data
+      collection across demographic groups and diabetes severity levels. The triple-balanced
+      design is critical for preventing algorithmic bias in AI/ML applications.
+  - id: task-003
+    name: Study T2DM disease trajectories
+    description: >
+      Study disease trajectories and salutogenesis pathways in T2DM through cross-sectional
+      analysis of participants at different disease stages, enabling pseudotime manifold
+      analysis to predict disease progression and paths to health resilience.
+
+addressing_gaps:
+  - id: gap-001
+    name: Lack of multimodal T2DM datasets
+    description: >
+      Provide a large-scale, harmonized, multi-site, multi-domain dataset enabling AI/ML
+      analyses not feasible with existing sources (e.g., claims or EHR alone). With 4,000
+      participants and over 10 variable domains, this is the largest publicly accessible
+      dataset of its kind.
+  - id: gap-002
+    name: Demographic underrepresentation
+    description: >
+      Address demographic inequities in T2DM research by recruiting equal proportions across
+      four race/ethnic groups (Asian, Black, Hispanic, White) and both biological sexes,
+      improving upon many previous epidemiological studies and clinical trials that lacked
+      diversity.
+  - id: gap-003
+    name: AI-readiness of medical datasets
+    description: >
+      Create a model for future AI-ready medical datasets through comprehensive metadata,
+      standardized data formats, FAIR compliance, and ethical data governance practices
+      that can be replicated for other health conditions.
+
+# Creators and Contributors
+creators:
+  - id: creator-001
+    name: Cynthia Owsley
+    description: Principal Investigator, University of Alabama at Birmingham, Department of Ophthalmology and Visual Sciences
+  - id: creator-002
+    name: Aaron Lee
+    description: Contact PI/Project Leader, University of Washington, Department of Ophthalmology, Assistant Professor
+  - id: creator-003
+    name: Sally L. Baxter
+    description: Co-Investigator, University of California San Diego, Department of Ophthalmology
+  - id: creator-004
+    name: Christopher G. Chute
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-005
+    name: Megan E. Collins
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-006
+    name: Jeffrey C. Edberg
+    description: Co-Investigator, University of Alabama at Birmingham, Department of Medicine
+  - id: creator-007
+    name: Kadija Ferryman
+    description: Co-Investigator, AI-READI Consortium (Bioethics)
+  - id: creator-008
+    name: Michelle Hribar
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-009
+    name: Samantha Hurst
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-010
+    name: Hiroshi Ishikawa
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-011
+    name: Cecilia S. Lee
+    description: Co-Investigator, University of Washington, Department of Ophthalmology
+  - id: creator-012
+    name: Alvin Y. Liu
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-013
+    name: Gerald McGwin
+    description: Co-Investigator, University of Alabama at Birmingham, Departments of Ophthalmology and Epidemiology
+  - id: creator-014
+    name: Shannon K. McWeeney
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-015
+    name: Camille Nebeker
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-016
+    name: Bhavesh Patel
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-017
+    name: Sara Jean Singer
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-018
+    name: Michael P. Snyder
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-019
+    name: Joseph Manuel Yracheta
+    description: Co-Investigator, AI-READI Consortium
+  - id: creator-020
+    name: Linda M. Zangwill
+    description: Co-Investigator, University of California San Diego, Department of Ophthalmology
+
+funders:
+  - id: funder-001
+    name: NIH Common Fund Bridge2AI Program
+    description: >
+      Funded through National Institutes of Health grant OT2OD032644, administered by
+      NIH Office of the Director. Additional support from grants P30DK035816 (Nutrition
+      and Obesity Research Center), UL1TR003096, and Research to Prevent Blindness.
+      Total funding in 2022: $5,026,499. Opportunity Number: OTA-21-008.
+
+# Composition
+instances:
+  - id: instance-001
+    name: Individual participants
+    description: >
+      Individual participants aged 40 and older with and without Type 2 Diabetes Mellitus (T2DM).
+      Target enrollment is 4,000 people, triple-balanced by self-reported race/ethnicity (Asian,
+      Black, Hispanic, White), T2DM severity (no diabetes, pre-diabetes/lifestyle-controlled
+      diabetes, diabetes treated with oral medications or non-insulin injections, insulin-controlled
+      diabetes), and biological sex (male, female). Participants must speak, read, and understand
+      English. Exclusion criteria include pregnancy and type 1 diabetes.
+    instance_type: >
+      Human participants recruited from three health system sites (University of Alabama at
+      Birmingham, University of California San Diego, University of Washington) between
+      2020 and 2025.
+
+subsets:
+  - id: subset-001
+    name: Public Access Dataset
+    description: >
+      Includes data not considered sensitive personal health information, available to the
+      public for download upon agreement with a license. Contains survey data, blood and urine
+      lab results, fitness activity levels, clinical measurements (e.g., monofilament and
+      cognitive function testing), retinal images, ECG, blood glucose levels, and environmental
+      variables such as home air quality. Available at https://fairhub.io/datasets/2.
+  - id: subset-002
+    name: Controlled Access Dataset
+    description: >
+      Includes sensitive data accessible by entering into a data use agreement. Contains
+      5-digit zip code, sex, race, ethnicity, genetic sequencing data (from buffy coats),
+      past health records, medications, and traffic and accident reports. Access requirements
+      are being developed by the Data Access Committee.
+  - id: subset-003
+    name: Biorepository
+    description: >
+      Biobanked samples stored at UAB Center for Clinical and Translational Science (CCTS),
+      including plasma, serum, buffy coats, peripheral blood mononuclear cells (PBMCs),
+      PAXgene RNA, and urine. Available to researchers for future ancillary studies according
+      to procedures and policies in development. Finite number of samples available.
+
+sampling_strategies:
+  - id: sampling-001
+    name: Triple-balanced recruitment
+    description: >
+      Recruitment sampling procedures aimed at achieving approximately equal distribution of
+      participants across three dimensions: (1) race/ethnicity (Asian, Black, Hispanic, White),
+      (2) T2DM severity (no diabetes, pre-diabetes/lifestyle-controlled, medication-controlled,
+      insulin-controlled), and (3) biological sex (male, female). This balanced design is
+      critical for developing unbiased machine learning models.
+    is_sample:
+      - true
+    is_random:
+      - false
+    is_representative:
+      - false
+    strategies:
+      - Targeted recruitment to balance demographics across race/ethnicity, sex, and diabetes severity
+      - Wave-based recruitment with monitoring and adjustment through under- and oversampling
+      - Recruitment from electronic health records screening using ICD-10 codes (R73.09 for pre-diabetes, E11.X for T2DM)
+      - Personalized invitation letters and emails with REDCap recruitment interface
+
+subpopulations:
+  - id: subpop-001
+    name: Asian participants
+    description: Self-reported Asian race/ethnicity, target ~1,000 participants (25% of sample)
+  - id: subpop-002
+    name: Black participants
+    description: Self-reported Black race/ethnicity, target ~1,000 participants (25% of sample)
+  - id: subpop-003
+    name: Hispanic participants
+    description: Self-reported Hispanic ethnicity, target ~1,000 participants (25% of sample)
+  - id: subpop-004
+    name: White participants
+    description: Self-reported White race/ethnicity, target ~1,000 participants (25% of sample)
+  - id: subpop-005
+    name: No diabetes
+    description: Participants without diabetes diagnosis, target ~1,000 participants (25% of sample)
+  - id: subpop-006
+    name: Pre-diabetes and lifestyle-controlled diabetes
+    description: Participants with pre-diabetes or lifestyle-controlled diabetes, target ~1,000 participants (25% of sample)
+  - id: subpop-007
+    name: Medication-controlled diabetes
+    description: Participants with diabetes treated with oral medications or non-insulin injections, target ~1,000 participants (25% of sample)
+  - id: subpop-008
+    name: Insulin-controlled diabetes
+    description: Participants with insulin-controlled diabetes, target ~1,000 participants (25% of sample)
+
+# Collection Process
+collection_mechanisms:
+  - id: collection-001
+    name: In-person data collection visits
+    description: >
+      Single study encounter per participant at one of three data collection sites (Birmingham,
+      San Diego, Seattle). Multi-domain protocol containing over 10 data collection domains
+      performed during the visit.
+  - id: collection-002
+    name: Electronic health record screening
+    description: >
+      Source population identified by screening electronic health records for patients aged
+      40+ who had medical encounters between 2020-2025. ICD-10 codes used to identify T2DM
+      (E11.X) and pre-diabetes (R73.09) cases.
+  - id: collection-003
+    name: Wave-based recruitment
+    description: >
+      Participants recruited in waves to facilitate efficient sampling. Composition and size
+      of each wave influenced by observed participation characteristics to maintain balance
+      across race/ethnicity, sex, and diabetes severity.
+  - id: collection-004
+    name: Home-based wearable monitoring
+    description: >
+      Continuous glucose monitoring (Dexcom G6, 5-minute intervals), physical activity
+      monitoring (Garmin VivoSmart 5), and environmental sensor monitoring (temperature,
+      humidity, air quality) conducted at participants' homes over specified monitoring periods.
+  - id: collection-005
+    name: Biospecimen collection and biobanking
+    description: >
+      Blood (53 mL) and urine collected during study visit. Local processing for plasma,
+      serum, buffy coats at all sites. Centralized biobanking at UAB CCTS. Standardized
+      operating procedures ensure consistent handling.
+
+acquisition_methods:
+  - id: acquisition-001
+    name: Survey and questionnaire data
+    description: >
+      Self-reported data collected via REDCap interfaces including demographics, medical
+      history, social determinants of health, depression screening (CES-D), diabetes-related
+      emotional distress (PAID scale), and psychosocial variables.
+  - id: acquisition-002
+    name: Physical measurements and vital signs
+    description: >
+      Height, weight, blood pressure, heart rate, waist circumference, body composition,
+      and other anthropometric measures collected during in-person visit.
+  - id: acquisition-003
+    name: Retinal imaging
+    description: >
+      Multi-device retinal imaging protocol capturing data from Optos California, Spectralis
+      OCT2, Triton DRI OCT, Cirrus 5000, and Fluorescence Lifetime Imaging Ophthalmoscopy (FLIO).
+      Both eyes imaged under dilated conditions (except Optos). Output formats include DICOM,
+      .fda, .sdt converted to DICOM.
+  - id: acquisition-004
+    name: Visual function testing
+    description: >
+      Visual acuity and contrast sensitivity under photopic (daylight) and mesopic (dim light)
+      conditions using Electronic Visual Acuity tester and Mars chart. Autorefraction data
+      collected using Topcon KR 800.
+  - id: acquisition-005
+    name: Clinical laboratory testing
+    description: >
+      Complete blood count (CBC) from fresh whole blood at local CLIA-certified labs. Central
+      lab testing at UW Nutrition and Obesity Research Center (NORC) for EDTA plasma tests
+      (NT-proBNP, Troponin-T, C-peptide, insulin), serum tests (CRP, lipid panel, glucose,
+      kidney and liver function markers), whole blood tests (HbA1c), and urine tests (creatinine,
+      albumin, other markers).
+  - id: acquisition-006
+    name: Electrocardiogram (ECG)
+    description: >
+      12-lead ECG data collected during study visit using standardized protocols.
+  - id: acquisition-007
+    name: Cognitive function testing
+    description: >
+      Montreal Cognitive Assessment (MoCA) administered to assess cognitive function, relevant
+      to T2DM complications including cognitive decline.
+  - id: acquisition-008
+    name: Peripheral neuropathy assessment
+    description: >
+      Monofilament testing performed to assess peripheral neuropathy, a common T2DM complication.
+  - id: acquisition-009
+    name: Continuous glucose monitoring
+    description: >
+      Dexcom G6 Continuous Glucose Monitor capturing blood glucose measurements (mg/dL) every
+      5 minutes. Data exported in CSV format.
+  - id: acquisition-010
+    name: Physical activity monitoring
+    description: >
+      Garmin VivoSmart 5 wearable device capturing number of steps, heart rate, sleep duration
+      (circadian and diurnal rhythm), and oxygen saturation. Data exported in .FIT format and
+      converted to mHealth standard.
+  - id: acquisition-011
+    name: Environmental monitoring
+    description: >
+      Custom-designed environmental sensor (Karalis Johnson Retina Center, UW) capturing ambient
+      temperature, relative humidity, nitrogen oxides (NO and NO2), volatile organic compounds,
+      particulate matter (PM1.0, PM2.5, PM4, PM10), and multi-spectral light intensity (11 measurements).
+      Data in CSV format.
+  - id: acquisition-012
+    name: Biospecimen collection
+    description: >
+      Non-fasting blood (53 mL) and urine collection. Processing includes whole blood for CBC,
+      EDTA plasma, serum, buffy coats for genomic DNA extraction, peripheral blood mononuclear
+      cells (PBMCs) from CPT tubes, and PAXgene RNA vacutainers. Samples stored at UAB CCTS
+      biorepository at appropriate temperatures.
+
+# Preprocessing, Cleaning, and Labeling
+preprocessing_strategies:
+  - id: preproc-001
+    name: Data standardization and harmonization
+    description: >
+      Data harmonized across three collection sites (Birmingham, San Diego, Seattle) using
+      standardized operating procedures, common protocols, and centralized data management
+      through REDCap. Ensures consistency and comparability across sites.
+    preprocessing_details:
+      - Standardized operating procedures across all three sites
+      - Common protocols and equipment
+      - Centralized data management through REDCap
+  - id: preproc-002
+    name: Image format conversion
+    description: >
+      Retinal imaging data converted from proprietary formats (.fda, .sdt) to DICOM standard
+      for the dataset. Wearable device data converted from .FIT format to mHealth standard.
+    preprocessing_details:
+      - Proprietary retinal imaging formats (.fda, .sdt) converted to DICOM
+      - Wearable device data (.FIT) converted to mHealth standard
+  - id: preproc-003
+    name: Biospecimen processing
+    description: >
+      Standardized local processing for plasma, serum, and buffy coats using consistent
+      protocols. Centralized processing of CPT tubes for PBMC isolation at UAB CCTS. Batch
+      shipping of biospecimens for central clinical lab analyses.
+    preprocessing_details:
+      - Standardized local processing for plasma, serum, buffy coats
+      - Centralized PBMC processing at UAB CCTS
+      - Batch shipping for central lab analyses
+  - id: preproc-004
+    name: Quality control and validation
+    description: >
+      Multiple quality control measures including standardized training of study coordinators,
+      equipment calibration, duplicate measurements, and data validation checks in REDCap
+      system.
+    preprocessing_details:
+      - Standardized training of study coordinators
+      - Equipment calibration protocols
+      - Duplicate measurements for quality assurance
+      - Data validation checks in REDCap
+
+cleaning_strategies:
+  - id: cleaning-001
+    name: Multi-site harmonization
+    description: >
+      Standardized protocols and procedures across all three data collection sites ensure
+      data consistency and quality. Common equipment, training, and REDCap data management
+      system used to maintain FAIR principles compliance.
+    cleaning_details:
+      - Cross-site harmonization procedures
+      - Standardized equipment and training
+      - REDCap data management for quality
+      - FAIR principles implementation
+
+# Uses
+intended_uses:
+  - id: use-001
+    name: AI/ML model development for T2DM
+    description: >
+      Primary intended use is development and training of artificial intelligence and machine
+      learning models to study Type 2 Diabetes Mellitus, disease trajectories, and salutogenesis
+      (pathways to health resilience).
+  - id: use-002
+    name: Multi-modal T2DM research
+    description: >
+      Research leveraging multiple data domains (imaging, clinical, genomic, wearable,
+      environmental) to understand complex interactions and relationships in T2DM progression
+      and management.
+  - id: use-003
+    name: Health equity research
+    description: >
+      Studies examining racial and ethnic disparities in T2DM outcomes, social determinants
+      of health effects, and development of equitable AI/ML applications for diverse populations.
+  - id: use-004
+    name: Biomarker discovery
+    description: >
+      Discovery of novel biomarkers for T2DM progression, complications, and salutogenesis
+      using biospecimens from the biorepository.
+  - id: use-005
+    name: Model dataset for AI-ready data standards
+    description: >
+      Use as an exemplar for future AI-ready medical dataset development, demonstrating best
+      practices in data collection, preparation, sharing, and ethical governance.
+
+discouraged_uses:
+  - id: discouraged-001
+    name: Uses outside pilot phase scope
+    description: >
+      As enrollment is ongoing, pilot data releases and periodic updates may not have achieved
+      balanced distribution across all groups. Early versions should be used with awareness
+      of this limitation.
+  - id: discouraged-002
+    name: Clinical decision-making without validation
+    description: >
+      Dataset is for research purposes. Any AI/ML models developed should undergo appropriate
+      clinical validation before use in patient care or clinical decision-making.
+  - id: discouraged-003
+    name: Re-identification attempts
+    description: >
+      Attempts to re-identify participants from de-identified data violate ethical principles
+      and data use agreements.
+
+# Distribution
+license: CC BY-NC 4.0
+license_and_use_terms:
+  id: license-001
+  name: Creative Commons Attribution Non-Commercial
+  description: >
+    Public access data distributed under Creative Commons Attribution Non-Commercial (CC BY-NC 4.0)
+    license. Permits others to distribute, remix, adapt, build upon this work non-commercially,
+    and license their derivative works on different terms, provided the original work is properly
+    cited, appropriate credit is given, any changes made indicated, and the use is non-commercial.
+    Controlled access data requires data use agreement. See http://creativecommons.org/licenses/by-nc/4.0/
+    for full license terms.
+  license_terms:
+    - Proper citation required
+    - Non-commercial use only for public data
+    - Derivative works permitted with attribution
+    - Changes must be indicated
+    - Controlled access data requires separate data use agreement
+
+distribution_formats:
+  - id: format-001
+    name: DICOM for imaging
+    description: >
+      Retinal imaging data distributed in DICOM format (converted from proprietary .fda and
+      .sdt formats for standardization).
+    access_urls:
+      - https://fairhub.io/datasets/2
+  - id: format-002
+    name: CSV for tabular and time-series data
+    description: >
+      Survey data, clinical lab results, continuous glucose monitoring, environmental sensor
+      data, and other tabular/time-series data provided in CSV format.
+    access_urls:
+      - https://fairhub.io/datasets/2
+  - id: format-003
+    name: mHealth standard for wearable data
+    description: >
+      Physical activity monitoring data (from Garmin VivoSmart 5) converted from .FIT format
+      to mHealth standard for interoperability.
+    access_urls:
+      - https://fairhub.io/datasets/2
+  - id: format-004
+    name: REDCap data dictionary
+    description: >
+      Metadata and data dictionaries provided through REDCap system documentation for survey
+      and study coordination data.
+    access_urls:
+      - https://docs.aireadi.org/
+
+# Maintenance
+maintainers:
+  - id: maintainer-001
+    name: AI-READI Consortium
+    description: >
+      Multidisciplinary consortium managing dataset maintenance including data collection sites,
+      coordinating centers, and data governance committees.
+    maintainer_details:
+      - University of Washington (lead institution, data coordination)
+      - University of Alabama at Birmingham (biorepository, data collection)
+      - University of California San Diego (data collection)
+      - Data Access Committee (access policies)
+      - Documentation team (version-specific guides)
+
+updates:
+  id: updates-001
+  name: Periodic data releases and maintenance plan
+  description: >
+    Dataset updated periodically as enrollment progresses toward target of 4,000 participants
+    by November 2026. Version-specific documentation maintained for each release. Biorepository
+    maintained at UAB CCTS with long-term storage protocols. Data sharing policies under ongoing
+    development by Data Access Committee.
+  frequency: Periodic releases with ongoing enrollment; final release planned for late 2026
+  update_details:
+    - Periodic data releases as enrollment continues
+    - Pilot data released with ongoing enrollment
+    - Final dataset expected after completion of 4,000 participant enrollment by November 2026
+    - Dataset versioning implemented (v1.0.0, v2.0.0, v3.0.0)
+    - Version-specific documentation at https://docs.aireadi.org/
+
+retention_limit:
+  id: retention-001
+  name: Data and biospecimen retention
+  description: >
+    Digital data maintained according to NIH data sharing policies. Biospecimen retention
+    subject to institutional policies and consent agreements. Finite number of biospecimen
+    samples available for distribution.
+  retention_details:
+    - NIH data sharing policies govern digital data retention
+    - Biospecimen retention per institutional policies
+    - Consent agreements specify retention terms
+    - Finite biospecimen availability
+
+# Ethics and Human Subjects
+human_subject_research:
+  id: hsr-001
+  name: AI-READI Human Subjects Research
+  description: >
+    Study approved by Institutional Review Board (IRB) of University of Washington (approval
+    number STUDY00016228), with reliance agreements from IRBs of University of Alabama at
+    Birmingham and University of California, San Diego. Written informed consent provided
+    by all participants. Bioethics guidance integrated throughout study design. Community
+    Advisory Board of 11 persons with diversity in race and ethnicity contributes to protocol
+    development. Ethical and equitable data collection and management practices implemented.
+  involves_human_subjects: true
+  irb_approval:
+    - University of Washington IRB approval number STUDY00016228
+    - University of Alabama at Birmingham IRB reliance agreement
+    - University of California San Diego IRB reliance agreement
+  ethics_review_board:
+    - University of Washington Institutional Review Board
+    - University of Alabama at Birmingham Institutional Review Board (reliance agreement)
+    - University of California San Diego Institutional Review Board (reliance agreement)
+    - Community Advisory Board with 11 members representing diverse race and ethnicity
+  special_populations:
+    - Recruitment targeted to include racial and ethnic minorities disproportionately affected by T2DM
+    - Asian populations
+    - Black populations
+    - Hispanic populations
+    - Tribal consultation planned for Native American cohort participation
+
+sensitive_elements:
+  - id: sensitive-001
+    name: Genetic and biospecimen data
+    description: >
+      Genomic DNA extracted from buffy coats, blood derivatives, and urine samples stored
+      with potential for future genetic analyses. Available in controlled access dataset only.
+    sensitive_elements_present: true
+    sensitivity_details:
+      - Genetic sequencing data from buffy coats
+      - Blood derivatives and urine biospecimens
+  - id: sensitive-002
+    name: Geographic and demographic identifiers
+    description: >
+      5-digit zip code, detailed race, ethnicity, and sex information available in controlled
+      access dataset only. Public dataset contains de-identified data.
+    sensitive_elements_present: true
+    sensitivity_details:
+      - 5-digit zip code
+      - Race and ethnicity details
+      - Biological sex
+  - id: sensitive-003
+    name: Medical history and records
+    description: >
+      Past health records, medications, traffic and accident reports available in controlled
+      access dataset only.
+    sensitive_elements_present: true
+    sensitivity_details:
+      - Past health records
+      - Medications
+      - Traffic and accident reports
+
+# Data Governance and External Resources
+external_resources:
+  - id: resource-001
+    name: AI-READI Project Website
+    description: Official project website with overview and resources
+    external_resources:
+      - https://aireadi.org/
+  - id: resource-002
+    name: AI-READI Dataset Documentation
+    description: Comprehensive dataset documentation with version-specific guides
+    external_resources:
+      - https://docs.aireadi.org/
+  - id: resource-003
+    name: FAIRhub Dataset Landing Page
+    description: Dataset repository and download portal
+    external_resources:
+      - https://fairhub.io/datasets/2
+  - id: resource-004
+    name: Bridge2AI Program
+    description: Parent NIH Common Fund program supporting AI-ready biomedical datasets
+    external_resources:
+      - https://bridge2ai.org/
+  - id: resource-005
+    name: NIH RePORTER Project Details
+    description: Federal grant information and project details
+    external_resources:
+      - https://reporter.nih.gov/project-details/10471118
+  - id: resource-006
+    name: Data Sharing Information
+    description: Policies and procedures for data access
+    external_resources:
+      - https://aireadi.org/goals/data-sharing
+  - id: resource-007
+    name: Zenodo Archive
+    description: Additional dataset documentation and resources
+    external_resources:
+      - https://doi.org/10.5281/zenodo.10642459
+  - id: resource-008
+    name: Protocol Publication
+    description: BMJ Open publication describing study design and protocol
+    external_resources:
+      - https://doi.org/10.1136/bmjopen-2024-097449
+  - id: resource-009
+    name: Nature Metabolism Commentary
+    description: Overview of AI-READI approach and significance
+    external_resources:
+      - https://doi.org/10.1038/s42255-024-01165-x
