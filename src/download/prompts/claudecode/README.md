@@ -1,64 +1,102 @@
-# Claude Code Deterministic Assistant Prompts
+# Claude Code D4D Generation Prompts
 
-This directory contains instruction files for the D4D Deterministic Assistant using Claude Code with temperature=0.0 settings for reproducible D4D datasheet generation.
+This directory contains instruction files for D4D datasheet generation using Claude Code with deterministic settings.
 
-## Instruction Files
+## Slash Commands (Moved)
+
+**Slash commands are in `.claude/commands/`** (standard Claude Code location):
+
+```
+.claude/commands/
+├── README.md
+├── d4d-agent.md       # /d4d-agent - Task tool agents
+├── d4d-assistant.md   # /d4d-assistant - In-session synthesis
+└── d4d-webfetch.md    # /d4d-webfetch - WebFetch + ARTL
+```
+
+Usage: Type `/d4d-agent`, `/d4d-assistant`, or `/d4d-webfetch` in Claude Code.
+
+## Three Generation Approaches
+
+| Approach | Method | Input | Workflow | Output Location |
+|----------|--------|-------|----------|-----------------|
+| **Agent Deterministic** | Task tool with agents | Preprocessed files | Custom | `claudecode/` |
+| **Assistant Deterministic** | In-session synthesis | Preprocessed files | `.github/workflows/` | `claudecode_assistant/` |
+| **GitHub Actions Workflow** | WebFetch + ARTL | Live URL fetch | `.github/workflows/` | `sheets_d4dassistant/` |
+
+Both **Assistant Deterministic** and **GitHub Actions Workflow** follow the methodology defined in `.github/workflows/d4d_assistant_create.md`. The key difference is input source: preprocessed files vs. live URL fetching.
+
+## Instruction Files (This Directory)
+
+These files are used by Python scripts and provide detailed workflow instructions:
 
 - **`d4d_deterministic_create.md`** - Instructions for creating new D4D datasheets
 - **`d4d_deterministic_edit.md`** - Instructions for editing existing D4D datasheets
+- **`d4d_generate_from_sources.md`** - Overview of source document generation
 
-These files guide the Claude Code Deterministic Assistant through workflows for metadata extraction, YAML generation, validation, and file management.
+## Deterministic Settings
 
-## Key Features
+All approaches use these settings for reproducibility:
 
-### Deterministic Settings
-- Temperature: 0.0 (maximum determinism)
-- Model: Date-pinned Claude model version
-- Schema: Local version-controlled file
-- Prompts: External version-controlled files
+- **Temperature**: 0.0 (maximum determinism)
+- **Schema**: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
+- **Validation**: Required before completion
+- **Field handling**: Prefer `null` or omission for unknown values
 
-### Output Location
-All Claude Code-generated D4D datasheets are saved to:
+## Input Sources
+
+### Preprocessed Files (Agent & Assistant approaches)
+
 ```
-data/d4d_concatenated/claudecode/
+data/preprocessed/concatenated/sources/
+├── AI_READI_sources_concatenated.txt
+├── CM4AI_sources_concatenated.txt
+├── VOICE_sources_concatenated.txt
+└── CHORUS_sources_concatenated.txt
+
+data/preprocessed/individual/{PROJECT}/
+└── {source_file}.txt
 ```
 
-### Metadata Tracking
-Each extraction generates a metadata record documenting:
-- Input sources (URLs, files)
-- Schema version used
-- Model settings
-- Timestamps
-- SHA-256 hashes for reproducibility
+### Live URLs (GitHub Actions approach)
 
-## Usage
+| Project | Primary URLs |
+|---------|--------------|
+| AI_READI | https://docs.aireadi.org, https://fairhub.io/datasets/2 |
+| CM4AI | https://cm4ai.org, https://doi.org/10.18130/V3/B35XWX |
+| VOICE | https://docs.b2ai-voice.org, https://doi.org/10.13026/249v-w155 |
+| CHORUS | https://chorus4ai.org |
 
-### Creating a New Datasheet
-1. Provide URLs or content describing the dataset
-2. Claude Code follows `d4d_deterministic_create.md` instructions
-3. Extracts metadata and generates YAML
-4. Validates against D4D schema
-5. Saves to `data/d4d_concatenated/claudecode/`
+## Output Locations Summary
 
-### Editing an Existing Datasheet
-1. Specify which datasheet to edit
-2. Claude Code follows `d4d_deterministic_edit.md` instructions
-3. Makes requested changes
-4. Validates modified YAML
-5. Updates the file
+```
+data/
+├── d4d_concatenated/
+│   ├── claudecode/                    # Agent Deterministic
+│   ├── claudecode_assistant/          # Assistant Deterministic
+│   ├── gpt5/                          # GPT-5 (alternative LLM)
+│   └── curated/                       # Manual curation
+├── d4d_individual/
+│   ├── claudecode/{PROJECT}/          # Agent Deterministic
+│   └── claudecode_assistant/{PROJECT}/ # Assistant Deterministic
+└── sheets_d4dassistant/               # GitHub Actions Workflow
+```
 
-## Comparison with Other Approaches
+## Validation
 
-| Approach | Location | Temperature | Use Case |
-|----------|----------|-------------|----------|
-| Claude Code Deterministic | `claudecode/` | 0.0 | Reproducible extraction |
-| GPT-5 Assistant | `gpt5/` | Default | Alternative LLM |
-| GitHub Actions Assistant | `.github/workflows/` | Default | Automated via issues |
-| Curated | `curated/` | N/A | Manual curation |
+All approaches require validation before completion:
 
-## Related Files
+```bash
+poetry run linkml-validate \
+  -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
+  -C Dataset <file>
+```
 
+## Related Documentation
+
+- **Slash Commands**: `.claude/commands/`
 - **Schema**: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
 - **Validation**: `make validate-d4d FILE=<file>`
 - **HTML Preview**: `src/html/human_readable_renderer.py`
-- **Determinism Documentation**: `notes/DETERMINISM.md`
+- **Determinism Notes**: `notes/DETERMINISM.md`
+- **GitHub Actions Workflow**: `.github/workflows/d4d_assistant_create.md`
