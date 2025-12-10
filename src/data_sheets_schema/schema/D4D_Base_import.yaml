@@ -362,6 +362,13 @@ slots:
     multivalued: true
     slot_uri: dcterms:references
 
+  resources:
+    description: >-
+      Sub-resources or component datasets. Used in DatasetCollection to contain
+      Dataset objects, and in Dataset to allow nested resource structures.
+    range: Dataset
+    multivalued: true
+
 ## SHARED ENUMS ##
 enums:
 

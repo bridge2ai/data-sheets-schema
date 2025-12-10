@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-09T21:41:51
+# Generation date: 2025-12-09T21:49:08
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -451,6 +451,7 @@ class Dataset(Information):
     path: Optional[str] = None
     sha256: Optional[str] = None
     external_resources: Optional[Union[Union[dict, "ExternalResource"], list[Union[dict, "ExternalResource"]]]] = empty_list()
+    resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]] = empty_dict()
     purposes: Optional[Union[Union[dict, "Purpose"], list[Union[dict, "Purpose"]]]] = empty_list()
     tasks: Optional[Union[Union[dict, "Task"], list[Union[dict, "Task"]]]] = empty_list()
     addressing_gaps: Optional[Union[Union[dict, "AddressingGap"], list[Union[dict, "AddressingGap"]]]] = empty_list()
@@ -505,7 +506,6 @@ class Dataset(Information):
     citation: Optional[str] = None
     parent_datasets: Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]] = empty_dict()
     related_datasets: Optional[Union[Union[dict, "DatasetRelationship"], list[Union[dict, "DatasetRelationship"]]]] = empty_list()
-    resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]] = empty_dict()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -543,6 +543,8 @@ class Dataset(Information):
         if not isinstance(self.external_resources, list):
             self.external_resources = [self.external_resources] if self.external_resources is not None else []
         self.external_resources = [v if isinstance(v, ExternalResource) else ExternalResource(**as_dict(v)) for v in self.external_resources]
+
+        self._normalize_inlined_as_list(slot_name="resources", slot_type=Dataset, key_name="id", keyed=True)
 
         if not isinstance(self.purposes, list):
             self.purposes = [self.purposes] if self.purposes is not None else []
@@ -742,8 +744,6 @@ class Dataset(Information):
         if not isinstance(self.related_datasets, list):
             self.related_datasets = [self.related_datasets] if self.related_datasets is not None else []
         self.related_datasets = [v if isinstance(v, DatasetRelationship) else DatasetRelationship(**as_dict(v)) for v in self.related_datasets]
-
-        self._normalize_inlined_as_list(slot_name="resources", slot_type=Dataset, key_name="id", keyed=True)
 
         super().__post_init__(**kwargs)
 
@@ -3372,8 +3372,8 @@ slots.doi = Slot(uri=DCTERMS.identifier, name="doi", curie=DCTERMS.curie('identi
 slots.external_resources = Slot(uri=DCTERMS.references, name="external_resources", curie=DCTERMS.curie('references'),
                    model_uri=DATA_SHEETS_SCHEMA.external_resources, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.datasetCollection__resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="datasetCollection__resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetCollection__resources, domain=None, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
+slots.resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
+                   model_uri=DATA_SHEETS_SCHEMA.resources, domain=None, range=Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]])
 
 slots.dataset__purposes = Slot(uri=DATA_SHEETS_SCHEMA.purposes, name="dataset__purposes", curie=DATA_SHEETS_SCHEMA.curie('purposes'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__purposes, domain=None, range=Optional[Union[Union[dict, Purpose], list[Union[dict, Purpose]]]])
@@ -3536,9 +3536,6 @@ slots.dataset__parent_datasets = Slot(uri=SCHEMA.isPartOf, name="dataset__parent
 
 slots.dataset__related_datasets = Slot(uri=DATA_SHEETS_SCHEMA.related_datasets, name="dataset__related_datasets", curie=DATA_SHEETS_SCHEMA.curie('related_datasets'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__related_datasets, domain=None, range=Optional[Union[Union[dict, DatasetRelationship], list[Union[dict, DatasetRelationship]]]])
-
-slots.dataset__resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="dataset__resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__resources, domain=None, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
 
 slots.dataSubset__is_data_split = Slot(uri=DATA_SHEETS_SCHEMA.is_data_split, name="dataSubset__is_data_split", curie=DATA_SHEETS_SCHEMA.curie('is_data_split'),
                    model_uri=DATA_SHEETS_SCHEMA.dataSubset__is_data_split, domain=None, range=Optional[Union[bool, Bool]])
@@ -4069,8 +4066,14 @@ slots.variableMetadata__derivation = Slot(uri=D4DVARIABLES.derivation, name="var
 slots.variableMetadata__quality_notes = Slot(uri=D4DVARIABLES.quality_notes, name="variableMetadata__quality_notes", curie=D4DVARIABLES.curie('quality_notes'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__quality_notes, domain=None, range=Optional[Union[str, list[str]]])
 
+slots.DatasetCollection_resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="DatasetCollection_resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
+                   model_uri=DATA_SHEETS_SCHEMA.DatasetCollection_resources, domain=DatasetCollection, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]])
+
 slots.Dataset_external_resources = Slot(uri=DCTERMS.references, name="Dataset_external_resources", curie=DCTERMS.curie('references'),
                    model_uri=DATA_SHEETS_SCHEMA.Dataset_external_resources, domain=Dataset, range=Optional[Union[Union[dict, "ExternalResource"], list[Union[dict, "ExternalResource"]]]])
+
+slots.Dataset_resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="Dataset_resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
+                   model_uri=DATA_SHEETS_SCHEMA.Dataset_resources, domain=Dataset, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]])
 
 slots.ExternalResource_external_resources = Slot(uri=DCTERMS.references, name="ExternalResource_external_resources", curie=DCTERMS.curie('references'),
                    model_uri=DATA_SHEETS_SCHEMA.ExternalResource_external_resources, domain=ExternalResource, range=Optional[Union[str, list[str]]])

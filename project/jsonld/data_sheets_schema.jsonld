@@ -1923,18 +1923,18 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "datasetCollection__resources",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "name": "resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
+      "description": "Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
-      "alias": "resources",
-      "owner": "DatasetCollection",
+      "owner": "Dataset",
       "domain_of": [
-        "DatasetCollection"
+        "DatasetCollection",
+        "Dataset"
       ],
       "range": "Dataset",
       "multivalued": true,
-      "inlined": true,
-      "inlined_as_list": true,
       "@type": "SlotDefinition"
     },
     {
@@ -2751,22 +2751,6 @@
         "Dataset"
       ],
       "range": "DatasetRelationship",
-      "multivalued": true,
-      "inlined": true,
-      "inlined_as_list": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "dataset__resources",
-      "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
-      "alias": "resources",
-      "owner": "Dataset",
-      "domain_of": [
-        "Dataset"
-      ],
-      "range": "Dataset",
       "multivalued": true,
       "inlined": true,
       "inlined_as_list": true,
@@ -5460,6 +5444,27 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "DatasetCollection_resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
+      "description": "Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "is_a": "resources",
+      "domain": "DatasetCollection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
+      "alias": "resources",
+      "owner": "DatasetCollection",
+      "domain_of": [
+        "DatasetCollection"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "resources",
+      "range": "Dataset",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "Dataset_external_resources",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/external_resources",
       "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
@@ -5478,6 +5483,27 @@
       "is_usage_slot": true,
       "usage_slot_name": "external_resources",
       "range": "ExternalResource",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "Dataset_resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
+      "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "is_a": "resources",
+      "domain": "Dataset",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
+      "alias": "resources",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "resources",
+      "range": "Dataset",
       "multivalued": true,
       "inlined": true,
       "inlined_as_list": true,
@@ -5548,18 +5574,9 @@
         "title",
         "version",
         "was_derived_from",
-        "datasetCollection__resources"
+        "DatasetCollection_resources"
       ],
       "slot_usage": {},
-      "attributes": [
-        {
-          "name": "resources",
-          "range": "Dataset",
-          "multivalued": true,
-          "inlined_as_list": true,
-          "@type": "SlotDefinition"
-        }
-      ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/DatasetCollection",
       "tree_root": true,
       "@type": "ClassDefinition"
@@ -5615,6 +5632,7 @@
         "path",
         "sha256",
         "Dataset_external_resources",
+        "Dataset_resources",
         "dataset__purposes",
         "dataset__tasks",
         "dataset__addressing_gaps",
@@ -5668,8 +5686,7 @@
         "dataset__is_tabular",
         "dataset__citation",
         "dataset__parent_datasets",
-        "dataset__related_datasets",
-        "dataset__resources"
+        "dataset__related_datasets"
       ],
       "slot_usage": {},
       "attributes": [
@@ -6064,14 +6081,6 @@
           "multivalued": true,
           "inlined_as_list": true,
           "@type": "SlotDefinition"
-        },
-        {
-          "name": "resources",
-          "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
-          "range": "Dataset",
-          "multivalued": true,
-          "inlined_as_list": true,
-          "@type": "SlotDefinition"
         }
       ],
       "class_uri": "http://www.w3.org/ns/dcat#Distribution",
@@ -6117,6 +6126,7 @@
         "path",
         "sha256",
         "Dataset_external_resources",
+        "Dataset_resources",
         "dataset__purposes",
         "dataset__tasks",
         "dataset__addressing_gaps",
@@ -6171,7 +6181,6 @@
         "dataset__citation",
         "dataset__parent_datasets",
         "dataset__related_datasets",
-        "dataset__resources",
         "dataSubset__is_data_split",
         "dataSubset__is_subpopulation"
       ],
@@ -8869,9 +8878,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-12-09T21:41:37",
-  "source_file_size": 14165,
-  "generation_date": "2025-12-09T21:41:49",
+  "source_file_date": "2025-12-09T21:48:49",
+  "source_file_size": 14114,
+  "generation_date": "2025-12-09T21:49:07",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

@@ -1426,6 +1426,16 @@ slots:
     - ExternalResource
     - DataSubset
     multivalued: true
+  resources:
+    name: resources
+    description: Sub-resources or component datasets. Used in DatasetCollection to
+      contain Dataset objects, and in Dataset to allow nested resource structures.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    domain_of:
+    - DatasetCollection
+    - Dataset
+    range: Dataset
+    multivalued: true
 classes:
   DatasetCollection:
     name: DatasetCollection
@@ -1441,9 +1451,17 @@ classes:
     close_mappings:
     - dcat:Catalog
     is_a: Information
+    slots:
+    - resources
+    slot_usage:
+      resources:
+        name: resources
+        inlined_as_list: true
     attributes:
       resources:
         name: resources
+        description: Sub-resources or component datasets. Used in DatasetCollection
+          to contain Dataset objects, and in Dataset to allow nested resource structures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         alias: resources
         owner: DatasetCollection
@@ -1808,10 +1826,16 @@ classes:
     - path
     - sha256
     - external_resources
+    - resources
     slot_usage:
       external_resources:
         name: external_resources
         range: ExternalResource
+        inlined_as_list: true
+      resources:
+        name: resources
+        description: Sub-resources or component datasets that are part of this dataset.
+          Allows datasets to contain nested resource structures.
         inlined_as_list: true
     attributes:
       purposes:
@@ -2422,20 +2446,6 @@ classes:
         multivalued: true
         inlined: true
         inlined_as_list: true
-      resources:
-        name: resources
-        description: Sub-resources or component datasets that are part of this dataset.
-          Allows datasets to contain nested resource structures.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        alias: resources
-        owner: Dataset
-        domain_of:
-        - DatasetCollection
-        - Dataset
-        range: Dataset
-        multivalued: true
-        inlined: true
-        inlined_as_list: true
       bytes:
         name: bytes
         description: Size of the data in bytes.
@@ -2540,6 +2550,20 @@ classes:
         - ExternalResource
         - DataSubset
         range: ExternalResource
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      resources:
+        name: resources
+        description: Sub-resources or component datasets that are part of this dataset.
+          Allows datasets to contain nested resource structures.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: resources
+        owner: Dataset
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        range: Dataset
         multivalued: true
         inlined: true
         inlined_as_list: true
@@ -3009,6 +3033,19 @@ classes:
         range: ExternalResource
         multivalued: true
         inlined_as_list: true
+      resources:
+        name: resources
+        description: Sub-resources or component datasets that are part of this dataset.
+          Allows datasets to contain nested resource structures.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: resources
+        owner: DataSubset
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        range: Dataset
+        multivalued: true
+        inlined_as_list: true
       purposes:
         name: purposes
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3574,19 +3611,6 @@ classes:
         domain_of:
         - Dataset
         range: DatasetRelationship
-        multivalued: true
-        inlined_as_list: true
-      resources:
-        name: resources
-        description: Sub-resources or component datasets that are part of this dataset.
-          Allows datasets to contain nested resource structures.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        alias: resources
-        owner: DataSubset
-        domain_of:
-        - DatasetCollection
-        - Dataset
-        range: Dataset
         multivalued: true
         inlined_as_list: true
       compression:

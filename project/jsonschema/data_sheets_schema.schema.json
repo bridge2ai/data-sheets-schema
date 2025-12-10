@@ -2493,6 +2493,7 @@
                     ]
                 },
                 "resources": {
+                    "description": "Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.",
                     "items": {
                         "$ref": "#/$defs/Dataset"
                     },
@@ -6166,6 +6167,7 @@
             ]
         },
         "resources": {
+            "description": "Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.",
             "items": {
                 "$ref": "#/$defs/Dataset"
             },

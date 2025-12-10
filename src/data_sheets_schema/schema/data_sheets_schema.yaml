@@ -72,10 +72,10 @@ classes:
     close_mappings:
       - dcat:Catalog
     is_a: Information
-    attributes:
+    slots:
+      - resources
+    slot_usage:
       resources:
-        range: Dataset
-        multivalued: true
         inlined_as_list: true
 
   # TODO: consider how to distinguish between metadata only vs
@@ -103,9 +103,15 @@ classes:
       - path
       - sha256
       - external_resources
+      - resources
     slot_usage:
       external_resources:
         range: ExternalResource
+        inlined_as_list: true
+      resources:
+        description: >-
+          Sub-resources or component datasets that are part of this dataset.
+          Allows datasets to contain nested resource structures.
         inlined_as_list: true
     attributes:
       # Motivation module classes
@@ -370,13 +376,6 @@ classes:
           Related datasets with typed relationships (e.g., supplements, derives from,
           is version of). Use DatasetRelationship class to specify relationship types.
         range: DatasetRelationship
-        multivalued: true
-        inlined_as_list: true
-      resources:
-        description: >-
-          Sub-resources or component datasets that are part of this dataset.
-          Allows datasets to contain nested resource structures.
-        range: Dataset
         multivalued: true
         inlined_as_list: true
 
