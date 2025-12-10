@@ -1,216 +1,232 @@
-id: bridge2ai-voice-dataset-collection
-name: Bridge2AI-Voice Dataset Collection
-title: Bridge2AI-Voice – An ethically-sourced, diverse voice dataset linked to health information
-description: >-
-  A collection of Bridge2AI-Voice dataset versions across multiple platforms,
-  including PhysioNet and Health Data Nexus releases.
-resources:
-  - id: https://doi.org/10.13026/249v-w155
-    name: Bridge2AI-Voice v1.1 (PhysioNet)
-    title: Bridge2AI-Voice – An ethically-sourced, diverse voice dataset linked to health information (v1.1)
-    description: >-
-      A comprehensive collection of derived representations from voice recordings
-      linked to demographic, clinical, and validated questionnaire data, enabling
-      ethically sourced AI research on voice as a biomarker of health. Version 1.1
-      provides 12,523 recordings from 306 adult participants collected across five
-      North American sites. Only de-identified derived data (e.g., spectrograms,
-      MFCCs, static acoustic features) are released; raw audio and free-speech
-      transcripts are withheld to reduce re-identification risk.
-    same_as:
-      - https://docs.b2ai-voice.org
-    citation: "Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/249v-w155"
-    creators:
-      - name: Alistair Johnson
-      - name: Jean-Christophe Bélisle-Pipon
-      - name: David Dorr
-      - name: Satrajit Ghosh
-      - name: Philip Payne
-      - name: Maria Powell
-      - name: Anais Rameau
-      - name: Vardit Ravitsky
-      - name: Alexandros Sigaras
-      - name: Olivier Elemento
-      - name: Yael Bensoussan
-    funders:
-      - grant:
-          award_number: 3OT2OD032720-01S1
-          title: "Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before"
-        grantor:
-          name: National Institutes of Health
-      - grant:
-          award_number: R01EB030362
-          title: PhysioNet infrastructure support
-        grantor:
-          name: National Institute of Biomedical Imaging and Bioengineering
-    purposes:
-      - description: Enable ethically sourced, large-scale AI research on voice as a biomarker of health by linking derived voice representations to phenotype and clinical information.
-    tasks:
-      - name: Voice biomarker discovery
-        description: Identify associations between voice-derived features and health conditions.
-      - name: Health condition modeling from voice
-        description: Develop and benchmark models using derived acoustic features and linked phenotypes.
-    addressing_gaps:
-      - description: Provides a large, ethically sourced, clinically linked voice dataset with privacy-preserving derived representations (no raw audio) to reduce re-identification risk.
-    subsets:
-      - name: spectrograms.parquet
-        path: spectrograms.parquet
-        format: parquet
-        description: Dense time-frequency power spectrograms per recording (513 x N) with participant_id, session_id, task_name.
-        is_data_split: false
-        is_subpopulation: false
-      - name: mfcc.parquet
-        path: mfcc.parquet
-        format: parquet
-        description: Mel-frequency cepstral coefficients (60 x N) derived from spectrograms, keyed by participant_id, session_id, task_name.
-        is_data_split: false
-        is_subpopulation: false
-      - name: phenotype.tsv
-        path: phenotype.tsv
-        format: tsv
-        description: One row per participant with demographics, validated questionnaire responses, and acoustic confounders.
-        is_data_split: false
-        is_subpopulation: false
-      - name: phenotype.json
-        path: phenotype.json
-        format: json
-        description: Data dictionary for phenotype.tsv with per-column descriptions.
-        is_data_split: false
-        is_subpopulation: false
-      - name: static_features.tsv
-        path: static_features.tsv
-        format: tsv
-        description: One row per recording with acoustic, phonetic, and prosodic features (openSMILE, Praat, parselmouth, torchaudio).
-        is_data_split: false
-        is_subpopulation: false
-      - name: static_features.json
-        path: static_features.json
-        format: json
-        description: Data dictionary for static_features.tsv feature descriptions.
-        is_data_split: false
-        is_subpopulation: false
-    instances:
-      - description: 12,523 recordings from 306 adult participants; most completed one session, a subset multiple sessions; five North American collection sites.
-    subpopulations:
-      - name: Voice disorders
-      - name: Neurological and neurodegenerative disorders
-      - name: Mood and psychiatric disorders
-      - name: Respiratory disorders
-    acquisition_methods:
-      - description: Voice tasks collected via standardized protocol (e.g., sustained vowel phonation), using a custom tablet application and headset when possible.
-    collection_mechanisms:
-      - description: Screening against inclusion/exclusion criteria within five predetermined clinical groups; data exported from REDCap.
-    data_collectors:
-      - description: Specialty clinics and institutional sites in North America (five sites).
-    collection_timeframes:
-      - description: Data collected prior to the 2025-01-17 v1.1 release; specific collection dates not disclosed.
-    ethical_reviews:
-      - description: Data collection and sharing approved by the University of South Florida Institutional Review Board.
-    human_subject_research:
-      description: Prospective human subjects research with IRB oversight; adult cohort in v1.1.
-    informed_consent:
-      - description: Participants provided consent for data collection and sharing of de-identified research data.
-    participant_privacy:
-      - description: HIPAA Safe Harbor de-identification; state/province removed (country retained); free-speech transcripts removed; raw audio not released in v1.1.
-    is_deidentified:
-      method: HIPAA Safe Harbor
-      description: Removal of all Safe Harbor identifiers; omission of raw audio; removal of free-speech transcripts; retention limited to non-identifying fields (e.g., country).
-      identifiers_removed:
-        - Names
-        - Geographic locators below country
-        - Dates finer than year
-        - Contact numbers and emails
-        - IP addresses
-        - Government and medical identifiers
-        - Device and account identifiers
-        - Vehicle and license identifiers
-        - URLs
-        - Full face photos
-        - Biometric identifiers
-        - Any unique identifiers
-    preprocessing_strategies:
-      - name: Raw audio preprocessing
-        description: Converted to mono and resampled to 16 kHz with a Butterworth anti-aliasing filter.
-      - name: Spectrogram computation
-        description: Short-time FFT with 25 ms window, 10 ms hop, 512-point FFT; stored as power spectrograms.
-      - name: MFCC computation
-        description: 60 coefficients computed from spectrograms.
-      - name: Acoustic feature extraction
-        description: openSMILE features capturing temporal dynamics and acoustic characteristics.
-      - name: Phonetic/prosodic features
-        description: Parselmouth/Praat measures including F0, formants, and voice quality metrics.
-      - name: Data export/merge
-        description: Export from REDCap and integration using open source library.
-      - name: Open-source code
-        description: b2aiprep library used to preprocess waveforms and merge phenotype data.
-    labeling_strategies:
-      - name: ASR transcription
-        description: Transcriptions generated using OpenAI Whisper Large; transcripts of free speech audio removed prior to release.
-    raw_sources:
-      - name: Raw audio waveforms
-        description: Original audio recordings collected during study visits (not distributed in v1.1).
-    intended_uses:
-      - description: Artificial intelligence and clinical research on voice as a biomarker of health using de-identified derived data.
-        examples:
-          - Development and benchmarking of models linking voice-derived features to health conditions.
-          - Exploration of acoustic, phonetic, and prosodic correlates of disease.
-        usage_notes: Data are provided as derived representations without raw audio to reduce re-identification risk.
-    limitations:
-      - Adult cohort only in v1.1; pediatric data not included.
-      - No raw audio in v1.1; analyses limited to derived representations.
-      - Participants selected for conditions known to manifest in voice, which may affect generalizability.
-    distribution_formats:
-      - name: Parquet
-        extension: .parquet
-        media_type: application/vnd.apache.parquet
-      - name: Tab-separated values
-        extension: .tsv
-        media_type: text/tab-separated-values
-      - name: JSON
-        extension: .json
-        media_type: application/json
-    distribution_dates:
-      - date: 2025-01-17
-        description: v1.1 public release on PhysioNet (registered access).
-    license_and_use_terms:
-      license_name: Bridge2AI Voice Registered Access License
-      access_requirements: Registered access on PhysioNet; users must sign the Bridge2AI Voice Registered Access Agreement.
-      usage_restrictions: Access and use governed by the Bridge2AI Voice Registered Access Agreement.
-    maintainers:
-      - name: PhysioNet platform team
-        role: Platform/publisher
-    updates:
-      description: v1.1 released on 2025-01-17; project subsequently updated to versions 2.0.0 and 2.0.1 on the platform.
-    version_access:
-      description: Files for v1.1 are no longer available; latest version of the project is 2.0.1.
-      latest_version_doi: "https://doi.org/10.13026/37yb-1t42"
-      versions_available:
-        - version: 1.1
-          date: 2025-01-17
-        - version: 2.0.0
-          date: 2025-04-16
-        - version: 2.0.1
-          date: 2025-08-18
-    variables:
-      - name: participant_id
-        description: Unique participant identifier used across files.
-      - name: session_id
-        description: Identifier for a specific recording session for a participant.
-      - name: task_name
-        description: Voice task label associated with a recording.
-      - name: spectrogram
-        description: Power spectrogram matrix per recording (513 x N).
-      - name: mfcc
-        description: Mel-frequency cepstral coefficients per recording (60 x N).
-      - name: static_features
-        description: Aggregate acoustic, phonetic, and prosodic features per recording from multiple toolkits.
-      - name: phenotype
-        description: Participant-level demographics, acoustic confounders, and validated questionnaire responses.
-  - id: https://doi.org/10.57764/qb6h-em84
-    name: Bridge2AI-Voice v1.0 (Health Data Nexus)
-    title: b2ai-voice 1.0 – Health Data Nexus entry
-    description: Entry within Health Data Nexus referencing Bridge2AI-Voice version 1.0. Limited metadata available from the provided source.
-    same_as:
-      - https://healthdatanexus.ai/content/b2ai-voice/1.0/
-    citation: "Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2024). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.0). Health Data Nexus. https://doi.org/10.57764/qb6h-em84"
-    distribution_dates:
-      - description: v1.0 initial release (date per platform record, 2024).
+# D4D Datasheet for VOICE Dataset
+# Generated by: Claude Code Deterministic Assistant
+# Source: data/preprocessed/concatenated/sources/VOICE_sources_concatenated.txt
+# Schema: data_sheets_schema (with renamed multivalued fields)
+# Temperature: 0.0 (deterministic)
+
+id: https://doi.org/10.13026/249v-w155
+name: Bridge2AI-Voice Dataset
+title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information
+description: >
+  The Bridge2AI-Voice project creates an ethically sourced flagship dataset to enable
+  future research in artificial intelligence and support critical insights into the
+  use of voice as a biomarker of health. Version 1.1 provides 12,523 recordings for
+  306 adult participants collected across five sites in North America. Participants
+  were selected based on known conditions which manifest within the voice waveform
+  including voice disorders, neurological disorders, mood disorders, and respiratory
+  disorders. This release contains de-identified derived data including spectrograms,
+  MFCCs, and acoustic features but not the original voice recordings.
+page: https://physionet.org/content/b2ai-voice/1.1/
+language: en
+keywords:
+  - Bridge2AI
+  - voice biomarker
+  - speech
+  - health
+  - voice disorders
+  - neurological disorders
+  - mood disorders
+  - respiratory disorders
+  - spectrogram
+  - MFCC
+  - acoustic features
+  - PhysioNet
+
+# Motivation
+purposes:
+  - description: >
+      Create an ethically sourced flagship dataset to enable future research in
+      artificial intelligence and support critical insights into the use of voice
+      as a biomarker of health.
+
+tasks:
+  - description: >
+      Enable AI research on voice as a biomarker for health conditions including
+      voice disorders, neurological disorders, mood disorders, and respiratory disorders.
+
+addressing_gaps:
+  - description: >
+      Address the need for large, high quality, multi-institutional and diverse voice
+      databases linked to health biomarkers to fuel voice AI research and answer
+      clinical questions.
+
+# Composition
+instances:
+  - description: >
+      Version 1.1 contains 12,523 recordings from 306 adult participants collected
+      across five sites in North America. Most participants completed one session,
+      with a subset completing multiple sessions.
+
+subsets:
+  - id: voice:spectrograms
+    name: spectrograms.parquet
+    description: >
+      Time-frequency power spectrograms (513 x N dimension) computed using short-time
+      FFT with 25ms window, 10ms hop length, and 512-point FFT.
+  - id: voice:mfcc
+    name: mfcc.parquet
+    description: >
+      60 Mel-frequency cepstral coefficients (MFCCs) derived from spectrograms,
+      60 x N dimension per recording.
+  - id: voice:phenotype
+    name: phenotype.tsv
+    description: >
+      Participant demographics, validated questionnaire responses, and acoustic
+      confounders with one row per unique participant.
+  - id: voice:static-features
+    name: static_features.tsv
+    description: >
+      Acoustic features from openSMILE, Praat, parselmouth, and torchaudio with
+      one row per unique recording.
+
+subpopulations:
+  - description: Voice disorders (benign and malignant lesions affecting vocal folds)
+  - description: Neurological and neurodegenerative disorders (including Parkinson's, ALS)
+  - description: Mood and psychiatric disorders (depression, anxiety)
+  - description: Respiratory disorders (cough, breathing sounds)
+
+sampling_strategies:
+  - description: >
+      Participants selected based on membership to five predetermined disease
+      groups from specialty clinics and institutions. Patients screened for
+      inclusion/exclusion criteria prior to visit by project investigators.
+
+# Collection
+acquisition_methods:
+  - description: >
+      Voice tasks collected via standardized protocol including sustained vowel
+      phonation using a custom tablet application with headset.
+    was_directly_observed: true
+    acquisition_details:
+      - Custom tablet application for data collection
+      - Headset used for voice recording when possible
+      - Standardized protocol across five collection sites
+
+collection_mechanisms:
+  - description: >
+      Data collection using REDCap with custom application.
+    mechanism_details:
+      - Custom tablet application for voice recording
+      - REDCap for clinical and questionnaire data
+      - Headset microphone for audio capture
+
+data_collectors:
+  - description: Specialty clinics and institutions across five North American sites.
+    collector_details:
+      - Five North American clinical sites
+      - Specialty clinics for each disease cohort
+
+collection_timeframes:
+  - description: Data collected prior to January 2025 release.
+    timeframe_details:
+      - v1.1 released January 17, 2025
+
+# Preprocessing
+preprocessing_strategies:
+  - description: >
+      Raw audio converted to mono and resampled to 16 kHz with Butterworth
+      anti-aliasing filter. Derived data computed using multiple feature
+      extraction pipelines.
+    preprocessing_details:
+      - Audio resampled to 16 kHz mono
+      - Spectrograms computed via short-time FFT (25ms window, 10ms hop, 512-point FFT)
+      - 60 MFCCs extracted from spectrograms
+      - Acoustic features extracted using openSMILE
+      - Phonetic and prosodic features computed using Parselmouth/Praat
+      - Transcriptions generated using OpenAI Whisper Large (free speech transcripts removed)
+
+cleaning_strategies:
+  - description: >
+      HIPAA Safe Harbor de-identification applied. Free speech transcripts removed
+      to reduce re-identification risk. Raw audio waveforms not released in v1.1.
+    cleaning_details:
+      - HIPAA Safe Harbor identifiers removed
+      - State and province removed (country retained)
+      - Free speech transcripts removed
+      - Raw audio waveforms omitted
+
+# Human subjects
+ethical_reviews:
+  - description: >
+      Data collection and sharing approved by the University of South Florida
+      Institutional Review Board.
+    review_details:
+      - IRB approval from University of South Florida
+
+informed_consent:
+  - consent_obtained: true
+    consent_type:
+      - Written consent for data collection
+      - Consent for research data sharing
+    description: >
+      Participants provided consent for data collection and sharing of
+      de-identified research data.
+
+is_deidentified:
+  description: >
+    De-identification using HIPAA Safe Harbor method. All Safe Harbor identifiers
+    removed including names, geographic locators, dates, contact information,
+    government identifiers, and biometric identifiers.
+
+# Uses
+future_use_impacts:
+  - description: >
+      Dataset designed for AI research on voice as health biomarker. Data are
+      provided as derived representations without raw audio to reduce
+      re-identification risk.
+    impact_details:
+      - Adult cohort only in v1.1 (pediatric data not included)
+      - No raw audio in v1.1 (analyses limited to derived representations)
+      - Participants selected for conditions manifesting in voice
+
+discouraged_uses:
+  - description: >
+      Access requires signing the Bridge2AI Voice Registered Access Agreement.
+      Use governed by the agreement terms.
+    discouragement_details:
+      - Registered access required
+      - Must sign data use agreement
+
+# Distribution
+distribution_formats:
+  - description: >
+      Dataset available via PhysioNet in Parquet, TSV, and JSON formats.
+    access_urls:
+      - https://physionet.org/content/b2ai-voice/1.1/
+
+license_and_use_terms:
+  description: >
+    Bridge2AI Voice Registered Access License. Only registered users who sign the
+    specified data use agreement can access the files.
+  license_terms:
+    - Bridge2AI Voice Registered Access License
+    - Requires signing Bridge2AI Voice Registered Access Agreement
+    - Registered access on PhysioNet
+
+# Maintenance
+maintainers:
+  - name: PhysioNet platform team
+    description: Dataset hosted and maintained by PhysioNet.
+    maintainer_details:
+      - PhysioNet platform and infrastructure
+      - MIT Laboratory for Computational Physiology
+
+updates:
+  description: >
+    Version 1.1 released January 17, 2025 adding MFCCs. Project subsequently
+    updated to versions 2.0.0 and 2.0.1.
+  update_details:
+    - v1.0 initial release 2024
+    - v1.1 released 2025-01-17 (added MFCCs)
+    - v2.0.0 released 2025-04-16
+    - v2.0.1 released 2025-08-18
+
+version_access:
+  description: >
+    Multiple versions available through PhysioNet. Files for v1.1 may no longer
+    be available; latest version is 2.0.1.
+  latest_version_doi: https://doi.org/10.13026/37yb-1t42
+  versions_available:
+    - "1.1 (January 2025)"
+    - "2.0.0 (April 2025)"
+    - "2.0.1 (August 2025)"
