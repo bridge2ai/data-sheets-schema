@@ -29,6 +29,7 @@ Last Updated: 2025-12-03
 """
 
 import hashlib
+import os
 import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
@@ -107,16 +108,81 @@ class D4DPromptLoader:
             )
 
     def _get_default_schema_path(self) -> Path:
-        """Get default local schema path."""
-        # Navigate up from prompts dir to project root
-        project_root = self.prompts_dir.parent.parent.parent
-        schema_path = project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema_all.yaml"
-
-        if not schema_path.exists():
-            # Try alternative path structure
-            schema_path = project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema.yaml"
-
-        return schema_path
+        """
+        Get default local schema path using robust project root detection.
+        
+        Searches upward from prompts directory for pyproject.toml marker file.
+        Falls back to D4D_PROJECT_ROOT environment variable if marker not found.
+        """
+        # First try marker file search (primary method)
+        project_root = self._find_project_root(self.prompts_dir, marker_file="pyproject.toml")
+        
+        # Fall back to environment variable if marker not found
+        if project_root is None:
+            env_root = os.getenv('D4D_PROJECT_ROOT')
+            if env_root:
+                project_root = Path(env_root)
+                if not project_root.exists():
+                    raise FileNotFoundError(
+                        f"D4D_PROJECT_ROOT environment variable points to non-existent path: {env_root}"
+                    )
+            else:
+                raise FileNotFoundError(
+                    f"Could not find project root. Searched upward from '{self.prompts_dir}' for 'pyproject.toml' marker file. "
+                    "Set D4D_PROJECT_ROOT environment variable to explicitly specify project root."
+                )
+        
+        # Try primary schema path (merged schema)
+        primary_path = project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema_all.yaml"
+        
+        if primary_path.exists():
+            return primary_path
+        
+        # Try alternative path (main schema with imports)
+        alternative_path = project_root / "src" / "data_sheets_schema" / "schema" / "data_sheets_schema.yaml"
+        
+        if alternative_path.exists():
+            return alternative_path
+        
+        # Neither path exists - provide helpful error
+        raise FileNotFoundError(
+            f"Schema file not found in project root: {project_root}. "
+            f"Tried both:\n"
+            f"  - {primary_path}\n"
+            f"  - {alternative_path}"
+        )
+    
+    def _find_project_root(self, start_path: Path, marker_file: str = "pyproject.toml", max_depth: int = 30) -> Optional[Path]:
+        """
+        Search upward from start_path to find project root containing marker_file.
+        
+        Args:
+            start_path: Directory to start searching from
+            marker_file: Name of marker file to search for (default: pyproject.toml)
+            max_depth: Maximum number of levels to search upward (default: 30)
+            
+        Returns:
+            Path to project root if found, None otherwise
+        """
+        current = start_path.resolve()
+        depth = 0
+        
+        # Search upward until we hit the filesystem root or max depth
+        # Note: At filesystem root, current == current.parent
+        while current != current.parent and depth < max_depth:
+            marker_path = current / marker_file
+            if marker_path.exists():
+                return current
+            current = current.parent
+            depth += 1
+        
+        # Check the filesystem root itself (if we haven't exceeded max_depth)
+        if depth < max_depth:
+            marker_path = current / marker_file
+            if marker_path.exists():
+                return current
+            
+        return None
 
     def _load_prompt_file(self, filename: str) -> tuple[str, str]:
         """
