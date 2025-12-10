@@ -286,7 +286,7 @@
 <tbody>
 <tr>
 <td><a href="../FundingMechanism/">FundingMechanism</a></td>
-<td><a href="../grant/">grant</a></td>
+<td><a href="../grants/">grants</a></td>
 <td>range</td>
 <td><a href="./">Grant</a></td>
 </tr>
@@ -372,6 +372,7 @@ attributes:
     owner: Grant
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -384,6 +385,7 @@ attributes:
     owner: Grant
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -395,46 +397,8 @@ attributes:
     owner: Grant
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
+    - DatasetProperty
     - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
 
 </code></pre>

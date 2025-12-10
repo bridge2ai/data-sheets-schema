@@ -219,11 +219,17 @@
       DatasetProperty &lt;|-- Deidentification
         click DatasetProperty href "../DatasetProperty/"
 
+      Deidentification : deidentification_details
+
       Deidentification : description
 
       Deidentification : id
 
       Deidentification : identifiable_elements_present
+
+      Deidentification : identifiers_removed
+
+      Deidentification : method
 
       Deidentification : name
 
@@ -242,11 +248,8 @@
 </div>
 <h2 id="inheritance">Inheritance</h2>
 <ul>
-<li><a href="../NamedThing/">NamedThing</a><ul>
 <li><a href="../DatasetProperty/">DatasetProperty</a><ul>
 <li><strong>Deidentification</strong></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -268,28 +271,46 @@
 <td>direct</td>
 </tr>
 <tr>
-<td><a href="../description/">description</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
-<td></td>
+<td><a href="../method/">method</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>Method used for de-identification (e</td>
 <td>direct</td>
+</tr>
+<tr>
+<td><a href="../identifiers_removed/">identifiers_removed</a></td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>List of identifier types removed during de-identification</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../deidentification_details/">deidentification_details</a></td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>Details on de-identification procedures and residual risks</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../id/">id</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>An optional identifier for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../name/">name</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable name for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../description/">description</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
 <td><a href="../used_software/">used_software</a></td>
 <td>* <br/> <a href="../Software/">Software</a></td>
 <td>What software was used as part of this dataset property?</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
-</tr>
-<tr>
-<td><a href="../id/">id</a></td>
-<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../name/">name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable name for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
 </table>
@@ -362,52 +383,33 @@ attributes:
     domain_of:
     - Deidentification
     range: boolean
-  description:
-    name: description
+  method:
+    name: method
+    description: Method used for de-identification (e.g., HIPAA Safe Harbor).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    rank: 1000
+    domain_of:
+    - Deidentification
+    range: string
+  identifiers_removed:
+    name: identifiers_removed
+    description: List of identifier types removed during de-identification.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    rank: 1000
+    domain_of:
+    - Deidentification
+    range: string
+    multivalued: true
+  deidentification_details:
+    name: deidentification_details
+    description: 'Details on de-identification procedures and residual risks.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    rank: 1000
     slot_uri: dcterms:description
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
     - Deidentification
-    - SensitiveElement
-    - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
 
@@ -433,56 +435,75 @@ attributes:
     domain_of:
     - Deidentification
     range: boolean
+  method:
+    name: method
+    description: Method used for de-identification (e.g., HIPAA Safe Harbor).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    rank: 1000
+    alias: method
+    owner: Deidentification
+    domain_of:
+    - Deidentification
+    range: string
+  identifiers_removed:
+    name: identifiers_removed
+    description: List of identifier types removed during de-identification.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    rank: 1000
+    alias: identifiers_removed
+    owner: Deidentification
+    domain_of:
+    - Deidentification
+    range: string
+    multivalued: true
+  deidentification_details:
+    name: deidentification_details
+    description: 'Details on de-identification procedures and residual risks.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: deidentification_details
+    owner: Deidentification
+    domain_of:
+    - Deidentification
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: Deidentification
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: Deidentification
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
   description:
     name: description
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    slot_uri: dcterms:description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: Deidentification
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
+    - DatasetProperty
     - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -494,30 +515,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: Deidentification
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: Deidentification
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 </code></pre>
 </details>

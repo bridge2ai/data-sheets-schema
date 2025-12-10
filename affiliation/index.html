@@ -289,6 +289,19 @@
     Identifier and Mapping Information
   </a>
   
+    <nav class="md-nav" aria-label="Identifier and Mapping Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#schema-source" class="md-nav__link">
+    Schema Source
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -326,7 +339,8 @@
 
 
 <h1 id="slot-affiliation">Slot: affiliation</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/affiliation">data_sheets_schema:affiliation</a>
+<p><em>The organization(s) to which the person belongs in the context of this dataset. May vary across datasets; multivalued to support multiple affiliations.</em></p>
+<p>URI: <a href="http://schema.org/affiliation">schema:affiliation</a>
 Alias: affiliation</p>
 <!-- no inheritance hierarchy -->
 
@@ -341,11 +355,6 @@ Alias: affiliation</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Creator/">Creator</a></td>
-<td>Who created the dataset (e</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../Person/">Person</a></td>
 <td>An individual human being</td>
 <td>no</td>
@@ -354,9 +363,18 @@ Alias: affiliation</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../String/">String</a></li>
+<li>
+<p>Range: <a href="../Organization/">Organization</a></p>
+</li>
+<li>
+<p>Multivalued: True</p>
+</li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="schema-source">Schema Source</h3>
+<ul>
+<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
+</ul>
 <h2 id="mappings">Mappings</h2>
 <table>
 <thead>
@@ -368,7 +386,7 @@ Alias: affiliation</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:affiliation</td>
+<td>schema:affiliation</td>
 </tr>
 <tr>
 <td>native</td>
@@ -380,11 +398,17 @@ Alias: affiliation</p>
 <details>
 
 <pre><code class="language-yaml">name: affiliation
+description: The organization(s) to which the person belongs in the context of this
+  dataset. May vary across datasets; multivalued to support multiple affiliations.
+from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+rank: 1000
+slot_uri: schema:affiliation
 alias: affiliation
+owner: Person
 domain_of:
 - Person
-- Creator
-range: string
+range: Organization
+multivalued: true
 
 </code></pre>
 

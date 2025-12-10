@@ -245,6 +245,8 @@
 
       LicenseAndUseTerms : id
 
+      LicenseAndUseTerms : license_terms
+
       LicenseAndUseTerms : name
 
       LicenseAndUseTerms : used_software
@@ -262,11 +264,8 @@
 </div>
 <h2 id="inheritance">Inheritance</h2>
 <ul>
-<li><a href="../NamedThing/">NamedThing</a><ul>
 <li><a href="../DatasetProperty/">DatasetProperty</a><ul>
 <li><strong>LicenseAndUseTerms</strong></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -282,7 +281,7 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../description/">description</a></td>
+<td><a href="../license_terms/">license_terms</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
 <td>Description of the dataset's license and terms of use (including links, costs...</td>
 <td>direct</td>
@@ -300,22 +299,28 @@
 <td>direct</td>
 </tr>
 <tr>
-<td><a href="../used_software/">used_software</a></td>
-<td>* <br/> <a href="../Software/">Software</a></td>
-<td>What software was used as part of this dataset property?</td>
-<td><a href="../DatasetProperty/">DatasetProperty</a></td>
-</tr>
-<tr>
 <td><a href="../id/">id</a></td>
-<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>An optional identifier for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
 <td><a href="../name/">name</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable name for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
+<td>A human-readable name for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../description/">description</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../used_software/">used_software</a></td>
+<td>* <br/> <a href="../Software/">Software</a></td>
+<td>What software was used as part of this dataset property?</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 </tbody>
 </table>
@@ -381,56 +386,17 @@ description: 'Will the dataset be distributed under a copyright or other IP lice
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
+  license_terms:
+    name: license_terms
     description: 'Description of the dataset''s license and terms of use (including
       links, costs, or usage constraints).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    rank: 1000
     slot_uri: dcterms:license
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
     - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
   data_use_permission:
@@ -475,58 +441,19 @@ description: 'Will the dataset be distributed under a copyright or other IP lice
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
+  license_terms:
+    name: license_terms
     description: 'Description of the dataset''s license and terms of use (including
       links, costs, or usage constraints).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    rank: 1000
     slot_uri: dcterms:license
-    alias: description
+    alias: license_terms
     owner: LicenseAndUseTerms
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
     - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
   data_use_permission:
@@ -561,6 +488,40 @@ attributes:
     - EthicalReview
     - LicenseAndUseTerms
     range: Person
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: LicenseAndUseTerms
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: LicenseAndUseTerms
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
+    alias: description
+    owner: LicenseAndUseTerms
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    - DatasetRelationship
+    range: string
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -572,30 +533,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: LicenseAndUseTerms
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: LicenseAndUseTerms
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 </code></pre>
 </details>

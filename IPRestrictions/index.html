@@ -225,6 +225,8 @@
 
       IPRestrictions : name
 
+      IPRestrictions : restrictions
+
       IPRestrictions : used_software
 
 
@@ -240,11 +242,8 @@
 </div>
 <h2 id="inheritance">Inheritance</h2>
 <ul>
-<li><a href="../NamedThing/">NamedThing</a><ul>
 <li><a href="../DatasetProperty/">DatasetProperty</a><ul>
 <li><strong>IPRestrictions</strong></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -260,28 +259,34 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../description/">description</a></td>
+<td><a href="../restrictions/">restrictions</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
 <td>Explanation of third-party IP restrictions</td>
 <td>direct</td>
+</tr>
+<tr>
+<td><a href="../id/">id</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>An optional identifier for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../name/">name</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable name for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../description/">description</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
 <td><a href="../used_software/">used_software</a></td>
 <td>* <br/> <a href="../Software/">Software</a></td>
 <td>What software was used as part of this dataset property?</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
-</tr>
-<tr>
-<td><a href="../id/">id</a></td>
-<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../name/">name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable name for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
 </table>
@@ -348,8 +353,8 @@ description: 'Have any third parties imposed IP-based or other restrictions on t
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
+  restrictions:
+    name: restrictions
     description: Explanation of third-party IP restrictions.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
@@ -357,47 +362,8 @@ attributes:
     - DUO:0000045
     slot_uri: dcterms:rights
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
+    - ExternalResource
     - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
 
@@ -415,60 +381,55 @@ description: 'Have any third parties imposed IP-based or other restrictions on t
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
+  restrictions:
+    name: restrictions
     description: Explanation of third-party IP restrictions.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - DUO:0000046
     - DUO:0000045
     slot_uri: dcterms:rights
+    alias: restrictions
+    owner: IPRestrictions
+    domain_of:
+    - ExternalResource
+    - IPRestrictions
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: IPRestrictions
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: IPRestrictions
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: IPRestrictions
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
+    - DatasetProperty
     - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -480,30 +441,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: IPRestrictions
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: IPRestrictions
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 </code></pre>
 </details>

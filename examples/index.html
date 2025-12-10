@@ -289,19 +289,6 @@
     Identifier and Mapping Information
   </a>
   
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -339,8 +326,7 @@
 
 
 <h1 id="slot-examples">Slot: examples</h1>
-<p><em>Example values for this variable to illustrate typical data.</em></p>
-<p>URI: <a href="http://www.w3.org/2004/02/skos/core#example">skos:example</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/examples">data_sheets_schema:examples</a>
 Alias: examples</p>
 <!-- no inheritance hierarchy -->
 
@@ -355,6 +341,16 @@ Alias: examples</p>
 </thead>
 <tbody>
 <tr>
+<td><a href="../IntendedUse/">IntendedUse</a></td>
+<td>Explicit statement of intended uses for this dataset</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../ExistingUse/">ExistingUse</a></td>
+<td>Has the dataset been used for any tasks already?</td>
+<td>no</td>
+</tr>
+<tr>
 <td><a href="../VariableMetadata/">VariableMetadata</a></td>
 <td>Metadata describing an individual variable, field, or column in a dataset</td>
 <td>no</td>
@@ -363,18 +359,9 @@ Alias: examples</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>
-<p>Range: <a href="../String/">String</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
+<li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
 <h2 id="mappings">Mappings</h2>
 <table>
 <thead>
@@ -386,7 +373,7 @@ Alias: examples</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>skos:example</td>
+<td>data_sheets_schema:examples</td>
 </tr>
 <tr>
 <td>native</td>
@@ -398,16 +385,12 @@ Alias: examples</p>
 <details>
 
 <pre><code class="language-yaml">name: examples
-description: Example values for this variable to illustrate typical data.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: skos:example
 alias: examples
-owner: VariableMetadata
 domain_of:
+- ExistingUse
+- IntendedUse
 - VariableMetadata
 range: string
-multivalued: true
 
 </code></pre>
 

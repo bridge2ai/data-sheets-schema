@@ -221,9 +221,15 @@
 
       CollectionTimeframe : description
 
+      CollectionTimeframe : end_date
+
       CollectionTimeframe : id
 
       CollectionTimeframe : name
+
+      CollectionTimeframe : start_date
+
+      CollectionTimeframe : timeframe_details
 
       CollectionTimeframe : used_software
 
@@ -240,11 +246,8 @@
 </div>
 <h2 id="inheritance">Inheritance</h2>
 <ul>
-<li><a href="../NamedThing/">NamedThing</a><ul>
 <li><a href="../DatasetProperty/">DatasetProperty</a><ul>
 <li><strong>CollectionTimeframe</strong></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -260,28 +263,46 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../description/">description</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
-<td>Free-text description of the data collection timeframe</td>
+<td><a href="../start_date/">start_date</a></td>
+<td>0..1 <br/> <a href="../Date/">Date</a></td>
+<td>Start date of data collection</td>
 <td>direct</td>
+</tr>
+<tr>
+<td><a href="../end_date/">end_date</a></td>
+<td>0..1 <br/> <a href="../Date/">Date</a></td>
+<td>End date of data collection</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../timeframe_details/">timeframe_details</a></td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>Details on the collection timeframe and relationship to data creation dates</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../id/">id</a></td>
+<td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
+<td>An optional identifier for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../name/">name</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable name for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
+</tr>
+<tr>
+<td><a href="../description/">description</a></td>
+<td>0..1 <br/> <a href="../String/">String</a></td>
+<td>A human-readable description for this property</td>
+<td><a href="../DatasetProperty/">DatasetProperty</a></td>
 </tr>
 <tr>
 <td><a href="../used_software/">used_software</a></td>
 <td>* <br/> <a href="../Software/">Software</a></td>
 <td>What software was used as part of this dataset property?</td>
 <td><a href="../DatasetProperty/">DatasetProperty</a></td>
-</tr>
-<tr>
-<td><a href="../id/">id</a></td>
-<td>1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td>A unique identifier for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
-</tr>
-<tr>
-<td><a href="../name/">name</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>A human-readable name for a thing</td>
-<td><a href="../NamedThing/">NamedThing</a></td>
 </tr>
 </tbody>
 </table>
@@ -346,53 +367,33 @@ description: 'Over what timeframe was the data collected, and does this timefram
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: Free-text description of the data collection timeframe
+  start_date:
+    name: start_date
+    description: Start date of data collection
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
-    slot_uri: dcterms:temporal
+    rank: 1000
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
     - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    range: date
+  end_date:
+    name: end_date
+    description: End date of data collection
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    domain_of:
+    - CollectionTimeframe
+    range: date
+  timeframe_details:
+    name: timeframe_details
+    description: 'Details on the collection timeframe and relationship to data creation
+      dates.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    slot_uri: dcterms:description
+    domain_of:
+    - CollectionTimeframe
     range: string
     multivalued: true
 
@@ -408,57 +409,75 @@ description: 'Over what timeframe was the data collected, and does this timefram
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
+  start_date:
+    name: start_date
+    description: Start date of data collection
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    alias: start_date
+    owner: CollectionTimeframe
+    domain_of:
+    - CollectionTimeframe
+    range: date
+  end_date:
+    name: end_date
+    description: End date of data collection
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    alias: end_date
+    owner: CollectionTimeframe
+    domain_of:
+    - CollectionTimeframe
+    range: date
+  timeframe_details:
+    name: timeframe_details
+    description: 'Details on the collection timeframe and relationship to data creation
+      dates.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: timeframe_details
+    owner: CollectionTimeframe
+    domain_of:
+    - CollectionTimeframe
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: CollectionTimeframe
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: CollectionTimeframe
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
   description:
     name: description
-    description: Free-text description of the data collection timeframe
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
-    slot_uri: dcterms:temporal
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: CollectionTimeframe
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
+    - DatasetProperty
     - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -470,30 +489,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: CollectionTimeframe
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: CollectionTimeframe
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 </code></pre>
 </details>

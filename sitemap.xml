@@ -2,1657 +2,1967 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/AddressingGap/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/AnatomicalEntity/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/BiasTypeEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Boolean/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CRediTRoleEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CategoryType/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CleaningStrategy/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Collection/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CollectionConsent/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CollectionMechanism/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CollectionNotification/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CollectionTimeframe/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ComplianceStatusEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Composition/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CompressionEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Confidentiality/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ConfidentialityLevelEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ConsentRevocation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ContentWarning/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Creator/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/CreatorOrMaintainerEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Curie/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataAnomaly/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataCollector/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataGeneratingProject/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataGovernance/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataProtectionImpact/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataSubset/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataUsePermissionEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Dataset/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/DatasetBias/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DatasetCollection/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/DatasetLimitation/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DatasetProperty/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DatasetRelationship/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DatasetRelationshipTypeEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Date/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DateOrDatetime/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Datetime/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Decimal/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Deidentification/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DirectCollection/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DiscouragedUse/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Distribution/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DistributionDate/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DistributionFormat/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Double/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/EdamIdentifier/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/EncodingEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Erratum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/EthicalReview/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Ethics/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ExistingUse/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ExportControlRegulatoryRestrictions/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ExtensionMechanism/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ExternalResource/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Float/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/FormatDialect/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/FormatEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/FundingMechanism/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/FutureUseImpact/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Grant/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Grantor/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/HumanSubjectCompensation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/HumanSubjectResearch/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/IPRestrictions/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Information/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/InformedConsent/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Instance/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/InstanceAcquisition/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Integer/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/IntendedUse/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Jsonpath/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Jsonpointer/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/LabelingStrategy/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/LicenseAndUseTerms/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/LimitationTypeEnum/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Maintainer/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Maintenance/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/MediaTypeEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/MeshIdentifier/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/MissingInfo/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Motivation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/NamedThing/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/NcitIdentifier/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Ncname/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Nodeidentifier/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Objectidentifier/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Organization/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/OrganizationContainer/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/OtherTask/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ParticipantPrivacy/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Person/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Preprocessing-Cleaning-Labeling/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/PreprocessingStrategy/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ProhibitedUse/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Purpose/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/RawData/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Relationships/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/RetentionLimits/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/RorIdentifier/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/SamplingStrategy/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/SensitiveElement/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Software/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Sparqlpath/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Splits/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/String/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Subpopulation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Task/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ThirdPartySharing/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Time/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/UpdatePlan/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Uri/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Uriorcurie/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/UseRepository/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Uses/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/VariableMetadata/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/VariableTypeEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/VersionAccess/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/VersionTypeEnum/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/VulnerablePopulations/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/WikidataIdentifier/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/about/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/access_url/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/access_urls/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/acquisition_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/acquisition_methods/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/addressing_gaps/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/affected_subsets/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/affiliation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/affiliations/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/annotation_platform/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/annotations_per_item/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/annotator_demographics/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/anomalies/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/anomaly_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/anonymization_method/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/archival/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/assent_procedures/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/bias_description/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/bias_type/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/bytes/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/categories/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/category/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/citation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/cleaning_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/cleaning_strategies/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/collection_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/collection_mechanisms/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/collection_timeframes/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/collector_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/comment_prefix/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/compensation_amount/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/compensation_provided/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/compensation_rationale/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/compensation_type/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/compression/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/confidential_elements/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/confidential_elements_present/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/confidentiality_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/confidentiality_level/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/conforms_to/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/conforms_to_class/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/conforms_to_schema/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/consent_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/consent_documentation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/consent_obtained/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/consent_scope/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/consent_type/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/contact_person/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/content_warnings/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/content_warnings_present/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/contribution_date/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/contribution_url/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/contributor_github_name/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/contributor_name/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/contributor_orcid/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/counts/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/created_by/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/created_on/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/creators/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/credit_roles/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/d4d_examples/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data-sheets-schema/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data_collectors/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data_linkage/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data_protection_impacts/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data_substrate/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data_topic/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data_type/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/data_use_permission/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/deidentification_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/delimiter/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/derivation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/description/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/dialect/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/discouraged_uses/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/discouragement_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/distribution/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/distribution_dates/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/distribution_formats/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/doi/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/double_quote/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/download_url/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/edam_id/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/email/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/encoding/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/end_date/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/enum_ontology_grounding_report/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/errata/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/erratum_details/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/erratum_url/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ethical_reviews/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ethics_review_board/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/examples/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/existing_uses/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/extension_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/extension_mechanism/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/external_resources/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/format/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/frequency/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/funders/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/future_guarantees/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/future_use_impacts/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/governance_committee_contact/</loc>
-         <lastmod>2025-12-03</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://bridge2ai.github.io/data-sheets-schema/grant/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/grant_number/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/grantor/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/grants/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/guardian_consent/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/hash/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/header/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/hipaa_compliant/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/human_subject_research/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/id/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/identifiable_elements_present/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/identification/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/identifiers_removed/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/impact_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/informed_consent/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/instance_type/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/instances/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/intended_uses/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/inter_annotator_agreement/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/involves_human_subjects/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ip_restrictions/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/irb_approval/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_data_split/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_deidentified/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/is_direct/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_identifier/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_random/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_representative/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_sample/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_sensitive/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/is_shared/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_subpopulation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/is_tabular/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/issued/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/keywords/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/known_biases/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/known_limitations/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/label/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/label_description/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/labeling_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/labeling_strategies/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/language/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/last_updated_on/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/latest_version_doi/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/license/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/license_and_use_terms/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/license_terms/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/limitation_description/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/limitation_type/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/maintainer_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/maintainers/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/maximum_value/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/md5/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/measurement_technique/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/mechanism_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/media_type/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/mesh_id/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/method/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/minimum_value/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/missing/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/missing_information/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/missing_value_code/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/mitigation_strategy/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/modified_by/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/name/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ncit_id/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/node_property/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/notification_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/orcid/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/organizations/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/other_compliance/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/other_tasks/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/page/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/parent_datasets/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/participant_compensation/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/participant_privacy/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/path/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/precision/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/preprocessing_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/preprocessing_strategies/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/principal_investigator/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/privacy_techniques/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/profile/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/prohibited_uses/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/prohibition_reason/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/publisher/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/purposes/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/quality_notes/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/quote_char/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/raw_data_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/raw_sources/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/recommended_mitigation/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/regulatory_compliance/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/regulatory_restrictions/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/reidentification_risk/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/related_datasets/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/related_to/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/relationship_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/relationship_type/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/release_dates/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/repository_details/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/repository_url/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/representative_verification/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/resources/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/response/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/restrictions/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/retention_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/retention_limit/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/retention_period/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/review_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/reviewing_organization/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/revocation_details/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/role/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ror_id/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/same_as/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/sampling_strategies/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/schema_evolution_analysis/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/scope_impact/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/sensitive_elements/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/sensitive_elements_present/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/sensitivity_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/sha256/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/source_data/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/special_populations/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/special_protections/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/split_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/standards_alignment/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/start_date/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/status/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/strategies/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/subclass_of/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/subpopulation_elements_present/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/subpopulations/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/subsets/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/target_dataset/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/task_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/tasks/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/themes/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/timeframe_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/title/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/type/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/unit/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/update_details/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/updates/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/url/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/usage_notes/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/use_category/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/use_repository/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/used_software/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/variable_name/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/variables/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/version/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/version_access/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/version_details/</loc>
+         <lastmod>2025-12-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/versions_available/</loc>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/vulnerable_groups_included/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/vulnerable_populations/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/warnings/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/was_derived_from/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/was_directly_observed/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/was_inferred_derived/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/was_reported_by_subjects/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/was_validated_verified/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/why_missing/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/why_not_representative/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/wikidata_id/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/withdrawal_mechanism/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/xref/</loc>
-         <lastmod>2025-12-03</lastmod>
+         <lastmod>2025-12-10</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

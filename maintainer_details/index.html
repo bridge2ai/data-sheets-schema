@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/grant/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/maintainer_details/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: grant - data-sheets-schema</title>
+        <title>Slot: maintainer_details - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-grant" class="md-skip">
+        <a href="#slot-maintainer_details" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: grant
+              Slot: maintainer_details
             
           </span>
         </div>
@@ -332,16 +332,17 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/grant.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/maintainer_details.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-grant">Slot: grant</h1>
-<p><em>Name/identifier of the specific grant mechanism supporting dataset creation.</em></p>
-<p>URI: <a href="http://schema.org/funding">schema:funding</a>
-Alias: grant</p>
+<h1 id="slot-maintainer_details">Slot: maintainer_details</h1>
+<p><em>Details on who will support, host, or maintain the dataset.</em></p>
+<p>__</p>
+<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
+Alias: maintainer_details</p>
 <!-- no inheritance hierarchy -->
 
 <h2 id="applicable-classes">Applicable Classes</h2>
@@ -355,15 +356,20 @@ Alias: grant</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../FundingMechanism/">FundingMechanism</a></td>
-<td>Who funded the creation of the dataset? If there is an associated grant, plea...</td>
+<td><a href="../Maintainer/">Maintainer</a></td>
+<td>Who will be supporting/hosting/maintaining the dataset?</td>
 <td>no</td>
 </tr>
 </tbody>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../Grant/">Grant</a></li>
+<li>
+<p>Range: <a href="../String/">String</a></p>
+</li>
+<li>
+<p>Multivalued: True</p>
+</li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
@@ -381,27 +387,30 @@ Alias: grant</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:funding</td>
+<td>dcterms:description</td>
 </tr>
 <tr>
 <td>native</td>
-<td>data_sheets_schema:grant</td>
+<td>data_sheets_schema:maintainer_details</td>
 </tr>
 </tbody>
 </table>
 <h2 id="linkml-source">LinkML Source</h2>
 <details>
 
-<pre><code class="language-yaml">name: grant
-description: Name/identifier of the specific grant mechanism supporting dataset creation.
+<pre><code class="language-yaml">name: maintainer_details
+description: 'Details on who will support, host, or maintain the dataset.
+
+  '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: schema:funding
-alias: grant
-owner: FundingMechanism
+slot_uri: dcterms:description
+alias: maintainer_details
+owner: Maintainer
 domain_of:
-- FundingMechanism
-range: Grant
+- Maintainer
+range: string
+multivalued: true
 
 </code></pre>
 

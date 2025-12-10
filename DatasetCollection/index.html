@@ -310,7 +310,7 @@
 <tr>
 <td><a href="../resources/">resources</a></td>
 <td>* <br/> <a href="../Dataset/">Dataset</a></td>
-<td></td>
+<td>Sub-resources or component datasets</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -508,15 +508,12 @@ exact_mappings:
 close_mappings:
 - dcat:Catalog
 is_a: Information
-attributes:
+slots:
+- resources
+slot_usage:
   resources:
     name: resources
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    domain_of:
-    - DatasetCollection
-    range: Dataset
-    multivalued: true
+    inlined_as_list: true
 tree_root: true
 
 </code></pre>
@@ -536,17 +533,25 @@ exact_mappings:
 close_mappings:
 - dcat:Catalog
 is_a: Information
+slot_usage:
+  resources:
+    name: resources
+    inlined_as_list: true
 attributes:
   resources:
     name: resources
+    description: Sub-resources or component datasets. Used in DatasetCollection to
+      contain Dataset objects, and in Dataset to allow nested resource structures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     alias: resources
     owner: DatasetCollection
     domain_of:
     - DatasetCollection
+    - Dataset
     range: Dataset
     multivalued: true
+    inlined_as_list: true
   compression:
     name: compression
     description: compression format used, if any. e.g., gzip, bzip2, zip
@@ -775,8 +780,8 @@ attributes:
     owner: DatasetCollection
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
-    required: true
   name:
     name: name
     description: A human-readable name for a thing.
@@ -787,6 +792,7 @@ attributes:
     owner: DatasetCollection
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -798,46 +804,8 @@ attributes:
     owner: DatasetCollection
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
+    - DatasetProperty
     - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
 tree_root: true
 

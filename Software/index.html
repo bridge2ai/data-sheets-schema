@@ -372,6 +372,18 @@
 <td><a href="./">Software</a></td>
 </tr>
 <tr>
+<td><a href="../DatasetBias/">DatasetBias</a></td>
+<td><a href="../used_software/">used_software</a></td>
+<td>range</td>
+<td><a href="./">Software</a></td>
+</tr>
+<tr>
+<td><a href="../DatasetLimitation/">DatasetLimitation</a></td>
+<td><a href="../used_software/">used_software</a></td>
+<td>range</td>
+<td><a href="./">Software</a></td>
+</tr>
+<tr>
 <td><a href="../ExternalResource/">ExternalResource</a></td>
 <td><a href="../used_software/">used_software</a></td>
 <td>range</td>
@@ -766,6 +778,7 @@ attributes:
     owner: Software
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -778,6 +791,7 @@ attributes:
     owner: Software
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -789,46 +803,8 @@ attributes:
     owner: Software
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
+    - DatasetProperty
     - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
 class_uri: schema:SoftwareApplication
 

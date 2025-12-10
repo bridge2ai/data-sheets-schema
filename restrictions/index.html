@@ -289,19 +289,6 @@
     Identifier and Mapping Information
   </a>
   
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -339,9 +326,7 @@
 
 
 <h1 id="slot-restrictions">Slot: restrictions</h1>
-<p><em>Description of any restrictions or fees associated with external resources.</em></p>
-<p>__</p>
-<p>URI: <a href="http://purl.org/dc/terms/accessRights">dcterms:accessRights</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/restrictions">data_sheets_schema:restrictions</a>
 Alias: restrictions</p>
 <!-- no inheritance hierarchy -->
 
@@ -360,22 +345,18 @@ Alias: restrictions</p>
 <td>Is the dataset self-contained or does it rely on external resources (e</td>
 <td>no</td>
 </tr>
+<tr>
+<td><a href="../IPRestrictions/">IPRestrictions</a></td>
+<td>Have any third parties imposed IP-based or other restrictions on the data ass...</td>
+<td>no</td>
+</tr>
 </tbody>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>
-<p>Range: <a href="../String/">String</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
+<li>Range: <a href="../String/">String</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
 <h2 id="mappings">Mappings</h2>
 <table>
 <thead>
@@ -387,7 +368,7 @@ Alias: restrictions</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:accessRights</td>
+<td>data_sheets_schema:restrictions</td>
 </tr>
 <tr>
 <td>native</td>
@@ -399,18 +380,11 @@ Alias: restrictions</p>
 <details>
 
 <pre><code class="language-yaml">name: restrictions
-description: 'Description of any restrictions or fees associated with external resources.
-
-  '
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: dcterms:accessRights
 alias: restrictions
-owner: ExternalResource
 domain_of:
 - ExternalResource
+- IPRestrictions
 range: string
-multivalued: true
 
 </code></pre>
 

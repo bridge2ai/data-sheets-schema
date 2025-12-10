@@ -212,8 +212,6 @@
     click NamedThing href "../NamedThing/"
       NamedThing &lt;|-- Organization
         click Organization href "../Organization/"
-      NamedThing &lt;|-- DatasetProperty
-        click DatasetProperty href "../DatasetProperty/"
       NamedThing &lt;|-- Software
         click Software href "../Software/"
       NamedThing &lt;|-- Person
@@ -235,7 +233,6 @@
 <ul>
 <li><strong>NamedThing</strong><ul>
 <li><a href="../Organization/">Organization</a></li>
-<li><a href="../DatasetProperty/">DatasetProperty</a></li>
 <li><a href="../Software/">Software</a></li>
 <li><a href="../Person/">Person</a></li>
 <li><a href="../Information/">Information</a></li>
@@ -315,6 +312,7 @@ attributes:
     identifier: true
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -325,6 +323,7 @@ attributes:
     slot_uri: schema:name
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -334,46 +333,8 @@ attributes:
     slot_uri: schema:description
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
+    - DatasetProperty
     - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
 class_uri: schema:Thing
 
@@ -396,6 +357,7 @@ attributes:
     owner: NamedThing
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -408,6 +370,7 @@ attributes:
     owner: NamedThing
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -419,46 +382,8 @@ attributes:
     owner: NamedThing
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
+    - DatasetProperty
     - DatasetRelationship
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - IntendedUse
-    - ProhibitedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
 class_uri: schema:Thing
 
