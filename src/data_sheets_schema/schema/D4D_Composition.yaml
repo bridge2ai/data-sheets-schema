@@ -255,12 +255,13 @@ classes:
       websites, other datasets)? If external, are there guarantees that those
       resources will remain available and unchanged?
     is_a: DatasetProperty
-    attributes:
+    slots:
+      - external_resources
+    slot_usage:
       external_resources:
         description: "List of links or identifiers for external resources."
         range: string
-        multivalued: true
-        slot_uri: dcterms:references
+    attributes:
       future_guarantees:
         description: >
           Explanation of any commitments that external resources will remain

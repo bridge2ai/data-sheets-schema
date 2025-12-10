@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-06T14:00:42
+# Generation date: 2025-12-09T21:41:51
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -450,6 +450,7 @@ class Dataset(Information):
     media_type: Optional[Union[str, "MediaTypeEnum"]] = None
     path: Optional[str] = None
     sha256: Optional[str] = None
+    external_resources: Optional[Union[Union[dict, "ExternalResource"], list[Union[dict, "ExternalResource"]]]] = empty_list()
     purposes: Optional[Union[Union[dict, "Purpose"], list[Union[dict, "Purpose"]]]] = empty_list()
     tasks: Optional[Union[Union[dict, "Task"], list[Union[dict, "Task"]]]] = empty_list()
     addressing_gaps: Optional[Union[Union[dict, "AddressingGap"], list[Union[dict, "AddressingGap"]]]] = empty_list()
@@ -460,7 +461,6 @@ class Dataset(Information):
     anomalies: Optional[Union[Union[dict, "DataAnomaly"], list[Union[dict, "DataAnomaly"]]]] = empty_list()
     known_biases: Optional[Union[Union[dict, "DatasetBias"], list[Union[dict, "DatasetBias"]]]] = empty_list()
     known_limitations: Optional[Union[Union[dict, "DatasetLimitation"], list[Union[dict, "DatasetLimitation"]]]] = empty_list()
-    external_resources: Optional[Union[Union[dict, "ExternalResource"], list[Union[dict, "ExternalResource"]]]] = empty_list()
     confidential_elements: Optional[Union[Union[dict, "Confidentiality"], list[Union[dict, "Confidentiality"]]]] = empty_list()
     content_warnings: Optional[Union[Union[dict, "ContentWarning"], list[Union[dict, "ContentWarning"]]]] = empty_list()
     subpopulations: Optional[Union[Union[dict, "Subpopulation"], list[Union[dict, "Subpopulation"]]]] = empty_list()
@@ -540,6 +540,10 @@ class Dataset(Information):
         if self.sha256 is not None and not isinstance(self.sha256, str):
             self.sha256 = str(self.sha256)
 
+        if not isinstance(self.external_resources, list):
+            self.external_resources = [self.external_resources] if self.external_resources is not None else []
+        self.external_resources = [v if isinstance(v, ExternalResource) else ExternalResource(**as_dict(v)) for v in self.external_resources]
+
         if not isinstance(self.purposes, list):
             self.purposes = [self.purposes] if self.purposes is not None else []
         self.purposes = [v if isinstance(v, Purpose) else Purpose(**as_dict(v)) for v in self.purposes]
@@ -577,10 +581,6 @@ class Dataset(Information):
         if not isinstance(self.known_limitations, list):
             self.known_limitations = [self.known_limitations] if self.known_limitations is not None else []
         self.known_limitations = [v if isinstance(v, DatasetLimitation) else DatasetLimitation(**as_dict(v)) for v in self.known_limitations]
-
-        if not isinstance(self.external_resources, list):
-            self.external_resources = [self.external_resources] if self.external_resources is not None else []
-        self.external_resources = [v if isinstance(v, ExternalResource) else ExternalResource(**as_dict(v)) for v in self.external_resources]
 
         if not isinstance(self.confidential_elements, list):
             self.confidential_elements = [self.confidential_elements] if self.confidential_elements is not None else []
@@ -3369,6 +3369,9 @@ slots.doi = Slot(uri=DCTERMS.identifier, name="doi", curie=DCTERMS.curie('identi
                    model_uri=DATA_SHEETS_SCHEMA.doi, domain=None, range=Optional[str],
                    pattern=re.compile(r'10\.\d{4,}\/.+'))
 
+slots.external_resources = Slot(uri=DCTERMS.references, name="external_resources", curie=DCTERMS.curie('references'),
+                   model_uri=DATA_SHEETS_SCHEMA.external_resources, domain=None, range=Optional[Union[str, list[str]]])
+
 slots.datasetCollection__resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="datasetCollection__resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetCollection__resources, domain=None, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
 
@@ -3401,9 +3404,6 @@ slots.dataset__known_biases = Slot(uri=DATA_SHEETS_SCHEMA.known_biases, name="da
 
 slots.dataset__known_limitations = Slot(uri=DATA_SHEETS_SCHEMA.known_limitations, name="dataset__known_limitations", curie=DATA_SHEETS_SCHEMA.curie('known_limitations'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__known_limitations, domain=None, range=Optional[Union[Union[dict, DatasetLimitation], list[Union[dict, DatasetLimitation]]]])
-
-slots.dataset__external_resources = Slot(uri=DATA_SHEETS_SCHEMA.external_resources, name="dataset__external_resources", curie=DATA_SHEETS_SCHEMA.curie('external_resources'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__external_resources, domain=None, range=Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]])
 
 slots.dataset__confidential_elements = Slot(uri=DATA_SHEETS_SCHEMA.confidential_elements, name="dataset__confidential_elements", curie=DATA_SHEETS_SCHEMA.curie('confidential_elements'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__confidential_elements, domain=None, range=Optional[Union[Union[dict, Confidentiality], list[Union[dict, Confidentiality]]]])
@@ -3711,9 +3711,6 @@ slots.datasetLimitation__scope_impact = Slot(uri=D4DCOMPOSITION.scope_impact, na
 
 slots.datasetLimitation__recommended_mitigation = Slot(uri=D4DCOMPOSITION.recommended_mitigation, name="datasetLimitation__recommended_mitigation", curie=D4DCOMPOSITION.curie('recommended_mitigation'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetLimitation__recommended_mitigation, domain=None, range=Optional[str])
-
-slots.externalResource__external_resources = Slot(uri=DCTERMS.references, name="externalResource__external_resources", curie=DCTERMS.curie('references'),
-                   model_uri=DATA_SHEETS_SCHEMA.externalResource__external_resources, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.externalResource__future_guarantees = Slot(uri=DCTERMS.description, name="externalResource__future_guarantees", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__future_guarantees, domain=None, range=Optional[Union[str, list[str]]])
@@ -4071,3 +4068,9 @@ slots.variableMetadata__derivation = Slot(uri=D4DVARIABLES.derivation, name="var
 
 slots.variableMetadata__quality_notes = Slot(uri=D4DVARIABLES.quality_notes, name="variableMetadata__quality_notes", curie=D4DVARIABLES.curie('quality_notes'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__quality_notes, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.Dataset_external_resources = Slot(uri=DCTERMS.references, name="Dataset_external_resources", curie=DCTERMS.curie('references'),
+                   model_uri=DATA_SHEETS_SCHEMA.Dataset_external_resources, domain=Dataset, range=Optional[Union[Union[dict, "ExternalResource"], list[Union[dict, "ExternalResource"]]]])
+
+slots.ExternalResource_external_resources = Slot(uri=DCTERMS.references, name="ExternalResource_external_resources", curie=DCTERMS.curie('references'),
+                   model_uri=DATA_SHEETS_SCHEMA.ExternalResource_external_resources, domain=ExternalResource, range=Optional[Union[str, list[str]]])

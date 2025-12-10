@@ -1905,6 +1905,24 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "external_resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/external_resources",
+      "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/references"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/references",
+      "owner": "ExternalResource",
+      "domain_of": [
+        "Dataset",
+        "ExternalResource"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "datasetCollection__resources",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
@@ -2072,21 +2090,6 @@
         "Dataset"
       ],
       "range": "DatasetLimitation",
-      "multivalued": true,
-      "inlined": true,
-      "inlined_as_list": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "dataset__external_resources",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/external_resources",
-      "alias": "external_resources",
-      "owner": "Dataset",
-      "domain_of": [
-        "Dataset"
-      ],
-      "range": "ExternalResource",
       "multivalued": true,
       "inlined": true,
       "inlined_as_list": true,
@@ -3639,23 +3642,6 @@
         "DatasetLimitation"
       ],
       "range": "string",
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "externalResource__external_resources",
-      "description": "List of links or identifiers for external resources.",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
-      "mappings": [
-        "http://purl.org/dc/terms/references"
-      ],
-      "slot_uri": "http://purl.org/dc/terms/references",
-      "alias": "external_resources",
-      "owner": "ExternalResource",
-      "domain_of": [
-        "ExternalResource"
-      ],
-      "range": "string",
-      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -5472,6 +5458,52 @@
       "range": "string",
       "multivalued": true,
       "@type": "SlotDefinition"
+    },
+    {
+      "name": "Dataset_external_resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/external_resources",
+      "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/references"
+      ],
+      "is_a": "external_resources",
+      "domain": "Dataset",
+      "slot_uri": "http://purl.org/dc/terms/references",
+      "alias": "external_resources",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "external_resources",
+      "range": "ExternalResource",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "ExternalResource_external_resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/external_resources",
+      "description": "List of links or identifiers for external resources.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://purl.org/dc/terms/references"
+      ],
+      "is_a": "external_resources",
+      "domain": "ExternalResource",
+      "slot_uri": "http://purl.org/dc/terms/references",
+      "alias": "external_resources",
+      "owner": "ExternalResource",
+      "domain_of": [
+        "ExternalResource"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "external_resources",
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
     }
   ],
   "classes": [
@@ -5582,6 +5614,7 @@
         "media_type",
         "path",
         "sha256",
+        "Dataset_external_resources",
         "dataset__purposes",
         "dataset__tasks",
         "dataset__addressing_gaps",
@@ -5592,7 +5625,6 @@
         "dataset__anomalies",
         "dataset__known_biases",
         "dataset__known_limitations",
-        "dataset__external_resources",
         "dataset__confidential_elements",
         "dataset__content_warnings",
         "dataset__subpopulations",
@@ -5713,13 +5745,6 @@
           "name": "known_limitations",
           "description": "Known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).",
           "range": "DatasetLimitation",
-          "multivalued": true,
-          "inlined_as_list": true,
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "external_resources",
-          "range": "ExternalResource",
           "multivalued": true,
           "inlined_as_list": true,
           "@type": "SlotDefinition"
@@ -6091,6 +6116,7 @@
         "media_type",
         "path",
         "sha256",
+        "Dataset_external_resources",
         "dataset__purposes",
         "dataset__tasks",
         "dataset__addressing_gaps",
@@ -6101,7 +6127,6 @@
         "dataset__anomalies",
         "dataset__known_biases",
         "dataset__known_limitations",
-        "dataset__external_resources",
         "dataset__confidential_elements",
         "dataset__content_warnings",
         "dataset__subpopulations",
@@ -7027,21 +7052,13 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__used_software",
-        "externalResource__external_resources",
+        "ExternalResource_external_resources",
         "externalResource__future_guarantees",
         "externalResource__archival",
         "externalResource__restrictions"
       ],
       "slot_usage": {},
       "attributes": [
-        {
-          "name": "external_resources",
-          "description": "List of links or identifiers for external resources.",
-          "slot_uri": "dcterms:references",
-          "range": "string",
-          "multivalued": true,
-          "@type": "SlotDefinition"
-        },
         {
           "name": "future_guarantees",
           "description": "Explanation of any commitments that external resources will remain available and stable over time.\n",
@@ -8852,9 +8869,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-12-06T14:00:20",
-  "source_file_size": 14148,
-  "generation_date": "2025-12-06T14:00:40",
+  "source_file_date": "2025-12-09T21:41:37",
+  "source_file_size": 14165,
+  "generation_date": "2025-12-09T21:41:49",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

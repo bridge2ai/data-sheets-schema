@@ -354,6 +354,14 @@ slots:
     slot_uri: dcterms:identifier
     pattern: "10\\.\\d{4,}\\/.+"
 
+  external_resources:
+    description: >-
+      Links or identifiers for external resources. Can be used either as a list
+      of ExternalResource objects (in Dataset) or as a list of URL strings
+      (within ExternalResource class).
+    multivalued: true
+    slot_uri: dcterms:references
+
 ## SHARED ENUMS ##
 enums:
 

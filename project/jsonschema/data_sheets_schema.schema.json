@@ -1037,6 +1037,7 @@
                     ]
                 },
                 "external_resources": {
+                    "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
                     "items": {
                         "$ref": "#/$defs/ExternalResource"
                     },
@@ -1813,6 +1814,7 @@
                     ]
                 },
                 "external_resources": {
+                    "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
                     "items": {
                         "$ref": "#/$defs/ExternalResource"
                     },

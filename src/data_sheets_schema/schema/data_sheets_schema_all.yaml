@@ -1414,6 +1414,18 @@ slots:
     - Dataset
     - DataSubset
     pattern: 10\.\d{4,}\/.+
+  external_resources:
+    name: external_resources
+    description: Links or identifiers for external resources. Can be used either as
+      a list of ExternalResource objects (in Dataset) or as a list of URL strings
+      (within ExternalResource class).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    slot_uri: dcterms:references
+    domain_of:
+    - Dataset
+    - ExternalResource
+    - DataSubset
+    multivalued: true
 classes:
   DatasetCollection:
     name: DatasetCollection
@@ -1795,6 +1807,12 @@ classes:
     - media_type
     - path
     - sha256
+    - external_resources
+    slot_usage:
+      external_resources:
+        name: external_resources
+        range: ExternalResource
+        inlined_as_list: true
     attributes:
       purposes:
         name: purposes
@@ -1911,18 +1929,6 @@ classes:
         domain_of:
         - Dataset
         range: DatasetLimitation
-        multivalued: true
-        inlined: true
-        inlined_as_list: true
-      external_resources:
-        name: external_resources
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        alias: external_resources
-        owner: Dataset
-        domain_of:
-        - Dataset
-        - ExternalResource
-        range: ExternalResource
         multivalued: true
         inlined: true
         inlined_as_list: true
@@ -2520,6 +2526,23 @@ classes:
         domain_of:
         - Dataset
         range: string
+      external_resources:
+        name: external_resources
+        description: Links or identifiers for external resources. Can be used either
+          as a list of ExternalResource objects (in Dataset) or as a list of URL strings
+          (within ExternalResource class).
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:references
+        alias: external_resources
+        owner: Dataset
+        domain_of:
+        - Dataset
+        - ExternalResource
+        - DataSubset
+        range: ExternalResource
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
       compression:
         name: compression
         description: compression format used, if any. e.g., gzip, bzip2, zip
@@ -2970,6 +2993,22 @@ classes:
         domain_of:
         - Dataset
         range: string
+      external_resources:
+        name: external_resources
+        description: Links or identifiers for external resources. Can be used either
+          as a list of ExternalResource objects (in Dataset) or as a list of URL strings
+          (within ExternalResource class).
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:references
+        alias: external_resources
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        - ExternalResource
+        - DataSubset
+        range: ExternalResource
+        multivalued: true
+        inlined_as_list: true
       purposes:
         name: purposes
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3076,17 +3115,6 @@ classes:
         domain_of:
         - Dataset
         range: DatasetLimitation
-        multivalued: true
-        inlined_as_list: true
-      external_resources:
-        name: external_resources
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        alias: external_resources
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        - ExternalResource
-        range: ExternalResource
         multivalued: true
         inlined_as_list: true
       confidential_elements:
@@ -9714,20 +9742,14 @@ classes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     is_a: DatasetProperty
-    attributes:
+    slots:
+    - external_resources
+    slot_usage:
       external_resources:
         name: external_resources
         description: List of links or identifiers for external resources.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-        slot_uri: dcterms:references
-        alias: external_resources
-        owner: ExternalResource
-        domain_of:
-        - Dataset
-        - DataSubset
-        - ExternalResource
         range: string
-        multivalued: true
+    attributes:
       future_guarantees:
         name: future_guarantees
         description: 'Explanation of any commitments that external resources will
@@ -9768,6 +9790,19 @@ classes:
         domain_of:
         - ExternalResource
         - IPRestrictions
+        range: string
+        multivalued: true
+      external_resources:
+        name: external_resources
+        description: List of links or identifiers for external resources.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:references
+        alias: external_resources
+        owner: ExternalResource
+        domain_of:
+        - Dataset
+        - ExternalResource
+        - DataSubset
         range: string
         multivalued: true
       id:

@@ -102,6 +102,11 @@ classes:
       - media_type
       - path
       - sha256
+      - external_resources
+    slot_usage:
+      external_resources:
+        range: ExternalResource
+        inlined_as_list: true
     attributes:
       # Motivation module classes
       purposes:
@@ -153,10 +158,6 @@ classes:
           Known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
         range: DatasetLimitation
-        multivalued: true
-        inlined_as_list: true
-      external_resources:
-        range: ExternalResource
         multivalued: true
         inlined_as_list: true
       confidential_elements:
