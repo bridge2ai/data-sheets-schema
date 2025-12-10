@@ -72,10 +72,11 @@ classes:
     close_mappings:
       - dcat:Catalog
     is_a: Information
-    attributes:
+    slots:
+      - resources
+    slot_usage:
       resources:
-        range: Dataset
-        multivalued: true
+        inlined_as_list: true
 
   # TODO: consider how to distinguish between metadata only vs
   # instances where data file is present (and we can extract metadata)
@@ -101,98 +102,145 @@ classes:
       - media_type
       - path
       - sha256
+      - external_resources
+      - resources
+    slot_usage:
+      external_resources:
+        range: ExternalResource
+        inlined_as_list: true
+      resources:
+        description: >-
+          Sub-resources or component datasets that are part of this dataset.
+          Allows datasets to contain nested resource structures.
+        inlined_as_list: true
     attributes:
       # Motivation module classes
       purposes:
         range: Purpose
         multivalued: true
+        inlined_as_list: true
       tasks:
         range: Task
         multivalued: true
+        inlined_as_list: true
       addressing_gaps:
         range: AddressingGap
         multivalued: true
+        inlined_as_list: true
       creators:
         range: Creator
         multivalued: true
+        inlined_as_list: true
       funders:
         range: FundingMechanism
         multivalued: true
+        inlined_as_list: true
       # Composition module classes
       subsets:
         range: DataSubset
         multivalued: true
+        inlined_as_list: true
         slot_uri: dcat:distribution
         exact_mappings:
           - schema:distribution
       instances:
         range: Instance
         multivalued: true
+        inlined_as_list: true
       anomalies:
         range: DataAnomaly
         multivalued: true
-      external_resources:
-        range: ExternalResource
+        inlined_as_list: true
+      known_biases:
+        description: >-
+          Known biases present in the dataset that may affect fairness,
+          representativeness, or model performance. Uses BiasTypeEnum for
+          standardized bias categorization mapped to the AI Ontology (AIO).
+        range: DatasetBias
         multivalued: true
+        inlined_as_list: true
+      known_limitations:
+        description: >-
+          Known limitations of the dataset that may affect its use or interpretation.
+          Distinct from biases (systematic errors) and anomalies (data quality issues).
+        range: DatasetLimitation
+        multivalued: true
+        inlined_as_list: true
       confidential_elements:
         range: Confidentiality
         multivalued: true
+        inlined_as_list: true
       content_warnings:
         range: ContentWarning
         multivalued: true
+        inlined_as_list: true
       subpopulations:
         range: Subpopulation
         multivalued: true
+        inlined_as_list: true
       sensitive_elements:
         range: SensitiveElement
         multivalued: true
+        inlined_as_list: true
       # Collection module classes
       acquisition_methods:
         range: InstanceAcquisition
         multivalued: true
+        inlined_as_list: true
       collection_mechanisms:
         range: CollectionMechanism
         multivalued: true
+        inlined_as_list: true
       sampling_strategies:
         range: SamplingStrategy
         multivalued: true
+        inlined_as_list: true
       data_collectors:
         range: DataCollector
         multivalued: true
+        inlined_as_list: true
       collection_timeframes:
         range: CollectionTimeframe
         multivalued: true
+        inlined_as_list: true
       # Ethics module classes
       ethical_reviews:
         range: EthicalReview
         multivalued: true
+        inlined_as_list: true
       data_protection_impacts:
         range: DataProtectionImpact
         multivalued: true
+        inlined_as_list: true
       # Human subjects module classes
       human_subject_research:
         range: HumanSubjectResearch
+        inlined: true
         description: >-
           Information about whether dataset involves human subjects research,
           including IRB approval, ethics review, and regulatory compliance.
       informed_consent:
         range: InformedConsent
         multivalued: true
+        inlined_as_list: true
         description: >-
           Details about informed consent procedures, including consent type,
           documentation, and withdrawal mechanisms.
       participant_privacy:
         range: ParticipantPrivacy
         multivalued: true
+        inlined_as_list: true
         description: >-
           Privacy protections and anonymization procedures for human research
           participants, including reidentification risk assessment.
       participant_compensation:
         range: HumanSubjectCompensation
+        inlined: true
         description: >-
           Compensation or incentives provided to human research participants.
       vulnerable_populations:
         range: VulnerablePopulations
+        inlined: true
         description: >-
           Information about protections for vulnerable populations (e.g., minors,
           pregnant women, prisoners) including special safeguards and assent procedures.
@@ -200,40 +248,51 @@ classes:
       preprocessing_strategies:
         range: PreprocessingStrategy
         multivalued: true
+        inlined_as_list: true
       cleaning_strategies:
         range: CleaningStrategy
         multivalued: true
+        inlined_as_list: true
       labeling_strategies:
         range: LabelingStrategy
         multivalued: true
+        inlined_as_list: true
       raw_sources:
         range: RawData
         multivalued: true
+        inlined_as_list: true
       # Uses module classes
       existing_uses:
         range: ExistingUse
         multivalued: true
+        inlined_as_list: true
       use_repository:
         range: UseRepository
         multivalued: true
+        inlined_as_list: true
       other_tasks:
         range: OtherTask
         multivalued: true
+        inlined_as_list: true
       future_use_impacts:
         range: FutureUseImpact
         multivalued: true
+        inlined_as_list: true
       discouraged_uses:
         range: DiscouragedUse
         multivalued: true
+        inlined_as_list: true
       intended_uses:
         range: IntendedUse
         multivalued: true
+        inlined_as_list: true
         description: >-
           Explicit intended and recommended uses for this dataset.
           Complements future_use_impacts by focusing on positive applications.
       prohibited_uses:
         range: ProhibitedUse
         multivalued: true
+        inlined_as_list: true
         description: >-
           Explicitly prohibited or forbidden uses for this dataset.
           Stronger than discouraged_uses - these are not permitted.
@@ -241,43 +300,56 @@ classes:
       distribution_formats:
         range: DistributionFormat
         multivalued: true
+        inlined_as_list: true
       distribution_dates:
         range: DistributionDate
         multivalued: true
+        inlined_as_list: true
       # Data Governance module classes
       license_and_use_terms:
         range: LicenseAndUseTerms
+        inlined: true
       ip_restrictions:
         range: IPRestrictions
+        inlined: true
       regulatory_restrictions:
         range: ExportControlRegulatoryRestrictions
+        inlined: true
       # Maintenance module classes
       maintainers:
         range: Maintainer
         multivalued: true
+        inlined_as_list: true
       errata:
         range: Erratum
         multivalued: true
+        inlined_as_list: true
       updates:
         range: UpdatePlan
+        inlined: true
       retention_limit:
         range: RetentionLimits
+        inlined: true
       version_access:
         range: VersionAccess
+        inlined: true
       extension_mechanism:
         range: ExtensionMechanism
+        inlined: true
       # Variable/field metadata
       variables:
         description: >-
           Metadata describing individual variables, fields, or columns in the dataset.
         range: VariableMetadata
         multivalued: true
+        inlined_as_list: true
         slot_uri: schema:variableMeasured
         exact_mappings:
           - schema:variableMeasured
       # Other attributes
       is_deidentified:
         range: Deidentification
+        inlined: true
       is_tabular:
         range: boolean
       # Dataset citation and relationships
@@ -295,6 +367,7 @@ classes:
           Enables hierarchical dataset composition (hasPart/isPartOf relationships).
         range: Dataset
         multivalued: true
+        inlined_as_list: true
         slot_uri: schema:isPartOf
         exact_mappings:
           - schema:isPartOf
@@ -304,6 +377,7 @@ classes:
           is version of). Use DatasetRelationship class to specify relationship types.
         range: DatasetRelationship
         multivalued: true
+        inlined_as_list: true
 
   DataSubset:
     description: >-

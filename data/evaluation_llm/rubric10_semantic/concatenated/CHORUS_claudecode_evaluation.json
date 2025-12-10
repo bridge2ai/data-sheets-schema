@@ -1,0 +1,609 @@
+{
+  "evaluation_metadata": {
+    "evaluated_file": "data/d4d_concatenated/claudecode/CHORUS_d4d.yaml",
+    "dataset_id": "chorus:clinical-care-dataset",
+    "dataset_name": "CHORUS Dataset",
+    "rubric_version": "2.0",
+    "rubric_type": "rubric10-semantic",
+    "evaluator": "Claude Code Deterministic Evaluator",
+    "evaluation_date": "2025-12-09",
+    "temperature": 0.0,
+    "evaluation_mode": "semantic_enhanced"
+  },
+  "element_scores": [
+    {
+      "id": 1,
+      "name": "Dataset Discovery and Identification",
+      "score": 3,
+      "max_score": 5,
+      "percentage": 60.0,
+      "sub_elements": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "score": 1,
+          "fields_checked": ["doi", "rrid", "id"],
+          "fields_found": ["id"],
+          "rationale": "URI identifier present (chorus:clinical-care-dataset) but no DOI or RRID"
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "score": 1,
+          "fields_checked": ["title", "description"],
+          "fields_found": ["title", "description"],
+          "rationale": "Both title and description present; description includes caveats about limited source content"
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "score": 1,
+          "fields_checked": ["keywords"],
+          "fields_found": ["keywords"],
+          "rationale": "7 keywords present covering project name, program, domain, and focus areas"
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "score": 0,
+          "fields_checked": ["page", "resources"],
+          "fields_found": ["page"],
+          "rationale": "Landing page present (https://chorus4ai.org) but no hierarchical resources defined"
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "score": 0,
+          "fields_checked": ["parent_datasets", "related_datasets"],
+          "fields_found": [],
+          "rationale": "No parent datasets or related dataset relationships documented"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Dataset Access and Retrieval",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "sub_elements": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "score": 0,
+          "fields_checked": ["license_and_use_terms", "ip_restrictions"],
+          "fields_found": [],
+          "rationale": "No license terms or IP restrictions documented"
+        },
+        {
+          "name": "Regulatory Restrictions and Confidentiality Level Specified",
+          "score": 0,
+          "fields_checked": ["regulatory_restrictions", "confidentiality_level"],
+          "fields_found": [],
+          "rationale": "No regulatory restrictions or confidentiality level specified"
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "score": 0,
+          "fields_checked": ["download_url"],
+          "fields_found": [],
+          "rationale": "No download URL provided; only landing page available"
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "score": 0,
+          "fields_checked": ["distribution_formats", "format", "media_type"],
+          "fields_found": ["distribution_formats"],
+          "rationale": "Distribution formats field present but contains only placeholder text with no specific format information"
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "score": 0,
+          "fields_checked": ["related_datasets", "external_resources"],
+          "fields_found": [],
+          "rationale": "No related datasets or external resources documented"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Data Reuse and Interoperability",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "sub_elements": [
+        {
+          "name": "License Terms Allow Reuse",
+          "score": 0,
+          "fields_checked": ["license_and_use_terms"],
+          "fields_found": [],
+          "rationale": "No license terms documented"
+        },
+        {
+          "name": "Data Formats Are Standardized (encoding, format)",
+          "score": 0,
+          "fields_checked": ["format", "encoding"],
+          "fields_found": [],
+          "rationale": "No format or encoding specifications provided"
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "score": 0,
+          "fields_checked": ["conforms_to", "conforms_to_schema"],
+          "fields_found": [],
+          "rationale": "No schema or ontology conformance documented"
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "score": 0,
+          "fields_checked": ["variables"],
+          "fields_found": [],
+          "rationale": "No variable-level metadata provided"
+        },
+        {
+          "name": "Use Guidance Provided (intended, prohibited uses)",
+          "score": 0,
+          "fields_checked": ["intended_uses", "prohibited_uses", "discouraged_uses"],
+          "fields_found": [],
+          "rationale": "No use guidance documented"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Ethical Use and Privacy Safeguards",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "sub_elements": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "score": 0,
+          "fields_checked": ["ethical_reviews", "human_subject_research"],
+          "fields_found": [],
+          "rationale": "No ethical review or human subjects research documentation"
+        },
+        {
+          "name": "Deidentification Method Described",
+          "score": 0,
+          "fields_checked": ["is_deidentified"],
+          "fields_found": [],
+          "rationale": "No deidentification information provided"
+        },
+        {
+          "name": "Privacy Protections Beyond Deidentification",
+          "score": 0,
+          "fields_checked": ["participant_privacy"],
+          "fields_found": [],
+          "rationale": "No participant privacy protections documented"
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "score": 0,
+          "fields_checked": ["informed_consent"],
+          "fields_found": [],
+          "rationale": "No informed consent information provided"
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "score": 0,
+          "fields_checked": ["vulnerable_populations", "participant_compensation"],
+          "fields_found": [],
+          "rationale": "No vulnerable population or compensation documentation"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Data Composition and Structure",
+      "score": 1,
+      "max_score": 5,
+      "percentage": 20.0,
+      "sub_elements": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "score": 0,
+          "fields_checked": ["subpopulations"],
+          "fields_found": [],
+          "rationale": "No subpopulation characteristics documented"
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "score": 1,
+          "fields_checked": ["instances"],
+          "fields_found": ["instances"],
+          "rationale": "Instances field present but contains only general description without specific counts"
+        },
+        {
+          "name": "Variable-Level Metadata and Tabular Flag",
+          "score": 0,
+          "fields_checked": ["variables", "is_tabular"],
+          "fields_found": [],
+          "rationale": "No variable metadata or tabular flag provided"
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "score": 0,
+          "fields_checked": ["instances"],
+          "fields_found": ["instances"],
+          "rationale": "Instances description is too general; lacks specific topics or conditions"
+        },
+        {
+          "name": "Data Quality Issues and Anomalies Documented",
+          "score": 0,
+          "fields_checked": ["anomalies", "sampling_strategies"],
+          "fields_found": [],
+          "rationale": "No anomalies or sampling strategies documented"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Data Provenance and Version Tracking",
+      "score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "sub_elements": [
+        {
+          "name": "Dataset Version Number Provided",
+          "score": 0,
+          "fields_checked": ["version"],
+          "fields_found": [],
+          "rationale": "No version number specified"
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "score": 0,
+          "fields_checked": ["version_access"],
+          "fields_found": [],
+          "rationale": "No version access methods provided"
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "score": 0,
+          "fields_checked": ["errata", "updates"],
+          "fields_found": [],
+          "rationale": "No errata or update information documented"
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "score": 0,
+          "fields_checked": ["updates"],
+          "fields_found": [],
+          "rationale": "No update schedule specified"
+        },
+        {
+          "name": "Provenance and Source Derivation Documented",
+          "score": 0,
+          "fields_checked": ["was_derived_from", "release_notes"],
+          "fields_found": [],
+          "rationale": "No provenance or release notes provided in schema fields (only in YAML comments)"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Scientific Motivation and Funding Transparency",
+      "score": 2,
+      "max_score": 5,
+      "percentage": 40.0,
+      "sub_elements": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "score": 1,
+          "fields_checked": ["purposes"],
+          "fields_found": ["purposes"],
+          "rationale": "Purpose documented describing Bridge2AI program and equitable AI goals"
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "score": 1,
+          "fields_checked": ["tasks"],
+          "fields_found": ["tasks"],
+          "rationale": "Research task documented focusing on AI research with equity emphasis"
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "score": 0,
+          "fields_checked": ["funders"],
+          "fields_found": [],
+          "rationale": "NIH and Bridge2AI mentioned in text but no structured funder information"
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "score": 0,
+          "fields_checked": ["funders"],
+          "fields_found": [],
+          "rationale": "No grant IDs or award numbers provided"
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "score": 0,
+          "fields_checked": ["creators", "funders"],
+          "fields_found": [],
+          "rationale": "No structured creator or acknowledgement information"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "score": 2,
+      "max_score": 5,
+      "percentage": 40.0,
+      "sub_elements": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "score": 0,
+          "fields_checked": ["collection_mechanisms"],
+          "fields_found": [],
+          "rationale": "No structured collection mechanisms documented"
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "score": 1,
+          "fields_checked": ["acquisition_methods"],
+          "fields_found": ["acquisition_methods"],
+          "rationale": "Acquisition method present with general description and was_directly_observed flag"
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling Strategies",
+          "score": 0,
+          "fields_checked": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "fields_found": [],
+          "rationale": "No preprocessing, cleaning, or labeling strategies documented"
+        },
+        {
+          "name": "Software and Tools Documented",
+          "score": 0,
+          "fields_checked": ["software_and_tools"],
+          "fields_found": [],
+          "rationale": "No software or tools documented"
+        },
+        {
+          "name": "External Standards and Resources Referenced",
+          "score": 1,
+          "fields_checked": ["external_resources", "conforms_to"],
+          "fields_found": [],
+          "rationale": "Partial credit: References to primary CHORUS materials and AIM-AHEAD mentioned but not in structured fields"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "score": 1,
+      "max_score": 5,
+      "percentage": 20.0,
+      "sub_elements": [
+        {
+          "name": "Known Limitations Documented",
+          "score": 1,
+          "fields_checked": ["known_limitations"],
+          "fields_found": [],
+          "rationale": "Limitations clearly stated in description and notes (limited source content, PDF extraction issues) but not in structured field"
+        },
+        {
+          "name": "Systematic Biases Identified and Described",
+          "score": 0,
+          "fields_checked": ["known_biases"],
+          "fields_found": [],
+          "rationale": "No systematic biases documented"
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "score": 0,
+          "fields_checked": ["anomalies"],
+          "fields_found": [],
+          "rationale": "No anomalies documented in structured field"
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "score": 0,
+          "fields_checked": ["sensitive_elements", "content_warnings"],
+          "fields_found": [],
+          "rationale": "No sensitive content warnings provided"
+        },
+        {
+          "name": "Ethical Review Details Including Conflicts",
+          "score": 0,
+          "fields_checked": ["ethical_reviews"],
+          "fields_found": [],
+          "rationale": "No ethical review documentation"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Cross-Platform and Community Integration",
+      "score": 1,
+      "max_score": 5,
+      "percentage": 20.0,
+      "sub_elements": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "score": 0,
+          "fields_checked": ["publisher"],
+          "fields_found": [],
+          "rationale": "No publisher information documented"
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "score": 0,
+          "fields_checked": ["citation", "doi"],
+          "fields_found": [],
+          "rationale": "No citation or DOI provided"
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "score": 0,
+          "fields_checked": ["conforms_to"],
+          "fields_found": [],
+          "rationale": "No community standards conformance documented"
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "score": 1,
+          "fields_checked": ["external_resources", "page"],
+          "fields_found": ["page"],
+          "rationale": "Landing page provided (https://chorus4ai.org); references to primary documentation in notes"
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "score": 0,
+          "fields_checked": ["related_datasets"],
+          "fields_found": [],
+          "rationale": "No related dataset relationships documented"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_score": 10,
+    "max_total_score": 50,
+    "overall_percentage": 20.0,
+    "sub_elements_passed": 10,
+    "sub_elements_total": 50,
+    "elements_with_scores": {
+      "1": 3,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 1,
+      "6": 0,
+      "7": 2,
+      "8": 2,
+      "9": 1,
+      "10": 1
+    },
+    "strongest_areas": [
+      "Dataset Discovery and Identification (60%)",
+      "Scientific Motivation and Funding Transparency (40%)",
+      "Technical Transparency (40%)"
+    ],
+    "weakest_areas": [
+      "Dataset Access and Retrieval (0%)",
+      "Data Reuse and Interoperability (0%)",
+      "Ethical Use and Privacy Safeguards (0%)",
+      "Data Provenance and Version Tracking (0%)"
+    ]
+  },
+  "semantic_analysis": {
+    "identifier_validation": {
+      "id_present": true,
+      "id_value": "chorus:clinical-care-dataset",
+      "id_format": "namespace:local-id",
+      "id_validity": "valid_uri_pattern",
+      "doi_present": false,
+      "doi_format": null,
+      "doi_validity": null,
+      "rrid_present": false,
+      "rrid_format": null,
+      "rrid_validity": null
+    },
+    "url_validation": {
+      "page_url": "https://chorus4ai.org",
+      "page_url_validity": "valid_https_url",
+      "download_url_present": false,
+      "external_urls_count": 1
+    },
+    "grant_validation": {
+      "funders_present": false,
+      "grant_ids_present": false,
+      "grant_id_formats": [],
+      "funding_agencies_mentioned_in_text": ["NIH", "Bridge2AI"],
+      "nih_grant_pattern_found": false
+    },
+    "consistency_checks": {
+      "title_description_alignment": true,
+      "title_description_alignment_note": "Title mentions CHORUS and surgery; description elaborates on clinical care and equitable AI focus",
+      "keywords_content_alignment": true,
+      "keywords_content_alignment_note": "Keywords align with Bridge2AI, clinical care, and surgery focus mentioned in description",
+      "motivation_tasks_alignment": true,
+      "motivation_tasks_alignment_note": "Purpose and tasks both emphasize equitable AI and clinical care research",
+      "collection_distribution_alignment": false,
+      "collection_distribution_alignment_note": "Collection methods mention clinical data but distribution formats provide no specifics"
+    },
+    "completeness_assessment": {
+      "metadata_completeness_level": "minimal",
+      "metadata_completeness_percentage": 20.0,
+      "critical_missing_fields": [
+        "doi",
+        "license_and_use_terms",
+        "download_url",
+        "version",
+        "funders",
+        "creators",
+        "ethical_reviews",
+        "human_subject_research",
+        "variables",
+        "known_limitations"
+      ],
+      "placeholder_fields_detected": [
+        "instances",
+        "distribution_formats",
+        "data_collectors"
+      ],
+      "has_self_reported_limitations": true,
+      "self_reported_limitations_note": "File explicitly acknowledges limited source content due to PDF extraction issues and directs users to primary documentation"
+    },
+    "semantic_understanding": {
+      "dataset_domain": "clinical_care_and_surgery",
+      "dataset_scope": "hospital_surgical_data",
+      "target_application": "equitable_ai_development",
+      "data_subjects": "clinical_patients",
+      "collection_setting": "hospital_and_surgical_environments",
+      "program_affiliation": "NIH_Bridge2AI",
+      "partner_program": "AIM-AHEAD",
+      "generation_method": "automated_with_limited_sources",
+      "extraction_challenges": "pdf_text_extraction_failure",
+      "recommended_action": "consult_primary_documentation"
+    },
+    "quality_indicators": {
+      "has_clear_purpose": true,
+      "has_actionable_metadata": false,
+      "suitable_for_reuse_without_additional_info": false,
+      "meets_fair_minimum": false,
+      "fair_gaps": [
+        "No persistent identifier (DOI/RRID)",
+        "No license terms",
+        "No structured metadata for variables",
+        "No access information"
+      ],
+      "transparency_level": "low",
+      "transparency_note": "Limited technical details; mostly high-level descriptions with explicit acknowledgment of incomplete information"
+    },
+    "data_governance_indicators": {
+      "license_specified": false,
+      "access_restrictions_specified": false,
+      "ethics_approval_documented": false,
+      "privacy_protections_documented": false,
+      "consent_documented": false,
+      "governance_maturity": "undefined",
+      "governance_note": "No data governance information available; essential for clinical data but not documented"
+    },
+    "recommendations": [
+      "Add DOI or RRID for persistent identification",
+      "Document license and use terms (critical for clinical data)",
+      "Specify access mechanisms and download URLs",
+      "Document ethical review and IRB approval (essential for human subjects data)",
+      "Add informed consent and privacy protection details",
+      "Include structured variable-level metadata",
+      "Document deidentification methods and privacy safeguards",
+      "Add grant IDs and funding information",
+      "Specify data formats, encoding, and schema conformance",
+      "Include version information and update schedule",
+      "Extract or supplement with content from primary CHORUS documentation sources"
+    ],
+    "evaluation_confidence": {
+      "confidence_level": "high",
+      "confidence_note": "Evaluation is confident due to clear field presence/absence; however, dataset completeness is explicitly limited by source extraction issues as acknowledged in the file itself"
+    }
+  },
+  "evaluation_notes": [
+    "This D4D file explicitly acknowledges severe limitations due to PDF extraction failures",
+    "Generator included transparent caveats directing users to primary documentation",
+    "Most fields contain either minimal placeholder text or are absent entirely",
+    "The file represents what can be extracted from limited source material rather than comprehensive metadata",
+    "Clinical care data would normally require extensive ethical, privacy, and governance documentation which is completely absent",
+    "Keywords and basic motivation are the most complete sections",
+    "The self-awareness about limitations (documented in comments and description) is a positive quality indicator",
+    "This appears to be a skeleton D4D requiring substantial enhancement from primary sources",
+    "For production use, this D4D should be regenerated with properly extracted source materials",
+    "The low score (20%) accurately reflects the minimal actionable metadata rather than evaluation error"
+  ]
+}

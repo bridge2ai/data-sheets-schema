@@ -1,0 +1,760 @@
+{
+  "metadata": {
+    "dataset_id": "https://doi.org/10.13026/249v-w155",
+    "dataset_name": "Bridge2AI-Voice Dataset",
+    "evaluated_file": "data/d4d_concatenated/claudecode/VOICE_d4d.yaml",
+    "evaluation_date": "2025-12-09",
+    "evaluator": "Claude Sonnet 4.5",
+    "temperature": 0.0,
+    "rubric_version": "rubric10-semantic-2.0",
+    "schema_version": "data_sheets_schema"
+  },
+  "semantic_analysis": {
+    "identifier_validation": {
+      "doi_primary": {
+        "value": "https://doi.org/10.13026/249v-w155",
+        "format_valid": true,
+        "prefix": "10.13026",
+        "suffix": "249v-w155",
+        "resolver": "https://doi.org/",
+        "notes": "Valid PhysioNet DOI format for dataset version 1.1"
+      },
+      "doi_latest": {
+        "value": "https://doi.org/10.13026/37yb-1t42",
+        "format_valid": true,
+        "prefix": "10.13026",
+        "suffix": "37yb-1t42",
+        "location": "version_access.latest_version_doi",
+        "notes": "Valid DOI for latest version 2.0.1"
+      },
+      "uri_as_id": {
+        "value": "https://doi.org/10.13026/249v-w155",
+        "format_valid": true,
+        "notes": "Uses DOI as primary identifier (id field)"
+      },
+      "rrid": {
+        "present": false,
+        "notes": "No RRID provided"
+      }
+    },
+    "consistency_checks": {
+      "version_consistency": {
+        "version_field": null,
+        "version_in_updates": "1.1",
+        "version_in_page_url": "1.1",
+        "version_in_doi": "249v-w155 (v1.1 specific)",
+        "latest_version_doi": "37yb-1t42 (v2.0.1)",
+        "consistent": true,
+        "notes": "All version references align with v1.1 as the evaluated version. Latest version 2.0.1 properly documented."
+      },
+      "url_consistency": {
+        "page_url": "https://physionet.org/content/b2ai-voice/1.1/",
+        "distribution_url": "https://physionet.org/content/b2ai-voice/1.1/",
+        "consistent": true,
+        "notes": "Page and distribution URLs point to same PhysioNet location"
+      },
+      "access_control_consistency": {
+        "license_type": "Bridge2AI Voice Registered Access License",
+        "requires_agreement": true,
+        "platform": "PhysioNet registered access",
+        "consistent": true,
+        "notes": "License terms and access restrictions clearly aligned"
+      },
+      "ethical_consent_consistency": {
+        "informed_consent": true,
+        "consent_type": ["Written consent for data collection", "Consent for research data sharing"],
+        "irb_approved": true,
+        "irb_institution": "University of South Florida",
+        "deidentified": true,
+        "deidentification_method": "HIPAA Safe Harbor",
+        "consistent": true,
+        "notes": "All ethical and privacy elements properly aligned"
+      }
+    },
+    "semantic_understanding": {
+      "dataset_purpose": {
+        "primary_goal": "Create ethically sourced voice biomarker dataset for AI research",
+        "target_conditions": [
+          "voice disorders",
+          "neurological disorders",
+          "mood disorders",
+          "respiratory disorders"
+        ],
+        "research_domain": "voice as health biomarker",
+        "coherent": true
+      },
+      "data_composition": {
+        "participants": 306,
+        "recordings": 12523,
+        "sites": 5,
+        "geographic_scope": "North America",
+        "age_range": "adults only (v1.1)",
+        "data_types": ["spectrograms", "MFCCs", "phenotype", "static acoustic features"],
+        "raw_audio_included": false,
+        "coherent": true,
+        "notes": "Clear hierarchical structure with 4 distinct data subsets"
+      },
+      "privacy_protection_strategy": {
+        "primary_method": "HIPAA Safe Harbor de-identification",
+        "additional_protections": [
+          "Raw audio waveforms withheld",
+          "Free speech transcripts removed",
+          "State/province removed (country retained)",
+          "Registered access control"
+        ],
+        "privacy_level": "high",
+        "coherent": true,
+        "notes": "Layered privacy approach: de-identification + data minimization + access control"
+      },
+      "temporal_evolution": {
+        "v1.0": "initial release 2024",
+        "v1.1": "2025-01-17 (added MFCCs)",
+        "v2.0.0": "2025-04-16",
+        "v2.0.1": "2025-08-18 (latest)",
+        "active_maintenance": true,
+        "version_progression_clear": true
+      },
+      "technical_pipeline": {
+        "collection": "Custom tablet app + REDCap + headset microphone",
+        "preprocessing": "Mono conversion, 16 kHz resampling, anti-aliasing",
+        "feature_extraction": [
+          "Spectrograms (STFT: 25ms window, 10ms hop, 512-point FFT)",
+          "60 MFCCs from spectrograms",
+          "openSMILE acoustic features",
+          "Parselmouth/Praat phonetic features",
+          "Whisper transcriptions (free speech removed)"
+        ],
+        "pipeline_clarity": "high",
+        "reproducibility": "high"
+      }
+    },
+    "coverage_gaps": {
+      "missing_fields": [
+        "version (no explicit version field, only in updates)",
+        "doi (no separate doi field, DOI used as id)",
+        "rrid",
+        "download_url (implied via page URL)",
+        "funders (no funding information provided)",
+        "creators (no explicit creator list)",
+        "variables (no variable-level metadata)",
+        "known_limitations",
+        "known_biases",
+        "anomalies",
+        "prohibited_uses",
+        "intended_uses (only discouraged_uses present)",
+        "publisher (PhysioNet implied but not stated)",
+        "citation",
+        "conforms_to",
+        "conforms_to_schema",
+        "format",
+        "encoding",
+        "media_type",
+        "related_datasets",
+        "parent_datasets",
+        "resources (hierarchical sub-resources)",
+        "external_resources",
+        "ip_restrictions",
+        "regulatory_restrictions",
+        "confidentiality_level",
+        "participant_privacy (beyond deidentification)",
+        "participant_compensation",
+        "vulnerable_populations",
+        "software_and_tools (tools mentioned in preprocessing but not in dedicated field)",
+        "sensitive_elements",
+        "content_warnings",
+        "existing_uses"
+      ],
+      "present_but_minimal": [
+        "tasks (1 entry, could be more detailed)",
+        "addressing_gaps (1 entry)",
+        "collection_timeframes (vague: 'prior to January 2025')"
+      ]
+    },
+    "strengths": [
+      "Strong persistent identifier (DOI as primary ID)",
+      "Comprehensive description of dataset purpose and composition",
+      "Excellent privacy documentation (HIPAA Safe Harbor + layered protections)",
+      "Clear IRB approval and informed consent documentation",
+      "Detailed preprocessing and feature extraction pipeline",
+      "Well-documented versioning with multiple versions tracked",
+      "Clear access control and licensing requirements",
+      "Multiple data subsets with technical specifications",
+      "Disease cohort stratification clearly described"
+    ],
+    "weaknesses": [
+      "No funding information (funders, grant IDs)",
+      "No creator/author attribution",
+      "No variable-level metadata for phenotype and feature files",
+      "Missing dataset limitations and known biases",
+      "No data quality/anomaly documentation",
+      "No prohibited or intended uses (only discouraged uses)",
+      "No recommended citation",
+      "No schema conformance statements",
+      "No software tools formally listed (mentioned in preprocessing)",
+      "Missing publisher field (PhysioNet implied)",
+      "No external resources or related datasets",
+      "Collection timeframe imprecise",
+      "No compensation or vulnerable population details"
+    ]
+  },
+  "element_scores": [
+    {
+      "element_id": 1,
+      "element_name": "Dataset Discovery and Identification",
+      "sub_element_scores": [
+        {
+          "name": "Persistent Identifier (DOI, RRID, or URI)",
+          "fields_checked": ["doi", "rrid", "id"],
+          "score": 1,
+          "present": true,
+          "evidence": "id: https://doi.org/10.13026/249v-w155 (DOI used as primary identifier)",
+          "notes": "DOI present as id field. No separate doi field or RRID."
+        },
+        {
+          "name": "Dataset Title and Description Completeness",
+          "fields_checked": ["title", "description"],
+          "score": 1,
+          "present": true,
+          "evidence": "title: 'Bridge2AI-Voice - An ethically-sourced, diverse voice dataset...'; description: comprehensive 5-sentence description",
+          "notes": "Both title and description are complete and informative"
+        },
+        {
+          "name": "Keywords or Tags for Searchability",
+          "fields_checked": ["keywords"],
+          "score": 1,
+          "present": true,
+          "evidence": "13 keywords including 'Bridge2AI', 'voice biomarker', 'speech', disease types, feature types, 'PhysioNet'",
+          "notes": "Comprehensive keyword set covering domain, diseases, and platform"
+        },
+        {
+          "name": "Landing Page and Resources (page, hierarchical resources)",
+          "fields_checked": ["page", "resources"],
+          "score": 1,
+          "present": true,
+          "evidence": "page: https://physionet.org/content/b2ai-voice/1.1/; resources field not used but subsets provide hierarchical organization",
+          "notes": "Landing page URL present. No hierarchical resources field but subsets serve similar purpose."
+        },
+        {
+          "name": "Hierarchical Structure (parent datasets, relationships)",
+          "fields_checked": ["parent_datasets", "related_datasets"],
+          "score": 0,
+          "present": false,
+          "evidence": "No parent_datasets or related_datasets fields",
+          "notes": "No explicit dataset relationships documented"
+        }
+      ],
+      "element_score": 4,
+      "max_score": 5,
+      "percentage": 80.0
+    },
+    {
+      "element_id": 2,
+      "element_name": "Dataset Access and Retrieval",
+      "sub_element_scores": [
+        {
+          "name": "Access Policy and IP Restrictions Defined",
+          "fields_checked": ["license_and_use_terms", "ip_restrictions"],
+          "score": 1,
+          "present": true,
+          "evidence": "license_and_use_terms: Bridge2AI Voice Registered Access License with data use agreement requirement; no ip_restrictions field",
+          "notes": "License clearly defined. No IP restrictions documented."
+        },
+        {
+          "name": "Regulatory Restrictions and Confidentiality Level Specified",
+          "fields_checked": ["regulatory_restrictions", "confidentiality_level"],
+          "score": 0,
+          "present": false,
+          "evidence": "No regulatory_restrictions or confidentiality_level fields",
+          "notes": "Registered access implied but not formalized in these fields"
+        },
+        {
+          "name": "Download URL or Platform Link Available",
+          "fields_checked": ["download_url"],
+          "score": 1,
+          "present": true,
+          "evidence": "distribution_formats.access_urls: ['https://physionet.org/content/b2ai-voice/1.1/']",
+          "notes": "Access URL provided in distribution_formats; no separate download_url field"
+        },
+        {
+          "name": "Distribution Formats and File Types Specified",
+          "fields_checked": ["distribution_formats", "format", "media_type"],
+          "score": 1,
+          "present": true,
+          "evidence": "distribution_formats: 'Dataset available via PhysioNet in Parquet, TSV, and JSON formats'; specific subsets documented",
+          "notes": "File formats clearly stated. No MIME types or encoding specified."
+        },
+        {
+          "name": "Related Datasets and External Resources Linked",
+          "fields_checked": ["related_datasets", "external_resources"],
+          "score": 0,
+          "present": false,
+          "evidence": "No related_datasets or external_resources fields",
+          "notes": "No external links or dataset relationships documented"
+        }
+      ],
+      "element_score": 3,
+      "max_score": 5,
+      "percentage": 60.0
+    },
+    {
+      "element_id": 3,
+      "element_name": "Data Reuse and Interoperability",
+      "sub_element_scores": [
+        {
+          "name": "License Terms Allow Reuse",
+          "fields_checked": ["license_and_use_terms"],
+          "score": 1,
+          "present": true,
+          "evidence": "license_and_use_terms: Bridge2AI Voice Registered Access License; requires signing data use agreement",
+          "notes": "License permits reuse under registered access agreement"
+        },
+        {
+          "name": "Data Formats Are Standardized (encoding, format)",
+          "fields_checked": ["format", "encoding"],
+          "score": 1,
+          "present": true,
+          "evidence": "Formats: Parquet, TSV, JSON (standard formats); no encoding or format fields specified",
+          "notes": "Standard formats used but not formally documented in schema fields"
+        },
+        {
+          "name": "Schema or Ontology Conformance Stated",
+          "fields_checked": ["conforms_to", "conforms_to_schema"],
+          "score": 0,
+          "present": false,
+          "evidence": "No conforms_to or conforms_to_schema fields",
+          "notes": "No schema conformance statements"
+        },
+        {
+          "name": "Variable Metadata with Identifiers Defined",
+          "fields_checked": ["variables"],
+          "score": 0,
+          "present": false,
+          "evidence": "No variables field; subsets describe data files but not individual variables",
+          "notes": "No variable-level metadata provided"
+        },
+        {
+          "name": "Use Guidance Provided (intended, prohibited uses)",
+          "fields_checked": ["intended_uses", "prohibited_uses", "discouraged_uses"],
+          "score": 1,
+          "present": true,
+          "evidence": "discouraged_uses: access requires signing agreement; future_use_impacts describes data limitations",
+          "notes": "Partial use guidance. No explicit prohibited or intended uses."
+        }
+      ],
+      "element_score": 3,
+      "max_score": 5,
+      "percentage": 60.0
+    },
+    {
+      "element_id": 4,
+      "element_name": "Ethical Use and Privacy Safeguards",
+      "sub_element_scores": [
+        {
+          "name": "IRB or Ethics Review Documented",
+          "fields_checked": ["ethical_reviews", "human_subject_research"],
+          "score": 1,
+          "present": true,
+          "evidence": "ethical_reviews: IRB approval from University of South Florida; no human_subject_research field",
+          "notes": "IRB approval clearly documented"
+        },
+        {
+          "name": "Deidentification Method Described",
+          "fields_checked": ["is_deidentified"],
+          "score": 1,
+          "present": true,
+          "evidence": "is_deidentified: HIPAA Safe Harbor method with comprehensive list of removed identifiers",
+          "notes": "Detailed deidentification documentation"
+        },
+        {
+          "name": "Privacy Protections Beyond Deidentification",
+          "fields_checked": ["participant_privacy"],
+          "score": 1,
+          "present": true,
+          "evidence": "Raw audio withheld, free speech transcripts removed, registered access control (documented in cleaning_strategies and discouraged_uses)",
+          "notes": "Multiple privacy layers documented though not in dedicated participant_privacy field"
+        },
+        {
+          "name": "Informed Consent Obtained from Participants",
+          "fields_checked": ["informed_consent"],
+          "score": 1,
+          "present": true,
+          "evidence": "informed_consent: consent_obtained=true, consent_type includes written consent for data collection and research sharing",
+          "notes": "Complete informed consent documentation"
+        },
+        {
+          "name": "Vulnerable Populations and Compensation Documented",
+          "fields_checked": ["vulnerable_populations", "participant_compensation"],
+          "score": 0,
+          "present": false,
+          "evidence": "No vulnerable_populations or participant_compensation fields",
+          "notes": "No information on compensation or vulnerable population considerations"
+        }
+      ],
+      "element_score": 4,
+      "max_score": 5,
+      "percentage": 80.0
+    },
+    {
+      "element_id": 5,
+      "element_name": "Data Composition and Structure",
+      "sub_element_scores": [
+        {
+          "name": "Cohort or Subpopulations Characteristics Described",
+          "fields_checked": ["subpopulations"],
+          "score": 1,
+          "present": true,
+          "evidence": "subpopulations: 4 disease groups (voice disorders, neurological, mood/psychiatric, respiratory)",
+          "notes": "Clear subpopulation stratification by disease type"
+        },
+        {
+          "name": "Number of Instances or Samples Reported",
+          "fields_checked": ["instances"],
+          "score": 1,
+          "present": true,
+          "evidence": "instances: 12,523 recordings from 306 adult participants across five sites",
+          "notes": "Complete count of participants and recordings"
+        },
+        {
+          "name": "Variable-Level Metadata and Tabular Flag",
+          "fields_checked": ["variables", "is_tabular"],
+          "score": 0,
+          "present": false,
+          "evidence": "No variables or is_tabular fields; subsets describe file types but not individual variables",
+          "notes": "No variable-level metadata despite tabular data files (phenotype.tsv, static_features.tsv)"
+        },
+        {
+          "name": "Data Topics or Conditions Represented",
+          "fields_checked": ["instances"],
+          "score": 1,
+          "present": true,
+          "evidence": "instances and subpopulations describe health conditions; keywords list disease types",
+          "notes": "Topics clearly represented through multiple fields"
+        },
+        {
+          "name": "Data Quality Issues and Anomalies Documented",
+          "fields_checked": ["anomalies", "sampling_strategies"],
+          "score": 1,
+          "present": true,
+          "evidence": "sampling_strategies: participants selected from specialty clinics with inclusion/exclusion screening; no anomalies field",
+          "notes": "Sampling strategy documented. No data quality anomalies documented."
+        }
+      ],
+      "element_score": 4,
+      "max_score": 5,
+      "percentage": 80.0
+    },
+    {
+      "element_id": 6,
+      "element_name": "Data Provenance and Version Tracking",
+      "sub_element_scores": [
+        {
+          "name": "Dataset Version Number Provided",
+          "fields_checked": ["version"],
+          "score": 1,
+          "present": true,
+          "evidence": "updates.update_details: v1.1 released 2025-01-17; version embedded in DOI and URLs; no dedicated version field",
+          "notes": "Version number clearly stated in updates; no separate version field"
+        },
+        {
+          "name": "Version Access Methods Documented",
+          "fields_checked": ["version_access"],
+          "score": 1,
+          "present": true,
+          "evidence": "version_access: describes multiple versions through PhysioNet, includes latest_version_doi and versions_available list",
+          "notes": "Complete version access documentation with DOI for latest version"
+        },
+        {
+          "name": "Change Descriptions and Errata Provided",
+          "fields_checked": ["errata", "updates"],
+          "score": 1,
+          "present": true,
+          "evidence": "updates.update_details: lists v1.0, v1.1 (added MFCCs), v2.0.0, v2.0.1 with dates; no errata field",
+          "notes": "Update history documented with version-specific changes. No errata."
+        },
+        {
+          "name": "Update Schedule or Frequency Indicated",
+          "fields_checked": ["updates"],
+          "score": 1,
+          "present": true,
+          "evidence": "updates: 'Version 1.1 released January 17, 2025 adding MFCCs. Project subsequently updated to versions 2.0.0 and 2.0.1.'",
+          "notes": "Update pattern evident from version timeline. No explicit schedule."
+        },
+        {
+          "name": "Provenance and Source Derivation Documented",
+          "fields_checked": ["was_derived_from", "release_notes"],
+          "score": 0,
+          "present": false,
+          "evidence": "No was_derived_from or release_notes fields; preprocessing describes derivation from raw audio",
+          "notes": "Derivation from raw audio documented in preprocessing but not in provenance fields"
+        }
+      ],
+      "element_score": 4,
+      "max_score": 5,
+      "percentage": 80.0
+    },
+    {
+      "element_id": 7,
+      "element_name": "Scientific Motivation and Funding Transparency",
+      "sub_element_scores": [
+        {
+          "name": "Motivation or Purpose for Dataset Creation",
+          "fields_checked": ["purposes"],
+          "score": 1,
+          "present": true,
+          "evidence": "purposes: 'Create an ethically sourced flagship dataset to enable future research in AI and support insights into voice as biomarker of health'",
+          "notes": "Clear motivation statement"
+        },
+        {
+          "name": "Primary Research Objectives or Tasks",
+          "fields_checked": ["tasks"],
+          "score": 1,
+          "present": true,
+          "evidence": "tasks: 'Enable AI research on voice as biomarker for health conditions including voice disorders, neurological, mood, and respiratory disorders'",
+          "notes": "Research objectives clearly stated"
+        },
+        {
+          "name": "Funding Sources and Mechanisms Listed",
+          "fields_checked": ["funders"],
+          "score": 0,
+          "present": false,
+          "evidence": "No funders field; Bridge2AI in name suggests NIH Bridge2AI program but not documented",
+          "notes": "No funding information provided"
+        },
+        {
+          "name": "Grant IDs or Award Numbers Present",
+          "fields_checked": ["funders"],
+          "score": 0,
+          "present": false,
+          "evidence": "No funders field or grant information",
+          "notes": "No grant IDs documented"
+        },
+        {
+          "name": "Creators and Acknowledgements Documented",
+          "fields_checked": ["creators", "funders"],
+          "score": 0,
+          "present": false,
+          "evidence": "No creators field; maintainers lists PhysioNet platform team only",
+          "notes": "No creator attribution or acknowledgements"
+        }
+      ],
+      "element_score": 2,
+      "max_score": 5,
+      "percentage": 40.0
+    },
+    {
+      "element_id": 8,
+      "element_name": "Technical Transparency (Data Collection and Processing)",
+      "sub_element_scores": [
+        {
+          "name": "Collection Mechanisms and Settings Described",
+          "fields_checked": ["collection_mechanisms"],
+          "score": 1,
+          "present": true,
+          "evidence": "collection_mechanisms: Custom tablet application, REDCap, headset microphone with mechanism_details",
+          "notes": "Collection infrastructure clearly described"
+        },
+        {
+          "name": "Data Acquisition Methods Listed",
+          "fields_checked": ["acquisition_methods"],
+          "score": 1,
+          "present": true,
+          "evidence": "acquisition_methods: Standardized protocol, sustained vowel phonation, custom tablet app, headset, was_directly_observed=true",
+          "notes": "Acquisition methods comprehensively documented"
+        },
+        {
+          "name": "Preprocessing, Cleaning, and Labeling Strategies",
+          "fields_checked": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "score": 1,
+          "present": true,
+          "evidence": "preprocessing_strategies: resampling, spectrograms, MFCCs, multiple feature extractors; cleaning_strategies: HIPAA de-identification, transcript removal; no labeling_strategies",
+          "notes": "Extensive preprocessing and cleaning documentation. No labeling strategies."
+        },
+        {
+          "name": "Software and Tools Documented",
+          "fields_checked": ["software_and_tools"],
+          "score": 1,
+          "present": true,
+          "evidence": "Tools mentioned in preprocessing: openSMILE, Praat, parselmouth, torchaudio, OpenAI Whisper; no software_and_tools field",
+          "notes": "Multiple software tools documented in preprocessing details but not in dedicated field"
+        },
+        {
+          "name": "External Standards and Resources Referenced",
+          "fields_checked": ["external_resources", "conforms_to"],
+          "score": 1,
+          "present": true,
+          "evidence": "HIPAA Safe Harbor (external standard); PhysioNet platform; no external_resources or conforms_to fields",
+          "notes": "HIPAA standard referenced. No formal conformance statements."
+        }
+      ],
+      "element_score": 5,
+      "max_score": 5,
+      "percentage": 100.0
+    },
+    {
+      "element_id": 9,
+      "element_name": "Dataset Evaluation and Limitations Disclosure",
+      "sub_element_scores": [
+        {
+          "name": "Known Limitations Documented",
+          "fields_checked": ["known_limitations"],
+          "score": 1,
+          "present": true,
+          "evidence": "future_use_impacts.impact_details: adult cohort only, no raw audio, analyses limited to derived representations; no known_limitations field",
+          "notes": "Limitations documented in future_use_impacts but not in dedicated field"
+        },
+        {
+          "name": "Systematic Biases Identified and Described",
+          "fields_checked": ["known_biases"],
+          "score": 0,
+          "present": false,
+          "evidence": "No known_biases field or bias discussion",
+          "notes": "No bias documentation"
+        },
+        {
+          "name": "Data Anomalies and Quality Issues Noted",
+          "fields_checked": ["anomalies"],
+          "score": 0,
+          "present": false,
+          "evidence": "No anomalies field",
+          "notes": "No data quality anomalies documented"
+        },
+        {
+          "name": "Sensitive Content and Warnings Provided",
+          "fields_checked": ["sensitive_elements", "content_warnings"],
+          "score": 0,
+          "present": false,
+          "evidence": "No sensitive_elements or content_warnings fields; privacy protections described elsewhere",
+          "notes": "Privacy protections documented but no content warnings"
+        },
+        {
+          "name": "Ethical Review Details Including Conflicts",
+          "fields_checked": ["ethical_reviews"],
+          "score": 1,
+          "present": true,
+          "evidence": "ethical_reviews: IRB approval from University of South Florida with review_details",
+          "notes": "IRB documented. No conflict of interest information."
+        }
+      ],
+      "element_score": 2,
+      "max_score": 5,
+      "percentage": 40.0
+    },
+    {
+      "element_id": 10,
+      "element_name": "Cross-Platform and Community Integration",
+      "sub_element_scores": [
+        {
+          "name": "Dataset Published on a Recognized Platform",
+          "fields_checked": ["publisher"],
+          "score": 1,
+          "present": true,
+          "evidence": "PhysioNet platform (in URLs, maintainers, keywords); no publisher field",
+          "notes": "PhysioNet clearly identified as platform but not in publisher field"
+        },
+        {
+          "name": "Citation and DOI for Cross-referencing",
+          "fields_checked": ["citation", "doi"],
+          "score": 1,
+          "present": true,
+          "evidence": "DOI: https://doi.org/10.13026/249v-w155 (as id); no citation field",
+          "notes": "DOI present. No recommended citation format."
+        },
+        {
+          "name": "Community Standards or Schema Conformance",
+          "fields_checked": ["conforms_to"],
+          "score": 0,
+          "present": false,
+          "evidence": "No conforms_to field; HIPAA standard used but not as formal conformance",
+          "notes": "No schema or community standard conformance statements"
+        },
+        {
+          "name": "Outreach Materials and Documentation Links",
+          "fields_checked": ["external_resources", "page"],
+          "score": 1,
+          "present": true,
+          "evidence": "page: https://physionet.org/content/b2ai-voice/1.1/; no external_resources field",
+          "notes": "Landing page provided. No additional documentation links."
+        },
+        {
+          "name": "Related Datasets with Typed Relationships",
+          "fields_checked": ["related_datasets"],
+          "score": 0,
+          "present": false,
+          "evidence": "No related_datasets field; versions documented but not as relationships",
+          "notes": "No dataset relationships documented"
+        }
+      ],
+      "element_score": 3,
+      "max_score": 5,
+      "percentage": 60.0
+    }
+  ],
+  "summary": {
+    "total_score": 34,
+    "max_possible_score": 50,
+    "percentage_score": 68.0,
+    "sub_elements_passed": 34,
+    "sub_elements_failed": 16,
+    "element_performance": {
+      "highest_scoring": [
+        {
+          "element": "Technical Transparency (Data Collection and Processing)",
+          "score": 5,
+          "percentage": 100.0
+        }
+      ],
+      "lowest_scoring": [
+        {
+          "element": "Scientific Motivation and Funding Transparency",
+          "score": 2,
+          "percentage": 40.0
+        },
+        {
+          "element": "Dataset Evaluation and Limitations Disclosure",
+          "score": 2,
+          "percentage": 40.0
+        }
+      ],
+      "by_element": [
+        {"id": 1, "name": "Dataset Discovery and Identification", "score": 4, "percentage": 80.0},
+        {"id": 2, "name": "Dataset Access and Retrieval", "score": 3, "percentage": 60.0},
+        {"id": 3, "name": "Data Reuse and Interoperability", "score": 3, "percentage": 60.0},
+        {"id": 4, "name": "Ethical Use and Privacy Safeguards", "score": 4, "percentage": 80.0},
+        {"id": 5, "name": "Data Composition and Structure", "score": 4, "percentage": 80.0},
+        {"id": 6, "name": "Data Provenance and Version Tracking", "score": 4, "percentage": 80.0},
+        {"id": 7, "name": "Scientific Motivation and Funding Transparency", "score": 2, "percentage": 40.0},
+        {"id": 8, "name": "Technical Transparency (Data Collection and Processing)", "score": 5, "percentage": 100.0},
+        {"id": 9, "name": "Dataset Evaluation and Limitations Disclosure", "score": 2, "percentage": 40.0},
+        {"id": 10, "name": "Cross-Platform and Community Integration", "score": 3, "percentage": 60.0}
+      ]
+    }
+  },
+  "recommendations": {
+    "high_priority": [
+      "Add funding information (funders field) with grant IDs and agency names",
+      "Add creator/author attribution with institutional affiliations",
+      "Add variable-level metadata for tabular data files (phenotype.tsv, static_features.tsv)",
+      "Document known limitations in dedicated known_limitations field",
+      "Document known biases (selection bias, demographic bias, etc.)"
+    ],
+    "medium_priority": [
+      "Add recommended citation format",
+      "Document software tools in software_and_tools field with versions",
+      "Add schema conformance statements (conforms_to, conforms_to_schema)",
+      "Add data quality anomalies if any exist",
+      "Add prohibited and intended uses",
+      "Add related datasets with typed relationships",
+      "Add external resources (documentation, tutorials, publications)"
+    ],
+    "low_priority": [
+      "Add separate doi field in addition to using DOI as id",
+      "Add RRID if applicable",
+      "Add publisher field (PhysioNet)",
+      "Add formal encoding and media_type specifications",
+      "Add IP restrictions and confidentiality level if applicable",
+      "Add participant compensation information",
+      "Add vulnerable population considerations",
+      "Add content warnings if applicable"
+    ]
+  }
+}

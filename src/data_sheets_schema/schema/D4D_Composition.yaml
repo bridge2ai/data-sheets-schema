@@ -159,8 +159,9 @@ classes:
       (e.g., users' movie ratings, social network links)?
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Explanation of how these relationships are represented."
+      relationship_details:
+        description: >
+          Details on relationships between instances (e.g., graph edges, ratings).
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -172,7 +173,9 @@ classes:
       If so, how are they defined and why?
     is_a: DatasetProperty
     attributes:
-      description:
+      split_details:
+        description: >
+          Details on recommended data splits and their rationale.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -183,10 +186,67 @@ classes:
       Are there any errors, sources of noise, or redundancies in the dataset?
     is_a: DatasetProperty
     attributes:
-      description:
+      anomaly_details:
+        description: >
+          Details on errors, noise sources, or redundancies in the dataset.
         range: string
         multivalued: true
         slot_uri: dcterms:description
+
+
+  DatasetBias:
+    description: >
+      Documents known biases present in the dataset. Biases are systematic errors
+      or prejudices that may affect the representativeness or fairness of the data.
+      Distinct from anomalies (data quality issues) and limitations (scope constraints).
+    is_a: DatasetProperty
+    attributes:
+      bias_type:
+        description: >
+          The type of bias identified, using standardized categories from
+          the Artificial Intelligence Ontology (AIO).
+        range: BiasTypeEnum
+      bias_description:
+        description: >
+          Detailed description of how this bias manifests in the dataset,
+          including affected populations, features, or outcomes.
+        range: string
+        slot_uri: dcterms:description
+      mitigation_strategy:
+        description: >
+          Steps taken or recommended to mitigate this bias.
+        range: string
+      affected_subsets:
+        description: >
+          Specific subsets or features of the dataset affected by this bias.
+        range: string
+        multivalued: true
+
+
+  DatasetLimitation:
+    description: >
+      Documents known limitations of the dataset that may affect its use
+      or interpretation. Distinct from biases (systematic errors) and
+      anomalies (data quality issues).
+    is_a: DatasetProperty
+    attributes:
+      limitation_type:
+        description: >
+          Category of limitation (e.g., scope, coverage, temporal, methodological).
+        range: LimitationTypeEnum
+      limitation_description:
+        description: >
+          Detailed description of the limitation and its implications.
+        range: string
+        slot_uri: dcterms:description
+      scope_impact:
+        description: >
+          How this limitation affects the scope or applicability of the dataset.
+        range: string
+      recommended_mitigation:
+        description: >
+          Recommended approaches for users to address this limitation.
+        range: string
 
 
   ExternalResource:
@@ -195,12 +255,13 @@ classes:
       websites, other datasets)? If external, are there guarantees that those
       resources will remain available and unchanged?
     is_a: DatasetProperty
-    attributes:
+    slots:
+      - external_resources
+    slot_usage:
       external_resources:
         description: "List of links or identifiers for external resources."
         range: string
-        multivalued: true
-        slot_uri: dcterms:references
+    attributes:
       future_guarantees:
         description: >
           Explanation of any commitments that external resources will remain
@@ -231,7 +292,9 @@ classes:
       confidential_elements_present:
         range: boolean
         description: "Indicates whether any confidential data elements are present."
-      description:
+      confidentiality_details:
+        description: >
+          Details on confidential data elements and handling procedures.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -280,7 +343,16 @@ classes:
       identifiable_elements_present:
         range: boolean
         description: "Indicates whether data subjects can be identified."
-      description:
+      method:
+        range: string
+        description: "Method used for de-identification (e.g., HIPAA Safe Harbor)."
+      identifiers_removed:
+        range: string
+        multivalued: true
+        description: "List of identifier types removed during de-identification."
+      deidentification_details:
+        description: >
+          Details on de-identification procedures and residual risks.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -295,7 +367,9 @@ classes:
       sensitive_elements_present:
         range: boolean
         description: "Indicates whether sensitive data elements are present."
-      description:
+      sensitivity_details:
+        description: >
+          Details on sensitive data elements present and handling procedures.
         range: string
         multivalued: true
         slot_uri: dcterms:description

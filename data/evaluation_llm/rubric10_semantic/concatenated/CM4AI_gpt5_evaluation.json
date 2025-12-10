@@ -1,0 +1,738 @@
+{
+  "evaluation_metadata": {
+    "dataset_id": "CM4AI",
+    "generator": "gpt5",
+    "evaluation_mode": "concatenated",
+    "rubric_version": "2.0",
+    "rubric_type": "rubric10-semantic",
+    "evaluation_date": "2025-12-09",
+    "evaluator": "Claude Sonnet 4.5",
+    "temperature": 0.0,
+    "file_path": "data/d4d_concatenated/gpt5/CM4AI_d4d.yaml"
+  },
+  "rubric10_scores": {
+    "element_1_discovery": {
+      "name": "Dataset Discovery and Identification",
+      "sub_elements": {
+        "persistent_identifier": {
+          "score": 1,
+          "evidence": "doi: 'doi:10.18130/V3/B35XWX', id: 'doi:10.18130/V3/B35XWX', same_as: ['https://doi.org/10.18130/V3/B35XWX']",
+          "semantic_analysis": {
+            "doi_format": "VALID - Proper DOI prefix and suffix format",
+            "doi_url_consistency": "CONSISTENT - DOI appears in id, doi, and same_as fields",
+            "resolvability": "DOI should resolve to https://doi.org/10.18130/V3/B35XWX"
+          }
+        },
+        "title_description": {
+          "score": 1,
+          "evidence": "title: 'Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)', description: comprehensive 12-line description",
+          "semantic_analysis": {
+            "title_quality": "HIGH - Descriptive, includes project name, date, and beta status",
+            "description_completeness": "EXCELLENT - Covers data types, cell lines, treatments, packaging format, collaborators, copyright, and citation requirements"
+          }
+        },
+        "keywords": {
+          "score": 1,
+          "evidence": "29 keywords including AI, Bridge2AI, CM4AI, CRISPR/Cas9, perturb-seq, scRNAseq, iPSC, SEC-MS, immunofluorescence, etc.",
+          "semantic_analysis": {
+            "keyword_count": 29,
+            "keyword_quality": "HIGH - Mix of techniques, cell types, diseases, and project identifiers",
+            "domain_coverage": "Comprehensive coverage of functional genomics, AI/ML, and cell biology domains"
+          }
+        },
+        "landing_page": {
+          "score": 1,
+          "evidence": "publisher: 'https://dataverse.lib.virginia.edu', use_repository mentions LibraData",
+          "semantic_analysis": {
+            "publisher_url": "VALID - University of Virginia Dataverse repository",
+            "download_url": "NOT_PRESENT - No explicit download_url field",
+            "resources_hierarchy": "PRESENT - 6 subsets with detailed metadata (RO-Crates and ZIP archives)"
+          }
+        },
+        "hierarchical_structure": {
+          "score": 1,
+          "evidence": "6 subsets defined with complete metadata (CRISPR atlas, raw sequences, imaging datasets, SEC-MS)",
+          "semantic_analysis": {
+            "subset_count": 6,
+            "parent_datasets": "NOT_PRESENT",
+            "related_datasets": "NOT_PRESENT",
+            "resources_quality": "HIGH - Each subset has id, name, title, description, format, md5, and full D4D metadata"
+          }
+        }
+      },
+      "total_score": 5,
+      "max_score": 5,
+      "percentage": 100.0
+    },
+    "element_2_access": {
+      "name": "Dataset Access and Retrieval",
+      "sub_elements": {
+        "access_policy": {
+          "score": 1,
+          "evidence": "license_and_use_terms: CC BY-NC-SA 4.0, ip_restrictions: UC Regents and Stanford copyright",
+          "semantic_analysis": {
+            "license": "VALID - Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International",
+            "license_clarity": "HIGH - Explicit license type and attribution requirements",
+            "copyright_holders": "2 entities: UC Regents (most data), Stanford (spatial proteomics)"
+          }
+        },
+        "regulatory_restrictions": {
+          "score": 0,
+          "evidence": "No regulatory_restrictions or confidentiality_level fields present",
+          "semantic_analysis": {
+            "regulatory_field": "ABSENT",
+            "confidentiality_field": "ABSENT",
+            "inference": "Likely public data given CC license, but explicit statement would improve clarity"
+          }
+        },
+        "download_url": {
+          "score": 0,
+          "evidence": "No download_url field; use_repository mentions 'selecting files individually for download'",
+          "semantic_analysis": {
+            "direct_download": "NOT_PROVIDED",
+            "access_method": "Repository-based (Dataverse), manual file selection suggested",
+            "barrier_level": "MODERATE - Requires navigation to repository"
+          }
+        },
+        "distribution_formats": {
+          "score": 1,
+          "evidence": "distribution_formats: RO-Crate packages (JSON) and ZIP archives; subsets specify JSON, ZIP, with media_type and md5",
+          "semantic_analysis": {
+            "format_diversity": "2 primary formats: RO-Crate (JSON metadata), ZIP (imaging)",
+            "format_standards": "HIGH - RO-Crate is a community standard (conforms_to: https://w3id.org/ro/crate)",
+            "file_integrity": "EXCELLENT - MD5 checksums provided for all subsets"
+          }
+        },
+        "external_resources": {
+          "score": 1,
+          "evidence": "External resources: PRIDE repository (planned); existing_uses cite bioRxiv publications",
+          "semantic_analysis": {
+            "external_links": "1 external repository (PRIDE) + 2 publications",
+            "link_status": "PRIDE upload planned (future), publications are existing uses",
+            "related_datasets_field": "ABSENT - No formal related_datasets field"
+          }
+        }
+      },
+      "total_score": 3,
+      "max_score": 5,
+      "percentage": 60.0
+    },
+    "element_3_reuse": {
+      "name": "Data Reuse and Interoperability",
+      "sub_elements": {
+        "license_reuse": {
+          "score": 1,
+          "evidence": "CC BY-NC-SA 4.0 allows reuse with attribution, non-commercial, share-alike",
+          "semantic_analysis": {
+            "reuse_permitted": "YES - With conditions (attribution, NC, SA)",
+            "commercial_use": "PROHIBITED - Non-commercial license",
+            "derivative_works": "ALLOWED - Must share under same license"
+          }
+        },
+        "standardized_formats": {
+          "score": 1,
+          "evidence": "format: JSON, compression: ZIP, media_type: application/json, application/zip",
+          "semantic_analysis": {
+            "format_standards": "HIGH - JSON and ZIP are standard formats",
+            "encoding": "NOT_SPECIFIED - No encoding field for text content",
+            "binary_vs_text": "Mixed: JSON (text), ZIP (binary)"
+          }
+        },
+        "schema_conformance": {
+          "score": 1,
+          "evidence": "conforms_to: 'https://w3id.org/ro/crate' at dataset and subset levels",
+          "semantic_analysis": {
+            "standard": "RO-Crate - Research Object Crate",
+            "conforms_to_schema": "NOT_PRESENT - No schema conformance beyond RO-Crate",
+            "validation": "RO-Crate provides structured metadata validation"
+          }
+        },
+        "variable_metadata": {
+          "score": 0,
+          "evidence": "No variables field present",
+          "semantic_analysis": {
+            "variables_field": "ABSENT",
+            "alternative_description": "instances field describes data types generically",
+            "data_dictionary": "NOT_PROVIDED - Would be in RO-Crate packages themselves"
+          }
+        },
+        "use_guidance": {
+          "score": 0,
+          "evidence": "No intended_uses, prohibited_uses, or discouraged_uses fields; only existing_uses (2 publications)",
+          "semantic_analysis": {
+            "intended_uses": "ABSENT",
+            "prohibited_uses": "ABSENT - Only license restrictions",
+            "existing_uses": "PRESENT - 2 bioRxiv publications cited",
+            "use_clarity": "MODERATE - License provides some guidance, but explicit use cases missing"
+          }
+        }
+      },
+      "total_score": 3,
+      "max_score": 5,
+      "percentage": 60.0
+    },
+    "element_4_ethics": {
+      "name": "Ethical Use and Privacy Safeguards",
+      "sub_elements": {
+        "ethics_review": {
+          "score": 0,
+          "evidence": "No ethical_reviews or human_subject_research fields present",
+          "semantic_analysis": {
+            "irb_documentation": "ABSENT",
+            "ethics_applicability": "Potentially N/A - Cell line data (iPSCs, cancer cell lines) may not require IRB",
+            "transparency": "LOW - No explicit statement about ethics oversight or exemption"
+          }
+        },
+        "deidentification": {
+          "score": 0,
+          "evidence": "No is_deidentified field present",
+          "semantic_analysis": {
+            "deidentification_field": "ABSENT",
+            "applicability": "Likely N/A - Cell line research, not human subjects",
+            "inference": "Cell lines (KOLF2.1J iPSC, MDA-MB-468) are commercial/research lines"
+          }
+        },
+        "privacy_protections": {
+          "score": 0,
+          "evidence": "No participant_privacy field present",
+          "semantic_analysis": {
+            "privacy_field": "ABSENT",
+            "applicability": "N/A - No human subjects, only cell lines",
+            "data_type": "In vitro experiments on cell lines"
+          }
+        },
+        "informed_consent": {
+          "score": 0,
+          "evidence": "No informed_consent field present",
+          "semantic_analysis": {
+            "consent_field": "ABSENT",
+            "applicability": "N/A - Cell line research",
+            "original_donors": "Not traceable to individual donors in this dataset"
+          }
+        },
+        "vulnerable_populations": {
+          "score": 0,
+          "evidence": "No vulnerable_populations or participant_compensation fields",
+          "semantic_analysis": {
+            "vulnerable_populations_field": "ABSENT",
+            "compensation_field": "ABSENT",
+            "applicability": "N/A - No human subjects research",
+            "dataset_type": "In vitro functional genomics"
+          }
+        }
+      },
+      "total_score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "semantic_interpretation": "All ethics fields absent, but likely not applicable for cell line research. Ideally would have explicit statement: 'Not applicable - cell line research only'"
+    },
+    "element_5_composition": {
+      "name": "Data Composition and Structure",
+      "sub_elements": {
+        "subpopulations": {
+          "score": 0,
+          "evidence": "No subpopulations field present",
+          "semantic_analysis": {
+            "subpopulations_field": "ABSENT",
+            "alternative": "Cell types described in description and keywords: iPSCs, NPCs, neurons, cardiomyocytes, MDA-MB-468",
+            "structured_metadata": "Missing - Would benefit from formal subpopulation documentation"
+          }
+        },
+        "instances": {
+          "score": 1,
+          "evidence": "instances field present in all 6 subsets with representation and data_type",
+          "semantic_analysis": {
+            "instance_count": "6 subsets, each with instances metadata",
+            "instance_quality": "GOOD - Describes data representation (e.g., 'CRISPR perturbation atlas metadata', 'Immunofluorescence confocal microscopy images')",
+            "quantitative_info": "LIMITED - No explicit n= sample counts"
+          }
+        },
+        "variable_metadata": {
+          "score": 0,
+          "evidence": "No variables or is_tabular fields present",
+          "semantic_analysis": {
+            "variables_field": "ABSENT",
+            "is_tabular_field": "ABSENT",
+            "data_modality": "Multi-modal: scRNA-seq, proteomics, imaging - inherently non-tabular or semi-tabular"
+          }
+        },
+        "data_topics": {
+          "score": 1,
+          "evidence": "instances field describes data topics: perturb-seq (11,739 genes), SEC-MS (protein complexes), IF imaging (563 proteins)",
+          "semantic_analysis": {
+            "topic_clarity": "HIGH - Clear description of perturbation targets, protein counts, cell types",
+            "coverage_scope": "Well-defined: genome-scale CRISPRi, proteome-scale SEC-MS, 563 protein localization"
+          }
+        },
+        "quality_issues": {
+          "score": 0,
+          "evidence": "No anomalies or sampling_strategies fields present",
+          "semantic_analysis": {
+            "anomalies_field": "ABSENT",
+            "quality_documentation": "MISSING - No quality control or known issues documented",
+            "validation_info": "Publications cited may contain validation details"
+          }
+        }
+      },
+      "total_score": 2,
+      "max_score": 5,
+      "percentage": 40.0
+    },
+    "element_6_provenance": {
+      "name": "Data Provenance and Version Tracking",
+      "sub_elements": {
+        "version_number": {
+          "score": 1,
+          "evidence": "version: '1.4'",
+          "semantic_analysis": {
+            "version_format": "SIMPLE - Semantic versioning (1.4)",
+            "version_clarity": "CLEAR - Indicates fourth minor version"
+          }
+        },
+        "version_access": {
+          "score": 0,
+          "evidence": "No version_access field present",
+          "semantic_analysis": {
+            "version_access_field": "ABSENT",
+            "repository_versioning": "Dataverse supports versioning, but not documented in D4D",
+            "historical_access": "UNKNOWN - Not documented"
+          }
+        },
+        "change_descriptions": {
+          "score": 0,
+          "evidence": "No errata field; updates field mentions 'Data will be augmented regularly' but no changelog",
+          "semantic_analysis": {
+            "errata_field": "ABSENT",
+            "changelog": "NOT_PROVIDED - Generic statement about future updates only",
+            "version_1.4_changes": "NOT_DOCUMENTED - No description of what changed from 1.3 to 1.4"
+          }
+        },
+        "update_schedule": {
+          "score": 1,
+          "evidence": "updates.description: 'Data will be augmented regularly through the end of the project'",
+          "semantic_analysis": {
+            "update_frequency": "VAGUE - 'regularly' not quantified",
+            "update_end_date": "Project-bound (unclear when project ends)",
+            "update_commitment": "PRESENT but not specific"
+          }
+        },
+        "provenance": {
+          "score": 1,
+          "evidence": "created_on: '2025-02-27', issued: '2025-03-03', publishers and institutions documented",
+          "semantic_analysis": {
+            "was_derived_from": "ABSENT - No explicit derivation chain",
+            "creation_dates": "PRESENT - Creation and publication dates clear",
+            "institutional_provenance": "EXCELLENT - Consortium members, institutions, funders documented",
+            "release_notes": "ABSENT"
+          }
+        }
+      },
+      "total_score": 3,
+      "max_score": 5,
+      "percentage": 60.0
+    },
+    "element_7_motivation": {
+      "name": "Scientific Motivation and Funding Transparency",
+      "sub_elements": {
+        "purposes": {
+          "score": 1,
+          "evidence": "purposes: 'Provide AI-ready multi-modal functional genomics datasets (perturb-seq, proteomics, imaging) to support machine learning and systems biology research'",
+          "semantic_analysis": {
+            "purpose_clarity": "HIGH - Clear AI/ML focus",
+            "purpose_count": "1 at dataset level, 1-2 per subset",
+            "alignment": "Consistent across dataset and subsets"
+          }
+        },
+        "tasks": {
+          "score": 1,
+          "evidence": "3 tasks: perturb-seq analysis, protein complex inference, subcellular localization classification",
+          "semantic_analysis": {
+            "task_count": 3,
+            "task_specificity": "HIGH - Specific analytical objectives per data modality",
+            "task_clarity": "EXCELLENT - Concrete tasks with clear inputs/outputs"
+          }
+        },
+        "funding_sources": {
+          "score": 1,
+          "evidence": "funders: NIH Bridge2AI CM4AI present at dataset and all subset levels",
+          "semantic_analysis": {
+            "funder_count": 1,
+            "funder_identification": "CLEAR - NIH via Bridge2AI program",
+            "consistency": "Consistent across dataset and subsets"
+          }
+        },
+        "grant_numbers": {
+          "score": 1,
+          "evidence": "grant_number: '1OT2OD032742-01' in all funders entries",
+          "semantic_analysis": {
+            "grant_format": "VALID - NIH grant format (type OT2, institute OD, serial 032742, amendment 01)",
+            "grant_consistency": "EXCELLENT - Same grant appears in dataset and all 6 subsets",
+            "grant_resolvability": "Should be resolvable via NIH RePORTER (id: 'https://reporter.nih.gov/')"
+          }
+        },
+        "creators_acknowledgements": {
+          "score": 1,
+          "evidence": "53 creators with ORCIDs and affiliations; multiple institutions acknowledged",
+          "semantic_analysis": {
+            "creator_count": 53,
+            "orcid_coverage": "HIGH - 42/53 (79%) have ORCIDs",
+            "affiliation_diversity": "EXCELLENT - 8+ institutions (UCSD, UCSF, Stanford, UVA, Yale, UAB, SFU, Hastings)",
+            "attribution_quality": "HIGH - Name, ORCID, affiliation for most creators"
+          }
+        }
+      },
+      "total_score": 5,
+      "max_score": 5,
+      "percentage": 100.0
+    },
+    "element_8_technical": {
+      "name": "Technical Transparency (Data Collection and Processing)",
+      "sub_elements": {
+        "collection_mechanisms": {
+          "score": 1,
+          "evidence": "collection_mechanisms: 3 entries covering CRISPRi perturb-seq, ICC-IF microscopy, SEC-MS",
+          "semantic_analysis": {
+            "mechanism_count": 3,
+            "mechanism_detail": "HIGH - Specific techniques, cell lines, and channels described",
+            "reproducibility": "GOOD - Enough detail for general understanding, may need protocol for exact replication"
+          }
+        },
+        "acquisition_methods": {
+          "score": 1,
+          "evidence": "acquisition_methods field present in all subsets (maps to collection_mechanisms)",
+          "semantic_analysis": {
+            "method_count": "3 distinct methods across subsets",
+            "method_specificity": "HIGH - CRISPRi details, microscopy channels, SEC-MS workflow",
+            "instrument_info": "PARTIAL - Confocal microscopy mentioned, but not specific instruments"
+          }
+        },
+        "preprocessing_strategies": {
+          "score": 0,
+          "evidence": "No preprocessing_strategies, cleaning_strategies, or labeling_strategies fields",
+          "semantic_analysis": {
+            "preprocessing_field": "ABSENT",
+            "cleaning_field": "ABSENT",
+            "labeling_field": "ABSENT",
+            "inference": "Raw data provided (e.g., 'Raw Sequences' subset), preprocessing may be user responsibility"
+          }
+        },
+        "software_tools": {
+          "score": 0,
+          "evidence": "No software_and_tools field present",
+          "semantic_analysis": {
+            "software_field": "ABSENT",
+            "tool_documentation": "MISSING - No bioinformatics pipelines or analysis software documented",
+            "fairscape_framework": "Mentioned in description as packaging method, but not in software field"
+          }
+        },
+        "external_standards": {
+          "score": 1,
+          "evidence": "conforms_to: 'https://w3id.org/ro/crate', external_resources: PRIDE repository",
+          "semantic_analysis": {
+            "standards_count": "1 (RO-Crate)",
+            "standard_quality": "HIGH - RO-Crate is a community standard for research data packaging",
+            "external_resource_count": 1,
+            "community_alignment": "STRONG - RO-Crate widely adopted in scientific computing"
+          }
+        }
+      },
+      "total_score": 3,
+      "max_score": 5,
+      "percentage": 60.0
+    },
+    "element_9_limitations": {
+      "name": "Dataset Evaluation and Limitations Disclosure",
+      "sub_elements": {
+        "known_limitations": {
+          "score": 0,
+          "evidence": "No known_limitations field present",
+          "semantic_analysis": {
+            "limitations_field": "ABSENT",
+            "implicit_limitations": "Beta release status, data augmentation ongoing",
+            "transparency": "LOW - No explicit discussion of dataset limitations"
+          }
+        },
+        "systematic_biases": {
+          "score": 0,
+          "evidence": "No known_biases field present",
+          "semantic_analysis": {
+            "biases_field": "ABSENT",
+            "potential_biases": "Cell line selection (KOLF2.1J, MDA-MB-468), perturbation coverage",
+            "disclosure": "MISSING - Would benefit from discussion of cell line representativeness"
+          }
+        },
+        "data_anomalies": {
+          "score": 0,
+          "evidence": "No anomalies field present",
+          "semantic_analysis": {
+            "anomalies_field": "ABSENT",
+            "quality_metrics": "NOT_PROVIDED",
+            "validation": "Publications may contain validation, but not in D4D metadata"
+          }
+        },
+        "sensitive_content": {
+          "score": 0,
+          "evidence": "No sensitive_elements or content_warnings fields",
+          "semantic_analysis": {
+            "sensitive_elements": "ABSENT",
+            "content_warnings": "ABSENT",
+            "applicability": "Likely N/A for cell line data, but explicit statement would be ideal"
+          }
+        },
+        "ethical_conflicts": {
+          "score": 0,
+          "evidence": "No ethical_reviews field to document conflicts or ethical considerations",
+          "semantic_analysis": {
+            "ethical_reviews_field": "ABSENT",
+            "conflict_disclosure": "MISSING - No conflict of interest statements",
+            "ethics_transparency": "LOW - No ethics documentation despite 53 authors and 8+ institutions"
+          }
+        }
+      },
+      "total_score": 0,
+      "max_score": 5,
+      "percentage": 0.0,
+      "semantic_interpretation": "Critical gap - even cell line research should document limitations, potential biases in cell line selection, and data quality metrics"
+    },
+    "element_10_integration": {
+      "name": "Cross-Platform and Community Integration",
+      "sub_elements": {
+        "recognized_platform": {
+          "score": 1,
+          "evidence": "publisher: 'https://dataverse.lib.virginia.edu' (UVA LibraData)",
+          "semantic_analysis": {
+            "platform": "RECOGNIZED - University of Virginia Dataverse (LibraData)",
+            "platform_type": "Institutional repository with DataCite integration",
+            "platform_reputation": "HIGH - University-backed, persistent infrastructure"
+          }
+        },
+        "citation_doi": {
+          "score": 1,
+          "evidence": "citation requirement in license_and_use_terms; DOI: 10.18130/V3/B35XWX",
+          "semantic_analysis": {
+            "citation_field": "IMPLIED - License requires citing dataset and publications",
+            "doi_presence": "PRESENT",
+            "citation_format": "NOT_PROVIDED - No explicit citation string, but DOI enables auto-generation"
+          }
+        },
+        "community_standards": {
+          "score": 1,
+          "evidence": "conforms_to: 'https://w3id.org/ro/crate' (RO-Crate standard)",
+          "semantic_analysis": {
+            "standard": "RO-Crate 1.1 (research data packaging)",
+            "community": "Research Data Alliance (RDA), European Open Science Cloud (EOSC)",
+            "adoption": "Growing standard in life sciences and AI/ML"
+          }
+        },
+        "outreach_documentation": {
+          "score": 1,
+          "evidence": "external_resources: PRIDE (proteomics), existing_uses: 2 bioRxiv publications, CM4AI.org mentioned",
+          "semantic_analysis": {
+            "external_resource_count": "1 repository + 2 publications",
+            "project_website": "CM4AI.org mentioned in description",
+            "documentation_links": "PARTIAL - Publications link to methods, but no explicit docs URL"
+          }
+        },
+        "related_datasets": {
+          "score": 0,
+          "evidence": "No related_datasets field with typed relationships",
+          "semantic_analysis": {
+            "related_datasets_field": "ABSENT",
+            "implicit_relationships": "Future PRIDE upload suggests related proteomics datasets",
+            "relationship_types": "NOT_SPECIFIED - No dcterms:relation or similar"
+          }
+        }
+      },
+      "total_score": 4,
+      "max_score": 5,
+      "percentage": 80.0
+    }
+  },
+  "summary_statistics": {
+    "total_score": 28,
+    "max_possible_score": 50,
+    "overall_percentage": 56.0,
+    "element_scores": {
+      "element_1_discovery": 5,
+      "element_2_access": 3,
+      "element_3_reuse": 3,
+      "element_4_ethics": 0,
+      "element_5_composition": 2,
+      "element_6_provenance": 3,
+      "element_7_motivation": 5,
+      "element_8_technical": 3,
+      "element_9_limitations": 0,
+      "element_10_integration": 4
+    },
+    "elements_with_full_score": [
+      "element_1_discovery",
+      "element_7_motivation"
+    ],
+    "elements_with_zero_score": [
+      "element_4_ethics",
+      "element_9_limitations"
+    ]
+  },
+  "semantic_analysis": {
+    "doi_validation": {
+      "doi_present": true,
+      "doi_format": "VALID",
+      "doi_string": "doi:10.18130/V3/B35XWX",
+      "doi_url": "https://doi.org/10.18130/V3/B35XWX",
+      "doi_consistency": "CONSISTENT - Appears in id, doi, and same_as fields",
+      "doi_prefix": "10.18130 (University of Virginia DataCommons)",
+      "doi_suffix": "V3/B35XWX (Dataverse versioned dataset)",
+      "resolvability": "Expected to resolve to UVA Dataverse record"
+    },
+    "grant_validation": {
+      "grant_present": true,
+      "grant_number": "1OT2OD032742-01",
+      "grant_format": "VALID - NIH grant format",
+      "grant_components": {
+        "type_code": "OT2 (Other Transaction Award)",
+        "activity_code": "1 (New award)",
+        "institute": "OD (Office of the Director)",
+        "serial_number": "032742",
+        "amendment": "01"
+      },
+      "grant_consistency": "EXCELLENT - Same grant in dataset + all 6 subsets",
+      "grantor_id": "https://reporter.nih.gov/",
+      "program": "Bridge2AI CM4AI",
+      "resolvability": "Should resolve via NIH RePORTER"
+    },
+    "orcid_analysis": {
+      "total_creators": 53,
+      "creators_with_orcid": 42,
+      "orcid_coverage_percentage": 79.2,
+      "orcid_format": "VALID - All ORCIDs follow https://orcid.org/XXXX-XXXX-XXXX-XXXX format",
+      "sample_orcids": [
+        "https://orcid.org/0000-0003-4060-7360",
+        "https://orcid.org/0000-0003-4535-3486",
+        "https://orcid.org/0000-0003-4647-3877"
+      ],
+      "creators_without_orcid": [
+        "Axelsson U",
+        "Chinn B",
+        "Fall J",
+        "Johannesson A",
+        "Khaliq H",
+        "Marquez C",
+        "Muralidharan M",
+        "Pan E",
+        "Polacco B",
+        "Zhang Y",
+        "Niestroy J"
+      ]
+    },
+    "date_consistency": {
+      "created_on": "2025-02-27",
+      "issued": "2025-03-03",
+      "time_gap": "4 days (reasonable for publication process)",
+      "date_format": "ISO 8601 YYYY-MM-DD",
+      "temporal_consistency": "VALID - Creation precedes publication"
+    },
+    "metadata_consistency": {
+      "dataset_vs_subsets": {
+        "funders": "CONSISTENT - Same funder/grant in dataset + all subsets",
+        "license": "CONSISTENT - Same CC BY-NC-SA 4.0 across all levels",
+        "publication_date": "CONSISTENT - 2025-03-03 across all subsets",
+        "conforms_to": "CONSISTENT - RO-Crate standard throughout",
+        "maintainer": "CONSISTENT - Same contact (Trey Ideker, UVA Dataverse) across all"
+      },
+      "cross_references": {
+        "publications": "2 bioRxiv papers cited in existing_uses",
+        "external_repositories": "PRIDE mentioned (future upload)",
+        "project_website": "CM4AI.org mentioned in description"
+      }
+    },
+    "standardization_quality": {
+      "controlled_vocabularies": {
+        "license": "STANDARD - Creative Commons license",
+        "conforms_to": "STANDARD - RO-Crate specification",
+        "media_type": "STANDARD - MIME types (application/json, application/zip)",
+        "keywords": "DOMAIN-SPECIFIC - Mix of standard terms and project-specific"
+      },
+      "identifier_schemes": {
+        "doi": "PRESENT",
+        "orcid": "HIGH_COVERAGE (79%)",
+        "ror": "ABSENT - Institutions identified by name, not ROR",
+        "grant_id": "PRESENT (NIH format)"
+      }
+    },
+    "completeness_gaps": {
+      "critical_missing": [
+        "download_url - No direct access URL",
+        "regulatory_restrictions - No explicit statement",
+        "variables - No data dictionary",
+        "preprocessing_strategies - No processing documentation",
+        "software_and_tools - No tool/pipeline documentation",
+        "known_limitations - No limitation disclosure",
+        "known_biases - No bias documentation",
+        "anomalies - No quality metrics"
+      ],
+      "likely_not_applicable": [
+        "ethical_reviews - Cell line research",
+        "is_deidentified - No human subjects",
+        "participant_privacy - No human subjects",
+        "informed_consent - No human subjects",
+        "vulnerable_populations - No human subjects"
+      ],
+      "would_improve_quality": [
+        "intended_uses - Explicit use cases beyond license",
+        "prohibited_uses - Specific prohibitions",
+        "version_access - How to access older versions",
+        "errata - Version changelog",
+        "related_datasets - Typed relationships to other datasets",
+        "subpopulations - Formal cell type/condition metadata",
+        "sampling_strategies - How samples were selected"
+      ]
+    },
+    "strengths": {
+      "discovery": "EXCELLENT - Comprehensive identification with DOI, title, description, keywords",
+      "attribution": "EXCELLENT - 53 creators with 79% ORCID coverage, clear institutional affiliations",
+      "funding_transparency": "EXCELLENT - Clear NIH grant with consistent metadata across dataset and subsets",
+      "hierarchical_organization": "EXCELLENT - 6 well-documented subsets with complete metadata inheritance",
+      "standardization": "STRONG - RO-Crate packaging, CC license, MIME types, MD5 checksums",
+      "multi_modal_coverage": "STRONG - Integrates genomics (perturb-seq), proteomics (SEC-MS), imaging (IF)"
+    },
+    "weaknesses": {
+      "direct_access": "MODERATE - No download_url, requires repository navigation",
+      "quality_documentation": "WEAK - No anomalies, biases, or limitations documented",
+      "processing_transparency": "WEAK - No preprocessing, cleaning, or software documentation",
+      "use_guidance": "WEAK - Only existing uses, no intended/prohibited uses beyond license",
+      "versioning_details": "MODERATE - Version number present, but no changelog or version access info",
+      "data_dictionary": "MISSING - No variables or tabular structure documentation"
+    }
+  },
+  "recommendations": {
+    "high_priority": [
+      "Add download_url or explicit access instructions",
+      "Document preprocessing_strategies and software_and_tools used in data generation",
+      "Add known_limitations field discussing beta status, cell line representativeness, coverage gaps",
+      "Document intended_uses and prohibited_uses beyond license terms",
+      "Add variables field or link to data dictionaries within RO-Crate packages"
+    ],
+    "medium_priority": [
+      "Add version_access documentation for accessing previous versions",
+      "Include errata or changelog describing v1.0 → v1.4 changes",
+      "Document subpopulations with formal cell type/treatment metadata",
+      "Add regulatory_restrictions field (even if 'None - public data')",
+      "Include related_datasets with typed relationships to PRIDE, publications, other datasets"
+    ],
+    "low_priority": [
+      "Consider adding ROR IDs for institutions alongside text names",
+      "Document anomalies or quality metrics from data validation",
+      "Add explicit ethics statement (e.g., 'Not applicable - cell line research only')",
+      "Include ORCIDs for remaining 11 creators without them",
+      "Add content_warnings if any cell lines derived from sensitive sources"
+    ]
+  },
+  "overall_assessment": {
+    "score_interpretation": "56.0% (28/50) - GOOD but with significant gaps",
+    "score_category": "MODERATE",
+    "key_insight": "Dataset excels at discovery, attribution, and funding transparency (elements 1, 7, 10) but lacks critical documentation for quality, limitations, and technical reproducibility (elements 4, 9). The 0% scores on ethics and limitations are concerning even for cell line research.",
+    "context": "GPT-5 generated comprehensive identification metadata and excellent attribution, but failed to populate fields requiring domain expertise (preprocessing, quality metrics, limitations) or fields that may be truly N/A (human subjects ethics).",
+    "comparison_to_ideal": "Strong foundation (discovery, funding, hierarchical structure) but needs substantial enhancement in transparency (quality, biases, limitations) and reusability (preprocessing, tools, use guidance) to meet full D4D standards.",
+    "semantic_quality": "MIXED - Excellent format compliance (DOIs, ORCIDs, grants, dates) and consistency across dataset/subsets, but semantic completeness limited by missing domain-specific documentation."
+  }
+}

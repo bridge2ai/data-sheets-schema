@@ -1,0 +1,649 @@
+{
+  "evaluation_metadata": {
+    "dataset": "CHORUS",
+    "method": "claudecode_agent",
+    "file_path": "data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml",
+    "rubric": "rubric10_semantic",
+    "rubric_version": "2.0",
+    "evaluation_date": "2025-12-09",
+    "evaluator": "Claude Sonnet 4.5",
+    "temperature": 0.0,
+    "evaluation_mode": "deterministic_semantic"
+  },
+
+  "semantic_analysis": {
+    "identifier_validation": {
+      "id_format": {
+        "value": "https://chorus4ai.org/",
+        "format": "URL",
+        "is_valid": true,
+        "is_resolvable": true,
+        "semantic_note": "Valid URL identifier pointing to project landing page"
+      },
+      "doi_format": {
+        "value": null,
+        "is_valid": false,
+        "semantic_note": "No DOI present - dataset lacks persistent scholarly identifier"
+      },
+      "rrid_format": {
+        "value": null,
+        "is_valid": false,
+        "semantic_note": "No RRID present - dataset lacks Research Resource Identifier"
+      },
+      "grant_identifiers": {
+        "found": [],
+        "format_validation": [],
+        "semantic_note": "No structured grant identifiers found in funders field (field absent)"
+      }
+    },
+
+    "consistency_checking": {
+      "temporal_consistency": {
+        "dates_mentioned": [
+          "2025-12-05 (generation date)",
+          "November 2024 (dataset status reference)",
+          "January-August 2025 (training program)"
+        ],
+        "is_consistent": true,
+        "semantic_note": "Temporal references are internally consistent; November 2024 status is reasonable for December 2025 generation"
+      },
+      "numeric_consistency": {
+        "instances_count": {
+          "mentioned": ["23,400 unique admissions"],
+          "is_consistent": true,
+          "semantic_note": "Consistently references 23,400 admissions across description, instances, and collection_timeframes"
+        },
+        "sites_count": {
+          "mentioned": ["14 hospitals", "14 data acquisition centers", "20-center collaboration"],
+          "is_consistent": true,
+          "semantic_note": "Consistently distinguishes 14 data acquisition sites within 20-center network"
+        }
+      },
+      "terminology_consistency": {
+        "dataset_name_variants": [
+          "CHoRUS Dataset",
+          "CHoRUS Network dataset",
+          "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS)"
+        ],
+        "is_consistent": true,
+        "semantic_note": "Name variants are semantically equivalent and properly expanded"
+      }
+    },
+
+    "semantic_understanding": {
+      "purpose_coherence": {
+        "stated_purposes": [
+          "Develop diverse, high-resolution, ethically sourced, AI-ready dataset for acute illness recovery"
+        ],
+        "aligns_with_composition": true,
+        "aligns_with_uses": true,
+        "semantic_note": "Purpose clearly aligns with multi-modal clinical data composition and intended ML applications"
+      },
+      "ethical_framework_coherence": {
+        "ethics_components": [
+          "IRB approvals at 14 sites",
+          "Patient-focused ethical frameworks",
+          "Social Determinants of Health",
+          "HIPAA-compliant de-identification",
+          "Controlled access via licensing"
+        ],
+        "is_coherent": true,
+        "semantic_note": "Comprehensive ethical framework with multiple protection layers; consistent across human_subject_research and data_protection_impacts"
+      },
+      "technical_coherence": {
+        "standards_mentioned": [
+          "OMOP (structured EHR)",
+          "WFDB (waveforms)",
+          "DICOM (imaging)",
+          "OHNLP (clinical text)",
+          "EDF+/Persyst (EEG)"
+        ],
+        "is_coherent": true,
+        "semantic_note": "Standards appropriately matched to data modalities; technical details consistent across composition, preprocessing, and distribution"
+      },
+      "access_model_coherence": {
+        "access_components": [
+          "Controlled access via licensing agreements",
+          "Secure collaborative cloud enclave",
+          "Institutional email required",
+          "Re-identification prohibited"
+        ],
+        "is_coherent": true,
+        "semantic_note": "Federated access model consistently described; security measures appropriate for protected health information"
+      }
+    },
+
+    "completeness_analysis": {
+      "critical_gaps": [
+        "No DOI for persistent identification",
+        "No structured funders field with grant IDs",
+        "No creators/authors field",
+        "No version number",
+        "No publisher field",
+        "No citation field",
+        "No download_url (only landing page)",
+        "No variables field (schema-level metadata)"
+      ],
+      "moderate_gaps": [
+        "No known_biases documented",
+        "No known_limitations documented",
+        "No prohibited_uses (only discouraged_uses)",
+        "No software_and_tools field",
+        "No conforms_to standards field",
+        "No is_deidentified structured field (only in descriptions)"
+      ],
+      "strengths": [
+        "Comprehensive multi-modal subsets (9 types)",
+        "Detailed ethical framework documentation",
+        "Clear preprocessing pipelines described",
+        "Well-documented collection mechanisms",
+        "Extensive external resources linked",
+        "Social Determinants of Health integration",
+        "Detailed confidentiality and sensitivity documentation"
+      ]
+    },
+
+    "semantic_quality_assessment": {
+      "description_quality": {
+        "score": "high",
+        "reasoning": "Rich narrative descriptions provide context, motivation, and technical details; 218-word main description is comprehensive"
+      },
+      "metadata_specificity": {
+        "score": "medium-high",
+        "reasoning": "Specific counts (23,400 admissions, 14 hospitals), named standards (OMOP, WFDB), and contact emails provided; lacks structured creator/funder metadata"
+      },
+      "actionability": {
+        "score": "medium",
+        "reasoning": "Users can understand data and access process, but lack of download_url, citation, and DOI limits immediate actionability"
+      },
+      "ethical_transparency": {
+        "score": "high",
+        "reasoning": "Exceptionally detailed ethical documentation across multiple fields; clear privacy protections and access controls"
+      }
+    }
+  },
+
+  "element_scores": {
+    "element_1_discovery_and_identification": {
+      "element_id": 1,
+      "element_name": "Dataset Discovery and Identification",
+      "sub_elements": {
+        "1.1_persistent_identifier": {
+          "field": ["doi", "rrid", "id"],
+          "score": 1,
+          "rationale": "Has id field (https://chorus4ai.org/) as URL identifier; lacks DOI and RRID",
+          "semantic_note": "URL is valid and resolvable but not a persistent scholarly identifier like DOI"
+        },
+        "1.2_title_description_completeness": {
+          "field": ["title", "description"],
+          "score": 1,
+          "rationale": "Complete title (68 chars) and comprehensive description (218 words with technical details)",
+          "semantic_note": "Description includes dataset size, modalities, ethics approach, and contact information"
+        },
+        "1.3_keywords_searchability": {
+          "field": ["keywords"],
+          "score": 1,
+          "rationale": "18 keywords covering domain (clinical care, acute illness), standards (OMOP, OHDSI), and principles (FAIR, ethical AI)",
+          "semantic_note": "Keywords balance technical terms and conceptual themes; support multiple search strategies"
+        },
+        "1.4_landing_page_resources": {
+          "field": ["page", "resources"],
+          "score": 1,
+          "rationale": "Has page field (https://chorus4ai.org/); no hierarchical resources field",
+          "semantic_note": "Landing page URL provided but no structured sub-resources hierarchy"
+        },
+        "1.5_hierarchical_structure": {
+          "field": ["parent_datasets", "related_datasets"],
+          "score": 0,
+          "rationale": "No parent_datasets or related_datasets fields present",
+          "semantic_note": "Missing hierarchical relationships despite being part of Bridge2AI ecosystem"
+        }
+      },
+      "element_score": 4,
+      "element_score_normalized": 0.8,
+      "element_score_percentage": 80.0
+    },
+
+    "element_2_access_and_retrieval": {
+      "element_id": 2,
+      "element_name": "Dataset Access and Retrieval",
+      "sub_elements": {
+        "2.1_access_policy_ip_restrictions": {
+          "field": ["license_and_use_terms", "ip_restrictions"],
+          "score": 1,
+          "rationale": "Detailed license_and_use_terms with licensing requirements, institutional email, registration; no ip_restrictions field",
+          "semantic_note": "Access policy clearly defined with 6 specific license_terms; institutional access implied but no IP restrictions"
+        },
+        "2.2_regulatory_confidentiality": {
+          "field": ["regulatory_restrictions", "confidentiality_level"],
+          "score": 0,
+          "rationale": "No regulatory_restrictions or confidentiality_level fields; confidentiality discussed in confidential_elements only",
+          "semantic_note": "HIPAA compliance mentioned but not in structured regulatory_restrictions field"
+        },
+        "2.3_download_url": {
+          "field": ["download_url"],
+          "score": 0,
+          "rationale": "No download_url field; only landing page URLs in distribution_formats.access_urls",
+          "semantic_note": "Access through collaborative cloud enclave, not direct download; missing explicit download_url"
+        },
+        "2.4_distribution_formats": {
+          "field": ["distribution_formats", "format", "media_type"],
+          "score": 1,
+          "rationale": "distribution_formats with access_urls and detailed format descriptions (OMOP, WFDB, DICOM, OHNLP); lacks format/media_type fields",
+          "semantic_note": "Formats described narratively (SQL database, WFDB, DICOM) but not as structured format/media_type fields"
+        },
+        "2.5_related_external_resources": {
+          "field": ["related_datasets", "external_resources"],
+          "score": 1,
+          "rationale": "2 external_resources entries with 8 URLs (GitHub repos, project websites); no related_datasets",
+          "semantic_note": "Rich external resources including SOPs, mappings, and documentation; missing dataset relationships"
+        }
+      },
+      "element_score": 3,
+      "element_score_normalized": 0.6,
+      "element_score_percentage": 60.0
+    },
+
+    "element_3_reuse_and_interoperability": {
+      "element_id": 3,
+      "element_name": "Data Reuse and Interoperability",
+      "sub_elements": {
+        "3.1_license_terms_reuse": {
+          "field": ["license_and_use_terms"],
+          "score": 1,
+          "rationale": "license_and_use_terms specifies controlled access with signed agreements; permits research use",
+          "semantic_note": "License allows reuse for research with agreements; MIT for software repositories"
+        },
+        "3.2_standardized_formats": {
+          "field": ["format", "encoding"],
+          "score": 0,
+          "rationale": "No format or encoding fields; formats described in distribution_formats.description only",
+          "semantic_note": "Uses international standards (OMOP, WFDB, DICOM) but lacks structured format/encoding fields"
+        },
+        "3.3_schema_conformance": {
+          "field": ["conforms_to", "conforms_to_schema"],
+          "score": 0,
+          "rationale": "No conforms_to or conforms_to_schema fields; standards mentioned only in descriptions",
+          "semantic_note": "OMOP, WFDB, DICOM, OHNLP conformance stated narratively but not in structured fields"
+        },
+        "3.4_variable_metadata": {
+          "field": ["variables"],
+          "score": 0,
+          "rationale": "No variables field; data elements described in subsets but not as structured variable metadata",
+          "semantic_note": "9 data subsets described but no schema-level variable definitions with identifiers"
+        },
+        "3.5_use_guidance": {
+          "field": ["intended_uses", "prohibited_uses", "discouraged_uses"],
+          "score": 1,
+          "rationale": "Has intended_uses and discouraged_uses with detailed descriptions; no prohibited_uses field",
+          "semantic_note": "Use guidance covers ML applications, health equity, and ethical constraints; re-identification discouraged"
+        }
+      },
+      "element_score": 2,
+      "element_score_normalized": 0.4,
+      "element_score_percentage": 40.0
+    },
+
+    "element_4_ethical_privacy_safeguards": {
+      "element_id": 4,
+      "element_name": "Ethical Use and Privacy Safeguards",
+      "sub_elements": {
+        "4.1_irb_ethics_review": {
+          "field": ["ethical_reviews", "human_subject_research"],
+          "score": 1,
+          "rationale": "human_subject_research with involves_human_subjects=true, irb_approval details, and ethics_review_board; no separate ethical_reviews field",
+          "semantic_note": "Multi-site IRB approvals documented; BRIDGE Center ethics expertise; patient-focused frameworks"
+        },
+        "4.2_deidentification_method": {
+          "field": ["is_deidentified"],
+          "score": 0,
+          "rationale": "No is_deidentified field; de-identification described in data_protection_impacts and confidential_elements",
+          "semantic_note": "HIPAA-compliant de-identification (Safe Harbor or Expert Determination) described but not in structured field"
+        },
+        "4.3_privacy_protections": {
+          "field": ["participant_privacy"],
+          "score": 0,
+          "rationale": "No participant_privacy field; privacy measures in data_protection_impacts and sensitive_elements",
+          "semantic_note": "Privacy scan tools, controlled access, and audit trails described but not as participant_privacy"
+        },
+        "4.4_informed_consent": {
+          "field": ["informed_consent"],
+          "score": 0,
+          "rationale": "No informed_consent field; retrospective data collection from clinical systems",
+          "semantic_note": "Retrospective clinical data likely under institutional oversight without individual consent"
+        },
+        "4.5_vulnerable_populations_compensation": {
+          "field": ["vulnerable_populations", "participant_compensation"],
+          "score": 0,
+          "rationale": "No vulnerable_populations or participant_compensation fields",
+          "semantic_note": "Acute illness patients potentially vulnerable; no documentation of special protections or compensation"
+        }
+      },
+      "element_score": 1,
+      "element_score_normalized": 0.2,
+      "element_score_percentage": 20.0
+    },
+
+    "element_5_composition_and_structure": {
+      "element_id": 5,
+      "element_name": "Data Composition and Structure",
+      "sub_elements": {
+        "5.1_subpopulations_characteristics": {
+          "field": ["subpopulations"],
+          "score": 1,
+          "rationale": "1 subpopulations entry describing acute illness patients across multi-center sites",
+          "semantic_note": "Describes patient cohort (acute illness requiring intensive monitoring) and diversity across sites"
+        },
+        "5.2_instances_count": {
+          "field": ["instances"],
+          "score": 1,
+          "rationale": "instances field with detailed description including 23,400 unique admissions count",
+          "semantic_note": "Specific count (23,400 admissions from 14 hospitals as of November 2024) with data modalities"
+        },
+        "5.3_variable_metadata_tabular": {
+          "field": ["variables", "is_tabular"],
+          "score": 0,
+          "rationale": "No variables or is_tabular fields; data structure described in subsets",
+          "semantic_note": "9 subsets with descriptions but no structured variable-level metadata or tabular flag"
+        },
+        "5.4_data_topics_conditions": {
+          "field": ["instances"],
+          "score": 1,
+          "rationale": "instances description covers clinical conditions (acute illness, intensive monitoring) and data topics",
+          "semantic_note": "Topics include demographics, diagnoses, procedures, medications, notes, imaging, waveforms, EEG"
+        },
+        "5.5_quality_anomalies": {
+          "field": ["anomalies", "sampling_strategies"],
+          "score": 1,
+          "rationale": "Has anomalies field with 4 anomaly_details; has sampling_strategies with multi-center approach",
+          "semantic_note": "Documents ongoing data collection, imaging de-identification in progress, and evolving dataset"
+        }
+      },
+      "element_score": 4,
+      "element_score_normalized": 0.8,
+      "element_score_percentage": 80.0
+    },
+
+    "element_6_provenance_version_tracking": {
+      "element_id": 6,
+      "element_name": "Data Provenance and Version Tracking",
+      "sub_elements": {
+        "6.1_version_number": {
+          "field": ["version"],
+          "score": 0,
+          "rationale": "No version field; generation date in header comments only",
+          "semantic_note": "File dated 2025-12-05 in comments but no semantic version number"
+        },
+        "6.2_version_access_methods": {
+          "field": ["version_access"],
+          "score": 1,
+          "rationale": "version_access field with description and 3 version_details about enclave and GitHub versioning",
+          "semantic_note": "Describes version management through cloud enclave, GitHub, and characterization reports"
+        },
+        "6.3_errata_updates": {
+          "field": ["errata", "updates"],
+          "score": 1,
+          "rationale": "Has updates field with description and 4 update_details; no errata field",
+          "semantic_note": "Documents ongoing updates, quality improvements, and GitHub tracking; no historical errata"
+        },
+        "6.4_update_schedule": {
+          "field": ["updates"],
+          "score": 1,
+          "rationale": "updates field describes periodic updates as sites complete extraction",
+          "semantic_note": "Update frequency tied to site delivery timelines; retrospective collection ongoing"
+        },
+        "6.5_provenance_derivation": {
+          "field": ["was_derived_from", "release_notes"],
+          "score": 0,
+          "rationale": "No was_derived_from or release_notes fields",
+          "semantic_note": "Source is original clinical data collection, not derived; no release documentation"
+        }
+      },
+      "element_score": 3,
+      "element_score_normalized": 0.6,
+      "element_score_percentage": 60.0
+    },
+
+    "element_7_motivation_funding_transparency": {
+      "element_id": 7,
+      "element_name": "Scientific Motivation and Funding Transparency",
+      "sub_elements": {
+        "7.1_motivation_purpose": {
+          "field": ["purposes"],
+          "score": 1,
+          "rationale": "1 purposes entry with detailed description of dataset creation motivation",
+          "semantic_note": "Clear purpose: diverse, ethically sourced dataset for acute illness recovery with health equity focus"
+        },
+        "7.2_research_objectives_tasks": {
+          "field": ["tasks"],
+          "score": 1,
+          "rationale": "1 tasks entry describing AI/ML model development for clinical care applications",
+          "semantic_note": "Specific tasks: prediction/decision support for acute illness recovery with multi-modal integration"
+        },
+        "7.3_funding_sources": {
+          "field": ["funders"],
+          "score": 0,
+          "rationale": "No funders field; Bridge2AI mentioned in keywords and description only",
+          "semantic_note": "Bridge2AI program implied but no structured funders with organization/mechanism details"
+        },
+        "7.4_grant_ids_awards": {
+          "field": ["funders"],
+          "score": 0,
+          "rationale": "No funders field with grant IDs or award numbers",
+          "semantic_note": "NIH Bridge2AI likely funded but no grant identifiers provided"
+        },
+        "7.5_creators_acknowledgements": {
+          "field": ["creators", "funders"],
+          "score": 0,
+          "rationale": "No creators or funders fields; program leads named in description and maintainers only",
+          "semantic_note": "6 program leads named in maintainers but not as structured creators with affiliations"
+        }
+      },
+      "element_score": 2,
+      "element_score_normalized": 0.4,
+      "element_score_percentage": 40.0
+    },
+
+    "element_8_technical_transparency": {
+      "element_id": 8,
+      "element_name": "Technical Transparency (Data Collection and Processing)",
+      "sub_elements": {
+        "8.1_collection_mechanisms": {
+          "field": ["collection_mechanisms"],
+          "score": 1,
+          "rationale": "1 collection_mechanisms entry with description and 5 mechanism_details",
+          "semantic_note": "Detailed ETL pipelines, clinical validation, waveform integration, PACS integration, OHNLP processing"
+        },
+        "8.2_acquisition_methods": {
+          "field": ["acquisition_methods"],
+          "score": 1,
+          "rationale": "1 acquisition_methods entry with was_directly_observed=true and 4 acquisition_details",
+          "semantic_note": "Retrospective extraction from hospital systems with multi-modal synchronization"
+        },
+        "8.3_preprocessing_cleaning_labeling": {
+          "field": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "score": 1,
+          "rationale": "Has all three: preprocessing_strategies (1 entry, 5 details), cleaning_strategies (1 entry, 4 details), labeling_strategies (1 entry, 3 details)",
+          "semantic_note": "OMOP transformation, quality checks, and planned annotation environment described"
+        },
+        "8.4_software_tools": {
+          "field": ["software_and_tools"],
+          "score": 0,
+          "rationale": "No software_and_tools field; tools mentioned in descriptions only (OHNLP, OMOP, WFDB)",
+          "semantic_note": "OHNLP toolkit, OMOP tools, WFDB converters mentioned but not structured with versions/URLs"
+        },
+        "8.5_external_standards_resources": {
+          "field": ["external_resources", "conforms_to"],
+          "score": 1,
+          "rationale": "2 external_resources entries with 8 URLs; no conforms_to field",
+          "semantic_note": "GitHub repos for SOPs, mappings, and tools; standards (OMOP, OHDSI) in descriptions"
+        }
+      },
+      "element_score": 4,
+      "element_score_normalized": 0.8,
+      "element_score_percentage": 80.0
+    },
+
+    "element_9_limitations_disclosure": {
+      "element_id": 9,
+      "element_name": "Dataset Evaluation and Limitations Disclosure",
+      "sub_elements": {
+        "9.1_known_limitations": {
+          "field": ["known_limitations"],
+          "score": 0,
+          "rationale": "No known_limitations field",
+          "semantic_note": "Anomalies describe data evolution but not inherent limitations of retrospective clinical data"
+        },
+        "9.2_systematic_biases": {
+          "field": ["known_biases"],
+          "score": 0,
+          "rationale": "No known_biases field; bias mentioned in ethics context only",
+          "semantic_note": "Bias mitigation strategies mentioned but no documentation of identified biases"
+        },
+        "9.3_data_anomalies_quality": {
+          "field": ["anomalies"],
+          "score": 1,
+          "rationale": "1 anomalies entry with description and 4 anomaly_details",
+          "semantic_note": "Documents ongoing collection, variable site timelines, in-progress de-identification and extraction"
+        },
+        "9.4_sensitive_content_warnings": {
+          "field": ["sensitive_elements", "content_warnings"],
+          "score": 1,
+          "rationale": "1 sensitive_elements entry with sensitive_elements_present=true and 6 sensitivity_details; no content_warnings",
+          "semantic_note": "Detailed sensitivity documentation for PHI, demographics, clinical data; no content_warnings field"
+        },
+        "9.5_ethical_review_conflicts": {
+          "field": ["ethical_reviews"],
+          "score": 0,
+          "rationale": "No ethical_reviews field; ethics information in human_subject_research.ethics_review_board only",
+          "semantic_note": "Multi-site oversight documented but no conflict of interest disclosures"
+        }
+      },
+      "element_score": 2,
+      "element_score_normalized": 0.4,
+      "element_score_percentage": 40.0
+    },
+
+    "element_10_community_integration": {
+      "element_id": 10,
+      "element_name": "Cross-Platform and Community Integration",
+      "sub_elements": {
+        "10.1_recognized_platform": {
+          "field": ["publisher"],
+          "score": 0,
+          "rationale": "No publisher field; hosted on collaborative cloud enclave but not a recognized data repository",
+          "semantic_note": "Federated access model through enclave, not published on platform like PhysioNet or Zenodo"
+        },
+        "10.2_citation_doi": {
+          "field": ["citation", "doi"],
+          "score": 0,
+          "rationale": "No citation or doi fields",
+          "semantic_note": "Subset DOI mentioned in subset-waveforms (10.1007/s12028-024-02007) but no dataset-level DOI/citation"
+        },
+        "10.3_community_standards_conformance": {
+          "field": ["conforms_to"],
+          "score": 0,
+          "rationale": "No conforms_to field; standards mentioned in descriptions only",
+          "semantic_note": "OMOP, WFDB, DICOM, OHNLP, EDF+ standards used but not in structured conforms_to"
+        },
+        "10.4_outreach_documentation_links": {
+          "field": ["external_resources", "page"],
+          "score": 1,
+          "rationale": "Has page field and 2 external_resources entries with 8 URLs total",
+          "semantic_note": "Rich documentation including websites, GitHub repos, SOPs, and mappings"
+        },
+        "10.5_related_datasets_relationships": {
+          "field": ["related_datasets"],
+          "score": 0,
+          "rationale": "No related_datasets field with typed relationships",
+          "semantic_note": "Part of Bridge2AI ecosystem but no explicit dataset relationships"
+        }
+      },
+      "element_score": 1,
+      "element_score_normalized": 0.2,
+      "element_score_percentage": 20.0
+    }
+  },
+
+  "summary_scores": {
+    "total_score": 26,
+    "max_possible_score": 50,
+    "percentage": 52.0,
+    "element_scores": {
+      "1_discovery_and_identification": 4,
+      "2_access_and_retrieval": 3,
+      "3_reuse_and_interoperability": 2,
+      "4_ethical_privacy_safeguards": 1,
+      "5_composition_and_structure": 4,
+      "6_provenance_version_tracking": 3,
+      "7_motivation_funding_transparency": 2,
+      "8_technical_transparency": 4,
+      "9_limitations_disclosure": 2,
+      "10_community_integration": 1
+    },
+    "element_percentages": {
+      "1_discovery_and_identification": 80.0,
+      "2_access_and_retrieval": 60.0,
+      "3_reuse_and_interoperability": 40.0,
+      "4_ethical_privacy_safeguards": 20.0,
+      "5_composition_and_structure": 80.0,
+      "6_provenance_version_tracking": 60.0,
+      "7_motivation_funding_transparency": 40.0,
+      "8_technical_transparency": 80.0,
+      "9_limitations_disclosure": 40.0,
+      "10_community_integration": 20.0
+    }
+  },
+
+  "strengths": [
+    "Comprehensive multi-modal data composition with 9 well-documented subsets",
+    "Exceptional ethical framework documentation with patient-focused principles",
+    "Detailed technical transparency across collection, preprocessing, and cleaning",
+    "Strong external resources linking (8 URLs across GitHub and project sites)",
+    "Clear data governance with controlled access and licensing terms",
+    "Social Determinants of Health integration throughout metadata",
+    "Specific numeric details (23,400 admissions, 14 hospitals, 20-center network)",
+    "International standards usage (OMOP, WFDB, DICOM, OHNLP) well-documented"
+  ],
+
+  "weaknesses": [
+    "Missing persistent scholarly identifier (no DOI or RRID)",
+    "No structured funding information (no funders field with grant IDs)",
+    "No structured creator metadata (authors/contributors with affiliations)",
+    "Missing critical interoperability fields (conforms_to, variables, format, encoding)",
+    "No version number for dataset tracking",
+    "No known_limitations or known_biases documented",
+    "Missing structured ethical fields (is_deidentified, participant_privacy, informed_consent)",
+    "No dataset relationships or hierarchy (related_datasets, parent_datasets)",
+    "No citation or publisher for scholarly integration",
+    "No download_url (access through enclave only)"
+  ],
+
+  "recommendations": [
+    "Obtain DOI for persistent identification and citation",
+    "Add structured funders field with Bridge2AI grant information",
+    "Create creators field with program leads and institutional affiliations",
+    "Add conforms_to field listing OMOP, WFDB, DICOM, OHNLP, OHDSI standards",
+    "Populate variables field with schema-level metadata for key data elements",
+    "Document known_limitations of retrospective clinical data collection",
+    "Add is_deidentified structured field with method details (currently in descriptions)",
+    "Create related_datasets linking to other Bridge2AI datasets",
+    "Generate recommended citation and publish on recognized platform",
+    "Assign version number aligned with dataset releases",
+    "Add format/encoding/media_type structured fields for each data modality",
+    "Document known_biases in multi-center clinical data"
+  ],
+
+  "key_semantic_findings": [
+    "Identifiers: Valid URL identifier but lacks persistent scholarly identifier (DOI/RRID)",
+    "Temporal consistency: All dates internally consistent; November 2024 status reasonable for generation",
+    "Numeric consistency: 23,400 admissions and 14/20 sites consistently referenced",
+    "Purpose coherence: Clear alignment between acute illness recovery purpose and multi-modal clinical composition",
+    "Ethical framework: Comprehensive and coherent across multiple documentation fields",
+    "Technical coherence: Standards appropriately matched to data modalities (OMOP for EHR, WFDB for waveforms, etc.)",
+    "Access model: Federated controlled access consistently described; appropriate for PHI",
+    "Completeness: Strong in composition/technical documentation; weak in scholarly metadata (funders/creators/citation)",
+    "Standards adoption: High use of community standards but not formalized in conforms_to field",
+    "Critical gap: No DOI limits discoverability and citation in scholarly literature"
+  ]
+}

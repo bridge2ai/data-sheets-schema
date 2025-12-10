@@ -1,0 +1,16 @@
+project,method,file,total_score,max_score,percentage
+AI,READI_claudecode_agent,AI_READI_claudecode_agent_evaluation.json,31,50,62.0
+AI,READI_claudecode_assistant,AI_READI_claudecode_assistant_evaluation.json,35,50,70.0
+AI,READI_claudecode,AI_READI_claudecode_evaluation.json,31,50,62.0
+AI,READI_gpt5,AI_READI_gpt5_evaluation.json,21,50,42.0
+CHORUS,claudecode_agent,CHORUS_claudecode_agent_evaluation.json,26,50,52.0
+CHORUS,claudecode,CHORUS_claudecode_evaluation.json,10,50,20.0
+CHORUS,gpt5,CHORUS_gpt5_evaluation.json,7,50,14.0
+CM4AI,claudecode_agent,CM4AI_claudecode_agent_evaluation.json,28,50,56.0
+CM4AI,claudecode_assistant,CM4AI_claudecode_assistant_evaluation.json,32,50,64.0
+CM4AI,claudecode,CM4AI_claudecode_evaluation.json,24,50,48.0
+CM4AI,gpt5,CM4AI_gpt5_evaluation.json,28,50,56.0
+VOICE,claudecode_agent,VOICE_claudecode_agent_evaluation.json,46,50,92.0
+VOICE,claudecode_assistant,VOICE_claudecode_assistant_evaluation.json,31,50,62.0
+VOICE,claudecode,VOICE_claudecode_evaluation.json,34,50,68.0
+VOICE,gpt5,VOICE_gpt5_evaluation.json,39,50,78.0

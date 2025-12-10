@@ -1,74 +1,88 @@
 {
-  "timestamp": "2025-09-08 22:05:44",
+  "timestamp": "2025-12-05 21:37:25",
   "statistics": {
-    "DOI": 3,
-    "Web Page": 2,
+    "PDF": 4,
+    "Web Page": 13,
     "FAIRhub Dataset": 2,
     "Dataverse Dataset": 2,
-    "PDF": 1,
-    "GitHub Repository": 1,
-    "Health Data Nexus": 1,
-    "PhysioNet Dataset": 1
+    "PhysioNet Dataset": 1,
+    "GitHub Repository": 2
   },
   "by_column": {
     "AI-READI": [
       {
-        "type": "DOI",
-        "url": "https://aireadi.org/publicationshttps://doi.org/10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449",
+        "type": "PDF",
+        "url": "https://bmjopen.bmj.com/content/bmjopen/15/2/e097449.full.pdf",
         "row": 2,
-        "doi": "10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bmjopen-2024-097449",
-        "filename": "doi_row2.json",
-        "path": "organized_by_column/AI_READI/doi_row2.json",
+        "filename": "e097449.full_row2.pdf",
+        "path": "data/raw/AI_READI/e097449.full_row2.pdf",
+        "size": 1410595,
         "downloaded": true,
         "column": "AI-READI",
-        "context": "https://aireadi.org/publicationshttps://doi.org/10.1038/s42255-024-01165-xhttps://doi.org/10.1136/bm..."
+        "context": "https://bmjopen.bmj.com/content/bmjopen/15/2/e097449.full.pdf"
+      },
+      {
+        "type": "PDF",
+        "url": "https://www.nature.com/articles/s42255-024-01165-x.pdf",
+        "row": 3,
+        "filename": "s42255-024-01165-x_row3.pdf",
+        "path": "data/raw/AI_READI/s42255-024-01165-x_row3.pdf",
+        "size": 269572,
+        "downloaded": true,
+        "column": "AI-READI",
+        "context": "https://www.nature.com/articles/s42255-024-01165-x.pdf"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://reporter.nih.gov/project-details/10471118",
+        "row": 7,
+        "filename": "reporter_nih_gov_project-details-10471118_row7.html",
+        "path": "data/raw/AI_READI/reporter_nih_gov_project-details-10471118_row7.html",
+        "size": 3308,
+        "downloaded": true,
+        "column": "AI-READI",
+        "context": "https://reporter.nih.gov/project-details/10471118"
       },
       {
         "type": "Web Page",
         "url": "https://docs.aireadi.org/docs/2/about",
-        "row": 8,
-        "filename": "docs_aireadi_org_docs-2_row8.html",
-        "path": "organized_by_column/AI_READI/docs_aireadi_org_docs-2_row8.html",
-        "size": 20070,
-        "text_file": "docs_aireadi_org_docs-2_row8.txt",
-        "text_size": 4215,
-        "title": "About | Documentation for the AI-READI Dataset",
+        "row": 10,
+        "filename": "docs_aireadi_org_docs-2_row10.html",
+        "path": "data/raw/AI_READI/docs_aireadi_org_docs-2_row10.html",
+        "size": 20494,
         "downloaded": true,
         "column": "AI-READI",
         "context": "https://docs.aireadi.org/docs/2/about"
       },
       {
-        "type": "DOI",
-        "url": "https://doi.org/10.5281/zenodo.10642459",
-        "row": 9,
-        "doi": "10.5281/zenodo.10642459",
-        "filename": "doi_row9.json",
-        "path": "organized_by_column/AI_READI/doi_row9.json",
+        "type": "Web Page",
+        "url": "https://zenodo.org/records/10642459/files/AI-READI-LICENSE-v1.0.pdf?download=1",
+        "row": 11,
+        "filename": "zenodo_org_records-10642459_row11.html",
+        "path": "data/raw/AI_READI/zenodo_org_records-10642459_row11.html",
+        "size": 100600,
         "downloaded": true,
         "column": "AI-READI",
-        "context": "License: https://doi.org/10.5281/zenodo.10642459"
+        "context": "https://zenodo.org/records/10642459/files/AI-READI-LICENSE-v1.0.pdf?download=1"
       },
       {
         "type": "FAIRhub Dataset",
         "url": "https://fairhub.io/datasets/2",
-        "row": 10,
+        "row": 12,
         "dataset_id": "2",
-        "filename": "fairhub_row10.json",
-        "path": "organized_by_column/AI_READI/fairhub_row10.json",
+        "filename": "fairhub_row12.json",
+        "path": "data/raw/AI_READI/fairhub_row12.json",
         "downloaded": true,
         "column": "AI-READI",
-        "context": "Uses: https://fairhub.io/datasets/2"
+        "context": "https://fairhub.io/datasets/2"
       },
       {
         "type": "Web Page",
         "url": "https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit",
-        "row": 11,
-        "filename": "docs_google_com_document-d_row11.html",
-        "path": "organized_by_column/AI_READI/docs_google_com_document-d_row11.html",
-        "size": 2194812,
-        "text_file": "docs_google_com_document-d_row11.txt",
-        "text_size": 337,
-        "title": "APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025.docx - Google Docs",
+        "row": 13,
+        "filename": "docs_google_com_document-d_row13.html",
+        "path": "data/raw/AI_READI/docs_google_com_document-d_row13.html",
+        "size": 2267634,
         "downloaded": true,
         "column": "AI-READI",
         "context": "https://docs.google.com/document/d/1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q/edit"
@@ -76,10 +90,10 @@
       {
         "type": "FAIRhub Dataset",
         "url": "https://fairhub.io/datasets/2",
-        "row": 13,
+        "row": 16,
         "dataset_id": "2",
-        "filename": "fairhub_row13.json",
-        "path": "organized_by_column/AI_READI/fairhub_row13.json",
+        "filename": "fairhub_row16.json",
+        "path": "data/raw/AI_READI/fairhub_row16.json",
         "downloaded": true,
         "column": "AI-READI",
         "context": "https://fairhub.io/datasets/2"
@@ -87,26 +101,44 @@
     ],
     "CM4AI": [
       {
-        "type": "DOI",
-        "url": "https://doi.org/10.1101/2024.05.21.589311",
-        "row": 3,
-        "doi": "10.1101/2024.05.21.589311",
-        "filename": "doi_row3.json",
-        "path": "organized_by_column/CM4AI/doi_row3.json",
+        "type": "PDF",
+        "url": "https://www.biorxiv.org/content/10.1101/2024.05.21.589311v1.full.pdf",
+        "row": 4,
+        "error": "403 Client Error: Forbidden for url: https://www.biorxiv.org/content/10.1101/2024.05.21.589311v1.full.pdf",
+        "downloaded": false,
+        "column": "CM4AI",
+        "context": "https://www.biorxiv.org/content/10.1101/2024.05.21.589311v1.full.pdf"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://reporter.nih.gov/project-details/11211616",
+        "row": 7,
+        "filename": "reporter_nih_gov_project-details-11211616_row7.html",
+        "path": "data/raw/CM4AI/reporter_nih_gov_project-details-11211616_row7.html",
+        "size": 3308,
         "downloaded": true,
         "column": "CM4AI",
-        "context": "https://doi.org/10.1101/2024.05.21.589311"
+        "context": "https://reporter.nih.gov/project-details/11211616"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en",
+        "row": 15,
+        "filename": "creativecommons_org_licenses-by-nc-sa_row15.html",
+        "path": "data/raw/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.html",
+        "size": 30867,
+        "downloaded": true,
+        "column": "CM4AI",
+        "context": "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en"
       },
       {
         "type": "Dataverse Dataset",
         "url": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX",
-        "row": 13,
+        "row": 16,
         "doi": "doi:10.18130/V3/B35XWX",
-        "filename": "dataverse_10.18130_V3_B35XWX_row13.html",
-        "path": "organized_by_column/CM4AI/dataverse_10.18130_V3_B35XWX_row13.html",
-        "size": 272285,
-        "text_file": "dataverse_10.18130_V3_B35XWX_row13.txt",
-        "title": "Cell Maps for Artificial Intelligence",
+        "filename": "dataverse_10.18130_V3_B35XWX_row16.html",
+        "path": "data/raw/CM4AI/dataverse_10.18130_V3_B35XWX_row16.html",
+        "size": 271468,
         "downloaded": true,
         "column": "CM4AI",
         "context": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX"
@@ -114,25 +146,129 @@
       {
         "type": "Dataverse Dataset",
         "url": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R&version=DRAFT",
-        "row": 16,
+        "row": 19,
         "doi": "doi:10.18130/V3/F3TD5R",
-        "filename": "dataverse_10.18130_V3_F3TD5R_row16.html",
-        "path": "organized_by_column/CM4AI/dataverse_10.18130_V3_F3TD5R_row16.html",
-        "size": 25211,
-        "text_file": "dataverse_10.18130_V3_F3TD5R_row16.txt",
-        "title": "Log In",
+        "filename": "dataverse_10.18130_V3_F3TD5R_row19.html",
+        "path": "data/raw/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.html",
+        "size": 307347,
         "downloaded": true,
         "column": "CM4AI",
         "context": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R&version=DRAFT"
       }
     ],
+    "VOICE": [
+      {
+        "type": "Web Page",
+        "url": "https://drive.google.com/file/d/1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5/view?usp=sharing",
+        "row": 5,
+        "filename": "drive_google_com_file-d_row5.html",
+        "path": "data/raw/VOICE/drive_google_com_file-d_row5.html",
+        "size": 144662,
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "https://drive.google.com/file/d/1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5/view?usp=sharing"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://reporter.nih.gov/project-details/11376382",
+        "row": 7,
+        "filename": "reporter_nih_gov_project-details-11376382_row7.html",
+        "path": "data/raw/VOICE/reporter_nih_gov_project-details-11376382_row7.html",
+        "size": 3308,
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "https://reporter.nih.gov/project-details/11376382"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://docs.b2ai-voice.org/",
+        "row": 10,
+        "filename": "docs_b2ai-voice_org_row10.html",
+        "path": "data/raw/VOICE/docs_b2ai-voice_org_row10.html",
+        "size": 891,
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "https://docs.b2ai-voice.org/ "
+      },
+      {
+        "type": "Web Page",
+        "url": "https://docs.google.com/document/d/1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN/edit",
+        "row": 13,
+        "filename": "docs_google_com_document-d_row13.html",
+        "path": "data/raw/VOICE/docs_google_com_document-d_row13.html",
+        "size": 1134713,
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "https://docs.google.com/document/d/1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN/edit"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://drive.google.com/file/d/1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA/view?usp=sharing",
+        "row": 14,
+        "filename": "drive_google_com_file-d_row14.html",
+        "path": "data/raw/VOICE/drive_google_com_file-d_row14.html",
+        "size": 144418,
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "https://drive.google.com/file/d/1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA/view?usp=sharing"
+      },
+      {
+        "type": "PhysioNet Dataset",
+        "url": "https://physionet.org/content/b2ai-voice/1.1/",
+        "row": 17,
+        "dataset_id": "b2ai-voice",
+        "version": "1.1",
+        "filename": "physionet_b2ai-voice_1.1_row17.html",
+        "path": "data/raw/VOICE/physionet_b2ai-voice_1.1_row17.html",
+        "size": 52804,
+        "access_note": "PhysioNet credentialed access required",
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "https://physionet.org/content/b2ai-voice/1.1/"
+      },
+      {
+        "type": "Web Page",
+        "url": "https://docs.b2ai-voice.org/",
+        "row": 22,
+        "filename": "docs_b2ai-voice_org_row22.html",
+        "path": "data/raw/VOICE/docs_b2ai-voice_org_row22.html",
+        "size": 891,
+        "downloaded": true,
+        "column": "VOICE",
+        "context": "Here is the d4d stuff for voice: https://docs.b2ai-voice.org/ and the underlying repo: https://githu..."
+      },
+      {
+        "type": "GitHub Repository",
+        "url": "https://github.com/eipm/bridge2ai-docs/tree/main/docs",
+        "row": 22,
+        "owner": "eipm",
+        "repo": "bridge2ai-docs",
+        "filename": "github_eipm_bridge2ai-docs_row22.json",
+        "path": "data/raw/VOICE/github_eipm_bridge2ai-docs_row22.json",
+        "downloaded": true,
+        "readme": "github_eipm_bridge2ai-docs_README_row22.md",
+        "column": "VOICE",
+        "context": "Here is the d4d stuff for voice: https://docs.b2ai-voice.org/ and the underlying repo: https://githu..."
+      }
+    ],
     "CHORUS": [
+      {
+        "type": "Web Page",
+        "url": "https://reporter.nih.gov/project-details/10472824",
+        "row": 7,
+        "filename": "reporter_nih_gov_project-details-10472824_row7.html",
+        "path": "data/raw/CHORUS/reporter_nih_gov_project-details-10472824_row7.html",
+        "size": 3308,
+        "downloaded": true,
+        "column": "CHORUS",
+        "context": "https://reporter.nih.gov/project-details/10472824"
+      },
       {
         "type": "PDF",
         "url": "https://www.aim-ahead.net/media/raekwjgs/aim-ahead-bridge2ai-for-clinical-care-informational-webinar.pdf",
-        "row": 7,
-        "filename": "aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf",
-        "path": "organized_by_column/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf",
+        "row": 9,
+        "filename": "aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.pdf",
+        "path": "data/raw/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.pdf",
         "size": 3352117,
         "downloaded": true,
         "column": "CHORUS",
@@ -141,36 +277,9 @@
       {
         "type": "GitHub Repository",
         "url": "https://github.com/chorus-ai#table-of-contents",
-        "row": 8,
+        "row": 10,
         "column": "CHORUS",
         "context": "https://github.com/chorus-ai#table-of-contents"
-      }
-    ],
-    "VOICE": [
-      {
-        "type": "Health Data Nexus",
-        "url": "https://healthdatanexus.ai/content/b2ai-voice/1.0/",
-        "row": 13,
-        "filename": "healthnexus_row13.json",
-        "path": "organized_by_column/VOICE/healthnexus_row13.json",
-        "downloaded": true,
-        "column": "VOICE",
-        "context": "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
-      },
-      {
-        "type": "PhysioNet Dataset",
-        "url": "https://physionet.org/content/b2ai-voice/1.1/",
-        "row": 14,
-        "dataset_id": "b2ai-voice",
-        "version": "1.1",
-        "filename": "physionet_b2ai-voice_1.1_row14.html",
-        "path": "organized_by_column/VOICE/physionet_b2ai-voice_1.1_row14.html",
-        "size": 51495,
-        "text_file": "physionet_b2ai-voice_1.1_row14.txt",
-        "access_note": "PhysioNet credentialed access required",
-        "downloaded": true,
-        "column": "VOICE",
-        "context": "https://physionet.org/content/b2ai-voice/1.1/"
       }
     ]
   },

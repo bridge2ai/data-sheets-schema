@@ -1,0 +1,456 @@
+{
+  "rubric": "rubric20",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/claudecode/AI_READI_d4d.yaml",
+  "project": "AI_READI",
+  "method": "claudecode",
+  "type": "concatenated",
+  "evaluation_timestamp": "2025-12-08T19:16:57.567637",
+  "model": {
+    "name": "hybrid-heuristic-evaluator",
+    "temperature": "N/A",
+    "evaluation_type": "rule_based_with_quality_heuristics"
+  },
+  "overall_score": {
+    "total_points": 49,
+    "max_points": 84,
+    "percentage": 58.3
+  },
+  "categories": {
+    "Structural Completeness": {
+      "name": "Structural Completeness",
+      "questions": [
+        {
+          "id": 1,
+          "name": "Field Completeness",
+          "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "id: https://fairhub.io/datasets/2",
+          "quality_note": "8/14 fields filled (\u226440%)"
+        },
+        {
+          "id": 2,
+          "name": "Entry Length Adequacy",
+          "description": "Narrative fields have meaningful content length",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "description: The AI-READI dataset consists of data collected from individuals with and withou...",
+          "quality_note": "Avg 470 chars (>200)"
+        },
+        {
+          "id": 3,
+          "name": "Keyword Diversity",
+          "description": "Number of unique keywords provided",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "keywords: 18 items",
+          "quality_note": "18 keywords (\u22658)"
+        },
+        {
+          "id": 4,
+          "name": "File Enumeration and Type Variety",
+          "description": "Number of distribution formats and file type diversity",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "No file types detected"
+        },
+        {
+          "id": 5,
+          "name": "Data File Size Availability",
+          "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
+          "score": 0,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "instances: 1 items",
+          "quality_note": "Fail: No file size/dimension metadata"
+        }
+      ],
+      "category_score": 10,
+      "category_max": 21
+    },
+    "Metadata Quality & Content": {
+      "name": "Metadata Quality & Content",
+      "questions": [
+        {
+          "id": 6,
+          "name": "Dataset Identification Metadata",
+          "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "page: https://fairhub.io/datasets/2",
+          "quality_note": "Pass: Persistent identifier found"
+        },
+        {
+          "id": 7,
+          "name": "Funding and Acknowledgements Completeness",
+          "description": "Funding sources, grants, sponsors, and creator affiliations",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: funders, creators, funding_and_acknowledgements",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 8,
+          "name": "Ethical and Privacy Declarations",
+          "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "Missing: ethical_reviews, human_subject_research, is_deidentified, participant_privacy, participant_compensation, vulnerable_populations, informed_consent, deidentification_and_privacy, ethics",
+          "quality_note": "Field absent or empty"
+        },
+        {
+          "id": 9,
+          "name": "Access Requirements and Governance Documentation",
+          "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
+          "score": 3,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "license_and_use_terms: present (2 keys)",
+          "quality_note": "License type only"
+        },
+        {
+          "id": 10,
+          "name": "Interoperability and Standardization",
+          "description": "Standard formats, encoding, ontologies, schema conformance",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "Non-standard or unspecified format"
+        }
+      ],
+      "category_score": 4,
+      "category_max": 21
+    },
+    "Technical Documentation": {
+      "name": "Technical Documentation",
+      "questions": [
+        {
+          "id": 11,
+          "name": "Tool and Software Transparency",
+          "description": "Preprocessing, cleaning, labeling strategies with software tools",
+          "score": 0,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "preprocessing_strategies: 1 items",
+          "quality_note": "No software tools documented"
+        },
+        {
+          "id": 12,
+          "name": "Collection Protocol Clarity",
+          "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "acquisition_methods: 1 items",
+          "quality_note": "Full recruitment and procedural details"
+        },
+        {
+          "id": 13,
+          "name": "Version History Documentation",
+          "description": "Version info, version access, errata, update plans, release notes",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "version_access: present (2 keys)",
+          "quality_note": "\u22652 versions with details: v1.0.0, v2.0.0"
+        },
+        {
+          "id": 14,
+          "name": "Associated Publications",
+          "description": "Citations or DOI-linked references",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "external_resources: 3 items",
+          "quality_note": "Multiple references: 3 DOIs"
+        },
+        {
+          "id": 15,
+          "name": "Human Subject Representation",
+          "description": "Demographics, subpopulations, vulnerable population protections",
+          "score": 3,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "subpopulations: 1 items",
+          "quality_note": "General human data"
+        }
+      ],
+      "category_score": 18,
+      "category_max": 25
+    },
+    "FAIRness & Accessibility": {
+      "name": "FAIRness & Accessibility",
+      "questions": [
+        {
+          "id": 16,
+          "name": "Findability (Persistent Links)",
+          "description": "Persistent identifiers (DOI, ID) and URLs for access",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "page: https://fairhub.io/datasets/2",
+          "quality_note": "Pass: External URLs present"
+        },
+        {
+          "id": 17,
+          "name": "Accessibility (Access Mechanism)",
+          "description": "Download URL, distribution formats, access policy",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "distribution_formats: 1 items",
+          "quality_note": "Fully defined access path"
+        },
+        {
+          "id": 18,
+          "name": "Reusability (License and Use Guidance)",
+          "description": "License with explicit use guidance (intended/prohibited/discouraged)",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "license_and_use_terms: present (2 keys)",
+          "quality_note": "License explicitly defines reuse terms"
+        },
+        {
+          "id": 19,
+          "name": "Data Integrity and Provenance",
+          "description": "Version access, errata, updates, source derivation, parent datasets",
+          "score": 5,
+          "max_score": 5,
+          "score_type": "numeric",
+          "evidence": "version_access: present (2 keys)",
+          "quality_note": "Structured version control with timestamps"
+        },
+        {
+          "id": 20,
+          "name": "Interlinking Across Platforms and Datasets",
+          "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
+          "score": 1,
+          "max_score": 1,
+          "score_type": "pass_fail",
+          "evidence": "external_resources: 3 items",
+          "quality_note": "Pass: Cross-platform links (zenodo, FAIRhub, Zenodo, doi.org, fairhub)"
+        }
+      ],
+      "category_score": 17,
+      "category_max": 17
+    }
+  },
+  "questions": [
+    {
+      "id": 1,
+      "name": "Field Completeness",
+      "description": "Proportion of mandatory schema fields populated including hierarchical structure and governance",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "id: https://fairhub.io/datasets/2",
+      "quality_note": "8/14 fields filled (\u226440%)"
+    },
+    {
+      "id": 2,
+      "name": "Entry Length Adequacy",
+      "description": "Narrative fields have meaningful content length",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "description: The AI-READI dataset consists of data collected from individuals with and withou...",
+      "quality_note": "Avg 470 chars (>200)"
+    },
+    {
+      "id": 3,
+      "name": "Keyword Diversity",
+      "description": "Number of unique keywords provided",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "keywords: 18 items",
+      "quality_note": "18 keywords (\u22658)"
+    },
+    {
+      "id": 4,
+      "name": "File Enumeration and Type Variety",
+      "description": "Number of distribution formats and file type diversity",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 1 items",
+      "quality_note": "No file types detected"
+    },
+    {
+      "id": 5,
+      "name": "Data File Size Availability",
+      "description": "Presence of file size or dimensional metadata (bytes, instance counts)",
+      "score": 0,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "instances: 1 items",
+      "quality_note": "Fail: No file size/dimension metadata"
+    },
+    {
+      "id": 6,
+      "name": "Dataset Identification Metadata",
+      "description": "Presence of unique identifiers (DOI, RRID, URLs)",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "page: https://fairhub.io/datasets/2",
+      "quality_note": "Pass: Persistent identifier found"
+    },
+    {
+      "id": 7,
+      "name": "Funding and Acknowledgements Completeness",
+      "description": "Funding sources, grants, sponsors, and creator affiliations",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: funders, creators, funding_and_acknowledgements",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 8,
+      "name": "Ethical and Privacy Declarations",
+      "description": "Comprehensive ethics: IRB, deidentification, privacy, consent, compensation, vulnerable populations",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "Missing: ethical_reviews, human_subject_research, is_deidentified, participant_privacy, participant_compensation, vulnerable_populations, informed_consent, deidentification_and_privacy, ethics",
+      "quality_note": "Field absent or empty"
+    },
+    {
+      "id": 9,
+      "name": "Access Requirements and Governance Documentation",
+      "description": "Access policy, license, IP restrictions, regulatory restrictions, confidentiality level",
+      "score": 3,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "license_and_use_terms: present (2 keys)",
+      "quality_note": "License type only"
+    },
+    {
+      "id": 10,
+      "name": "Interoperability and Standardization",
+      "description": "Standard formats, encoding, ontologies, schema conformance",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 1 items",
+      "quality_note": "Non-standard or unspecified format"
+    },
+    {
+      "id": 11,
+      "name": "Tool and Software Transparency",
+      "description": "Preprocessing, cleaning, labeling strategies with software tools",
+      "score": 0,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "preprocessing_strategies: 1 items",
+      "quality_note": "No software tools documented"
+    },
+    {
+      "id": 12,
+      "name": "Collection Protocol Clarity",
+      "description": "Collection mechanisms, acquisition methods, data collectors, timeframes",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "acquisition_methods: 1 items",
+      "quality_note": "Full recruitment and procedural details"
+    },
+    {
+      "id": 13,
+      "name": "Version History Documentation",
+      "description": "Version info, version access, errata, update plans, release notes",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "version_access: present (2 keys)",
+      "quality_note": "\u22652 versions with details: v1.0.0, v2.0.0"
+    },
+    {
+      "id": 14,
+      "name": "Associated Publications",
+      "description": "Citations or DOI-linked references",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "external_resources: 3 items",
+      "quality_note": "Multiple references: 3 DOIs"
+    },
+    {
+      "id": 15,
+      "name": "Human Subject Representation",
+      "description": "Demographics, subpopulations, vulnerable population protections",
+      "score": 3,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "subpopulations: 1 items",
+      "quality_note": "General human data"
+    },
+    {
+      "id": 16,
+      "name": "Findability (Persistent Links)",
+      "description": "Persistent identifiers (DOI, ID) and URLs for access",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "page: https://fairhub.io/datasets/2",
+      "quality_note": "Pass: External URLs present"
+    },
+    {
+      "id": 17,
+      "name": "Accessibility (Access Mechanism)",
+      "description": "Download URL, distribution formats, access policy",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "distribution_formats: 1 items",
+      "quality_note": "Fully defined access path"
+    },
+    {
+      "id": 18,
+      "name": "Reusability (License and Use Guidance)",
+      "description": "License with explicit use guidance (intended/prohibited/discouraged)",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "license_and_use_terms: present (2 keys)",
+      "quality_note": "License explicitly defines reuse terms"
+    },
+    {
+      "id": 19,
+      "name": "Data Integrity and Provenance",
+      "description": "Version access, errata, updates, source derivation, parent datasets",
+      "score": 5,
+      "max_score": 5,
+      "score_type": "numeric",
+      "evidence": "version_access: present (2 keys)",
+      "quality_note": "Structured version control with timestamps"
+    },
+    {
+      "id": 20,
+      "name": "Interlinking Across Platforms and Datasets",
+      "description": "External resources and dataset relationships (typed relationships, hierarchical linkages)",
+      "score": 1,
+      "max_score": 1,
+      "score_type": "pass_fail",
+      "evidence": "external_resources: 3 items",
+      "quality_note": "Pass: Cross-platform links (zenodo, FAIRhub, Zenodo, doi.org, fairhub)"
+    }
+  ],
+  "metadata": {
+    "evaluator_id": "batch-hybrid-evaluator",
+    "rubric_hash": "sha256-rubric20",
+    "d4d_file_hash": "1d071fc4995bfe564a76ecfbc2ebc6c1ca2f1599cf0a13ae60bbe72efe745a10"
+  }
+}

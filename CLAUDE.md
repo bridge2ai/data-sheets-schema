@@ -805,6 +805,199 @@ Complete methodology, rubric details, and findings documented in:
 - `data/rubric/rubric10.txt` - 10-element hierarchical rubric specification
 - `data/rubric/rubric20.txt` - 20-question detailed rubric specification
 
+## D4D LLM-based Evaluation (Quality Assessment)
+
+The repository includes LLM-as-judge evaluation agents that provide quality-based assessment of D4D datasheets, complementing the existing field-presence detection.
+
+### LLM Evaluation Agents
+
+**Conversational quality evaluation - No API key required**
+
+Two specialized agents for quality assessment that work directly within Claude Code conversations:
+
+**d4d-rubric10** (`.claude/agents/d4d-rubric10.md`):
+- Evaluates using the 10-element hierarchical rubric
+- Binary scoring (0/1) with quality notes and evidence
+- Maximum: 50 points (10 elements × 5 sub-elements)
+- Focus: Discovery, access, reuse, ethics, composition, provenance, motivation, transparency, limitations, integration
+
+**d4d-rubric20** (`.claude/agents/d4d-rubric20.md`):
+- Evaluates using the 20-question detailed rubric
+- Mixed scoring: 0-5 numeric or pass/fail
+- Maximum: 84 points across 4 categories
+- Focus: Structural completeness, metadata quality, technical documentation, FAIR compliance
+
+### Usage Examples
+
+**PRIMARY MODE: Conversational Evaluation (No API Key Required)**
+```
+User: Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with d4d-rubric10
+
+Agent returns:
+✅ Rubric10 Evaluation Complete
+Overall Score: 38.5/50 (77%)
+
+Strengths:
+- Comprehensive ethical documentation with IRB approval
+- Clear access mechanisms and licensing
+- Detailed preprocessing pipeline
+
+Weaknesses:
+- Missing funding agency and award details
+- Limited version history documentation
+
+Recommendations:
+- Add funding_and_acknowledgements section
+- Include GitHub links for preprocessing code
+```
+
+**More Usage Examples:** See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive examples including:
+- Comparing multiple methods
+- Pre-publication quality checks
+- Tracking improvements over time
+- Understanding quality vs presence gaps
+- Actionable improvement recommendations
+
+**Batch Conversational Evaluation:**
+```
+User: Evaluate all four projects (AI_READI, CHORUS, CM4AI, VOICE) across
+all methods (curated, gpt5, claudecode_agent, claudecode_assistant) using
+both rubric10 and rubric20 and save results to data/evaluation_llm/
+```
+
+The agent will iterate through all files, evaluate each one, and save structured results.
+
+**OPTIONAL: External Automation (via Makefile - Requires ANTHROPIC_API_KEY):**
+```bash
+# For CI/CD or external scripting only
+# Requires: export ANTHROPIC_API_KEY=sk-ant-...
+
+# Batch evaluation of all concatenated files
+make evaluate-d4d-llm-batch-concatenated
+# Evaluates: AI_READI, CHORUS, CM4AI, VOICE
+# Methods: curated, gpt5, claudecode_agent, claudecode_assistant
+# Time: ~25 minutes, Cost: ~$6
+
+# Dry run (preview files without evaluating)
+make evaluate-d4d-llm-batch-dry-run
+
+# Evaluate all individual D4D files (~85 files)
+make evaluate-d4d-llm-batch-individual
+# Time: ~2 hours, Cost: ~$34
+
+# Evaluate individual files for specific project/method
+make evaluate-d4d-llm-batch-individual-filtered PROJECT=VOICE
+make evaluate-d4d-llm-batch-individual-filtered METHOD=claudecode_agent
+
+# Complete evaluation (concatenated + individual)
+make evaluate-d4d-llm-batch-all
+# Time: ~2.5 hours, Cost: ~$40
+
+# ─────────────────────────────────────────────────
+# Legacy single-file evaluation targets:
+# ─────────────────────────────────────────────────
+
+# Evaluate with rubric10
+make evaluate-d4d-llm-rubric10
+
+# Evaluate with rubric20
+make evaluate-d4d-llm-rubric20
+
+# Evaluate with both rubrics
+make evaluate-d4d-llm-both
+
+# Evaluate single file
+make evaluate-d4d-llm FILE=data/d4d_concatenated/claudecode/VOICE_d4d.yaml \\
+  PROJECT=VOICE METHOD=claudecode RUBRIC=both
+
+# Compare LLM vs presence-based evaluation
+make compare-evaluations
+
+# View summaries
+make eval-llm-summary
+
+# Clean results
+make clean-eval-llm
+```
+
+**Reproducibility:**
+- Temperature: 0.0 (fully deterministic)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Same D4D file → Same quality score every time
+- Rubrics: Version-controlled in `data/rubric/`
+- **No API key needed for conversational use** (you're already using Claude Code)
+- External scripts (optional): `src/evaluation/batch_evaluate_*.sh`
+
+### LLM Evaluation Features
+
+**Quality over Presence:**
+- Assesses content quality, not just field existence
+- Evaluates completeness, actionability, and usefulness
+- Provides evidence quotes from D4D files
+- Identifies strengths, weaknesses, and recommendations
+
+**Scoring Approach:**
+- Temperature: 0.0 (fully deterministic evaluation)
+- Model: claude-sonnet-4-5-20250929 (date-pinned)
+- Returns: JSON with scores, evidence, and assessment
+- Exports: Compatible CSV, JSON, and Markdown reports
+
+**Comparison with Presence Detection:**
+
+| Metric | Presence Detection | LLM Quality Assessment |
+|--------|-------------------|----------------------|
+| Speed | ~1 second | ~30-60 seconds |
+| Cost | Free | ~$0.10-0.30 per file |
+| Insight | "Field missing" | "Field present but generic/incomplete/excellent" |
+| Evidence | None | Quotes, reasoning, context |
+| Use Case | CI/CD, quick checks | Deep analysis, comparison |
+
+### LLM Evaluation Commands
+
+```bash
+# Direct script usage
+poetry run python src/evaluation/evaluate_d4d_llm.py \\
+  --file data/d4d_concatenated/claudecode/VOICE_d4d.yaml \\
+  --project VOICE --method claudecode --rubric both
+
+# Batch evaluation
+poetry run python src/evaluation/evaluate_d4d_llm.py \\
+  --all --rubric both --output-dir data/evaluation_llm
+
+# Compare methods
+poetry run python src/evaluation/compare_evaluation_methods.py \\
+  --llm-dir data/evaluation_llm \\
+  --presence-dir data/evaluation
+```
+
+### LLM Evaluation Output
+
+All LLM evaluation runs generate:
+- `data/evaluation_llm/rubric10/summary_report.md` - Rubric10 summary
+- `data/evaluation_llm/rubric20/summary_report.md` - Rubric20 summary
+- `data/evaluation_llm/scores.csv` - Compatible scoring data
+- `data/evaluation_llm/scores.json` - Full results with metadata
+- `data/evaluation_comparison/comparison_report.md` - LLM vs presence comparison
+
+### Dependencies
+
+**Environment variables:**
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...  # Required for LLM evaluation
+```
+
+**Python packages:**
+```bash
+poetry add anthropic  # Claude API client
+```
+
+### LLM Evaluation Documentation
+
+Complete LLM evaluation methodology documented in:
+- `notes/LLM_EVALUATION.md` - Full LLM evaluation methodology
+- `src/download/prompts/rubric10_system_prompt.md` - Rubric10 evaluation prompt
+- `src/download/prompts/rubric20_system_prompt.md` - Rubric20 evaluation prompt
+
 ## Running Single Tests
 
 To run a specific test file:

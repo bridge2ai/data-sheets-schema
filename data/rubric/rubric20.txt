@@ -1,9 +1,108 @@
+# D4D Rubric20 - Twenty-Question Detailed Evaluation Rubric
+# Schema Version: 2.0
+# Last Updated: 2025-12-08
+
+# =============================================================================
+# FIELD REFERENCE GUIDE
+# =============================================================================
+# Use these exact field names when evaluating D4D files against the schema.
+# The D4D schema uses a class-based structure, not dot-notation.
+#
+# Discovery & Access:
+#   - id: Unique identifier (URI)
+#   - doi: Digital Object Identifier
+#   - rrid: Research Resource Identifier
+#   - title: Dataset title
+#   - description: Dataset description
+#   - keywords: Search keywords (list)
+#   - download_url: Download URL
+#   - page: Landing page URL
+#   - distribution_formats: DistributionFormat (list)
+#
+# Licensing & Governance:
+#   - license_and_use_terms: LicenseAndUseTerms class
+#   - ip_restrictions: IPRestrictions class
+#   - regulatory_restrictions: ExportControlRegulatoryRestrictions class
+#   - confidentiality_level: ConfidentialityLevelEnum
+#
+# Human Subjects:
+#   - human_subject_research: HumanSubjectResearch class
+#   - informed_consent: InformedConsent (list)
+#   - participant_privacy: ParticipantPrivacy (list)
+#   - participant_compensation: HumanSubjectCompensation class
+#   - vulnerable_populations: VulnerablePopulations class
+#   - ethical_reviews: EthicalReview (list)
+#
+# Data Composition:
+#   - instances: Instance (list)
+#   - variables: VariableMetadata (list)
+#   - subpopulations: Subpopulation (list)
+#   - is_tabular: Boolean
+#   - is_deidentified: Deidentification class
+#
+# Data Quality:
+#   - anomalies: DataAnomaly (list)
+#   - known_biases: DatasetBias (list)
+#   - known_limitations: DatasetLimitation (list)
+#
+# Use Guidance:
+#   - intended_uses: IntendedUse (list)
+#   - prohibited_uses: ProhibitedUse (list)
+#   - discouraged_uses: DiscouragedUse (list)
+#   - existing_uses: ExistingUse (list)
+#
+# Hierarchical Structure:
+#   - resources: Dataset (list) - nested sub-resources
+#   - parent_datasets: Dataset (list) - parent datasets
+#   - related_datasets: DatasetRelationship (list) - typed relationships
+#
+# Funding & Motivation:
+#   - purposes: Purpose (list)
+#   - tasks: Task (list)
+#   - funders: FundingMechanism (list)
+#   - creators: Creator (list)
+#
+# Technical Methods:
+#   - collection_mechanisms: CollectionMechanism (list)
+#   - acquisition_methods: DataAcquisition (list)
+#   - preprocessing_strategies: PreprocessingStrategy (list)
+#   - cleaning_strategies: CleaningStrategy (list)
+#   - labeling_strategies: LabelingStrategy (list)
+#   - software_and_tools: Software (list)
+#
+# Versioning & Maintenance:
+#   - version: Version string
+#   - version_access: VersionAccess class
+#   - updates: UpdatePlan class
+#   - errata: Erratum (list)
+#   - maintainers: Maintainer (list)
+#   - was_derived_from: Source provenance
+#   - release_notes: Release documentation
+#
+# Distribution:
+#   - format: File format specification
+#   - media_type: MIME type
+#   - encoding: Character encoding
+#   - bytes: File size in bytes
+#   - conforms_to: Standards conformance
+#   - conforms_to_schema: Schema conformance
+#
+# Other:
+#   - publisher: Publishing organization
+#   - citation: Recommended citation
+#   - external_resources: ExternalResource (list)
+#   - sensitive_elements: Sensitive content description
+#   - content_warnings: Content warnings
+# =============================================================================
+
 d4d_evaluation_rubric:
-  schema_version: "1.0"
+  schema_version: "2.0"
   description: >
     A 20-question rubric for evaluating D4D YAML files for completeness, data quality,
     interoperability, and FAIR compliance. Each element is linked to specific metadata fields
     and tasks described in the D4D schema (data_sheets_schema_all.yaml).
+
+    Total maximum score: 84 points (16 numeric questions × 5 points + 4 pass/fail questions × 1 point)
 
   scoring_scale:
     quantitative: 0–5
@@ -15,8 +114,12 @@ d4d_evaluation_rubric:
     # --------------------------- #
     - id: 1
       name: "Field Completeness"
-      description: "Proportion of mandatory schema fields populated (e.g., id, title, description, keywords, license)."
-      field: ["id", "title", "description", "keywords", "license_and_use_terms"]
+      description: >
+        Proportion of mandatory schema fields populated including core identification,
+        hierarchical structure, governance, and composition metadata.
+      field: ["id", "title", "description", "keywords", "license_and_use_terms",
+              "doi", "page", "creators", "purposes", "instances", "resources",
+              "parent_datasets", "variables", "confidentiality_level"]
       method: "Count non-empty required fields; score by proportion filled."
       score_type: numeric
       scoring:
@@ -27,8 +130,8 @@ d4d_evaluation_rubric:
 
     - id: 2
       name: "Entry Length Adequacy"
-      description: "Checks whether narrative fields (e.g., description, motivation) have meaningful content length."
-      field: ["description", "motivation"]
+      description: "Checks whether narrative fields (e.g., description, purposes) have meaningful content length."
+      field: ["description", "purposes"]
       method: "Measure average string length >200 characters."
       score_type: numeric
       scoring:
@@ -51,9 +154,9 @@ d4d_evaluation_rubric:
 
     - id: 4
       name: "File Enumeration and Type Variety"
-      description: "Number of files and file type diversity in distribution_formats or files.listing."
-      field: ["files", "distribution_formats"]
-      method: "Count total file entries and unique file extensions."
+      description: "Number of distribution formats and file type diversity."
+      field: ["distribution_formats", "format", "media_type", "bytes"]
+      method: "Count total formats and unique media types."
       score_type: numeric
       scoring:
         0: "1 file type only"
@@ -63,9 +166,9 @@ d4d_evaluation_rubric:
 
     - id: 5
       name: "Data File Size Availability"
-      description: "Presence of file size or dimensional metadata in files section (e.g., 513×N spectrogram)."
-      field: ["files", "data_characteristics"]
-      method: "Detect numeric values or array dimensions."
+      description: "Presence of file size or dimensional metadata (bytes, instance counts)."
+      field: ["bytes", "instances"]
+      method: "Detect numeric values for file size or instance counts."
       score_type: pass_fail
       scoring:
         Pass: "Numeric file size or dimension info found."
@@ -78,7 +181,7 @@ d4d_evaluation_rubric:
     - id: 6
       name: "Dataset Identification Metadata"
       description: "Presence of unique identifiers such as DOI, RRID, or persistent URLs."
-      field: ["doi", "rrid", "page"]
+      field: ["doi", "rrid", "id", "page"]
       method: "Check for non-null DOI or equivalent identifier."
       score_type: pass_fail
       scoring:
@@ -88,43 +191,50 @@ d4d_evaluation_rubric:
 
     - id: 7
       name: "Funding and Acknowledgements Completeness"
-      description: "Checks presence of funding sources, grants, or institutional sponsors."
-      field: ["funding_and_acknowledgements", "funding"]
+      description: "Checks presence of funding sources, grants, institutional sponsors, and creator affiliations."
+      field: ["funders", "creators"]
       score_type: numeric
       scoring:
         0: "No funding data"
-        3: "Funding agency but missing award number"
-        5: "Funding agency + award number + acknowledgment"
+        3: "Funding agency or creator info but missing grants/affiliations"
+        5: "Funders with grants + creators with affiliations"
       task_ref: [22, 23, 24, 25]
 
     - id: 8
       name: "Ethical and Privacy Declarations"
-      description: "Presence of deidentification methods, IRB approvals, or ethical sourcing notes."
-      field: ["deidentification_and_privacy", "ethics"]
+      description: >
+        Comprehensive ethics coverage including IRB approval, deidentification, privacy protections,
+        informed consent, participant compensation, and vulnerable population safeguards.
+      field: ["ethical_reviews", "human_subject_research", "is_deidentified",
+              "participant_privacy", "participant_compensation", "vulnerable_populations",
+              "informed_consent"]
       score_type: numeric
       scoring:
         0: "No ethics fields present"
-        3: "Ethical note but no IRB or deidentification method"
-        5: "IRB approval + deidentification + ethical sourcing details"
+        3: "Basic ethics (IRB + deidentification)"
+        5: "Comprehensive (all human subjects protections documented)"
       task_ref: [59, 76, 80, 84]
       applies_to: ["Bridge2AI-Voice", "AI-READI"]
 
     - id: 9
-      name: "Access Requirements Documentation"
-      description: "Determines if access policy and license are clearly defined (open, registered, restricted)."
-      field: ["access_and_licensing", "license_and_use_terms"]
+      name: "Access Requirements and Governance Documentation"
+      description: >
+        Determines if access policy, license, IP restrictions, regulatory restrictions,
+        and confidentiality level are clearly defined.
+      field: ["license_and_use_terms", "ip_restrictions", "regulatory_restrictions",
+              "confidentiality_level"]
       score_type: numeric
       scoring:
-        0: "No license info"
-        3: "License type only"
-        5: "License + Data Use Agreement + platform access description"
+        0: "No license or access info"
+        3: "License only"
+        5: "License + restrictions + confidentiality classification"
       task_ref: [11, 12, 87, 88]
       applies_to: ["Bridge2AI-Voice", "Dataverse"]
 
     - id: 10
       name: "Interoperability and Standardization"
       description: "Presence of standard formats, ontologies, or schema conformance (e.g., Parquet, TSV, LinkML)."
-      field: ["data_characteristics.data_formats", "conforms_to"]
+      field: ["format", "encoding", "conforms_to", "conforms_to_schema"]
       score_type: numeric
       scoring:
         0: "Non-standard or unspecified format"
@@ -138,61 +248,71 @@ d4d_evaluation_rubric:
     # --------------------------- #
     - id: 11
       name: "Tool and Software Transparency"
-      description: "Mentions of preprocessing libraries or tools used in data preparation."
-      field: ["software_and_tools"]
+      description: >
+        Mentions of preprocessing, cleaning, and labeling strategies with software tools
+        used in data preparation.
+      field: ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies",
+              "software_and_tools"]
       score_type: numeric
       scoring:
         0: "No software tools documented"
-        3: "At least one preprocessing tool listed"
-        5: "Comprehensive list with versions or URLs"
+        3: "At least one strategy or tool listed"
+        5: "Comprehensive strategies with software versions/URLs"
       task_ref: [64, 65, 66]
       applies_to: ["Bridge2AI-Voice"]
 
     - id: 12
       name: "Collection Protocol Clarity"
-      description: "Evaluates description completeness of participant recruitment and data acquisition."
-      field: ["collection_process"]
+      description: >
+        Evaluates description completeness of data collection mechanisms, acquisition methods,
+        data collectors, and collection timeframes.
+      field: ["acquisition_methods", "collection_mechanisms", "data_collectors",
+              "collection_timeframes"]
       score_type: numeric
       scoring:
         0: "No collection description"
-        3: "Partial description (e.g., general setting only)"
-        5: "Full recruitment and procedural details included"
+        3: "Partial description (e.g., mechanism only)"
+        5: "Full collection protocol with methods, collectors, and timeframes"
       task_ref: [46, 47, 48, 49]
       applies_to: ["Bridge2AI-Voice", "AI-READI"]
 
     - id: 13
       name: "Version History Documentation"
-      description: "Presence of multiple version records and associated dates."
-      field: ["release_notes", "versions_available_on_platform"]
+      description: >
+        Presence of version information, version access methods, errata, update plans,
+        and release notes with dates.
+      field: ["version", "version_access", "errata", "updates", "release_notes"]
       score_type: numeric
       scoring:
         0: "Single version only"
-        3: "Two versions listed without detail"
-        5: "≥2 versions with change summaries and release dates"
+        3: "Version number + basic access info"
+        5: "Comprehensive versioning with errata, updates, and release notes"
       task_ref: [8, 95]
       applies_to: ["Bridge2AI-Voice", "Dataverse"]
 
     - id: 14
       name: "Associated Publications"
       description: "Presence of formal citations or DOI-linked references."
-      field: ["citations", "references"]
+      field: ["citation", "external_resources"]
       score_type: numeric
       scoring:
         0: "No publications cited"
-        3: "One DOI or paper cited"
-        5: "Multiple references and dataset DOI cross-links"
+        3: "One citation or reference"
+        5: "Multiple references with DOI cross-links"
       task_ref: [9, 30]
       applies_to: ["Bridge2AI-Voice", "AI-READI"]
 
     - id: 15
       name: "Human Subject Representation"
-      description: "Indicates inclusion of human subjects, demographic diversity, or subgroup details."
-      field: ["composition.population", "subpopulations"]
+      description: >
+        Indicates inclusion of human subjects with demographic diversity, subpopulation details,
+        and vulnerable population protections.
+      field: ["subpopulations", "instances", "vulnerable_populations"]
       score_type: numeric
       scoring:
         0: "No human subject information"
         3: "General human data without subgroup description"
-        5: "Detailed demographics and inclusion/exclusion criteria"
+        5: "Detailed demographics, subpopulations, and inclusion/exclusion criteria"
       task_ref: [31, 35, 37]
       applies_to: ["Bridge2AI-Voice", "AI-READI"]
 
@@ -201,55 +321,62 @@ d4d_evaluation_rubric:
     # --------------------------- #
     - id: 16
       name: "Findability (Persistent Links)"
-      description: "Dataset includes persistent URLs for access and documentation."
-      field: ["page", "download_url", "external_resources"]
+      description: "Dataset includes persistent URLs, DOI, and identifier for access and documentation."
+      field: ["page", "doi", "id"]
       score_type: pass_fail
       scoring:
-        Pass: "At least one working external URL present."
-        Fail: "No external links found."
+        Pass: "At least one persistent identifier present."
+        Fail: "No persistent identifiers found."
       task_ref: [7, 14, 91]
 
     - id: 17
       name: "Accessibility (Access Mechanism)"
-      description: "Describes how users can obtain the dataset (download, DUA, login)."
-      field: ["distribution_formats", "access_and_licensing"]
+      description: "Describes how users can obtain the dataset (download URL, distribution formats, access policy)."
+      field: ["download_url", "distribution_formats", "license_and_use_terms"]
       score_type: numeric
       scoring:
         0: "Unclear access method"
         3: "Partially described access mechanism"
-        5: "Fully defined access path (platform, login, policy)"
+        5: "Fully defined access path (download URL, formats, policy)"
       task_ref: [11, 87, 90]
       applies_to: ["Dataverse", "PhysioNet"]
 
     - id: 18
-      name: "Reusability (License Clarity)"
-      description: "License is clearly defined and permits identifiable reuse cases."
-      field: ["license_and_use_terms"]
+      name: "Reusability (License and Use Guidance)"
+      description: >
+        License is clearly defined with explicit use guidance including intended uses,
+        prohibited uses, and discouraged uses.
+      field: ["license_and_use_terms", "intended_uses", "prohibited_uses", "discouraged_uses"]
       score_type: numeric
       scoring:
-        0: "No license"
+        0: "No license or use guidance"
         3: "License present but unclear reuse conditions"
-        5: "License explicitly defines reuse terms"
+        5: "License + comprehensive use guidance (intended/prohibited/discouraged)"
       task_ref: [13, 88]
 
     - id: 19
       name: "Data Integrity and Provenance"
-      description: "Presence of change logs or provenance tracking (e.g., versioned documentation)."
-      field: ["updates", "version_access"]
+      description: >
+        Presence of version access, errata, update plans, source derivation,
+        and parent dataset linkages.
+      field: ["version_access", "errata", "updates", "was_derived_from", "parent_datasets"]
       score_type: numeric
       scoring:
         0: "No provenance metadata"
-        3: "Change notes only"
-        5: "Structured version control with timestamps"
+        3: "Version info or change notes only"
+        5: "Comprehensive provenance with version tracking and source derivation"
       task_ref: [3, 8, 95]
 
     - id: 20
-      name: "Interlinking Across Platforms"
-      description: "Metadata connects dataset records across multiple platforms (e.g., FAIRhub + PhysioNet)."
-      field: ["external_resources", "project_website"]
+      name: "Interlinking Across Platforms and Datasets"
+      description: >
+        Metadata connects to external resources and related datasets with typed relationships
+        (derives_from, supplements, is_version_of, etc.), plus hierarchical linkages to parent
+        datasets and nested resources.
+      field: ["external_resources", "related_datasets", "parent_datasets", "resources"]
       score_type: pass_fail
       scoring:
-        Pass: "Cross-platform links verified."
-        Fail: "No external linkages found."
+        Pass: "Cross-platform links or dataset relationships found."
+        Fail: "No external linkages or relationships found."
       task_ref: [14, 86]
       applies_to: ["Health Nexus", "PhysioNet", "FAIRhub"]

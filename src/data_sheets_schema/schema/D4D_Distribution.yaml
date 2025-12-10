@@ -47,9 +47,9 @@ classes:
       was created?
     is_a: DatasetProperty
     attributes:
-      description:
+      is_shared:
         description: >
-          Boolean or textual explanation regarding distribution to
+          Boolean indicating whether the dataset is distributed to
           parties external to the dataset-creating entity.
         range: boolean
         slot_uri: dcterms:accessRights
@@ -61,7 +61,7 @@ classes:
       API, GitHub)?
     is_a: DatasetProperty
     attributes:
-      description:
+      access_urls:
         description: "Details of the distribution channel(s) or format(s)."
         range: string
         multivalued: true
@@ -73,7 +73,7 @@ classes:
       When will the dataset be distributed?
     is_a: DatasetProperty
     attributes:
-      description:
+      release_dates:
         description: >
           Dates or timeframe for dataset release. Could be a one-time release date
           or multiple scheduled releases.
