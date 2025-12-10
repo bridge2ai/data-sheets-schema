@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-03T21:12:14
+# Generation date: 2025-12-06T14:00:42
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -56,8 +56,8 @@ from rdflib import (
     URIRef
 )
 
-from linkml_runtime.linkml_model.types import Boolean, Datetime, Float, Integer, String, Uri, Uriorcurie
-from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDateTime
+from linkml_runtime.linkml_model.types import Boolean, Date, Datetime, Float, Integer, String, Uri, Uriorcurie
+from linkml_runtime.utils.metamodelcore import Bool, URI, URIorCURIE, XSDDate, XSDDateTime
 
 metamodel_version = "1.7.0"
 version = None
@@ -105,10 +105,6 @@ class OrganizationId(NamedThingId):
     pass
 
 
-class DatasetPropertyId(NamedThingId):
-    pass
-
-
 class SoftwareId(NamedThingId):
     pass
 
@@ -133,239 +129,11 @@ class DataSubsetId(DatasetId):
     pass
 
 
-class PurposeId(DatasetPropertyId):
-    pass
-
-
-class TaskId(DatasetPropertyId):
-    pass
-
-
-class AddressingGapId(DatasetPropertyId):
-    pass
-
-
-class CreatorId(DatasetPropertyId):
-    pass
-
-
-class FundingMechanismId(DatasetPropertyId):
-    pass
-
-
 class GrantorId(OrganizationId):
     pass
 
 
 class GrantId(NamedThingId):
-    pass
-
-
-class InstanceId(DatasetPropertyId):
-    pass
-
-
-class SamplingStrategyId(DatasetPropertyId):
-    pass
-
-
-class MissingInfoId(DatasetPropertyId):
-    pass
-
-
-class RelationshipsId(DatasetPropertyId):
-    pass
-
-
-class SplitsId(DatasetPropertyId):
-    pass
-
-
-class DataAnomalyId(DatasetPropertyId):
-    pass
-
-
-class ExternalResourceId(DatasetPropertyId):
-    pass
-
-
-class ConfidentialityId(DatasetPropertyId):
-    pass
-
-
-class ContentWarningId(DatasetPropertyId):
-    pass
-
-
-class SubpopulationId(DatasetPropertyId):
-    pass
-
-
-class DeidentificationId(DatasetPropertyId):
-    pass
-
-
-class SensitiveElementId(DatasetPropertyId):
-    pass
-
-
-class DatasetRelationshipId(DatasetPropertyId):
-    pass
-
-
-class InstanceAcquisitionId(DatasetPropertyId):
-    pass
-
-
-class CollectionMechanismId(DatasetPropertyId):
-    pass
-
-
-class DataCollectorId(DatasetPropertyId):
-    pass
-
-
-class CollectionTimeframeId(DatasetPropertyId):
-    pass
-
-
-class DirectCollectionId(DatasetPropertyId):
-    pass
-
-
-class PreprocessingStrategyId(DatasetPropertyId):
-    pass
-
-
-class CleaningStrategyId(DatasetPropertyId):
-    pass
-
-
-class LabelingStrategyId(DatasetPropertyId):
-    pass
-
-
-class RawDataId(DatasetPropertyId):
-    pass
-
-
-class ExistingUseId(DatasetPropertyId):
-    pass
-
-
-class UseRepositoryId(DatasetPropertyId):
-    pass
-
-
-class OtherTaskId(DatasetPropertyId):
-    pass
-
-
-class FutureUseImpactId(DatasetPropertyId):
-    pass
-
-
-class DiscouragedUseId(DatasetPropertyId):
-    pass
-
-
-class IntendedUseId(DatasetPropertyId):
-    pass
-
-
-class ProhibitedUseId(DatasetPropertyId):
-    pass
-
-
-class ThirdPartySharingId(DatasetPropertyId):
-    pass
-
-
-class DistributionFormatId(DatasetPropertyId):
-    pass
-
-
-class DistributionDateId(DatasetPropertyId):
-    pass
-
-
-class MaintainerId(DatasetPropertyId):
-    pass
-
-
-class ErratumId(DatasetPropertyId):
-    pass
-
-
-class UpdatePlanId(DatasetPropertyId):
-    pass
-
-
-class RetentionLimitsId(DatasetPropertyId):
-    pass
-
-
-class VersionAccessId(DatasetPropertyId):
-    pass
-
-
-class ExtensionMechanismId(DatasetPropertyId):
-    pass
-
-
-class EthicalReviewId(DatasetPropertyId):
-    pass
-
-
-class DataProtectionImpactId(DatasetPropertyId):
-    pass
-
-
-class CollectionNotificationId(DatasetPropertyId):
-    pass
-
-
-class CollectionConsentId(DatasetPropertyId):
-    pass
-
-
-class ConsentRevocationId(DatasetPropertyId):
-    pass
-
-
-class HumanSubjectResearchId(DatasetPropertyId):
-    pass
-
-
-class InformedConsentId(DatasetPropertyId):
-    pass
-
-
-class ParticipantPrivacyId(DatasetPropertyId):
-    pass
-
-
-class HumanSubjectCompensationId(DatasetPropertyId):
-    pass
-
-
-class VulnerablePopulationsId(DatasetPropertyId):
-    pass
-
-
-class LicenseAndUseTermsId(DatasetPropertyId):
-    pass
-
-
-class IPRestrictionsId(DatasetPropertyId):
-    pass
-
-
-class ExportControlRegulatoryRestrictionsId(DatasetPropertyId):
-    pass
-
-
-class VariableMetadataId(DatasetPropertyId):
     pass
 
 
@@ -424,7 +192,7 @@ class Organization(NamedThing):
 
 
 @dataclass(repr=False)
-class DatasetProperty(NamedThing):
+class DatasetProperty(YAMLRoot):
     """
     Represents a single property of a dataset, or a set of related properties.
     """
@@ -435,18 +203,22 @@ class DatasetProperty(NamedThing):
     class_name: ClassVar[str] = "DatasetProperty"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetProperty
 
-    id: Union[str, DatasetPropertyId] = None
-    used_software: Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]] = empty_list()
+    id: Optional[Union[str, URIorCURIE]] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    used_software: Optional[Union[dict[Union[str, SoftwareId], Union[dict, "Software"]], list[Union[dict, "Software"]]]] = empty_dict()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DatasetPropertyId):
-            self.id = DatasetPropertyId(self.id)
+        if self.id is not None and not isinstance(self.id, URIorCURIE):
+            self.id = URIorCURIE(self.id)
 
-        if not isinstance(self.used_software, list):
-            self.used_software = [self.used_software] if self.used_software is not None else []
-        self.used_software = [v if isinstance(v, SoftwareId) else SoftwareId(v) for v in self.used_software]
+        if self.name is not None and not isinstance(self.name, str):
+            self.name = str(self.name)
+
+        if self.description is not None and not isinstance(self.description, str):
+            self.description = str(self.description)
+
+        self._normalize_inlined_as_list(slot_name="used_software", slot_type=Software, key_name="id", keyed=True)
 
         super().__post_init__(**kwargs)
 
@@ -678,59 +450,61 @@ class Dataset(Information):
     media_type: Optional[Union[str, "MediaTypeEnum"]] = None
     path: Optional[str] = None
     sha256: Optional[str] = None
-    purposes: Optional[Union[Union[str, PurposeId], list[Union[str, PurposeId]]]] = empty_list()
-    tasks: Optional[Union[Union[str, TaskId], list[Union[str, TaskId]]]] = empty_list()
-    addressing_gaps: Optional[Union[Union[str, AddressingGapId], list[Union[str, AddressingGapId]]]] = empty_list()
-    creators: Optional[Union[Union[str, CreatorId], list[Union[str, CreatorId]]]] = empty_list()
-    funders: Optional[Union[Union[str, FundingMechanismId], list[Union[str, FundingMechanismId]]]] = empty_list()
-    subsets: Optional[Union[Union[str, DataSubsetId], list[Union[str, DataSubsetId]]]] = empty_list()
-    instances: Optional[Union[Union[str, InstanceId], list[Union[str, InstanceId]]]] = empty_list()
-    anomalies: Optional[Union[Union[str, DataAnomalyId], list[Union[str, DataAnomalyId]]]] = empty_list()
-    external_resources: Optional[Union[Union[str, ExternalResourceId], list[Union[str, ExternalResourceId]]]] = empty_list()
-    confidential_elements: Optional[Union[Union[str, ConfidentialityId], list[Union[str, ConfidentialityId]]]] = empty_list()
-    content_warnings: Optional[Union[Union[str, ContentWarningId], list[Union[str, ContentWarningId]]]] = empty_list()
-    subpopulations: Optional[Union[Union[str, SubpopulationId], list[Union[str, SubpopulationId]]]] = empty_list()
-    sensitive_elements: Optional[Union[Union[str, SensitiveElementId], list[Union[str, SensitiveElementId]]]] = empty_list()
-    acquisition_methods: Optional[Union[Union[str, InstanceAcquisitionId], list[Union[str, InstanceAcquisitionId]]]] = empty_list()
-    collection_mechanisms: Optional[Union[Union[str, CollectionMechanismId], list[Union[str, CollectionMechanismId]]]] = empty_list()
-    sampling_strategies: Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]] = empty_list()
-    data_collectors: Optional[Union[Union[str, DataCollectorId], list[Union[str, DataCollectorId]]]] = empty_list()
-    collection_timeframes: Optional[Union[Union[str, CollectionTimeframeId], list[Union[str, CollectionTimeframeId]]]] = empty_list()
-    ethical_reviews: Optional[Union[Union[str, EthicalReviewId], list[Union[str, EthicalReviewId]]]] = empty_list()
-    data_protection_impacts: Optional[Union[Union[str, DataProtectionImpactId], list[Union[str, DataProtectionImpactId]]]] = empty_list()
-    human_subject_research: Optional[Union[str, HumanSubjectResearchId]] = None
-    informed_consent: Optional[Union[Union[str, InformedConsentId], list[Union[str, InformedConsentId]]]] = empty_list()
-    participant_privacy: Optional[Union[Union[str, ParticipantPrivacyId], list[Union[str, ParticipantPrivacyId]]]] = empty_list()
-    participant_compensation: Optional[Union[str, HumanSubjectCompensationId]] = None
-    vulnerable_populations: Optional[Union[str, VulnerablePopulationsId]] = None
-    preprocessing_strategies: Optional[Union[Union[str, PreprocessingStrategyId], list[Union[str, PreprocessingStrategyId]]]] = empty_list()
-    cleaning_strategies: Optional[Union[Union[str, CleaningStrategyId], list[Union[str, CleaningStrategyId]]]] = empty_list()
-    labeling_strategies: Optional[Union[Union[str, LabelingStrategyId], list[Union[str, LabelingStrategyId]]]] = empty_list()
-    raw_sources: Optional[Union[Union[str, RawDataId], list[Union[str, RawDataId]]]] = empty_list()
-    existing_uses: Optional[Union[Union[str, ExistingUseId], list[Union[str, ExistingUseId]]]] = empty_list()
-    use_repository: Optional[Union[Union[str, UseRepositoryId], list[Union[str, UseRepositoryId]]]] = empty_list()
-    other_tasks: Optional[Union[Union[str, OtherTaskId], list[Union[str, OtherTaskId]]]] = empty_list()
-    future_use_impacts: Optional[Union[Union[str, FutureUseImpactId], list[Union[str, FutureUseImpactId]]]] = empty_list()
-    discouraged_uses: Optional[Union[Union[str, DiscouragedUseId], list[Union[str, DiscouragedUseId]]]] = empty_list()
-    intended_uses: Optional[Union[Union[str, IntendedUseId], list[Union[str, IntendedUseId]]]] = empty_list()
-    prohibited_uses: Optional[Union[Union[str, ProhibitedUseId], list[Union[str, ProhibitedUseId]]]] = empty_list()
-    distribution_formats: Optional[Union[Union[str, DistributionFormatId], list[Union[str, DistributionFormatId]]]] = empty_list()
-    distribution_dates: Optional[Union[Union[str, DistributionDateId], list[Union[str, DistributionDateId]]]] = empty_list()
-    license_and_use_terms: Optional[Union[str, LicenseAndUseTermsId]] = None
-    ip_restrictions: Optional[Union[str, IPRestrictionsId]] = None
-    regulatory_restrictions: Optional[Union[str, ExportControlRegulatoryRestrictionsId]] = None
-    maintainers: Optional[Union[Union[str, MaintainerId], list[Union[str, MaintainerId]]]] = empty_list()
-    errata: Optional[Union[Union[str, ErratumId], list[Union[str, ErratumId]]]] = empty_list()
-    updates: Optional[Union[str, UpdatePlanId]] = None
-    retention_limit: Optional[Union[str, RetentionLimitsId]] = None
-    version_access: Optional[Union[str, VersionAccessId]] = None
-    extension_mechanism: Optional[Union[str, ExtensionMechanismId]] = None
-    variables: Optional[Union[Union[str, VariableMetadataId], list[Union[str, VariableMetadataId]]]] = empty_list()
-    is_deidentified: Optional[Union[str, DeidentificationId]] = None
+    purposes: Optional[Union[Union[dict, "Purpose"], list[Union[dict, "Purpose"]]]] = empty_list()
+    tasks: Optional[Union[Union[dict, "Task"], list[Union[dict, "Task"]]]] = empty_list()
+    addressing_gaps: Optional[Union[Union[dict, "AddressingGap"], list[Union[dict, "AddressingGap"]]]] = empty_list()
+    creators: Optional[Union[Union[dict, "Creator"], list[Union[dict, "Creator"]]]] = empty_list()
+    funders: Optional[Union[Union[dict, "FundingMechanism"], list[Union[dict, "FundingMechanism"]]]] = empty_list()
+    subsets: Optional[Union[dict[Union[str, DataSubsetId], Union[dict, "DataSubset"]], list[Union[dict, "DataSubset"]]]] = empty_dict()
+    instances: Optional[Union[Union[dict, "Instance"], list[Union[dict, "Instance"]]]] = empty_list()
+    anomalies: Optional[Union[Union[dict, "DataAnomaly"], list[Union[dict, "DataAnomaly"]]]] = empty_list()
+    known_biases: Optional[Union[Union[dict, "DatasetBias"], list[Union[dict, "DatasetBias"]]]] = empty_list()
+    known_limitations: Optional[Union[Union[dict, "DatasetLimitation"], list[Union[dict, "DatasetLimitation"]]]] = empty_list()
+    external_resources: Optional[Union[Union[dict, "ExternalResource"], list[Union[dict, "ExternalResource"]]]] = empty_list()
+    confidential_elements: Optional[Union[Union[dict, "Confidentiality"], list[Union[dict, "Confidentiality"]]]] = empty_list()
+    content_warnings: Optional[Union[Union[dict, "ContentWarning"], list[Union[dict, "ContentWarning"]]]] = empty_list()
+    subpopulations: Optional[Union[Union[dict, "Subpopulation"], list[Union[dict, "Subpopulation"]]]] = empty_list()
+    sensitive_elements: Optional[Union[Union[dict, "SensitiveElement"], list[Union[dict, "SensitiveElement"]]]] = empty_list()
+    acquisition_methods: Optional[Union[Union[dict, "InstanceAcquisition"], list[Union[dict, "InstanceAcquisition"]]]] = empty_list()
+    collection_mechanisms: Optional[Union[Union[dict, "CollectionMechanism"], list[Union[dict, "CollectionMechanism"]]]] = empty_list()
+    sampling_strategies: Optional[Union[Union[dict, "SamplingStrategy"], list[Union[dict, "SamplingStrategy"]]]] = empty_list()
+    data_collectors: Optional[Union[Union[dict, "DataCollector"], list[Union[dict, "DataCollector"]]]] = empty_list()
+    collection_timeframes: Optional[Union[Union[dict, "CollectionTimeframe"], list[Union[dict, "CollectionTimeframe"]]]] = empty_list()
+    ethical_reviews: Optional[Union[Union[dict, "EthicalReview"], list[Union[dict, "EthicalReview"]]]] = empty_list()
+    data_protection_impacts: Optional[Union[Union[dict, "DataProtectionImpact"], list[Union[dict, "DataProtectionImpact"]]]] = empty_list()
+    human_subject_research: Optional[Union[dict, "HumanSubjectResearch"]] = None
+    informed_consent: Optional[Union[Union[dict, "InformedConsent"], list[Union[dict, "InformedConsent"]]]] = empty_list()
+    participant_privacy: Optional[Union[Union[dict, "ParticipantPrivacy"], list[Union[dict, "ParticipantPrivacy"]]]] = empty_list()
+    participant_compensation: Optional[Union[dict, "HumanSubjectCompensation"]] = None
+    vulnerable_populations: Optional[Union[dict, "VulnerablePopulations"]] = None
+    preprocessing_strategies: Optional[Union[Union[dict, "PreprocessingStrategy"], list[Union[dict, "PreprocessingStrategy"]]]] = empty_list()
+    cleaning_strategies: Optional[Union[Union[dict, "CleaningStrategy"], list[Union[dict, "CleaningStrategy"]]]] = empty_list()
+    labeling_strategies: Optional[Union[Union[dict, "LabelingStrategy"], list[Union[dict, "LabelingStrategy"]]]] = empty_list()
+    raw_sources: Optional[Union[Union[dict, "RawData"], list[Union[dict, "RawData"]]]] = empty_list()
+    existing_uses: Optional[Union[Union[dict, "ExistingUse"], list[Union[dict, "ExistingUse"]]]] = empty_list()
+    use_repository: Optional[Union[Union[dict, "UseRepository"], list[Union[dict, "UseRepository"]]]] = empty_list()
+    other_tasks: Optional[Union[Union[dict, "OtherTask"], list[Union[dict, "OtherTask"]]]] = empty_list()
+    future_use_impacts: Optional[Union[Union[dict, "FutureUseImpact"], list[Union[dict, "FutureUseImpact"]]]] = empty_list()
+    discouraged_uses: Optional[Union[Union[dict, "DiscouragedUse"], list[Union[dict, "DiscouragedUse"]]]] = empty_list()
+    intended_uses: Optional[Union[Union[dict, "IntendedUse"], list[Union[dict, "IntendedUse"]]]] = empty_list()
+    prohibited_uses: Optional[Union[Union[dict, "ProhibitedUse"], list[Union[dict, "ProhibitedUse"]]]] = empty_list()
+    distribution_formats: Optional[Union[Union[dict, "DistributionFormat"], list[Union[dict, "DistributionFormat"]]]] = empty_list()
+    distribution_dates: Optional[Union[Union[dict, "DistributionDate"], list[Union[dict, "DistributionDate"]]]] = empty_list()
+    license_and_use_terms: Optional[Union[dict, "LicenseAndUseTerms"]] = None
+    ip_restrictions: Optional[Union[dict, "IPRestrictions"]] = None
+    regulatory_restrictions: Optional[Union[dict, "ExportControlRegulatoryRestrictions"]] = None
+    maintainers: Optional[Union[Union[dict, "Maintainer"], list[Union[dict, "Maintainer"]]]] = empty_list()
+    errata: Optional[Union[Union[dict, "Erratum"], list[Union[dict, "Erratum"]]]] = empty_list()
+    updates: Optional[Union[dict, "UpdatePlan"]] = None
+    retention_limit: Optional[Union[dict, "RetentionLimits"]] = None
+    version_access: Optional[Union[dict, "VersionAccess"]] = None
+    extension_mechanism: Optional[Union[dict, "ExtensionMechanism"]] = None
+    variables: Optional[Union[Union[dict, "VariableMetadata"], list[Union[dict, "VariableMetadata"]]]] = empty_list()
+    is_deidentified: Optional[Union[dict, "Deidentification"]] = None
     is_tabular: Optional[Union[bool, Bool]] = None
     citation: Optional[str] = None
-    parent_datasets: Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]] = empty_list()
-    related_datasets: Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]] = empty_list()
+    parent_datasets: Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]] = empty_dict()
+    related_datasets: Optional[Union[Union[dict, "DatasetRelationship"], list[Union[dict, "DatasetRelationship"]]]] = empty_list()
     resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, "Dataset"]], list[Union[dict, "Dataset"]]]] = empty_dict()
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -768,188 +542,194 @@ class Dataset(Information):
 
         if not isinstance(self.purposes, list):
             self.purposes = [self.purposes] if self.purposes is not None else []
-        self.purposes = [v if isinstance(v, PurposeId) else PurposeId(v) for v in self.purposes]
+        self.purposes = [v if isinstance(v, Purpose) else Purpose(**as_dict(v)) for v in self.purposes]
 
         if not isinstance(self.tasks, list):
             self.tasks = [self.tasks] if self.tasks is not None else []
-        self.tasks = [v if isinstance(v, TaskId) else TaskId(v) for v in self.tasks]
+        self.tasks = [v if isinstance(v, Task) else Task(**as_dict(v)) for v in self.tasks]
 
         if not isinstance(self.addressing_gaps, list):
             self.addressing_gaps = [self.addressing_gaps] if self.addressing_gaps is not None else []
-        self.addressing_gaps = [v if isinstance(v, AddressingGapId) else AddressingGapId(v) for v in self.addressing_gaps]
+        self.addressing_gaps = [v if isinstance(v, AddressingGap) else AddressingGap(**as_dict(v)) for v in self.addressing_gaps]
 
         if not isinstance(self.creators, list):
             self.creators = [self.creators] if self.creators is not None else []
-        self.creators = [v if isinstance(v, CreatorId) else CreatorId(v) for v in self.creators]
+        self.creators = [v if isinstance(v, Creator) else Creator(**as_dict(v)) for v in self.creators]
 
         if not isinstance(self.funders, list):
             self.funders = [self.funders] if self.funders is not None else []
-        self.funders = [v if isinstance(v, FundingMechanismId) else FundingMechanismId(v) for v in self.funders]
+        self.funders = [v if isinstance(v, FundingMechanism) else FundingMechanism(**as_dict(v)) for v in self.funders]
 
-        if not isinstance(self.subsets, list):
-            self.subsets = [self.subsets] if self.subsets is not None else []
-        self.subsets = [v if isinstance(v, DataSubsetId) else DataSubsetId(v) for v in self.subsets]
+        self._normalize_inlined_as_list(slot_name="subsets", slot_type=DataSubset, key_name="id", keyed=True)
 
         if not isinstance(self.instances, list):
             self.instances = [self.instances] if self.instances is not None else []
-        self.instances = [v if isinstance(v, InstanceId) else InstanceId(v) for v in self.instances]
+        self.instances = [v if isinstance(v, Instance) else Instance(**as_dict(v)) for v in self.instances]
 
         if not isinstance(self.anomalies, list):
             self.anomalies = [self.anomalies] if self.anomalies is not None else []
-        self.anomalies = [v if isinstance(v, DataAnomalyId) else DataAnomalyId(v) for v in self.anomalies]
+        self.anomalies = [v if isinstance(v, DataAnomaly) else DataAnomaly(**as_dict(v)) for v in self.anomalies]
+
+        if not isinstance(self.known_biases, list):
+            self.known_biases = [self.known_biases] if self.known_biases is not None else []
+        self.known_biases = [v if isinstance(v, DatasetBias) else DatasetBias(**as_dict(v)) for v in self.known_biases]
+
+        if not isinstance(self.known_limitations, list):
+            self.known_limitations = [self.known_limitations] if self.known_limitations is not None else []
+        self.known_limitations = [v if isinstance(v, DatasetLimitation) else DatasetLimitation(**as_dict(v)) for v in self.known_limitations]
 
         if not isinstance(self.external_resources, list):
             self.external_resources = [self.external_resources] if self.external_resources is not None else []
-        self.external_resources = [v if isinstance(v, ExternalResourceId) else ExternalResourceId(v) for v in self.external_resources]
+        self.external_resources = [v if isinstance(v, ExternalResource) else ExternalResource(**as_dict(v)) for v in self.external_resources]
 
         if not isinstance(self.confidential_elements, list):
             self.confidential_elements = [self.confidential_elements] if self.confidential_elements is not None else []
-        self.confidential_elements = [v if isinstance(v, ConfidentialityId) else ConfidentialityId(v) for v in self.confidential_elements]
+        self.confidential_elements = [v if isinstance(v, Confidentiality) else Confidentiality(**as_dict(v)) for v in self.confidential_elements]
 
         if not isinstance(self.content_warnings, list):
             self.content_warnings = [self.content_warnings] if self.content_warnings is not None else []
-        self.content_warnings = [v if isinstance(v, ContentWarningId) else ContentWarningId(v) for v in self.content_warnings]
+        self.content_warnings = [v if isinstance(v, ContentWarning) else ContentWarning(**as_dict(v)) for v in self.content_warnings]
 
         if not isinstance(self.subpopulations, list):
             self.subpopulations = [self.subpopulations] if self.subpopulations is not None else []
-        self.subpopulations = [v if isinstance(v, SubpopulationId) else SubpopulationId(v) for v in self.subpopulations]
+        self.subpopulations = [v if isinstance(v, Subpopulation) else Subpopulation(**as_dict(v)) for v in self.subpopulations]
 
         if not isinstance(self.sensitive_elements, list):
             self.sensitive_elements = [self.sensitive_elements] if self.sensitive_elements is not None else []
-        self.sensitive_elements = [v if isinstance(v, SensitiveElementId) else SensitiveElementId(v) for v in self.sensitive_elements]
+        self.sensitive_elements = [v if isinstance(v, SensitiveElement) else SensitiveElement(**as_dict(v)) for v in self.sensitive_elements]
 
         if not isinstance(self.acquisition_methods, list):
             self.acquisition_methods = [self.acquisition_methods] if self.acquisition_methods is not None else []
-        self.acquisition_methods = [v if isinstance(v, InstanceAcquisitionId) else InstanceAcquisitionId(v) for v in self.acquisition_methods]
+        self.acquisition_methods = [v if isinstance(v, InstanceAcquisition) else InstanceAcquisition(**as_dict(v)) for v in self.acquisition_methods]
 
         if not isinstance(self.collection_mechanisms, list):
             self.collection_mechanisms = [self.collection_mechanisms] if self.collection_mechanisms is not None else []
-        self.collection_mechanisms = [v if isinstance(v, CollectionMechanismId) else CollectionMechanismId(v) for v in self.collection_mechanisms]
+        self.collection_mechanisms = [v if isinstance(v, CollectionMechanism) else CollectionMechanism(**as_dict(v)) for v in self.collection_mechanisms]
 
         if not isinstance(self.sampling_strategies, list):
             self.sampling_strategies = [self.sampling_strategies] if self.sampling_strategies is not None else []
-        self.sampling_strategies = [v if isinstance(v, SamplingStrategyId) else SamplingStrategyId(v) for v in self.sampling_strategies]
+        self.sampling_strategies = [v if isinstance(v, SamplingStrategy) else SamplingStrategy(**as_dict(v)) for v in self.sampling_strategies]
 
         if not isinstance(self.data_collectors, list):
             self.data_collectors = [self.data_collectors] if self.data_collectors is not None else []
-        self.data_collectors = [v if isinstance(v, DataCollectorId) else DataCollectorId(v) for v in self.data_collectors]
+        self.data_collectors = [v if isinstance(v, DataCollector) else DataCollector(**as_dict(v)) for v in self.data_collectors]
 
         if not isinstance(self.collection_timeframes, list):
             self.collection_timeframes = [self.collection_timeframes] if self.collection_timeframes is not None else []
-        self.collection_timeframes = [v if isinstance(v, CollectionTimeframeId) else CollectionTimeframeId(v) for v in self.collection_timeframes]
+        self.collection_timeframes = [v if isinstance(v, CollectionTimeframe) else CollectionTimeframe(**as_dict(v)) for v in self.collection_timeframes]
 
         if not isinstance(self.ethical_reviews, list):
             self.ethical_reviews = [self.ethical_reviews] if self.ethical_reviews is not None else []
-        self.ethical_reviews = [v if isinstance(v, EthicalReviewId) else EthicalReviewId(v) for v in self.ethical_reviews]
+        self.ethical_reviews = [v if isinstance(v, EthicalReview) else EthicalReview(**as_dict(v)) for v in self.ethical_reviews]
 
         if not isinstance(self.data_protection_impacts, list):
             self.data_protection_impacts = [self.data_protection_impacts] if self.data_protection_impacts is not None else []
-        self.data_protection_impacts = [v if isinstance(v, DataProtectionImpactId) else DataProtectionImpactId(v) for v in self.data_protection_impacts]
+        self.data_protection_impacts = [v if isinstance(v, DataProtectionImpact) else DataProtectionImpact(**as_dict(v)) for v in self.data_protection_impacts]
 
-        if self.human_subject_research is not None and not isinstance(self.human_subject_research, HumanSubjectResearchId):
-            self.human_subject_research = HumanSubjectResearchId(self.human_subject_research)
+        if self.human_subject_research is not None and not isinstance(self.human_subject_research, HumanSubjectResearch):
+            self.human_subject_research = HumanSubjectResearch(**as_dict(self.human_subject_research))
 
         if not isinstance(self.informed_consent, list):
             self.informed_consent = [self.informed_consent] if self.informed_consent is not None else []
-        self.informed_consent = [v if isinstance(v, InformedConsentId) else InformedConsentId(v) for v in self.informed_consent]
+        self.informed_consent = [v if isinstance(v, InformedConsent) else InformedConsent(**as_dict(v)) for v in self.informed_consent]
 
         if not isinstance(self.participant_privacy, list):
             self.participant_privacy = [self.participant_privacy] if self.participant_privacy is not None else []
-        self.participant_privacy = [v if isinstance(v, ParticipantPrivacyId) else ParticipantPrivacyId(v) for v in self.participant_privacy]
+        self.participant_privacy = [v if isinstance(v, ParticipantPrivacy) else ParticipantPrivacy(**as_dict(v)) for v in self.participant_privacy]
 
-        if self.participant_compensation is not None and not isinstance(self.participant_compensation, HumanSubjectCompensationId):
-            self.participant_compensation = HumanSubjectCompensationId(self.participant_compensation)
+        if self.participant_compensation is not None and not isinstance(self.participant_compensation, HumanSubjectCompensation):
+            self.participant_compensation = HumanSubjectCompensation(**as_dict(self.participant_compensation))
 
-        if self.vulnerable_populations is not None and not isinstance(self.vulnerable_populations, VulnerablePopulationsId):
-            self.vulnerable_populations = VulnerablePopulationsId(self.vulnerable_populations)
+        if self.vulnerable_populations is not None and not isinstance(self.vulnerable_populations, VulnerablePopulations):
+            self.vulnerable_populations = VulnerablePopulations(**as_dict(self.vulnerable_populations))
 
         if not isinstance(self.preprocessing_strategies, list):
             self.preprocessing_strategies = [self.preprocessing_strategies] if self.preprocessing_strategies is not None else []
-        self.preprocessing_strategies = [v if isinstance(v, PreprocessingStrategyId) else PreprocessingStrategyId(v) for v in self.preprocessing_strategies]
+        self.preprocessing_strategies = [v if isinstance(v, PreprocessingStrategy) else PreprocessingStrategy(**as_dict(v)) for v in self.preprocessing_strategies]
 
         if not isinstance(self.cleaning_strategies, list):
             self.cleaning_strategies = [self.cleaning_strategies] if self.cleaning_strategies is not None else []
-        self.cleaning_strategies = [v if isinstance(v, CleaningStrategyId) else CleaningStrategyId(v) for v in self.cleaning_strategies]
+        self.cleaning_strategies = [v if isinstance(v, CleaningStrategy) else CleaningStrategy(**as_dict(v)) for v in self.cleaning_strategies]
 
         if not isinstance(self.labeling_strategies, list):
             self.labeling_strategies = [self.labeling_strategies] if self.labeling_strategies is not None else []
-        self.labeling_strategies = [v if isinstance(v, LabelingStrategyId) else LabelingStrategyId(v) for v in self.labeling_strategies]
+        self.labeling_strategies = [v if isinstance(v, LabelingStrategy) else LabelingStrategy(**as_dict(v)) for v in self.labeling_strategies]
 
         if not isinstance(self.raw_sources, list):
             self.raw_sources = [self.raw_sources] if self.raw_sources is not None else []
-        self.raw_sources = [v if isinstance(v, RawDataId) else RawDataId(v) for v in self.raw_sources]
+        self.raw_sources = [v if isinstance(v, RawData) else RawData(**as_dict(v)) for v in self.raw_sources]
 
         if not isinstance(self.existing_uses, list):
             self.existing_uses = [self.existing_uses] if self.existing_uses is not None else []
-        self.existing_uses = [v if isinstance(v, ExistingUseId) else ExistingUseId(v) for v in self.existing_uses]
+        self.existing_uses = [v if isinstance(v, ExistingUse) else ExistingUse(**as_dict(v)) for v in self.existing_uses]
 
         if not isinstance(self.use_repository, list):
             self.use_repository = [self.use_repository] if self.use_repository is not None else []
-        self.use_repository = [v if isinstance(v, UseRepositoryId) else UseRepositoryId(v) for v in self.use_repository]
+        self.use_repository = [v if isinstance(v, UseRepository) else UseRepository(**as_dict(v)) for v in self.use_repository]
 
         if not isinstance(self.other_tasks, list):
             self.other_tasks = [self.other_tasks] if self.other_tasks is not None else []
-        self.other_tasks = [v if isinstance(v, OtherTaskId) else OtherTaskId(v) for v in self.other_tasks]
+        self.other_tasks = [v if isinstance(v, OtherTask) else OtherTask(**as_dict(v)) for v in self.other_tasks]
 
         if not isinstance(self.future_use_impacts, list):
             self.future_use_impacts = [self.future_use_impacts] if self.future_use_impacts is not None else []
-        self.future_use_impacts = [v if isinstance(v, FutureUseImpactId) else FutureUseImpactId(v) for v in self.future_use_impacts]
+        self.future_use_impacts = [v if isinstance(v, FutureUseImpact) else FutureUseImpact(**as_dict(v)) for v in self.future_use_impacts]
 
         if not isinstance(self.discouraged_uses, list):
             self.discouraged_uses = [self.discouraged_uses] if self.discouraged_uses is not None else []
-        self.discouraged_uses = [v if isinstance(v, DiscouragedUseId) else DiscouragedUseId(v) for v in self.discouraged_uses]
+        self.discouraged_uses = [v if isinstance(v, DiscouragedUse) else DiscouragedUse(**as_dict(v)) for v in self.discouraged_uses]
 
         if not isinstance(self.intended_uses, list):
             self.intended_uses = [self.intended_uses] if self.intended_uses is not None else []
-        self.intended_uses = [v if isinstance(v, IntendedUseId) else IntendedUseId(v) for v in self.intended_uses]
+        self.intended_uses = [v if isinstance(v, IntendedUse) else IntendedUse(**as_dict(v)) for v in self.intended_uses]
 
         if not isinstance(self.prohibited_uses, list):
             self.prohibited_uses = [self.prohibited_uses] if self.prohibited_uses is not None else []
-        self.prohibited_uses = [v if isinstance(v, ProhibitedUseId) else ProhibitedUseId(v) for v in self.prohibited_uses]
+        self.prohibited_uses = [v if isinstance(v, ProhibitedUse) else ProhibitedUse(**as_dict(v)) for v in self.prohibited_uses]
 
         if not isinstance(self.distribution_formats, list):
             self.distribution_formats = [self.distribution_formats] if self.distribution_formats is not None else []
-        self.distribution_formats = [v if isinstance(v, DistributionFormatId) else DistributionFormatId(v) for v in self.distribution_formats]
+        self.distribution_formats = [v if isinstance(v, DistributionFormat) else DistributionFormat(**as_dict(v)) for v in self.distribution_formats]
 
         if not isinstance(self.distribution_dates, list):
             self.distribution_dates = [self.distribution_dates] if self.distribution_dates is not None else []
-        self.distribution_dates = [v if isinstance(v, DistributionDateId) else DistributionDateId(v) for v in self.distribution_dates]
+        self.distribution_dates = [v if isinstance(v, DistributionDate) else DistributionDate(**as_dict(v)) for v in self.distribution_dates]
 
-        if self.license_and_use_terms is not None and not isinstance(self.license_and_use_terms, LicenseAndUseTermsId):
-            self.license_and_use_terms = LicenseAndUseTermsId(self.license_and_use_terms)
+        if self.license_and_use_terms is not None and not isinstance(self.license_and_use_terms, LicenseAndUseTerms):
+            self.license_and_use_terms = LicenseAndUseTerms(**as_dict(self.license_and_use_terms))
 
-        if self.ip_restrictions is not None and not isinstance(self.ip_restrictions, IPRestrictionsId):
-            self.ip_restrictions = IPRestrictionsId(self.ip_restrictions)
+        if self.ip_restrictions is not None and not isinstance(self.ip_restrictions, IPRestrictions):
+            self.ip_restrictions = IPRestrictions(**as_dict(self.ip_restrictions))
 
-        if self.regulatory_restrictions is not None and not isinstance(self.regulatory_restrictions, ExportControlRegulatoryRestrictionsId):
-            self.regulatory_restrictions = ExportControlRegulatoryRestrictionsId(self.regulatory_restrictions)
+        if self.regulatory_restrictions is not None and not isinstance(self.regulatory_restrictions, ExportControlRegulatoryRestrictions):
+            self.regulatory_restrictions = ExportControlRegulatoryRestrictions(**as_dict(self.regulatory_restrictions))
 
         if not isinstance(self.maintainers, list):
             self.maintainers = [self.maintainers] if self.maintainers is not None else []
-        self.maintainers = [v if isinstance(v, MaintainerId) else MaintainerId(v) for v in self.maintainers]
+        self.maintainers = [v if isinstance(v, Maintainer) else Maintainer(**as_dict(v)) for v in self.maintainers]
 
         if not isinstance(self.errata, list):
             self.errata = [self.errata] if self.errata is not None else []
-        self.errata = [v if isinstance(v, ErratumId) else ErratumId(v) for v in self.errata]
+        self.errata = [v if isinstance(v, Erratum) else Erratum(**as_dict(v)) for v in self.errata]
 
-        if self.updates is not None and not isinstance(self.updates, UpdatePlanId):
-            self.updates = UpdatePlanId(self.updates)
+        if self.updates is not None and not isinstance(self.updates, UpdatePlan):
+            self.updates = UpdatePlan(**as_dict(self.updates))
 
-        if self.retention_limit is not None and not isinstance(self.retention_limit, RetentionLimitsId):
-            self.retention_limit = RetentionLimitsId(self.retention_limit)
+        if self.retention_limit is not None and not isinstance(self.retention_limit, RetentionLimits):
+            self.retention_limit = RetentionLimits(**as_dict(self.retention_limit))
 
-        if self.version_access is not None and not isinstance(self.version_access, VersionAccessId):
-            self.version_access = VersionAccessId(self.version_access)
+        if self.version_access is not None and not isinstance(self.version_access, VersionAccess):
+            self.version_access = VersionAccess(**as_dict(self.version_access))
 
-        if self.extension_mechanism is not None and not isinstance(self.extension_mechanism, ExtensionMechanismId):
-            self.extension_mechanism = ExtensionMechanismId(self.extension_mechanism)
+        if self.extension_mechanism is not None and not isinstance(self.extension_mechanism, ExtensionMechanism):
+            self.extension_mechanism = ExtensionMechanism(**as_dict(self.extension_mechanism))
 
         if not isinstance(self.variables, list):
             self.variables = [self.variables] if self.variables is not None else []
-        self.variables = [v if isinstance(v, VariableMetadataId) else VariableMetadataId(v) for v in self.variables]
+        self.variables = [v if isinstance(v, VariableMetadata) else VariableMetadata(**as_dict(v)) for v in self.variables]
 
-        if self.is_deidentified is not None and not isinstance(self.is_deidentified, DeidentificationId):
-            self.is_deidentified = DeidentificationId(self.is_deidentified)
+        if self.is_deidentified is not None and not isinstance(self.is_deidentified, Deidentification):
+            self.is_deidentified = Deidentification(**as_dict(self.is_deidentified))
 
         if self.is_tabular is not None and not isinstance(self.is_tabular, Bool):
             self.is_tabular = Bool(self.is_tabular)
@@ -957,13 +737,11 @@ class Dataset(Information):
         if self.citation is not None and not isinstance(self.citation, str):
             self.citation = str(self.citation)
 
-        if not isinstance(self.parent_datasets, list):
-            self.parent_datasets = [self.parent_datasets] if self.parent_datasets is not None else []
-        self.parent_datasets = [v if isinstance(v, DatasetId) else DatasetId(v) for v in self.parent_datasets]
+        self._normalize_inlined_as_list(slot_name="parent_datasets", slot_type=Dataset, key_name="id", keyed=True)
 
         if not isinstance(self.related_datasets, list):
             self.related_datasets = [self.related_datasets] if self.related_datasets is not None else []
-        self.related_datasets = [v if isinstance(v, DatasetRelationshipId) else DatasetRelationshipId(v) for v in self.related_datasets]
+        self.related_datasets = [v if isinstance(v, DatasetRelationship) else DatasetRelationship(**as_dict(v)) for v in self.related_datasets]
 
         self._normalize_inlined_as_list(slot_name="resources", slot_type=Dataset, key_name="id", keyed=True)
 
@@ -1050,15 +828,9 @@ class Purpose(DatasetProperty):
     class_name: ClassVar[str] = "Purpose"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Purpose
 
-    id: Union[str, PurposeId] = None
     response: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, PurposeId):
-            self.id = PurposeId(self.id)
-
         if self.response is not None and not isinstance(self.response, str):
             self.response = str(self.response)
 
@@ -1077,15 +849,9 @@ class Task(DatasetProperty):
     class_name: ClassVar[str] = "Task"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Task
 
-    id: Union[str, TaskId] = None
     response: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, TaskId):
-            self.id = TaskId(self.id)
-
         if self.response is not None and not isinstance(self.response, str):
             self.response = str(self.response)
 
@@ -1104,15 +870,9 @@ class AddressingGap(DatasetProperty):
     class_name: ClassVar[str] = "AddressingGap"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.AddressingGap
 
-    id: Union[str, AddressingGapId] = None
     response: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, AddressingGapId):
-            self.id = AddressingGapId(self.id)
-
         if self.response is not None and not isinstance(self.response, str):
             self.response = str(self.response)
 
@@ -1132,22 +892,15 @@ class Creator(DatasetProperty):
     class_name: ClassVar[str] = "Creator"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Creator
 
-    id: Union[str, CreatorId] = None
     principal_investigator: Optional[Union[str, PersonId]] = None
-    affiliation: Optional[Union[str, OrganizationId]] = None
+    affiliations: Optional[Union[dict[Union[str, OrganizationId], Union[dict, Organization]], list[Union[dict, Organization]]]] = empty_dict()
     credit_roles: Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, CreatorId):
-            self.id = CreatorId(self.id)
-
         if self.principal_investigator is not None and not isinstance(self.principal_investigator, PersonId):
             self.principal_investigator = PersonId(self.principal_investigator)
 
-        if self.affiliation is not None and not isinstance(self.affiliation, OrganizationId):
-            self.affiliation = OrganizationId(self.affiliation)
+        self._normalize_inlined_as_list(slot_name="affiliations", slot_type=Organization, key_name="id", keyed=True)
 
         if not isinstance(self.credit_roles, list):
             self.credit_roles = [self.credit_roles] if self.credit_roles is not None else []
@@ -1169,21 +922,14 @@ class FundingMechanism(DatasetProperty):
     class_name: ClassVar[str] = "FundingMechanism"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FundingMechanism
 
-    id: Union[str, FundingMechanismId] = None
     grantor: Optional[Union[str, GrantorId]] = None
-    grant: Optional[Union[str, GrantId]] = None
+    grants: Optional[Union[dict[Union[str, GrantId], Union[dict, "Grant"]], list[Union[dict, "Grant"]]]] = empty_dict()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, FundingMechanismId):
-            self.id = FundingMechanismId(self.id)
-
         if self.grantor is not None and not isinstance(self.grantor, GrantorId):
             self.grantor = GrantorId(self.grantor)
 
-        if self.grant is not None and not isinstance(self.grant, GrantId):
-            self.grant = GrantId(self.grant)
+        self._normalize_inlined_as_list(slot_name="grants", slot_type=Grant, key_name="id", keyed=True)
 
         super().__post_init__(**kwargs)
 
@@ -1252,22 +998,16 @@ class Instance(DatasetProperty):
     class_name: ClassVar[str] = "Instance"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Instance
 
-    id: Union[str, InstanceId] = None
     data_topic: Optional[Union[str, URIorCURIE]] = None
     instance_type: Optional[str] = None
     data_substrate: Optional[Union[str, URIorCURIE]] = None
     counts: Optional[int] = None
     label: Optional[Union[bool, Bool]] = None
     label_description: Optional[str] = None
-    sampling_strategies: Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]] = empty_list()
-    missing_information: Optional[Union[Union[str, MissingInfoId], list[Union[str, MissingInfoId]]]] = empty_list()
+    sampling_strategies: Optional[Union[Union[dict, "SamplingStrategy"], list[Union[dict, "SamplingStrategy"]]]] = empty_list()
+    missing_information: Optional[Union[Union[dict, "MissingInfo"], list[Union[dict, "MissingInfo"]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, InstanceId):
-            self.id = InstanceId(self.id)
-
         if self.data_topic is not None and not isinstance(self.data_topic, URIorCURIE):
             self.data_topic = URIorCURIE(self.data_topic)
 
@@ -1288,11 +1028,11 @@ class Instance(DatasetProperty):
 
         if not isinstance(self.sampling_strategies, list):
             self.sampling_strategies = [self.sampling_strategies] if self.sampling_strategies is not None else []
-        self.sampling_strategies = [v if isinstance(v, SamplingStrategyId) else SamplingStrategyId(v) for v in self.sampling_strategies]
+        self.sampling_strategies = [v if isinstance(v, SamplingStrategy) else SamplingStrategy(**as_dict(v)) for v in self.sampling_strategies]
 
         if not isinstance(self.missing_information, list):
             self.missing_information = [self.missing_information] if self.missing_information is not None else []
-        self.missing_information = [v if isinstance(v, MissingInfoId) else MissingInfoId(v) for v in self.missing_information]
+        self.missing_information = [v if isinstance(v, MissingInfo) else MissingInfo(**as_dict(v)) for v in self.missing_information]
 
         super().__post_init__(**kwargs)
 
@@ -1310,7 +1050,6 @@ class SamplingStrategy(DatasetProperty):
     class_name: ClassVar[str] = "SamplingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SamplingStrategy
 
-    id: Union[str, SamplingStrategyId] = None
     is_sample: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
     is_random: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
     source_data: Optional[Union[str, list[str]]] = empty_list()
@@ -1320,11 +1059,6 @@ class SamplingStrategy(DatasetProperty):
     strategies: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, SamplingStrategyId):
-            self.id = SamplingStrategyId(self.id)
-
         if not isinstance(self.is_sample, list):
             self.is_sample = [self.is_sample] if self.is_sample is not None else []
         self.is_sample = [v if isinstance(v, Bool) else Bool(v) for v in self.is_sample]
@@ -1368,16 +1102,10 @@ class MissingInfo(DatasetProperty):
     class_name: ClassVar[str] = "MissingInfo"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.MissingInfo
 
-    id: Union[str, MissingInfoId] = None
     missing: Optional[Union[str, list[str]]] = empty_list()
     why_missing: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, MissingInfoId):
-            self.id = MissingInfoId(self.id)
-
         if not isinstance(self.missing, list):
             self.missing = [self.missing] if self.missing is not None else []
         self.missing = [v if isinstance(v, str) else str(v) for v in self.missing]
@@ -1401,18 +1129,12 @@ class Relationships(DatasetProperty):
     class_name: ClassVar[str] = "Relationships"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Relationships
 
-    id: Union[str, RelationshipsId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    relationship_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, RelationshipsId):
-            self.id = RelationshipsId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.relationship_details, list):
+            self.relationship_details = [self.relationship_details] if self.relationship_details is not None else []
+        self.relationship_details = [v if isinstance(v, str) else str(v) for v in self.relationship_details]
 
         super().__post_init__(**kwargs)
 
@@ -1429,18 +1151,12 @@ class Splits(DatasetProperty):
     class_name: ClassVar[str] = "Splits"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Splits
 
-    id: Union[str, SplitsId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    split_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, SplitsId):
-            self.id = SplitsId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.split_details, list):
+            self.split_details = [self.split_details] if self.split_details is not None else []
+        self.split_details = [v if isinstance(v, str) else str(v) for v in self.split_details]
 
         super().__post_init__(**kwargs)
 
@@ -1457,18 +1173,82 @@ class DataAnomaly(DatasetProperty):
     class_name: ClassVar[str] = "DataAnomaly"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataAnomaly
 
-    id: Union[str, DataAnomalyId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    anomaly_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DataAnomalyId):
-            self.id = DataAnomalyId(self.id)
+        if not isinstance(self.anomaly_details, list):
+            self.anomaly_details = [self.anomaly_details] if self.anomaly_details is not None else []
+        self.anomaly_details = [v if isinstance(v, str) else str(v) for v in self.anomaly_details]
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class DatasetBias(DatasetProperty):
+    """
+    Documents known biases present in the dataset. Biases are systematic errors or prejudices that may affect the
+    representativeness or fairness of the data. Distinct from anomalies (data quality issues) and limitations (scope
+    constraints).
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["DatasetBias"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:DatasetBias"
+    class_name: ClassVar[str] = "DatasetBias"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetBias
+
+    bias_type: Optional[Union[str, "BiasTypeEnum"]] = None
+    bias_description: Optional[str] = None
+    mitigation_strategy: Optional[str] = None
+    affected_subsets: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self.bias_type is not None and not isinstance(self.bias_type, BiasTypeEnum):
+            self.bias_type = BiasTypeEnum(self.bias_type)
+
+        if self.bias_description is not None and not isinstance(self.bias_description, str):
+            self.bias_description = str(self.bias_description)
+
+        if self.mitigation_strategy is not None and not isinstance(self.mitigation_strategy, str):
+            self.mitigation_strategy = str(self.mitigation_strategy)
+
+        if not isinstance(self.affected_subsets, list):
+            self.affected_subsets = [self.affected_subsets] if self.affected_subsets is not None else []
+        self.affected_subsets = [v if isinstance(v, str) else str(v) for v in self.affected_subsets]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class DatasetLimitation(DatasetProperty):
+    """
+    Documents known limitations of the dataset that may affect its use or interpretation. Distinct from biases
+    (systematic errors) and anomalies (data quality issues).
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DCOMPOSITION["DatasetLimitation"]
+    class_class_curie: ClassVar[str] = "d4dcomposition:DatasetLimitation"
+    class_name: ClassVar[str] = "DatasetLimitation"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetLimitation
+
+    limitation_type: Optional[Union[str, "LimitationTypeEnum"]] = None
+    limitation_description: Optional[str] = None
+    scope_impact: Optional[str] = None
+    recommended_mitigation: Optional[str] = None
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self.limitation_type is not None and not isinstance(self.limitation_type, LimitationTypeEnum):
+            self.limitation_type = LimitationTypeEnum(self.limitation_type)
+
+        if self.limitation_description is not None and not isinstance(self.limitation_description, str):
+            self.limitation_description = str(self.limitation_description)
+
+        if self.scope_impact is not None and not isinstance(self.scope_impact, str):
+            self.scope_impact = str(self.scope_impact)
+
+        if self.recommended_mitigation is not None and not isinstance(self.recommended_mitigation, str):
+            self.recommended_mitigation = str(self.recommended_mitigation)
 
         super().__post_init__(**kwargs)
 
@@ -1486,18 +1266,12 @@ class ExternalResource(DatasetProperty):
     class_name: ClassVar[str] = "ExternalResource"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExternalResource
 
-    id: Union[str, ExternalResourceId] = None
     external_resources: Optional[Union[str, list[str]]] = empty_list()
     future_guarantees: Optional[Union[str, list[str]]] = empty_list()
     archival: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
     restrictions: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ExternalResourceId):
-            self.id = ExternalResourceId(self.id)
-
         if not isinstance(self.external_resources, list):
             self.external_resources = [self.external_resources] if self.external_resources is not None else []
         self.external_resources = [v if isinstance(v, str) else str(v) for v in self.external_resources]
@@ -1530,22 +1304,16 @@ class Confidentiality(DatasetProperty):
     class_name: ClassVar[str] = "Confidentiality"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Confidentiality
 
-    id: Union[str, ConfidentialityId] = None
     confidential_elements_present: Optional[Union[bool, Bool]] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    confidentiality_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ConfidentialityId):
-            self.id = ConfidentialityId(self.id)
-
         if self.confidential_elements_present is not None and not isinstance(self.confidential_elements_present, Bool):
             self.confidential_elements_present = Bool(self.confidential_elements_present)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.confidentiality_details, list):
+            self.confidentiality_details = [self.confidentiality_details] if self.confidentiality_details is not None else []
+        self.confidentiality_details = [v if isinstance(v, str) else str(v) for v in self.confidentiality_details]
 
         super().__post_init__(**kwargs)
 
@@ -1563,16 +1331,10 @@ class ContentWarning(DatasetProperty):
     class_name: ClassVar[str] = "ContentWarning"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ContentWarning
 
-    id: Union[str, ContentWarningId] = None
     content_warnings_present: Optional[Union[bool, Bool]] = None
     warnings: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ContentWarningId):
-            self.id = ContentWarningId(self.id)
-
         if self.content_warnings_present is not None and not isinstance(self.content_warnings_present, Bool):
             self.content_warnings_present = Bool(self.content_warnings_present)
 
@@ -1596,17 +1358,11 @@ class Subpopulation(DatasetProperty):
     class_name: ClassVar[str] = "Subpopulation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Subpopulation
 
-    id: Union[str, SubpopulationId] = None
     subpopulation_elements_present: Optional[Union[bool, Bool]] = None
     identification: Optional[Union[str, list[str]]] = empty_list()
     distribution: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, SubpopulationId):
-            self.id = SubpopulationId(self.id)
-
         if self.subpopulation_elements_present is not None and not isinstance(self.subpopulation_elements_present, Bool):
             self.subpopulation_elements_present = Bool(self.subpopulation_elements_present)
 
@@ -1634,22 +1390,25 @@ class Deidentification(DatasetProperty):
     class_name: ClassVar[str] = "Deidentification"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Deidentification
 
-    id: Union[str, DeidentificationId] = None
     identifiable_elements_present: Optional[Union[bool, Bool]] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    method: Optional[str] = None
+    identifiers_removed: Optional[Union[str, list[str]]] = empty_list()
+    deidentification_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DeidentificationId):
-            self.id = DeidentificationId(self.id)
-
         if self.identifiable_elements_present is not None and not isinstance(self.identifiable_elements_present, Bool):
             self.identifiable_elements_present = Bool(self.identifiable_elements_present)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if self.method is not None and not isinstance(self.method, str):
+            self.method = str(self.method)
+
+        if not isinstance(self.identifiers_removed, list):
+            self.identifiers_removed = [self.identifiers_removed] if self.identifiers_removed is not None else []
+        self.identifiers_removed = [v if isinstance(v, str) else str(v) for v in self.identifiers_removed]
+
+        if not isinstance(self.deidentification_details, list):
+            self.deidentification_details = [self.deidentification_details] if self.deidentification_details is not None else []
+        self.deidentification_details = [v if isinstance(v, str) else str(v) for v in self.deidentification_details]
 
         super().__post_init__(**kwargs)
 
@@ -1667,22 +1426,16 @@ class SensitiveElement(DatasetProperty):
     class_name: ClassVar[str] = "SensitiveElement"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SensitiveElement
 
-    id: Union[str, SensitiveElementId] = None
     sensitive_elements_present: Optional[Union[bool, Bool]] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    sensitivity_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, SensitiveElementId):
-            self.id = SensitiveElementId(self.id)
-
         if self.sensitive_elements_present is not None and not isinstance(self.sensitive_elements_present, Bool):
             self.sensitive_elements_present = Bool(self.sensitive_elements_present)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.sensitivity_details, list):
+            self.sensitivity_details = [self.sensitivity_details] if self.sensitivity_details is not None else []
+        self.sensitivity_details = [v if isinstance(v, str) else str(v) for v in self.sensitivity_details]
 
         super().__post_init__(**kwargs)
 
@@ -1700,17 +1453,11 @@ class DatasetRelationship(DatasetProperty):
     class_name: ClassVar[str] = "DatasetRelationship"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DatasetRelationship
 
-    id: Union[str, DatasetRelationshipId] = None
     target_dataset: str = None
     relationship_type: Union[str, "DatasetRelationshipTypeEnum"] = None
     description: Optional[str] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DatasetRelationshipId):
-            self.id = DatasetRelationshipId(self.id)
-
         if self._is_empty(self.target_dataset):
             self.MissingRequiredField("target_dataset")
         if not isinstance(self.target_dataset, str):
@@ -1740,23 +1487,13 @@ class InstanceAcquisition(DatasetProperty):
     class_name: ClassVar[str] = "InstanceAcquisition"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.InstanceAcquisition
 
-    id: Union[str, InstanceAcquisitionId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
     was_directly_observed: Optional[Union[bool, Bool]] = None
     was_reported_by_subjects: Optional[Union[bool, Bool]] = None
     was_inferred_derived: Optional[Union[bool, Bool]] = None
     was_validated_verified: Optional[Union[bool, Bool]] = None
+    acquisition_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, InstanceAcquisitionId):
-            self.id = InstanceAcquisitionId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
         if self.was_directly_observed is not None and not isinstance(self.was_directly_observed, Bool):
             self.was_directly_observed = Bool(self.was_directly_observed)
 
@@ -1768,6 +1505,10 @@ class InstanceAcquisition(DatasetProperty):
 
         if self.was_validated_verified is not None and not isinstance(self.was_validated_verified, Bool):
             self.was_validated_verified = Bool(self.was_validated_verified)
+
+        if not isinstance(self.acquisition_details, list):
+            self.acquisition_details = [self.acquisition_details] if self.acquisition_details is not None else []
+        self.acquisition_details = [v if isinstance(v, str) else str(v) for v in self.acquisition_details]
 
         super().__post_init__(**kwargs)
 
@@ -1785,18 +1526,12 @@ class CollectionMechanism(DatasetProperty):
     class_name: ClassVar[str] = "CollectionMechanism"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionMechanism
 
-    id: Union[str, CollectionMechanismId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    mechanism_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, CollectionMechanismId):
-            self.id = CollectionMechanismId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.mechanism_details, list):
+            self.mechanism_details = [self.mechanism_details] if self.mechanism_details is not None else []
+        self.mechanism_details = [v if isinstance(v, str) else str(v) for v in self.mechanism_details]
 
         super().__post_init__(**kwargs)
 
@@ -1813,18 +1548,16 @@ class DataCollector(DatasetProperty):
     class_name: ClassVar[str] = "DataCollector"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataCollector
 
-    id: Union[str, DataCollectorId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    role: Optional[str] = None
+    collector_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DataCollectorId):
-            self.id = DataCollectorId(self.id)
+        if self.role is not None and not isinstance(self.role, str):
+            self.role = str(self.role)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.collector_details, list):
+            self.collector_details = [self.collector_details] if self.collector_details is not None else []
+        self.collector_details = [v if isinstance(v, str) else str(v) for v in self.collector_details]
 
         super().__post_init__(**kwargs)
 
@@ -1842,18 +1575,20 @@ class CollectionTimeframe(DatasetProperty):
     class_name: ClassVar[str] = "CollectionTimeframe"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionTimeframe
 
-    id: Union[str, CollectionTimeframeId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    start_date: Optional[Union[str, XSDDate]] = None
+    end_date: Optional[Union[str, XSDDate]] = None
+    timeframe_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, CollectionTimeframeId):
-            self.id = CollectionTimeframeId(self.id)
+        if self.start_date is not None and not isinstance(self.start_date, XSDDate):
+            self.start_date = XSDDate(self.start_date)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if self.end_date is not None and not isinstance(self.end_date, XSDDate):
+            self.end_date = XSDDate(self.end_date)
+
+        if not isinstance(self.timeframe_details, list):
+            self.timeframe_details = [self.timeframe_details] if self.timeframe_details is not None else []
+        self.timeframe_details = [v if isinstance(v, str) else str(v) for v in self.timeframe_details]
 
         super().__post_init__(**kwargs)
 
@@ -1871,18 +1606,16 @@ class DirectCollection(DatasetProperty):
     class_name: ClassVar[str] = "DirectCollection"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DirectCollection
 
-    id: Union[str, DirectCollectionId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    is_direct: Optional[Union[bool, Bool]] = None
+    collection_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DirectCollectionId):
-            self.id = DirectCollectionId(self.id)
+        if self.is_direct is not None and not isinstance(self.is_direct, Bool):
+            self.is_direct = Bool(self.is_direct)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.collection_details, list):
+            self.collection_details = [self.collection_details] if self.collection_details is not None else []
+        self.collection_details = [v if isinstance(v, str) else str(v) for v in self.collection_details]
 
         super().__post_init__(**kwargs)
 
@@ -1899,18 +1632,12 @@ class PreprocessingStrategy(DatasetProperty):
     class_name: ClassVar[str] = "PreprocessingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.PreprocessingStrategy
 
-    id: Union[str, PreprocessingStrategyId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    preprocessing_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, PreprocessingStrategyId):
-            self.id = PreprocessingStrategyId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.preprocessing_details, list):
+            self.preprocessing_details = [self.preprocessing_details] if self.preprocessing_details is not None else []
+        self.preprocessing_details = [v if isinstance(v, str) else str(v) for v in self.preprocessing_details]
 
         super().__post_init__(**kwargs)
 
@@ -1927,18 +1654,12 @@ class CleaningStrategy(DatasetProperty):
     class_name: ClassVar[str] = "CleaningStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CleaningStrategy
 
-    id: Union[str, CleaningStrategyId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    cleaning_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, CleaningStrategyId):
-            self.id = CleaningStrategyId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.cleaning_details, list):
+            self.cleaning_details = [self.cleaning_details] if self.cleaning_details is not None else []
+        self.cleaning_details = [v if isinstance(v, str) else str(v) for v in self.cleaning_details]
 
         super().__post_init__(**kwargs)
 
@@ -1956,23 +1677,13 @@ class LabelingStrategy(DatasetProperty):
     class_name: ClassVar[str] = "LabelingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LabelingStrategy
 
-    id: Union[str, LabelingStrategyId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
     annotation_platform: Optional[str] = None
     annotations_per_item: Optional[int] = None
     inter_annotator_agreement: Optional[str] = None
     annotator_demographics: Optional[Union[str, list[str]]] = empty_list()
+    labeling_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, LabelingStrategyId):
-            self.id = LabelingStrategyId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
         if self.annotation_platform is not None and not isinstance(self.annotation_platform, str):
             self.annotation_platform = str(self.annotation_platform)
 
@@ -1985,6 +1696,10 @@ class LabelingStrategy(DatasetProperty):
         if not isinstance(self.annotator_demographics, list):
             self.annotator_demographics = [self.annotator_demographics] if self.annotator_demographics is not None else []
         self.annotator_demographics = [v if isinstance(v, str) else str(v) for v in self.annotator_demographics]
+
+        if not isinstance(self.labeling_details, list):
+            self.labeling_details = [self.labeling_details] if self.labeling_details is not None else []
+        self.labeling_details = [v if isinstance(v, str) else str(v) for v in self.labeling_details]
 
         super().__post_init__(**kwargs)
 
@@ -2002,18 +1717,16 @@ class RawData(DatasetProperty):
     class_name: ClassVar[str] = "RawData"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.RawData
 
-    id: Union[str, RawDataId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    access_url: Optional[Union[str, URI]] = None
+    raw_data_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, RawDataId):
-            self.id = RawDataId(self.id)
+        if self.access_url is not None and not isinstance(self.access_url, URI):
+            self.access_url = URI(self.access_url)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.raw_data_details, list):
+            self.raw_data_details = [self.raw_data_details] if self.raw_data_details is not None else []
+        self.raw_data_details = [v if isinstance(v, str) else str(v) for v in self.raw_data_details]
 
         super().__post_init__(**kwargs)
 
@@ -2030,18 +1743,12 @@ class ExistingUse(DatasetProperty):
     class_name: ClassVar[str] = "ExistingUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExistingUse
 
-    id: Union[str, ExistingUseId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    examples: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ExistingUseId):
-            self.id = ExistingUseId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.examples, list):
+            self.examples = [self.examples] if self.examples is not None else []
+        self.examples = [v if isinstance(v, str) else str(v) for v in self.examples]
 
         super().__post_init__(**kwargs)
 
@@ -2059,18 +1766,16 @@ class UseRepository(DatasetProperty):
     class_name: ClassVar[str] = "UseRepository"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.UseRepository
 
-    id: Union[str, UseRepositoryId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    repository_url: Optional[Union[str, URI]] = None
+    repository_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, UseRepositoryId):
-            self.id = UseRepositoryId(self.id)
+        if self.repository_url is not None and not isinstance(self.repository_url, URI):
+            self.repository_url = URI(self.repository_url)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.repository_details, list):
+            self.repository_details = [self.repository_details] if self.repository_details is not None else []
+        self.repository_details = [v if isinstance(v, str) else str(v) for v in self.repository_details]
 
         super().__post_init__(**kwargs)
 
@@ -2087,18 +1792,12 @@ class OtherTask(DatasetProperty):
     class_name: ClassVar[str] = "OtherTask"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.OtherTask
 
-    id: Union[str, OtherTaskId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    task_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, OtherTaskId):
-            self.id = OtherTaskId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.task_details, list):
+            self.task_details = [self.task_details] if self.task_details is not None else []
+        self.task_details = [v if isinstance(v, str) else str(v) for v in self.task_details]
 
         super().__post_init__(**kwargs)
 
@@ -2116,18 +1815,12 @@ class FutureUseImpact(DatasetProperty):
     class_name: ClassVar[str] = "FutureUseImpact"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FutureUseImpact
 
-    id: Union[str, FutureUseImpactId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    impact_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, FutureUseImpactId):
-            self.id = FutureUseImpactId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.impact_details, list):
+            self.impact_details = [self.impact_details] if self.impact_details is not None else []
+        self.impact_details = [v if isinstance(v, str) else str(v) for v in self.impact_details]
 
         super().__post_init__(**kwargs)
 
@@ -2144,18 +1837,12 @@ class DiscouragedUse(DatasetProperty):
     class_name: ClassVar[str] = "DiscouragedUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DiscouragedUse
 
-    id: Union[str, DiscouragedUseId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    discouragement_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DiscouragedUseId):
-            self.id = DiscouragedUseId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.discouragement_details, list):
+            self.discouragement_details = [self.discouragement_details] if self.discouragement_details is not None else []
+        self.discouragement_details = [v if isinstance(v, str) else str(v) for v in self.discouragement_details]
 
         super().__post_init__(**kwargs)
 
@@ -2173,19 +1860,17 @@ class IntendedUse(DatasetProperty):
     class_name: ClassVar[str] = "IntendedUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.IntendedUse
 
-    id: Union[str, IntendedUseId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    examples: Optional[Union[str, list[str]]] = empty_list()
+    usage_notes: Optional[str] = None
     use_category: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, IntendedUseId):
-            self.id = IntendedUseId(self.id)
+        if not isinstance(self.examples, list):
+            self.examples = [self.examples] if self.examples is not None else []
+        self.examples = [v if isinstance(v, str) else str(v) for v in self.examples]
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if self.usage_notes is not None and not isinstance(self.usage_notes, str):
+            self.usage_notes = str(self.usage_notes)
 
         if not isinstance(self.use_category, list):
             self.use_category = [self.use_category] if self.use_category is not None else []
@@ -2207,20 +1892,9 @@ class ProhibitedUse(DatasetProperty):
     class_name: ClassVar[str] = "ProhibitedUse"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ProhibitedUse
 
-    id: Union[str, ProhibitedUseId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
     prohibition_reason: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ProhibitedUseId):
-            self.id = ProhibitedUseId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
         if not isinstance(self.prohibition_reason, list):
             self.prohibition_reason = [self.prohibition_reason] if self.prohibition_reason is not None else []
         self.prohibition_reason = [v if isinstance(v, str) else str(v) for v in self.prohibition_reason]
@@ -2241,17 +1915,11 @@ class ThirdPartySharing(DatasetProperty):
     class_name: ClassVar[str] = "ThirdPartySharing"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ThirdPartySharing
 
-    id: Union[str, ThirdPartySharingId] = None
-    description: Optional[Union[bool, Bool]] = None
+    is_shared: Optional[Union[bool, Bool]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ThirdPartySharingId):
-            self.id = ThirdPartySharingId(self.id)
-
-        if self.description is not None and not isinstance(self.description, Bool):
-            self.description = Bool(self.description)
+        if self.is_shared is not None and not isinstance(self.is_shared, Bool):
+            self.is_shared = Bool(self.is_shared)
 
         super().__post_init__(**kwargs)
 
@@ -2268,18 +1936,12 @@ class DistributionFormat(DatasetProperty):
     class_name: ClassVar[str] = "DistributionFormat"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionFormat
 
-    id: Union[str, DistributionFormatId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    access_urls: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DistributionFormatId):
-            self.id = DistributionFormatId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.access_urls, list):
+            self.access_urls = [self.access_urls] if self.access_urls is not None else []
+        self.access_urls = [v if isinstance(v, str) else str(v) for v in self.access_urls]
 
         super().__post_init__(**kwargs)
 
@@ -2296,18 +1958,12 @@ class DistributionDate(DatasetProperty):
     class_name: ClassVar[str] = "DistributionDate"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionDate
 
-    id: Union[str, DistributionDateId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    release_dates: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DistributionDateId):
-            self.id = DistributionDateId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.release_dates, list):
+            self.release_dates = [self.release_dates] if self.release_dates is not None else []
+        self.release_dates = [v if isinstance(v, str) else str(v) for v in self.release_dates]
 
         super().__post_init__(**kwargs)
 
@@ -2324,18 +1980,16 @@ class Maintainer(DatasetProperty):
     class_name: ClassVar[str] = "Maintainer"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Maintainer
 
-    id: Union[str, MaintainerId] = None
-    description: Optional[Union[Union[str, "CreatorOrMaintainerEnum"], list[Union[str, "CreatorOrMaintainerEnum"]]]] = empty_list()
+    role: Optional[Union[str, "CreatorOrMaintainerEnum"]] = None
+    maintainer_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, MaintainerId):
-            self.id = MaintainerId(self.id)
+        if self.role is not None and not isinstance(self.role, CreatorOrMaintainerEnum):
+            self.role = CreatorOrMaintainerEnum(self.role)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, CreatorOrMaintainerEnum) else CreatorOrMaintainerEnum(v) for v in self.description]
+        if not isinstance(self.maintainer_details, list):
+            self.maintainer_details = [self.maintainer_details] if self.maintainer_details is not None else []
+        self.maintainer_details = [v if isinstance(v, str) else str(v) for v in self.maintainer_details]
 
         super().__post_init__(**kwargs)
 
@@ -2352,18 +2006,16 @@ class Erratum(DatasetProperty):
     class_name: ClassVar[str] = "Erratum"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.Erratum
 
-    id: Union[str, ErratumId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    erratum_url: Optional[Union[str, URI]] = None
+    erratum_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ErratumId):
-            self.id = ErratumId(self.id)
+        if self.erratum_url is not None and not isinstance(self.erratum_url, URI):
+            self.erratum_url = URI(self.erratum_url)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.erratum_details, list):
+            self.erratum_details = [self.erratum_details] if self.erratum_details is not None else []
+        self.erratum_details = [v if isinstance(v, str) else str(v) for v in self.erratum_details]
 
         super().__post_init__(**kwargs)
 
@@ -2381,18 +2033,16 @@ class UpdatePlan(DatasetProperty):
     class_name: ClassVar[str] = "UpdatePlan"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.UpdatePlan
 
-    id: Union[str, UpdatePlanId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    frequency: Optional[str] = None
+    update_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, UpdatePlanId):
-            self.id = UpdatePlanId(self.id)
+        if self.frequency is not None and not isinstance(self.frequency, str):
+            self.frequency = str(self.frequency)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.update_details, list):
+            self.update_details = [self.update_details] if self.update_details is not None else []
+        self.update_details = [v if isinstance(v, str) else str(v) for v in self.update_details]
 
         super().__post_init__(**kwargs)
 
@@ -2411,18 +2061,16 @@ class RetentionLimits(DatasetProperty):
     class_name: ClassVar[str] = "RetentionLimits"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.RetentionLimits
 
-    id: Union[str, RetentionLimitsId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    retention_period: Optional[str] = None
+    retention_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, RetentionLimitsId):
-            self.id = RetentionLimitsId(self.id)
+        if self.retention_period is not None and not isinstance(self.retention_period, str):
+            self.retention_period = str(self.retention_period)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.retention_details, list):
+            self.retention_details = [self.retention_details] if self.retention_details is not None else []
+        self.retention_details = [v if isinstance(v, str) else str(v) for v in self.retention_details]
 
         super().__post_init__(**kwargs)
 
@@ -2440,18 +2088,21 @@ class VersionAccess(DatasetProperty):
     class_name: ClassVar[str] = "VersionAccess"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VersionAccess
 
-    id: Union[str, VersionAccessId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    latest_version_doi: Optional[str] = None
+    versions_available: Optional[Union[str, list[str]]] = empty_list()
+    version_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, VersionAccessId):
-            self.id = VersionAccessId(self.id)
+        if self.latest_version_doi is not None and not isinstance(self.latest_version_doi, str):
+            self.latest_version_doi = str(self.latest_version_doi)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.versions_available, list):
+            self.versions_available = [self.versions_available] if self.versions_available is not None else []
+        self.versions_available = [v if isinstance(v, str) else str(v) for v in self.versions_available]
+
+        if not isinstance(self.version_details, list):
+            self.version_details = [self.version_details] if self.version_details is not None else []
+        self.version_details = [v if isinstance(v, str) else str(v) for v in self.version_details]
 
         super().__post_init__(**kwargs)
 
@@ -2469,18 +2120,16 @@ class ExtensionMechanism(DatasetProperty):
     class_name: ClassVar[str] = "ExtensionMechanism"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExtensionMechanism
 
-    id: Union[str, ExtensionMechanismId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    contribution_url: Optional[Union[str, URI]] = None
+    extension_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ExtensionMechanismId):
-            self.id = ExtensionMechanismId(self.id)
+        if self.contribution_url is not None and not isinstance(self.contribution_url, URI):
+            self.contribution_url = URI(self.contribution_url)
 
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.extension_details, list):
+            self.extension_details = [self.extension_details] if self.extension_details is not None else []
+        self.extension_details = [v if isinstance(v, str) else str(v) for v in self.extension_details]
 
         super().__post_init__(**kwargs)
 
@@ -2499,26 +2148,20 @@ class EthicalReview(DatasetProperty):
     class_name: ClassVar[str] = "EthicalReview"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.EthicalReview
 
-    id: Union[str, EthicalReviewId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
     contact_person: Optional[Union[str, PersonId]] = None
     reviewing_organization: Optional[Union[str, OrganizationId]] = None
+    review_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, EthicalReviewId):
-            self.id = EthicalReviewId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
-
         if self.contact_person is not None and not isinstance(self.contact_person, PersonId):
             self.contact_person = PersonId(self.contact_person)
 
         if self.reviewing_organization is not None and not isinstance(self.reviewing_organization, OrganizationId):
             self.reviewing_organization = OrganizationId(self.reviewing_organization)
+
+        if not isinstance(self.review_details, list):
+            self.review_details = [self.review_details] if self.review_details is not None else []
+        self.review_details = [v if isinstance(v, str) else str(v) for v in self.review_details]
 
         super().__post_init__(**kwargs)
 
@@ -2537,18 +2180,12 @@ class DataProtectionImpact(DatasetProperty):
     class_name: ClassVar[str] = "DataProtectionImpact"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DataProtectionImpact
 
-    id: Union[str, DataProtectionImpactId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    impact_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, DataProtectionImpactId):
-            self.id = DataProtectionImpactId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.impact_details, list):
+            self.impact_details = [self.impact_details] if self.impact_details is not None else []
+        self.impact_details = [v if isinstance(v, str) else str(v) for v in self.impact_details]
 
         super().__post_init__(**kwargs)
 
@@ -2566,18 +2203,12 @@ class CollectionNotification(DatasetProperty):
     class_name: ClassVar[str] = "CollectionNotification"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionNotification
 
-    id: Union[str, CollectionNotificationId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    notification_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, CollectionNotificationId):
-            self.id = CollectionNotificationId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.notification_details, list):
+            self.notification_details = [self.notification_details] if self.notification_details is not None else []
+        self.notification_details = [v if isinstance(v, str) else str(v) for v in self.notification_details]
 
         super().__post_init__(**kwargs)
 
@@ -2595,18 +2226,12 @@ class CollectionConsent(DatasetProperty):
     class_name: ClassVar[str] = "CollectionConsent"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.CollectionConsent
 
-    id: Union[str, CollectionConsentId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    consent_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, CollectionConsentId):
-            self.id = CollectionConsentId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.consent_details, list):
+            self.consent_details = [self.consent_details] if self.consent_details is not None else []
+        self.consent_details = [v if isinstance(v, str) else str(v) for v in self.consent_details]
 
         super().__post_init__(**kwargs)
 
@@ -2624,18 +2249,12 @@ class ConsentRevocation(DatasetProperty):
     class_name: ClassVar[str] = "ConsentRevocation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ConsentRevocation
 
-    id: Union[str, ConsentRevocationId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    revocation_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ConsentRevocationId):
-            self.id = ConsentRevocationId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.revocation_details, list):
+            self.revocation_details = [self.revocation_details] if self.revocation_details is not None else []
+        self.revocation_details = [v if isinstance(v, str) else str(v) for v in self.revocation_details]
 
         super().__post_init__(**kwargs)
 
@@ -2653,7 +2272,6 @@ class HumanSubjectResearch(DatasetProperty):
     class_name: ClassVar[str] = "HumanSubjectResearch"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.HumanSubjectResearch
 
-    id: Union[str, HumanSubjectResearchId] = None
     involves_human_subjects: Optional[Union[bool, Bool]] = None
     irb_approval: Optional[Union[str, list[str]]] = empty_list()
     ethics_review_board: Optional[Union[str, list[str]]] = empty_list()
@@ -2661,11 +2279,6 @@ class HumanSubjectResearch(DatasetProperty):
     regulatory_compliance: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, HumanSubjectResearchId):
-            self.id = HumanSubjectResearchId(self.id)
-
         if self.involves_human_subjects is not None and not isinstance(self.involves_human_subjects, Bool):
             self.involves_human_subjects = Bool(self.involves_human_subjects)
 
@@ -2700,7 +2313,6 @@ class InformedConsent(DatasetProperty):
     class_name: ClassVar[str] = "InformedConsent"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.InformedConsent
 
-    id: Union[str, InformedConsentId] = None
     consent_obtained: Optional[Union[bool, Bool]] = None
     consent_type: Optional[Union[str, list[str]]] = empty_list()
     consent_documentation: Optional[Union[str, list[str]]] = empty_list()
@@ -2708,11 +2320,6 @@ class InformedConsent(DatasetProperty):
     consent_scope: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, InformedConsentId):
-            self.id = InformedConsentId(self.id)
-
         if self.consent_obtained is not None and not isinstance(self.consent_obtained, Bool):
             self.consent_obtained = Bool(self.consent_obtained)
 
@@ -2747,18 +2354,12 @@ class ParticipantPrivacy(DatasetProperty):
     class_name: ClassVar[str] = "ParticipantPrivacy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ParticipantPrivacy
 
-    id: Union[str, ParticipantPrivacyId] = None
     anonymization_method: Optional[Union[str, list[str]]] = empty_list()
     reidentification_risk: Optional[Union[str, list[str]]] = empty_list()
     privacy_techniques: Optional[Union[str, list[str]]] = empty_list()
     data_linkage: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ParticipantPrivacyId):
-            self.id = ParticipantPrivacyId(self.id)
-
         if not isinstance(self.anonymization_method, list):
             self.anonymization_method = [self.anonymization_method] if self.anonymization_method is not None else []
         self.anonymization_method = [v if isinstance(v, str) else str(v) for v in self.anonymization_method]
@@ -2790,18 +2391,12 @@ class HumanSubjectCompensation(DatasetProperty):
     class_name: ClassVar[str] = "HumanSubjectCompensation"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.HumanSubjectCompensation
 
-    id: Union[str, HumanSubjectCompensationId] = None
     compensation_provided: Optional[Union[bool, Bool]] = None
     compensation_type: Optional[Union[str, list[str]]] = empty_list()
     compensation_amount: Optional[Union[str, list[str]]] = empty_list()
     compensation_rationale: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, HumanSubjectCompensationId):
-            self.id = HumanSubjectCompensationId(self.id)
-
         if self.compensation_provided is not None and not isinstance(self.compensation_provided, Bool):
             self.compensation_provided = Bool(self.compensation_provided)
 
@@ -2832,18 +2427,12 @@ class VulnerablePopulations(DatasetProperty):
     class_name: ClassVar[str] = "VulnerablePopulations"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VulnerablePopulations
 
-    id: Union[str, VulnerablePopulationsId] = None
     vulnerable_groups_included: Optional[Union[bool, Bool]] = None
     special_protections: Optional[Union[str, list[str]]] = empty_list()
     assent_procedures: Optional[Union[str, list[str]]] = empty_list()
     guardian_consent: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, VulnerablePopulationsId):
-            self.id = VulnerablePopulationsId(self.id)
-
         if self.vulnerable_groups_included is not None and not isinstance(self.vulnerable_groups_included, Bool):
             self.vulnerable_groups_included = Bool(self.vulnerable_groups_included)
 
@@ -2875,20 +2464,14 @@ class LicenseAndUseTerms(DatasetProperty):
     class_name: ClassVar[str] = "LicenseAndUseTerms"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LicenseAndUseTerms
 
-    id: Union[str, LicenseAndUseTermsId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    license_terms: Optional[Union[str, list[str]]] = empty_list()
     data_use_permission: Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]] = empty_list()
     contact_person: Optional[Union[str, PersonId]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, LicenseAndUseTermsId):
-            self.id = LicenseAndUseTermsId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.license_terms, list):
+            self.license_terms = [self.license_terms] if self.license_terms is not None else []
+        self.license_terms = [v if isinstance(v, str) else str(v) for v in self.license_terms]
 
         if not isinstance(self.data_use_permission, list):
             self.data_use_permission = [self.data_use_permission] if self.data_use_permission is not None else []
@@ -2914,18 +2497,12 @@ class IPRestrictions(DatasetProperty):
     class_name: ClassVar[str] = "IPRestrictions"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.IPRestrictions
 
-    id: Union[str, IPRestrictionsId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    restrictions: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, IPRestrictionsId):
-            self.id = IPRestrictionsId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.restrictions, list):
+            self.restrictions = [self.restrictions] if self.restrictions is not None else []
+        self.restrictions = [v if isinstance(v, str) else str(v) for v in self.restrictions]
 
         super().__post_init__(**kwargs)
 
@@ -2945,22 +2522,16 @@ class ExportControlRegulatoryRestrictions(DatasetProperty):
     class_name: ClassVar[str] = "ExportControlRegulatoryRestrictions"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ExportControlRegulatoryRestrictions
 
-    id: Union[str, ExportControlRegulatoryRestrictionsId] = None
-    description: Optional[Union[str, list[str]]] = empty_list()
+    regulatory_restrictions: Optional[Union[str, list[str]]] = empty_list()
     hipaa_compliant: Optional[Union[str, "ComplianceStatusEnum"]] = None
     other_compliance: Optional[Union[str, list[str]]] = empty_list()
     confidentiality_level: Optional[Union[str, "ConfidentialityLevelEnum"]] = None
     governance_committee_contact: Optional[Union[str, PersonId]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, ExportControlRegulatoryRestrictionsId):
-            self.id = ExportControlRegulatoryRestrictionsId(self.id)
-
-        if not isinstance(self.description, list):
-            self.description = [self.description] if self.description is not None else []
-        self.description = [v if isinstance(v, str) else str(v) for v in self.description]
+        if not isinstance(self.regulatory_restrictions, list):
+            self.regulatory_restrictions = [self.regulatory_restrictions] if self.regulatory_restrictions is not None else []
+        self.regulatory_restrictions = [v if isinstance(v, str) else str(v) for v in self.regulatory_restrictions]
 
         if self.hipaa_compliant is not None and not isinstance(self.hipaa_compliant, ComplianceStatusEnum):
             self.hipaa_compliant = ComplianceStatusEnum(self.hipaa_compliant)
@@ -2991,7 +2562,6 @@ class VariableMetadata(DatasetProperty):
     class_name: ClassVar[str] = "VariableMetadata"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VariableMetadata
 
-    id: Union[str, VariableMetadataId] = None
     variable_name: str = None
     data_type: Optional[Union[str, "VariableTypeEnum"]] = None
     unit: Optional[Union[str, URIorCURIE]] = None
@@ -3008,11 +2578,6 @@ class VariableMetadata(DatasetProperty):
     quality_notes: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self._is_empty(self.id):
-            self.MissingRequiredField("id")
-        if not isinstance(self.id, VariableMetadataId):
-            self.id = VariableMetadataId(self.id)
-
         if self._is_empty(self.variable_name):
             self.MissingRequiredField("variable_name")
         if not isinstance(self.variable_name, str):
@@ -3317,6 +2882,38 @@ class BiasTypeEnum(EnumDefinitionImpl):
     _defn = EnumDefinition(
         name="BiasTypeEnum",
         description="""Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO) bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO""",
+    )
+
+class LimitationTypeEnum(EnumDefinitionImpl):
+    """
+    Types of limitations that may affect dataset use or interpretation. Distinct from biases (systematic errors) and
+    anomalies (data quality issues).
+    """
+    scope_limitation = PermissibleValue(
+        text="scope_limitation",
+        description="""Dataset does not cover all intended use cases or populations. The scope of the dataset is narrower than the intended application domain.""")
+    temporal_limitation = PermissibleValue(
+        text="temporal_limitation",
+        description="""Dataset is limited to specific time periods. Data may not reflect current conditions or may not be applicable to other time periods.""")
+    coverage_limitation = PermissibleValue(
+        text="coverage_limitation",
+        description="""Dataset has incomplete coverage of target domain. Missing data points, categories, or geographic regions within the intended scope.""")
+    methodological_limitation = PermissibleValue(
+        text="methodological_limitation",
+        description="""Data collection methodology introduces constraints. Limitations arising from how data was gathered, measured, or processed.""")
+    representativeness_limitation = PermissibleValue(
+        text="representativeness_limitation",
+        description="""Dataset may not be representative of target population. Sample may not accurately reflect the broader population of interest.""")
+    resolution_limitation = PermissibleValue(
+        text="resolution_limitation",
+        description="""Data granularity or resolution is insufficient for some uses. Level of detail may not support fine-grained analysis or specific applications.""")
+    integration_limitation = PermissibleValue(
+        text="integration_limitation",
+        description="""Challenges in combining with other data sources. Incompatibilities in formats, identifiers, or schemas that hinder data integration.""")
+
+    _defn = EnumDefinition(
+        name="LimitationTypeEnum",
+        description="""Types of limitations that may affect dataset use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).""",
     )
 
 class VersionTypeEnum(EnumDefinitionImpl):
@@ -3776,151 +3373,157 @@ slots.datasetCollection__resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name
                    model_uri=DATA_SHEETS_SCHEMA.datasetCollection__resources, domain=None, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
 
 slots.dataset__purposes = Slot(uri=DATA_SHEETS_SCHEMA.purposes, name="dataset__purposes", curie=DATA_SHEETS_SCHEMA.curie('purposes'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__purposes, domain=None, range=Optional[Union[Union[str, PurposeId], list[Union[str, PurposeId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__purposes, domain=None, range=Optional[Union[Union[dict, Purpose], list[Union[dict, Purpose]]]])
 
 slots.dataset__tasks = Slot(uri=DATA_SHEETS_SCHEMA.tasks, name="dataset__tasks", curie=DATA_SHEETS_SCHEMA.curie('tasks'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__tasks, domain=None, range=Optional[Union[Union[str, TaskId], list[Union[str, TaskId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__tasks, domain=None, range=Optional[Union[Union[dict, Task], list[Union[dict, Task]]]])
 
 slots.dataset__addressing_gaps = Slot(uri=DATA_SHEETS_SCHEMA.addressing_gaps, name="dataset__addressing_gaps", curie=DATA_SHEETS_SCHEMA.curie('addressing_gaps'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__addressing_gaps, domain=None, range=Optional[Union[Union[str, AddressingGapId], list[Union[str, AddressingGapId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__addressing_gaps, domain=None, range=Optional[Union[Union[dict, AddressingGap], list[Union[dict, AddressingGap]]]])
 
 slots.dataset__creators = Slot(uri=DATA_SHEETS_SCHEMA.creators, name="dataset__creators", curie=DATA_SHEETS_SCHEMA.curie('creators'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__creators, domain=None, range=Optional[Union[Union[str, CreatorId], list[Union[str, CreatorId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__creators, domain=None, range=Optional[Union[Union[dict, Creator], list[Union[dict, Creator]]]])
 
 slots.dataset__funders = Slot(uri=DATA_SHEETS_SCHEMA.funders, name="dataset__funders", curie=DATA_SHEETS_SCHEMA.curie('funders'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__funders, domain=None, range=Optional[Union[Union[str, FundingMechanismId], list[Union[str, FundingMechanismId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__funders, domain=None, range=Optional[Union[Union[dict, FundingMechanism], list[Union[dict, FundingMechanism]]]])
 
 slots.dataset__subsets = Slot(uri=DCAT.distribution, name="dataset__subsets", curie=DCAT.curie('distribution'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__subsets, domain=None, range=Optional[Union[Union[str, DataSubsetId], list[Union[str, DataSubsetId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__subsets, domain=None, range=Optional[Union[dict[Union[str, DataSubsetId], Union[dict, DataSubset]], list[Union[dict, DataSubset]]]])
 
 slots.dataset__instances = Slot(uri=DATA_SHEETS_SCHEMA.instances, name="dataset__instances", curie=DATA_SHEETS_SCHEMA.curie('instances'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__instances, domain=None, range=Optional[Union[Union[str, InstanceId], list[Union[str, InstanceId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__instances, domain=None, range=Optional[Union[Union[dict, Instance], list[Union[dict, Instance]]]])
 
 slots.dataset__anomalies = Slot(uri=DATA_SHEETS_SCHEMA.anomalies, name="dataset__anomalies", curie=DATA_SHEETS_SCHEMA.curie('anomalies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__anomalies, domain=None, range=Optional[Union[Union[str, DataAnomalyId], list[Union[str, DataAnomalyId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__anomalies, domain=None, range=Optional[Union[Union[dict, DataAnomaly], list[Union[dict, DataAnomaly]]]])
+
+slots.dataset__known_biases = Slot(uri=DATA_SHEETS_SCHEMA.known_biases, name="dataset__known_biases", curie=DATA_SHEETS_SCHEMA.curie('known_biases'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__known_biases, domain=None, range=Optional[Union[Union[dict, DatasetBias], list[Union[dict, DatasetBias]]]])
+
+slots.dataset__known_limitations = Slot(uri=DATA_SHEETS_SCHEMA.known_limitations, name="dataset__known_limitations", curie=DATA_SHEETS_SCHEMA.curie('known_limitations'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__known_limitations, domain=None, range=Optional[Union[Union[dict, DatasetLimitation], list[Union[dict, DatasetLimitation]]]])
 
 slots.dataset__external_resources = Slot(uri=DATA_SHEETS_SCHEMA.external_resources, name="dataset__external_resources", curie=DATA_SHEETS_SCHEMA.curie('external_resources'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__external_resources, domain=None, range=Optional[Union[Union[str, ExternalResourceId], list[Union[str, ExternalResourceId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__external_resources, domain=None, range=Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]])
 
 slots.dataset__confidential_elements = Slot(uri=DATA_SHEETS_SCHEMA.confidential_elements, name="dataset__confidential_elements", curie=DATA_SHEETS_SCHEMA.curie('confidential_elements'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__confidential_elements, domain=None, range=Optional[Union[Union[str, ConfidentialityId], list[Union[str, ConfidentialityId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__confidential_elements, domain=None, range=Optional[Union[Union[dict, Confidentiality], list[Union[dict, Confidentiality]]]])
 
 slots.dataset__content_warnings = Slot(uri=DATA_SHEETS_SCHEMA.content_warnings, name="dataset__content_warnings", curie=DATA_SHEETS_SCHEMA.curie('content_warnings'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__content_warnings, domain=None, range=Optional[Union[Union[str, ContentWarningId], list[Union[str, ContentWarningId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__content_warnings, domain=None, range=Optional[Union[Union[dict, ContentWarning], list[Union[dict, ContentWarning]]]])
 
 slots.dataset__subpopulations = Slot(uri=DATA_SHEETS_SCHEMA.subpopulations, name="dataset__subpopulations", curie=DATA_SHEETS_SCHEMA.curie('subpopulations'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__subpopulations, domain=None, range=Optional[Union[Union[str, SubpopulationId], list[Union[str, SubpopulationId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__subpopulations, domain=None, range=Optional[Union[Union[dict, Subpopulation], list[Union[dict, Subpopulation]]]])
 
 slots.dataset__sensitive_elements = Slot(uri=DATA_SHEETS_SCHEMA.sensitive_elements, name="dataset__sensitive_elements", curie=DATA_SHEETS_SCHEMA.curie('sensitive_elements'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__sensitive_elements, domain=None, range=Optional[Union[Union[str, SensitiveElementId], list[Union[str, SensitiveElementId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__sensitive_elements, domain=None, range=Optional[Union[Union[dict, SensitiveElement], list[Union[dict, SensitiveElement]]]])
 
 slots.dataset__acquisition_methods = Slot(uri=DATA_SHEETS_SCHEMA.acquisition_methods, name="dataset__acquisition_methods", curie=DATA_SHEETS_SCHEMA.curie('acquisition_methods'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__acquisition_methods, domain=None, range=Optional[Union[Union[str, InstanceAcquisitionId], list[Union[str, InstanceAcquisitionId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__acquisition_methods, domain=None, range=Optional[Union[Union[dict, InstanceAcquisition], list[Union[dict, InstanceAcquisition]]]])
 
 slots.dataset__collection_mechanisms = Slot(uri=DATA_SHEETS_SCHEMA.collection_mechanisms, name="dataset__collection_mechanisms", curie=DATA_SHEETS_SCHEMA.curie('collection_mechanisms'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__collection_mechanisms, domain=None, range=Optional[Union[Union[str, CollectionMechanismId], list[Union[str, CollectionMechanismId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__collection_mechanisms, domain=None, range=Optional[Union[Union[dict, CollectionMechanism], list[Union[dict, CollectionMechanism]]]])
 
 slots.dataset__sampling_strategies = Slot(uri=DATA_SHEETS_SCHEMA.sampling_strategies, name="dataset__sampling_strategies", curie=DATA_SHEETS_SCHEMA.curie('sampling_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__sampling_strategies, domain=None, range=Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__sampling_strategies, domain=None, range=Optional[Union[Union[dict, SamplingStrategy], list[Union[dict, SamplingStrategy]]]])
 
 slots.dataset__data_collectors = Slot(uri=DATA_SHEETS_SCHEMA.data_collectors, name="dataset__data_collectors", curie=DATA_SHEETS_SCHEMA.curie('data_collectors'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__data_collectors, domain=None, range=Optional[Union[Union[str, DataCollectorId], list[Union[str, DataCollectorId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__data_collectors, domain=None, range=Optional[Union[Union[dict, DataCollector], list[Union[dict, DataCollector]]]])
 
 slots.dataset__collection_timeframes = Slot(uri=DATA_SHEETS_SCHEMA.collection_timeframes, name="dataset__collection_timeframes", curie=DATA_SHEETS_SCHEMA.curie('collection_timeframes'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__collection_timeframes, domain=None, range=Optional[Union[Union[str, CollectionTimeframeId], list[Union[str, CollectionTimeframeId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__collection_timeframes, domain=None, range=Optional[Union[Union[dict, CollectionTimeframe], list[Union[dict, CollectionTimeframe]]]])
 
 slots.dataset__ethical_reviews = Slot(uri=DATA_SHEETS_SCHEMA.ethical_reviews, name="dataset__ethical_reviews", curie=DATA_SHEETS_SCHEMA.curie('ethical_reviews'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__ethical_reviews, domain=None, range=Optional[Union[Union[str, EthicalReviewId], list[Union[str, EthicalReviewId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__ethical_reviews, domain=None, range=Optional[Union[Union[dict, EthicalReview], list[Union[dict, EthicalReview]]]])
 
 slots.dataset__data_protection_impacts = Slot(uri=DATA_SHEETS_SCHEMA.data_protection_impacts, name="dataset__data_protection_impacts", curie=DATA_SHEETS_SCHEMA.curie('data_protection_impacts'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__data_protection_impacts, domain=None, range=Optional[Union[Union[str, DataProtectionImpactId], list[Union[str, DataProtectionImpactId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__data_protection_impacts, domain=None, range=Optional[Union[Union[dict, DataProtectionImpact], list[Union[dict, DataProtectionImpact]]]])
 
 slots.dataset__human_subject_research = Slot(uri=DATA_SHEETS_SCHEMA.human_subject_research, name="dataset__human_subject_research", curie=DATA_SHEETS_SCHEMA.curie('human_subject_research'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__human_subject_research, domain=None, range=Optional[Union[str, HumanSubjectResearchId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__human_subject_research, domain=None, range=Optional[Union[dict, HumanSubjectResearch]])
 
 slots.dataset__informed_consent = Slot(uri=DATA_SHEETS_SCHEMA.informed_consent, name="dataset__informed_consent", curie=DATA_SHEETS_SCHEMA.curie('informed_consent'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__informed_consent, domain=None, range=Optional[Union[Union[str, InformedConsentId], list[Union[str, InformedConsentId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__informed_consent, domain=None, range=Optional[Union[Union[dict, InformedConsent], list[Union[dict, InformedConsent]]]])
 
 slots.dataset__participant_privacy = Slot(uri=DATA_SHEETS_SCHEMA.participant_privacy, name="dataset__participant_privacy", curie=DATA_SHEETS_SCHEMA.curie('participant_privacy'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__participant_privacy, domain=None, range=Optional[Union[Union[str, ParticipantPrivacyId], list[Union[str, ParticipantPrivacyId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__participant_privacy, domain=None, range=Optional[Union[Union[dict, ParticipantPrivacy], list[Union[dict, ParticipantPrivacy]]]])
 
 slots.dataset__participant_compensation = Slot(uri=DATA_SHEETS_SCHEMA.participant_compensation, name="dataset__participant_compensation", curie=DATA_SHEETS_SCHEMA.curie('participant_compensation'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__participant_compensation, domain=None, range=Optional[Union[str, HumanSubjectCompensationId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__participant_compensation, domain=None, range=Optional[Union[dict, HumanSubjectCompensation]])
 
 slots.dataset__vulnerable_populations = Slot(uri=DATA_SHEETS_SCHEMA.vulnerable_populations, name="dataset__vulnerable_populations", curie=DATA_SHEETS_SCHEMA.curie('vulnerable_populations'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__vulnerable_populations, domain=None, range=Optional[Union[str, VulnerablePopulationsId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__vulnerable_populations, domain=None, range=Optional[Union[dict, VulnerablePopulations]])
 
 slots.dataset__preprocessing_strategies = Slot(uri=DATA_SHEETS_SCHEMA.preprocessing_strategies, name="dataset__preprocessing_strategies", curie=DATA_SHEETS_SCHEMA.curie('preprocessing_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__preprocessing_strategies, domain=None, range=Optional[Union[Union[str, PreprocessingStrategyId], list[Union[str, PreprocessingStrategyId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__preprocessing_strategies, domain=None, range=Optional[Union[Union[dict, PreprocessingStrategy], list[Union[dict, PreprocessingStrategy]]]])
 
 slots.dataset__cleaning_strategies = Slot(uri=DATA_SHEETS_SCHEMA.cleaning_strategies, name="dataset__cleaning_strategies", curie=DATA_SHEETS_SCHEMA.curie('cleaning_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__cleaning_strategies, domain=None, range=Optional[Union[Union[str, CleaningStrategyId], list[Union[str, CleaningStrategyId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__cleaning_strategies, domain=None, range=Optional[Union[Union[dict, CleaningStrategy], list[Union[dict, CleaningStrategy]]]])
 
 slots.dataset__labeling_strategies = Slot(uri=DATA_SHEETS_SCHEMA.labeling_strategies, name="dataset__labeling_strategies", curie=DATA_SHEETS_SCHEMA.curie('labeling_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__labeling_strategies, domain=None, range=Optional[Union[Union[str, LabelingStrategyId], list[Union[str, LabelingStrategyId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__labeling_strategies, domain=None, range=Optional[Union[Union[dict, LabelingStrategy], list[Union[dict, LabelingStrategy]]]])
 
 slots.dataset__raw_sources = Slot(uri=DATA_SHEETS_SCHEMA.raw_sources, name="dataset__raw_sources", curie=DATA_SHEETS_SCHEMA.curie('raw_sources'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__raw_sources, domain=None, range=Optional[Union[Union[str, RawDataId], list[Union[str, RawDataId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__raw_sources, domain=None, range=Optional[Union[Union[dict, RawData], list[Union[dict, RawData]]]])
 
 slots.dataset__existing_uses = Slot(uri=DATA_SHEETS_SCHEMA.existing_uses, name="dataset__existing_uses", curie=DATA_SHEETS_SCHEMA.curie('existing_uses'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__existing_uses, domain=None, range=Optional[Union[Union[str, ExistingUseId], list[Union[str, ExistingUseId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__existing_uses, domain=None, range=Optional[Union[Union[dict, ExistingUse], list[Union[dict, ExistingUse]]]])
 
 slots.dataset__use_repository = Slot(uri=DATA_SHEETS_SCHEMA.use_repository, name="dataset__use_repository", curie=DATA_SHEETS_SCHEMA.curie('use_repository'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__use_repository, domain=None, range=Optional[Union[Union[str, UseRepositoryId], list[Union[str, UseRepositoryId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__use_repository, domain=None, range=Optional[Union[Union[dict, UseRepository], list[Union[dict, UseRepository]]]])
 
 slots.dataset__other_tasks = Slot(uri=DATA_SHEETS_SCHEMA.other_tasks, name="dataset__other_tasks", curie=DATA_SHEETS_SCHEMA.curie('other_tasks'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__other_tasks, domain=None, range=Optional[Union[Union[str, OtherTaskId], list[Union[str, OtherTaskId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__other_tasks, domain=None, range=Optional[Union[Union[dict, OtherTask], list[Union[dict, OtherTask]]]])
 
 slots.dataset__future_use_impacts = Slot(uri=DATA_SHEETS_SCHEMA.future_use_impacts, name="dataset__future_use_impacts", curie=DATA_SHEETS_SCHEMA.curie('future_use_impacts'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__future_use_impacts, domain=None, range=Optional[Union[Union[str, FutureUseImpactId], list[Union[str, FutureUseImpactId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__future_use_impacts, domain=None, range=Optional[Union[Union[dict, FutureUseImpact], list[Union[dict, FutureUseImpact]]]])
 
 slots.dataset__discouraged_uses = Slot(uri=DATA_SHEETS_SCHEMA.discouraged_uses, name="dataset__discouraged_uses", curie=DATA_SHEETS_SCHEMA.curie('discouraged_uses'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__discouraged_uses, domain=None, range=Optional[Union[Union[str, DiscouragedUseId], list[Union[str, DiscouragedUseId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__discouraged_uses, domain=None, range=Optional[Union[Union[dict, DiscouragedUse], list[Union[dict, DiscouragedUse]]]])
 
 slots.dataset__intended_uses = Slot(uri=DATA_SHEETS_SCHEMA.intended_uses, name="dataset__intended_uses", curie=DATA_SHEETS_SCHEMA.curie('intended_uses'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__intended_uses, domain=None, range=Optional[Union[Union[str, IntendedUseId], list[Union[str, IntendedUseId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__intended_uses, domain=None, range=Optional[Union[Union[dict, IntendedUse], list[Union[dict, IntendedUse]]]])
 
 slots.dataset__prohibited_uses = Slot(uri=DATA_SHEETS_SCHEMA.prohibited_uses, name="dataset__prohibited_uses", curie=DATA_SHEETS_SCHEMA.curie('prohibited_uses'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__prohibited_uses, domain=None, range=Optional[Union[Union[str, ProhibitedUseId], list[Union[str, ProhibitedUseId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__prohibited_uses, domain=None, range=Optional[Union[Union[dict, ProhibitedUse], list[Union[dict, ProhibitedUse]]]])
 
 slots.dataset__distribution_formats = Slot(uri=DATA_SHEETS_SCHEMA.distribution_formats, name="dataset__distribution_formats", curie=DATA_SHEETS_SCHEMA.curie('distribution_formats'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__distribution_formats, domain=None, range=Optional[Union[Union[str, DistributionFormatId], list[Union[str, DistributionFormatId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__distribution_formats, domain=None, range=Optional[Union[Union[dict, DistributionFormat], list[Union[dict, DistributionFormat]]]])
 
 slots.dataset__distribution_dates = Slot(uri=DATA_SHEETS_SCHEMA.distribution_dates, name="dataset__distribution_dates", curie=DATA_SHEETS_SCHEMA.curie('distribution_dates'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__distribution_dates, domain=None, range=Optional[Union[Union[str, DistributionDateId], list[Union[str, DistributionDateId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__distribution_dates, domain=None, range=Optional[Union[Union[dict, DistributionDate], list[Union[dict, DistributionDate]]]])
 
 slots.dataset__license_and_use_terms = Slot(uri=DATA_SHEETS_SCHEMA.license_and_use_terms, name="dataset__license_and_use_terms", curie=DATA_SHEETS_SCHEMA.curie('license_and_use_terms'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__license_and_use_terms, domain=None, range=Optional[Union[str, LicenseAndUseTermsId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__license_and_use_terms, domain=None, range=Optional[Union[dict, LicenseAndUseTerms]])
 
 slots.dataset__ip_restrictions = Slot(uri=DATA_SHEETS_SCHEMA.ip_restrictions, name="dataset__ip_restrictions", curie=DATA_SHEETS_SCHEMA.curie('ip_restrictions'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__ip_restrictions, domain=None, range=Optional[Union[str, IPRestrictionsId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__ip_restrictions, domain=None, range=Optional[Union[dict, IPRestrictions]])
 
 slots.dataset__regulatory_restrictions = Slot(uri=DATA_SHEETS_SCHEMA.regulatory_restrictions, name="dataset__regulatory_restrictions", curie=DATA_SHEETS_SCHEMA.curie('regulatory_restrictions'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__regulatory_restrictions, domain=None, range=Optional[Union[str, ExportControlRegulatoryRestrictionsId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__regulatory_restrictions, domain=None, range=Optional[Union[dict, ExportControlRegulatoryRestrictions]])
 
 slots.dataset__maintainers = Slot(uri=DATA_SHEETS_SCHEMA.maintainers, name="dataset__maintainers", curie=DATA_SHEETS_SCHEMA.curie('maintainers'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__maintainers, domain=None, range=Optional[Union[Union[str, MaintainerId], list[Union[str, MaintainerId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__maintainers, domain=None, range=Optional[Union[Union[dict, Maintainer], list[Union[dict, Maintainer]]]])
 
 slots.dataset__errata = Slot(uri=DATA_SHEETS_SCHEMA.errata, name="dataset__errata", curie=DATA_SHEETS_SCHEMA.curie('errata'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__errata, domain=None, range=Optional[Union[Union[str, ErratumId], list[Union[str, ErratumId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__errata, domain=None, range=Optional[Union[Union[dict, Erratum], list[Union[dict, Erratum]]]])
 
 slots.dataset__updates = Slot(uri=DATA_SHEETS_SCHEMA.updates, name="dataset__updates", curie=DATA_SHEETS_SCHEMA.curie('updates'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__updates, domain=None, range=Optional[Union[str, UpdatePlanId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__updates, domain=None, range=Optional[Union[dict, UpdatePlan]])
 
 slots.dataset__retention_limit = Slot(uri=DATA_SHEETS_SCHEMA.retention_limit, name="dataset__retention_limit", curie=DATA_SHEETS_SCHEMA.curie('retention_limit'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__retention_limit, domain=None, range=Optional[Union[str, RetentionLimitsId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__retention_limit, domain=None, range=Optional[Union[dict, RetentionLimits]])
 
 slots.dataset__version_access = Slot(uri=DATA_SHEETS_SCHEMA.version_access, name="dataset__version_access", curie=DATA_SHEETS_SCHEMA.curie('version_access'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__version_access, domain=None, range=Optional[Union[str, VersionAccessId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__version_access, domain=None, range=Optional[Union[dict, VersionAccess]])
 
 slots.dataset__extension_mechanism = Slot(uri=DATA_SHEETS_SCHEMA.extension_mechanism, name="dataset__extension_mechanism", curie=DATA_SHEETS_SCHEMA.curie('extension_mechanism'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__extension_mechanism, domain=None, range=Optional[Union[str, ExtensionMechanismId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__extension_mechanism, domain=None, range=Optional[Union[dict, ExtensionMechanism]])
 
 slots.dataset__variables = Slot(uri=SCHEMA.variableMeasured, name="dataset__variables", curie=SCHEMA.curie('variableMeasured'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__variables, domain=None, range=Optional[Union[Union[str, VariableMetadataId], list[Union[str, VariableMetadataId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__variables, domain=None, range=Optional[Union[Union[dict, VariableMetadata], list[Union[dict, VariableMetadata]]]])
 
 slots.dataset__is_deidentified = Slot(uri=DATA_SHEETS_SCHEMA.is_deidentified, name="dataset__is_deidentified", curie=DATA_SHEETS_SCHEMA.curie('is_deidentified'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__is_deidentified, domain=None, range=Optional[Union[str, DeidentificationId]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__is_deidentified, domain=None, range=Optional[Union[dict, Deidentification]])
 
 slots.dataset__is_tabular = Slot(uri=DATA_SHEETS_SCHEMA.is_tabular, name="dataset__is_tabular", curie=DATA_SHEETS_SCHEMA.curie('is_tabular'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__is_tabular, domain=None, range=Optional[Union[bool, Bool]])
@@ -3929,10 +3532,10 @@ slots.dataset__citation = Slot(uri=SCHEMA.citation, name="dataset__citation", cu
                    model_uri=DATA_SHEETS_SCHEMA.dataset__citation, domain=None, range=Optional[str])
 
 slots.dataset__parent_datasets = Slot(uri=SCHEMA.isPartOf, name="dataset__parent_datasets", curie=SCHEMA.curie('isPartOf'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__parent_datasets, domain=None, range=Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__parent_datasets, domain=None, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
 
 slots.dataset__related_datasets = Slot(uri=DATA_SHEETS_SCHEMA.related_datasets, name="dataset__related_datasets", curie=DATA_SHEETS_SCHEMA.curie('related_datasets'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataset__related_datasets, domain=None, range=Optional[Union[Union[str, DatasetRelationshipId], list[Union[str, DatasetRelationshipId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__related_datasets, domain=None, range=Optional[Union[Union[dict, DatasetRelationship], list[Union[dict, DatasetRelationship]]]])
 
 slots.dataset__resources = Slot(uri=DATA_SHEETS_SCHEMA.resources, name="dataset__resources", curie=DATA_SHEETS_SCHEMA.curie('resources'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__resources, domain=None, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
@@ -3952,8 +3555,17 @@ slots.namedThing__name = Slot(uri=SCHEMA.name, name="namedThing__name", curie=SC
 slots.namedThing__description = Slot(uri=SCHEMA.description, name="namedThing__description", curie=SCHEMA.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.namedThing__description, domain=None, range=Optional[str])
 
+slots.datasetProperty__id = Slot(uri=SCHEMA.identifier, name="datasetProperty__id", curie=SCHEMA.curie('identifier'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__id, domain=None, range=Optional[Union[str, URIorCURIE]])
+
+slots.datasetProperty__name = Slot(uri=SCHEMA.name, name="datasetProperty__name", curie=SCHEMA.curie('name'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__name, domain=None, range=Optional[str])
+
+slots.datasetProperty__description = Slot(uri=SCHEMA.description, name="datasetProperty__description", curie=SCHEMA.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__description, domain=None, range=Optional[str])
+
 slots.datasetProperty__used_software = Slot(uri=DATA_SHEETS_SCHEMA.used_software, name="datasetProperty__used_software", curie=DATA_SHEETS_SCHEMA.curie('used_software'),
-                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__used_software, domain=None, range=Optional[Union[Union[str, SoftwareId], list[Union[str, SoftwareId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.datasetProperty__used_software, domain=None, range=Optional[Union[dict[Union[str, SoftwareId], Union[dict, Software]], list[Union[dict, Software]]]])
 
 slots.software__version = Slot(uri=SCHEMA.softwareVersion, name="software__version", curie=SCHEMA.curie('softwareVersion'),
                    model_uri=DATA_SHEETS_SCHEMA.software__version, domain=None, range=Optional[str])
@@ -4001,8 +3613,8 @@ slots.addressingGap__response = Slot(uri=DCTERMS.description, name="addressingGa
 slots.creator__principal_investigator = Slot(uri=DCTERMS.creator, name="creator__principal_investigator", curie=DCTERMS.curie('creator'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.creator__affiliation = Slot(uri=SCHEMA.affiliation, name="creator__affiliation", curie=SCHEMA.curie('affiliation'),
-                   model_uri=DATA_SHEETS_SCHEMA.creator__affiliation, domain=None, range=Optional[Union[str, OrganizationId]])
+slots.creator__affiliations = Slot(uri=SCHEMA.affiliation, name="creator__affiliations", curie=SCHEMA.curie('affiliation'),
+                   model_uri=DATA_SHEETS_SCHEMA.creator__affiliations, domain=None, range=Optional[Union[dict[Union[str, OrganizationId], Union[dict, Organization]], list[Union[dict, Organization]]]])
 
 slots.creator__credit_roles = Slot(uri=D4DMOTIVATION.credit_roles, name="creator__credit_roles", curie=D4DMOTIVATION.curie('credit_roles'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__credit_roles, domain=None, range=Optional[Union[Union[str, "CRediTRoleEnum"], list[Union[str, "CRediTRoleEnum"]]]])
@@ -4010,8 +3622,8 @@ slots.creator__credit_roles = Slot(uri=D4DMOTIVATION.credit_roles, name="creator
 slots.fundingMechanism__grantor = Slot(uri=SCHEMA.funder, name="fundingMechanism__grantor", curie=SCHEMA.curie('funder'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grantor, domain=None, range=Optional[Union[str, GrantorId]])
 
-slots.fundingMechanism__grant = Slot(uri=SCHEMA.funding, name="fundingMechanism__grant", curie=SCHEMA.curie('funding'),
-                   model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grant, domain=None, range=Optional[Union[str, GrantId]])
+slots.fundingMechanism__grants = Slot(uri=SCHEMA.funding, name="fundingMechanism__grants", curie=SCHEMA.curie('funding'),
+                   model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grants, domain=None, range=Optional[Union[dict[Union[str, GrantId], Union[dict, Grant]], list[Union[dict, Grant]]]])
 
 slots.grant__grant_number = Slot(uri=SCHEMA.identifier, name="grant__grant_number", curie=SCHEMA.curie('identifier'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])
@@ -4035,10 +3647,10 @@ slots.instance__label_description = Slot(uri=SCHEMA.description, name="instance_
                    model_uri=DATA_SHEETS_SCHEMA.instance__label_description, domain=None, range=Optional[str])
 
 slots.instance__sampling_strategies = Slot(uri=D4DCOMPOSITION.sampling_strategies, name="instance__sampling_strategies", curie=D4DCOMPOSITION.curie('sampling_strategies'),
-                   model_uri=DATA_SHEETS_SCHEMA.instance__sampling_strategies, domain=None, range=Optional[Union[Union[str, SamplingStrategyId], list[Union[str, SamplingStrategyId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.instance__sampling_strategies, domain=None, range=Optional[Union[Union[dict, SamplingStrategy], list[Union[dict, SamplingStrategy]]]])
 
 slots.instance__missing_information = Slot(uri=D4DCOMPOSITION.missing_information, name="instance__missing_information", curie=D4DCOMPOSITION.curie('missing_information'),
-                   model_uri=DATA_SHEETS_SCHEMA.instance__missing_information, domain=None, range=Optional[Union[Union[str, MissingInfoId], list[Union[str, MissingInfoId]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.instance__missing_information, domain=None, range=Optional[Union[Union[dict, MissingInfo], list[Union[dict, MissingInfo]]]])
 
 slots.samplingStrategy__is_sample = Slot(uri=D4DCOMPOSITION.is_sample, name="samplingStrategy__is_sample", curie=D4DCOMPOSITION.curie('is_sample'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_sample, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
@@ -4067,14 +3679,38 @@ slots.missingInfo__missing = Slot(uri=DCTERMS.description, name="missingInfo__mi
 slots.missingInfo__why_missing = Slot(uri=DCTERMS.description, name="missingInfo__why_missing", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__why_missing, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.relationships__description = Slot(uri=DCTERMS.description, name="relationships__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.relationships__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.relationships__relationship_details = Slot(uri=DCTERMS.description, name="relationships__relationship_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.relationships__relationship_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.splits__description = Slot(uri=DCTERMS.description, name="splits__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.splits__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.splits__split_details = Slot(uri=DCTERMS.description, name="splits__split_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.splits__split_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.dataAnomaly__description = Slot(uri=DCTERMS.description, name="dataAnomaly__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.dataAnomaly__anomaly_details = Slot(uri=DCTERMS.description, name="dataAnomaly__anomaly_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__anomaly_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.datasetBias__bias_type = Slot(uri=D4DCOMPOSITION.bias_type, name="datasetBias__bias_type", curie=D4DCOMPOSITION.curie('bias_type'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetBias__bias_type, domain=None, range=Optional[Union[str, "BiasTypeEnum"]])
+
+slots.datasetBias__bias_description = Slot(uri=DCTERMS.description, name="datasetBias__bias_description", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetBias__bias_description, domain=None, range=Optional[str])
+
+slots.datasetBias__mitigation_strategy = Slot(uri=D4DCOMPOSITION.mitigation_strategy, name="datasetBias__mitigation_strategy", curie=D4DCOMPOSITION.curie('mitigation_strategy'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetBias__mitigation_strategy, domain=None, range=Optional[str])
+
+slots.datasetBias__affected_subsets = Slot(uri=D4DCOMPOSITION.affected_subsets, name="datasetBias__affected_subsets", curie=D4DCOMPOSITION.curie('affected_subsets'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetBias__affected_subsets, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.datasetLimitation__limitation_type = Slot(uri=D4DCOMPOSITION.limitation_type, name="datasetLimitation__limitation_type", curie=D4DCOMPOSITION.curie('limitation_type'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetLimitation__limitation_type, domain=None, range=Optional[Union[str, "LimitationTypeEnum"]])
+
+slots.datasetLimitation__limitation_description = Slot(uri=DCTERMS.description, name="datasetLimitation__limitation_description", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetLimitation__limitation_description, domain=None, range=Optional[str])
+
+slots.datasetLimitation__scope_impact = Slot(uri=D4DCOMPOSITION.scope_impact, name="datasetLimitation__scope_impact", curie=D4DCOMPOSITION.curie('scope_impact'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetLimitation__scope_impact, domain=None, range=Optional[str])
+
+slots.datasetLimitation__recommended_mitigation = Slot(uri=D4DCOMPOSITION.recommended_mitigation, name="datasetLimitation__recommended_mitigation", curie=D4DCOMPOSITION.curie('recommended_mitigation'),
+                   model_uri=DATA_SHEETS_SCHEMA.datasetLimitation__recommended_mitigation, domain=None, range=Optional[str])
 
 slots.externalResource__external_resources = Slot(uri=DCTERMS.references, name="externalResource__external_resources", curie=DCTERMS.curie('references'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__external_resources, domain=None, range=Optional[Union[str, list[str]]])
@@ -4091,8 +3727,8 @@ slots.externalResource__restrictions = Slot(uri=DCTERMS.accessRights, name="exte
 slots.confidentiality__confidential_elements_present = Slot(uri=D4DCOMPOSITION.confidential_elements_present, name="confidentiality__confidential_elements_present", curie=D4DCOMPOSITION.curie('confidential_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.confidentiality__confidential_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.confidentiality__description = Slot(uri=DCTERMS.description, name="confidentiality__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.confidentiality__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.confidentiality__confidentiality_details = Slot(uri=DCTERMS.description, name="confidentiality__confidentiality_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.confidentiality__confidentiality_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.contentWarning__content_warnings_present = Slot(uri=D4DCOMPOSITION.content_warnings_present, name="contentWarning__content_warnings_present", curie=D4DCOMPOSITION.curie('content_warnings_present'),
                    model_uri=DATA_SHEETS_SCHEMA.contentWarning__content_warnings_present, domain=None, range=Optional[Union[bool, Bool]])
@@ -4112,14 +3748,20 @@ slots.subpopulation__distribution = Slot(uri=DCTERMS.description, name="subpopul
 slots.deidentification__identifiable_elements_present = Slot(uri=D4DCOMPOSITION.identifiable_elements_present, name="deidentification__identifiable_elements_present", curie=D4DCOMPOSITION.curie('identifiable_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__identifiable_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.deidentification__description = Slot(uri=DCTERMS.description, name="deidentification__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.deidentification__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.deidentification__method = Slot(uri=D4DCOMPOSITION.method, name="deidentification__method", curie=D4DCOMPOSITION.curie('method'),
+                   model_uri=DATA_SHEETS_SCHEMA.deidentification__method, domain=None, range=Optional[str])
+
+slots.deidentification__identifiers_removed = Slot(uri=D4DCOMPOSITION.identifiers_removed, name="deidentification__identifiers_removed", curie=D4DCOMPOSITION.curie('identifiers_removed'),
+                   model_uri=DATA_SHEETS_SCHEMA.deidentification__identifiers_removed, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.deidentification__deidentification_details = Slot(uri=DCTERMS.description, name="deidentification__deidentification_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.deidentification__deidentification_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.sensitiveElement__sensitive_elements_present = Slot(uri=D4DCOMPOSITION.sensitive_elements_present, name="sensitiveElement__sensitive_elements_present", curie=D4DCOMPOSITION.curie('sensitive_elements_present'),
                    model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__sensitive_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.sensitiveElement__description = Slot(uri=DCTERMS.description, name="sensitiveElement__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.sensitiveElement__sensitivity_details = Slot(uri=DCTERMS.description, name="sensitiveElement__sensitivity_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__sensitivity_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.datasetRelationship__target_dataset = Slot(uri=D4DCOMPOSITION.target_dataset, name="datasetRelationship__target_dataset", curie=D4DCOMPOSITION.curie('target_dataset'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__target_dataset, domain=None, range=str)
@@ -4129,9 +3771,6 @@ slots.datasetRelationship__relationship_type = Slot(uri=D4DCOMPOSITION.relations
 
 slots.datasetRelationship__description = Slot(uri=D4DCOMPOSITION.description, name="datasetRelationship__description", curie=D4DCOMPOSITION.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__description, domain=None, range=Optional[str])
-
-slots.instanceAcquisition__description = Slot(uri=DCTERMS.description, name="instanceAcquisition__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__description, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.instanceAcquisition__was_directly_observed = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_directly_observed'], name="instanceAcquisition__was_directly_observed", curie=DATA_SHEETS_SCHEMA.curie('collection/was_directly_observed'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_directly_observed, domain=None, range=Optional[Union[bool, Bool]])
@@ -4145,26 +3784,38 @@ slots.instanceAcquisition__was_inferred_derived = Slot(uri=DATA_SHEETS_SCHEMA['c
 slots.instanceAcquisition__was_validated_verified = Slot(uri=DATA_SHEETS_SCHEMA['collection/was_validated_verified'], name="instanceAcquisition__was_validated_verified", curie=DATA_SHEETS_SCHEMA.curie('collection/was_validated_verified'),
                    model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__was_validated_verified, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.collectionMechanism__description = Slot(uri=DCTERMS.description, name="collectionMechanism__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionMechanism__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.instanceAcquisition__acquisition_details = Slot(uri=DCTERMS.description, name="instanceAcquisition__acquisition_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.instanceAcquisition__acquisition_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.dataCollector__description = Slot(uri=DCTERMS.description, name="dataCollector__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataCollector__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.collectionMechanism__mechanism_details = Slot(uri=DCTERMS.description, name="collectionMechanism__mechanism_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.collectionMechanism__mechanism_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.collectionTimeframe__description = Slot(uri=DCTERMS.temporal, name="collectionTimeframe__description", curie=DCTERMS.curie('temporal'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionTimeframe__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.dataCollector__role = Slot(uri=DATA_SHEETS_SCHEMA['collection/role'], name="dataCollector__role", curie=DATA_SHEETS_SCHEMA.curie('collection/role'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataCollector__role, domain=None, range=Optional[str])
 
-slots.directCollection__description = Slot(uri=DCTERMS.source, name="directCollection__description", curie=DCTERMS.curie('source'),
-                   model_uri=DATA_SHEETS_SCHEMA.directCollection__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.dataCollector__collector_details = Slot(uri=DCTERMS.description, name="dataCollector__collector_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataCollector__collector_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.preprocessingStrategy__description = Slot(uri=DCTERMS.description, name="preprocessingStrategy__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.collectionTimeframe__start_date = Slot(uri=DATA_SHEETS_SCHEMA['collection/start_date'], name="collectionTimeframe__start_date", curie=DATA_SHEETS_SCHEMA.curie('collection/start_date'),
+                   model_uri=DATA_SHEETS_SCHEMA.collectionTimeframe__start_date, domain=None, range=Optional[Union[str, XSDDate]])
 
-slots.cleaningStrategy__description = Slot(uri=DCTERMS.description, name="cleaningStrategy__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.collectionTimeframe__end_date = Slot(uri=DATA_SHEETS_SCHEMA['collection/end_date'], name="collectionTimeframe__end_date", curie=DATA_SHEETS_SCHEMA.curie('collection/end_date'),
+                   model_uri=DATA_SHEETS_SCHEMA.collectionTimeframe__end_date, domain=None, range=Optional[Union[str, XSDDate]])
 
-slots.labelingStrategy__description = Slot(uri=DCTERMS.description, name="labelingStrategy__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.collectionTimeframe__timeframe_details = Slot(uri=DCTERMS.description, name="collectionTimeframe__timeframe_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.collectionTimeframe__timeframe_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.directCollection__is_direct = Slot(uri=DATA_SHEETS_SCHEMA['collection/is_direct'], name="directCollection__is_direct", curie=DATA_SHEETS_SCHEMA.curie('collection/is_direct'),
+                   model_uri=DATA_SHEETS_SCHEMA.directCollection__is_direct, domain=None, range=Optional[Union[bool, Bool]])
+
+slots.directCollection__collection_details = Slot(uri=DCTERMS.description, name="directCollection__collection_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.directCollection__collection_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.preprocessingStrategy__preprocessing_details = Slot(uri=DCTERMS.description, name="preprocessingStrategy__preprocessing_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__preprocessing_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.cleaningStrategy__cleaning_details = Slot(uri=DCTERMS.description, name="cleaningStrategy__cleaning_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__cleaning_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.labelingStrategy__annotation_platform = Slot(uri=SCHEMA.instrument, name="labelingStrategy__annotation_platform", curie=SCHEMA.curie('instrument'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__annotation_platform, domain=None, range=Optional[str])
@@ -4178,65 +3829,92 @@ slots.labelingStrategy__inter_annotator_agreement = Slot(uri=SCHEMA.measurementM
 slots.labelingStrategy__annotator_demographics = Slot(uri=D4DPREPROCESSING.annotator_demographics, name="labelingStrategy__annotator_demographics", curie=D4DPREPROCESSING.curie('annotator_demographics'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__annotator_demographics, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.rawData__description = Slot(uri=D4DPREPROCESSING.description, name="rawData__description", curie=D4DPREPROCESSING.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.rawData__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.labelingStrategy__labeling_details = Slot(uri=DCTERMS.description, name="labelingStrategy__labeling_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__labeling_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.existingUse__description = Slot(uri=DCTERMS.description, name="existingUse__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.existingUse__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.rawData__access_url = Slot(uri=D4DPREPROCESSING.access_url, name="rawData__access_url", curie=D4DPREPROCESSING.curie('access_url'),
+                   model_uri=DATA_SHEETS_SCHEMA.rawData__access_url, domain=None, range=Optional[Union[str, URI]])
 
-slots.useRepository__description = Slot(uri=SCHEMA.url, name="useRepository__description", curie=SCHEMA.curie('url'),
-                   model_uri=DATA_SHEETS_SCHEMA.useRepository__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.rawData__raw_data_details = Slot(uri=DCTERMS.description, name="rawData__raw_data_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.rawData__raw_data_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.otherTask__description = Slot(uri=DCTERMS.description, name="otherTask__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.otherTask__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.existingUse__examples = Slot(uri=D4DUSES.examples, name="existingUse__examples", curie=D4DUSES.curie('examples'),
+                   model_uri=DATA_SHEETS_SCHEMA.existingUse__examples, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.futureUseImpact__description = Slot(uri=DCTERMS.description, name="futureUseImpact__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.futureUseImpact__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.useRepository__repository_url = Slot(uri=D4DUSES.repository_url, name="useRepository__repository_url", curie=D4DUSES.curie('repository_url'),
+                   model_uri=DATA_SHEETS_SCHEMA.useRepository__repository_url, domain=None, range=Optional[Union[str, URI]])
 
-slots.discouragedUse__description = Slot(uri=DCTERMS.description, name="discouragedUse__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.discouragedUse__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.useRepository__repository_details = Slot(uri=DCTERMS.description, name="useRepository__repository_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.useRepository__repository_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.intendedUse__description = Slot(uri=DCTERMS.description, name="intendedUse__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.intendedUse__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.otherTask__task_details = Slot(uri=DCTERMS.description, name="otherTask__task_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.otherTask__task_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.futureUseImpact__impact_details = Slot(uri=DCTERMS.description, name="futureUseImpact__impact_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.futureUseImpact__impact_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.discouragedUse__discouragement_details = Slot(uri=DCTERMS.description, name="discouragedUse__discouragement_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.discouragedUse__discouragement_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.intendedUse__examples = Slot(uri=D4DUSES.examples, name="intendedUse__examples", curie=D4DUSES.curie('examples'),
+                   model_uri=DATA_SHEETS_SCHEMA.intendedUse__examples, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.intendedUse__usage_notes = Slot(uri=D4DUSES.usage_notes, name="intendedUse__usage_notes", curie=D4DUSES.curie('usage_notes'),
+                   model_uri=DATA_SHEETS_SCHEMA.intendedUse__usage_notes, domain=None, range=Optional[str])
 
 slots.intendedUse__use_category = Slot(uri=D4DUSES.use_category, name="intendedUse__use_category", curie=D4DUSES.curie('use_category'),
                    model_uri=DATA_SHEETS_SCHEMA.intendedUse__use_category, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.prohibitedUse__description = Slot(uri=DCTERMS.description, name="prohibitedUse__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__description, domain=None, range=Optional[Union[str, list[str]]])
-
 slots.prohibitedUse__prohibition_reason = Slot(uri=D4DUSES.prohibition_reason, name="prohibitedUse__prohibition_reason", curie=D4DUSES.curie('prohibition_reason'),
                    model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__prohibition_reason, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.thirdPartySharing__description = Slot(uri=DCTERMS.accessRights, name="thirdPartySharing__description", curie=DCTERMS.curie('accessRights'),
-                   model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__description, domain=None, range=Optional[Union[bool, Bool]])
+slots.thirdPartySharing__is_shared = Slot(uri=DCTERMS.accessRights, name="thirdPartySharing__is_shared", curie=DCTERMS.curie('accessRights'),
+                   model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__is_shared, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.distributionFormat__description = Slot(uri=DCAT.accessURL, name="distributionFormat__description", curie=DCAT.curie('accessURL'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.distributionFormat__access_urls = Slot(uri=DCAT.accessURL, name="distributionFormat__access_urls", curie=DCAT.curie('accessURL'),
+                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__access_urls, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.distributionDate__description = Slot(uri=DCTERMS.available, name="distributionDate__description", curie=DCTERMS.curie('available'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionDate__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.distributionDate__release_dates = Slot(uri=DCTERMS.available, name="distributionDate__release_dates", curie=DCTERMS.curie('available'),
+                   model_uri=DATA_SHEETS_SCHEMA.distributionDate__release_dates, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.maintainer__description = Slot(uri=SCHEMA.maintainer, name="maintainer__description", curie=SCHEMA.curie('maintainer'),
-                   model_uri=DATA_SHEETS_SCHEMA.maintainer__description, domain=None, range=Optional[Union[Union[str, "CreatorOrMaintainerEnum"], list[Union[str, "CreatorOrMaintainerEnum"]]]])
+slots.maintainer__role = Slot(uri=SCHEMA.maintainer, name="maintainer__role", curie=SCHEMA.curie('maintainer'),
+                   model_uri=DATA_SHEETS_SCHEMA.maintainer__role, domain=None, range=Optional[Union[str, "CreatorOrMaintainerEnum"]])
 
-slots.erratum__description = Slot(uri=DCTERMS.description, name="erratum__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.erratum__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.maintainer__maintainer_details = Slot(uri=DCTERMS.description, name="maintainer__maintainer_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.maintainer__maintainer_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.updatePlan__description = Slot(uri=DCTERMS.modified, name="updatePlan__description", curie=DCTERMS.curie('modified'),
-                   model_uri=DATA_SHEETS_SCHEMA.updatePlan__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.erratum__erratum_url = Slot(uri=D4DMAINTENANCE.erratum_url, name="erratum__erratum_url", curie=D4DMAINTENANCE.curie('erratum_url'),
+                   model_uri=DATA_SHEETS_SCHEMA.erratum__erratum_url, domain=None, range=Optional[Union[str, URI]])
 
-slots.retentionLimits__description = Slot(uri=DCTERMS.description, name="retentionLimits__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.retentionLimits__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.erratum__erratum_details = Slot(uri=DCTERMS.description, name="erratum__erratum_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.erratum__erratum_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.versionAccess__description = Slot(uri=DCTERMS.isVersionOf, name="versionAccess__description", curie=DCTERMS.curie('isVersionOf'),
-                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.updatePlan__frequency = Slot(uri=D4DMAINTENANCE.frequency, name="updatePlan__frequency", curie=D4DMAINTENANCE.curie('frequency'),
+                   model_uri=DATA_SHEETS_SCHEMA.updatePlan__frequency, domain=None, range=Optional[str])
 
-slots.extensionMechanism__description = Slot(uri=DCTERMS.description, name="extensionMechanism__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.updatePlan__update_details = Slot(uri=DCTERMS.description, name="updatePlan__update_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.updatePlan__update_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.ethicalReview__description = Slot(uri=DCTERMS.description, name="ethicalReview__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.retentionLimits__retention_period = Slot(uri=D4DMAINTENANCE.retention_period, name="retentionLimits__retention_period", curie=D4DMAINTENANCE.curie('retention_period'),
+                   model_uri=DATA_SHEETS_SCHEMA.retentionLimits__retention_period, domain=None, range=Optional[str])
+
+slots.retentionLimits__retention_details = Slot(uri=DCTERMS.description, name="retentionLimits__retention_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.retentionLimits__retention_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.versionAccess__latest_version_doi = Slot(uri=D4DMAINTENANCE.latest_version_doi, name="versionAccess__latest_version_doi", curie=D4DMAINTENANCE.curie('latest_version_doi'),
+                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__latest_version_doi, domain=None, range=Optional[str])
+
+slots.versionAccess__versions_available = Slot(uri=D4DMAINTENANCE.versions_available, name="versionAccess__versions_available", curie=D4DMAINTENANCE.curie('versions_available'),
+                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__versions_available, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.versionAccess__version_details = Slot(uri=DCTERMS.description, name="versionAccess__version_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__version_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.extensionMechanism__contribution_url = Slot(uri=D4DMAINTENANCE.contribution_url, name="extensionMechanism__contribution_url", curie=D4DMAINTENANCE.curie('contribution_url'),
+                   model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__contribution_url, domain=None, range=Optional[Union[str, URI]])
+
+slots.extensionMechanism__extension_details = Slot(uri=DCTERMS.description, name="extensionMechanism__extension_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__extension_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.ethicalReview__contact_person = Slot(uri=SCHEMA.contactPoint, name="ethicalReview__contact_person", curie=SCHEMA.curie('contactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__contact_person, domain=None, range=Optional[Union[str, PersonId]])
@@ -4244,17 +3922,20 @@ slots.ethicalReview__contact_person = Slot(uri=SCHEMA.contactPoint, name="ethica
 slots.ethicalReview__reviewing_organization = Slot(uri=SCHEMA.provider, name="ethicalReview__reviewing_organization", curie=SCHEMA.curie('provider'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__reviewing_organization, domain=None, range=Optional[Union[str, OrganizationId]])
 
-slots.dataProtectionImpact__description = Slot(uri=DCTERMS.description, name="dataProtectionImpact__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.ethicalReview__review_details = Slot(uri=DCTERMS.description, name="ethicalReview__review_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.ethicalReview__review_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.collectionNotification__description = Slot(uri=DCTERMS.description, name="collectionNotification__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionNotification__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.dataProtectionImpact__impact_details = Slot(uri=DCTERMS.description, name="dataProtectionImpact__impact_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataProtectionImpact__impact_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.collectionConsent__description = Slot(uri=DCTERMS.description, name="collectionConsent__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.collectionConsent__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.collectionNotification__notification_details = Slot(uri=DCTERMS.description, name="collectionNotification__notification_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.collectionNotification__notification_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.consentRevocation__description = Slot(uri=DCTERMS.description, name="consentRevocation__description", curie=DCTERMS.curie('description'),
-                   model_uri=DATA_SHEETS_SCHEMA.consentRevocation__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.collectionConsent__consent_details = Slot(uri=DCTERMS.description, name="collectionConsent__consent_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.collectionConsent__consent_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.consentRevocation__revocation_details = Slot(uri=DCTERMS.description, name="consentRevocation__revocation_details", curie=DCTERMS.curie('description'),
+                   model_uri=DATA_SHEETS_SCHEMA.consentRevocation__revocation_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.humanSubjectResearch__involves_human_subjects = Slot(uri=D4DHUMAN.involves_human_subjects, name="humanSubjectResearch__involves_human_subjects", curie=D4DHUMAN.curie('involves_human_subjects'),
                    model_uri=DATA_SHEETS_SCHEMA.humanSubjectResearch__involves_human_subjects, domain=None, range=Optional[Union[bool, Bool]])
@@ -4322,8 +4003,8 @@ slots.vulnerablePopulations__assent_procedures = Slot(uri=D4DHUMAN.assent_proced
 slots.vulnerablePopulations__guardian_consent = Slot(uri=D4DHUMAN.guardian_consent, name="vulnerablePopulations__guardian_consent", curie=D4DHUMAN.curie('guardian_consent'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__guardian_consent, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.licenseAndUseTerms__description = Slot(uri=DCTERMS.license, name="licenseAndUseTerms__description", curie=DCTERMS.curie('license'),
-                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.licenseAndUseTerms__license_terms = Slot(uri=DCTERMS.license, name="licenseAndUseTerms__license_terms", curie=DCTERMS.curie('license'),
+                   model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__license_terms, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="licenseAndUseTerms__data_use_permission", curie=DUO.curie('0000001'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]])
@@ -4331,11 +4012,11 @@ slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="l
 slots.licenseAndUseTerms__contact_person = Slot(uri=SCHEMA.contactPoint, name="licenseAndUseTerms__contact_person", curie=SCHEMA.curie('contactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.iPRestrictions__description = Slot(uri=DCTERMS.rights, name="iPRestrictions__description", curie=DCTERMS.curie('rights'),
-                   model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.iPRestrictions__restrictions = Slot(uri=DCTERMS.rights, name="iPRestrictions__restrictions", curie=DCTERMS.curie('rights'),
+                   model_uri=DATA_SHEETS_SCHEMA.iPRestrictions__restrictions, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.exportControlRegulatoryRestrictions__description = Slot(uri=DCTERMS.accessRights, name="exportControlRegulatoryRestrictions__description", curie=DCTERMS.curie('accessRights'),
-                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__description, domain=None, range=Optional[Union[str, list[str]]])
+slots.exportControlRegulatoryRestrictions__regulatory_restrictions = Slot(uri=DCTERMS.accessRights, name="exportControlRegulatoryRestrictions__regulatory_restrictions", curie=DCTERMS.curie('accessRights'),
+                   model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__regulatory_restrictions, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.exportControlRegulatoryRestrictions__hipaa_compliant = Slot(uri=D4DDATAGOVERNANCE.hipaa_compliant, name="exportControlRegulatoryRestrictions__hipaa_compliant", curie=D4DDATAGOVERNANCE.curie('hipaa_compliant'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__hipaa_compliant, domain=None, range=Optional[Union[str, "ComplianceStatusEnum"]])

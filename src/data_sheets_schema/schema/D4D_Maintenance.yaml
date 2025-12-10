@@ -42,13 +42,17 @@ classes:
       Who will be supporting/hosting/maintaining the dataset?
     is_a: DatasetProperty
     attributes:
-      description:
+      role:
         description: >
-          Name or role of the maintainer, possibly referencing
-          CreatorOrMaintainerEnum or other details.
+          Role of the maintainer (e.g., researcher, platform, organization).
         range: CreatorOrMaintainerEnum
-        multivalued: true
         slot_uri: schema:maintainer
+      maintainer_details:
+        description: >
+          Details on who will support, host, or maintain the dataset.
+        range: string
+        multivalued: true
+        slot_uri: dcterms:description
 
 
   Erratum:
@@ -56,10 +60,12 @@ classes:
       Is there an erratum? If so, please provide a link or other access point.
     is_a: DatasetProperty
     attributes:
-      description:
+      erratum_url:
+        description: "URL or access point for the erratum."
+        range: uri
+      erratum_details:
         description: >
-          Description or reference to the erratum, including details on known
-          issues and how they may be corrected.
+          Details on any errata or corrections to the dataset.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -72,13 +78,15 @@ classes:
       these updates be communicated?
     is_a: DatasetProperty
     attributes:
-      description:
+      frequency:
+        description: "How often updates are planned (e.g., quarterly, annually)."
+        range: string
+      update_details:
         description: >
-          Details on the dataset's update policy, schedule, responsible parties,
-          and communication channels (e.g., mailing list, GitHub releases).
+          Details on update plans, responsible parties, and communication methods.
         range: string
         multivalued: true
-        slot_uri: dcterms:modified
+        slot_uri: dcterms:description
 
 
   RetentionLimits:
@@ -89,10 +97,12 @@ classes:
       and how they will be enforced.
     is_a: DatasetProperty
     attributes:
-      description:
+      retention_period:
+        description: "Time period for data retention."
+        range: string
+      retention_details:
         description: >
-          Policies or regulations around data retention, including any
-          enforcement mechanisms or responsibilities.
+          Details on data retention limits and enforcement procedures.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -104,13 +114,19 @@ classes:
       If so, how? If not, how will obsolescence be communicated to dataset consumers?
     is_a: DatasetProperty
     attributes:
-      description:
-        description: >
-          Explanation of whether and how previous dataset versions remain accessible,
-          including versioning policies and deprecation announcements.
+      latest_version_doi:
+        description: "DOI or URL of the latest dataset version."
+        range: string
+      versions_available:
+        description: "List of available versions with metadata."
         range: string
         multivalued: true
-        slot_uri: dcterms:isVersionOf
+      version_details:
+        description: >
+          Details on version support policies and obsolescence communication.
+        range: string
+        multivalued: true
+        slot_uri: dcterms:description
 
 
   ExtensionMechanism:
@@ -120,11 +136,12 @@ classes:
       those contributions are validated and communicated.
     is_a: DatasetProperty
     attributes:
-      description:
+      contribution_url:
+        description: "URL for contribution guidelines or process."
+        range: uri
+      extension_details:
         description: >
-          Details on processes or tools that facilitate extensions,
-          augmentations, or third-party contributions, including any
-          review/approval workflows.
+          Details on extension mechanisms, contribution validation, and communication.
         range: string
         multivalued: true
         slot_uri: dcterms:description

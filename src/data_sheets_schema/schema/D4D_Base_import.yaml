@@ -94,7 +94,6 @@ classes:
         slot_uri: schema:identifier
         range: uriorcurie
         description: A unique identifier for a thing.
-        required: true
       name:
         slot_uri: schema:name
         description: A human-readable name for a thing.
@@ -112,14 +111,27 @@ classes:
       Represents a group or organization.
 
   # Base class for all dataset properties and components
+  # Note: Does NOT inherit from NamedThing to avoid required id constraint
   DatasetProperty:
     description: "Represents a single property of a dataset, or a set of related properties."
-    is_a: NamedThing
     attributes:
+      id:
+        slot_uri: schema:identifier
+        range: uriorcurie
+        description: An optional identifier for this property.
+      name:
+        slot_uri: schema:name
+        description: A human-readable name for this property.
+        range: string
+      description:
+        slot_uri: schema:description
+        description: A human-readable description for this property.
+        range: string
       used_software:
         description: "What software was used as part of this dataset property?"
         range: Software
         multivalued: true
+        inlined_as_list: true
 
   Software:
     description: "A software program or library."
@@ -528,6 +540,40 @@ enums:
           to prefer information that confirms existing beliefs, influencing the
           search for, interpretation of, and recall of information.
         meaning: AIO:ConfirmationBias
+
+  LimitationTypeEnum:
+    description: >-
+      Types of limitations that may affect dataset use or interpretation.
+      Distinct from biases (systematic errors) and anomalies (data quality issues).
+    permissible_values:
+      scope_limitation:
+        description: >-
+          Dataset does not cover all intended use cases or populations.
+          The scope of the dataset is narrower than the intended application domain.
+      temporal_limitation:
+        description: >-
+          Dataset is limited to specific time periods. Data may not reflect
+          current conditions or may not be applicable to other time periods.
+      coverage_limitation:
+        description: >-
+          Dataset has incomplete coverage of target domain. Missing data points,
+          categories, or geographic regions within the intended scope.
+      methodological_limitation:
+        description: >-
+          Data collection methodology introduces constraints. Limitations arising
+          from how data was gathered, measured, or processed.
+      representativeness_limitation:
+        description: >-
+          Dataset may not be representative of target population. Sample may not
+          accurately reflect the broader population of interest.
+      resolution_limitation:
+        description: >-
+          Data granularity or resolution is insufficient for some uses. Level of
+          detail may not support fine-grained analysis or specific applications.
+      integration_limitation:
+        description: >-
+          Challenges in combining with other data sources. Incompatibilities in
+          formats, identifiers, or schemas that hinder data integration.
 
   VersionTypeEnum:
     description: >-

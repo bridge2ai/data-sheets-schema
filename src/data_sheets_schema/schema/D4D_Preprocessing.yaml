@@ -45,8 +45,9 @@ classes:
       tokenization, SIFT feature extraction)?
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Explanation of any preprocessing steps performed on the data."
+      preprocessing_details:
+        description: >
+          Details on preprocessing steps applied to the data.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -58,8 +59,9 @@ classes:
       processing of missing values)?
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Explanation of any data cleaning steps performed."
+      cleaning_details:
+        description: >
+          Details on data cleaning procedures applied.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -71,11 +73,6 @@ classes:
       This class documents the annotation process and quality metrics.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Explanation of any labeling steps performed."
-        range: string
-        multivalued: true
-        slot_uri: dcterms:description
       annotation_platform:
         description: >-
           Platform or tool used for annotation (e.g., Label Studio, Prodigy,
@@ -99,6 +96,12 @@ classes:
           (e.g., geographic location, language background, expertise level).
         range: string
         multivalued: true
+      labeling_details:
+        description: >
+          Details on labeling/annotation procedures and quality metrics.
+        range: string
+        multivalued: true
+        slot_uri: dcterms:description
 
 
   RawData:
@@ -107,7 +110,12 @@ classes:
       data? If so, please provide a link or other access point to the "raw" data.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Details about the availability or location of raw data."
+      access_url:
+        description: "URL or access point for the raw data."
+        range: uri
+      raw_data_details:
+        description: >
+          Details on raw data availability and access procedures.
         range: string
         multivalued: true
+        slot_uri: dcterms:description

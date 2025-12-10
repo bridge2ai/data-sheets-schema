@@ -80,9 +80,11 @@ classes:
         slot_uri: dcterms:creator
         exact_mappings:
           - schema:creator
-      affiliation:
-        description: "Organization(s) with which the creator or team is affiliated."
+      affiliations:
+        description: "Organizations with which the creator or team is affiliated."
         range: Organization
+        multivalued: true
+        inlined_as_list: true
         slot_uri: schema:affiliation
       credit_roles:
         description: >-
@@ -105,9 +107,11 @@ classes:
         description: "Name/identifier of the organization providing monetary or resource support."
         range: Grantor
         slot_uri: schema:funder
-      grant:
-        description: "Name/identifier of the specific grant mechanism supporting dataset creation."
+      grants:
+        description: "Grant mechanisms supporting dataset creation. Multiple grants may fund a single dataset."
         range: Grant
+        multivalued: true
+        inlined_as_list: true
         slot_uri: schema:funding
 
 

@@ -42,11 +42,10 @@ classes:
       Has the dataset been used for any tasks already?
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "List or summary of known/previous uses of the dataset."
+      examples:
+        description: "List of examples of known/previous uses of the dataset."
         range: string
         multivalued: true
-        slot_uri: dcterms:description
 
 
   UseRepository:
@@ -55,11 +54,15 @@ classes:
       that use the dataset? If so, provide a link or other access point.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Reference(s) to a repository of known dataset uses."
+      repository_url:
+        description: "URL to a repository of known dataset uses."
+        range: uri
+      repository_details:
+        description: >
+          Details on the repository of known dataset uses.
         range: string
         multivalued: true
-        slot_uri: schema:url
+        slot_uri: dcterms:description
 
 
   OtherTask:
@@ -67,8 +70,9 @@ classes:
       What other tasks could the dataset be used for?
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Potential additional tasks or domains for dataset usage."
+      task_details:
+        description: >
+          Details on other potential tasks the dataset could be used for.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -82,8 +86,9 @@ classes:
       impacts and any mitigation strategies.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Details regarding the possible future impacts or risks of use."
+      impact_details:
+        description: >
+          Details on potential impacts, risks, and mitigation strategies.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -94,8 +99,9 @@ classes:
       Are there tasks for which the dataset should not be used?
     is_a: DatasetProperty
     attributes:
-      description:
-        description: "Description of tasks or contexts in which dataset use is discouraged."
+      discouragement_details:
+        description: >
+          Details on tasks for which the dataset should not be used.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -108,13 +114,15 @@ classes:
       rather than risks. Aligns with RO-Crate "Intended Use" field.
     is_a: DatasetProperty
     attributes:
-      description:
+      examples:
         description: >-
-          Description of recommended and intended uses for this dataset.
-          May include specific tasks, research questions, or application domains.
+          List of example intended uses for this dataset.
         range: string
         multivalued: true
-        slot_uri: dcterms:description
+      usage_notes:
+        description: >-
+          Notes or caveats about using the dataset for intended purposes.
+        range: string
       use_category:
         description: >-
           Category of intended use (e.g., research, clinical, educational,
@@ -131,14 +139,6 @@ classes:
       "Prohibited Uses" field.
     is_a: DatasetProperty
     attributes:
-      description:
-        description: >-
-          Description of explicitly prohibited uses for this dataset.
-          May include specific tasks, applications, or domains that are
-          forbidden by license terms, data use agreements, or ethical constraints.
-        range: string
-        multivalued: true
-        slot_uri: dcterms:description
       prohibition_reason:
         description: >-
           Reason why this use is prohibited (e.g., license restriction,

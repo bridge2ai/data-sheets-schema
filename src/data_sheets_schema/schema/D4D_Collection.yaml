@@ -35,11 +35,6 @@ classes:
       Describes how data associated with each instance was acquired
       (e.g., directly observed, reported by subjects, inferred).
     attributes:
-      description:
-        description: Free-text description of the acquisition process
-        range: string
-        multivalued: true
-        slot_uri: dcterms:description
       was_directly_observed:
         description: Whether the data was directly observed
         range: boolean
@@ -52,6 +47,12 @@ classes:
       was_validated_verified:
         description: Whether the data was validated or verified in any way
         range: boolean
+      acquisition_details:
+        description: >
+          Details on how data was acquired for each instance.
+        range: string
+        multivalued: true
+        slot_uri: dcterms:description
 
 
   CollectionMechanism:
@@ -60,8 +61,9 @@ classes:
       What mechanisms or procedures were used to collect the data (e.g., hardware,
       manual curation, software APIs)? Also covers how these mechanisms were validated.
     attributes:
-      description:
-        description: Free-text description of the collection mechanism(s)
+      mechanism_details:
+        description: >
+          Details on mechanisms or procedures used to collect the data.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -73,8 +75,12 @@ classes:
       Who was involved in the data collection (e.g., students, crowdworkers, contractors),
       and how they were compensated.
     attributes:
-      description:
-        description: Free-text details about the data collectors and compensation
+      role:
+        description: Role of the data collector (e.g., researcher, crowdworker)
+        range: string
+      collector_details:
+        description: >
+          Details on who collected the data and their compensation.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -86,11 +92,18 @@ classes:
       Over what timeframe was the data collected, and does this timeframe match the
       creation timeframe of the underlying data?
     attributes:
-      description:
-        description: Free-text description of the data collection timeframe
+      start_date:
+        description: Start date of data collection
+        range: date
+      end_date:
+        description: End date of data collection
+        range: date
+      timeframe_details:
+        description: >
+          Details on the collection timeframe and relationship to data creation dates.
         range: string
         multivalued: true
-        slot_uri: dcterms:temporal
+        slot_uri: dcterms:description
 
 
   DirectCollection:
@@ -99,11 +112,15 @@ classes:
       Indicates whether the data was collected directly from the individuals in question
       or obtained via third parties/other sources.
     attributes:
-      description:
-        description: Free-text description of data collection source(s)
+      is_direct:
+        description: Whether collection was direct from individuals
+        range: boolean
+      collection_details:
+        description: >
+          Details on direct vs. indirect collection methods and sources.
         range: string
         multivalued: true
-        slot_uri: dcterms:source
+        slot_uri: dcterms:description
 
 
 
