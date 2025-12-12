@@ -1,0 +1,53 @@
+Module	Original Questions	Bridge2AI Classes	Coverage	Notes
+Motivation	For what purpose?	Purpose	Full
+Motivation	Who created?	Creator (with CRediT roles)	Enhanced	CRediT taxonomy with 14 roles
+Motivation	Who funded?	FundingMechanism, Grantor, Grant	Extended	Structured funding with grant numbers
+Motivation	Other comments	Free-text fields	Full
+Composition	What do instances represent?	Instance	Full
+Composition	How many instances?	Instance.counts	Full
+Composition	Sample vs. complete?	SamplingStrategy	Enhanced
+Composition	What data per instance?	Instance.instance_type, data_substrate	Full
+Composition	Labels/targets?	Instance.label, label_description	Full
+Composition	Missing information?	MissingInfo	Full
+Composition	Relationships explicit?	Relationships	Full
+Composition	Recommended splits?	Splits	Full
+Composition	Errors/noise/redundancies?	DataAnomaly	Full
+Composition	Self-contained vs. external?	ExternalResource	Enhanced
+Composition	Confidential data?	Confidentiality	Enhanced
+Composition	Offensive content?	ContentWarning	Full
+Composition	Subpopulations identified?	Subpopulation	Full
+Composition	Individuals identifiable?	Deidentification	Enhanced
+Composition	Sensitive data?	SensitiveElement	Enhanced
+Collection	How was data acquired?	InstanceAcquisition	Full
+Collection	What mechanisms used?	CollectionMechanism	Full
+Collection	Sampling strategy?	SamplingStrategy (in Composition)	Moved	Architectural reorganization
+Collection	Who was involved?	DataCollector	Enhanced	Includes compensation tracking
+Collection	Timeframe?	CollectionTimeframe	Full
+Collection	Ethical review?	EthicalReview (in Ethics module)	Moved	Separated to Ethics module
+Collection	Direct collection?	DirectCollection	Full
+Collection	Notification?	CollectionNotification (in Ethics)	Moved	Separated to Ethics module
+Collection	Consent?	CollectionConsent (in Ethics)	Moved	Separated to Ethics module
+Collection	Consent revocation?	ConsentRevocation (in Ethics)	Moved	Separated to Ethics module
+Collection	Impact analysis?	DataProtectionImpact (in Ethics)	Moved	Separated to Ethics module
+Preprocessing	Any preprocessing done?	PreprocessingStrategy	Full
+Preprocessing	Raw data saved?	RawData	Enhanced	Tracks raw source with access points
+Preprocessing	Software available?	PreprocessingStrategy.used_software	Enhanced	Software class with version, license, URL
+Preprocessing	Labeling (implied)	LabelingStrategy	Extended	Separated as distinct class
+Uses	Used for tasks already?	ExistingUse	Full
+Uses	Repository linking?	UseRepository	Full
+Uses	Other potential tasks?	OtherTask	Full
+Uses	Impacts/risks?	FutureUseImpact	Enhanced
+Uses	Discouraged uses?	DiscouragedUse	Full
+Distribution	Third-party distribution?	ThirdPartySharing	Full
+Distribution	How distributed?	DistributionFormat	Full
+Distribution	When distributed?	DistributionDate	Full
+Distribution	License/ToU?	LicenseAndUseTerms (Data Gov.)	Moved	Separated to Data Governance
+Distribution	Third-party IP restrictions?	IPRestrictions (Data Gov.)	Moved	Separated to Data Governance
+Distribution	Export controls?	ExportControlRegulatoryRestrictions (Data Gov.)	Moved	Separated to Data Governance
+Maintenance	Who supports/hosts/maintains?	Maintainer	Full
+Maintenance	Contact info?	Maintainer contact fields	Full
+Maintenance	Erratum?	Erratum	Enhanced	Structured with issue tracking
+Maintenance	Will be updated?	UpdatePlan	Enhanced	Semantic versioning support
+Maintenance	Retention limits?	RetentionLimits	Full
+Maintenance	Older versions supported?	VersionAccess	Full
+Maintenance	Extension mechanism?	ExtensionMechanism	Full

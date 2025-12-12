@@ -1,0 +1,5 @@
+Module	Classes	Rationale	Key Features	Regulatory Frameworks
+Ethics	5	Consolidate ethics questions scattered across Collection/Composition/Maintenance	EthicalReview, DataProtectionImpact, CollectionNotification, CollectionConsent, ConsentRevocation	EU GDPR, CCPA, IRB requirements, DPIA standards
+Human Subjects	5	Create dedicated human research module following RO-Crate/FAIRSCAPE precedent	HumanSubjectResearch, InformedConsent, ParticipantPrivacy, HumanSubjectCompensation, VulnerablePopulations	45 CFR 46 (Common Rule), Belmont Report, HIPAA, Vulnerable population protections (Subpart B/C/D)
+Data Governance	3	Separate legal/governance concerns from distribution logistics	LicenseAndUseTerms, IPRestrictions, ExportControlRegulatoryRestrictions	Export controls (ITAR, EAR), GDPR, HIPAA, FERPA, ISO 27001, NIST SP 800-60
+Variables	1	Field-level metadata not in original Gebru framework	Variable (with VariableTypeEnum: categorical, continuous, ordinal, binary, datetime, text, identifier)	Schema.org/DataCatalog, DDI (Data Documentation Initiative)

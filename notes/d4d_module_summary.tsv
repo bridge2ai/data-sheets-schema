@@ -1,0 +1,13 @@
+Module	Gebru Section	Classes	New in Bridge2AI?	Key Enhancements
+Motivation	Motivation	5	No	CRediT roles, structured funding, gap analysis
+Composition	Composition	14	No	Bias taxonomy (AIO), limitation types, dataset relationships
+Collection	Collection	5	No	Separated from Ethics module
+Preprocessing	Preprocessing	4	No	Separated cleaning/labeling, software tracking
+Uses	Uses	6	Partially	Added Intended & Prohibited uses
+Distribution	Distribution	3	No	Separated from Data Governance
+Maintenance	Maintenance	6	No	Semantic versioning, structured errata
+Ethics	Embedded in Collection/Composition	5	YES	Consolidated all ethical considerations
+Human	Embedded in Composition/Collection	5	YES	RO-Crate influence, regulatory compliance
+Data Governance	Embedded in Distribution	3	YES	Separated legal/IP from distribution
+Variables	Not in Gebru	1	YES	Field-level metadata
+Base	N/A (infrastructure)	7	YES	Shared classes, enums, slots

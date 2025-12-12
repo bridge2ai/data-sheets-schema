@@ -1,0 +1,8 @@
+Aspect	Gebru et al. (2021)	Bridge2AI Schema	Change
+Sections	7 core sections	10 modules	+43%
+Structure	~57 questions (prose)	~80+ classes	Fully structured
+Format	Free-text answers	Typed, validated YAML/JSON	Machine-readable
+Ontology Alignment	Suggestions only	15+ ontology mappings	Semantic web ready
+Extensibility	Domain-specific customization mentioned	Modular architecture with inheritance	Production-grade
+Human Subjects	Embedded in other sections	Dedicated module (5 classes)	Separated & expanded
+Data Governance	Mixed with Distribution	Dedicated module (3 classes)	Separated & formalized

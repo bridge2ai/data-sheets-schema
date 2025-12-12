@@ -1,0 +1,6 @@
+Gebru et al. Core Values	Bridge2AI Preservation	Status
+Transparency & accountability	Enhanced via structured auditable metadata	Preserved
+Avoid unwanted biases	Explicit BiasTypeEnum with AIO mappings	Preserved
+Informed dataset selection	Machine-queryable criteria	Preserved
+Facilitate reproducibility	Provenance tracking, version management	Preserved
+Stakeholder communication	Multi-format output (YAML + HTML + JSON)	Preserved

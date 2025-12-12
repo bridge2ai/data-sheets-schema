@@ -1,0 +1,16 @@
+Enhancement Category	Gebru et al.	Bridge2AI	Impact
+Bias Documentation	Mentioned conceptually	BiasTypeEnum with 9 types mapped to AIO ontology	Machine-readable bias taxonomy
+Limitation Tracking	Free-text discussion	LimitationTypeEnum with 8 categories	Structured limitation classification
+Dataset Relationships	Not specified	DatasetRelationshipTypeEnum with 14 relationship types	Hierarchical composition support
+Variable Metadata	Dataset-level only	VariableMetadata class for field-level documentation	Column/field-level granularity
+Intended Uses	Implied in "what could it be used for?"	IntendedUse class (RO-Crate influence)	Explicit recommended applications
+Prohibited Uses	Discouraged uses only	ProhibitedUse class with legal enforcement	Stronger than discouraged
+CRediT Roles	Generic creator field	CRediTRoleEnum with 14 standardized roles	Precise contributor attribution
+Structured Funding	Free-text funding mention	Grantor, Grant, FundingMechanism classes	Grant number, amount, opportunity tracking
+Confidentiality Levels	Not specified	ConfidentialityLevelEnum mapped to ISO 27001, NIST, TLP	Security classification standards
+Data Use Permissions	License field	DataUsePermissionEnum mapped to DUO ontology	Controlled access framework
+Semantic Versioning	Version mentions	VersionTypeEnum (MAJOR/MINOR/PATCH)	Systematic version management
+Software Tracking	Software used mention	Software class with version, license, URL	Reproducibility metadata
+Deidentification	Yes/No question	Deidentification class with methods, standards, risk	Privacy methodology documentation
+Sampling Strategy	Basic description	SamplingStrategy with is_random, is_representative, verification	Statistical rigor tracking
+Format Specification	General description	FormatEnum (18 types), MediaTypeEnum (14 types), CompressionEnum	Precise technical specification

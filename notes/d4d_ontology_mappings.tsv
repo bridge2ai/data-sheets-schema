@@ -1,0 +1,16 @@
+Ontology/Vocabulary	Prefix	Usage	URI
+Schema.org	schema:	Primary semantic mappings	http://schema.org/
+DCAT	dcat:	Dataset catalog vocabulary	http://www.w3.org/ns/dcat#
+Dublin Core	dcterms:	Metadata terms	http://purl.org/dc/terms/
+PROV-O	prov:	Provenance	http://www.w3.org/ns/prov#
+SKOS	skos:	Concept schemes	http://www.w3.org/2004/02/skos/core#
+AI Ontology	AIO:	Bias taxonomy	https://www.ohio.edu/ai-ontology/
+Data Use Ontology	DUO:	Usage permissions	http://purl.obolibrary.org/obo/DUO_
+Bridge2AI Topics	B2AI_TOPIC:	Domain topics	https://w3id.org/bridge2ai/b2ai-topics/
+Bridge2AI Substrates	B2AI_SUBSTRATE:	Data types	https://w3id.org/bridge2ai/b2ai-substrates/
+QUDT	qudt:	Units/quantities	http://qudt.org/schema/qudt/
+SHACL	sh:	Validation shapes	http://www.w3.org/ns/shacl#
+DataCite	datacite:	Citation metadata	http://purl.org/spar/datacite/
+FOAF	foaf:	People/organizations	http://xmlns.com/foaf/0.1/
+OBI	OBI:	Biomedical investigations	http://purl.obolibrary.org/obo/OBI_
+CRediT	credit:	Contributor roles	https://credit.niso.org/
