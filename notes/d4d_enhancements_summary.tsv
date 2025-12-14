@@ -3,7 +3,7 @@ Bias Documentation	Mentioned conceptually	BiasTypeEnum with 9 types mapped to AI
 Limitation Tracking	Free-text discussion	LimitationTypeEnum with 8 categories	Structured limitation classification
 Dataset Relationships	Not specified	DatasetRelationshipTypeEnum with 14 relationship types	Hierarchical composition support
 Variable Metadata	Dataset-level only	VariableMetadata class for field-level documentation	Column/field-level granularity
-Intended Uses	Implied in "what could it be used for?"	IntendedUse class (RO-Crate influence)	Explicit recommended applications
+Intended Uses	Implied in what could it be used for?	IntendedUse class (RO-Crate influence)	Explicit recommended applications
 Prohibited Uses	Discouraged uses only	ProhibitedUse class with legal enforcement	Stronger than discouraged
 CRediT Roles	Generic creator field	CRediTRoleEnum with 14 standardized roles	Precise contributor attribution
 Structured Funding	Free-text funding mention	Grantor, Grant, FundingMechanism classes	Grant number, amount, opportunity tracking
