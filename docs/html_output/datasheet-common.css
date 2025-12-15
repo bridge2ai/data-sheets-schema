@@ -87,6 +87,12 @@ body {
     display: block;
 }
 
+.item-value {
+    color: #212529;
+    line-height: 1.6;
+    margin-top: 0.25rem;
+}
+
 .item-context {
     font-size: 0.8rem;
     color: #6c757d;
@@ -224,7 +230,11 @@ a:hover {
     .item-label {
         color: #d0d0d0;
     }
-    
+
+    .item-value {
+        color: #e0e0e0;
+    }
+
     .item-context {
         color: #a0a0a0;
     }

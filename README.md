@@ -20,7 +20,7 @@ Curated comprehensive datasheets for each Bridge2AI data generating project:
 * **[AI-READI](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/AI_READI_human_readable.html)** - Retinal imaging and diabetes dataset
 * **[CM4AI](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/CM4AI_human_readable.html)** - Cell maps for AI dataset
 * **[VOICE](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/VOICE_human_readable.html)** - Voice biomarker dataset
-* **[CHORUS](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/CHORUS_d4d_alldocs.html)** - Health data for underrepresented populations
+* **[CHORUS](https://bridge2ai.github.io/data-sheets-schema/html_output/concatenated/curated/CHORUS_human_readable.html)** - Health data for underrepresented populations
 
 [View all D4D examples →](https://bridge2ai.github.io/data-sheets-schema/d4d_examples.html)
 
