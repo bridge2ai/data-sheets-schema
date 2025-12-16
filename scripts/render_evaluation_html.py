@@ -346,13 +346,31 @@ def generate_evaluation_html(eval_data, output_path):
             if isinstance(value, dict):
                 # Extract element number from key
                 elem_num = key.split('_')[1] if '_' in key else '0'
+
+                # Convert sub_elements to sub_element_scores format
+                sub_element_scores = []
+                if 'sub_elements' in value:
+                    # CHORUS/CM4AI/VOICE format with nested sub_elements dict
+                    for sub_key, sub_value in sorted(value['sub_elements'].items()):
+                        if isinstance(sub_value, dict):
+                            # Extract sub-element name from key (e.g., "1.1_persistent_identifier" -> "Persistent Identifier")
+                            sub_name = sub_key.split('_', 1)[1].replace('_', ' ').title() if '_' in sub_key else sub_key.replace('_', ' ').title()
+
+                            sub_element_scores.append({
+                                'name': sub_name,
+                                'fields': sub_value.get('field', sub_value.get('fields', [])),  # Handle both 'field' and 'fields'
+                                'score': sub_value.get('score', 0),
+                                'rationale': sub_value.get('rationale', 'N/A'),
+                                'semantic_notes': sub_value.get('semantic_note', sub_value.get('semantic_notes', ''))  # Handle both variants
+                            })
+
                 element_list.append({
                     'element_id': elem_num,
-                    'element_name': value.get('name', key.replace('_', ' ').title()),
-                    'element_score': value.get('score', 0),
+                    'element_name': value.get('element_name', value.get('name', key.replace('_', ' ').title())),
+                    'element_score': value.get('element_score', value.get('score', 0)),
                     'element_max_score': value.get('max_score', 5),
-                    'element_percentage': value.get('percentage', 0),
-                    'sub_element_scores': []
+                    'element_percentage': value.get('element_score_percentage', value.get('percentage', 0)),
+                    'sub_element_scores': sub_element_scores
                 })
             else:
                 # Value is just a number
@@ -365,6 +383,39 @@ def generate_evaluation_html(eval_data, output_path):
                     'sub_element_scores': []
                 })
         element_scores = element_list
+
+    # Also handle array format elements that have sub_elements instead of sub_element_scores
+    for element in element_scores:
+        # If element has sub_elements but empty sub_element_scores, convert it
+        if 'sub_elements' in element and not element.get('sub_element_scores'):
+            sub_elem = element['sub_elements']
+            converted_subs = []
+
+            if isinstance(sub_elem, list):
+                # VOICE format: sub_elements is an array
+                for sub in sub_elem:
+                    if isinstance(sub, dict):
+                        converted_subs.append({
+                            'name': sub.get('name', ''),
+                            'fields': sub.get('fields_found', sub.get('fields', sub.get('field', []))),
+                            'score': sub.get('score', 0),
+                            'rationale': sub.get('evidence', sub.get('rationale', 'N/A')),
+                            'semantic_notes': sub.get('semantic_note', sub.get('semantic_notes', ''))
+                        })
+            elif isinstance(sub_elem, dict):
+                # Already handled in dict conversion above, but check again for hybrid formats
+                for sub_key, sub_value in sorted(sub_elem.items()):
+                    if isinstance(sub_value, dict):
+                        sub_name = sub_key.split('_', 1)[1].replace('_', ' ').title() if '_' in sub_key else sub_key.replace('_', ' ').title()
+                        converted_subs.append({
+                            'name': sub_name,
+                            'fields': sub_value.get('field', sub_value.get('fields', [])),
+                            'score': sub_value.get('score', 0),
+                            'rationale': sub_value.get('rationale', 'N/A'),
+                            'semantic_notes': sub_value.get('semantic_note', sub_value.get('semantic_notes', ''))
+                        })
+
+            element['sub_element_scores'] = converted_subs
 
     for element in element_scores:
         elem_score = element.get('element_score', 0)
