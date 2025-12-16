@@ -1,2391 +1,464 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CRISPR Perturbation Cell Atlas - Datasheet for Dataset</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: #fafafa;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .header h1 {
-            margin: 0 0 0.5rem 0;
-            font-size: 2rem;
-            font-weight: 300;
-        }
-        
-        .content {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .key {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .value {
-            color: #34495e;
-        }
-        
-        pre {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 4px;
-            overflow-x: auto;
-            border-left: 4px solid #667eea;
-        }
-        
-        .timestamp {
-            text-align: center;
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 2rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-    </style>
+    <link rel="stylesheet" href="datasheet-common.css">
+    <title>CM4AI Dataset Documentation - Datasheet for Dataset</title>
 </head>
 <body>
     <div class="header">
-        <h1>CRISPR Perturbation Cell Atlas</h1>
-        <p class="subtitle">Datasheet for Dataset</p>
+        <h1>CM4AI Dataset Documentation</h1>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
     </div>
-    <div class="content">
-        <pre>creators: &id001
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  principal_investigator:
-    id: https://orcid.org/0000-0002-1708-8454
-    name: Ideker T
-- affiliation:
-    id: University of California San Francisco
-    name: University of California San Francisco
-  principal_investigator:
-    id: https://orcid.org/0000-0003-4902-337X
-    name: Krogan N
-- affiliation:
-    id: Stanford University
-    name: Stanford University
-  principal_investigator:
-    id: https://orcid.org/0000-0001-7034-0850
-    name: Lundberg E
-- affiliation:
-    id: University of Virginia
-    name: University of Virginia
-  author:
-    id: https://orcid.org/0000-0003-4060-7360
-    name: Clark T
-- affiliation:
-    id: University of California, San Diego
-    name: University of California, San Diego
-  author:
-    id: https://orcid.org/0000-0003-4535-3486
-    name: Parker J
-- affiliation:
-    id: University of Virginia
-    name: University of Virginia
-  author:
-    id: https://orcid.org/0000-0003-4647-3877
-    name: Al Manir S
-- affiliation:
-    id: KTH Royal Institute of Technology
-    name: KTH Royal Institute of Technology
-  author:
-    id: ''
-    name: Axelsson U
-- affiliation:
-    id: Stanford University
-    name: Stanford University
-  author:
-    id: https://orcid.org/0000-0002-4180-422X
-    name: Ballllosero Navarro F
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: ''
-    name: Chinn B
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0001-9998-705X
-    name: Churas CP
-- affiliation:
-    id: University of California, San Diego
-    name: University of California, San Diego
-  author:
-    id: https://orcid.org/0000-0002-6711-8260
-    name: Dailamy A
-- affiliation:
-    id: University of California, San Diego
-    name: University of California, San Diego
-  author:
-    id: https://orcid.org/0009-0009-0483-7506
-    name: Doctor Y
-- affiliation:
-    id: KTH - Royal Institute of Technology
-    name: KTH - Royal Institute of Technology
-  author:
-    id: ''
-    name: Fall J
-- affiliation:
-    id: University of California San Francisco
-    name: University of California San Francisco
-  author:
-    id: https://orcid.org/0000-0003-0223-0312
-    name: Forget A
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0002-6311-3526
-    name: Gao J
-- affiliation:
-    id: Stanford University
-    name: Stanford University
-  author:
-    id: https://orcid.org/0000-0002-4650-9094
-    name: Hansen JN
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0002-1571-8029
-    name: Hu M
-- affiliation:
-    id: KTH - Royal Institute of Technology
-    name: KTH - Royal Institute of Technology
-  author:
-    id: ''
-    name: Johannesson A
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: ''
-    name: Khaliq H
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0003-0917-355X
-    name: Lee YH
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0001-7252-8638
-    name: Lenkiewicz J
-- affiliation:
-    id: University of Virginia
-    name: University of Virginia
-  author:
-    id: https://orcid.org/0000-0003-0384-8499
-    name: Levinson MA
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: 0000-0003-3960-420X
-    name: Marquez C
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0003-2404-3040
-    name: Metallo C
-- affiliation:
-    id: University of California San Francisco
-    name: University of California San Francisco
-  author:
-    id: ''
-    name: Muralidharan M
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0003-3881-7588
-    name: Nourreddine S
-- affiliation:
-    id: University of Virginia
-    name: University of Virginia
-  author:
-    id: https://orcid.org/0000-0002-1103-3882
-    name: Niestroy J
-- affiliation:
-    id: University of California San Francisco
-    name: University of California San Francisco
-  author:
-    id: https://orcid.org/0000-0002-4025-1299
-    name: Obernier K
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: ''
-    name: Pan E
-- affiliation:
-    id: University of California San Francisco
-    name: University of California San Francisco
-  author:
-    id: ''
-    name: Polacco B
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0002-1471-9513
-    name: Pratt D
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0009-0005-4217-2745
-    name: Qian G
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0001-6339-9141
-    name: Schaffer L
-- affiliation:
-    id: KTH Royal Institute of Technology
-    name: KTH Royal Institute of Technology
-  author:
-    id: https://orcid.org/0000-0003-3361-3797
-    name: Sigaeva A
-- affiliation:
-    id: University of Alabama at Birmingham
-    name: University of Alabama at Birmingham
-  author:
-    id: https://orcid.org/0000-0001-6730-2773
-    name: Thaker S
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: ''
-    name: Zhang Y
-- affiliation:
-    id: Simon Fraser University
-    name: Simon Fraser University
-  author:
-    id: https://orcid.org/0000-0002-8965-8153
-    name: "B\xE9lisle-Pipon JC"
-- affiliation:
-    id: Yale University
-    name: Yale University
-  author:
-    id: https://orcid.org/0000-0001-8179-1796
-    name: Brandt C
-- affiliation:
-    id: The University of Alabama at Birmingham
-    name: The University of Alabama at Birmingham
-  author:
-    id: https://orcid.org/0000-0002-6112-415X
-    name: Chen JY
-- affiliation:
-    id: University of Texas at Austin
-    name: University of Texas at Austin
-  author:
-    id: https://orcid.org/0000-0003-2567-2009
-    name: Ding Y
-- affiliation:
-    id: Yale University
-    name: Yale University
-  author:
-    id: https://orcid.org/0000-0003-4664-3143
-    name: Fodeh S
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0002-3383-1287
-    name: Mali P
-- affiliation:
-    id: University of Alabama
-    name: University of Alabama
-  author:
-    id: https://orcid.org/0000-0002-3508-3577
-    name: Payne-Foster P
-- affiliation:
-    id: University of Virginia
-    name: University of Virginia
-  author:
-    id: https://orcid.org/0000-0002-6644-8284
-    name: Ratcliffe S
-- affiliation:
-    id: University of Montreal
-    name: University of Montreal
-  author:
-    id: https://orcid.org/0000-0002-7080-8801
-    name: Ravitsky V
-- affiliation:
-    id: University of California San Diego
-    name: University of California San Diego
-  author:
-    id: https://orcid.org/0000-0003-0435-6197
-    name: Sali A
-- affiliation:
-    id: Yale University
-    name: Yale University
-  author:
-    id: https://orcid.org/0000-0002-2048-4028
-    name: Schulz W
-description: "This dataset represents an expressed genome-scale CRISPRi Perturbation\
-  \ Cell Atlas in undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs)\
-  \ mapping transcriptional and fitness phenotypes associated with 11,739 targeted\
-  \ genes, as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org)\
-  \ Functional Genomics Grand Challenge, a component of the U.S. National Institute\
-  \ of Health\u2019s (NIH) Bridge2AI program. We validated these findings via phenotypic,\
-  \ protein-interaction, and metabolic tracing assays."
-funders: &id002
-- grant:
-    grant_number: 1OT2OD032742-01
-    id: 1OT2OD032742-01
-    name: ''
-  grantor:
-    id: NIH
-    name: National Institutes of Health
-id: https://doi.org/10.18130/V3/B35XWX#crispr-atlas
-issued: '2025-03-03'
-keywords: &id003
-- CRISPR/Cas9
-- perturb-seq
-- iPSC
-- KOLF2.1J
-- scRNAseq
-resources:
-- acquisition_methods: []
-  addressing_gaps: []
-  anomalies: []
-  bytes: 31100
-  cleaning_strategies: []
-  collection_mechanisms: []
-  collection_timeframes: []
-  compression: ''
-  confidential_elements: []
-  conforms_to:
-  - RO-Crate
-  - FAIRSCAPE
-  conforms_to_class: ''
-  conforms_to_schema: ''
-  content_warnings: []
-  created_by:
-  - Niestroy, Justin
-  created_on: '2025-02-27'
-  creators: *id001
-  data_collectors: []
-  data_protection_impacts: []
-  description: "This dataset represents an expressed genome-scale CRISPRi Perturbation\
-    \ Cell Atlas in undifferentiated KOLF2.1J human induced pluripotent stem cells\
-    \ (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739\
-    \ targeted genes, as part of the Cell Maps for Artificial Intelligence (CM4AI;\
-    \ CM4AI.org) Functional Genomics Grand Challenge, a component of the U.S. National\
-    \ Institute of Health\u2019s (NIH) Bridge2AI program. We validated these findings\
-    \ via phenotypic, protein-interaction, and metabolic tracing assays."
-  dialect: ''
-  discouraged_uses: []
-  distribution_dates: []
-  distribution_formats: []
-  doi: https://doi.org/10.18130/V3/B35XWX
-  download_url: ''
-  encoding: ''
-  errata: []
-  ethical_reviews: []
-  existing_uses: []
-  extension_mechanism: ''
-  external_resources: []
-  format: JSON
-  funders: *id002
-  future_use_impacts: []
-  hash: ''
-  id: https://doi.org/10.18130/V3/B35XWX#crispr-atlas
-  instances: []
-  ip_restrictions: ''
-  is_deidentified:
-    description: []
-    identifiable_elements_present: ''
-  is_tabular: ''
-  issued: '2025-03-03'
-  keywords: *id003
-  labeling_strategies: []
-  language: ''
-  last_updated_on: '2025-02-27'
-  license: https://creativecommons.org/licenses/by-nc-sa/4.0/
-  license_and_use_terms:
-  - description: Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike
-      4.0 International license. Attribution is required to the copyright holders
-      and the authors.
-  maintainers: []
-  md5: cbd...818
-  media_type: ''
-  modified_by: []
-  other_tasks: []
-  page: ''
-  path: CRISPR Perturbation Cell Atlas/ro-crate-metadata.json
-  preprocessing_strategies: []
-  publisher: University of Virginia Dataverse
-  purposes:
-  - response: To provide AI-ready datasets for the Cell Maps for Artificial Intelligence
-      (CM4AI) Functional Genomics Grand Challenge, a part of the NIH Bridge2AI program.
-  raw_sources: []
-  regulatory_restrictions: ''
-  retention_limit: ''
-  sampling_strategies: []
-  sensitive_elements: []
-  sha256: ''
-  status: ''
-  subpopulations: []
-  subsets: []
-  tasks: []
-  title: CRISPR Perturbation Cell Atlas
-  updates: []
-  use_repository: []
-  version: '1.4'
-  version_access: []
-  was_derived_from: []
-- acquisition_methods: []
-  addressing_gaps: []
-  anomalies: []
-  bytes: 1000100
-  cleaning_strategies: []
-  collection_mechanisms: []
-  collection_timeframes: []
-  compression: ''
-  confidential_elements: []
-  conforms_to:
-  - RO-Crate
-  - FAIRSCAPE
-  conforms_to_class: ''
-  conforms_to_schema: ''
-  content_warnings: []
-  created_by:
-  - Niestroy, Justin
-  created_on: '2025-02-27'
-  creators:
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    principal_investigator:
-      id: https://orcid.org/0000-0002-1708-8454
-      name: Ideker T
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    principal_investigator:
-      id: https://orcid.org/0000-0003-4902-337X
-      name: Krogan N
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    principal_investigator:
-      id: https://orcid.org/0000-0001-7034-0850
-      name: Lundberg E
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4060-7360
-      name: Clark T
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0003-4535-3486
-      name: Parker J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4647-3877
-      name: Al Manir S
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: ''
-      name: Axelsson U
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4180-422X
-      name: Ballllosero Navarro F
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Chinn B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-9998-705X
-      name: Churas CP
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0002-6711-8260
-      name: Dailamy A
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0009-0009-0483-7506
-      name: Doctor Y
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Fall J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0003-0223-0312
-      name: Forget A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-6311-3526
-      name: Gao J
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4650-9094
-      name: Hansen JN
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1571-8029
-      name: Hu M
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Johannesson A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Khaliq H
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0917-355X
-      name: Lee YH
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-7252-8638
-      name: Lenkiewicz J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-0384-8499
-      name: Levinson MA
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: 0000-0003-3960-420X
-      name: Marquez C
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-2404-3040
-      name: Metallo C
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Muralidharan M
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-3881-7588
-      name: Nourreddine S
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-1103-3882
-      name: Niestroy J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0002-4025-1299
-      name: Obernier K
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Pan E
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Polacco B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1471-9513
-      name: Pratt D
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0009-0005-4217-2745
-      name: Qian G
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-6339-9141
-      name: Schaffer L
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: https://orcid.org/0000-0003-3361-3797
-      name: Sigaeva A
-  - affiliation:
-      id: University of Alabama at Birmingham
-      name: University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0001-6730-2773
-      name: Thaker S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Zhang Y
-  - affiliation:
-      id: Simon Fraser University
-      name: Simon Fraser University
-    author:
-      id: https://orcid.org/0000-0002-8965-8153
-      name: "B\xE9lisle-Pipon JC"
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0001-8179-1796
-      name: Brandt C
-  - affiliation:
-      id: The University of Alabama at Birmingham
-      name: The University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0002-6112-415X
-      name: Chen JY
-  - affiliation:
-      id: University of Texas at Austin
-      name: University of Texas at Austin
-    author:
-      id: https://orcid.org/0000-0003-2567-2009
-      name: Ding Y
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0003-4664-3143
-      name: Fodeh S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-3383-1287
-      name: Mali P
-  - affiliation:
-      id: University of Alabama
-      name: University of Alabama
-    author:
-      id: https://orcid.org/0000-0002-3508-3577
-      name: Payne-Foster P
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-6644-8284
-      name: Ratcliffe S
-  - affiliation:
-      id: University of Montreal
-      name: University of Montreal
-    author:
-      id: https://orcid.org/0000-0002-7080-8801
-      name: Ravitsky V
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0435-6197
-      name: Sali A
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0002-2048-4028
-      name: Schulz W
-  data_collectors: []
-  data_protection_impacts: []
-  description: "This dataset represents raw sequence data from an expressed genome-scale\
-    \ CRISPRi Perturbation Cell Atlas in KOLF2.1J human induced pluripotent stem cells\
-    \ (hiPSCs) mapping transcriptional and fitness phenotypes associated with 11,739\
-    \ targeted genes, as part of the Cell Maps for Artificial Intelligence (CM4AI;\
-    \ CM4AI.org) Functional Genomics Grand Challenge, a component of the U.S. National\
-    \ Institute of Health\u2019s (NIH) Bridge2AI program."
-  dialect: ''
-  discouraged_uses: []
-  distribution_dates: []
-  distribution_formats: []
-  doi: https://doi.org/10.18130/V3/B35XWX
-  download_url: ''
-  encoding: ''
-  errata: []
-  ethical_reviews: []
-  existing_uses: []
-  extension_mechanism: ''
-  external_resources: []
-  format: JSON
-  funders:
-  - grant:
-      grant_number: 1OT2OD032742-01
-      id: 1OT2OD032742-01
-      name: ''
-    grantor:
-      id: NIH
-      name: National Institutes of Health
-  future_use_impacts: []
-  hash: ''
-  id: https://doi.org/10.18130/V3/B35XWX#crispr-raw
-  instances: []
-  ip_restrictions: ''
-  is_deidentified:
-    description: []
-    identifiable_elements_present: ''
-  is_tabular: ''
-  issued: '2025-03-03'
-  keywords:
-  - CRISPR/Cas9
-  - perturb-seq
-  - iPSC
-  - KOLF2.1J
-  - scRNAseq
-  labeling_strategies: []
-  language: ''
-  last_updated_on: '2025-02-27'
-  license: https://creativecommons.org/licenses/by-nc-sa/4.0/
-  license_and_use_terms:
-  - description: Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike
-      4.0 International license. Attribution is required to the copyright holders
-      and the authors.
-  maintainers: []
-  md5: 1ca...f5c
-  media_type: ''
-  modified_by: []
-  other_tasks: []
-  page: ''
-  path: CRISPR Perturbation RNA Sequences - Raw Sequences/ro-crate-metadata.json
-  preprocessing_strategies: []
-  publisher: University of Virginia Dataverse
-  purposes:
-  - response: To provide AI-ready datasets for the Cell Maps for Artificial Intelligence
-      (CM4AI) Functional Genomics Grand Challenge, a part of the NIH Bridge2AI program.
-  raw_sources: []
-  regulatory_restrictions: ''
-  retention_limit: ''
-  sampling_strategies: []
-  sensitive_elements: []
-  sha256: ''
-  status: ''
-  subpopulations: []
-  subsets: []
-  tasks: []
-  title: CRISPR Perturbation RNA Sequences - Raw Sequences
-  updates: []
-  use_repository: []
-  version: '1.4'
-  version_access: []
-  was_derived_from: []
-- acquisition_methods: []
-  addressing_gaps: []
-  anomalies: []
-  bytes: 2791728742
-  cleaning_strategies: []
-  collection_mechanisms: []
-  collection_timeframes: []
-  compression: ZIP
-  confidential_elements: []
-  conforms_to:
-  - RO-Crate
-  - FAIRSCAPE
-  conforms_to_class: ''
-  conforms_to_schema: ''
-  content_warnings: []
-  created_by:
-  - Niestroy, Justin
-  created_on: '2025-02-27'
-  creators:
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    principal_investigator:
-      id: https://orcid.org/0000-0002-1708-8454
-      name: Ideker T
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    principal_investigator:
-      id: https://orcid.org/0000-0003-4902-337X
-      name: Krogan N
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    principal_investigator:
-      id: https://orcid.org/0000-0001-7034-0850
-      name: Lundberg E
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4060-7360
-      name: Clark T
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0003-4535-3486
-      name: Parker J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4647-3877
-      name: Al Manir S
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: ''
-      name: Axelsson U
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4180-422X
-      name: Ballllosero Navarro F
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Chinn B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-9998-705X
-      name: Churas CP
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0002-6711-8260
-      name: Dailamy A
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0009-0009-0483-7506
-      name: Doctor Y
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Fall J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0003-0223-0312
-      name: Forget A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-6311-3526
-      name: Gao J
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4650-9094
-      name: Hansen JN
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1571-8029
-      name: Hu M
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Johannesson A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Khaliq H
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0917-355X
-      name: Lee YH
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-7252-8638
-      name: Lenkiewicz J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-0384-8499
-      name: Levinson MA
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: 0000-0003-3960-420X
-      name: Marquez C
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-2404-3040
-      name: Metallo C
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Muralidharan M
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-3881-7588
-      name: Nourreddine S
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-1103-3882
-      name: Niestroy J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0002-4025-1299
-      name: Obernier K
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Pan E
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Polacco B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1471-9513
-      name: Pratt D
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0009-0005-4217-2745
-      name: Qian G
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-6339-9141
-      name: Schaffer L
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: https://orcid.org/0000-0003-3361-3797
-      name: Sigaeva A
-  - affiliation:
-      id: University of Alabama at Birmingham
-      name: University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0001-6730-2773
-      name: Thaker S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Zhang Y
-  - affiliation:
-      id: Simon Fraser University
-      name: Simon Fraser University
-    author:
-      id: https://orcid.org/0000-0002-8965-8153
-      name: "B\xE9lisle-Pipon JC"
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0001-8179-1796
-      name: Brandt C
-  - affiliation:
-      id: The University of Alabama at Birmingham
-      name: The University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0002-6112-415X
-      name: Chen JY
-  - affiliation:
-      id: University of Texas at Austin
-      name: University of Texas at Austin
-    author:
-      id: https://orcid.org/0000-0003-2567-2009
-      name: Ding Y
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0003-4664-3143
-      name: Fodeh S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-3383-1287
-      name: Mali P
-  - affiliation:
-      id: University of Alabama
-      name: University of Alabama
-    author:
-      id: https://orcid.org/0000-0002-3508-3577
-      name: Payne-Foster P
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-6644-8284
-      name: Ratcliffe S
-  - affiliation:
-      id: University of Montreal
-      name: University of Montreal
-    author:
-      id: https://orcid.org/0000-0002-7080-8801
-      name: Ravitsky V
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0435-6197
-      name: Sali A
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0002-2048-4028
-      name: Schulz W
-  data_collectors: []
-  data_protection_impacts: []
-  description: This data set displays the spatial localization of 563 proteins of
-    interest in cells of the breast cancer cell line MDA-MB-468 treated with paclitaxel
-    as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy
-    in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial
-    Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel);
-    endoplasmic reticulum with a calreticulin antibody (yellow channel); microtubules
-    with tubulin antibody (red channel); and antibody against protein of interest
-    (green channel).
-  dialect: ''
-  discouraged_uses: []
-  distribution_dates: []
-  distribution_formats: []
-  doi: https://doi.org/10.18130/V3/B35XWX
-  download_url: ''
-  encoding: ''
-  errata: []
-  ethical_reviews: []
-  existing_uses: []
-  extension_mechanism: ''
-  external_resources: []
-  format: ZIP
-  funders:
-  - grant:
-      grant_number: 1OT2OD032742-01
-      id: 1OT2OD032742-01
-      name: ''
-    grantor:
-      id: NIH
-      name: National Institutes of Health
-  future_use_impacts: []
-  hash: ''
-  id: https://doi.org/10.18130/V3/B35XWX#images-paclitaxel
-  instances: []
-  ip_restrictions: ''
-  is_deidentified:
-    description: []
-    identifiable_elements_present: ''
-  is_tabular: ''
-  issued: '2025-03-03'
-  keywords:
-  - protein localization
-  - subcellular imaging
-  - breast cancer
-  - MDA-MB-468
-  - paclitaxel
-  labeling_strategies: []
-  language: ''
-  last_updated_on: '2025-02-27'
-  license: https://creativecommons.org/licenses/by-nc-sa/4.0/
-  license_and_use_terms:
-  - description: Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike
-      4.0 International license. Attribution is required to the copyright holders
-      and the authors.
-  maintainers: []
-  md5: 942...043
-  media_type: ''
-  modified_by: []
-  other_tasks: []
-  page: ''
-  path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-paclitaxel.zip
-  preprocessing_strategies: []
-  publisher: University of Virginia Dataverse
-  purposes:
-  - response: To provide AI-ready datasets for the Cell Maps for Artificial Intelligence
-      (CM4AI) Functional Genomics Grand Challenge, a part of the NIH Bridge2AI program.
-  raw_sources: []
-  regulatory_restrictions: ''
-  retention_limit: ''
-  sampling_strategies: []
-  sensitive_elements: []
-  sha256: ''
-  status: ''
-  subpopulations: []
-  subsets: []
-  tasks: []
-  title: Protein Localization Subcellular Images - Paclitaxel
-  updates: []
-  use_repository: []
-  version: '1.4'
-  version_access: []
-  was_derived_from: []
-- acquisition_methods: []
-  addressing_gaps: []
-  anomalies: []
-  bytes: 3435973836
-  cleaning_strategies: []
-  collection_mechanisms: []
-  collection_timeframes: []
-  compression: ZIP
-  confidential_elements: []
-  conforms_to:
-  - RO-Crate
-  - FAIRSCAPE
-  conforms_to_class: ''
-  conforms_to_schema: ''
-  content_warnings: []
-  created_by:
-  - Niestroy, Justin
-  created_on: '2025-02-27'
-  creators:
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    principal_investigator:
-      id: https://orcid.org/0000-0002-1708-8454
-      name: Ideker T
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    principal_investigator:
-      id: https://orcid.org/0000-0003-4902-337X
-      name: Krogan N
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    principal_investigator:
-      id: https://orcid.org/0000-0001-7034-0850
-      name: Lundberg E
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4060-7360
-      name: Clark T
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0003-4535-3486
-      name: Parker J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4647-3877
-      name: Al Manir S
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: ''
-      name: Axelsson U
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4180-422X
-      name: Ballllosero Navarro F
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Chinn B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-9998-705X
-      name: Churas CP
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0002-6711-8260
-      name: Dailamy A
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0009-0009-0483-7506
-      name: Doctor Y
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Fall J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0003-0223-0312
-      name: Forget A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-6311-3526
-      name: Gao J
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4650-9094
-      name: Hansen JN
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1571-8029
-      name: Hu M
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Johannesson A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Khaliq H
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0917-355X
-      name: Lee YH
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-7252-8638
-      name: Lenkiewicz J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-0384-8499
-      name: Levinson MA
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: 0000-0003-3960-420X
-      name: Marquez C
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-2404-3040
-      name: Metallo C
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Muralidharan M
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-3881-7588
-      name: Nourreddine S
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-1103-3882
-      name: Niestroy J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0002-4025-1299
-      name: Obernier K
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Pan E
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Polacco B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1471-9513
-      name: Pratt D
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0009-0005-4217-2745
-      name: Qian G
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-6339-9141
-      name: Schaffer L
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: https://orcid.org/0000-0003-3361-3797
-      name: Sigaeva A
-  - affiliation:
-      id: University of Alabama at Birmingham
-      name: University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0001-6730-2773
-      name: Thaker S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Zhang Y
-  - affiliation:
-      id: Simon Fraser University
-      name: Simon Fraser University
-    author:
-      id: https://orcid.org/0000-0002-8965-8153
-      name: "B\xE9lisle-Pipon JC"
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0001-8179-1796
-      name: Brandt C
-  - affiliation:
-      id: The University of Alabama at Birmingham
-      name: The University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0002-6112-415X
-      name: Chen JY
-  - affiliation:
-      id: University of Texas at Austin
-      name: University of Texas at Austin
-    author:
-      id: https://orcid.org/0000-0003-2567-2009
-      name: Ding Y
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0003-4664-3143
-      name: Fodeh S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-3383-1287
-      name: Mali P
-  - affiliation:
-      id: University of Alabama
-      name: University of Alabama
-    author:
-      id: https://orcid.org/0000-0002-3508-3577
-      name: Payne-Foster P
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-6644-8284
-      name: Ratcliffe S
-  - affiliation:
-      id: University of Montreal
-      name: University of Montreal
-    author:
-      id: https://orcid.org/0000-0002-7080-8801
-      name: Ravitsky V
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0435-6197
-      name: Sali A
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0002-2048-4028
-      name: Schulz W
-  data_collectors: []
-  data_protection_impacts: []
-  description: This data set displays the spatial localization of 563 proteins of
-    interest in untreated cells of the breast cancer cell line MDA-MB-468 as imaged
-    by immunofluorescence-based staining (ICC-IF) and confocal microscopy in the Lundberg
-    Lab at Stanford University, as part of the Cell Maps for Artificial Intelligence
-    (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel); endoplasmic
-    reticulum with a calreticulin antibody (yellow channel); microtubules with tubulin
-    antibody (red channel); and antibody against protein of interest (green channel).
-  dialect: ''
-  discouraged_uses: []
-  distribution_dates: []
-  distribution_formats: []
-  doi: https://doi.org/10.18130/V3/B35XWX
-  download_url: ''
-  encoding: ''
-  errata: []
-  ethical_reviews: []
-  existing_uses: []
-  extension_mechanism: ''
-  external_resources: []
-  format: ZIP
-  funders:
-  - grant:
-      grant_number: 1OT2OD032742-01
-      id: 1OT2OD032742-01
-      name: ''
-    grantor:
-      id: NIH
-      name: National Institutes of Health
-  future_use_impacts: []
-  hash: ''
-  id: https://doi.org/10.18130/V3/B35XWX#images-untreated
-  instances: []
-  ip_restrictions: ''
-  is_deidentified:
-    description: []
-    identifiable_elements_present: ''
-  is_tabular: ''
-  issued: '2025-03-03'
-  keywords:
-  - protein localization
-  - subcellular imaging
-  - breast cancer
-  - MDA-MB-468
-  labeling_strategies: []
-  language: ''
-  last_updated_on: '2025-02-27'
-  license: https://creativecommons.org/licenses/by-nc-sa/4.0/
-  license_and_use_terms:
-  - description: Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike
-      4.0 International license. Attribution is required to the copyright holders
-      and the authors.
-  maintainers: []
-  md5: 0b4...ef7
-  media_type: ''
-  modified_by: []
-  other_tasks: []
-  page: ''
-  path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-untreated.zip
-  preprocessing_strategies: []
-  publisher: University of Virginia Dataverse
-  purposes:
-  - response: To provide AI-ready datasets for the Cell Maps for Artificial Intelligence
-      (CM4AI) Functional Genomics Grand Challenge, a part of the NIH Bridge2AI program.
-  raw_sources: []
-  regulatory_restrictions: ''
-  retention_limit: ''
-  sampling_strategies: []
-  sensitive_elements: []
-  sha256: ''
-  status: ''
-  subpopulations: []
-  subsets: []
-  tasks: []
-  title: Protein Localization Subcellular Images - Untreated
-  updates: []
-  use_repository: []
-  version: '1.4'
-  version_access: []
-  was_derived_from: []
-- acquisition_methods: []
-  addressing_gaps: []
-  anomalies: []
-  bytes: 3006477107
-  cleaning_strategies: []
-  collection_mechanisms: []
-  collection_timeframes: []
-  compression: ZIP
-  confidential_elements: []
-  conforms_to:
-  - RO-Crate
-  - FAIRSCAPE
-  conforms_to_class: ''
-  conforms_to_schema: ''
-  content_warnings: []
-  created_by:
-  - Niestroy, Justin
-  created_on: '2025-02-27'
-  creators:
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    principal_investigator:
-      id: https://orcid.org/0000-0002-1708-8454
-      name: Ideker T
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    principal_investigator:
-      id: https://orcid.org/0000-0003-4902-337X
-      name: Krogan N
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    principal_investigator:
-      id: https://orcid.org/0000-0001-7034-0850
-      name: Lundberg E
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4060-7360
-      name: Clark T
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0003-4535-3486
-      name: Parker J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4647-3877
-      name: Al Manir S
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: ''
-      name: Axelsson U
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4180-422X
-      name: Ballllosero Navarro F
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Chinn B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-9998-705X
-      name: Churas CP
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0002-6711-8260
-      name: Dailamy A
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0009-0009-0483-7506
-      name: Doctor Y
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Fall J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0003-0223-0312
-      name: Forget A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-6311-3526
-      name: Gao J
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4650-9094
-      name: Hansen JN
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1571-8029
-      name: Hu M
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Johannesson A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Khaliq H
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0917-355X
-      name: Lee YH
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-7252-8638
-      name: Lenkiewicz J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-0384-8499
-      name: Levinson MA
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: 0000-0003-3960-420X
-      name: Marquez C
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-2404-3040
-      name: Metallo C
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Muralidharan M
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-3881-7588
-      name: Nourreddine S
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-1103-3882
-      name: Niestroy J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0002-4025-1299
-      name: Obernier K
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Pan E
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Polacco B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1471-9513
-      name: Pratt D
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0009-0005-4217-2745
-      name: Qian G
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-6339-9141
-      name: Schaffer L
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: https://orcid.org/0000-0003-3361-3797
-      name: Sigaeva A
-  - affiliation:
-      id: University of Alabama at Birmingham
-      name: University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0001-6730-2773
-      name: Thaker S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Zhang Y
-  - affiliation:
-      id: Simon Fraser University
-      name: Simon Fraser University
-    author:
-      id: https://orcid.org/0000-0002-8965-8153
-      name: "B\xE9lisle-Pipon JC"
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0001-8179-1796
-      name: Brandt C
-  - affiliation:
-      id: The University of Alabama at Birmingham
-      name: The University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0002-6112-415X
-      name: Chen JY
-  - affiliation:
-      id: University of Texas at Austin
-      name: University of Texas at Austin
-    author:
-      id: https://orcid.org/0000-0003-2567-2009
-      name: Ding Y
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0003-4664-3143
-      name: Fodeh S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-3383-1287
-      name: Mali P
-  - affiliation:
-      id: University of Alabama
-      name: University of Alabama
-    author:
-      id: https://orcid.org/0000-0002-3508-3577
-      name: Payne-Foster P
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-6644-8284
-      name: Ratcliffe S
-  - affiliation:
-      id: University of Montreal
-      name: University of Montreal
-    author:
-      id: https://orcid.org/0000-0002-7080-8801
-      name: Ravitsky V
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0435-6197
-      name: Sali A
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0002-2048-4028
-      name: Schulz W
-  data_collectors: []
-  data_protection_impacts: []
-  description: This data set displays the spatial localization of 563 proteins of
-    interest in cells of the breast cancer cell line MDA-MB-468 treated with vorinostat
-    as imaged by immunofluorescence-based staining (ICC-IF) and confocal microscopy
-    in the Lundberg Lab at Stanford University, as part of the Cell Maps for Artificial
-    Intelligence (CM4AI; CM4AI.org) project. Nuclei were stained with DAPI (blue channel);
-    endoplasmic reticulum with a calreticulin antibody (yellow channel); microtubules
-    with tubulin antibody (red channel); and antibody against protein of interest
-    (green channel).
-  dialect: ''
-  discouraged_uses: []
-  distribution_dates: []
-  distribution_formats: []
-  doi: https://doi.org/10.18130/V3/B35XWX
-  download_url: ''
-  encoding: ''
-  errata: []
-  ethical_reviews: []
-  existing_uses: []
-  extension_mechanism: ''
-  external_resources: []
-  format: ZIP
-  funders:
-  - grant:
-      grant_number: 1OT2OD032742-01
-      id: 1OT2OD032742-01
-      name: ''
-    grantor:
-      id: NIH
-      name: National Institutes of Health
-  future_use_impacts: []
-  hash: ''
-  id: https://doi.org/10.18130/V3/B35XWX#images-vorinostat
-  instances: []
-  ip_restrictions: ''
-  is_deidentified:
-    description: []
-    identifiable_elements_present: ''
-  is_tabular: ''
-  issued: '2025-03-03'
-  keywords:
-  - protein localization
-  - subcellular imaging
-  - breast cancer
-  - MDA-MB-468
-  - vorinostat
-  labeling_strategies: []
-  language: ''
-  last_updated_on: '2025-02-27'
-  license: https://creativecommons.org/licenses/by-nc-sa/4.0/
-  license_and_use_terms:
-  - description: Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike
-      4.0 International license. Attribution is required to the copyright holders
-      and the authors.
-  maintainers: []
-  md5: ac5...d52
-  media_type: ''
-  modified_by: []
-  other_tasks: []
-  page: ''
-  path: Protein Localization Subcellular Images/cm4ai-v0.6-beta-if-images-vorinostat.zip
-  preprocessing_strategies: []
-  publisher: University of Virginia Dataverse
-  purposes:
-  - response: To provide AI-ready datasets for the Cell Maps for Artificial Intelligence
-      (CM4AI) Functional Genomics Grand Challenge, a part of the NIH Bridge2AI program.
-  raw_sources: []
-  regulatory_restrictions: ''
-  retention_limit: ''
-  sampling_strategies: []
-  sensitive_elements: []
-  sha256: ''
-  status: ''
-  subpopulations: []
-  subsets: []
-  tasks: []
-  title: Protein Localization Subcellular Images - Vorinostat
-  updates: []
-  use_repository: []
-  version: '1.4'
-  version_access: []
-  was_derived_from: []
-- acquisition_methods: []
-  addressing_gaps: []
-  anomalies: []
-  bytes: 2900
-  cleaning_strategies: []
-  collection_mechanisms: []
-  collection_timeframes: []
-  compression: ''
-  confidential_elements: []
-  conforms_to:
-  - RO-Crate
-  - FAIRSCAPE
-  conforms_to_class: ''
-  conforms_to_schema: ''
-  content_warnings: []
-  created_by:
-  - Niestroy, Justin
-  created_on: '2025-02-27'
-  creators:
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    principal_investigator:
-      id: https://orcid.org/0000-0002-1708-8454
-      name: Ideker T
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    principal_investigator:
-      id: https://orcid.org/0000-0003-4902-337X
-      name: Krogan N
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    principal_investigator:
-      id: https://orcid.org/0000-0001-7034-0850
-      name: Lundberg E
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4060-7360
-      name: Clark T
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0003-4535-3486
-      name: Parker J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-4647-3877
-      name: Al Manir S
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: ''
-      name: Axelsson U
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4180-422X
-      name: Ballllosero Navarro F
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Chinn B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-9998-705X
-      name: Churas CP
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0000-0002-6711-8260
-      name: Dailamy A
-  - affiliation:
-      id: University of California, San Diego
-      name: University of California, San Diego
-    author:
-      id: https://orcid.org/0009-0009-0483-7506
-      name: Doctor Y
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Fall J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0003-0223-0312
-      name: Forget A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-6311-3526
-      name: Gao J
-  - affiliation:
-      id: Stanford University
-      name: Stanford University
-    author:
-      id: https://orcid.org/0000-0002-4650-9094
-      name: Hansen JN
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1571-8029
-      name: Hu M
-  - affiliation:
-      id: KTH - Royal Institute of Technology
-      name: KTH - Royal Institute of Technology
-    author:
-      id: ''
-      name: Johannesson A
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Khaliq H
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0917-355X
-      name: Lee YH
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-7252-8638
-      name: Lenkiewicz J
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0003-0384-8499
-      name: Levinson MA
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: 0000-0003-3960-420X
-      name: Marquez C
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-2404-3040
-      name: Metallo C
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Muralidharan M
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-3881-7588
-      name: Nourreddine S
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-1103-3882
-      name: Niestroy J
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: https://orcid.org/0000-0002-4025-1299
-      name: Obernier K
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Pan E
-  - affiliation:
-      id: University of California San Francisco
-      name: University of California San Francisco
-    author:
-      id: ''
-      name: Polacco B
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-1471-9513
-      name: Pratt D
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0009-0005-4217-2745
-      name: Qian G
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0001-6339-9141
-      name: Schaffer L
-  - affiliation:
-      id: KTH Royal Institute of Technology
-      name: KTH Royal Institute of Technology
-    author:
-      id: https://orcid.org/0000-0003-3361-3797
-      name: Sigaeva A
-  - affiliation:
-      id: University of Alabama at Birmingham
-      name: University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0001-6730-2773
-      name: Thaker S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: ''
-      name: Zhang Y
-  - affiliation:
-      id: Simon Fraser University
-      name: Simon Fraser University
-    author:
-      id: https://orcid.org/0000-0002-8965-8153
-      name: "B\xE9lisle-Pipon JC"
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0001-8179-1796
-      name: Brandt C
-  - affiliation:
-      id: The University of Alabama at Birmingham
-      name: The University of Alabama at Birmingham
-    author:
-      id: https://orcid.org/0000-0002-6112-415X
-      name: Chen JY
-  - affiliation:
-      id: University of Texas at Austin
-      name: University of Texas at Austin
-    author:
-      id: https://orcid.org/0000-0003-2567-2009
-      name: Ding Y
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0003-4664-3143
-      name: Fodeh S
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0002-3383-1287
-      name: Mali P
-  - affiliation:
-      id: University of Alabama
-      name: University of Alabama
-    author:
-      id: https://orcid.org/0000-0002-3508-3577
-      name: Payne-Foster P
-  - affiliation:
-      id: University of Virginia
-      name: University of Virginia
-    author:
-      id: https://orcid.org/0000-0002-6644-8284
-      name: Ratcliffe S
-  - affiliation:
-      id: University of Montreal
-      name: University of Montreal
-    author:
-      id: https://orcid.org/0000-0002-7080-8801
-      name: Ravitsky V
-  - affiliation:
-      id: University of California San Diego
-      name: University of California San Diego
-    author:
-      id: https://orcid.org/0000-0003-0435-6197
-      name: Sali A
-  - affiliation:
-      id: Yale University
-      name: Yale University
-    author:
-      id: https://orcid.org/0000-0002-2048-4028
-      name: Schulz W
-  data_collectors: []
-  data_protection_impacts: []
-  description: "This dataset was generated by size exclusion chromatography-mass spectroscopy\
-    \ (SEC-MS) on undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs),\
-    \ in the Nevan Krogan laboratory at the University of California San Francisco,\
-    \ as part of the Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org) Functional\
-    \ Genomics Grand Challenge, a component of the U.S. National Institute of Health\u2019\
-    s (NIH) Bridge2AI program. The data will be uploaded to Pride when available."
-  dialect: ''
-  discouraged_uses: []
-  distribution_dates: []
-  distribution_formats: []
-  doi: https://doi.org/10.18130/V3/B35XWX
-  download_url: ''
-  encoding: ''
-  errata: []
-  ethical_reviews: []
-  existing_uses: []
-  extension_mechanism: ''
-  external_resources: []
-  format: JSON
-  funders:
-  - grant:
-      grant_number: 1OT2OD032742-01
-      id: 1OT2OD032742-01
-      name: ''
-    grantor:
-      id: NIH
-      name: National Institutes of Health
-  future_use_impacts: []
-  hash: ''
-  id: https://doi.org/10.18130/V3/B35XWX#ppi-secms
-  instances: []
-  ip_restrictions: ''
-  is_deidentified:
-    description: []
-    identifiable_elements_present: ''
-  is_tabular: ''
-  issued: '2025-03-03'
-  keywords:
-  - protein-protein interaction
-  - SEC-MS
-  - mass spectroscopy
-  - iPSC
-  - KOLF2.1J
-  labeling_strategies: []
-  language: ''
-  last_updated_on: '2025-02-27'
-  license: https://creativecommons.org/licenses/by-nc-sa/4.0/
-  license_and_use_terms:
-  - description: Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike
-      4.0 International license. Attribution is required to the copyright holders
-      and the authors.
-  maintainers: []
-  md5: cb6...032
-  media_type: ''
-  modified_by: []
-  other_tasks: []
-  page: ''
-  path: Protein-protein Interaction SEC-MS/ro-crate-metadata.json
-  preprocessing_strategies: []
-  publisher: University of Virginia Dataverse
-  purposes:
-  - response: To provide AI-ready datasets for the Cell Maps for Artificial Intelligence
-      (CM4AI) Functional Genomics Grand Challenge, a part of the NIH Bridge2AI program.
-  raw_sources: []
-  regulatory_restrictions: ''
-  retention_limit: ''
-  sampling_strategies: []
-  sensitive_elements: []
-  sha256: ''
-  status: ''
-  subpopulations: []
-  subsets: []
-  tasks: []
-  title: Protein-protein Interaction SEC-MS
-  updates: []
-  use_repository: []
-  version: '1.4'
-  version_access: []
-  was_derived_from: []
-title: CRISPR Perturbation Cell Atlas
-version: '1.4'
-</pre>
-    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">Why was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Response</th></tr></thead><tbody><tr><td>Create AI-ready maps of human cell architecture from disease-relevant cell lines as part of the NIH ...</td><td>cm4ai:purpose:ai-ready-maps</td><td>Create AI-ready cell architecture maps</td><td>CM4AI's overarching mission is to produce ethical, AI-ready datasets of cell architecture, inferred ...</td></tr><tr><td>Enable interpretable genotype-phenotype learning by providing visible machine learning systems infor...</td><td>cm4ai:purpose:interpretable-genotype-phenotype</td><td>Enable interpretable genotype-phenotype learning</td><td>The CM4AI project seeks to map the spatiotemporal architecture of human cells and use these maps tow...</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>cm4ai:funder:nih-bridge2ai</dd><dt>Name</dt><dd>NIH Bridge2AI Functional Genomics</dd><dt>Description</dt><dd><div class="long-description">National Institutes of Health Bridge to Artificial Intelligence program, Functional Genomics Data Generation Project. This work was funded by the National Institutes of Health under awards 1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center), and by the Frederick Thomas Fund of the University of Virginia. Grant number: 1OT2OD032742-01. Project period: September 1, 2022 to August 31, 2026.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Instance Type</th><th>Name</th></tr></thead><tbody><tr><td>Expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J human induced pl...</td><td>cm4ai:instance:crispr-perturbation</td><td>Perturb-seq single-cell RNA sequencing data</td><td>CRISPR Perturbation Cell Atlas</td></tr><tr><td>Size exclusion chromatography-mass spectroscopy (SEC-MS) data from undifferentiated KOLF2.1J human i...</td><td>cm4ai:instance:sec-ms-ipsc</td><td>Protein-protein interaction mass spectrometry data</td><td>SEC-MS protein-protein interactions in iPSCs</td></tr><tr><td>SEC-MS protein-protein interaction data from iPSC-derived NPCs (neural progenitor cells), neurons, a...</td><td>cm4ai:instance:sec-ms-differentiated</td><td>Protein-protein interaction mass spectrometry data</td><td>SEC-MS in differentiated iPSC derivatives</td></tr><tr><td>Spatial localization of 563 proteins of interest in untreated cells of the breast cancer cell line M...</td><td>cm4ai:instance:if-images-untreated</td><td>Immunofluorescence confocal microscopy images</td><td>Immunofluorescence images - untreated MDA-MB-468</td></tr><tr><td>Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated with paclitaxel chemo...</td><td>cm4ai:instance:if-images-paclitaxel</td><td>Immunofluorescence confocal microscopy images</td><td>Immunofluorescence images - paclitaxel-treated MDA-MB-468</td></tr><tr><td>Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated with vorinostat chemo...</td><td>cm4ai:instance:if-images-vorinostat</td><td>Immunofluorescence confocal microscopy images</td><td>Immunofluorescence images - vorinostat-treated MDA-MB-468</td></tr><tr><td>AP-MS on endogenously tagged cell lines for protein-protein interaction mapping. 17 genes endogenous...</td><td>cm4ai:instance:ap-ms</td><td>Protein-protein interaction mass spectrometry data</td><td>Affinity purification mass spectrometry</td></tr><tr><td>Hierarchical directed acyclic graph (DAG) maps of cell architecture produced by integrating protein ...</td><td>cm4ai:instance:cell-maps</td><td>Network data structure (hierarchical graph)</td><td>Hierarchical cell maps</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Formats
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Access Urls</th><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX</td><td>Datasets packaged in RO-Crate format with rich metadata and provenance graphs.
+</td><td>cm4ai:format:ro-crate</td><td>RO-Crate packages</td></tr><tr><td>https://dataverse.lib.virginia.edu</td><td>University of Virginia's LibraData (Dataverse) NIH-approved generalist repository.
+</td><td>cm4ai:format:dataverse</td><td>LibraData Dataverse repository</td></tr><tr><td>https://cm4ai.org, http://www.cm4ai.org</td><td>CM4AI project portal using U-BRITE platform for open dissemination.
+</td><td>cm4ai:format:portal</td><td>CM4AI web portal</td></tr><tr><td>https://www.ndexbio.org</td><td>Cell maps shared via NDEx for visualization in web browsers or Cytoscape.
+</td><td>cm4ai:format:ndex</td><td>Network Data Exchange</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label required-field">
+                            ID
+                            <span class="required-indicator" title="Required field">*</span>
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.18130/V3/B35XWX" target="_blank">https://doi.org/10.18130/V3/B35XWX</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Name
+                            
+                        </label>
+                        <div class="item-value">CM4AI</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Title
+                            
+                        </label>
+                        <div class="item-value">Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Description
+                            
+                        </label>
+                        <div class="item-value"><div class="long-description">This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI's objective is to deliver machine-readable hierarchical maps of cell architecture as AI-Ready data produced from multimodal interrogation of 100 chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders in disease-relevant cell lines under perturbed and unperturbed conditions. CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center.
+</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Page
+                            
+                        </label>
+                        <div class="item-value"><a href="https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX" target="_blank">https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Language
+                            
+                        </label>
+                        <div class="item-value">en</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>AI</li><li>affinity purification</li><li>AP-MS</li><li>artificial intelligence</li><li>breast cancer</li><li>Bridge2AI</li><li>cardiomyocyte</li><li>CM4AI</li><li>CRISPR/Cas9</li><li>CRISPR/Cas perturbation screens</li><li>functional genomics</li><li>induced pluripotent stem cell</li><li>iPSC</li><li>KOLF2.1J</li><li>machine learning</li><li>mass spectroscopy</li><li>MDA-MB-468</li><li>neural progenitor cell</li><li>NPC</li><li>neuron</li><li>paclitaxel</li><li>perturb-seq</li><li>perturbation sequencing</li><li>protein-protein interaction</li><li>protein localization</li><li>single-cell RNA sequencing</li><li>scRNAseq</li><li>SEC-MS</li><li>size exclusion chromatography</li><li>subcellular imaging</li><li>vorinostat</li><li>RO-Crate</li><li>FAIRSCAPE</li><li>cell maps</li><li>hierarchical maps</li><li>visible machine learning</li><li>VNN</li><li>visible neural networks</li><li>chromatin modifiers</li><li>metabolic enzymes</li><li>immunofluorescence</li><li>IF imaging</li><li>spatial proteomics</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Addressing Gaps
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Response</th></tr></thead><tbody><tr><td>Address the limitation of black-box machine learning models in genomics by creating visible neural n...</td><td>cm4ai:gap:black-box-ml</td><td>Address black-box machine learning</td><td>Machine learning models show great promise in analyzing the human genome but their inner workings ar...</td></tr><tr><td>Fill the gap in availability of high-quality, FAIR, AI-ready functional genomics datasets with rich ...</td><td>cm4ai:gap:fair-ai-datasets</td><td>Provide FAIR AI-ready functional genomics datasets</td><td>CM4AI addresses the need for ethical, FAIR, AI-Ready biomedical data that are fully characterized wi...</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Creators
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Contributor</td><td>Trey Ideker</td><td>cm4ai:creator:ideker</td><td>-</td></tr><tr><td>Contributor</td><td>Timothy W Clark</td><td>cm4ai:creator:clark</td><td>-</td></tr><tr><td>Contributor</td><td>Nevan J Krogan</td><td>cm4ai:creator:krogan</td><td>-</td></tr><tr><td>Contributor</td><td>Emma Lundberg</td><td>cm4ai:creator:lundberg</td><td>-</td></tr><tr><td>Contributor</td><td>Prashant Mali</td><td>cm4ai:creator:mali</td><td>-</td></tr><tr><td>Contributor</td><td>Andrej Sali</td><td>cm4ai:creator:sali</td><td>-</td></tr><tr><td>Contributor</td><td>Jean-Christophe Bélisle-Pipon</td><td>cm4ai:creator:belisle-pipon</td><td>-</td></tr><tr><td>Contributor</td><td>Cynthia Brandt</td><td>cm4ai:creator:brandt</td><td>-</td></tr><tr><td>Contributor</td><td>Jake Yue Chen</td><td>cm4ai:creator:chen</td><td>-</td></tr><tr><td>Contributor</td><td>Ying Ding</td><td>cm4ai:creator:ding</td><td>-</td></tr><tr><td>Contributor</td><td>Samah Fodeh</td><td>cm4ai:creator:fodeh</td><td>-</td></tr><tr><td>Contributor</td><td>Pamela Payne-Foster</td><td>cm4ai:creator:payne-foster</td><td>-</td></tr><tr><td>Contributor</td><td>Sarah J Ratcliffe</td><td>cm4ai:creator:ratcliffe</td><td>-</td></tr><tr><td>Contributor</td><td>Vardit Ravitsky</td><td>cm4ai:creator:ravitsky</td><td>-</td></tr><tr><td>Contributor</td><td>Wade Loren Schulz</td><td>cm4ai:creator:schulz</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subsets
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J human induced pl...</td><td>cm4ai:subset:crispr-atlas</td><td>CRISPR Perturbation Cell Atlas</td></tr><tr><td>Size exclusion chromatography-mass spectroscopy data on undifferentiated KOLF2.1J human induced plur...</td><td>cm4ai:subset:sec-ms-ipsc</td><td>Protein-protein Interaction SEC-MS iPSCs</td></tr><tr><td>Spatial localization of 563 proteins in untreated MDA-MB-468 breast cancer cells imaged by ICC-IF an...</td><td>cm4ai:subset:if-untreated</td><td>Protein Localization Images - Untreated</td></tr><tr><td>Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated with paclitaxel, imag...</td><td>cm4ai:subset:if-paclitaxel</td><td>Protein Localization Images - Paclitaxel</td></tr><tr><td>Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated with vorinostat, imag...</td><td>cm4ai:subset:if-vorinostat</td><td>Protein Localization Images - Vorinostat</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Disease-relevant cell lines selected to enable AI-ready functional genomics mapping for cancer, neur...</td><td>cm4ai:sampling:cell-line-selection</td><td>Disease-relevant cell line selection</td></tr><tr><td>Selection of 100 chromatin regulators and 100 metabolic enzymes involved in cancer, neuropsychiatric...</td><td>cm4ai:sampling:chromatin-modifiers</td><td>Chromatin modifier selection</td></tr><tr><td>Selection of chemotherapy treatments (paclitaxel and vorinostat) and cell differentiation states to ...</td><td>cm4ai:sampling:perturbation-conditions</td><td>Perturbation and treatment conditions</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            External Resources
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>External Resources</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Official CM4AI project website and portal</td><td>https://cm4ai.org, https://www.cm4ai.org</td><td>cm4ai:resource:project-website</td><td>CM4AI Project Website</td></tr><tr><td>Key publications describing CM4AI methods and datasets</td><td>https://doi.org/10.1101/2024.05.21.589311, https://doi.org/10.1101/2024.11.03.621734</td><td>cm4ai:resource:publications</td><td>CM4AI Publications</td></tr><tr><td>Platform for sharing and visualizing cell maps</td><td>https://www.ndexbio.org</td><td>cm4ai:resource:ndex</td><td>Network Data Exchange (NDEx)</td></tr><tr><td>AI-readiness framework for metadata and provenance</td><td>https://fairscape.github.io</td><td>cm4ai:resource:fairscape</td><td>FAIRSCAPE Framework</td></tr><tr><td>Software tools for cell map creation and analysis</td><td>https://github.com/idekerlab, http://integrativemodeling.org</td><td>cm4ai:resource:software-tools</td><td>CM4AI Software Tools</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Acquisition Methods
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Acquisition Details</th><th>Description</th><th>ID</th><th>Name</th><th>Was Directly Observed</th></tr></thead><tbody><tr><td>Endogenous tagging of genes in MDA-MB-468 cells, AP-MS data acquisition under three conditions (untreated, paclitaxel, vorinostat), 17 genes tagged in Year 1, 34 additional genes in process</td><td>AP-MS on endogenously tagged cell lines to map protein-protein interactions of 100 chromatin regulat...</td><td>cm4ai:acquisition:ap-ms</td><td>Affinity purification mass spectrometry</td><td>True</td></tr><tr><td>SEC-MS performed on MDA-MB-468 cells under three conditions, Identified 72/100 chromatin modifiers with 52 in protein complexes, ... (+3 more)</td><td>SEC-MS for proteome-wide complex and interaction mapping as orthogonal approach to AP-MS.
+</td><td>cm4ai:acquisition:sec-ms</td><td>Size exclusion chromatography mass spectrometry</td><td>True</td></tr><tr><td>Automated fixation and permeabilization protocols using pipetting robot, Four-channel staining (DAPI, calreticulin, tubulin, target protein), ... (+3 more)</td><td>IF staining and high-resolution confocal microscopy for spatial proteomics mapping of protein subcel...</td><td>cm4ai:acquisition:immunofluorescence</td><td>Immunofluorescence confocal microscopy</td><td>True</td></tr><tr><td>CRISPR lentiviral library targeting 100 chromatin factors with 6 guide RNAs per gene, MDA-MB-468 and KOLF2 CRISPR lines with inducible dCas9, ... (+4 more)</td><td>CRISPR-Cas9 perturbation screens for genetic perturbation mapping with single-cell RNA sequencing re...</td><td>cm4ai:acquisition:crispr-perturbation</td><td>Single-cell CRISPR perturbation screens</td><td>True</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Mechanisms
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Mechanism Details</th><th>Name</th></tr></thead><tbody><tr><td>Mass spectrometry instruments for AP-MS and SEC-MS protein interaction mapping.
+</td><td>cm4ai:mechanism:mass-spectrometry</td><td>Affinity purification coupled with mass spectrometry, Size exclusion chromatography coupled with mass spectrometry, Proteome-wide interaction profiling</td><td>Mass spectrometry instruments</td></tr><tr><td>High-resolution confocal microscopy for immunofluorescence imaging of protein subcellular localizati...</td><td>cm4ai:mechanism:confocal-microscopy</td><td>Confocal microscopy with four-channel imaging, Immunofluorescence-based staining (ICC-IF), Automated pipetting robot for sample preparation</td><td>Confocal microscopy</td></tr><tr><td>CRISPR-Cas9 gene perturbation with single-cell RNA sequencing for transcriptional and fitness phenot...</td><td>cm4ai:mechanism:crispr-cas9</td><td>CRISPRi gene knockdown with inducible dCas9, Lentiviral library delivery, ... (+2 more)</td><td>CRISPR-Cas9 perturbation system</td></tr><tr><td>Multi-Scale Integrated Cell (MuSIC) pipeline for integrating multimodal data streams into hierarchic...</td><td>cm4ai:mechanism:music-pipeline</td><td>node2vec deep learning for PPI network embedding, Human Protein Atlas deep learning for image embedding, ... (+4 more)</td><td>MuSIC data integration pipeline</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Collectors
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Collector Details</th><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Ideker Lab - project coordination and cell map integration, Mali Lab - genetic perturbation mapping, Sali Lab - integrative structure modeling</td><td>UCSD teams led by Trey Ideker (PI), Prashant Mali, and Andrej Sali.
+</td><td>cm4ai:collector:ucsd</td><td>University of California San Diego</td></tr><tr><td>Krogan Laboratory - AP-MS and SEC-MS data generation, Protein complex mapping across conditions</td><td>UCSF teams led by Nevan Krogan for protein-protein interaction data.
+</td><td>cm4ai:collector:ucsf</td><td>University of California San Francisco</td></tr><tr><td>Lundberg Laboratory - immunofluorescence imaging, Spatial proteomics mapping with confocal microscopy, Copyright holder for raw image data</td><td>Stanford team led by Emma Lundberg for spatial proteomics.
+</td><td>cm4ai:collector:stanford</td><td>Stanford University</td></tr><tr><td>Standards Module - FAIRSCAPE framework development, AI-readiness packaging and metadata, Data repository (LibraData/Dataverse)</td><td>UVA team led by Timothy Clark for AI-readiness standards.
+</td><td>cm4ai:collector:uva</td><td>University of Virginia</td></tr><tr><td>Data curation and standards, Internship program hosting</td><td>Yale team led by Cynthia Brandt, Samah Fodeh, and Wade Schulz.
+</td><td>cm4ai:collector:yale</td><td>Yale University</td></tr><tr><td>Teaming Module - U-BRITE platform for portal, Open dissemination of data, maps, and tools, Internship program hosting</td><td>UAB team led by Jake Chen for teaming and dissemination.
+</td><td>cm4ai:collector:uab</td><td>University of Alabama at Birmingham</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Timeframes
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Timeframe Details</th></tr></thead><tbody><tr><td>September 1, 2022 to August 31, 2026 with ongoing data augmentation.
+</td><td>cm4ai:timeframe:project-period</td><td>Overall project period</td><td>Project start September 1 2022, Project end August 31 2026, ... (+4 more)</td></tr><tr><td>Year 1 data generation including chromatin modifiers, spatial proteomics, and CRISPR screens.
+</td><td>cm4ai:timeframe:year1</td><td>Year 1 accomplishments</td><td>100 chromatin regulators mapped in MDA-MB-468 cells, Single-cell CRISPR screens completed, ... (+2 more)</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Preprocessing Strategies
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Preprocessing Details</th></tr></thead><tbody><tr><td>Generation of embeddings from PPI networks and IF images using deep learning models for dimensionali...</td><td>cm4ai:preprocessing:embedding</td><td>Deep learning embeddings</td><td>node2vec deep learning for PPI network embedding, Human Protein Atlas deep learning for image embedding, Contrastive learning for co-embedding integration</td></tr><tr><td>Integration of PPI and image embeddings through MuSIC pipeline to create co-embeddings and hierarchi...</td><td>cm4ai:preprocessing:integration</td><td>Multimodal data integration</td><td>Co-embedding integration with minimal information loss, Community detection based on co-embedding similarities, Hierarchy creation from multi-resolution community detection</td></tr><tr><td>Annotation of protein assemblies in cell maps using ontology alignment and large language models.
+</td><td>cm4ai:preprocessing:annotation</td><td>Cell map annotation</td><td>Alignment to Gene Ontology and Reactome pathways, LLM-based naming of protein assemblies with confidence scores, Evaluation of overlap with known cell biology</td></tr><tr><td>Packaging of datasets with rich metadata, provenance graphs, and schemas in RO-Crate format for AI-r...</td><td>cm4ai:preprocessing:ro-crate-packaging</td><td>RO-Crate packaging with FAIRSCAPE</td><td>FAIRSCAPE-CLI client for RO-Crate creation, JSON-Schema data dictionaries for all datasets, ... (+4 more)</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Maintainers
+                            
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>cm4ai:maintainer:cm4ai-team</dd><dt>Name</dt><dd>CM4AI Project Team</dd><dt>Description</dt><dd>Multi-institutional team responsible for dataset maintenance.
+</dd><dt>Maintainer Details</dt><dd><ul class='formatted-list'><li>Point of contact Trey Ideker (University of California San Diego)</li><li>Data depositor Justin Niestroy (University of Virginia)</li><li>Data Access Committee for ethical supervision</li></ul></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Ethical Reviews
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Review Details</th></tr></thead><tbody><tr><td>Ethics team employs Value-Sensitive Design (VSD) methodology for ethical AI development.
+</td><td>cm4ai:ethics:value-sensitive-design</td><td>Value-Sensitive Design framework</td><td>Conceptual work to craft axiological repository of values, Design standards and expectations for responsible AI, ... (+2 more)</td></tr><tr><td>Mixed empirical research combining qualitative and quantitative methods to capture community insight...</td><td>cm4ai:ethics:stakeholder-engagement</td><td>Stakeholder engagement research</td><td>Diverse perspective integration in ethical guidelines, Community insights on values and concerns, Tools for ethical, legal, and social ramifications awareness</td></tr><tr><td>Bridge2AI Data Sharing and Dissemination Working Group Code of Conduct for data access.
+</td><td>cm4ai:ethics:code-of-conduct</td><td>Bridge2AI Code of Conduct</td><td>Basic requirements for Bridge2AI Open House participants, Attestation required prior to accessing CM4AI datasets, Ethical commitments from data users</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Data Protection Impacts
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Impact Details</th><th>Name</th></tr></thead><tbody><tr><td>Ethical preparation, licensing, dissemination, and data access supervision balancing openness with i...</td><td>cm4ai:protection:licensing</td><td>CC BY-NC-SA 4.0 for open non-commercial use, Commercial use requires separate licensing, ... (+2 more)</td><td>Licensing and data governance</td></tr><tr><td>Guidelines and best practices for ethical development of AI systems leveraging CM4AI data.
+</td><td>cm4ai:protection:responsible-ai</td><td>Anticipation of potential AI/ML applications, Integration into data governance frameworks, ... (+2 more)</td><td>Responsible AI development framework</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">What (other) tasks could the dataset be used for?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Response</th></tr></thead><tbody><tr><td>Create hierarchical directed acyclic graph (DAG) maps where each node represents an assembly of prot...</td><td>cm4ai:task:cell-mapping</td><td>Hierarchical cell mapping</td><td>Cell maps are hierarchical directed acyclic graphs (DAG), where each node represents an assembly of ...</td></tr><tr><td>Integrate three complementary mapping approaches - proteomic mass spectrometry, cellular imaging, an...</td><td>cm4ai:task:multimodal-integration</td><td>Multimodal data integration</td><td>The project launches a coordinated effort involving three complementary mapping approaches: affinity...</td></tr><tr><td>Package datasets with FAIR compliance, provenance graphs, complete schemas, validation procedures, d...</td><td>cm4ai:task:ai-readiness</td><td>AI-readiness packaging</td><td>AI-Ready biomedical data are fully characterized FAIR data of known provenance, which can be ethical...</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Existing Uses
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Examples</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Scientific publications describing CM4AI methods and initial findings.
+</td><td>Clark T, et al. Cell Maps for Artificial Intelligence. bioRxiv 2024.05.21.589311, Nourreddine S, et al. A PERTURBATION CELL ATLAS OF HUMAN iPSCs. bioRxiv 2024.11.03.621734</td><td>cm4ai:use:publications</td><td>Publications using CM4AI data</td></tr><tr><td>March 2024 CodeFest event for training researchers in CM4AI data and tools.
+</td><td>38 registrants with 40% female and 30% from underrepresented communities, Detailed tutorials on data derivation and integration, Production-ready software demonstration</td><td>cm4ai:use:codefest</td><td>CM4AI CodeFest training event</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intended Uses
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Examples</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Development of visible neural networks (VNNs) that provide interpretable AI/ML predictions based on ...</td><td>Visible machine learning systems informed by cell maps, Interpretable genotype-phenotype predictions, ... (+2 more)</td><td>cm4ai:intended:visible-ml</td><td>Visible machine learning development</td></tr><tr><td>AI/ML research on functional genomics data including transcriptional phenotypes, protein interaction...</td><td>Machine learning on multimodal functional genomics data, Disease mechanism understanding, ... (+2 more)</td><td>cm4ai:intended:biomedical-ai</td><td>Biomedical AI research</td></tr><tr><td>Research on protein assemblies, cellular compartments, and protein complex organization.
+</td><td>Protein complex characterization, Subcellular localization studies, ... (+2 more)</td><td>cm4ai:intended:cell-biology</td><td>Cell biology research</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Future Use Impacts
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Impact Details</th><th>Name</th></tr></thead><tbody><tr><td>Dataset characteristics specific to MDA-MB-468 and KOLF2.1J cell lines may not generalize to all cel...</td><td>cm4ai:impact:cell-line-specific</td><td>MDA-MB-468 specific to triple-negative breast cancer context, KOLF2.1J from healthy male Northern European donor, ... (+2 more)</td><td>Cell line-specific characteristics</td></tr><tr><td>Limitations inherent to mass spectrometry, microscopy, and CRISPR perturbation technologies.
+</td><td>cm4ai:impact:technological-limitations</td><td>Mass spectrometry detection limits, Antibody availability and specificity constraints, ... (+3 more)</td><td>Technological and methodological limitations</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Discouraged Uses
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>Discouragement Details</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>Commercial use is restricted by CC BY-NC-SA 4.0 license and requires separate licensing negotiation....</td><td>Commercial use not permitted under CC BY-NC-SA 4.0, Separate license required from copyright holders (UCSD, Stanford, UCSF), Data Access Committee supervision for commercial licensing</td><td>cm4ai:discouraged:commercial</td><td>Commercial use without license</td></tr><tr><td>Data are from cell lines, not clinical samples, and should not be directly applied to clinical decis...</td><td>Non-clinical data from tissue cultures, De-identified and cannot be matched to human subjects, Requires clinical validation before medical application</td><td>cm4ai:discouraged:clinical-direct</td><td>Direct clinical application without validation</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License And Use Terms
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>cm4ai:license:cc-by-nc-sa</dd><dt>Name</dt><dd>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</dd><dt>Description</dt><dd><div class="long-description">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license. Data are Copyright 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data copyright 2025 The Board of Trustees of the Leland Stanford Junior University.
+</div></dd><dt>License Terms</dt><dd><ul class='formatted-list'><li>Attribution required to copyright holders and authors</li><li>Citation of bioRxiv article required</li><li>Non-commercial use only without separate license</li><li>ShareAlike - derivatives must use same license</li><li>Software under BSD-3 and MIT open source licenses</li><li>FAIRSCAPE under MIT license</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <div>
+                        <h2 class="section-title">Distribution</h2>
+                        <p class="section-description">How will the dataset be distributed?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License
+                            
+                        </label>
+                        <div class="item-value">CC BY-NC-SA 4.0</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Version Access
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>cm4ai:version-access</dd><dt>Name</dt><dd>Dataset versioning</dd><dt>Description</dt><dd>Dataset versioned through University of Virginia Dataverse with DOI persistence.
+</dd><dt>Version Details</dt><dd><ul class='formatted-list'><li>DOI doi:10.18130/V3/B35XWX for persistent access</li><li>Dataverse versioning system tracks updates</li><li>Software packages versioned for reproducibility</li><li>Version referenced in dataset metadata</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔄</span>
+                    <div>
+                        <h2 class="section-title">Maintenance</h2>
+                        <p class="section-description">How will the dataset be maintained?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Updates
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>cm4ai:updates</dd><dt>Name</dt><dd>Regular data augmentation</dd><dt>Description</dt><dd>Data will be augmented regularly through the end of the project in August 2026.
+</dd><dt>Update Details</dt><dd><ul class='formatted-list'><li>Ongoing data generation and release</li><li>Regular updates to LibraData repository</li><li>Additional cell lines and conditions planned</li><li>Year 2 expansion to iPSC differentiation states</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">👥</span>
+                    <div>
+                        <h2 class="section-title">Human Subjects</h2>
+                        <p class="section-description">Does the dataset relate to people?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Human Subject Research
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>cm4ai:ethics:non-human-subjects</dd><dt>Name</dt><dd>Non-human subjects research</dd><dt>Description</dt><dd><div class="long-description">CM4AI data are distinctive in being non-clinical data from tissue cultures that are considered de-identified as they cannot be matched to human subjects with current knowledge. Data from ethically sourced cell lines: MDA-MB-468 from ATCC with established provenance, and KOLF2.1J from HipSci with donor consent for research use. No direct human subjects involvement; cell lines cannot be matched to individuals.
+</div></dd><dt>Involves Human Subjects</dt><dd>False</dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
     <div class="timestamp">
-        Generated on 2025-08-14 19:52:46
+        Generated on 2025-12-09 18:07:08 using Bridge2AI Data Sheets Schema
     </div>
 </body>
 </html>
