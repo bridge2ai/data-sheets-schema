@@ -1,13 +1,13 @@
 {
   "evaluation_metadata": {
     "evaluated_file": "data/d4d_concatenated/claudecode_agent/CM4AI_d4d.yaml",
-    "project": "CM4AI",
     "generation_method": "claudecode_agent",
-    "rubric": "rubric10-semantic",
     "rubric_version": "2.0",
-    "evaluation_date": "2025-12-09",
     "evaluator": "Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)",
-    "temperature": 0.0
+    "temperature": 0.0,
+    "dataset_id": "CM4AI",
+    "evaluation_timestamp": "2025-12-09",
+    "rubric_type": "rubric10-semantic"
   },
   "semantic_analysis": {
     "identifier_validation": {
@@ -23,7 +23,10 @@
       },
       "grant_identifiers": {
         "present": true,
-        "values": ["1OT2OD032742-01", "5U54HG012513-02"],
+        "values": [
+          "1OT2OD032742-01",
+          "5U54HG012513-02"
+        ],
         "format_valid": true,
         "format_notes": "Valid NIH grant format with type prefix (OT2, U54) followed by institute code and serial number"
       }
@@ -114,7 +117,7 @@
       "richness_notes": "High density of information in populated fields with detailed descriptions, response texts, and technical specifications. Strong in Motivation, Composition, Collection, and Ethics. Weak in Data Quality, Versioning, and Technical Standards conformance.",
       "actionability_score": 0.75,
       "actionability_notes": "Clear access paths via DOI, license terms, and distribution formats. Detailed technical methods support reproducibility. Strong guidance on intended/discouraged uses. Missing explicit download URLs and version-specific access details.",
-      "transparency_score": 0.80,
+      "transparency_score": 0.8,
       "transparency_notes": "Excellent transparency in methods, ethics framework, funding, and institutional collaborations. Comprehensive creator/collector attribution. Strong disclosure of cell line sources and treatment conditions. Limited transparency on data quality issues and systematic biases."
     }
   },
