@@ -298,110 +298,208 @@
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Evaluation Date</div>
-                    <div class="metadata-value">2025-12-09T00:00:00Z</div>
+                    <div class="metadata-value">2025-12-17</div>
                 </div>
             </div>
         </div>
 
         <div class="score-card">
-            <div class="score-large">31/50</div>
-            <div class="score-subtitle">62.0% Overall Score</div>
+            <div class="score-large">32/50</div>
+            <div class="score-subtitle">0.0% Overall Score</div>
         </div>
 
         <h2>Element Scores</h2>
 
         <div class="element">
             <div class="element-header">
-                <div class="element-title">Element 1: Dataset Discovery and Identification</div>
-                <div class="element-score score-high">4/5 (80%)</div>
+                <div class="element-title">Element 10: Cross-Platform and Community Integration</div>
+                <div class="element-score score-low">2/5 (40%)</div>
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Persistent Identifier (DOI, RRID, or URI)
+                    Recognized Platform
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> publisher
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No publisher field; dataset published on FAIRhub (URL in id, page, distribution_formats) - a recognized data repository for FAIR-compliant datasets
+                </div>
+
+                <div class="detail">
+                    <span class="detail-label">Semantic Notes:</span> FAIRhub is established repository for Bridge2AI and FAIR datasets; platform evident from URLs (https://fairhub.io/datasets/2) but not formalized in publisher field; FAIRhub provides versioning, metadata management, controlled access
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Citation Doi
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> citation, doi
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No citation or doi fields; dataset lacks DOI despite being published on FAIRhub repository; publications about the dataset (BMJ Open protocol https://doi.org/10.1136/bmjopen-2024-097449, Nature Metabolism commentary https://doi.org/10.1038/s42255-024-01165-x) have DOIs in external_resources but dataset itself does not
+                </div>
+
+                <div class="detail">
+                    <span class="detail-label">Semantic Notes:</span> Critical gap: dataset lacks DOI for persistent identification and citation in scholarly literature; FAIRhub repositories typically support DOI minting; publications describe dataset but don't provide citable dataset DOI; recommended citation field would guide proper attribution
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Community Standards Conformance
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> conforms_to
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No conforms_to field; standards (OMOP Common Data Model, DICOM, mHealth, RxNorm, ICD-10, FAIR principles) mentioned extensively in preprocessing_strategies and description but not formalized
+                </div>
+
+                <div class="detail">
+                    <span class="detail-label">Semantic Notes:</span> Standards adoption comprehensive: OMOP for clinical data (international standard), DICOM for imaging (international standard), mHealth for wearables (open standard), RxNorm for medications (NLM standard), ICD-10 for diagnoses (WHO standard), FAIR principles (meta-standard); lack of conforms_to field with URIs prevents automated standards discovery and interoperability checking
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Outreach Documentation Links
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> external_resources, page
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Has page field (https://fairhub.io/datasets/2) and 9 external_resources entries with comprehensive URLs: project website (https://aireadi.org/), documentation (https://docs.aireadi.org/ with version-specific guides), FAIRhub repository, Bridge2AI program (https://bridge2ai.org/), NIH RePORTER (grant 10471118), data sharing info (https://aireadi.org/goals/data-sharing), Zenodo archive (doi:10.5281/zenodo.10642459), BMJ Open protocol publication, Nature Metabolism commentary
+                </div>
+
+                <div class="detail">
+                    <span class="detail-label">Semantic Notes:</span> Outreach and documentation exceptional: project website for general audience, comprehensive documentation site with version-specific guides, program context (Bridge2AI), funding transparency (NIH RePORTER), access procedures (data sharing page), archived resources (Zenodo), peer-reviewed publications (protocol and commentary); supports diverse user needs (researchers, funders, public)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Related Datasets Relationships
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> related_datasets
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No related_datasets field with typed relationships; Bridge2AI program membership evident (keyword, external_resources) but no explicit links to other Bridge2AI datasets (CHORUS, CM4AI, VOICE)
+                </div>
+
+                <div class="detail">
+                    <span class="detail-label">Semantic Notes:</span> Related datasets implicit: part of Bridge2AI ecosystem with CHORUS (clinical care), CM4AI (cell maps), VOICE (voice biomarkers) but no typed relationships (e.g., 'sibling' datasets in Bridge2AI program); lack of related_datasets prevents cross-dataset discovery and integrated analyses
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 1: Dataset Discovery and Identification</div>
+                <div class="element-score score-high">5/5 (100%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Persistent Identifier
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> doi, rrid, id
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> id present (https://fairhub.io/datasets/2), no DOI or RRID
+                    <span class="detail-label">Rationale:</span> Has id field (https://fairhub.io/datasets/2) as URL identifier; lacks DOI and RRID persistent identifiers
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> URI format valid, HTTPS protocol, no DOI assigned yet
+                    <span class="detail-label">Semantic Notes:</span> URL is valid and resolvable to FAIRhub repository but not a persistent scholarly identifier like DOI; dataset published in BMJ Open and Nature Metabolism but DOIs for publications not reflected in dataset metadata
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Dataset Title and Description Completeness
+                    Title Description Completeness
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> title, description
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Both title and comprehensive description present
+                    <span class="detail-label">Rationale:</span> Complete title (88 chars) and comprehensive description (249 words covering objectives, methods, scale, and principles)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Title: 'Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)', Description: 273 words, detailed and comprehensive
+                    <span class="detail-label">Semantic Notes:</span> Description exceptionally detailed: includes salutogenesis concept, triple-balanced sampling rationale, multi-domain data types, site locations, scale (4,000 participants), FAIR principles, and ethical considerations
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Keywords or Tags for Searchability
+                    Keywords Searchability
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> keywords
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 19 keywords present covering T2DM, AI/ML, multimodal data, equity, Bridge2AI
+                    <span class="detail-label">Rationale:</span> 19 keywords covering disease (Type 2 Diabetes Mellitus, T2DM), methods (retinal imaging, CGM, wearables, biorepository), concepts (salutogenesis, health equity), standards (FAIR principles), and program (Bridge2AI)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Keywords include domain terms, methodology, demographics, specific technologies
+                    <span class="detail-label">Semantic Notes:</span> Keywords balance technical terms (continuous glucose monitoring) and conceptual themes (salutogenesis, health equity); support multiple discovery strategies (disease, methods, principles)
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Landing Page and Resources (page, hierarchical resources)
+                    Landing Page Resources
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> page, resources
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Landing page URL present (https://fairhub.io/datasets/2), no hierarchical resources field
+                    <span class="detail-label">Rationale:</span> Has page field (https://fairhub.io/datasets/2); no hierarchical resources field but 9 external_resources with URLs
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Page URL matches dataset id, no nested sub-resources defined
+                    <span class="detail-label">Semantic Notes:</span> Landing page URL valid and points to FAIRhub repository; external_resources provide comprehensive documentation (project website, documentation site, publications, Zenodo, NIH RePORTER)
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Hierarchical Structure (parent datasets, relationships)
-                    <span class="sub-element-score score-0">0/1</span>
+                    Hierarchical Structure
+                    <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> parent_datasets, related_datasets
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Neither parent_datasets nor related_datasets fields present
+                    <span class="detail-label">Rationale:</span> No parent_datasets or related_datasets fields, but hierarchical structure documented through 3 subsets (Public Access, Controlled Access, Biorepository) with clear descriptions
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> No explicit dataset hierarchy or relationships documented
+                    <span class="detail-label">Semantic Notes:</span> Internal hierarchy well-defined via subsets; external hierarchy (Bridge2AI program membership) implied in keywords and external_resources but not formalized in parent_datasets; subsets properly stratified by data sensitivity
                 </div>
 
             </div>
@@ -416,90 +514,90 @@
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Access Policy and IP Restrictions Defined
+                    Access Policy Ip Restrictions
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> license_and_use_terms, ip_restrictions
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> license_and_use_terms present with comprehensive CC BY-NC 4.0 details, no ip_restrictions
+                    <span class="detail-label">Rationale:</span> Detailed license_and_use_terms with CC BY-NC 4.0 for public data, DUA requirement for controlled access, 6 license_terms listed; no ip_restrictions field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> License: CC BY-NC 4.0 with full terms, controlled access mentioned, no IP restrictions specified
+                    <span class="detail-label">Semantic Notes:</span> Access policy clearly stratified: public data (CC BY-NC 4.0 with attribution requirements), controlled data (DUA with Data Access Committee review), biorepository (procedures in development); IP restrictions not applicable to open science model
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Regulatory Restrictions and Confidentiality Level Specified
+                    Regulatory Confidentiality
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> regulatory_restrictions, confidentiality_level
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Neither regulatory_restrictions nor confidentiality_level fields present
+                    <span class="detail-label">Rationale:</span> No regulatory_restrictions or confidentiality_level fields; regulatory context (IRB approval, NIH policies) described in human_subject_research and retention_limit
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Export controls not documented, confidentiality level not specified
+                    <span class="detail-label">Semantic Notes:</span> IRB oversight and NIH data sharing policies mentioned but not in structured regulatory_restrictions field; confidentiality stratification evident in three-tier access model but not formalized in confidentiality_level enum
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Download URL or Platform Link Available
+                    Download Url
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> download_url
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No download_url field present, only landing page and access_urls in distribution_formats
+                    <span class="detail-label">Rationale:</span> No download_url field; access URLs in distribution_formats.access_urls (all point to https://fairhub.io/datasets/2)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Access URLs present in distribution_formats (https://fairhub.io/datasets/2) but not in dedicated download_url field
+                    <span class="detail-label">Semantic Notes:</span> Landing page URL provided but not direct download link; FAIRhub access model likely requires account/login for downloads
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Distribution Formats and File Types Specified
+                    Distribution Formats
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> distribution_formats, format, media_type
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> distribution_formats present with 4 entries: DICOM, CSV, mHealth, REDCap
+                    <span class="detail-label">Rationale:</span> 4 distribution_formats entries with access_urls and detailed format descriptions (DICOM, CSV, mHealth, REDCap); lacks top-level format/media_type fields
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Format types documented: DICOM (imaging), CSV (tabular), mHealth (wearables), REDCap (metadata)
+                    <span class="detail-label">Semantic Notes:</span> Formats well-documented: DICOM for imaging (converted from proprietary .fda/.sdt), CSV for tabular/time-series, mHealth for wearables (converted from .FIT), REDCap for metadata; media types described narratively but not as structured MIME types
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Related Datasets and External Resources Linked
+                    Related External Resources
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> related_datasets, external_resources
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> external_resources present with 9 resources, no related_datasets
+                    <span class="detail-label">Rationale:</span> 9 external_resources entries with URLs (project website, documentation, FAIRhub, Bridge2AI, NIH RePORTER, data sharing info, Zenodo, 2 publications); no related_datasets
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> External resources include: project website, docs, FAIRhub, Bridge2AI, NIH RePORTER, Zenodo, publications
+                    <span class="detail-label">Semantic Notes:</span> Rich external resources covering project context, access procedures, publications, and funding; missing typed relationships to other Bridge2AI datasets (CHORUS, CM4AI, VOICE)
                 </div>
 
             </div>
@@ -509,95 +607,95 @@
         <div class="element">
             <div class="element-header">
                 <div class="element-title">Element 3: Data Reuse and Interoperability</div>
-                <div class="element-score score-medium">3/5 (60%)</div>
+                <div class="element-score score-low">2/5 (40%)</div>
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    License Terms Allow Reuse
+                    License Terms Reuse
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> license_and_use_terms
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> CC BY-NC 4.0 license with clear reuse terms: attribution required, non-commercial, derivatives permitted
+                    <span class="detail-label">Rationale:</span> license_and_use_terms specifies CC BY-NC 4.0 for public data permitting reuse with attribution; controlled data requires DUA; 6 specific license_terms documented
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> License explicitly allows distribution, remix, adapt, build upon with proper citation
+                    <span class="detail-label">Semantic Notes:</span> License allows broad non-commercial reuse with proper attribution; derivative works permitted with attribution and change indication; controlled data terms under development by Data Access Committee
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Data Formats Are Standardized (encoding, format)
-                    <span class="sub-element-score score-1">1/1</span>
+                    Standardized Formats
+                    <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> format, encoding
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Standardized formats documented: DICOM, CSV, mHealth standard
+                    <span class="detail-label">Rationale:</span> No format or encoding fields at top level; formats described in distribution_formats.description only (DICOM, CSV, mHealth, REDCap)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Formats converted from proprietary (.fda, .sdt, .FIT) to standards (DICOM, mHealth)
+                    <span class="detail-label">Semantic Notes:</span> Uses international standards (DICOM for imaging, mHealth for wearables, CSV for tabular) but lacks structured format/encoding fields with MIME types or character encoding specifications
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Schema or Ontology Conformance Stated
+                    Schema Conformance
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> conforms_to, conforms_to_schema
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Neither conforms_to nor conforms_to_schema fields present
+                    <span class="detail-label">Rationale:</span> No conforms_to or conforms_to_schema fields; standards (OMOP, DICOM, mHealth, RxNorm, ICD-10) mentioned only in preprocessing_strategies descriptions
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> No explicit schema conformance documented, though FAIR principles mentioned
+                    <span class="detail-label">Semantic Notes:</span> OMOP Common Data Model for clinical data, DICOM for imaging, mHealth for wearables, RxNorm for medications, ICD-10 for diagnoses stated narratively but not in structured conformance fields with URIs
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Variable Metadata with Identifiers Defined
+                    Variable Metadata
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> variables
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No variables field present
+                    <span class="detail-label">Rationale:</span> No variables field; data elements described in instances and acquisition_methods but not as structured variable-level metadata with identifiers
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Variable-level metadata not documented in D4D file, though REDCap data dictionary mentioned
+                    <span class="detail-label">Semantic Notes:</span> 12 acquisition methods describe data types (survey, vitals, imaging, labs, ECG, cognitive, neuropathy, CGM, activity, environmental, biospecimens) but no schema-level variable definitions with names, types, units, ranges
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Use Guidance Provided (intended, prohibited uses)
+                    Use Guidance
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> intended_uses, prohibited_uses, discouraged_uses
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> intended_uses (5 items) and discouraged_uses (3 items) present, no prohibited_uses
+                    <span class="detail-label">Rationale:</span> 5 intended_uses and 3 discouraged_uses with detailed descriptions; no prohibited_uses field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Intended: AI/ML development, multimodal research, equity, biomarker discovery. Discouraged: pilot phase limitations, clinical use without validation, re-identification
+                    <span class="detail-label">Semantic Notes:</span> Use guidance comprehensive: intended uses (AI/ML development, multi-modal research, health equity, biomarker discovery, model dataset), discouraged uses (during ongoing enrollment, clinical use without validation, re-identification attempts); covers research ethics and practical limitations
                 </div>
 
             </div>
@@ -612,90 +710,90 @@
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    IRB or Ethics Review Documented
+                    Irb Ethics Review
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> ethical_reviews, human_subject_research
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> human_subject_research present with IRB details: UW approval STUDY00016228, UAB and UCSD reliance agreements
+                    <span class="detail-label">Rationale:</span> Comprehensive human_subject_research with involves_human_subjects=true, detailed IRB approvals (UW STUDY00016228 with UAB and UCSD reliance), ethics_review_board details, Community Advisory Board (11 members); no separate ethical_reviews field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> IRB approval number format valid (STUDY00016228), three institutions documented, Community Advisory Board mentioned
+                    <span class="detail-label">Semantic Notes:</span> Multi-site IRB coordination documented with lead institution (UW) and reliance agreements; bioethics guidance integration mentioned; Community Advisory Board with diversity in race/ethnicity provides community input; ethical and equitable practices emphasized
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Deidentification Method Described
+                    Deidentification Method
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> is_deidentified
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No is_deidentified field present
+                    <span class="detail-label">Rationale:</span> No is_deidentified field; de-identification described in subsets (public data de-identified, controlled data includes identifiers) and sensitive_elements
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Public dataset described as 'de-identified' in text but no structured deidentification metadata
+                    <span class="detail-label">Semantic Notes:</span> De-identification strategy evident in two-tier access model (public de-identified, controlled with 5-digit zip/race/sex) but not formalized in is_deidentified object with method specification (e.g., Safe Harbor, Expert Determination)
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Privacy Protections Beyond Deidentification
+                    Privacy Protections
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> participant_privacy
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No participant_privacy field present
+                    <span class="detail-label">Rationale:</span> No participant_privacy field; privacy measures described in subsets (controlled access for sensitive data) and license_and_use_terms (re-identification prohibited)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Sensitive data controls mentioned (controlled access, data use agreement) but not in participant_privacy field
+                    <span class="detail-label">Semantic Notes:</span> Privacy protections implemented through access control (DUA for sensitive data), re-identification prohibition in license terms, and data stratification; lack of participant_privacy field misses opportunity to document technical safeguards (encryption, audit logging)
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Informed Consent Obtained from Participants
+                    Informed Consent
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> informed_consent
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Informed consent documented in human_subject_research.description: 'Written informed consent provided by all participants'
+                    <span class="detail-label">Rationale:</span> informed_consent implicit in human_subject_research description ('Written informed consent provided by all participants'); no separate informed_consent list field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Consent mentioned in prose, not as structured informed_consent field
+                    <span class="detail-label">Semantic Notes:</span> Informed consent clearly stated as required for all participants; process integrated with IRB approval; lack of informed_consent list field prevents documentation of consent type (broad/specific), withdrawal procedures, or consent forms
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Vulnerable Populations and Compensation Documented
+                    Vulnerable Populations Compensation
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> vulnerable_populations, participant_compensation
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> vulnerable_populations documented in human_subject_research.special_populations: racial/ethnic minorities, tribal consultation planned
+                    <span class="detail-label">Rationale:</span> vulnerable_populations addressed in human_subject_research.special_populations (racial/ethnic minorities targeted, tribal consultation planned for Native American cohort); no participant_compensation field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Special populations include Asian, Black, Hispanic, Native American cohorts. No participant_compensation field
+                    <span class="detail-label">Semantic Notes:</span> Special populations documented: Asian, Black, Hispanic populations explicitly recruited for equity; tribal consultation planned for Native American cohort participation; compensation not documented but recruitment strategy suggests equitable engagement
                 </div>
 
             </div>
@@ -710,90 +808,90 @@
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Cohort or Subpopulations Characteristics Described
+                    Subpopulations Characteristics
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> subpopulations
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> subpopulations present with 8 groups: 4 race/ethnicity groups + 4 diabetes severity groups
+                    <span class="detail-label">Rationale:</span> 8 subpopulations entries documenting triple-balanced design: 4 race/ethnic groups (Asian, Black, Hispanic, White) and 4 diabetes severity levels (no diabetes, pre-diabetes/lifestyle, medication, insulin) with target counts (~1,000 each, 25%)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Triple-balanced design: Asian, Black, Hispanic, White x No diabetes, Pre-diabetes, Medication-controlled, Insulin-controlled
+                    <span class="detail-label">Semantic Notes:</span> Subpopulations exceptionally well-defined with specific target proportions; triple-balance design (race × diabetes × sex) clearly articulated; stratification rationale aligned with health equity purpose
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Number of Instances or Samples Reported
+                    Instances Count
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> instances
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> instances present with participant details: 4,000 target enrollment, age 40+, triple-balanced sampling
+                    <span class="detail-label">Rationale:</span> 1 instances entry with detailed description including target enrollment (4,000 participants), age criteria (40+), inclusion/exclusion criteria (pregnancy, type 1 diabetes excluded), instance_type (human participants from 3 sites, 2022-2026)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Target: 4,000 participants, each subpopulation ~1,000 (25%), recruitment 2020-2025
+                    <span class="detail-label">Semantic Notes:</span> Instance count specific (4,000 target); temporal scope defined (2022-2026 enrollment); participant characteristics detailed (age 40+, English-speaking, triple-balanced); exclusions documented
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Variable-Level Metadata and Tabular Flag
+                    Variable Metadata Tabular
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> variables, is_tabular
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Neither variables nor is_tabular fields present
+                    <span class="detail-label">Rationale:</span> No variables or is_tabular fields; data elements described across 12 acquisition_methods and 4 distribution_formats
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Variable-level metadata not documented, though data described as tabular (CSV format)
+                    <span class="detail-label">Semantic Notes:</span> Dataset includes both tabular (survey, lab results, vitals) and non-tabular (DICOM imaging, waveforms) data but no is_tabular flag; variable-level metadata absent despite detailed acquisition_methods descriptions
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Data Topics or Conditions Represented
+                    Data Topics Conditions
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> instances
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> instances.instance_type describes conditions: T2DM, pre-diabetes, no diabetes
+                    <span class="detail-label">Rationale:</span> Data topics comprehensively described across 12 acquisition_methods: survey (demographics, medical history, SDOH, depression, diet), physical measurements, retinal imaging (7 devices), visual function, clinical labs (CBC, metabolic, HbA1c), ECG, cognitive function (MoCA), neuropathy, CGM, activity monitoring, environmental sensors, biospecimens
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Primary condition: Type 2 Diabetes Mellitus, severity levels from healthy to insulin-controlled
+                    <span class="detail-label">Semantic Notes:</span> 12 distinct data domains documented with specific instruments/devices; topics span patient-reported outcomes, clinical assessments, imaging, physiological monitoring, biospecimens; T2DM focus evident across all domains
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Data Quality Issues and Anomalies Documented
+                    Quality Anomalies
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> anomalies, sampling_strategies
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> sampling_strategies present (1 detailed entry), no anomalies field
+                    <span class="detail-label">Rationale:</span> No anomalies field; sampling_strategies field with 1 entry detailing triple-balanced recruitment with is_sample=true, is_random=false, is_representative=false, and 4 specific strategies (targeted recruitment, wave-based with adjustment, EHR screening, REDCap interface)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Sampling: triple-balanced, non-random, non-representative, targeted recruitment. No documented anomalies
+                    <span class="detail-label">Semantic Notes:</span> Sampling strategy comprehensively documented including non-random, non-representative nature (targeted for balance); quality control measures in preprocessing_strategies (coordinator training, duplicate measurements, calibration, REDCap validation); anomalies field would capture ongoing enrollment status and wave-based adjustments
                 </div>
 
             </div>
@@ -803,95 +901,95 @@
         <div class="element">
             <div class="element-header">
                 <div class="element-title">Element 6: Data Provenance and Version Tracking</div>
-                <div class="element-score score-low">2/5 (40%)</div>
+                <div class="element-score score-medium">3/5 (60%)</div>
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Dataset Version Number Provided
+                    Version Number
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> version
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No version field present
+                    <span class="detail-label">Rationale:</span> No version field at top level; version information in updates.update_details (pilot data May 2024, v1.0.0 November 2024, v2.0.0 and v3.0.0 mentioned)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Version numbers mentioned in updates (v1.0.0, v2.0.0, v3.0.0) but not in dedicated version field
+                    <span class="detail-label">Semantic Notes:</span> Versioning implemented (v1.0.0 current, v2.0.0/v3.0.0 planned) but not in dedicated version field; version-specific documentation at https://docs.aireadi.org/ mentioned
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Version Access Methods Documented
+                    Version Access Methods
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> version_access
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No version_access field present
+                    <span class="detail-label">Rationale:</span> No version_access field; version information in updates description ('Version-specific documentation maintained for each release') and external_resources (documentation URL)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Version-specific documentation mentioned (https://docs.aireadi.org/) but not structured version_access
+                    <span class="detail-label">Semantic Notes:</span> Version-specific documentation mentioned (https://docs.aireadi.org/) but no structured version_access object describing how to access specific versions (e.g., DOI versioning, FAIRhub version URLs)
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Change Descriptions and Errata Provided
+                    Change Errata
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> errata, updates
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> updates present with detailed update plan, no errata
+                    <span class="detail-label">Rationale:</span> No errata field; updates field with comprehensive description and 6 update_details entries documenting release timeline (pilot May 2024, v1.0.0 November 2024, v2.0.0/v3.0.0 with additional participants, final dataset late 2026, versioning implemented, version-specific docs)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Updates: periodic releases, enrollment progress, final release November 2026, versioning implemented
+                    <span class="detail-label">Semantic Notes:</span> Update history well-documented with specific dates and version milestones; errata field would capture corrections to published versions; current focus on prospective updates (ongoing enrollment) rather than retrospective errata
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Update Schedule or Frequency Indicated
+                    Update Schedule
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> updates
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> updates.frequency present: 'Periodic releases with ongoing enrollment; final release planned for late 2026'
+                    <span class="detail-label">Rationale:</span> updates field includes frequency ('Periodic releases with ongoing enrollment; final release planned for late 2026') and detailed schedule (pilot 5/2024, v1.0.0 11/2024, v2.0.0/v3.0.0 during enrollment, final post-11/2026)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Frequency: periodic during enrollment (2020-2026), final release after 4,000 participants
+                    <span class="detail-label">Semantic Notes:</span> Update frequency clearly defined: periodic releases tied to enrollment milestones; final release post-November 2026; version-specific documentation updated with each release
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Provenance and Source Derivation Documented
-                    <span class="sub-element-score score-0">0/1</span>
+                    Provenance Derivation
+                    <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> was_derived_from, release_notes
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Neither was_derived_from nor release_notes fields present
+                    <span class="detail-label">Rationale:</span> No was_derived_from or release_notes fields; provenance documented through collection_mechanisms (EHR screening, in-person visits, wave-based recruitment, home monitoring, biobanking) indicating original data collection
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> D4D file has generation metadata but dataset provenance not documented
+                    <span class="detail-label">Semantic Notes:</span> Provenance clear from collection methods: original prospective data collection (not derived from other datasets); lack of was_derived_from appropriate for primary data; release_notes would document version-specific changes
                 </div>
 
             </div>
@@ -906,90 +1004,90 @@
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Motivation or Purpose for Dataset Creation
+                    Motivation Purpose
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> purposes
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> purposes present with 3 detailed entries: T2DM salutogenesis, AI/ML standards, demographic equity
+                    <span class="detail-label">Rationale:</span> 3 purposes entries with detailed descriptions: understanding T2DM salutogenesis (hypothesis-agnostic, multi-domain, AI/ML-designed), establishing AI/ML data standards (best practices, bioethics, FAIR principles), addressing demographic inequities (triple-balanced across race/ethnicity, sex, diabetes severity)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Purposes comprehensive: hypothesis-agnostic ML research, FAIR standards establishment, addressing inequities
+                    <span class="detail-label">Semantic Notes:</span> Purposes comprehensive and well-articulated; salutogenesis concept (disease to health pathway) clearly defined; equity motivation explicit in triple-balanced design; standardization goals aligned with Bridge2AI mission
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Primary Research Objectives or Tasks
+                    Research Objectives Tasks
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> tasks
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> tasks present with 3 entries: multimodal AI/ML, unbiased models, disease trajectories
+                    <span class="detail-label">Rationale:</span> 3 tasks entries with detailed descriptions: enable multi-domain AI/ML analyses (survey, clinical, imaging, wearable, environmental, biospecimen), develop unbiased AI/ML models (balanced data for bias prevention), study T2DM disease trajectories (cross-sectional analysis, pseudotime manifold)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Tasks detailed: enable AI/ML across domains, prevent algorithmic bias, study progression pathways
+                    <span class="detail-label">Semantic Notes:</span> Tasks specific and actionable; link purposes to concrete analytical approaches (multi-modal AI/ML, bias mitigation, trajectory analysis); pseudotime manifold analysis method for cross-sectional progression inference clearly stated
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Funding Sources and Mechanisms Listed
+                    Funding Sources
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> funders
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> funders present with comprehensive NIH funding details
+                    <span class="detail-label">Rationale:</span> 1 funders entry (NIH Common Fund Bridge2AI Program) with detailed description including grant number (OT2OD032644), administering agency (NIH Office of the Director), additional support grants (P30DK035816, UL1TR003096, Research to Prevent Blindness), total funding ($5,026,499 in 2022), opportunity number (OTA-21-008), project period (9/1/2022-8/31/2025)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Primary: NIH Common Fund Bridge2AI OT2OD032644, Additional: P30DK035816, UL1TR003096, Research to Prevent Blindness
+                    <span class="detail-label">Semantic Notes:</span> Funding exceptionally well-documented: primary grant with full details, supplementary grants listed, specific funding amount with year, opportunity number (OTA-21-008) for RFA traceability, precise project period
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Grant IDs or Award Numbers Present
+                    Grant Ids Awards
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> funders
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Grant IDs present: OT2OD032644, P30DK035816, UL1TR003096, Opportunity Number OTA-21-008
+                    <span class="detail-label">Rationale:</span> funders.description includes grant IDs: OT2OD032644 (primary), P30DK035816 (NORC support), UL1TR003096 (translational support), Research to Prevent Blindness (unrestricted support)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Grant format valid (OT2, P30, UL1 prefixes), 2022 funding amount $5,026,499
+                    <span class="detail-label">Semantic Notes:</span> Grant identifiers present with proper NIH format (type prefix + institute + serial); primary grant (OT2OD032644) traceable via NIH RePORTER (linked in external_resources); supporting grants documented
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Creators and Acknowledgements Documented
+                    Creators Acknowledgements
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> creators, funders
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> creators present with 20 investigators including names, roles, affiliations
+                    <span class="detail-label">Rationale:</span> 20 creators entries with names, institutional affiliations, and roles (Contact PI/Project Leader, Principal Investigator, Co-Investigators with departments): University of Washington (Aaron Lee, Cecilia Lee), UAB (Cynthia Owsley, Jeffrey Edberg, Gerald McGwin), UCSD (Sally Baxter, Linda Zangwill), plus 13 additional co-investigators across institutions
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Comprehensive team: PI Cynthia Owsley, Contact PI Aaron Lee, 18 Co-Investigators across 3 sites
+                    <span class="detail-label">Semantic Notes:</span> Creator attribution comprehensive: 20 investigators with specific roles and departments; multi-institutional collaboration (UW, UAB, UCSD) clearly documented; contact PI designated (Aaron Lee); funders in separate field with acknowledgements
                 </div>
 
             </div>
@@ -1004,90 +1102,90 @@
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Collection Mechanisms and Settings Described
+                    Collection Mechanisms
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> collection_mechanisms
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> collection_mechanisms present with 5 detailed entries: in-person visits, EHR screening, wave-based recruitment, home monitoring, biospecimen collection
+                    <span class="detail-label">Rationale:</span> 5 collection_mechanisms entries with detailed descriptions: in-person visits (2.5-4 hours, 10+ domains), EHR screening (ICD-10 codes R73.09/E11.X, 2020-2025 encounters), wave-based recruitment (monitoring for balance), home-based wearable monitoring (Dexcom G6, Garmin, environmental sensor, 10 days), biospecimen collection and biobanking (53 mL blood, urine, UAB CCTS storage)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Mechanisms comprehensive: single encounter, ICD-10 codes (R73.09, E11.X), wave-based sampling, CGM/wearables, biobanking
+                    <span class="detail-label">Semantic Notes:</span> Collection mechanisms comprehensive across settings (clinic, home, biorepository); temporal details (visit duration, monitoring period, encounter timeframe); specific ICD-10 codes for screening; wave-based adjustment strategy for balance maintenance
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Data Acquisition Methods Listed
+                    Acquisition Methods
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> acquisition_methods
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> acquisition_methods present with 12 detailed entries covering all data domains
+                    <span class="detail-label">Rationale:</span> 12 acquisition_methods entries with extensive details: survey/questionnaire (REDCap, demographics, SDOH, CES-D-10, PAID, diet), physical measurements (height, weight, WHR, BMI, BP twice), retinal imaging (7 devices with models, DICOM/proprietary formats, dilated except Aurora), visual function (E-VAT, Mars, Topcon KR 800), clinical labs (CBC local CLIA, EDTA plasma, serum, HbA1c, urine at UW NORC), ECG (Philips Pagewriter TC30, position recorded), cognitive (MoCA Duo iPad, subscores, Memory Index), neuropathy (10g monofilament, 3 locations × 10), CGM (Dexcom G6, 5-min intervals, 10 days, CSV), activity (Garmin VivoSmart 5, steps, HR, sleep, SpO2, .FIT to mHealth), environmental (custom sensor, 11 measurements, 10 days, CSV), biospecimens (53 mL, processing details, centralized biobanking)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Methods comprehensive: surveys (REDCap), vitals, retinal imaging (5 devices), visual function, labs (CBC, EDTA, serum), ECG, cognitive (MoCA), neuropathy, CGM (Dexcom G6), wearables (Garmin), environmental sensors, biospecimens
+                    <span class="detail-label">Semantic Notes:</span> Acquisition methods exceptionally detailed: specific instrument models, measurement protocols, data formats, temporal resolution, processing sites; sufficient detail for protocol replication; multi-site harmonization evident (common equipment, centralized labs)
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Preprocessing, Cleaning, and Labeling Strategies
+                    Preprocessing Cleaning Labeling
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> preprocessing_strategies, cleaning_strategies, labeling_strategies
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> preprocessing_strategies (4 entries) and cleaning_strategies (1 entry) present, no labeling_strategies
+                    <span class="detail-label">Rationale:</span> 5 preprocessing_strategies entries (standardization/harmonization across sites via SOPs/REDCap/training, image format conversion DICOM/mHealth, biospecimen processing with centralized steps, quality control with validation/calibration, data mapping to standards OMOP/DICOM/mHealth/RxNorm/ICD-10) and 1 cleaning_strategies entry (multi-site harmonization, standardized equipment/training, REDCap quality, FAIR implementation, pilot enrollment for familiarity); no labeling_strategies
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Preprocessing: harmonization, format conversion (DICOM, mHealth), biospecimen processing, QC. Cleaning: multi-site harmonization, FAIR compliance
+                    <span class="detail-label">Semantic Notes:</span> Preprocessing comprehensive: site harmonization via SOPs and training certification, format standardization (proprietary to DICOM/mHealth), centralized processing for consistency, quality control with duplicate measurements and calibration, AI-ready mapping to standards; cleaning focuses on harmonization and FAIR compliance; labeling not applicable (observational data, not annotated)
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Software and Tools Documented
+                    Software Tools
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> software_and_tools
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No software_and_tools field present
+                    <span class="detail-label">Rationale:</span> No software_and_tools field; tools mentioned in acquisition_methods descriptions (REDCap for survey/coordination, MoCA Duo Application for cognitive, specific device software for imaging/monitoring) and preprocessing_strategies (OMOP tools, format converters)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Tools mentioned in text (REDCap, Dexcom G6, Garmin, Optos, Spectralis, Cirrus, etc.) but not in structured field
+                    <span class="detail-label">Semantic Notes:</span> Software evident throughout: REDCap (data management), MoCA Duo (cognitive assessment), OMOP tools (clinical data mapping), format converters (proprietary to DICOM, .FIT to mHealth), FAIRhub (distribution); lack of software_and_tools field prevents structured documentation with versions, licenses, URLs
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    External Standards and Resources Referenced
+                    External Standards Resources
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> external_resources, conforms_to
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> external_resources present with 9 detailed entries, no conforms_to
+                    <span class="detail-label">Rationale:</span> 9 external_resources entries with URLs (project website, documentation with version-specific guides, FAIRhub repository, Bridge2AI program, NIH RePORTER grant details, data sharing policies, Zenodo archive, BMJ Open protocol publication, Nature Metabolism commentary); no conforms_to field but standards in preprocessing_strategies
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Resources: project website, docs, FAIRhub, Bridge2AI, NIH RePORTER, Zenodo (10.5281/zenodo.10642459), BMJ Open (10.1136/bmjopen-2024-097449), Nature Metabolism
+                    <span class="detail-label">Semantic Notes:</span> External resources comprehensive: project context (website, Bridge2AI program), access (FAIRhub, data sharing policies), documentation (version-specific guides, Zenodo), funding (NIH RePORTER), publications (BMJ Open protocol, Nature Metabolism overview); standards (OMOP, DICOM, mHealth, RxNorm, ICD-10, FAIR) mentioned but not in conforms_to field with URIs
                 </div>
 
             </div>
@@ -1097,193 +1195,95 @@
         <div class="element">
             <div class="element-header">
                 <div class="element-title">Element 9: Dataset Evaluation and Limitations Disclosure</div>
-                <div class="element-score score-low">2/5 (40%)</div>
+                <div class="element-score score-low">1/5 (20%)</div>
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Known Limitations Documented
+                    Known Limitations
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> known_limitations
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No known_limitations field present
+                    <span class="detail-label">Rationale:</span> No known_limitations field; limitations implied in discouraged_uses (ongoing enrollment may not have achieved balance, research purpose not clinical validated) but not explicitly documented
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Limitations mentioned in discouraged_uses (pilot phase imbalance, cross-sectional design) but not structured known_limitations
+                    <span class="detail-label">Semantic Notes:</span> Known limitations implied: ongoing enrollment (balance not yet achieved as of early releases), cross-sectional design (cannot directly observe longitudinal trajectories, uses pseudotime manifold inference), age restriction (40+), language restriction (English only), geographic restriction (3 US sites), exclusions (pregnancy, type 1 diabetes); lack of known_limitations field misses opportunity to document inherent constraints
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Systematic Biases Identified and Described
+                    Systematic Biases
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> known_biases
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No known_biases field present
+                    <span class="detail-label">Rationale:</span> No known_biases field; bias mitigation (triple-balanced sampling) described in sampling_strategies and purposes but identified biases not documented
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Sampling acknowledged as non-representative but not documented as known_biases
+                    <span class="detail-label">Semantic Notes:</span> Bias documentation absent despite likely biases: EHR-based recruitment (selects individuals with healthcare access/encounters 2020-2025), English language requirement (excludes non-English speakers within racial/ethnic groups), single-center site representation (each site serves different regional populations), volunteer bias (health-conscious individuals more likely to participate in 4-hour study); bias mitigation strategies well-documented but pre-existing biases not explicitly stated
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Data Anomalies and Quality Issues Noted
+                    Data Anomalies Quality
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> anomalies
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No anomalies field present
+                    <span class="detail-label">Rationale:</span> No anomalies field; data quality measures in preprocessing_strategies (quality control, validation, calibration, duplicate measurements, coordinator training) but anomalies not documented
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Quality control measures documented but no specific anomalies reported
+                    <span class="detail-label">Semantic Notes:</span> Quality control processes comprehensive (duplicate measurements, calibration, validation checks, coordinator certification, practice subjects) but data anomalies not documented; potential anomalies: wave-based recruitment variation, site differences despite harmonization, device availability differences across sites (e.g., FLIO at select sites), ongoing enrollment status
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Sensitive Content and Warnings Provided
+                    Sensitive Content Warnings
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> sensitive_elements, content_warnings
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> sensitive_elements present with 3 detailed entries, no content_warnings
+                    <span class="detail-label">Rationale:</span> 3 sensitive_elements entries with sensitive_elements_present=true and detailed sensitivity_details: genetic/biospecimen data (genomic DNA from buffy coats, blood derivatives, urine, PBMCs, PAXgene RNA in controlled access), geographic/demographic identifiers (5-digit zip, race, ethnicity, sex in controlled access, public de-identified), medical history/records (health records, medications with RxNorm, traffic/accident reports in controlled access); no content_warnings field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Sensitive: genetic/biospecimen data (controlled access), geographic/demographic identifiers (5-digit zip, race, sex), medical history/medications
+                    <span class="detail-label">Semantic Notes:</span> Sensitive elements comprehensively documented with three-tier access stratification (public de-identified, controlled with identifiers/genetics, biorepository); sensitivity_details enumerate specific data types; content_warnings not applicable (no potentially distressing content beyond medical context); re-identification risk addressed via license prohibition
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Ethical Review Details Including Conflicts
-                    <span class="sub-element-score score-1">1/1</span>
+                    Ethical Review Conflicts
+                    <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> ethical_reviews
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> ethical_reviews documented in human_subject_research: 3 IRBs, Community Advisory Board
+                    <span class="detail-label">Rationale:</span> No ethical_reviews list field; ethics information in human_subject_research (IRB approval STUDY00016228, multi-site reliance, Community Advisory Board, bioethics guidance) but no conflict of interest disclosures
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> IRB: UW (STUDY00016228), UAB reliance, UCSD reliance. CAB: 11 members, diverse race/ethnicity. No conflicts documented
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="element">
-            <div class="element-header">
-                <div class="element-title">Element 10: Cross-Platform and Community Integration</div>
-                <div class="element-score score-low">1/5 (20%)</div>
-            </div>
-
-            <div class="sub-element">
-                <div class="sub-element-name">
-                    Dataset Published on a Recognized Platform
-                    <span class="sub-element-score score-0">0/1</span>
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Fields:</span> publisher
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Rationale:</span> No publisher field present
-                </div>
-
-                <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Published on FAIRhub (https://fairhub.io/datasets/2) but no publisher field documenting this
-                </div>
-
-            </div>
-
-            <div class="sub-element">
-                <div class="sub-element-name">
-                    Citation and DOI for Cross-referencing
-                    <span class="sub-element-score score-0">0/1</span>
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Fields:</span> citation, doi
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Rationale:</span> Neither citation nor doi fields present
-                </div>
-
-                <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Related publications have DOIs (10.1136/bmjopen-2024-097449, 10.1038/s42255-024-01165-x) but dataset has no DOI
-                </div>
-
-            </div>
-
-            <div class="sub-element">
-                <div class="sub-element-name">
-                    Community Standards or Schema Conformance
-                    <span class="sub-element-score score-0">0/1</span>
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Fields:</span> conforms_to
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Rationale:</span> No conforms_to field present
-                </div>
-
-                <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> FAIR principles mentioned repeatedly but no structured conformance documentation
-                </div>
-
-            </div>
-
-            <div class="sub-element">
-                <div class="sub-element-name">
-                    Outreach Materials and Documentation Links
-                    <span class="sub-element-score score-1">1/1</span>
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Fields:</span> external_resources, page
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Rationale:</span> external_resources (9 entries) and page present with comprehensive links
-                </div>
-
-                <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Resources: aireadi.org, docs.aireadi.org, fairhub.io, bridge2ai.org, reporter.nih.gov, zenodo.org, publications
-                </div>
-
-            </div>
-
-            <div class="sub-element">
-                <div class="sub-element-name">
-                    Related Datasets with Typed Relationships
-                    <span class="sub-element-score score-0">0/1</span>
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Fields:</span> related_datasets
-                </div>
-                <div class="detail">
-                    <span class="detail-label">Rationale:</span> No related_datasets field present
-                </div>
-
-                <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> No explicit relationships to other Bridge2AI datasets or related datasets
+                    <span class="detail-label">Semantic Notes:</span> IRB oversight and bioethics integration documented; Community Advisory Board provides stakeholder input; conflict of interest disclosures likely in IRB protocols and publications (BMJ Open, Nature Metabolism) but not in dataset metadata; ethical_reviews field would formalize ethics framework documentation
                 </div>
 
             </div>
@@ -1296,209 +1296,96 @@
             <h3>Identifier Validation</h3>
             <div class="validation-grid">
 
-                <div class="validation-item">
-                    <strong>id_format:</strong><br>valid
-                </div>
-
-                <div class="validation-item">
-                    <strong>id_value:</strong><br>https://fairhub.io/datasets/2
-                </div>
-
-                <div class="validation-item">
-                    <strong>id_notes:</strong><br>HTTPS URI, valid format, resolvable
-                </div>
-
-                <div class="validation-item">
-                    <strong>doi_format:</strong><br>not_present
-                </div>
-
-                <div class="validation-item">
-                    <strong>doi_notes:</strong><br>No DOI assigned to dataset, though related publications have DOIs
-                </div>
-
-                <div class="validation-item">
-                    <strong>rrid_format:</strong><br>not_present
-                </div>
-
-                <div class="validation-item">
-                    <strong>rrid_notes:</strong><br>No RRID assigned
-                </div>
-
             </div>
         </div>
-
-        <h3>Completeness Gaps</h3>
-
-        <h4>High Priority Missing Fields</h4>
-        <ul class="gap-list">
-
-            <li class="gap-item high">doi: No DOI assigned to dataset</li>
-
-            <li class="gap-item high">variables: No variable-level metadata documented</li>
-
-            <li class="gap-item high">known_limitations: Limitations mentioned in text but not structured field</li>
-
-            <li class="gap-item high">known_biases: Sampling biases not formally documented</li>
-
-            <li class="gap-item high">publisher: FAIRhub not documented as publisher</li>
-
-            <li class="gap-item high">citation: No recommended citation provided</li>
-
-        </ul>
-
-        <h4>Medium Priority Missing Fields</h4>
-        <ul class="gap-list">
-
-            <li class="gap-item medium">related_datasets: No relationships to other Bridge2AI datasets</li>
-
-            <li class="gap-item medium">parent_datasets: No parent dataset hierarchy</li>
-
-            <li class="gap-item medium">is_deidentified: De-identification mentioned but not structured</li>
-
-            <li class="gap-item medium">participant_privacy: Privacy measures not formally documented</li>
-
-            <li class="gap-item medium">software_and_tools: Tools mentioned in text but not structured</li>
-
-            <li class="gap-item medium">conforms_to: FAIR principles mentioned but not formal conformance</li>
-
-            <li class="gap-item medium">version: Version numbers mentioned but not in version field</li>
-
-        </ul>
-
-        <h4>Low Priority Missing Fields</h4>
-        <ul class="gap-list">
-
-            <li class="gap-item low">rrid: No Research Resource Identifier</li>
-
-            <li class="gap-item low">download_url: Access URLs in distribution_formats but not dedicated field</li>
-
-            <li class="gap-item low">regulatory_restrictions: Export controls not documented</li>
-
-            <li class="gap-item low">confidentiality_level: Confidentiality level not specified</li>
-
-            <li class="gap-item low">ip_restrictions: IP restrictions not documented</li>
-
-            <li class="gap-item low">anomalies: No data anomalies reported</li>
-
-            <li class="gap-item low">content_warnings: No content warnings specified</li>
-
-            <li class="gap-item low">version_access: Version access methods not structured</li>
-
-            <li class="gap-item low">errata: No errata field</li>
-
-            <li class="gap-item low">was_derived_from: Dataset provenance not documented</li>
-
-            <li class="gap-item low">release_notes: No release notes</li>
-
-        </ul>
 
         <h3>Strengths</h3>
         <ul class="gap-list">
 
-            <li class="gap-item strength">Comprehensive scientific motivation and funding (100% element 7)</li>
+            <li class="gap-item strength">Perfect scores in Discovery (Element 1: 100%) and Motivation/Funding (Element 7: 100%)</li>
 
-            <li class="gap-item strength">Detailed technical transparency with 12 acquisition methods (80% element 8)</li>
+            <li class="gap-item strength">Exceptional creator attribution (20 investigators with affiliations and roles)</li>
 
-            <li class="gap-item strength">Strong dataset composition with triple-balanced sampling (80% element 5)</li>
+            <li class="gap-item strength">Comprehensive funding documentation (grant IDs, amounts, opportunity number, project period)</li>
 
-            <li class="gap-item strength">Good discovery metadata with clear identifier and description (80% element 1)</li>
+            <li class="gap-item strength">Outstanding ethical framework (multi-site IRB coordination, Community Advisory Board, bioethics integration)</li>
 
-            <li class="gap-item strength">Extensive external resources linking (9 resources)</li>
+            <li class="gap-item strength">Rich multi-modal data composition (12 acquisition methods across survey, clinical, imaging, wearable, environmental, biospecimen domains)</li>
 
-            <li class="gap-item strength">Multi-institutional IRB approval with ethical oversight</li>
+            <li class="gap-item strength">Detailed technical transparency (specific device models, protocols, processing steps, quality control)</li>
 
-            <li class="gap-item strength">Valid grant IDs with proper NIH format</li>
+            <li class="gap-item strength">Triple-balanced sampling design explicitly documented for health equity</li>
 
-            <li class="gap-item strength">All URLs resolvable and valid</li>
+            <li class="gap-item strength">Comprehensive external resources (9 URLs covering project, documentation, publications, funding)</li>
 
-            <li class="gap-item strength">Consistent documentation across sites, participants, and time periods</li>
+            <li class="gap-item strength">Strong use guidance (5 intended uses, 3 discouraged uses with rationales)</li>
 
-            <li class="gap-item strength">Clear AI/ML design principles and use cases</li>
+            <li class="gap-item strength">Three-tier access model (public, controlled, biorepository) aligned with data sensitivity</li>
 
         </ul>
 
         <h3>Weaknesses</h3>
         <ul class="gap-list">
 
-            <li class="gap-item weakness">Poor cross-platform integration (20% element 10) - missing DOI, publisher, citation</li>
+            <li class="gap-item weakness">No DOI for persistent identification and scholarly citation (critical for Element 10)</li>
 
-            <li class="gap-item weakness">Limited data provenance tracking (40% element 6) - no version field, version_access, or errata</li>
+            <li class="gap-item weakness">Missing structured fields for standards conformance (conforms_to) despite extensive standards use</li>
 
-            <li class="gap-item weakness">Insufficient limitations disclosure (40% element 9) - no known_limitations, known_biases, or anomalies</li>
+            <li class="gap-item weakness">No variable-level metadata (variables field) limiting programmatic access</li>
 
-            <li class="gap-item weakness">Missing variable-level metadata throughout</li>
+            <li class="gap-item weakness">Limitations disclosure weak (Element 9: 20%) - no known_limitations, known_biases, or anomalies fields</li>
 
-            <li class="gap-item weakness">No formal schema conformance documentation despite FAIR claims</li>
+            <li class="gap-item weakness">No version number at top level (only in update timeline)</li>
 
-            <li class="gap-item weakness">No relationships to other datasets or hierarchical structure</li>
+            <li class="gap-item weakness">Missing structured ethical fields (is_deidentified, participant_privacy as separate objects)</li>
 
-            <li class="gap-item weakness">Incomplete access metadata (no download_url, regulatory_restrictions, confidentiality_level)</li>
+            <li class="gap-item weakness">No related_datasets linking to other Bridge2AI datasets</li>
 
-            <li class="gap-item weakness">De-identification and privacy measures mentioned but not formally documented</li>
+            <li class="gap-item weakness">No format, media_type, encoding fields at top level (only in distribution_formats descriptions)</li>
 
-            <li class="gap-item weakness">Software and tools mentioned extensively but not in structured field</li>
+            <li class="gap-item weakness">No software_and_tools field (tools mentioned only in descriptions)</li>
+
+            <li class="gap-item weakness">No publisher field (FAIRhub repository evident from URLs but not formalized)</li>
 
         </ul>
 
         <h2>Recommendations</h2>
 
         <div class="recommendation-section">
-            <h3>Critical Recommendations</h3>
+            <h3>Recommendations</h3>
 
-            <div class="recommendation-item critical">Assign DOI to dataset for persistent identification and citation</div>
+            <div class="recommendation-item">Obtain DOI from FAIRhub for dataset persistent identification (addresses Element 10 weakness)</div>
 
-            <div class="recommendation-item critical">Add variable-level metadata (variables field) with data dictionary</div>
+            <div class="recommendation-item">Add conforms_to field listing OMOP, DICOM, mHealth, RxNorm, ICD-10 standards with URIs</div>
 
-            <div class="recommendation-item critical">Document known_limitations field with pilot phase constraints and cross-sectional design</div>
+            <div class="recommendation-item">Create variables field with schema-level metadata for key data elements (demographics, vitals, labs)</div>
 
-            <div class="recommendation-item critical">Add publisher field documenting FAIRhub as platform</div>
+            <div class="recommendation-item">Document known_limitations: ongoing enrollment, cross-sectional design, age/language restrictions, geographic coverage</div>
 
-            <div class="recommendation-item critical">Create recommended citation field for proper attribution</div>
+            <div class="recommendation-item">Document known_biases: EHR-based recruitment, English language requirement, volunteer bias</div>
 
-        </div>
+            <div class="recommendation-item">Add version field at top level (currently v1.0.0 per updates timeline)</div>
 
-        <div class="recommendation-section">
-            <h3>Important Recommendations</h3>
+            <div class="recommendation-item">Create is_deidentified object specifying de-identification method for public subset</div>
 
-            <div class="recommendation-item important">Add version field with current version number</div>
+            <div class="recommendation-item">Add related_datasets linking to CHORUS, CM4AI, VOICE datasets with relationship type 'sibling-project'</div>
 
-            <div class="recommendation-item important">Document known_biases related to non-representative sampling</div>
+            <div class="recommendation-item">Populate software_and_tools field: REDCap, MoCA Duo, OMOP tools, format converters with versions</div>
 
-            <div class="recommendation-item important">Add conforms_to field specifying FAIR principles and relevant standards</div>
+            <div class="recommendation-item">Add publisher field: 'FAIRhub' or institutional publisher</div>
 
-            <div class="recommendation-item important">Document software_and_tools with structured entries for REDCap, imaging devices, wearables</div>
+            <div class="recommendation-item">Add version_access object describing how to access specific versions via FAIRhub</div>
 
-            <div class="recommendation-item important">Add is_deidentified field with de-identification method details</div>
+            <div class="recommendation-item">Generate recommended citation field for consistent attribution</div>
 
-            <div class="recommendation-item important">Document related_datasets linking to other Bridge2AI datasets (CM4AI, CHORUS, VOICE)</div>
+            <div class="recommendation-item">Add format/media_type/encoding fields at top level for primary data formats</div>
 
-            <div class="recommendation-item important">Add participant_privacy field documenting privacy protections beyond de-identification</div>
-
-        </div>
-
-        <div class="recommendation-section">
-            <h3>Optional Recommendations</h3>
-
-            <div class="recommendation-item optional">Consider RRID registration for broader discoverability</div>
-
-            <div class="recommendation-item optional">Add download_url field for direct download access</div>
-
-            <div class="recommendation-item optional">Document regulatory_restrictions if any export controls apply</div>
-
-            <div class="recommendation-item optional">Specify confidentiality_level for tiered access model</div>
-
-            <div class="recommendation-item optional">Add version_access field documenting how to access prior versions</div>
-
-            <div class="recommendation-item optional">Document errata as issues are discovered</div>
-
-            <div class="recommendation-item optional">Add was_derived_from for provenance tracking</div>
-
-            <div class="recommendation-item optional">Create release_notes for version change documentation</div>
+            <div class="recommendation-item">Document anomalies: wave-based recruitment variations, site differences, device availability</div>
 
         </div>
 
         <div class="timestamp">
-            Generated on 2025-12-16 21:15:47 using Bridge2AI Data Sheets Schema
+            Generated on 2025-12-17 10:15:39 using Bridge2AI Data Sheets Schema
         </div>
     </div>
 </body>
