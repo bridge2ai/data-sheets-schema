@@ -77,6 +77,8 @@ classes:
       instances, delete instances)? If so, how often, by whom, and how will
       these updates be communicated?
     is_a: DatasetProperty
+    exact_mappings:
+      - rai:dataReleaseMaintenancePlan
     attributes:
       frequency:
         description: "How often updates are planned (e.g., quarterly, annually)."

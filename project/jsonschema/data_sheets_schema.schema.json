@@ -46,6 +46,86 @@
             "title": "AddressingGap",
             "type": "object"
         },
+        "AnnotationAnalysis": {
+            "additionalProperties": false,
+            "description": "Analysis of annotation quality, inter-annotator agreement metrics, and systematic patterns in annotation disagreements.",
+            "properties": {
+                "agreement_metric": {
+                    "description": "Type of agreement metric used (Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreement, etc.).\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "analysis_method": {
+                    "description": "Methodology used to assess annotation quality and resolve disagreements.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "annotation_quality_details": {
+                    "description": "Additional details on annotation quality assessment and findings.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "disagreement_patterns": {
+                    "description": "Systematic patterns in annotator disagreements (e.g., by demographic group, annotation difficulty, task type).\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "inter_annotator_agreement_score": {
+                    "description": "Measured agreement between annotators (e.g., Cohen's kappa value, Fleiss' kappa, Krippendorff's alpha).\n",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "AnnotationAnalysis",
+            "type": "object"
+        },
         "BiasTypeEnum": {
             "description": "Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO) bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO",
             "enum": [
@@ -810,6 +890,16 @@
                         "null"
                     ]
                 },
+                "annotation_analyses": {
+                    "description": "Analysis of annotation quality and inter-annotator agreement.",
+                    "items": {
+                        "$ref": "#/$defs/AnnotationAnalysis"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "anomalies": {
                     "items": {
                         "$ref": "#/$defs/DataAnomaly"
@@ -1090,6 +1180,16 @@
                     "description": "A unique identifier for a thing.",
                     "type": "string"
                 },
+                "imputation_protocols": {
+                    "description": "Data imputation methodology and techniques.",
+                    "items": {
+                        "$ref": "#/$defs/ImputationProtocol"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "informed_consent": {
                     "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
                     "items": {
@@ -1234,6 +1334,16 @@
                         }
                     ]
                 },
+                "machine_annotation_tools": {
+                    "description": "Automated annotation tools used in dataset creation.",
+                    "items": {
+                        "$ref": "#/$defs/MachineAnnotationTools"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "maintainers": {
                     "items": {
                         "$ref": "#/$defs/Maintainer"
@@ -1253,6 +1363,16 @@
                 "media_type": {
                     "$ref": "#/$defs/MediaTypeEnum",
                     "description": "The media type of the data. This should be a MIME type."
+                },
+                "missing_data_documentation": {
+                    "description": "Documentation of missing data patterns and handling strategies.",
+                    "items": {
+                        "$ref": "#/$defs/MissingDataDocumentation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 },
                 "modified_by": {
                     "type": [
@@ -1347,6 +1467,16 @@
                 "purposes": {
                     "items": {
                         "$ref": "#/$defs/Purpose"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "raw_data_sources": {
+                    "description": "Description of raw data sources before preprocessing.",
+                    "items": {
+                        "$ref": "#/$defs/RawDataSource"
                     },
                     "type": [
                         "array",
@@ -1587,6 +1717,16 @@
                         "null"
                     ]
                 },
+                "annotation_analyses": {
+                    "description": "Analysis of annotation quality and inter-annotator agreement.",
+                    "items": {
+                        "$ref": "#/$defs/AnnotationAnalysis"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "anomalies": {
                     "items": {
                         "$ref": "#/$defs/DataAnomaly"
@@ -1867,6 +2007,16 @@
                     "description": "A unique identifier for a thing.",
                     "type": "string"
                 },
+                "imputation_protocols": {
+                    "description": "Data imputation methodology and techniques.",
+                    "items": {
+                        "$ref": "#/$defs/ImputationProtocol"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "informed_consent": {
                     "description": "Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.",
                     "items": {
@@ -1997,6 +2147,16 @@
                         }
                     ]
                 },
+                "machine_annotation_tools": {
+                    "description": "Automated annotation tools used in dataset creation.",
+                    "items": {
+                        "$ref": "#/$defs/MachineAnnotationTools"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "maintainers": {
                     "items": {
                         "$ref": "#/$defs/Maintainer"
@@ -2016,6 +2176,16 @@
                 "media_type": {
                     "$ref": "#/$defs/MediaTypeEnum",
                     "description": "The media type of the data. This should be a MIME type."
+                },
+                "missing_data_documentation": {
+                    "description": "Documentation of missing data patterns and handling strategies.",
+                    "items": {
+                        "$ref": "#/$defs/MissingDataDocumentation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 },
                 "modified_by": {
                     "type": [
@@ -2110,6 +2280,16 @@
                 "purposes": {
                     "items": {
                         "$ref": "#/$defs/Purpose"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "raw_data_sources": {
+                    "description": "Description of raw data sources before preprocessing.",
+                    "items": {
+                        "$ref": "#/$defs/RawDataSource"
                     },
                     "type": [
                         "array",
@@ -3847,6 +4027,79 @@
             "title": "IPRestrictions",
             "type": "object"
         },
+        "ImputationProtocol": {
+            "additionalProperties": false,
+            "description": "Description of data imputation methodology, including techniques used to handle missing values and rationale for chosen approaches.",
+            "properties": {
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "imputation_method": {
+                    "description": "Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, model-based imputation, etc.).\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "imputation_rationale": {
+                    "description": "Justification for the imputation approach chosen, including assumptions made about missing data mechanisms.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "imputation_validation": {
+                    "description": "Methods used to validate imputation quality (if any).\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "imputed_fields": {
+                    "description": "Fields or columns where imputation was applied.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "ImputationProtocol",
+            "type": "object"
+        },
         "Information": {
             "additionalProperties": false,
             "description": "Grouping for datasets and data files",
@@ -4339,13 +4592,6 @@
             "additionalProperties": false,
             "description": "Was any labeling of the data done (e.g., part-of-speech tagging)? This class documents the annotation process and quality metrics.",
             "properties": {
-                "annotation_platform": {
-                    "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "annotations_per_item": {
                     "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
                     "type": [
@@ -4355,6 +4601,23 @@
                 },
                 "annotator_demographics": {
                     "description": "Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "data_annotation_platform": {
+                    "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "data_annotation_protocol": {
+                    "description": "Annotation methodology, tasks, and protocols followed during labeling. Includes annotation guidelines, quality control procedures, and task definitions.",
                     "items": {
                         "type": "string"
                     },
@@ -4495,6 +4758,85 @@
             "title": "LimitationTypeEnum",
             "type": "string"
         },
+        "MachineAnnotationTools": {
+            "additionalProperties": false,
+            "description": "Automated or machine-learning-based annotation tools used in dataset creation, including NLP pipelines, computer vision models, or other automated labeling systems.",
+            "properties": {
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "tool_accuracy": {
+                    "description": "Known accuracy or performance metrics for the automated tools (if available).\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "tool_description": {
+                    "description": "Description of what each tool does in the annotation process and what types of annotations it produces.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "tool_name": {
+                    "description": "Name of the automated annotation tool (e.g., spaCy, NLTK, Stanford NER, custom ML model, GPT-based annotation).\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "tool_version": {
+                    "description": "Version numbers or commit hashes of the tools used.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "MachineAnnotationTools",
+            "type": "object"
+        },
         "Maintainer": {
             "additionalProperties": false,
             "description": "Who will be supporting/hosting/maintaining the dataset?",
@@ -4573,6 +4915,72 @@
             ],
             "title": "MediaTypeEnum",
             "type": "string"
+        },
+        "MissingDataDocumentation": {
+            "additionalProperties": false,
+            "description": "Documentation of missing data in the dataset, including patterns, causes, and strategies for handling missing values.",
+            "properties": {
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "handling_strategy": {
+                    "description": "Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "missing_data_causes": {
+                    "description": "Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy constraints).\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "missing_data_patterns": {
+                    "description": "Description of patterns in missing data (e.g., missing completely at random, missing at random, missing not at random).\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "MissingDataDocumentation",
+            "type": "object"
         },
         "MissingInfo": {
             "additionalProperties": false,
@@ -5074,6 +5482,76 @@
                 }
             },
             "title": "RawData",
+            "type": "object"
+        },
+        "RawDataSource": {
+            "additionalProperties": false,
+            "description": "Description of raw data sources before preprocessing, cleaning, or labeling. Documents where the original data comes from and how it can be accessed.",
+            "properties": {
+                "access_details": {
+                    "description": "Information on how to access or retrieve the raw source data.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "raw_data_format": {
+                    "description": "Format of the raw data before any preprocessing.\n",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "source_description": {
+                    "description": "Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collection).\n",
+                    "type": "string"
+                },
+                "source_type": {
+                    "description": "Type of raw source (sensor, database, user input, web scraping, etc.).\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "source_description"
+            ],
+            "title": "RawDataSource",
             "type": "object"
         },
         "Relationships": {

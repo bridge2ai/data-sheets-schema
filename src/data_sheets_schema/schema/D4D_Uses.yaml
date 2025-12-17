@@ -85,6 +85,8 @@ classes:
       treatment, legal or financial risks)? If so, describe these
       impacts and any mitigation strategies.
     is_a: DatasetProperty
+    exact_mappings:
+      - rai:dataSocialImpact
     attributes:
       impact_details:
         description: >
@@ -113,6 +115,8 @@ classes:
       FutureUseImpact by focusing on positive, recommended applications
       rather than risks. Aligns with RO-Crate "Intended Use" field.
     is_a: DatasetProperty
+    exact_mappings:
+      - rai:dataUseCases
     attributes:
       examples:
         description: >-

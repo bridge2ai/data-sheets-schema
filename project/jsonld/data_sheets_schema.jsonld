@@ -2231,6 +2231,38 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "dataset__missing_data_documentation",
+      "description": "Documentation of missing data patterns and handling strategies.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/missing_data_documentation",
+      "alias": "missing_data_documentation",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "MissingDataDocumentation",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__raw_data_sources",
+      "description": "Description of raw data sources before preprocessing.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/raw_data_sources",
+      "alias": "raw_data_sources",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "RawDataSource",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "dataset__ethical_reviews",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ethical_reviews",
@@ -2389,6 +2421,54 @@
         "Dataset"
       ],
       "range": "RawData",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__imputation_protocols",
+      "description": "Data imputation methodology and techniques.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/imputation_protocols",
+      "alias": "imputation_protocols",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "ImputationProtocol",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__annotation_analyses",
+      "description": "Analysis of annotation quality and inter-annotator agreement.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/annotation_analyses",
+      "alias": "annotation_analyses",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "AnnotationAnalysis",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__machine_annotation_tools",
+      "description": "Automated annotation tools used in dataset creation.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/machine_annotation_tools",
+      "alias": "machine_annotation_tools",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "MachineAnnotationTools",
       "multivalued": true,
       "inlined": true,
       "inlined_as_list": true,
@@ -4098,6 +4178,101 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "missingDataDocumentation__missing_data_patterns",
+      "description": "Description of patterns in missing data (e.g., missing completely at random, missing at random, missing not at random).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/missing_data_patterns",
+      "alias": "missing_data_patterns",
+      "owner": "MissingDataDocumentation",
+      "domain_of": [
+        "MissingDataDocumentation"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "missingDataDocumentation__missing_data_causes",
+      "description": "Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy constraints).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/missing_data_causes",
+      "alias": "missing_data_causes",
+      "owner": "MissingDataDocumentation",
+      "domain_of": [
+        "MissingDataDocumentation"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "missingDataDocumentation__handling_strategy",
+      "description": "Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/handling_strategy",
+      "alias": "handling_strategy",
+      "owner": "MissingDataDocumentation",
+      "domain_of": [
+        "MissingDataDocumentation"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "rawDataSource__source_description",
+      "description": "Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collection).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/source_description",
+      "alias": "source_description",
+      "owner": "RawDataSource",
+      "domain_of": [
+        "RawDataSource"
+      ],
+      "range": "string",
+      "required": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "rawDataSource__source_type",
+      "description": "Type of raw source (sensor, database, user input, web scraping, etc.).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/source_type",
+      "alias": "source_type",
+      "owner": "RawDataSource",
+      "domain_of": [
+        "RawDataSource"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "rawDataSource__access_details",
+      "description": "Information on how to access or retrieve the raw source data.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/access_details",
+      "alias": "access_details",
+      "owner": "RawDataSource",
+      "domain_of": [
+        "RawDataSource"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "rawDataSource__raw_data_format",
+      "description": "Format of the raw data before any preprocessing.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/raw_data_format",
+      "alias": "raw_data_format",
+      "owner": "RawDataSource",
+      "domain_of": [
+        "RawDataSource"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "preprocessingStrategy__preprocessing_details",
       "description": "Details on preprocessing steps applied to the data.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
@@ -4132,14 +4307,17 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "labelingStrategy__annotation_platform",
+      "name": "labelingStrategy__data_annotation_platform",
       "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
         "http://schema.org/instrument"
       ],
+      "exact_mappings": [
+        "http://mlcommons.org/croissant/RAI/dataAnnotationPlatform"
+      ],
       "slot_uri": "http://schema.org/instrument",
-      "alias": "annotation_platform",
+      "alias": "data_annotation_platform",
       "owner": "LabelingStrategy",
       "domain_of": [
         "LabelingStrategy"
@@ -4148,9 +4326,29 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "labelingStrategy__data_annotation_protocol",
+      "description": "Annotation methodology, tasks, and protocols followed during labeling. Includes annotation guidelines, quality control procedures, and task definitions.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "exact_mappings": [
+        "http://mlcommons.org/croissant/RAI/dataAnnotationProtocol"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#data_annotation_protocol",
+      "alias": "data_annotation_protocol",
+      "owner": "LabelingStrategy",
+      "domain_of": [
+        "LabelingStrategy"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "labelingStrategy__annotations_per_item",
       "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "exact_mappings": [
+        "http://mlcommons.org/croissant/RAI/annotationsPerItem"
+      ],
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#annotations_per_item",
       "alias": "annotations_per_item",
       "owner": "LabelingStrategy",
@@ -4180,6 +4378,9 @@
       "name": "labelingStrategy__annotator_demographics",
       "description": "Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "exact_mappings": [
+        "http://mlcommons.org/croissant/RAI/annotatorDemographics"
+      ],
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#annotator_demographics",
       "alias": "annotator_demographics",
       "owner": "LabelingStrategy",
@@ -4232,6 +4433,183 @@
       "owner": "RawData",
       "domain_of": [
         "RawData"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "imputationProtocol__imputation_method",
+      "description": "Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, model-based imputation, etc.).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#imputation_method",
+      "alias": "imputation_method",
+      "owner": "ImputationProtocol",
+      "domain_of": [
+        "ImputationProtocol"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "imputationProtocol__imputed_fields",
+      "description": "Fields or columns where imputation was applied.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#imputed_fields",
+      "alias": "imputed_fields",
+      "owner": "ImputationProtocol",
+      "domain_of": [
+        "ImputationProtocol"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "imputationProtocol__imputation_rationale",
+      "description": "Justification for the imputation approach chosen, including assumptions made about missing data mechanisms.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#imputation_rationale",
+      "alias": "imputation_rationale",
+      "owner": "ImputationProtocol",
+      "domain_of": [
+        "ImputationProtocol"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "imputationProtocol__imputation_validation",
+      "description": "Methods used to validate imputation quality (if any).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#imputation_validation",
+      "alias": "imputation_validation",
+      "owner": "ImputationProtocol",
+      "domain_of": [
+        "ImputationProtocol"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "annotationAnalysis__inter_annotator_agreement_score",
+      "description": "Measured agreement between annotators (e.g., Cohen's kappa value, Fleiss' kappa, Krippendorff's alpha).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#inter_annotator_agreement_score",
+      "alias": "inter_annotator_agreement_score",
+      "owner": "AnnotationAnalysis",
+      "domain_of": [
+        "AnnotationAnalysis"
+      ],
+      "range": "float",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "annotationAnalysis__agreement_metric",
+      "description": "Type of agreement metric used (Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreement, etc.).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#agreement_metric",
+      "alias": "agreement_metric",
+      "owner": "AnnotationAnalysis",
+      "domain_of": [
+        "AnnotationAnalysis"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "annotationAnalysis__analysis_method",
+      "description": "Methodology used to assess annotation quality and resolve disagreements.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#analysis_method",
+      "alias": "analysis_method",
+      "owner": "AnnotationAnalysis",
+      "domain_of": [
+        "AnnotationAnalysis"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "annotationAnalysis__disagreement_patterns",
+      "description": "Systematic patterns in annotator disagreements (e.g., by demographic group, annotation difficulty, task type).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#disagreement_patterns",
+      "alias": "disagreement_patterns",
+      "owner": "AnnotationAnalysis",
+      "domain_of": [
+        "AnnotationAnalysis"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "annotationAnalysis__annotation_quality_details",
+      "description": "Additional details on annotation quality assessment and findings.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#annotation_quality_details",
+      "alias": "annotation_quality_details",
+      "owner": "AnnotationAnalysis",
+      "domain_of": [
+        "AnnotationAnalysis"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "machineAnnotationTools__tool_name",
+      "description": "Name of the automated annotation tool (e.g., spaCy, NLTK, Stanford NER, custom ML model, GPT-based annotation).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_name",
+      "alias": "tool_name",
+      "owner": "MachineAnnotationTools",
+      "domain_of": [
+        "MachineAnnotationTools"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "machineAnnotationTools__tool_version",
+      "description": "Version numbers or commit hashes of the tools used.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_version",
+      "alias": "tool_version",
+      "owner": "MachineAnnotationTools",
+      "domain_of": [
+        "MachineAnnotationTools"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "machineAnnotationTools__tool_description",
+      "description": "Description of what each tool does in the annotation process and what types of annotations it produces.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_description",
+      "alias": "tool_description",
+      "owner": "MachineAnnotationTools",
+      "domain_of": [
+        "MachineAnnotationTools"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "machineAnnotationTools__tool_accuracy",
+      "description": "Known accuracy or performance metrics for the automated tools (if available).\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_accuracy",
+      "alias": "tool_accuracy",
+      "owner": "MachineAnnotationTools",
+      "domain_of": [
+        "MachineAnnotationTools"
       ],
       "range": "string",
       "multivalued": true,
@@ -5652,6 +6030,8 @@
         "dataset__sampling_strategies",
         "dataset__data_collectors",
         "dataset__collection_timeframes",
+        "dataset__missing_data_documentation",
+        "dataset__raw_data_sources",
         "dataset__ethical_reviews",
         "dataset__data_protection_impacts",
         "dataset__human_subject_research",
@@ -5663,6 +6043,9 @@
         "dataset__cleaning_strategies",
         "dataset__labeling_strategies",
         "dataset__raw_sources",
+        "dataset__imputation_protocols",
+        "dataset__annotation_analyses",
+        "dataset__machine_annotation_tools",
         "dataset__existing_uses",
         "dataset__use_repository",
         "dataset__other_tasks",
@@ -5830,6 +6213,22 @@
           "@type": "SlotDefinition"
         },
         {
+          "name": "missing_data_documentation",
+          "description": "Documentation of missing data patterns and handling strategies.",
+          "range": "MissingDataDocumentation",
+          "multivalued": true,
+          "inlined_as_list": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "raw_data_sources",
+          "description": "Description of raw data sources before preprocessing.",
+          "range": "RawDataSource",
+          "multivalued": true,
+          "inlined_as_list": true,
+          "@type": "SlotDefinition"
+        },
+        {
           "name": "ethical_reviews",
           "range": "EthicalReview",
           "multivalued": true,
@@ -5904,6 +6303,30 @@
         {
           "name": "raw_sources",
           "range": "RawData",
+          "multivalued": true,
+          "inlined_as_list": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "imputation_protocols",
+          "description": "Data imputation methodology and techniques.",
+          "range": "ImputationProtocol",
+          "multivalued": true,
+          "inlined_as_list": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "annotation_analyses",
+          "description": "Analysis of annotation quality and inter-annotator agreement.",
+          "range": "AnnotationAnalysis",
+          "multivalued": true,
+          "inlined_as_list": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "machine_annotation_tools",
+          "description": "Automated annotation tools used in dataset creation.",
+          "range": "MachineAnnotationTools",
           "multivalued": true,
           "inlined_as_list": true,
           "@type": "SlotDefinition"
@@ -6146,6 +6569,8 @@
         "dataset__sampling_strategies",
         "dataset__data_collectors",
         "dataset__collection_timeframes",
+        "dataset__missing_data_documentation",
+        "dataset__raw_data_sources",
         "dataset__ethical_reviews",
         "dataset__data_protection_impacts",
         "dataset__human_subject_research",
@@ -6157,6 +6582,9 @@
         "dataset__cleaning_strategies",
         "dataset__labeling_strategies",
         "dataset__raw_sources",
+        "dataset__imputation_protocols",
+        "dataset__annotation_analyses",
+        "dataset__machine_annotation_tools",
         "dataset__existing_uses",
         "dataset__use_repository",
         "dataset__other_tasks",
@@ -6960,6 +7388,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#DatasetBias",
       "description": "Documents known biases present in the dataset. Biases are systematic errors or prejudices that may affect the representativeness or fairness of the data. Distinct from anomalies (data quality issues) and limitations (scope constraints).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "exact_mappings": [
+        "rai:dataBiases"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -7008,6 +7439,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#DatasetLimitation",
       "description": "Documents known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "exact_mappings": [
+        "rai:dataLimitations"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -7257,6 +7691,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/composition#SensitiveElement",
       "description": "Does the dataset contain data that might be considered sensitive (e.g., race, sexual orientation, religion, biometrics)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
+      "exact_mappings": [
+        "rai:personalSensitiveInformation"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -7386,6 +7823,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/CollectionMechanism",
       "description": "What mechanisms or procedures were used to collect the data (e.g., hardware, manual curation, software APIs)? Also covers how these mechanisms were validated.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "exact_mappings": [
+        "rai:dataCollection"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -7447,6 +7887,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/CollectionTimeframe",
       "description": "Over what timeframe was the data collected, and does this timeframe match the creation timeframe of the underlying data?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "exact_mappings": [
+        "rai:dataCollectionTimeframe"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -7518,10 +7961,108 @@
       "@type": "ClassDefinition"
     },
     {
+      "name": "MissingDataDocumentation",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/MissingDataDocumentation",
+      "description": "Documentation of missing data in the dataset, including patterns, causes, and strategies for handling missing values.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "exact_mappings": [
+        "rai:dataCollectionMissingData"
+      ],
+      "is_a": "DatasetProperty",
+      "slots": [
+        "datasetProperty__id",
+        "datasetProperty__name",
+        "datasetProperty__description",
+        "datasetProperty__used_software",
+        "missingDataDocumentation__missing_data_patterns",
+        "missingDataDocumentation__missing_data_causes",
+        "missingDataDocumentation__handling_strategy"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "missing_data_patterns",
+          "description": "Description of patterns in missing data (e.g., missing completely at random, missing at random, missing not at random).\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "missing_data_causes",
+          "description": "Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy constraints).\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "handling_strategy",
+          "description": "Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).\n",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/MissingDataDocumentation",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "RawDataSource",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/RawDataSource",
+      "description": "Description of raw data sources before preprocessing, cleaning, or labeling. Documents where the original data comes from and how it can be accessed.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
+      "exact_mappings": [
+        "rai:dataCollectionRawData"
+      ],
+      "is_a": "DatasetProperty",
+      "slots": [
+        "datasetProperty__id",
+        "datasetProperty__name",
+        "datasetProperty__description",
+        "datasetProperty__used_software",
+        "rawDataSource__source_description",
+        "rawDataSource__source_type",
+        "rawDataSource__access_details",
+        "rawDataSource__raw_data_format"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "source_description",
+          "description": "Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collection).\n",
+          "range": "string",
+          "required": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "source_type",
+          "description": "Type of raw source (sensor, database, user input, web scraping, etc.).\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "access_details",
+          "description": "Information on how to access or retrieve the raw source data.\n",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "raw_data_format",
+          "description": "Format of the raw data before any preprocessing.\n",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/collection/RawDataSource",
+      "@type": "ClassDefinition"
+    },
+    {
       "name": "PreprocessingStrategy",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#PreprocessingStrategy",
       "description": "Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "exact_mappings": [
+        "rai:dataPreprocessingProtocol"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -7549,6 +8090,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#CleaningStrategy",
       "description": "Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "exact_mappings": [
+        "rai:dataManipulationProtocol"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -7582,7 +8126,8 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__used_software",
-        "labelingStrategy__annotation_platform",
+        "labelingStrategy__data_annotation_platform",
+        "labelingStrategy__data_annotation_protocol",
         "labelingStrategy__annotations_per_item",
         "labelingStrategy__inter_annotator_agreement",
         "labelingStrategy__annotator_demographics",
@@ -7591,15 +8136,31 @@
       "slot_usage": {},
       "attributes": [
         {
-          "name": "annotation_platform",
+          "name": "data_annotation_platform",
           "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
+          "exact_mappings": [
+            "rai:dataAnnotationPlatform"
+          ],
           "slot_uri": "schema:instrument",
           "range": "string",
           "@type": "SlotDefinition"
         },
         {
+          "name": "data_annotation_protocol",
+          "description": "Annotation methodology, tasks, and protocols followed during labeling. Includes annotation guidelines, quality control procedures, and task definitions.",
+          "exact_mappings": [
+            "rai:dataAnnotationProtocol"
+          ],
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
           "name": "annotations_per_item",
           "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
+          "exact_mappings": [
+            "rai:annotationsPerItem"
+          ],
           "range": "integer",
           "@type": "SlotDefinition"
         },
@@ -7613,6 +8174,9 @@
         {
           "name": "annotator_demographics",
           "description": "Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).",
+          "exact_mappings": [
+            "rai:annotatorDemographics"
+          ],
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -7661,6 +8225,168 @@
         }
       ],
       "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#RawData",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "ImputationProtocol",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#ImputationProtocol",
+      "description": "Description of data imputation methodology, including techniques used to handle missing values and rationale for chosen approaches.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "exact_mappings": [
+        "rai:dataImputationProtocol"
+      ],
+      "is_a": "DatasetProperty",
+      "slots": [
+        "datasetProperty__id",
+        "datasetProperty__name",
+        "datasetProperty__description",
+        "datasetProperty__used_software",
+        "imputationProtocol__imputation_method",
+        "imputationProtocol__imputed_fields",
+        "imputationProtocol__imputation_rationale",
+        "imputationProtocol__imputation_validation"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "imputation_method",
+          "description": "Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, model-based imputation, etc.).\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "imputed_fields",
+          "description": "Fields or columns where imputation was applied.\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "imputation_rationale",
+          "description": "Justification for the imputation approach chosen, including assumptions made about missing data mechanisms.\n",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "imputation_validation",
+          "description": "Methods used to validate imputation quality (if any).\n",
+          "range": "string",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#ImputationProtocol",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "AnnotationAnalysis",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#AnnotationAnalysis",
+      "description": "Analysis of annotation quality, inter-annotator agreement metrics, and systematic patterns in annotation disagreements.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "exact_mappings": [
+        "rai:dataAnnotationAnalysis"
+      ],
+      "is_a": "DatasetProperty",
+      "slots": [
+        "datasetProperty__id",
+        "datasetProperty__name",
+        "datasetProperty__description",
+        "datasetProperty__used_software",
+        "annotationAnalysis__inter_annotator_agreement_score",
+        "annotationAnalysis__agreement_metric",
+        "annotationAnalysis__analysis_method",
+        "annotationAnalysis__disagreement_patterns",
+        "annotationAnalysis__annotation_quality_details"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "inter_annotator_agreement_score",
+          "description": "Measured agreement between annotators (e.g., Cohen's kappa value, Fleiss' kappa, Krippendorff's alpha).\n",
+          "range": "float",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "agreement_metric",
+          "description": "Type of agreement metric used (Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreement, etc.).\n",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "analysis_method",
+          "description": "Methodology used to assess annotation quality and resolve disagreements.\n",
+          "range": "string",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "disagreement_patterns",
+          "description": "Systematic patterns in annotator disagreements (e.g., by demographic group, annotation difficulty, task type).\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "annotation_quality_details",
+          "description": "Additional details on annotation quality assessment and findings.\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#AnnotationAnalysis",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "MachineAnnotationTools",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#MachineAnnotationTools",
+      "description": "Automated or machine-learning-based annotation tools used in dataset creation, including NLP pipelines, computer vision models, or other automated labeling systems.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
+      "exact_mappings": [
+        "rai:machineAnnotationTools"
+      ],
+      "is_a": "DatasetProperty",
+      "slots": [
+        "datasetProperty__id",
+        "datasetProperty__name",
+        "datasetProperty__description",
+        "datasetProperty__used_software",
+        "machineAnnotationTools__tool_name",
+        "machineAnnotationTools__tool_version",
+        "machineAnnotationTools__tool_description",
+        "machineAnnotationTools__tool_accuracy"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "tool_name",
+          "description": "Name of the automated annotation tool (e.g., spaCy, NLTK, Stanford NER, custom ML model, GPT-based annotation).\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "tool_version",
+          "description": "Version numbers or commit hashes of the tools used.\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "tool_description",
+          "description": "Description of what each tool does in the annotation process and what types of annotations it produces.\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "tool_accuracy",
+          "description": "Known accuracy or performance metrics for the automated tools (if available).\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#MachineAnnotationTools",
       "@type": "ClassDefinition"
     },
     {
@@ -7755,6 +8481,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#FutureUseImpact",
       "description": "Is there anything about the dataset's composition or collection that might impact future uses or create risks/harm (e.g., unfair treatment, legal or financial risks)? If so, describe these impacts and any mitigation strategies.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
+      "exact_mappings": [
+        "rai:dataSocialImpact"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -7809,6 +8538,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#IntendedUse",
       "description": "Explicit statement of intended uses for this dataset. Complements FutureUseImpact by focusing on positive, recommended applications rather than risks. Aligns with RO-Crate \"Intended Use\" field.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
+      "exact_mappings": [
+        "rai:dataUseCases"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -8025,6 +8757,9 @@
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#UpdatePlan",
       "description": "Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, how often, by whom, and how will these updates be communicated?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
+      "exact_mappings": [
+        "rai:dataReleaseMaintenancePlan"
+      ],
       "is_a": "DatasetProperty",
       "slots": [
         "datasetProperty__id",
@@ -8878,9 +9613,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2025-12-09T21:48:49",
-  "source_file_size": 14114,
-  "generation_date": "2025-12-09T21:49:07",
+  "source_file_date": "2025-12-17T12:24:43",
+  "source_file_size": 15161,
+  "generation_date": "2025-12-17T12:25:14",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

@@ -44,6 +44,8 @@ classes:
       Was any preprocessing of the data done (e.g., discretization or bucketing,
       tokenization, SIFT feature extraction)?
     is_a: DatasetProperty
+    exact_mappings:
+      - rai:dataPreprocessingProtocol
     attributes:
       preprocessing_details:
         description: >
@@ -58,6 +60,8 @@ classes:
       Was any cleaning of the data done (e.g., removal of instances,
       processing of missing values)?
     is_a: DatasetProperty
+    exact_mappings:
+      - rai:dataManipulationProtocol
     attributes:
       cleaning_details:
         description: >
@@ -73,17 +77,29 @@ classes:
       This class documents the annotation process and quality metrics.
     is_a: DatasetProperty
     attributes:
-      annotation_platform:
+      data_annotation_platform:
         description: >-
           Platform or tool used for annotation (e.g., Label Studio, Prodigy,
           Amazon Mechanical Turk, custom annotation tool).
         range: string
         slot_uri: schema:instrument
+        exact_mappings:
+          - rai:dataAnnotationPlatform
+      data_annotation_protocol:
+        description: >-
+          Annotation methodology, tasks, and protocols followed during labeling.
+          Includes annotation guidelines, quality control procedures, and task definitions.
+        range: string
+        multivalued: true
+        exact_mappings:
+          - rai:dataAnnotationProtocol
       annotations_per_item:
         description: >-
           Number of annotations collected per data item. Multiple annotations
           per item enable calculation of inter-annotator agreement.
         range: integer
+        exact_mappings:
+          - rai:annotationsPerItem
       inter_annotator_agreement:
         description: >-
           Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa,
@@ -96,6 +112,8 @@ classes:
           (e.g., geographic location, language background, expertise level).
         range: string
         multivalued: true
+        exact_mappings:
+          - rai:annotatorDemographics
       labeling_details:
         description: >
           Details on labeling/annotation procedures and quality metrics.
@@ -119,3 +137,100 @@ classes:
         range: string
         multivalued: true
         slot_uri: dcterms:description
+
+
+  ImputationProtocol:
+    is_a: DatasetProperty
+    description: >
+      Description of data imputation methodology, including techniques used
+      to handle missing values and rationale for chosen approaches.
+    exact_mappings:
+      - rai:dataImputationProtocol
+    attributes:
+      imputation_method:
+        description: >
+          Specific imputation technique used (mean, median, mode, forward fill,
+          backward fill, interpolation, model-based imputation, etc.).
+        range: string
+        multivalued: true
+      imputed_fields:
+        description: >
+          Fields or columns where imputation was applied.
+        range: string
+        multivalued: true
+      imputation_rationale:
+        description: >
+          Justification for the imputation approach chosen, including
+          assumptions made about missing data mechanisms.
+        range: string
+      imputation_validation:
+        description: >
+          Methods used to validate imputation quality (if any).
+        range: string
+
+
+  AnnotationAnalysis:
+    is_a: DatasetProperty
+    description: >
+      Analysis of annotation quality, inter-annotator agreement metrics,
+      and systematic patterns in annotation disagreements.
+    exact_mappings:
+      - rai:dataAnnotationAnalysis
+    attributes:
+      inter_annotator_agreement_score:
+        description: >
+          Measured agreement between annotators (e.g., Cohen's kappa value,
+          Fleiss' kappa, Krippendorff's alpha).
+        range: float
+      agreement_metric:
+        description: >
+          Type of agreement metric used (Cohen's kappa, Fleiss' kappa,
+          Krippendorff's alpha, percentage agreement, etc.).
+        range: string
+      analysis_method:
+        description: >
+          Methodology used to assess annotation quality and resolve disagreements.
+        range: string
+      disagreement_patterns:
+        description: >
+          Systematic patterns in annotator disagreements (e.g., by demographic
+          group, annotation difficulty, task type).
+        range: string
+        multivalued: true
+      annotation_quality_details:
+        description: >
+          Additional details on annotation quality assessment and findings.
+        range: string
+        multivalued: true
+
+
+  MachineAnnotationTools:
+    is_a: DatasetProperty
+    description: >
+      Automated or machine-learning-based annotation tools used in dataset creation,
+      including NLP pipelines, computer vision models, or other automated labeling systems.
+    exact_mappings:
+      - rai:machineAnnotationTools
+    attributes:
+      tool_name:
+        description: >
+          Name of the automated annotation tool (e.g., spaCy, NLTK, Stanford NER,
+          custom ML model, GPT-based annotation).
+        range: string
+        multivalued: true
+      tool_version:
+        description: >
+          Version numbers or commit hashes of the tools used.
+        range: string
+        multivalued: true
+      tool_description:
+        description: >
+          Description of what each tool does in the annotation process and
+          what types of annotations it produces.
+        range: string
+        multivalued: true
+      tool_accuracy:
+        description: >
+          Known accuracy or performance metrics for the automated tools (if available).
+        range: string
+        multivalued: true
