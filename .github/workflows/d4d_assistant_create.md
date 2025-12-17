@@ -84,28 +84,99 @@ This workflow is triggered when a user requests creation of a new D4D datasheet,
 
 ## Step-by-Step Process
 
-### 1. Load the D4D Schema
+### 1. Study Schema Structure and Reference Examples
+
+**CRITICAL**: Before generating ANY D4D YAML, you MUST understand the exact field names used by each schema class.
+
+#### 1a. Read Reference Examples FIRST
 
 ```bash
 # Ensure the full merged schema is available
 make full-schema
 ```
 
+**Read validated reference examples:**
+- `data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml` - Comprehensive validated example
+- `data/d4d_concatenated/claudecode_agent/CHORUS_d4d.yaml` - Another validated example
+
+**What to observe:**
+- How `purposes`, `tasks`, `addressing_gaps`, `creators`, `funders` are structured
+- Field naming patterns: Most classes use simple `{id, description}` structure
+- How multi-part information is merged into single `description` strings
+- Proper use of `id` fields with namespace prefixes (e.g., `project:creator:1`)
+
+#### 1b. Read the Schema and Extract Field Definitions
+
 **Schema Reference:**
 - Read the complete schema from: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
 - This contains ALL D4D classes, slots, and enums in a single file
 - Use this schema as the authoritative reference for structure and valid values
 
+**For each class you'll use, extract EXACT field names:**
+- Search for `class Purpose:`, `class Task:`, `class Creator:`, etc.
+- Note which fields are required vs optional
+- Identify field types (string, integer, enum, etc.)
+- Check for multivalued fields (lists)
+
+#### 1c. Common Field Name Mistakes to AVOID
+
+**Problem**: Agents often invent semantic field names that "make sense" but aren't in the schema.
+
+```yaml
+# ❌ WRONG - Invented semantic field names (validation will FAIL)
+purposes:
+  - purpose_description: "To enable AI research..."  # Field doesn't exist!
+tasks:
+  - task_description: "Disease screening"  # Field doesn't exist!
+    tags: [screening, diagnosis]  # Field doesn't exist!
+creators:
+  - creator_name: "Dr. Jane Smith"  # Field doesn't exist!
+    creator_role: "Principal Investigator"  # Field doesn't exist!
+    creator_affiliation: "Stanford University"  # Field doesn't exist!
+funders:
+  - funder_name: "NIH"  # Field doesn't exist!
+    grant_number: "R01-123456"  # Field doesn't exist!
+    funding_amount: 500000  # Field doesn't exist!
+subsets:
+  - subset_name: "Training set"  # Field doesn't exist!
+    subset_description: "80% of data"  # Field doesn't exist!
+    # Missing required 'id' field!
+
+# ✅ CORRECT - Actual schema field names
+purposes:
+  - id: dataset:purpose:1
+    description: "To enable AI research..."  # Simple description string
+tasks:
+  - id: dataset:task:1
+    description: "Disease screening for five disease categories"  # All info in description
+creators:
+  - id: dataset:creator:1
+    description: "Dr. Jane Smith, Principal Investigator, Stanford University"  # Merged into description
+funders:
+  - id: dataset:funder:1
+    name: "NIH"  # FundingMechanism has name AND description
+    description: "NIH grant R01-123456, total funding $500,000"  # Details in description
+subsets:
+  - id: dataset:subset:training  # Required!
+    name: "Training set"  # DataSubset has name field
+    description: "80% of data for model training"
+```
+
+**Key Pattern**: Most D4D classes use a minimal `{id, description}` structure where:
+- `id` is required and should use namespaced format (e.g., `project:type:identifier`)
+- `description` contains all the details in natural language
+- Multi-part information is merged into the `description` string
+
 **Key Schema Sections:**
 - `id` (required) - Unique identifier for the dataset
 - `name` (required) - Dataset name
-- `motivation` - Purpose and creation motivation (Motivation class)
-- `composition` - What the dataset contains (Composition class)
-- `collection_process` - How data was collected (CollectionProcess class)
-- `preprocessing` - Cleaning and preprocessing steps (Preprocessing class)
-- `uses` - Recommended and unsuitable uses (Uses class)
-- `distribution` - How dataset is distributed (Distribution class)
-- `maintenance` - Update and maintenance plans (Maintenance class)
+- `purposes` - List of Purpose objects, each with `{id, description}`
+- `tasks` - List of Task objects, each with `{id, description}`
+- `addressing_gaps` - List of AddressingGap objects, each with `{id, description}`
+- `creators` - List of Creator objects, each with `{id, description}`
+- `funders` - List of FundingMechanism objects with `{id, name, description}`
+- `instances` - List of Instance objects, each with `{id, description}`
+- `subsets` - List of DataSubset objects (inherits from Dataset, requires `id`)
 
 ### 2. Gather Source Content
 
@@ -199,35 +270,52 @@ poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_a
 
 **Common Validation Errors and Fixes:**
 
-1. **Missing Required Field**
+1. **Unknown/Invented Field Names** (MOST COMMON ERROR)
    ```
-   Error: 'id' is a required property
+   Error: Additional properties are not allowed ('purpose_description' was unexpected)
+   Error: Additional properties are not allowed ('creator_name', 'creator_role' were unexpected)
+   Error: Additional properties are not allowed ('subset_name', 'subset_description' were unexpected)
    ```
-   **Fix**: Add the missing required field (`id` and `name` are always required)
+   **Root Cause**: You invented semantic field names instead of using schema field names
 
-2. **Invalid Enum Value**
+   **Fix**:
+   - Read reference examples to see correct field structure
+   - Most classes use `{id, description}` pattern
+   - Replace invented fields with schema-defined fields:
+     ```yaml
+     # ❌ WRONG
+     - creator_name: "Jane Smith"
+       creator_role: "PI"
+
+     # ✅ CORRECT
+     - id: project:creator:1
+       description: "Jane Smith, Principal Investigator"
+     ```
+
+2. **Missing Required Field**
+   ```
+   Error: 'id' is a required property in /purposes/0
+   Error: 'id' is a required property in /subsets/0
+   ```
+   **Fix**: Add the required `id` field with namespaced format (e.g., `project:purpose:1`)
+
+3. **Invalid Enum Value**
    ```
    Error: 'SomeValue' is not one of ['ValidValue1', 'ValidValue2']
    ```
    **Fix**: Check the schema for valid enum values and use one from the allowed list
 
-3. **Wrong Data Type**
+4. **Wrong Data Type**
    ```
    Error: 'string_value' is not of type 'integer'
    ```
    **Fix**: Convert the value to the correct type (e.g., change "1000" to 1000 for integers)
 
-4. **Invalid YAML Syntax**
+5. **Invalid YAML Syntax**
    ```
    Error: mapping values are not allowed here
    ```
    **Fix**: Check indentation, quotes, and YAML structure
-
-5. **Unknown Field**
-   ```
-   Error: Additional properties are not allowed ('unknown_field' was unexpected)
-   ```
-   **Fix**: Remove the field or check if you're using the correct field name from the schema
 
 **If Validation Fails:**
 1. Read the error message carefully to identify the issue

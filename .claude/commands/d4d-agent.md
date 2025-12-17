@@ -59,13 +59,70 @@ Extract these key elements from source documents:
 For each project (AI_READI, CM4AI, VOICE, CHORUS):
 
 1. **Launch Task agents in parallel** using Task tool with subagent_type='general-purpose'
-2. **Read source documents** from preprocessed locations
-3. **Read schema** from src/data_sheets_schema/schema/data_sheets_schema_all.yaml
-4. **Extract metadata** using the checklist above
-5. **Generate valid YAML** conforming to schema
-6. **Validate schema compliance** with: poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset <file>
-7. **Validate ontology terms** with: poetry run linkml-term-validator validate-data <file> --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml
-8. **Save** to output location
+
+2. **Read reference examples FIRST** (Critical for understanding correct structure):
+   - Read validated examples: `data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml`
+   - Study how `Purpose`, `Task`, `AddressingGap`, `Creator`, `FundingMechanism`, etc. are structured
+   - Note: These classes use simple `{id, description}` pattern, NOT semantic field names
+
+3. **Read schema and extract field definitions**:
+   - Path: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
+   - For each class you'll use (Purpose, Task, Creator, etc.), extract EXACT field names
+   - **Critical**: Do NOT invent field names based on semantics
+
+4. **Common Field Name Mistakes to AVOID**:
+   ```yaml
+   # ❌ WRONG - Semantic field names (not in schema)
+   purposes:
+     - purpose_description: "..."
+   tasks:
+     - task_description: "..."
+       tags: [...]
+   creators:
+     - creator_name: "John Doe"
+       creator_role: "PI"
+       creator_affiliation: "University"
+
+   # ✅ CORRECT - Schema field names
+   purposes:
+     - id: project:purpose:1
+       description: "..."
+   tasks:
+     - id: project:task:1
+       description: "..."
+   creators:
+     - id: project:creator:1
+       description: "John Doe, Principal Investigator, University"
+   ```
+
+5. **Read source documents** from preprocessed locations
+
+6. **Extract metadata** using the checklist above
+
+7. **Generate valid YAML** conforming to schema:
+   - Use ONLY field names found in schema
+   - Include required `id` fields for all objects
+   - Merge multi-part information into single `description` strings
+   - Follow reference examples for structure
+
+8. **REQUIRED validation** (NON-SKIPPABLE):
+   ```bash
+   poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset <file>
+   ```
+   - If validation fails: analyze errors, fix field names, re-validate
+   - DO NOT proceed without passing validation
+
+9. **Validate ontology terms**:
+   ```bash
+   poetry run linkml-term-validator validate-data <file> --schema src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+   ```
+
+10. **Verify output**:
+    - Check file has comprehensive content (should be 1000+ lines for concatenated)
+    - Confirm all major sections populated (purposes, tasks, creators, etc.)
+    - Verify no invented field names used
+
+11. **Save** to output location
 
 ## Merging Multiple Sources
 

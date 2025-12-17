@@ -123,22 +123,44 @@ cat <path-to-datasheet>.yaml
 - **Add list items**: Append to multivalued fields
 - **Update from new source**: Extract additional metadata from new URLs/documents
 
-### 3. Load Schema for Reference
+### 3. Load Schema and Verify Field Names
 
 ```bash
 # Ensure full schema is available
 make full-schema
 ```
 
+**CRITICAL**: Before making edits, verify you're using correct schema field names.
+
+**Read Reference Examples:**
+- `data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml` - Validated example structure
+- Compare existing datasheet structure with reference examples
+- Note field naming patterns for classes you'll modify
+
 **Verify Schema Constraints:**
 - Read `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
 - Check field definitions for the sections being edited
+- Extract EXACT field names for classes you'll use (Purpose, Task, Creator, etc.)
 - Verify slot constraints:
   - Is the field required or optional?
   - Is it multivalued (list)?
   - What is the expected range/type?
   - Are there enum constraints?
 - Understand class relationships for nested objects
+
+**Common Field Name Mistakes to AVOID When Editing:**
+```yaml
+# ❌ WRONG - Invented semantic field names
+purposes:
+  - purpose_description: "..."  # Field doesn't exist!
+
+# ✅ CORRECT - Schema field names
+purposes:
+  - id: project:purpose:1
+    description: "..."  # Use 'description' field
+```
+
+**Key Pattern**: Most D4D classes use `{id, description}` structure. Don't invent field names like `purpose_description`, `creator_name`, `subset_name`, etc.
 
 ### 4. Make Edits
 
