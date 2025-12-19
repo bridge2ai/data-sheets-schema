@@ -4064,8 +4064,11 @@
                 },
                 "imputation_validation": {
                     "description": "Methods used to validate imputation quality (if any).\n",
+                    "items": {
+                        "type": "string"
+                    },
                     "type": [
-                        "string",
+                        "array",
                         "null"
                     ]
                 },

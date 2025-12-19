@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-18T22:13:08
+# Generation date: 2025-12-18T22:14:54
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1848,7 +1848,7 @@ class ImputationProtocol(DatasetProperty):
     imputation_method: Optional[Union[str, list[str]]] = empty_list()
     imputed_fields: Optional[Union[str, list[str]]] = empty_list()
     imputation_rationale: Optional[str] = None
-    imputation_validation: Optional[str] = None
+    imputation_validation: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if not isinstance(self.imputation_method, list):
@@ -1862,8 +1862,9 @@ class ImputationProtocol(DatasetProperty):
         if self.imputation_rationale is not None and not isinstance(self.imputation_rationale, str):
             self.imputation_rationale = str(self.imputation_rationale)
 
-        if self.imputation_validation is not None and not isinstance(self.imputation_validation, str):
-            self.imputation_validation = str(self.imputation_validation)
+        if not isinstance(self.imputation_validation, list):
+            self.imputation_validation = [self.imputation_validation] if self.imputation_validation is not None else []
+        self.imputation_validation = [v if isinstance(v, str) else str(v) for v in self.imputation_validation]
 
         super().__post_init__(**kwargs)
 
@@ -4096,7 +4097,7 @@ slots.imputationProtocol__imputation_rationale = Slot(uri=D4DPREPROCESSING.imput
                    model_uri=DATA_SHEETS_SCHEMA.imputationProtocol__imputation_rationale, domain=None, range=Optional[str])
 
 slots.imputationProtocol__imputation_validation = Slot(uri=D4DPREPROCESSING.imputation_validation, name="imputationProtocol__imputation_validation", curie=D4DPREPROCESSING.curie('imputation_validation'),
-                   model_uri=DATA_SHEETS_SCHEMA.imputationProtocol__imputation_validation, domain=None, range=Optional[str])
+                   model_uri=DATA_SHEETS_SCHEMA.imputationProtocol__imputation_validation, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.annotationAnalysis__inter_annotator_agreement_score = Slot(uri=D4DPREPROCESSING.inter_annotator_agreement_score, name="annotationAnalysis__inter_annotator_agreement_score", curie=D4DPREPROCESSING.curie('inter_annotator_agreement_score'),
                    model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__inter_annotator_agreement_score, domain=None, range=Optional[float])

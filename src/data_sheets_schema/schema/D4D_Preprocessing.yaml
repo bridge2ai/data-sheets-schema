@@ -167,6 +167,7 @@ classes:
         description: >
           Methods used to validate imputation quality (if any).
         range: string
+        multivalued: true
 
 
   AnnotationAnalysis:
