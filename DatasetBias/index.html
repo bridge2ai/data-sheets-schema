@@ -370,6 +370,10 @@
 <td>native</td>
 <td>data_sheets_schema:DatasetBias</td>
 </tr>
+<tr>
+<td>exact</td>
+<td>rai:dataBiases</td>
+</tr>
 </tbody>
 </table>
 <h2 id="linkml-source">LinkML Source</h2>
@@ -383,6 +387,8 @@ description: 'Documents known biases present in the dataset. Biases are systemat
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:dataBiases
 is_a: DatasetProperty
 attributes:
   bias_type:
@@ -441,6 +447,8 @@ description: 'Documents known biases present in the dataset. Biases are systemat
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:dataBiases
 is_a: DatasetProperty
 attributes:
   bias_type:

@@ -345,6 +345,10 @@
 <td>native</td>
 <td>data_sheets_schema:SensitiveElement</td>
 </tr>
+<tr>
+<td>exact</td>
+<td>rai:personalSensitiveInformation</td>
+</tr>
 </tbody>
 </table>
 <h2 id="linkml-source">LinkML Source</h2>
@@ -357,6 +361,8 @@ description: 'Does the dataset contain data that might be considered sensitive (
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:personalSensitiveInformation
 is_a: DatasetProperty
 attributes:
   sensitive_elements_present:
@@ -390,6 +396,8 @@ description: 'Does the dataset contain data that might be considered sensitive (
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:personalSensitiveInformation
 is_a: DatasetProperty
 attributes:
   sensitive_elements_present:

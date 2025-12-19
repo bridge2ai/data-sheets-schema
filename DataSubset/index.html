@@ -240,6 +240,17 @@
 
 
 
+      DataSubset : annotation_analyses
+
+
+
+
+
+        DataSubset --&gt; "*" AnnotationAnalysis : annotation_analyses
+        click AnnotationAnalysis href "../AnnotationAnalysis/"
+
+
+
       DataSubset : anomalies
 
 
@@ -519,6 +530,17 @@
 
       DataSubset : id
 
+      DataSubset : imputation_protocols
+
+
+
+
+
+        DataSubset --&gt; "*" ImputationProtocol : imputation_protocols
+        click ImputationProtocol href "../ImputationProtocol/"
+
+
+
       DataSubset : informed_consent
 
 
@@ -634,6 +656,17 @@
 
 
 
+      DataSubset : machine_annotation_tools
+
+
+
+
+
+        DataSubset --&gt; "*" MachineAnnotationTools : machine_annotation_tools
+        click MachineAnnotationTools href "../MachineAnnotationTools/"
+
+
+
       DataSubset : maintainers
 
 
@@ -655,6 +688,17 @@
 
         DataSubset --&gt; "0..1" MediaTypeEnum : media_type
         click MediaTypeEnum href "../MediaTypeEnum/"
+
+
+
+      DataSubset : missing_data_documentation
+
+
+
+
+
+        DataSubset --&gt; "*" MissingDataDocumentation : missing_data_documentation
+        click MissingDataDocumentation href "../MissingDataDocumentation/"
 
 
 
@@ -742,6 +786,17 @@
 
         DataSubset --&gt; "*" Purpose : purposes
         click Purpose href "../Purpose/"
+
+
+
+      DataSubset : raw_data_sources
+
+
+
+
+
+        DataSubset --&gt; "*" RawDataSource : raw_data_sources
+        click RawDataSource href "../RawDataSource/"
 
 
 
@@ -1139,6 +1194,18 @@
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
+<td><a href="../missing_data_documentation/">missing_data_documentation</a></td>
+<td>* <br/> <a href="../MissingDataDocumentation/">MissingDataDocumentation</a></td>
+<td>Documentation of missing data patterns and handling strategies</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../raw_data_sources/">raw_data_sources</a></td>
+<td>* <br/> <a href="../RawDataSource/">RawDataSource</a></td>
+<td>Description of raw data sources before preprocessing</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
 <td><a href="../ethical_reviews/">ethical_reviews</a></td>
 <td>* <br/> <a href="../EthicalReview/">EthicalReview</a></td>
 <td></td>
@@ -1202,6 +1269,24 @@
 <td><a href="../raw_sources/">raw_sources</a></td>
 <td>* <br/> <a href="../RawData/">RawData</a></td>
 <td></td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../imputation_protocols/">imputation_protocols</a></td>
+<td>* <br/> <a href="../ImputationProtocol/">ImputationProtocol</a></td>
+<td>Data imputation methodology and techniques</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../annotation_analyses/">annotation_analyses</a></td>
+<td>* <br/> <a href="../AnnotationAnalysis/">AnnotationAnalysis</a></td>
+<td>Analysis of annotation quality and inter-annotator agreement</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../machine_annotation_tools/">machine_annotation_tools</a></td>
+<td>* <br/> <a href="../MachineAnnotationTools/">MachineAnnotationTools</a></td>
+<td>Automated annotation tools used in dataset creation</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1964,6 +2049,32 @@ attributes:
     multivalued: true
     inlined: true
     inlined_as_list: true
+  missing_data_documentation:
+    name: missing_data_documentation
+    description: Documentation of missing data patterns and handling strategies.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: missing_data_documentation
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: MissingDataDocumentation
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  raw_data_sources:
+    name: raw_data_sources
+    description: Description of raw data sources before preprocessing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: raw_data_sources
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: RawDataSource
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   ethical_reviews:
     name: ethical_reviews
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2096,6 +2207,45 @@ attributes:
     domain_of:
     - Dataset
     range: RawData
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  imputation_protocols:
+    name: imputation_protocols
+    description: Data imputation methodology and techniques.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: imputation_protocols
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ImputationProtocol
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  annotation_analyses:
+    name: annotation_analyses
+    description: Analysis of annotation quality and inter-annotator agreement.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: annotation_analyses
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: AnnotationAnalysis
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  machine_annotation_tools:
+    name: machine_annotation_tools
+    description: Automated annotation tools used in dataset creation.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: machine_annotation_tools
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: MachineAnnotationTools
     multivalued: true
     inlined: true
     inlined_as_list: true

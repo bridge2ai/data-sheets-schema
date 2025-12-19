@@ -219,11 +219,13 @@
       DatasetProperty &lt;|-- LabelingStrategy
         click DatasetProperty href "../DatasetProperty/"
 
-      LabelingStrategy : annotation_platform
-
       LabelingStrategy : annotations_per_item
 
       LabelingStrategy : annotator_demographics
+
+      LabelingStrategy : data_annotation_platform
+
+      LabelingStrategy : data_annotation_protocol
 
       LabelingStrategy : description
 
@@ -267,9 +269,15 @@
 </thead>
 <tbody>
 <tr>
-<td><a href="../annotation_platform/">annotation_platform</a></td>
+<td><a href="../data_annotation_platform/">data_annotation_platform</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
 <td>Platform or tool used for annotation (e</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../data_annotation_protocol/">data_annotation_protocol</a></td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>Annotation methodology, tasks, and protocols followed during labeling</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -383,21 +391,37 @@ description: 'Was any labeling of the data done (e.g., part-of-speech tagging)? 
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  annotation_platform:
-    name: annotation_platform
+  data_annotation_platform:
+    name: data_annotation_platform
     description: Platform or tool used for annotation (e.g., Label Studio, Prodigy,
       Amazon Mechanical Turk, custom annotation tool).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    exact_mappings:
+    - rai:dataAnnotationPlatform
     rank: 1000
     slot_uri: schema:instrument
     domain_of:
     - LabelingStrategy
     range: string
+  data_annotation_protocol:
+    name: data_annotation_protocol
+    description: Annotation methodology, tasks, and protocols followed during labeling.
+      Includes annotation guidelines, quality control procedures, and task definitions.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    exact_mappings:
+    - rai:dataAnnotationProtocol
+    rank: 1000
+    domain_of:
+    - LabelingStrategy
+    range: string
+    multivalued: true
   annotations_per_item:
     name: annotations_per_item
     description: Number of annotations collected per data item. Multiple annotations
       per item enable calculation of inter-annotator agreement.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    exact_mappings:
+    - rai:annotationsPerItem
     rank: 1000
     domain_of:
     - LabelingStrategy
@@ -418,6 +442,8 @@ attributes:
     description: Demographic information about annotators, if available and relevant
       (e.g., geographic location, language background, expertise level).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    exact_mappings:
+    - rai:annotatorDemographics
     rank: 1000
     domain_of:
     - LabelingStrategy
@@ -448,23 +474,41 @@ description: 'Was any labeling of the data done (e.g., part-of-speech tagging)? 
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  annotation_platform:
-    name: annotation_platform
+  data_annotation_platform:
+    name: data_annotation_platform
     description: Platform or tool used for annotation (e.g., Label Studio, Prodigy,
       Amazon Mechanical Turk, custom annotation tool).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    exact_mappings:
+    - rai:dataAnnotationPlatform
     rank: 1000
     slot_uri: schema:instrument
-    alias: annotation_platform
+    alias: data_annotation_platform
     owner: LabelingStrategy
     domain_of:
     - LabelingStrategy
     range: string
+  data_annotation_protocol:
+    name: data_annotation_protocol
+    description: Annotation methodology, tasks, and protocols followed during labeling.
+      Includes annotation guidelines, quality control procedures, and task definitions.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    exact_mappings:
+    - rai:dataAnnotationProtocol
+    rank: 1000
+    alias: data_annotation_protocol
+    owner: LabelingStrategy
+    domain_of:
+    - LabelingStrategy
+    range: string
+    multivalued: true
   annotations_per_item:
     name: annotations_per_item
     description: Number of annotations collected per data item. Multiple annotations
       per item enable calculation of inter-annotator agreement.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    exact_mappings:
+    - rai:annotationsPerItem
     rank: 1000
     alias: annotations_per_item
     owner: LabelingStrategy
@@ -489,6 +533,8 @@ attributes:
     description: Demographic information about annotators, if available and relevant
       (e.g., geographic location, language background, expertise level).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    exact_mappings:
+    - rai:annotatorDemographics
     rank: 1000
     alias: annotator_demographics
     owner: LabelingStrategy
