@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-18T22:14:54
+# Generation date: 2025-12-18T22:19:34
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1922,23 +1922,18 @@ class MachineAnnotationTools(DatasetProperty):
     class_name: ClassVar[str] = "MachineAnnotationTools"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.MachineAnnotationTools
 
-    tool_name: Optional[Union[str, list[str]]] = empty_list()
-    tool_version: Optional[Union[str, list[str]]] = empty_list()
-    tool_description: Optional[Union[str, list[str]]] = empty_list()
+    tools: Optional[Union[str, list[str]]] = empty_list()
+    tool_descriptions: Optional[Union[str, list[str]]] = empty_list()
     tool_accuracy: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if not isinstance(self.tool_name, list):
-            self.tool_name = [self.tool_name] if self.tool_name is not None else []
-        self.tool_name = [v if isinstance(v, str) else str(v) for v in self.tool_name]
+        if not isinstance(self.tools, list):
+            self.tools = [self.tools] if self.tools is not None else []
+        self.tools = [v if isinstance(v, str) else str(v) for v in self.tools]
 
-        if not isinstance(self.tool_version, list):
-            self.tool_version = [self.tool_version] if self.tool_version is not None else []
-        self.tool_version = [v if isinstance(v, str) else str(v) for v in self.tool_version]
-
-        if not isinstance(self.tool_description, list):
-            self.tool_description = [self.tool_description] if self.tool_description is not None else []
-        self.tool_description = [v if isinstance(v, str) else str(v) for v in self.tool_description]
+        if not isinstance(self.tool_descriptions, list):
+            self.tool_descriptions = [self.tool_descriptions] if self.tool_descriptions is not None else []
+        self.tool_descriptions = [v if isinstance(v, str) else str(v) for v in self.tool_descriptions]
 
         if not isinstance(self.tool_accuracy, list):
             self.tool_accuracy = [self.tool_accuracy] if self.tool_accuracy is not None else []
@@ -4114,14 +4109,11 @@ slots.annotationAnalysis__disagreement_patterns = Slot(uri=D4DPREPROCESSING.disa
 slots.annotationAnalysis__annotation_quality_details = Slot(uri=D4DPREPROCESSING.annotation_quality_details, name="annotationAnalysis__annotation_quality_details", curie=D4DPREPROCESSING.curie('annotation_quality_details'),
                    model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__annotation_quality_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.machineAnnotationTools__tool_name = Slot(uri=D4DPREPROCESSING.tool_name, name="machineAnnotationTools__tool_name", curie=D4DPREPROCESSING.curie('tool_name'),
-                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_name, domain=None, range=Optional[Union[str, list[str]]])
+slots.machineAnnotationTools__tools = Slot(uri=D4DPREPROCESSING.tools, name="machineAnnotationTools__tools", curie=D4DPREPROCESSING.curie('tools'),
+                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tools, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.machineAnnotationTools__tool_version = Slot(uri=D4DPREPROCESSING.tool_version, name="machineAnnotationTools__tool_version", curie=D4DPREPROCESSING.curie('tool_version'),
-                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_version, domain=None, range=Optional[Union[str, list[str]]])
-
-slots.machineAnnotationTools__tool_description = Slot(uri=D4DPREPROCESSING.tool_description, name="machineAnnotationTools__tool_description", curie=D4DPREPROCESSING.curie('tool_description'),
-                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_description, domain=None, range=Optional[Union[str, list[str]]])
+slots.machineAnnotationTools__tool_descriptions = Slot(uri=D4DPREPROCESSING.tool_descriptions, name="machineAnnotationTools__tool_descriptions", curie=D4DPREPROCESSING.curie('tool_descriptions'),
+                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_descriptions, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.machineAnnotationTools__tool_accuracy = Slot(uri=D4DPREPROCESSING.tool_accuracy, name="machineAnnotationTools__tool_accuracy", curie=D4DPREPROCESSING.curie('tool_accuracy'),
                    model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_accuracy, domain=None, range=Optional[Union[str, list[str]]])

@@ -4562,11 +4562,11 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "machineAnnotationTools__tool_name",
-      "description": "Name of the automated annotation tool (e.g., spaCy, NLTK, Stanford NER, custom ML model, GPT-based annotation).\n",
+      "name": "machineAnnotationTools__tools",
+      "description": "List of automated annotation tools with their versions. Format each entry as \"ToolName version\" (e.g., \"spaCy 3.5.0\", \"NLTK 3.8\", \"GPT-4 turbo\"). Use \"unknown\" for version if not available (e.g., \"Custom NER Model unknown\").\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_name",
-      "alias": "tool_name",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tools",
+      "alias": "tools",
       "owner": "MachineAnnotationTools",
       "domain_of": [
         "MachineAnnotationTools"
@@ -4576,25 +4576,11 @@
       "@type": "SlotDefinition"
     },
     {
-      "name": "machineAnnotationTools__tool_version",
-      "description": "Version numbers or commit hashes of the tools used.\n",
+      "name": "machineAnnotationTools__tool_descriptions",
+      "description": "Descriptions of what each tool does in the annotation process and what types of annotations it produces. Should correspond to the tools list.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_version",
-      "alias": "tool_version",
-      "owner": "MachineAnnotationTools",
-      "domain_of": [
-        "MachineAnnotationTools"
-      ],
-      "range": "string",
-      "multivalued": true,
-      "@type": "SlotDefinition"
-    },
-    {
-      "name": "machineAnnotationTools__tool_description",
-      "description": "Description of what each tool does in the annotation process and what types of annotations it produces.\n",
-      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
-      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_description",
-      "alias": "tool_description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_descriptions",
+      "alias": "tool_descriptions",
       "owner": "MachineAnnotationTools",
       "domain_of": [
         "MachineAnnotationTools"
@@ -4605,7 +4591,7 @@
     },
     {
       "name": "machineAnnotationTools__tool_accuracy",
-      "description": "Known accuracy or performance metrics for the automated tools (if available).\n",
+      "description": "Known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., \"spaCy F1: 0.95\", \"GPT-4 Accuracy: 92%\").\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#tool_accuracy",
       "alias": "tool_accuracy",
@@ -8354,37 +8340,29 @@
         "datasetProperty__name",
         "datasetProperty__description",
         "datasetProperty__used_software",
-        "machineAnnotationTools__tool_name",
-        "machineAnnotationTools__tool_version",
-        "machineAnnotationTools__tool_description",
+        "machineAnnotationTools__tools",
+        "machineAnnotationTools__tool_descriptions",
         "machineAnnotationTools__tool_accuracy"
       ],
       "slot_usage": {},
       "attributes": [
         {
-          "name": "tool_name",
-          "description": "Name of the automated annotation tool (e.g., spaCy, NLTK, Stanford NER, custom ML model, GPT-based annotation).\n",
+          "name": "tools",
+          "description": "List of automated annotation tools with their versions. Format each entry as \"ToolName version\" (e.g., \"spaCy 3.5.0\", \"NLTK 3.8\", \"GPT-4 turbo\"). Use \"unknown\" for version if not available (e.g., \"Custom NER Model unknown\").\n",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
-          "name": "tool_version",
-          "description": "Version numbers or commit hashes of the tools used.\n",
-          "range": "string",
-          "multivalued": true,
-          "@type": "SlotDefinition"
-        },
-        {
-          "name": "tool_description",
-          "description": "Description of what each tool does in the annotation process and what types of annotations it produces.\n",
+          "name": "tool_descriptions",
+          "description": "Descriptions of what each tool does in the annotation process and what types of annotations it produces. Should correspond to the tools list.\n",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
           "name": "tool_accuracy",
-          "description": "Known accuracy or performance metrics for the automated tools (if available).\n",
+          "description": "Known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., \"spaCy F1: 0.95\", \"GPT-4 Accuracy: 92%\").\n",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -9619,7 +9597,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2025-12-18T22:11:52",
   "source_file_size": 15161,
-  "generation_date": "2025-12-18T22:14:52",
+  "generation_date": "2025-12-18T22:19:33",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
