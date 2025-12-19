@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-17T12:25:16
+# Generation date: 2025-12-18T22:13:08
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1694,7 +1694,7 @@ class RawDataSource(DatasetProperty):
     source_description: str = None
     source_type: Optional[Union[str, list[str]]] = empty_list()
     access_details: Optional[str] = None
-    raw_data_format: Optional[str] = None
+    raw_data_format: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.source_description):
@@ -1709,8 +1709,9 @@ class RawDataSource(DatasetProperty):
         if self.access_details is not None and not isinstance(self.access_details, str):
             self.access_details = str(self.access_details)
 
-        if self.raw_data_format is not None and not isinstance(self.raw_data_format, str):
-            self.raw_data_format = str(self.raw_data_format)
+        if not isinstance(self.raw_data_format, list):
+            self.raw_data_format = [self.raw_data_format] if self.raw_data_format is not None else []
+        self.raw_data_format = [v if isinstance(v, str) else str(v) for v in self.raw_data_format]
 
         super().__post_init__(**kwargs)
 
@@ -4053,7 +4054,7 @@ slots.rawDataSource__access_details = Slot(uri=DATA_SHEETS_SCHEMA['collection/ac
                    model_uri=DATA_SHEETS_SCHEMA.rawDataSource__access_details, domain=None, range=Optional[str])
 
 slots.rawDataSource__raw_data_format = Slot(uri=DATA_SHEETS_SCHEMA['collection/raw_data_format'], name="rawDataSource__raw_data_format", curie=DATA_SHEETS_SCHEMA.curie('collection/raw_data_format'),
-                   model_uri=DATA_SHEETS_SCHEMA.rawDataSource__raw_data_format, domain=None, range=Optional[str])
+                   model_uri=DATA_SHEETS_SCHEMA.rawDataSource__raw_data_format, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.preprocessingStrategy__preprocessing_details = Slot(uri=DCTERMS.description, name="preprocessingStrategy__preprocessing_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__preprocessing_details, domain=None, range=Optional[Union[str, list[str]]])

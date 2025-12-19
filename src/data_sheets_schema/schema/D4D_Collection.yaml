@@ -181,6 +181,7 @@ classes:
         description: >
           Format of the raw data before any preprocessing.
         range: string
+        multivalued: true
 
 
 

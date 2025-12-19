@@ -5518,8 +5518,11 @@
                 },
                 "raw_data_format": {
                     "description": "Format of the raw data before any preprocessing.\n",
+                    "items": {
+                        "type": "string"
+                    },
                     "type": [
-                        "string",
+                        "array",
                         "null"
                     ]
                 },
