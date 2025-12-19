@@ -1,8 +1,8 @@
 # D4D Datasheet for AI-READI Dataset
 # Generation Method: Claude Code Agent Deterministic
-# Source: data/preprocessed/concatenated/AI_READI_preprocessed.txt
+# Source: data/preprocessed/concatenated/AI_READI_preprocessed.txt (245K, 13 source files)
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
-# Generated: 2025-12-05
+# Generated: 2025-12-16
 
 id: https://fairhub.io/datasets/2
 name: AI-READI
@@ -113,11 +113,11 @@ addressing_gaps:
 # Creators and Contributors
 creators:
   - id: creator-001
-    name: Cynthia Owsley
-    description: Principal Investigator, University of Alabama at Birmingham, Department of Ophthalmology and Visual Sciences
-  - id: creator-002
     name: Aaron Lee
     description: Contact PI/Project Leader, University of Washington, Department of Ophthalmology, Assistant Professor
+  - id: creator-002
+    name: Cynthia Owsley
+    description: Principal Investigator, University of Alabama at Birmingham, Department of Ophthalmology and Visual Sciences
   - id: creator-003
     name: Sally L. Baxter
     description: Co-Investigator, University of California San Diego, Department of Ophthalmology
@@ -180,7 +180,8 @@ funders:
       Funded through National Institutes of Health grant OT2OD032644, administered by
       NIH Office of the Director. Additional support from grants P30DK035816 (Nutrition
       and Obesity Research Center), UL1TR003096, and Research to Prevent Blindness.
-      Total funding in 2022: $5,026,499. Opportunity Number: OTA-21-008.
+      Total funding in 2022: $5,026,499. Opportunity Number: OTA-21-008. Project dates:
+      September 1, 2022 to August 31, 2025.
 
 # Composition
 instances:
@@ -196,7 +197,7 @@ instances:
     instance_type: >
       Human participants recruited from three health system sites (University of Alabama at
       Birmingham, University of California San Diego, University of Washington) between
-      2020 and 2025.
+      2022 and 2026.
 
 subsets:
   - id: subset-001
@@ -276,7 +277,7 @@ collection_mechanisms:
     description: >
       Single study encounter per participant at one of three data collection sites (Birmingham,
       San Diego, Seattle). Multi-domain protocol containing over 10 data collection domains
-      performed during the visit.
+      performed during the visit lasting between 2.5 and 4 hours.
   - id: collection-002
     name: Electronic health record screening
     description: >
@@ -288,13 +289,14 @@ collection_mechanisms:
     description: >
       Participants recruited in waves to facilitate efficient sampling. Composition and size
       of each wave influenced by observed participation characteristics to maintain balance
-      across race/ethnicity, sex, and diabetes severity.
+      across race/ethnicity, sex, and diabetes severity. Enrollment began July 18, 2023 and
+      continues until November 30, 2026.
   - id: collection-004
     name: Home-based wearable monitoring
     description: >
       Continuous glucose monitoring (Dexcom G6, 5-minute intervals), physical activity
       monitoring (Garmin VivoSmart 5), and environmental sensor monitoring (temperature,
-      humidity, air quality) conducted at participants' homes over specified monitoring periods.
+      humidity, air quality) conducted at participants' homes over 10-day monitoring periods.
   - id: collection-005
     name: Biospecimen collection and biobanking
     description: >
@@ -307,65 +309,75 @@ acquisition_methods:
     name: Survey and questionnaire data
     description: >
       Self-reported data collected via REDCap interfaces including demographics, medical
-      history, social determinants of health, depression screening (CES-D), diabetes-related
-      emotional distress (PAID scale), and psychosocial variables.
+      history, social determinants of health, depression screening (CES-D-10), diabetes-related
+      emotional distress (PAID scale), diabetes self-care score, dietary assessment, ophthalmic
+      survey, substance use (smoking, alcohol, vaping, marijuana), general health conditions,
+      and current medications with RxNorm codes.
   - id: acquisition-002
     name: Physical measurements and vital signs
     description: >
-      Height, weight, blood pressure, heart rate, waist circumference, body composition,
-      and other anthropometric measures collected during in-person visit.
+      Height, weight, waist and hip circumference (waist-hip ratio and BMI calculated), blood
+      pressure (systolic and diastolic, measured twice separated by 2 minutes), and heart rate
+      collected during in-person visit using standardized protocols.
   - id: acquisition-003
     name: Retinal imaging
     description: >
-      Multi-device retinal imaging protocol capturing data from Optos California, Spectralis
-      OCT2, Triton DRI OCT, Cirrus 5000, and Fluorescence Lifetime Imaging Ophthalmoscopy (FLIO).
-      Both eyes imaged under dilated conditions (except Optos). Output formats include DICOM,
-      .fda, .sdt converted to DICOM.
+      Multi-device retinal imaging protocol capturing data from Aurora IQ (Optomed), EIDON
+      widefield truecolor confocal fundus system (iCare), Spectralis HRA OCT and OCTA
+      (Heidelberg Engineering), Maestro2 3D OCT-1 (Topcon), Triton DRI OCT (Topcon),
+      Cirrus 5000 (Carl Zeiss), and Fluorescence Lifetime Imaging Ophthalmoscopy (FLIO,
+      Heidelberg Engineering). Both eyes imaged under dilated conditions (except Aurora IQ).
+      Output formats include DICOM, with proprietary formats (.fda, .sdt) converted to DICOM.
   - id: acquisition-004
     name: Visual function testing
     description: >
       Visual acuity and contrast sensitivity under photopic (daylight) and mesopic (dim light)
-      conditions using Electronic Visual Acuity tester and Mars chart. Autorefraction data
-      collected using Topcon KR 800.
+      conditions using Electronic Visual Acuity tester (M&S Technology) and Mars chart (Mars
+      Perceptrix). Autorefraction data collected using Topcon KR 800.
   - id: acquisition-005
     name: Clinical laboratory testing
     description: >
       Complete blood count (CBC) from fresh whole blood at local CLIA-certified labs. Central
       lab testing at UW Nutrition and Obesity Research Center (NORC) for EDTA plasma tests
-      (NT-proBNP, Troponin-T, C-peptide, insulin), serum tests (CRP, lipid panel, glucose,
+      (NT-proBNP, Troponin-T, C-peptide, insulin), serum tests (CRP-HS, lipid panel, glucose,
       kidney and liver function markers), whole blood tests (HbA1c), and urine tests (creatinine,
       albumin, other markers).
   - id: acquisition-006
     name: Electrocardiogram (ECG)
     description: >
-      12-lead ECG data collected during study visit using standardized protocols.
+      12-lead ECG data collected using Philips Pagewriter TC30 Cardiograph during study visit
+      with participant sitting in reclining chair or lying supine at recorded position
+      (0°, 30°, 60°, or 90° relative to supine).
   - id: acquisition-007
     name: Cognitive function testing
     description: >
-      Montreal Cognitive Assessment (MoCA) administered to assess cognitive function, relevant
-      to T2DM complications including cognitive decline.
+      Montreal Cognitive Assessment (MoCA) administered electronically on iPad using MoCA Duo
+      Application (total score, section subscores, Memory Index Score, task completion times).
+      Total possible score is 30, with higher numbers representing better performance.
   - id: acquisition-008
     name: Peripheral neuropathy assessment
     description: >
-      Monofilament testing performed to assess peripheral neuropathy, a common T2DM complication.
+      Monofilament testing performed to assess peripheral neuropathy using 10g filament at
+      three locations on each foot (10 times per location) with participant's eyes closed,
+      responding yes/no whether they feel the filament.
   - id: acquisition-009
     name: Continuous glucose monitoring
     description: >
       Dexcom G6 Continuous Glucose Monitor capturing blood glucose measurements (mg/dL) every
-      5 minutes. Data exported in CSV format.
+      5 minutes for 10 days. Data exported in CSV format.
   - id: acquisition-010
     name: Physical activity monitoring
     description: >
       Garmin VivoSmart 5 wearable device capturing number of steps, heart rate, sleep duration
-      (circadian and diurnal rhythm), and oxygen saturation. Data exported in .FIT format and
-      converted to mHealth standard.
+      (circadian and diurnal rhythm), and oxygen saturation for 10 days. Data exported in .FIT
+      format and converted to mHealth standard.
   - id: acquisition-011
     name: Environmental monitoring
     description: >
       Custom-designed environmental sensor (Karalis Johnson Retina Center, UW) capturing ambient
       temperature, relative humidity, nitrogen oxides (NO and NO2), volatile organic compounds,
-      particulate matter (PM1.0, PM2.5, PM4, PM10), and multi-spectral light intensity (11 measurements).
-      Data in CSV format.
+      particulate matter (PM1.0, PM2.5, PM4, PM10), and multi-spectral light intensity (11
+      measurements) for 10 days. Data in CSV format.
   - id: acquisition-012
     name: Biospecimen collection
     description: >
@@ -386,6 +398,8 @@ preprocessing_strategies:
       - Standardized operating procedures across all three sites
       - Common protocols and equipment
       - Centralized data management through REDCap
+      - Standardized training of study coordinators with certification process
+      - Manual of Procedures (MOP) for reference
   - id: preproc-002
     name: Image format conversion
     description: >
@@ -394,6 +408,8 @@ preprocessing_strategies:
     preprocessing_details:
       - Proprietary retinal imaging formats (.fda, .sdt) converted to DICOM
       - Wearable device data (.FIT) converted to mHealth standard
+      - ECG data exported in .xml format
+      - MoCA data exported in .csv format
   - id: preproc-003
     name: Biospecimen processing
     description: >
@@ -403,18 +419,32 @@ preprocessing_strategies:
     preprocessing_details:
       - Standardized local processing for plasma, serum, buffy coats
       - Centralized PBMC processing at UAB CCTS
-      - Batch shipping for central lab analyses
+      - Batch shipping for central lab analyses at UW NORC
+      - Genomic DNA extractions from stored buffy coats performed at UAB CCTS
   - id: preproc-004
     name: Quality control and validation
     description: >
       Multiple quality control measures including standardized training of study coordinators,
       equipment calibration, duplicate measurements, and data validation checks in REDCap
-      system.
+      system. Data managers at each site oversee quality control before uploading to FAIRhub.
     preprocessing_details:
-      - Standardized training of study coordinators
+      - Standardized training of study coordinators with certification
       - Equipment calibration protocols
-      - Duplicate measurements for quality assurance
+      - Duplicate measurements for quality assurance (e.g., blood pressure measured twice)
       - Data validation checks in REDCap
+      - Practice subjects required before enrolling participants
+  - id: preproc-005
+    name: Data mapping to standards
+    description: >
+      All data mapped to applicable data standard formats such as Observational Medical Outcomes
+      Partnership Common Data Model for clinical data and DICOM format for retinal imaging.
+      Data stored and shared as 'AI-ready' enabling immediate AI/ML research without reformatting.
+    preprocessing_details:
+      - OMOP Common Data Model for clinical data
+      - DICOM for retinal imaging
+      - mHealth standard for wearable device data
+      - RxNorm codes for medications
+      - ICD-10 codes for diabetes classification
 
 cleaning_strategies:
   - id: cleaning-001
@@ -428,6 +458,7 @@ cleaning_strategies:
       - Standardized equipment and training
       - REDCap data management for quality
       - FAIR principles implementation
+      - Pilot enrollment period (July 18 - November 30, 2023) to ensure coordinator familiarity
 
 # Uses
 intended_uses:
@@ -436,13 +467,14 @@ intended_uses:
     description: >
       Primary intended use is development and training of artificial intelligence and machine
       learning models to study Type 2 Diabetes Mellitus, disease trajectories, and salutogenesis
-      (pathways to health resilience).
+      (pathways to health resilience). Designed for pseudotime manifold analysis to predict
+      disease progression.
   - id: use-002
     name: Multi-modal T2DM research
     description: >
       Research leveraging multiple data domains (imaging, clinical, genomic, wearable,
-      environmental) to understand complex interactions and relationships in T2DM progression
-      and management.
+      environmental, survey) to understand complex interactions and relationships in T2DM
+      progression and management.
   - id: use-003
     name: Health equity research
     description: >
@@ -461,11 +493,11 @@ intended_uses:
 
 discouraged_uses:
   - id: discouraged-001
-    name: Uses outside pilot phase scope
+    name: Uses during ongoing enrollment
     description: >
-      As enrollment is ongoing, pilot data releases and periodic updates may not have achieved
-      balanced distribution across all groups. Early versions should be used with awareness
-      of this limitation.
+      As enrollment is ongoing until November 2026, pilot data releases and periodic updates
+      may not have achieved balanced distribution across all groups. Early versions should be
+      used with awareness of this limitation.
   - id: discouraged-002
     name: Clinical decision-making without validation
     description: >
@@ -538,7 +570,7 @@ maintainers:
       - University of Alabama at Birmingham (biorepository, data collection)
       - University of California San Diego (data collection)
       - Data Access Committee (access policies)
-      - Documentation team (version-specific guides)
+      - Documentation team (version-specific guides at https://docs.aireadi.org/)
 
 updates:
   id: updates-001
@@ -547,13 +579,16 @@ updates:
     Dataset updated periodically as enrollment progresses toward target of 4,000 participants
     by November 2026. Version-specific documentation maintained for each release. Biorepository
     maintained at UAB CCTS with long-term storage protocols. Data sharing policies under ongoing
-    development by Data Access Committee.
+    development by Data Access Committee. Pilot data released May 2024; all data through July 31,
+    2024 released November 2024.
   frequency: Periodic releases with ongoing enrollment; final release planned for late 2026
   update_details:
     - Periodic data releases as enrollment continues
-    - Pilot data released with ongoing enrollment
+    - Pilot data released May 2024
+    - v1.0.0 data through July 31, 2024 released November 2024
+    - v2.0.0 and v3.0.0 released with additional participants
     - Final dataset expected after completion of 4,000 participant enrollment by November 2026
-    - Dataset versioning implemented (v1.0.0, v2.0.0, v3.0.0)
+    - Dataset versioning implemented
     - Version-specific documentation at https://docs.aireadi.org/
 
 retention_limit:
@@ -565,9 +600,10 @@ retention_limit:
     samples available for distribution.
   retention_details:
     - NIH data sharing policies govern digital data retention
-    - Biospecimen retention per institutional policies
+    - Biospecimen retention per institutional policies at UAB CCTS
     - Consent agreements specify retention terms
     - Finite biospecimen availability
+    - Procedures for reviewing and prioritizing biospecimen requests under development
 
 # Ethics and Human Subjects
 human_subject_research:
@@ -607,6 +643,8 @@ sensitive_elements:
     sensitivity_details:
       - Genetic sequencing data from buffy coats
       - Blood derivatives and urine biospecimens
+      - Peripheral blood mononuclear cells (PBMCs)
+      - PAXgene RNA
   - id: sensitive-002
     name: Geographic and demographic identifiers
     description: >
@@ -625,7 +663,7 @@ sensitive_elements:
     sensitive_elements_present: true
     sensitivity_details:
       - Past health records
-      - Medications
+      - Medications with RxNorm codes
       - Traffic and accident reports
 
 # Data Governance and External Resources
@@ -666,7 +704,7 @@ external_resources:
     external_resources:
       - https://doi.org/10.5281/zenodo.10642459
   - id: resource-008
-    name: Protocol Publication
+    name: Protocol Publication (BMJ Open)
     description: BMJ Open publication describing study design and protocol
     external_resources:
       - https://doi.org/10.1136/bmjopen-2024-097449

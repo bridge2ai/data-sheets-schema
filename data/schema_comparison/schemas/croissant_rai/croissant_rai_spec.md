@@ -19,19 +19,24 @@ The Croissant RAI (Responsible AI) Specification Version 1.0 extends the Croissa
 
 ## Primary RAI Properties
 
-The specification defines 24 properties organized across seven use cases:
+The specification defines 20 properties organized across five use cases:
 
 ### Data Lifecycle (Dataset Level)
-- `rai:dataCollection` - "Description of the data collection process"
+- `rai:dataCollection` - Description of the data collection process
 - `rai:dataCollectionType` - Enumerated types (surveys, web scraping, manual curation, etc.)
+- `rai:dataCollectionTimeframe` - Temporal scope of data collection
+- `rai:dataCollectionMissingData` - Documentation of missing data patterns
+- `rai:dataCollectionRawData` - Raw data sources before preprocessing
 - `rai:dataLimitations` - Known constraints and generalization limits
 - `rai:dataPreprocessingProtocol` - Preparation steps for ML processing
 
 ### Data Labeling
-- `rai:annotationProtocol` - Annotation methodology and task definitions
-- `rai:annotationPlatform` - Tools and platforms used
+- `rai:dataAnnotationProtocol` - Annotation methodology and task definitions
+- `rai:dataAnnotationPlatform` - Tools and platforms used for annotation
 - `rai:annotationsPerItem` - Number of labels per instance
 - `rai:annotatorDemographics` - Demographic specifications of annotators
+- `rai:dataAnnotationAnalysis` - Analysis of annotation quality and agreement
+- `rai:machineAnnotationTools` - Automated annotation tools and models
 
 ### Safety & Fairness Evaluation
 - `rai:dataBiases` - Documented bias descriptions
@@ -40,8 +45,9 @@ The specification defines 24 properties organized across seven use cases:
 - `rai:dataUseCases` - Intended applications and usage guidelines
 
 ### Compliance & Governance
-- `rai:dataManipulationProtocol` - Data transformation procedures
-- `rai:dataReleaseMaintenance` - Versioning and deprecation policies
+- `rai:dataManipulationProtocol` - Data cleaning and transformation procedures
+- `rai:dataImputationProtocol` - Missing data imputation methodology
+- `rai:dataReleaseMaintenancePlan` - Versioning and deprecation policies
 
 ## Example Implementation
 

@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2025-12-09T21:49:08
+# Generation date: 2025-12-18T22:19:34
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -88,6 +88,7 @@ LINKML = CurieNamespace('linkml', 'https://w3id.org/linkml/')
 MEDIATYPES = CurieNamespace('mediatypes', 'https://www.iana.org/assignments/media-types/')
 PROV = CurieNamespace('prov', 'http://www.w3.org/ns/prov#')
 QUDT = CurieNamespace('qudt', 'http://qudt.org/schema/qudt/')
+RAI = CurieNamespace('rai', 'http://mlcommons.org/croissant/RAI/')
 SCHEMA = CurieNamespace('schema', 'http://schema.org/')
 SH = CurieNamespace('sh', 'https://w3id.org/shacl/')
 SKOS = CurieNamespace('skos', 'http://www.w3.org/2004/02/skos/core#')
@@ -471,6 +472,8 @@ class Dataset(Information):
     sampling_strategies: Optional[Union[Union[dict, "SamplingStrategy"], list[Union[dict, "SamplingStrategy"]]]] = empty_list()
     data_collectors: Optional[Union[Union[dict, "DataCollector"], list[Union[dict, "DataCollector"]]]] = empty_list()
     collection_timeframes: Optional[Union[Union[dict, "CollectionTimeframe"], list[Union[dict, "CollectionTimeframe"]]]] = empty_list()
+    missing_data_documentation: Optional[Union[Union[dict, "MissingDataDocumentation"], list[Union[dict, "MissingDataDocumentation"]]]] = empty_list()
+    raw_data_sources: Optional[Union[Union[dict, "RawDataSource"], list[Union[dict, "RawDataSource"]]]] = empty_list()
     ethical_reviews: Optional[Union[Union[dict, "EthicalReview"], list[Union[dict, "EthicalReview"]]]] = empty_list()
     data_protection_impacts: Optional[Union[Union[dict, "DataProtectionImpact"], list[Union[dict, "DataProtectionImpact"]]]] = empty_list()
     human_subject_research: Optional[Union[dict, "HumanSubjectResearch"]] = None
@@ -482,6 +485,9 @@ class Dataset(Information):
     cleaning_strategies: Optional[Union[Union[dict, "CleaningStrategy"], list[Union[dict, "CleaningStrategy"]]]] = empty_list()
     labeling_strategies: Optional[Union[Union[dict, "LabelingStrategy"], list[Union[dict, "LabelingStrategy"]]]] = empty_list()
     raw_sources: Optional[Union[Union[dict, "RawData"], list[Union[dict, "RawData"]]]] = empty_list()
+    imputation_protocols: Optional[Union[Union[dict, "ImputationProtocol"], list[Union[dict, "ImputationProtocol"]]]] = empty_list()
+    annotation_analyses: Optional[Union[Union[dict, "AnnotationAnalysis"], list[Union[dict, "AnnotationAnalysis"]]]] = empty_list()
+    machine_annotation_tools: Optional[Union[Union[dict, "MachineAnnotationTools"], list[Union[dict, "MachineAnnotationTools"]]]] = empty_list()
     existing_uses: Optional[Union[Union[dict, "ExistingUse"], list[Union[dict, "ExistingUse"]]]] = empty_list()
     use_repository: Optional[Union[Union[dict, "UseRepository"], list[Union[dict, "UseRepository"]]]] = empty_list()
     other_tasks: Optional[Union[Union[dict, "OtherTask"], list[Union[dict, "OtherTask"]]]] = empty_list()
@@ -620,6 +626,14 @@ class Dataset(Information):
             self.collection_timeframes = [self.collection_timeframes] if self.collection_timeframes is not None else []
         self.collection_timeframes = [v if isinstance(v, CollectionTimeframe) else CollectionTimeframe(**as_dict(v)) for v in self.collection_timeframes]
 
+        if not isinstance(self.missing_data_documentation, list):
+            self.missing_data_documentation = [self.missing_data_documentation] if self.missing_data_documentation is not None else []
+        self.missing_data_documentation = [v if isinstance(v, MissingDataDocumentation) else MissingDataDocumentation(**as_dict(v)) for v in self.missing_data_documentation]
+
+        if not isinstance(self.raw_data_sources, list):
+            self.raw_data_sources = [self.raw_data_sources] if self.raw_data_sources is not None else []
+        self.raw_data_sources = [v if isinstance(v, RawDataSource) else RawDataSource(**as_dict(v)) for v in self.raw_data_sources]
+
         if not isinstance(self.ethical_reviews, list):
             self.ethical_reviews = [self.ethical_reviews] if self.ethical_reviews is not None else []
         self.ethical_reviews = [v if isinstance(v, EthicalReview) else EthicalReview(**as_dict(v)) for v in self.ethical_reviews]
@@ -660,6 +674,18 @@ class Dataset(Information):
         if not isinstance(self.raw_sources, list):
             self.raw_sources = [self.raw_sources] if self.raw_sources is not None else []
         self.raw_sources = [v if isinstance(v, RawData) else RawData(**as_dict(v)) for v in self.raw_sources]
+
+        if not isinstance(self.imputation_protocols, list):
+            self.imputation_protocols = [self.imputation_protocols] if self.imputation_protocols is not None else []
+        self.imputation_protocols = [v if isinstance(v, ImputationProtocol) else ImputationProtocol(**as_dict(v)) for v in self.imputation_protocols]
+
+        if not isinstance(self.annotation_analyses, list):
+            self.annotation_analyses = [self.annotation_analyses] if self.annotation_analyses is not None else []
+        self.annotation_analyses = [v if isinstance(v, AnnotationAnalysis) else AnnotationAnalysis(**as_dict(v)) for v in self.annotation_analyses]
+
+        if not isinstance(self.machine_annotation_tools, list):
+            self.machine_annotation_tools = [self.machine_annotation_tools] if self.machine_annotation_tools is not None else []
+        self.machine_annotation_tools = [v if isinstance(v, MachineAnnotationTools) else MachineAnnotationTools(**as_dict(v)) for v in self.machine_annotation_tools]
 
         if not isinstance(self.existing_uses, list):
             self.existing_uses = [self.existing_uses] if self.existing_uses is not None else []
@@ -1621,6 +1647,76 @@ class DirectCollection(DatasetProperty):
 
 
 @dataclass(repr=False)
+class MissingDataDocumentation(DatasetProperty):
+    """
+    Documentation of missing data in the dataset, including patterns, causes, and strategies for handling missing
+    values.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/MissingDataDocumentation"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:collection/MissingDataDocumentation"
+    class_name: ClassVar[str] = "MissingDataDocumentation"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.MissingDataDocumentation
+
+    missing_data_patterns: Optional[Union[str, list[str]]] = empty_list()
+    missing_data_causes: Optional[Union[str, list[str]]] = empty_list()
+    handling_strategy: Optional[str] = None
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if not isinstance(self.missing_data_patterns, list):
+            self.missing_data_patterns = [self.missing_data_patterns] if self.missing_data_patterns is not None else []
+        self.missing_data_patterns = [v if isinstance(v, str) else str(v) for v in self.missing_data_patterns]
+
+        if not isinstance(self.missing_data_causes, list):
+            self.missing_data_causes = [self.missing_data_causes] if self.missing_data_causes is not None else []
+        self.missing_data_causes = [v if isinstance(v, str) else str(v) for v in self.missing_data_causes]
+
+        if self.handling_strategy is not None and not isinstance(self.handling_strategy, str):
+            self.handling_strategy = str(self.handling_strategy)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class RawDataSource(DatasetProperty):
+    """
+    Description of raw data sources before preprocessing, cleaning, or labeling. Documents where the original data
+    comes from and how it can be accessed.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA["collection/RawDataSource"]
+    class_class_curie: ClassVar[str] = "data_sheets_schema:collection/RawDataSource"
+    class_name: ClassVar[str] = "RawDataSource"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.RawDataSource
+
+    source_description: str = None
+    source_type: Optional[Union[str, list[str]]] = empty_list()
+    access_details: Optional[str] = None
+    raw_data_format: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self._is_empty(self.source_description):
+            self.MissingRequiredField("source_description")
+        if not isinstance(self.source_description, str):
+            self.source_description = str(self.source_description)
+
+        if not isinstance(self.source_type, list):
+            self.source_type = [self.source_type] if self.source_type is not None else []
+        self.source_type = [v if isinstance(v, str) else str(v) for v in self.source_type]
+
+        if self.access_details is not None and not isinstance(self.access_details, str):
+            self.access_details = str(self.access_details)
+
+        if not isinstance(self.raw_data_format, list):
+            self.raw_data_format = [self.raw_data_format] if self.raw_data_format is not None else []
+        self.raw_data_format = [v if isinstance(v, str) else str(v) for v in self.raw_data_format]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
 class PreprocessingStrategy(DatasetProperty):
     """
     Was any preprocessing of the data done (e.g., discretization or bucketing, tokenization, SIFT feature extraction)?
@@ -1677,15 +1773,20 @@ class LabelingStrategy(DatasetProperty):
     class_name: ClassVar[str] = "LabelingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LabelingStrategy
 
-    annotation_platform: Optional[str] = None
+    data_annotation_platform: Optional[str] = None
+    data_annotation_protocol: Optional[Union[str, list[str]]] = empty_list()
     annotations_per_item: Optional[int] = None
     inter_annotator_agreement: Optional[str] = None
     annotator_demographics: Optional[Union[str, list[str]]] = empty_list()
     labeling_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self.annotation_platform is not None and not isinstance(self.annotation_platform, str):
-            self.annotation_platform = str(self.annotation_platform)
+        if self.data_annotation_platform is not None and not isinstance(self.data_annotation_platform, str):
+            self.data_annotation_platform = str(self.data_annotation_platform)
+
+        if not isinstance(self.data_annotation_protocol, list):
+            self.data_annotation_protocol = [self.data_annotation_protocol] if self.data_annotation_protocol is not None else []
+        self.data_annotation_protocol = [v if isinstance(v, str) else str(v) for v in self.data_annotation_protocol]
 
         if self.annotations_per_item is not None and not isinstance(self.annotations_per_item, int):
             self.annotations_per_item = int(self.annotations_per_item)
@@ -1727,6 +1828,116 @@ class RawData(DatasetProperty):
         if not isinstance(self.raw_data_details, list):
             self.raw_data_details = [self.raw_data_details] if self.raw_data_details is not None else []
         self.raw_data_details = [v if isinstance(v, str) else str(v) for v in self.raw_data_details]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class ImputationProtocol(DatasetProperty):
+    """
+    Description of data imputation methodology, including techniques used to handle missing values and rationale for
+    chosen approaches.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["ImputationProtocol"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:ImputationProtocol"
+    class_name: ClassVar[str] = "ImputationProtocol"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ImputationProtocol
+
+    imputation_method: Optional[Union[str, list[str]]] = empty_list()
+    imputed_fields: Optional[Union[str, list[str]]] = empty_list()
+    imputation_rationale: Optional[str] = None
+    imputation_validation: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if not isinstance(self.imputation_method, list):
+            self.imputation_method = [self.imputation_method] if self.imputation_method is not None else []
+        self.imputation_method = [v if isinstance(v, str) else str(v) for v in self.imputation_method]
+
+        if not isinstance(self.imputed_fields, list):
+            self.imputed_fields = [self.imputed_fields] if self.imputed_fields is not None else []
+        self.imputed_fields = [v if isinstance(v, str) else str(v) for v in self.imputed_fields]
+
+        if self.imputation_rationale is not None and not isinstance(self.imputation_rationale, str):
+            self.imputation_rationale = str(self.imputation_rationale)
+
+        if not isinstance(self.imputation_validation, list):
+            self.imputation_validation = [self.imputation_validation] if self.imputation_validation is not None else []
+        self.imputation_validation = [v if isinstance(v, str) else str(v) for v in self.imputation_validation]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class AnnotationAnalysis(DatasetProperty):
+    """
+    Analysis of annotation quality, inter-annotator agreement metrics, and systematic patterns in annotation
+    disagreements.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["AnnotationAnalysis"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:AnnotationAnalysis"
+    class_name: ClassVar[str] = "AnnotationAnalysis"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.AnnotationAnalysis
+
+    inter_annotator_agreement_score: Optional[float] = None
+    agreement_metric: Optional[str] = None
+    analysis_method: Optional[str] = None
+    disagreement_patterns: Optional[Union[str, list[str]]] = empty_list()
+    annotation_quality_details: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self.inter_annotator_agreement_score is not None and not isinstance(self.inter_annotator_agreement_score, float):
+            self.inter_annotator_agreement_score = float(self.inter_annotator_agreement_score)
+
+        if self.agreement_metric is not None and not isinstance(self.agreement_metric, str):
+            self.agreement_metric = str(self.agreement_metric)
+
+        if self.analysis_method is not None and not isinstance(self.analysis_method, str):
+            self.analysis_method = str(self.analysis_method)
+
+        if not isinstance(self.disagreement_patterns, list):
+            self.disagreement_patterns = [self.disagreement_patterns] if self.disagreement_patterns is not None else []
+        self.disagreement_patterns = [v if isinstance(v, str) else str(v) for v in self.disagreement_patterns]
+
+        if not isinstance(self.annotation_quality_details, list):
+            self.annotation_quality_details = [self.annotation_quality_details] if self.annotation_quality_details is not None else []
+        self.annotation_quality_details = [v if isinstance(v, str) else str(v) for v in self.annotation_quality_details]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class MachineAnnotationTools(DatasetProperty):
+    """
+    Automated or machine-learning-based annotation tools used in dataset creation, including NLP pipelines, computer
+    vision models, or other automated labeling systems.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DPREPROCESSING["MachineAnnotationTools"]
+    class_class_curie: ClassVar[str] = "d4dpreprocessing:MachineAnnotationTools"
+    class_name: ClassVar[str] = "MachineAnnotationTools"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.MachineAnnotationTools
+
+    tools: Optional[Union[str, list[str]]] = empty_list()
+    tool_descriptions: Optional[Union[str, list[str]]] = empty_list()
+    tool_accuracy: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if not isinstance(self.tools, list):
+            self.tools = [self.tools] if self.tools is not None else []
+        self.tools = [v if isinstance(v, str) else str(v) for v in self.tools]
+
+        if not isinstance(self.tool_descriptions, list):
+            self.tool_descriptions = [self.tool_descriptions] if self.tool_descriptions is not None else []
+        self.tool_descriptions = [v if isinstance(v, str) else str(v) for v in self.tool_descriptions]
+
+        if not isinstance(self.tool_accuracy, list):
+            self.tool_accuracy = [self.tool_accuracy] if self.tool_accuracy is not None else []
+        self.tool_accuracy = [v if isinstance(v, str) else str(v) for v in self.tool_accuracy]
 
         super().__post_init__(**kwargs)
 
@@ -3432,6 +3643,12 @@ slots.dataset__data_collectors = Slot(uri=DATA_SHEETS_SCHEMA.data_collectors, na
 slots.dataset__collection_timeframes = Slot(uri=DATA_SHEETS_SCHEMA.collection_timeframes, name="dataset__collection_timeframes", curie=DATA_SHEETS_SCHEMA.curie('collection_timeframes'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__collection_timeframes, domain=None, range=Optional[Union[Union[dict, CollectionTimeframe], list[Union[dict, CollectionTimeframe]]]])
 
+slots.dataset__missing_data_documentation = Slot(uri=DATA_SHEETS_SCHEMA.missing_data_documentation, name="dataset__missing_data_documentation", curie=DATA_SHEETS_SCHEMA.curie('missing_data_documentation'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__missing_data_documentation, domain=None, range=Optional[Union[Union[dict, MissingDataDocumentation], list[Union[dict, MissingDataDocumentation]]]])
+
+slots.dataset__raw_data_sources = Slot(uri=DATA_SHEETS_SCHEMA.raw_data_sources, name="dataset__raw_data_sources", curie=DATA_SHEETS_SCHEMA.curie('raw_data_sources'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__raw_data_sources, domain=None, range=Optional[Union[Union[dict, RawDataSource], list[Union[dict, RawDataSource]]]])
+
 slots.dataset__ethical_reviews = Slot(uri=DATA_SHEETS_SCHEMA.ethical_reviews, name="dataset__ethical_reviews", curie=DATA_SHEETS_SCHEMA.curie('ethical_reviews'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__ethical_reviews, domain=None, range=Optional[Union[Union[dict, EthicalReview], list[Union[dict, EthicalReview]]]])
 
@@ -3464,6 +3681,15 @@ slots.dataset__labeling_strategies = Slot(uri=DATA_SHEETS_SCHEMA.labeling_strate
 
 slots.dataset__raw_sources = Slot(uri=DATA_SHEETS_SCHEMA.raw_sources, name="dataset__raw_sources", curie=DATA_SHEETS_SCHEMA.curie('raw_sources'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__raw_sources, domain=None, range=Optional[Union[Union[dict, RawData], list[Union[dict, RawData]]]])
+
+slots.dataset__imputation_protocols = Slot(uri=DATA_SHEETS_SCHEMA.imputation_protocols, name="dataset__imputation_protocols", curie=DATA_SHEETS_SCHEMA.curie('imputation_protocols'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__imputation_protocols, domain=None, range=Optional[Union[Union[dict, ImputationProtocol], list[Union[dict, ImputationProtocol]]]])
+
+slots.dataset__annotation_analyses = Slot(uri=DATA_SHEETS_SCHEMA.annotation_analyses, name="dataset__annotation_analyses", curie=DATA_SHEETS_SCHEMA.curie('annotation_analyses'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__annotation_analyses, domain=None, range=Optional[Union[Union[dict, AnnotationAnalysis], list[Union[dict, AnnotationAnalysis]]]])
+
+slots.dataset__machine_annotation_tools = Slot(uri=DATA_SHEETS_SCHEMA.machine_annotation_tools, name="dataset__machine_annotation_tools", curie=DATA_SHEETS_SCHEMA.curie('machine_annotation_tools'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__machine_annotation_tools, domain=None, range=Optional[Union[Union[dict, MachineAnnotationTools], list[Union[dict, MachineAnnotationTools]]]])
 
 slots.dataset__existing_uses = Slot(uri=DATA_SHEETS_SCHEMA.existing_uses, name="dataset__existing_uses", curie=DATA_SHEETS_SCHEMA.curie('existing_uses'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__existing_uses, domain=None, range=Optional[Union[Union[dict, ExistingUse], list[Union[dict, ExistingUse]]]])
@@ -3805,14 +4031,38 @@ slots.directCollection__is_direct = Slot(uri=DATA_SHEETS_SCHEMA['collection/is_d
 slots.directCollection__collection_details = Slot(uri=DCTERMS.description, name="directCollection__collection_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.directCollection__collection_details, domain=None, range=Optional[Union[str, list[str]]])
 
+slots.missingDataDocumentation__missing_data_patterns = Slot(uri=DATA_SHEETS_SCHEMA['collection/missing_data_patterns'], name="missingDataDocumentation__missing_data_patterns", curie=DATA_SHEETS_SCHEMA.curie('collection/missing_data_patterns'),
+                   model_uri=DATA_SHEETS_SCHEMA.missingDataDocumentation__missing_data_patterns, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.missingDataDocumentation__missing_data_causes = Slot(uri=DATA_SHEETS_SCHEMA['collection/missing_data_causes'], name="missingDataDocumentation__missing_data_causes", curie=DATA_SHEETS_SCHEMA.curie('collection/missing_data_causes'),
+                   model_uri=DATA_SHEETS_SCHEMA.missingDataDocumentation__missing_data_causes, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.missingDataDocumentation__handling_strategy = Slot(uri=DATA_SHEETS_SCHEMA['collection/handling_strategy'], name="missingDataDocumentation__handling_strategy", curie=DATA_SHEETS_SCHEMA.curie('collection/handling_strategy'),
+                   model_uri=DATA_SHEETS_SCHEMA.missingDataDocumentation__handling_strategy, domain=None, range=Optional[str])
+
+slots.rawDataSource__source_description = Slot(uri=DATA_SHEETS_SCHEMA['collection/source_description'], name="rawDataSource__source_description", curie=DATA_SHEETS_SCHEMA.curie('collection/source_description'),
+                   model_uri=DATA_SHEETS_SCHEMA.rawDataSource__source_description, domain=None, range=str)
+
+slots.rawDataSource__source_type = Slot(uri=DATA_SHEETS_SCHEMA['collection/source_type'], name="rawDataSource__source_type", curie=DATA_SHEETS_SCHEMA.curie('collection/source_type'),
+                   model_uri=DATA_SHEETS_SCHEMA.rawDataSource__source_type, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.rawDataSource__access_details = Slot(uri=DATA_SHEETS_SCHEMA['collection/access_details'], name="rawDataSource__access_details", curie=DATA_SHEETS_SCHEMA.curie('collection/access_details'),
+                   model_uri=DATA_SHEETS_SCHEMA.rawDataSource__access_details, domain=None, range=Optional[str])
+
+slots.rawDataSource__raw_data_format = Slot(uri=DATA_SHEETS_SCHEMA['collection/raw_data_format'], name="rawDataSource__raw_data_format", curie=DATA_SHEETS_SCHEMA.curie('collection/raw_data_format'),
+                   model_uri=DATA_SHEETS_SCHEMA.rawDataSource__raw_data_format, domain=None, range=Optional[Union[str, list[str]]])
+
 slots.preprocessingStrategy__preprocessing_details = Slot(uri=DCTERMS.description, name="preprocessingStrategy__preprocessing_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.preprocessingStrategy__preprocessing_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.cleaningStrategy__cleaning_details = Slot(uri=DCTERMS.description, name="cleaningStrategy__cleaning_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__cleaning_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.labelingStrategy__annotation_platform = Slot(uri=SCHEMA.instrument, name="labelingStrategy__annotation_platform", curie=SCHEMA.curie('instrument'),
-                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__annotation_platform, domain=None, range=Optional[str])
+slots.labelingStrategy__data_annotation_platform = Slot(uri=SCHEMA.instrument, name="labelingStrategy__data_annotation_platform", curie=SCHEMA.curie('instrument'),
+                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__data_annotation_platform, domain=None, range=Optional[str])
+
+slots.labelingStrategy__data_annotation_protocol = Slot(uri=D4DPREPROCESSING.data_annotation_protocol, name="labelingStrategy__data_annotation_protocol", curie=D4DPREPROCESSING.curie('data_annotation_protocol'),
+                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__data_annotation_protocol, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.labelingStrategy__annotations_per_item = Slot(uri=D4DPREPROCESSING.annotations_per_item, name="labelingStrategy__annotations_per_item", curie=D4DPREPROCESSING.curie('annotations_per_item'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__annotations_per_item, domain=None, range=Optional[int])
@@ -3831,6 +4081,42 @@ slots.rawData__access_url = Slot(uri=D4DPREPROCESSING.access_url, name="rawData_
 
 slots.rawData__raw_data_details = Slot(uri=DCTERMS.description, name="rawData__raw_data_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.rawData__raw_data_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.imputationProtocol__imputation_method = Slot(uri=D4DPREPROCESSING.imputation_method, name="imputationProtocol__imputation_method", curie=D4DPREPROCESSING.curie('imputation_method'),
+                   model_uri=DATA_SHEETS_SCHEMA.imputationProtocol__imputation_method, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.imputationProtocol__imputed_fields = Slot(uri=D4DPREPROCESSING.imputed_fields, name="imputationProtocol__imputed_fields", curie=D4DPREPROCESSING.curie('imputed_fields'),
+                   model_uri=DATA_SHEETS_SCHEMA.imputationProtocol__imputed_fields, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.imputationProtocol__imputation_rationale = Slot(uri=D4DPREPROCESSING.imputation_rationale, name="imputationProtocol__imputation_rationale", curie=D4DPREPROCESSING.curie('imputation_rationale'),
+                   model_uri=DATA_SHEETS_SCHEMA.imputationProtocol__imputation_rationale, domain=None, range=Optional[str])
+
+slots.imputationProtocol__imputation_validation = Slot(uri=D4DPREPROCESSING.imputation_validation, name="imputationProtocol__imputation_validation", curie=D4DPREPROCESSING.curie('imputation_validation'),
+                   model_uri=DATA_SHEETS_SCHEMA.imputationProtocol__imputation_validation, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.annotationAnalysis__inter_annotator_agreement_score = Slot(uri=D4DPREPROCESSING.inter_annotator_agreement_score, name="annotationAnalysis__inter_annotator_agreement_score", curie=D4DPREPROCESSING.curie('inter_annotator_agreement_score'),
+                   model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__inter_annotator_agreement_score, domain=None, range=Optional[float])
+
+slots.annotationAnalysis__agreement_metric = Slot(uri=D4DPREPROCESSING.agreement_metric, name="annotationAnalysis__agreement_metric", curie=D4DPREPROCESSING.curie('agreement_metric'),
+                   model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__agreement_metric, domain=None, range=Optional[str])
+
+slots.annotationAnalysis__analysis_method = Slot(uri=D4DPREPROCESSING.analysis_method, name="annotationAnalysis__analysis_method", curie=D4DPREPROCESSING.curie('analysis_method'),
+                   model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__analysis_method, domain=None, range=Optional[str])
+
+slots.annotationAnalysis__disagreement_patterns = Slot(uri=D4DPREPROCESSING.disagreement_patterns, name="annotationAnalysis__disagreement_patterns", curie=D4DPREPROCESSING.curie('disagreement_patterns'),
+                   model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__disagreement_patterns, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.annotationAnalysis__annotation_quality_details = Slot(uri=D4DPREPROCESSING.annotation_quality_details, name="annotationAnalysis__annotation_quality_details", curie=D4DPREPROCESSING.curie('annotation_quality_details'),
+                   model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__annotation_quality_details, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.machineAnnotationTools__tools = Slot(uri=D4DPREPROCESSING.tools, name="machineAnnotationTools__tools", curie=D4DPREPROCESSING.curie('tools'),
+                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tools, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.machineAnnotationTools__tool_descriptions = Slot(uri=D4DPREPROCESSING.tool_descriptions, name="machineAnnotationTools__tool_descriptions", curie=D4DPREPROCESSING.curie('tool_descriptions'),
+                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_descriptions, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.machineAnnotationTools__tool_accuracy = Slot(uri=D4DPREPROCESSING.tool_accuracy, name="machineAnnotationTools__tool_accuracy", curie=D4DPREPROCESSING.curie('tool_accuracy'),
+                   model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tool_accuracy, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.existingUse__examples = Slot(uri=D4DUSES.examples, name="existingUse__examples", curie=D4DUSES.curie('examples'),
                    model_uri=DATA_SHEETS_SCHEMA.existingUse__examples, domain=None, range=Optional[Union[str, list[str]]])

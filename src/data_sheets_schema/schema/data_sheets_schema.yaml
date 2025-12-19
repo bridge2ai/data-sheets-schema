@@ -203,6 +203,18 @@ classes:
         range: CollectionTimeframe
         multivalued: true
         inlined_as_list: true
+      missing_data_documentation:
+        description: >-
+          Documentation of missing data patterns and handling strategies.
+        range: MissingDataDocumentation
+        multivalued: true
+        inlined_as_list: true
+      raw_data_sources:
+        description: >-
+          Description of raw data sources before preprocessing.
+        range: RawDataSource
+        multivalued: true
+        inlined_as_list: true
       # Ethics module classes
       ethical_reviews:
         range: EthicalReview
@@ -259,6 +271,24 @@ classes:
         inlined_as_list: true
       raw_sources:
         range: RawData
+        multivalued: true
+        inlined_as_list: true
+      imputation_protocols:
+        description: >-
+          Data imputation methodology and techniques.
+        range: ImputationProtocol
+        multivalued: true
+        inlined_as_list: true
+      annotation_analyses:
+        description: >-
+          Analysis of annotation quality and inter-annotator agreement.
+        range: AnnotationAnalysis
+        multivalued: true
+        inlined_as_list: true
+      machine_annotation_tools:
+        description: >-
+          Automated annotation tools used in dataset creation.
+        range: MachineAnnotationTools
         multivalued: true
         inlined_as_list: true
       # Uses module classes

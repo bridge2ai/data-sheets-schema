@@ -1,902 +1,669 @@
 # D4D Datasheet for CM4AI Dataset
 # Generation Method: Claude Code Agent Deterministic
-# Source: data/preprocessed/concatenated/CM4AI_preprocessed.txt
+# Source: data/preprocessed/concatenated/CM4AI_preprocessed.txt (161K, 8 source files)
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
-# Generated: 2025-12-05
+# Generated: 2025-12-16
 
 id: https://doi.org/10.18130/V3/B35XWX
 name: CM4AI
-title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+title: Cell Maps for Artificial Intelligence (CM4AI) Data Generation Project
 description: >
-  This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence
-  (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI
-  program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J
-  iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons,
-  and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence
-  and absence of chemotherapy (vorinostat and paclitaxel). CM4AI's objective is to
-  deliver machine-readable hierarchical maps of cell architecture as AI-Ready data
-  produced from multimodal interrogation of 100 chromatin modifiers and 100 metabolic
-  enzymes involved in cancer, neuropsychiatric, and cardiac disorders in disease-relevant
-  cell lines under perturbed and unperturbed conditions. CM4AI output data are packaged
-  with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format
-  using the FAIRSCAPE framework. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA,
-  Yale, UA Birmingham, Simon Fraser University, and the Hastings Center.
-page: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
+  The Cell Maps for Artificial Intelligence (CM4AI) is a NIH-funded Bridge to Artificial
+  Intelligence (Bridge2AI) Data Generation Project in the area of Functional Genomics.
+  CM4AI's objective is to deliver machine-readable hierarchical maps of cell architecture
+  as AI-Ready data produced from multimodal interrogation of 100 chromatin modifiers and
+  100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders in
+  disease-relevant cell lines under perturbed and unperturbed conditions. The dataset uses
+  state-of-the-art mass spectrometry based proteomics (AP-MS, SEC-MS), spatial proteomics
+  via immunofluorescence cell imaging, and genetic perturbations using CRISPR/Cas9. Cell
+  lines under investigation include treated and untreated MDA-MB-468 breast cancer cell
+  lines (paclitaxel and vorinostat), and differentiated neurons and cardiomyocytes generated
+  from NIH-iPCS-1 KOLF2.1J induced pluripotent stem cells (IPSCs). CM4AI's software
+  pipeline and AI-readiness framework provide important enabling capabilities for this work,
+  packaging data with provenance graphs and rich metadata in RO-Crate format using the
+  FAIRSCAPE framework.
+page: https://www.cm4ai.org
 language: en
 keywords:
-  - AI
-  - affinity purification
-  - AP-MS
-  - artificial intelligence
-  - breast cancer
-  - Bridge2AI
-  - cardiomyocyte
+  - Cell Maps
   - CM4AI
+  - Bridge2AI
+  - Artificial Intelligence
+  - Machine Learning
+  - Functional Genomics
+  - protein-protein interaction
+  - AP-MS
+  - SEC-MS
+  - affinity purification mass spectrometry
+  - size exclusion chromatography
+  - immunofluorescence
+  - subcellular imaging
+  - spatial proteomics
   - CRISPR/Cas9
-  - CRISPR/Cas perturbation screens
-  - functional genomics
-  - induced pluripotent stem cell
-  - iPSC
-  - KOLF2.1J
-  - machine learning
-  - mass spectroscopy
-  - MDA-MB-468
-  - neural progenitor cell
-  - NPC
-  - neuron
-  - paclitaxel
   - perturb-seq
   - perturbation sequencing
-  - protein-protein interaction
-  - protein localization
-  - single-cell RNA sequencing
-  - scRNAseq
-  - SEC-MS
-  - size exclusion chromatography
-  - subcellular imaging
-  - vorinostat
-  - RO-Crate
-  - FAIRSCAPE
-  - cell maps
-  - hierarchical maps
-  - visible machine learning
-  - VNN
-  - visible neural networks
+  - breast cancer
+  - MDA-MB-468
+  - induced pluripotent stem cells
+  - iPSC
+  - KOLF2.1J
   - chromatin modifiers
   - metabolic enzymes
-  - immunofluorescence
-  - IF imaging
-  - spatial proteomics
+  - hierarchical cell maps
+  - AI-ready datasets
+  - FAIR principles
+  - RO-Crate
+  - FAIRSCAPE
+  - visible neural networks
+  - VNN
+  - multi-scale integrated cell
+  - MuSIC
 
 # Motivation
 purposes:
-  - id: cm4ai:purpose:ai-ready-maps
-    name: Create AI-ready cell architecture maps
+  - id: cm4ai:purpose:001
     description: >
-      Create AI-ready maps of human cell architecture from disease-relevant cell
-      lines as part of the NIH Bridge2AI Functional Genomics Grand Challenge to
-      enable transformative biomedical AI research.
-    response: >
-      CM4AI's overarching mission is to produce ethical, AI-ready datasets of cell
-      architecture, inferred from multimodal data collected for human cell lines, to
-      enable transformative biomedical AI research. The project aims to ethically
-      leverage state-of-the-art computational and experimental tools in biomedical
-      science to enable a new generation of transformative artificial intelligence
-      research to benefit humanity.
-
-  - id: cm4ai:purpose:interpretable-genotype-phenotype
-    name: Enable interpretable genotype-phenotype learning
+      Produce ethical, AI-ready datasets of cell architecture inferred from multimodal data
+      collected for human cell lines to enable transformative biomedical AI research. The
+      project aims to map the spatiotemporal architecture of human cells and use these maps
+      toward the grand challenge of interpretable genotype-phenotype learning.
+  - id: cm4ai:purpose:002
     description: >
-      Enable interpretable genotype-phenotype learning by providing visible machine
-      learning systems informed by multi-scale cell architecture.
-    response: >
-      The CM4AI project seeks to map the spatiotemporal architecture of human cells
-      and use these maps toward the grand challenge of interpretable genotype-phenotype
-      learning. In genomics and precision medicine, machine learning models are often
-      black boxes, predicting phenotypes from genotypes without understanding the
-      mechanisms. CM4AI addresses this deficiency through coordinated effort involving
-      proteomic mass spectrometry, cellular imaging, and genetic perturbation via
-      CRISPR/Cas9 to create visible machine learning systems.
+      Address the deficiency of "black box" machine learning models in genomics and precision
+      medicine by creating large-scale maps of cellular structure/function across demographic
+      and disease contexts. These maps enable "visible" machine learning systems informed by
+      multi-scale cell and tissue architecture where predictions can be explained through
+      knowledge of biological mechanisms.
+  - id: cm4ai:purpose:003
+    description: >
+      Establish standards, best practices, and guidelines for AI-ready biomedical data through
+      the FAIRSCAPE framework, providing fully characterized FAIR data of known provenance that
+      can be ethically and reliably processed by AI applications with models and software
+      available for validation and re-use.
 
 tasks:
-  - id: cm4ai:task:cell-mapping
-    name: Hierarchical cell mapping
+  - id: cm4ai:task:001
     description: >
-      Create hierarchical directed acyclic graph (DAG) maps where each node represents
-      an assembly of proteins in proximity at a given scale, spanning from large
-      assemblies representing cell compartments to small assemblies of proteins in
-      close proximity.
-    response: >
-      Cell maps are hierarchical directed acyclic graphs (DAG), where each node
-      represents an assembly of proteins in proximity at a given scale, spanning from
-      large assemblies representing cell compartments (e.g., nucleus, mitochondria)
-      to small assemblies of proteins in close proximity (e.g., protein complexes or
-      subunits). These maps are produced by integrating localization and interaction
-      data using self-supervised embedding approaches from deep learning, followed by
-      algorithmic community detection at multiple resolutions.
-
-  - id: cm4ai:task:multimodal-integration
-    name: Multimodal data integration
+      Enable development of visible machine learning (VNN) tools that interrogate how protein
+      assemblies in the cell affect cell-level phenotype predictions. Cell maps provide a
+      foundation for downstream applications in human genomics, including interpretation of
+      genetic variants and mutations.
+  - id: cm4ai:task:002
     description: >
-      Integrate three complementary mapping approaches - proteomic mass spectrometry,
-      cellular imaging, and genetic perturbation - to create comprehensive maps of
-      cellular structure and function.
-    response: >
-      The project launches a coordinated effort involving three complementary mapping
-      approaches: affinity purification-mass spectrometry (AP-MS) and size-exclusion
-      mass spectroscopy (SEC-MS) for protein interaction networks; immunofluorescence
-      (IF) staining and high-resolution microscopy for protein localization; and
-      single-cell CRISPR-Cas perturbation screens for genetic perturbation mapping.
-      These data streams are integrated via the MuSIC (Multi-Scale Integrated Cell)
-      software pipeline employing deep learning models and community detection algorithms.
-
-  - id: cm4ai:task:ai-readiness
-    name: AI-readiness packaging
+      Support multi-modal data integration for functional genomics by combining protein
+      interaction networks (AP-MS, SEC-MS), protein localization and distribution (IF imaging),
+      and transcriptional states (CRISPR perturbation screens) to generate comprehensive
+      hierarchical maps of cell architecture.
+  - id: cm4ai:task:003
     description: >
-      Package datasets with FAIR compliance, provenance graphs, complete schemas,
-      validation procedures, datasheets, and ethical documentation to ensure AI-readiness.
-    response: >
-      AI-Ready biomedical data are fully characterized FAIR data of known provenance,
-      which can be ethically and reliably processed by AI applications. CM4AI uses
-      the FAIRSCAPE framework to establish AI-readiness through: (a) FAIRness including
-      rich metadata and persistent globally unique identifiers; (b) machine-readable
-      provenance graphs resolvable as metadata for all results; and (c) characterization
-      and validation of all datasets using JSON-Schema descriptions resolvable from
-      provenance graph metadata.
+      Facilitate AI/ML research in disease-relevant contexts by studying chromatin regulators
+      and metabolic enzymes in cancer, neuropsychiatric, and cardiac disorders under both
+      perturbed and unperturbed conditions.
 
 addressing_gaps:
-  - id: cm4ai:gap:black-box-ml
-    name: Address black-box machine learning
+  - id: cm4ai:gap:001
     description: >
-      Address the limitation of black-box machine learning models in genomics by
-      creating visible neural networks built on knowledge maps of cell architecture.
-    response: >
-      Machine learning models show great promise in analyzing the human genome but
-      their inner workings are typically difficult-to-interpret black boxes. CM4AI
-      provides matched data and tools to enable the creation of visible ML systems,
-      which are built directly on knowledge maps of cell and tissue architecture
-      rather than being opaque black boxes. Cell maps have been used in AI tools for
-      visible machine learning or visible neural networks (VNNs) to interrogate how
-      protein assemblies affect cell-level phenotype predictions.
-
-  - id: cm4ai:gap:fair-ai-datasets
-    name: Provide FAIR AI-ready functional genomics datasets
+      Provide interpretable AI/ML models that address the "black box" problem in genomics
+      and precision medicine by building models directly on knowledge maps of cell and tissue
+      architecture rather than learning genotype-phenotype relationships without understanding
+      mechanisms.
+  - id: cm4ai:gap:002
     description: >
-      Fill the gap in availability of high-quality, FAIR, AI-ready functional genomics
-      datasets with rich metadata, provenance graphs, and ethical documentation.
-    response: >
-      CM4AI addresses the need for ethical, FAIR, AI-Ready biomedical data that are
-      fully characterized with known provenance, can be ethically and reliably processed
-      by AI applications, and whose predictions may be fully explained and interpreted.
-      The project provides datasets packaged with provenance graphs and rich metadata
-      in RO-Crate format using FAIRSCAPE framework, with complete schemas, validation
-      procedures, and datasheets.
+      Create a library of large-scale, multi-modal cell maps not previously available, enabling
+      research into cellular structure/function relationships across disease contexts that
+      cannot be achieved with single-modality datasets.
+  - id: cm4ai:gap:003
+    description: >
+      Establish a model for ethical, FAIR, and AI-ready biomedical datasets through comprehensive
+      metadata, provenance graphs, standardized formats, and data governance practices that can
+      be replicated for other biomedical domains beyond functional genomics.
 
+# Creators and Contributors
 creators:
-  - id: cm4ai:creator:ideker
-    name: Trey Ideker
-    description: >
-      Contact PI and corresponding author. University of California San Diego.
-      tideker@health.ucsd.edu
-
-  - id: cm4ai:creator:clark
-    name: Timothy W Clark
-    description: >
-      Co-corresponding author. University of Virginia. Standards Module lead.
-
-  - id: cm4ai:creator:krogan
-    name: Nevan J Krogan
-    description: >
-      Co-corresponding author. University of California San Francisco. Protein-protein
-      interaction data generation.
-
-  - id: cm4ai:creator:lundberg
-    name: Emma Lundberg
-    description: >
-      Co-corresponding author. Stanford University. Spatial proteomics mapping lead.
-
-  - id: cm4ai:creator:mali
-    name: Prashant Mali
-    description: >
-      Co-corresponding author. University of California San Diego. Genetic perturbation
-      mapping.
-
-  - id: cm4ai:creator:sali
-    name: Andrej Sali
-    description: >
-      Co-corresponding author. University of California San Francisco. Integrative
-      structure modeling.
-
-  - id: cm4ai:creator:belisle-pipon
-    name: Jean-Christophe Bélisle-Pipon
-    description: >
-      Co-corresponding author. Simon Fraser University. Ethics Module lead.
-
-  - id: cm4ai:creator:brandt
-    name: Cynthia Brandt
-    description: >
-      Co-corresponding author. Yale University.
-
-  - id: cm4ai:creator:chen
-    name: Jake Yue Chen
-    description: >
-      Co-corresponding author. University of Alabama at Birmingham. Teaming Module.
-
-  - id: cm4ai:creator:ding
-    name: Ying Ding
-    description: >
-      Co-corresponding author. University of Texas at Austin.
-
-  - id: cm4ai:creator:fodeh
-    name: Samah Fodeh
-    description: >
-      Co-corresponding author. Yale University.
-
-  - id: cm4ai:creator:payne-foster
-    name: Pamela Payne-Foster
-    description: >
-      Co-corresponding author. University of Alabama.
-
-  - id: cm4ai:creator:ratcliffe
-    name: Sarah J Ratcliffe
-    description: >
-      Co-corresponding author. University of Virginia.
-
-  - id: cm4ai:creator:ravitsky
-    name: Vardit Ravitsky
-    description: >
-      Co-corresponding author. University of Montreal. Ethics Module.
-
-  - id: cm4ai:creator:schulz
-    name: Wade Loren Schulz
-    description: >
-      Co-corresponding author. Yale University.
+  - id: cm4ai:creator:001
+    description: Trey Ideker, Contact PI/Project Leader, University of California San Diego, Department of Medicine
+  - id: cm4ai:creator:002
+    description: Timothy Clark, Co-PI, University of Virginia
+  - id: cm4ai:creator:003
+    description: Jake Chen, Co-PI, University of Alabama at Birmingham
+  - id: cm4ai:creator:004
+    description: Nevan Krogan, Co-PI, University of California San Francisco
+  - id: cm4ai:creator:005
+    description: Emma Lundberg, Co-PI, Stanford University
+  - id: cm4ai:creator:006
+    description: Prashant Mali, Co-PI, University of California San Diego
+  - id: cm4ai:creator:007
+    description: Andrej Sali, Co-PI, University of California San Francisco
+  - id: cm4ai:creator:008
+    description: Wade Schulz, Co-PI, Yale University
+  - id: cm4ai:creator:009
+    description: Jean-Christophe Bélisle-Pipon, Co-PI Ethics, Simon Fraser University
+  - id: cm4ai:creator:010
+    description: Vardit Ravitsky, Co-PI Ethics, University of Montreal and Hastings Center
+  - id: cm4ai:creator:011
+    description: Sarah Ratcliffe, Co-PI, University of Virginia
+  - id: cm4ai:creator:012
+    description: Cynthia Brandt, Co-PI, Yale University
+  - id: cm4ai:creator:013
+    description: Ying Ding, Co-PI, University of Texas at Austin
+  - id: cm4ai:creator:014
+    description: Samah Fodeh, Co-PI, Yale University
+  - id: cm4ai:creator:015
+    description: Pamela Payne-Foster, Co-PI, University of Alabama
+  - id: cm4ai:creator:016
+    description: Jillian Parker, Project Manager, University of California San Diego
+  - id: cm4ai:creator:017
+    description: Leah Schaffer, University of California San Diego
+  - id: cm4ai:creator:018
+    description: Kirsten Obernier, University of California San Francisco
+  - id: cm4ai:creator:019
+    description: Sadnan Al Manir, University of Virginia
+  - id: cm4ai:creator:020
+    description: Christopher P Churas, University of California San Diego
 
 funders:
-  - id: cm4ai:funder:nih-bridge2ai
-    name: NIH Bridge2AI Functional Genomics
+  - id: cm4ai:funder:001
     description: >
-      National Institutes of Health Bridge to Artificial Intelligence program,
-      Functional Genomics Data Generation Project. This work was funded by the
-      National Institutes of Health under awards 1OT2OD032742-01 (Bridge2AI
-      Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center), and by
-      the Frederick Thomas Fund of the University of Virginia. Grant number:
-      1OT2OD032742-01. Project period: September 1, 2022 to August 31, 2026.
+      National Institutes of Health (NIH) Common Fund Bridge2AI Program, grant 1OT2OD032742-01
+      (Bridge2AI Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center), administered
+      by NIH Office of the Director. Opportunity Number: OTA-21-008. Total funding 2025: $5,289,382.
+      Additional support from Frederick Thomas Fund of the University of Virginia.
 
 # Composition
 instances:
-  - id: cm4ai:instance:crispr-perturbation
-    name: CRISPR Perturbation Cell Atlas
+  - id: cm4ai:instance:001
     description: >
-      Expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated
-      KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional
-      and fitness phenotypes associated with 11,739 targeted genes.
-    instance_type: Perturb-seq single-cell RNA sequencing data
-
-  - id: cm4ai:instance:sec-ms-ipsc
-    name: SEC-MS protein-protein interactions in iPSCs
-    description: >
-      Size exclusion chromatography-mass spectroscopy (SEC-MS) data from undifferentiated
-      KOLF2.1J human induced pluripotent stem cells, identifying 72/100 chromatin
-      modifiers with 52 being integral components of protein complexes. Over 700
-      protein complexes detected.
-    instance_type: Protein-protein interaction mass spectrometry data
-
-  - id: cm4ai:instance:sec-ms-differentiated
-    name: SEC-MS in differentiated iPSC derivatives
-    description: >
-      SEC-MS protein-protein interaction data from iPSC-derived NPCs (neural progenitor
-      cells), neurons, and cardiomyocytes. Over 700 protein complexes identified in
-      iPSCs and differentiated neurons.
-    instance_type: Protein-protein interaction mass spectrometry data
-
-  - id: cm4ai:instance:if-images-untreated
-    name: Immunofluorescence images - untreated MDA-MB-468
-    description: >
-      Spatial localization of 563 proteins of interest in untreated cells of the
-      breast cancer cell line MDA-MB-468 imaged by ICC-IF and confocal microscopy.
-      Nuclei stained with DAPI (blue); endoplasmic reticulum with calreticulin (yellow);
-      microtubules with tubulin (red); antibody against protein of interest (green).
-    instance_type: Immunofluorescence confocal microscopy images
-
-  - id: cm4ai:instance:if-images-paclitaxel
-    name: Immunofluorescence images - paclitaxel-treated MDA-MB-468
-    description: >
-      Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated
-      with paclitaxel chemotherapy, imaged by ICC-IF and confocal microscopy with
-      four-channel staining.
-    instance_type: Immunofluorescence confocal microscopy images
-
-  - id: cm4ai:instance:if-images-vorinostat
-    name: Immunofluorescence images - vorinostat-treated MDA-MB-468
-    description: >
-      Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated
-      with vorinostat chemotherapy, imaged by ICC-IF and confocal microscopy with
-      four-channel staining.
-    instance_type: Immunofluorescence confocal microscopy images
-
-  - id: cm4ai:instance:ap-ms
-    name: Affinity purification mass spectrometry
-    description: >
-      AP-MS on endogenously tagged cell lines for protein-protein interaction mapping.
-      17 genes endogenously tagged in MDA-MB-468 cells with data acquired under three
-      conditions (untreated, paclitaxel, vorinostat). 34 additional genes in process.
-    instance_type: Protein-protein interaction mass spectrometry data
-
-  - id: cm4ai:instance:cell-maps
-    name: Hierarchical cell maps
-    description: >
-      Hierarchical directed acyclic graph (DAG) maps of cell architecture produced
-      by integrating protein localization (IF) and protein-protein interaction (AP-MS,
-      SEC-MS) data through MuSIC pipeline using deep learning embeddings and community
-      detection algorithms.
-    instance_type: Network data structure (hierarchical graph)
+      Cell lines representing disease-relevant biological contexts. Instances include MDA-MB-468
+      triple negative breast cancer cell line (RRID:CVCL_0419) established from metastatic pleural
+      effusion of 51-year-old black female with metastatic mammary adenocarcinoma, available from
+      ATCC; and KOLF2.1J (RRID:CVCL_B5P3) induced pluripotent stem cell line derived from healthy
+      male Northern European donor, available from Human Induced Pluripotent Stem Cells Initiative
+      (HipSci) resource. Cell lines studied under multiple perturbation conditions.
+    instance_type: >
+      Non-clinical, de-identified cell lines that cannot be matched to human subjects with current
+      knowledge. Commercially available cell lines ethically sourced and extensively characterized.
 
 subsets:
-  - id: cm4ai:subset:crispr-atlas
-    name: CRISPR Perturbation Cell Atlas
+  - id: cm4ai:subset:001
     description: >
-      Expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated
-      KOLF2.1J human induced pluripotent stem cells mapping transcriptional and
-      fitness phenotypes for 11,739 targeted genes. RO-Crate packaged dataset.
-
-  - id: cm4ai:subset:sec-ms-ipsc
-    name: Protein-protein Interaction SEC-MS iPSCs
+      CRISPR Perturbation Cell Atlas - Expressed genome-scale CRISPRi perturbation data in
+      undifferentiated KOLF2.1J human induced pluripotent stem cells (hiPSCs) mapping transcriptional
+      and fitness phenotypes associated with 11,739 targeted genes. Includes single-cell CRISPR
+      screens of 100 chromatin regulators using 10x Genomics 3'HT kit. Data validated via phenotypic,
+      protein-interaction, and metabolic tracing assays.
+  - id: cm4ai:subset:002
     description: >
-      Size exclusion chromatography-mass spectroscopy data on undifferentiated
-      KOLF2.1J human induced pluripotent stem cells and iPSC-derived NPCs, neurons,
-      and cardiomyocytes from the Krogan laboratory at UCSF.
-
-  - id: cm4ai:subset:if-untreated
-    name: Protein Localization Images - Untreated
+      Protein-Protein Interaction SEC-MS Data - Size exclusion chromatography-mass spectrometry
+      (SEC-MS) data in KOLF2.1J iPSCs (undifferentiated, differentiated neurons, neural progenitor
+      cells, cardiomyocytes) and MDA-MB-468 cells (untreated, paclitaxel-treated, vorinostat-treated).
+      Detected PPI profiles of over 1,000 complexes with thousands of proteins exhibiting differential
+      elution profiles between conditions. Data deposited to MassIVE Repository.
+  - id: cm4ai:subset:003
     description: >
-      Spatial localization of 563 proteins in untreated MDA-MB-468 breast cancer
-      cells imaged by ICC-IF and confocal microscopy in the Lundberg Lab at Stanford.
-      ZIP archive: 3.2 GB.
-
-  - id: cm4ai:subset:if-paclitaxel
-    name: Protein Localization Images - Paclitaxel
+      Protein-Protein Interaction AP-MS Data - Affinity purification mass spectrometry on
+      endogenously tagged cell lines for 100 chromatin regulators under different conditions.
+      17 genes endogenously tagged in MDA-MB-468 with AP-MS data acquired under three conditions
+      (untreated, paclitaxel, vorinostat). 34 additional genes in tagging process.
+  - id: cm4ai:subset:004
     description: >
-      Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated
-      with paclitaxel, imaged by ICC-IF and confocal microscopy. ZIP archive: 2.6 GB.
-
-  - id: cm4ai:subset:if-vorinostat
-    name: Protein Localization Images - Vorinostat
+      Spatial Proteomics IF Images - Immunofluorescence-based staining (ICC-IF) and confocal
+      microscopy images displaying spatial localization of 563 proteins of interest in MDA-MB-468
+      breast cancer cells (untreated, paclitaxel-treated, vorinostat-treated). Images from Lundberg
+      Lab at Stanford University. Nuclei stained with DAPI (blue), endoplasmic reticulum with
+      calreticulin antibody (yellow), microtubules with tubulin antibody (red), protein of interest
+      (green). Total size: 8.6 GB (3 conditions).
+  - id: cm4ai:subset:005
     description: >
-      Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated
-      with vorinostat, imaged by ICC-IF and confocal microscopy. ZIP archive: 2.8 GB.
+      Raw Sequence Data - Raw sequence data from expressed genome-scale CRISPRi Perturbation Cell
+      Atlas deposited to NCBI Sequence Read Archive (SRA) BioProject.
 
 sampling_strategies:
-  - id: cm4ai:sampling:cell-line-selection
-    name: Disease-relevant cell line selection
+  - id: cm4ai:sampling:001
     description: >
-      Disease-relevant cell lines selected to enable AI-ready functional genomics
-      mapping for cancer, neuropsychiatric, and cardiac disorders. CM4AI elected to
-      use the cancer cell line MDA-MB-468 (RRID:CVCL_0419), a triple negative breast
-      cancer cell line from a 51-year-old female with metastatic mammary adenocarcinoma,
-      available from ATCC with extensive characterization; and the iPSC line KOLF2.1J
-      (RRID:CVCL_B5P3) from a healthy male Northern European donor, available from
-      the Human Induced Pluripotent Stem Cells Initiative (HipSci). Both cell lines
-      have been ethically sourced.
+      Disease-relevant cell line selection based on established models for cancer, neuropsychiatric,
+      and cardiac disorders. MDA-MB-468 selected as triple negative breast cancer model extensively
+      used to study this cancer type, well characterized with transcriptomic, mutational profile,
+      and whole-genome sequencing data available. KOLF2.1J selected as reference iPSC line for
+      large-scale collaborative studies, available via simple MTA for non-for-profit organizations.
+    is_sample:
+      - false
+    is_random:
+      - false
+    is_representative:
+      - false
+    strategies:
+      - Selection of commercially available, ethically sourced, well-characterized cell lines
+      - MDA-MB-468 breast cancer cell line from ATCC (RRID:CVCL_0419)
+      - KOLF2.1J iPSC line from HipSci resource (RRID:CVCL_B5P3)
+      - Target 100 chromatin modifiers and 100 metabolic enzymes for comprehensive coverage
+      - Multi-condition perturbation design (untreated, paclitaxel, vorinostat for cancer cells; undifferentiated, neuron, cardiomyocyte for iPSCs)
 
-  - id: cm4ai:sampling:chromatin-modifiers
-    name: Chromatin modifier selection
-    description: >
-      Selection of 100 chromatin regulators and 100 metabolic enzymes involved in
-      cancer, neuropsychiatric, and cardiac disorders for comprehensive mapping. The
-      project focuses on mapping 100 chromatin modifiers and 100 metabolic enzymes
-      involved in cancer, neuropsychiatric, and cardiac disorders. For Year 1, 100
-      chromatin regulators were mapped in MDA-MB-468 cells under three conditions,
-      with SEC-MS identifying 72/100 chromatin modifiers.
+subpopulations:
+  - id: cm4ai:subpop:001
+    description: MDA-MB-468 breast cancer cells, untreated condition
+  - id: cm4ai:subpop:002
+    description: MDA-MB-468 breast cancer cells, paclitaxel treatment
+  - id: cm4ai:subpop:003
+    description: MDA-MB-468 breast cancer cells, vorinostat treatment
+  - id: cm4ai:subpop:004
+    description: KOLF2.1J iPSCs, undifferentiated state
+  - id: cm4ai:subpop:005
+    description: KOLF2.1J iPSCs, differentiated to neurons
+  - id: cm4ai:subpop:006
+    description: KOLF2.1J iPSCs, differentiated to neural progenitor cells (NPCs)
+  - id: cm4ai:subpop:007
+    description: KOLF2.1J iPSCs, differentiated to cardiomyocytes
 
-  - id: cm4ai:sampling:perturbation-conditions
-    name: Perturbation and treatment conditions
-    description: >
-      Selection of chemotherapy treatments (paclitaxel and vorinostat) and cell
-      differentiation states to enable comparison of perturbed vs unperturbed conditions.
-      Data streams generated from MDA-MB-468 breast cancer cells treated with paclitaxel
-      and vorinostat versus untreated cells; and KOLF2.1J iPSCs in undifferentiated
-      state versus neurons and cardiomyocytes generated from differentiation. Single-cell
-      CRISPR screens performed perturbing 100 chromatin regulators with/without drug
-      treatment.
-
-external_resources:
-  - id: cm4ai:resource:project-website
-    name: CM4AI Project Website
-    description: Official CM4AI project website and portal
-    external_resources:
-      - https://cm4ai.org
-      - https://www.cm4ai.org
-
-  - id: cm4ai:resource:publications
-    name: CM4AI Publications
-    description: Key publications describing CM4AI methods and datasets
-    external_resources:
-      - https://doi.org/10.1101/2024.05.21.589311
-      - https://doi.org/10.1101/2024.11.03.621734
-
-  - id: cm4ai:resource:ndex
-    name: Network Data Exchange (NDEx)
-    description: Platform for sharing and visualizing cell maps
-    external_resources:
-      - https://www.ndexbio.org
-
-  - id: cm4ai:resource:fairscape
-    name: FAIRSCAPE Framework
-    description: AI-readiness framework for metadata and provenance
-    external_resources:
-      - https://fairscape.github.io
-
-  - id: cm4ai:resource:software-tools
-    name: CM4AI Software Tools
-    description: Software tools for cell map creation and analysis
-    external_resources:
-      - https://github.com/idekerlab
-      - http://integrativemodeling.org
-
-# Collection
-acquisition_methods:
-  - id: cm4ai:acquisition:ap-ms
-    name: Affinity purification mass spectrometry
-    description: >
-      AP-MS on endogenously tagged cell lines to map protein-protein interactions
-      of 100 chromatin regulators under different conditions.
-    was_directly_observed: true
-    acquisition_details:
-      - Endogenous tagging of genes in MDA-MB-468 cells
-      - AP-MS data acquisition under three conditions (untreated, paclitaxel, vorinostat)
-      - 17 genes tagged in Year 1, 34 additional genes in process
-
-  - id: cm4ai:acquisition:sec-ms
-    name: Size exclusion chromatography mass spectrometry
-    description: >
-      SEC-MS for proteome-wide complex and interaction mapping as orthogonal approach
-      to AP-MS.
-    was_directly_observed: true
-    acquisition_details:
-      - SEC-MS performed on MDA-MB-468 cells under three conditions
-      - Identified 72/100 chromatin modifiers with 52 in protein complexes
-      - Over 1000 complexes detected in MDA-MB-468 cells
-      - SEC-MS in KOLF2 iPSCs and derivatives uncovering 700+ protein complexes
-      - Thousands of proteins with differential elution profiles between treatments
-
-  - id: cm4ai:acquisition:immunofluorescence
-    name: Immunofluorescence confocal microscopy
-    description: >
-      IF staining and high-resolution confocal microscopy for spatial proteomics
-      mapping of protein subcellular organization.
-    was_directly_observed: true
-    acquisition_details:
-      - Automated fixation and permeabilization protocols using pipetting robot
-      - Four-channel staining (DAPI, calreticulin, tubulin, target protein)
-      - Spatial proteomics mapping of 100 chromatin regulators in MDA-MB-468
-      - 500 additional proteins pending from genetic perturbations and PPI results
-      - Human Protein Atlas antibody resource utilized
-
-  - id: cm4ai:acquisition:crispr-perturbation
-    name: Single-cell CRISPR perturbation screens
-    description: >
-      CRISPR-Cas9 perturbation screens for genetic perturbation mapping with single-cell
-      RNA sequencing readout (perturb-seq).
-    was_directly_observed: true
-    acquisition_details:
-      - CRISPR lentiviral library targeting 100 chromatin factors with 6 guide RNAs per gene
-      - MDA-MB-468 and KOLF2 CRISPR lines with inducible dCas9
-      - Single-cell screens under 3 conditions for MDA-MB-468 (no treatment, paclitaxel, vorinostat)
-      - Single-cell screens in undifferentiated KOLF2.1J iPSCs
-      - 10x Genomics 3'HT kit used for sequencing
-      - 11,739 targeted genes in final atlas
-
+# Collection Process
 collection_mechanisms:
-  - id: cm4ai:mechanism:mass-spectrometry
-    name: Mass spectrometry instruments
+  - id: cm4ai:collection:001
     description: >
-      Mass spectrometry instruments for AP-MS and SEC-MS protein interaction mapping.
-    mechanism_details:
-      - Affinity purification coupled with mass spectrometry
-      - Size exclusion chromatography coupled with mass spectrometry
-      - Proteome-wide interaction profiling
-
-  - id: cm4ai:mechanism:confocal-microscopy
-    name: Confocal microscopy
+      Protein-protein interaction data collection via affinity purification mass spectrometry
+      (AP-MS) on endogenously tagged cell lines. Genes endogenously tagged in target cell lines
+      followed by affinity purification and mass spectrometry analysis under multiple treatment
+      conditions.
+  - id: cm4ai:collection:002
     description: >
-      High-resolution confocal microscopy for immunofluorescence imaging of protein
-      subcellular localization.
-    mechanism_details:
-      - Confocal microscopy with four-channel imaging
-      - Immunofluorescence-based staining (ICC-IF)
-      - Automated pipetting robot for sample preparation
-
-  - id: cm4ai:mechanism:crispr-cas9
-    name: CRISPR-Cas9 perturbation system
+      Proteome-wide complex/interaction mapping using size-exclusion chromatography coupled to
+      mass spectrometry (SEC-MS) as orthogonal approach to AP-MS. Enabled identification of
+      72/100 chromatin modifiers with 52 integral components of protein complexes, detecting PPI
+      profiles of over 1,000 complexes.
+  - id: cm4ai:collection:003
     description: >
-      CRISPR-Cas9 gene perturbation with single-cell RNA sequencing for transcriptional
-      and fitness phenotyping.
-    mechanism_details:
-      - CRISPRi gene knockdown with inducible dCas9
-      - Lentiviral library delivery
-      - Single-cell RNA sequencing with 10x Genomics 3'HT
-      - Perturb-seq for simultaneous perturbation and transcriptional readout
-
-  - id: cm4ai:mechanism:music-pipeline
-    name: MuSIC data integration pipeline
+      Spatial proteomics data collection via immunofluorescence (IF) subcellular microscopy.
+      Automated fixation and permeabilization protocols established for pipetting robot for
+      MDA-MB-468 and KOLF2 cell lines. Antibodies from Human Protein Atlas resource used for
+      staining. Confocal microscopy imaging at Stanford University Lundberg Lab.
+  - id: cm4ai:collection:004
     description: >
-      Multi-Scale Integrated Cell (MuSIC) pipeline for integrating multimodal data
-      streams into hierarchical cell maps.
-    mechanism_details:
-      - node2vec deep learning for PPI network embedding
-      - Human Protein Atlas deep learning for image embedding
-      - Contrastive deep learning for co-embedding integration
-      - Community detection for protein hierarchy creation
-      - Gene Ontology and Reactome alignment for annotation
-      - Large language model for assembly naming
+      Single-cell CRISPR perturbation screens using CRISPR lentiviral library targeting 100
+      chromatin factors with 6 guide RNAs per gene. MDA-MB-468 and KOLF2 CRISPR lines expressing
+      inducible dCas9 generated and characterized. Screens performed using 10x Genomics 3'HT kit
+      mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes.
 
-data_collectors:
-  - id: cm4ai:collector:ucsd
-    name: University of California San Diego
+acquisition_methods:
+  - id: cm4ai:acquisition:001
     description: >
-      UCSD teams led by Trey Ideker (PI), Prashant Mali, and Andrej Sali.
-    collector_details:
-      - Ideker Lab - project coordination and cell map integration
-      - Mali Lab - genetic perturbation mapping
-      - Sali Lab - integrative structure modeling
-
-  - id: cm4ai:collector:ucsf
-    name: University of California San Francisco
+      AP-MS data acquisition - Affinity purification followed by mass spectrometry on endogenously
+      tagged proteins. 17 genes tagged in MDA-MB-468 with data acquired under untreated, paclitaxel,
+      and vorinostat conditions. 34 additional genes in tagging process. Data provides binary
+      protein-protein interaction networks.
+  - id: cm4ai:acquisition:002
     description: >
-      UCSF teams led by Nevan Krogan for protein-protein interaction data.
-    collector_details:
-      - Krogan Laboratory - AP-MS and SEC-MS data generation
-      - Protein complex mapping across conditions
-
-  - id: cm4ai:collector:stanford
-    name: Stanford University
+      SEC-MS data acquisition - Size exclusion chromatography separation of protein complexes
+      followed by mass spectrometry. Performed in MDA-MB-468 cells (3 conditions) and KOLF2 iPSCs
+      and derivatives (undifferentiated, neurons, NPCs, cardiomyocytes). Detected over 1,000
+      complexes in MDA-MB468 cells with thousands of proteins exhibiting differential elution
+      profiles between control and treated cells. Over 700 complexes detected in iPSCs and neurons.
+  - id: cm4ai:acquisition:003
     description: >
-      Stanford team led by Emma Lundberg for spatial proteomics.
-    collector_details:
-      - Lundberg Laboratory - immunofluorescence imaging
-      - Spatial proteomics mapping with confocal microscopy
-      - Copyright holder for raw image data
-
-  - id: cm4ai:collector:uva
-    name: University of Virginia
+      IF imaging data acquisition - High-resolution confocal microscopy of immunofluorescence-stained
+      cells capturing protein localization. 563 proteins imaged in MDA-MB-468 cells across 3
+      conditions (untreated, paclitaxel, vorinostat). Four-color imaging: DAPI (nuclei, blue),
+      calreticulin antibody (ER, yellow), tubulin antibody (microtubules, red), protein of interest
+      (green). Output formats include DICOM and proprietary formats converted to DICOM.
+  - id: cm4ai:acquisition:004
     description: >
-      UVA team led by Timothy Clark for AI-readiness standards.
-    collector_details:
-      - Standards Module - FAIRSCAPE framework development
-      - AI-readiness packaging and metadata
-      - Data repository (LibraData/Dataverse)
+      CRISPR perturbation sequencing - Single-cell RNA sequencing of CRISPR-perturbed cells using
+      10x Genomics 3'HT kit. Library targeting 100 chromatin regulators with 6 guide RNAs per gene.
+      Screens performed in MDA-MB-468 cells (untreated, paclitaxel, vorinostat) and undifferentiated
+      KOLF2.1J iPSCs. Raw sequence data deposited to NCBI SRA. Processed data includes transcriptional
+      and fitness phenotypes for 11,739 targeted genes.
 
-  - id: cm4ai:collector:yale
-    name: Yale University
-    description: >
-      Yale team led by Cynthia Brandt, Samah Fodeh, and Wade Schulz.
-    collector_details:
-      - Data curation and standards
-      - Internship program hosting
-
-  - id: cm4ai:collector:uab
-    name: University of Alabama at Birmingham
-    description: >
-      UAB team led by Jake Chen for teaming and dissemination.
-    collector_details:
-      - Teaming Module - U-BRITE platform for portal
-      - Open dissemination of data, maps, and tools
-      - Internship program hosting
-
-collection_timeframes:
-  - id: cm4ai:timeframe:project-period
-    name: Overall project period
-    description: >
-      September 1, 2022 to August 31, 2026 with ongoing data augmentation.
-    timeframe_details:
-      - Project start September 1 2022
-      - Project end August 31 2026
-      - Data creation through February 2025
-      - Publication date March 3 2025
-      - Dataset version 1.4
-      - Ongoing augmentation planned through project end
-
-  - id: cm4ai:timeframe:year1
-    name: Year 1 accomplishments
-    description: >
-      Year 1 data generation including chromatin modifiers, spatial proteomics, and
-      CRISPR screens.
-    timeframe_details:
-      - 100 chromatin regulators mapped in MDA-MB-468 cells
-      - Single-cell CRISPR screens completed
-      - SEC-MS data generated across conditions
-      - IF images released for MuSIC pipeline
-
-# Preprocessing
+# Preprocessing, Cleaning, and Labeling
 preprocessing_strategies:
-  - id: cm4ai:preprocessing:embedding
-    name: Deep learning embeddings
+  - id: cm4ai:preproc:001
     description: >
-      Generation of embeddings from PPI networks and IF images using deep learning
-      models for dimensionality reduction.
+      Multi-scale integrated cell (MuSIC) data integration pipeline processes multiple input
+      data streams to generate hierarchical cell maps. Pipeline divided into segments: (1) Download
+      PPI and image data from laboratory deposition archives, (2) Generate embeddings from PPI
+      networks using node2vec deep learning and from IF images using Human Protein Atlas deep
+      learning model, (3) Co-embedding integration using contrastive deep learning, (4) Protein
+      community detection and hierarchy creation based on co-embedding similarities, (5) Hierarchy
+      evaluation and annotation using Gene Ontology, Reactome, and large language models.
     preprocessing_details:
-      - node2vec deep learning for PPI network embedding
-      - Human Protein Atlas deep learning for image embedding
-      - Contrastive learning for co-embedding integration
-
-  - id: cm4ai:preprocessing:integration
-    name: Multimodal data integration
+      - PPI network dimensionality reduction via node2vec deep learning model
+      - IF image dimensionality reduction via Human Protein Atlas deep learning model
+      - Contrastive deep learning for co-embedding integration
+      - Community detection at multiple resolutions to generate protein assembly hierarchy
+      - Hierarchical directed acyclic graph (DAG) representation of cell architecture
+  - id: cm4ai:preproc:002
     description: >
-      Integration of PPI and image embeddings through MuSIC pipeline to create
-      co-embeddings and hierarchical maps.
+      FAIRSCAPE AI-readiness packaging applied to all data segments. Client-side Python3
+      application called from command line or as Python functions by data integration pipeline.
+      Creates RO-Crate packages with datasets, metadata, software, and unique identifier stubs.
+      RO-Crates sent to FAIRSCAPE server for persistent identifier (PID) registration using ARK
+      scheme, component decomposition and PID assignment, and end-to-end provenance entailment
+      computation using EVI Evidence Graph Ontology.
     preprocessing_details:
-      - Co-embedding integration with minimal information loss
-      - Community detection based on co-embedding similarities
-      - Hierarchy creation from multi-resolution community detection
-
-  - id: cm4ai:preprocessing:annotation
-    name: Cell map annotation
-    description: >
-      Annotation of protein assemblies in cell maps using ontology alignment and
-      large language models.
-    preprocessing_details:
-      - Alignment to Gene Ontology and Reactome pathways
-      - LLM-based naming of protein assemblies with confidence scores
-      - Evaluation of overlap with known cell biology
-
-  - id: cm4ai:preprocessing:ro-crate-packaging
-    name: RO-Crate packaging with FAIRSCAPE
-    description: >
-      Packaging of datasets with rich metadata, provenance graphs, and schemas in
-      RO-Crate format for AI-readiness.
-    preprocessing_details:
-      - FAIRSCAPE-CLI client for RO-Crate creation
       - JSON-Schema data dictionaries for all datasets
-      - Provenance graph computation with EVI Evidence Graph Ontology
-      - ARK persistent identifier assignment
-      - Machine- and human-readable landing pages
-      - JSON-LD metadata serialization
+      - RO-Crate package creation with metadata and software
+      - ARK persistent identifier assignment (DOIs planned for final publishable work)
+      - Provenance graph computation in EVI Evidence Graph Ontology
+      - Machine- and human-readable landing pages with metadata in JSON-LD using Schema.org and EVI vocabularies
+  - id: cm4ai:preproc:003
+    description: >
+      Format standardization for interoperability. Image data converted from proprietary formats
+      to DICOM standard. Wearable device data converted from .FIT to mHealth standard (applicable
+      to future data streams). Mass spectrometry data deposited to MassIVE Repository. Sequence
+      data deposited to NCBI SRA BioProject.
+    preprocessing_details:
+      - IF imaging data converted to DICOM format
+      - Mass spectrometry data standardized for MassIVE deposition
+      - Sequence data formatted for NCBI SRA submission
+      - Metadata expressed in JSON-LD graph language
+
+cleaning_strategies:
+  - id: cm4ai:cleaning:001
+    description: >
+      Quality control procedures implemented for all data modalities. CRISPR perturbation data
+      undergoes QC validation. Mass spectrometry data validated via phenotypic, protein-interaction,
+      and metabolic tracing assays. Imaging data processed through automated pipelines with
+      quality checks. Standardized operating procedures ensure consistency across experimental
+      batches and conditions.
+    cleaning_details:
+      - QC validation of CRISPR perturbation screen data
+      - Validation of SEC-MS findings via orthogonal assays (phenotypic, PPI, metabolic tracing)
+      - Automated image processing quality checks
+      - Standardized protocols across all data acquisition modalities
+  - id: cm4ai:cleaning:002
+    description: >
+      Cell map annotation and validation through two-pronged approach. First, cell maps aligned
+      to known protein function and pathway resources (Gene Ontology, Reactome) to determine
+      assemblies with high overlap with known cell biology. Second, assemblies annotated using
+      large language model (LLM) approach developed to name protein sets and assign confidence
+      scores.
+    cleaning_details:
+      - Alignment to Gene Ontology for functional annotation
+      - Alignment to Reactome for pathway annotation
+      - LLM-based assembly naming with confidence scoring
+      - Validation against known cell biology
 
 # Uses
-existing_uses:
-  - id: cm4ai:use:publications
-    name: Publications using CM4AI data
-    description: >
-      Scientific publications describing CM4AI methods and initial findings.
-    examples:
-      - Clark T, et al. Cell Maps for Artificial Intelligence. bioRxiv 2024.05.21.589311
-      - Nourreddine S, et al. A PERTURBATION CELL ATLAS OF HUMAN iPSCs. bioRxiv 2024.11.03.621734
-
-  - id: cm4ai:use:codefest
-    name: CM4AI CodeFest training event
-    description: >
-      March 2024 CodeFest event for training researchers in CM4AI data and tools.
-    examples:
-      - 38 registrants with 40% female and 30% from underrepresented communities
-      - Detailed tutorials on data derivation and integration
-      - Production-ready software demonstration
-
 intended_uses:
-  - id: cm4ai:intended:visible-ml
-    name: Visible machine learning development
+  - id: cm4ai:use:001
     description: >
-      Development of visible neural networks (VNNs) that provide interpretable
-      AI/ML predictions based on cell architecture knowledge.
-    examples:
-      - Visible machine learning systems informed by cell maps
-      - Interpretable genotype-phenotype predictions
-      - Drug response prediction using cell architecture
-      - Genetic variant interpretation
-
-  - id: cm4ai:intended:biomedical-ai
-    name: Biomedical AI research
+      Primary intended use is development of visible machine learning (VNN) tools for interpretable
+      AI/ML in genomics and precision medicine. Cell maps provide hierarchical structure for
+      VNNs where nodes represent protein assemblies spanning from large compartments (nucleus,
+      mitochondria) to small protein complexes, enabling "visible neural networks" that are not
+      black boxes but built directly on knowledge maps.
+  - id: cm4ai:use:002
     description: >
-      AI/ML research on functional genomics data including transcriptional phenotypes,
-      protein interactions, and protein localization.
-    examples:
-      - Machine learning on multimodal functional genomics data
-      - Disease mechanism understanding
-      - Therapeutic target identification
-      - Precision medicine applications
-
-  - id: cm4ai:intended:cell-biology
-    name: Cell biology research
+      AI/ML model training for functional genomics applications including interpretation of genetic
+      variants, mutation effects, drug response prediction, and disease trajectory modeling.
+      Cell maps used in visible machine learning approaches for hypothesis-agnostic analysis
+      of genotype-phenotype relationships.
+  - id: cm4ai:use:003
     description: >
-      Research on protein assemblies, cellular compartments, and protein complex
-      organization.
-    examples:
-      - Protein complex characterization
-      - Subcellular localization studies
-      - Chromatin modifier function
-      - Metabolic enzyme organization
-
-future_use_impacts:
-  - id: cm4ai:impact:cell-line-specific
-    name: Cell line-specific characteristics
+      Research into cellular processes, protein complex formation, and cell architectural changes
+      in presence of disease processes (cancer), treatment conditions (chemotherapy), or genetic
+      perturbations (CRISPR). Multi-modal integration enables study of structure-function
+      relationships not feasible with single-modality data.
+  - id: cm4ai:use:004
     description: >
-      Dataset characteristics specific to MDA-MB-468 and KOLF2.1J cell lines may
-      not generalize to all cell types or conditions.
-    impact_details:
-      - MDA-MB-468 specific to triple-negative breast cancer context
-      - KOLF2.1J from healthy male Northern European donor
-      - Treatment effects specific to paclitaxel and vorinostat
-      - Differentiation states limited to neurons and cardiomyocytes
-
-  - id: cm4ai:impact:technological-limitations
-    name: Technological and methodological limitations
+      Biomedical AI research leveraging AI-ready datasets with comprehensive provenance, metadata,
+      and FAIR compliance. Dataset serves as model for ethical, FAIR, AI-ready biomedical data
+      development demonstrating best practices in data collection, preparation, sharing, and
+      governance.
+  - id: cm4ai:use:005
     description: >
-      Limitations inherent to mass spectrometry, microscopy, and CRISPR perturbation
-      technologies.
-    impact_details:
-      - Mass spectrometry detection limits
-      - Antibody availability and specificity constraints
-      - Imaging resolution limitations
-      - CRISPR off-target effects
-      - Single-cell sequencing coverage
+      Training and workforce development in biomedical AI/ML. Dataset and tools used in
+      educational activities including virtual CodeFests, in-person internships at Yale and
+      UCSD, and asynchronous training materials to cultivate diverse biomedical AI/ML workforce.
 
 discouraged_uses:
-  - id: cm4ai:discouraged:commercial
-    name: Commercial use without license
+  - id: cm4ai:discouraged:001
     description: >
-      Commercial use is restricted by CC BY-NC-SA 4.0 license and requires separate
-      licensing negotiation.
-    discouragement_details:
-      - Commercial use not permitted under CC BY-NC-SA 4.0
-      - Separate license required from copyright holders (UCSD, Stanford, UCSF)
-      - Data Access Committee supervision for commercial licensing
-
-  - id: cm4ai:discouraged:clinical-direct
-    name: Direct clinical application without validation
+      Clinical decision-making or patient care applications without appropriate regulatory
+      oversight and approval. Laboratory data derived from de-identified cell lines are not
+      to be used in clinical contexts involving patients without proper validation, regulatory
+      clearance, and ethical review.
+  - id: cm4ai:discouraged:002
     description: >
-      Data are from cell lines, not clinical samples, and should not be directly
-      applied to clinical decision-making without appropriate validation.
-    discouragement_details:
-      - Non-clinical data from tissue cultures
-      - De-identified and cannot be matched to human subjects
-      - Requires clinical validation before medical application
+      Uses requiring representation of all biological variants in the population. Data derived
+      from commercially available de-identified cell lines (MDA-MB-468 from 51-year-old black
+      female, KOLF2.1J from male Northern European donor) do not represent all demographic or
+      genetic diversity seen in population at large.
+  - id: cm4ai:discouraged:003
+    description: >
+      Applications requiring complete final dataset. This is interim beta release that does not
+      contain computed cell maps (to be added in future releases). Current release most suitable
+      for bioinformatics analysis of individual datasets. Requires domain expertise for meaningful
+      analysis. Data under temporary pre-publication embargo with incomplete overlap of protein
+      sets across modalities.
 
 # Distribution
-distribution_formats:
-  - id: cm4ai:format:ro-crate
-    name: RO-Crate packages
-    description: >
-      Datasets packaged in RO-Crate format with rich metadata and provenance graphs.
-    access_urls:
-      - https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX
-
-  - id: cm4ai:format:dataverse
-    name: LibraData Dataverse repository
-    description: >
-      University of Virginia's LibraData (Dataverse) NIH-approved generalist repository.
-    access_urls:
-      - https://dataverse.lib.virginia.edu
-
-  - id: cm4ai:format:portal
-    name: CM4AI web portal
-    description: >
-      CM4AI project portal using U-BRITE platform for open dissemination.
-    access_urls:
-      - https://cm4ai.org
-      - http://www.cm4ai.org
-
-  - id: cm4ai:format:ndex
-    name: Network Data Exchange
-    description: >
-      Cell maps shared via NDEx for visualization in web browsers or Cytoscape.
-    access_urls:
-      - https://www.ndexbio.org
-
 license: CC BY-NC-SA 4.0
-
 license_and_use_terms:
-  id: cm4ai:license:cc-by-nc-sa
-  name: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+  id: cm4ai:license:001
   description: >
-    Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license.
-    Data are Copyright 2025 The Regents of the University of California except where
-    otherwise noted. Spatial proteomics raw image data copyright 2025 The Board of
-    Trustees of the Leland Stanford Junior University.
+    Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+    International license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Copyright (c) 2025
+    The Regents of the University of California except where otherwise noted. Spatial proteomics
+    raw image data copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University.
+    Permits distribution, remix, adaptation, and building upon work non-commercially with attribution
+    to copyright holders and authors. Derivative works must be licensed under same terms. Commercial
+    use requires separate license negotiation with copyright holders (UCSD, Stanford, UCSF). Data
+    Access Committee supervises ethical matters related to dataset distribution and potential dual
+    licensing for commercial use.
   license_terms:
     - Attribution required to copyright holders and authors
-    - Citation of bioRxiv article required
     - Non-commercial use only without separate license
-    - ShareAlike - derivatives must use same license
-    - Software under BSD-3 and MIT open source licenses
-    - FAIRSCAPE under MIT license
+    - Derivative works must use same license (CC BY-NC-SA 4.0)
+    - Citation of Related Publication required (bioRxiv 2024.05.21.589311)
+    - Direct citation of data collection required
+    - Commercial use requires separate license negotiation
+    - Data Access Committee oversight for ethical distribution
+
+distribution_formats:
+  - id: cm4ai:format:001
+    description: >
+      RO-Crate packages containing datasets, provenance graphs, and rich metadata using
+      FAIRSCAPE framework. Packages include JSON-LD metadata, ARK persistent identifiers,
+      complete provenance graphs in EVI Evidence Graph Ontology, and resolvable landing
+      pages (human- and machine-readable).
+    access_urls:
+      - https://doi.org/10.18130/V3/B35XWX
+      - https://doi.org/10.18130/V3/F3TD5R
+      - https://www.cm4ai.org
+  - id: cm4ai:format:002
+    description: >
+      DICOM format for immunofluorescence imaging data. IF images converted from proprietary
+      formats to DICOM standard for interoperability. Total size 8.6 GB across three treatment
+      conditions for MDA-MB-468 cells.
+    access_urls:
+      - https://doi.org/10.18130/V3/B35XWX
+  - id: cm4ai:format:003
+    description: >
+      Mass spectrometry data deposited to MassIVE Repository. SEC-MS data for human iPSCs and
+      cancer cells available through MassIVE with links from primary dataset. AP-MS data to be
+      deposited when additional tagging complete.
+    access_urls:
+      - MassIVE Repository (iPSCs)
+      - MassIVE Repository (Cancer cells)
+  - id: cm4ai:format:004
+    description: >
+      Raw sequence data in NCBI Sequence Read Archive (SRA). CRISPR perturbation raw sequence
+      data deposited to NCBI BioProject. Single-cell RNA sequencing data from 10x Genomics
+      3'HT kit.
+    access_urls:
+      - NCBI BioProject SRA
+  - id: cm4ai:format:005
+    description: >
+      JSON metadata files in RO-Crate packages providing structured metadata for computational
+      access. Metadata expressed in Schema.org and EVI vocabularies using JSON-LD graph language.
+    access_urls:
+      - https://doi.org/10.18130/V3/B35XWX
+  - id: cm4ai:format:006
+    description: >
+      Cell map visualizations via Network Data Exchange (NDEx) and HiView. Cell maps shared
+      via NDEx for web browser or Cytoscape access. HiView provides interactive circle-packing
+      diagram visualization of hierarchical cell maps. Python ndex2 library for programmatic
+      access.
+    access_urls:
+      - https://www.ndexbio.org
+      - https://www.cm4ai.org
 
 # Maintenance
 maintainers:
-  - id: cm4ai:maintainer:cm4ai-team
-    name: CM4AI Project Team
+  - id: cm4ai:maintainer:001
     description: >
-      Multi-institutional team responsible for dataset maintenance.
+      CM4AI Consortium - Multidisciplinary team across UCSD, UCSF, Stanford, UVA, Yale, UA
+      Birmingham, Simon Fraser University, and Hastings Center. Led by Trey Ideker (UCSD) as
+      Contact PI. Project management by Jillian Parker (UCSD). Data governance by Jillian Parker
+      (jillianparker@health.ucsd.edu). Ethical review by Vardit Ravitsky (ravitskyv@thehastingscenter.org)
+      and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca).
     maintainer_details:
-      - Point of contact Trey Ideker (University of California San Diego)
-      - Data depositor Justin Niestroy (University of Virginia)
-      - Data Access Committee for ethical supervision
+      - University of California San Diego (lead, data generation, tools)
+      - University of California San Francisco (data generation, integrative modeling)
+      - Stanford University (spatial proteomics imaging)
+      - University of Virginia (standards, FAIRSCAPE infrastructure)
+      - Yale University (skills development, ethics)
+      - University of Alabama at Birmingham (teaming, workforce development)
+      - Simon Fraser University (ethics)
+      - Hastings Center (ethics)
+      - Data Access Committee for distribution oversight
 
 updates:
-  id: cm4ai:updates
-  name: Regular data augmentation
+  id: cm4ai:updates:001
   description: >
-    Data will be augmented regularly through the end of the project in August 2026.
+    Dataset regularly updated and augmented through end of project November 2026. Quarterly
+    release schedule with versions tracked (currently V1.4 March 2025, V2.1 June 2025). Long-term
+    preservation in University of Virginia Dataverse (LibraData) supported by committed institutional
+    funds. Updates include additional proteins imaged, additional genes tagged for AP-MS,
+    SEC-MS data from additional cell types and conditions, computed cell maps from MuSIC
+    pipeline integration, and corrections to metadata and naming conventions.
+  frequency: Quarterly releases; final release planned November 2026
   update_details:
-    - Ongoing data generation and release
-    - Regular updates to LibraData repository
-    - Additional cell lines and conditions planned
-    - Year 2 expansion to iPSC differentiation states
+    - Beta release March 2025 (V1) with perturb-seq, SEC-MS, IF images
+    - Beta release June 2025 (V2) added RGB IF images, metadata corrections
+    - Quarterly updates through November 2026
+    - Computed cell maps to be added in future releases
+    - Additional protein coverage ongoing (17/51 genes tagged, 34 more in process)
+    - SEC-MS expansion to additional cell types and conditions
+    - Long-term preservation in UVA Dataverse
 
-version_access:
-  id: cm4ai:version-access
-  name: Dataset versioning
+retention_limit:
+  id: cm4ai:retention:001
   description: >
-    Dataset versioned through University of Virginia Dataverse with DOI persistence.
-  version_details:
-    - DOI doi:10.18130/V3/B35XWX for persistent access
-    - Dataverse versioning system tracks updates
-    - Software packages versioned for reproducibility
-    - Version referenced in dataset metadata
+    Digital data maintained according to NIH data sharing policies with long-term preservation
+    commitment from University of Virginia institutional funds. Dataverse repository provides
+    persistent storage with ARK persistent identifiers resolving to metadata and data. Some
+    datasets under temporary pre-publication embargo. No planned deletion date. Cell line
+    materials available through commercial sources (ATCC for MDA-MB-468, HipSci for KOLF2.1J).
+  retention_details:
+    - NIH data sharing policies govern retention
+    - UVA institutional funds committed for long-term preservation
+    - ARK persistent identifiers ensure permanent resolvability
+    - Temporary pre-publication embargo on some datasets
+    - No planned data deletion
+    - Source cell lines commercially available
 
-# Ethics
+# Ethics and Human Subjects
 human_subject_research:
-  id: cm4ai:ethics:non-human-subjects
-  name: Non-human subjects research
+  id: cm4ai:hsr:001
+  name: CM4AI Human Subjects Research
   description: >
-    CM4AI data are distinctive in being non-clinical data from tissue cultures that
-    are considered de-identified as they cannot be matched to human subjects with
-    current knowledge. Data from ethically sourced cell lines: MDA-MB-468 from ATCC
-    with established provenance, and KOLF2.1J from HipSci with donor consent for
-    research use. No direct human subjects involvement; cell lines cannot be matched
-    to individuals.
+    Dataset uses commercially available, ethically sourced, de-identified cell lines that cannot
+    be matched to human subjects with current knowledge. Non-clinical data from tissue cultures.
+    MDA-MB-468 and KOLF2.1J cell lines obtained through established commercial and academic
+    sources (ATCC, HipSci) with appropriate material transfer agreements. No human subjects
+    involved in data collection. Ethics team employed Value-Sensitive Design (VSD) methodology
+    to create normative standards and expectations for responsible design of datasets and AI
+    technologies. CM4AI Life Cycle framework designed to elucidate governance milestones
+    throughout data generation and AI system development. No IRB approval required for use of
+    de-identified commercial cell lines.
   involves_human_subjects: false
+  irb_approval:
+    - Not applicable - de-identified commercial cell lines
+  ethics_review_board:
+    - CM4AI Ethics team led by Jean-Christophe Bélisle-Pipon and Vardit Ravitsky
+    - Value-Sensitive Design (VSD) methodology for normative standards
+    - CM4AI Life Cycle framework for governance milestones
+    - Data Access Committee for distribution oversight
+  special_populations:
+    - Cell lines derived from 51-year-old black female (MDA-MB-468)
+    - Cell lines derived from male Northern European donor (KOLF2.1J)
+    - No additional special populations involved
 
-ethical_reviews:
-  - id: cm4ai:ethics:value-sensitive-design
-    name: Value-Sensitive Design framework
+sensitive_elements:
+  - id: cm4ai:sensitive:001
     description: >
-      Ethics team employs Value-Sensitive Design (VSD) methodology for ethical AI
-      development.
-    review_details:
-      - Conceptual work to craft axiological repository of values
-      - Design standards and expectations for responsible AI
-      - CM4AI Life Cycle framework for governance milestones
-      - Embedding ethical considerations at every phase
+      Cell line origin information includes demographic details (51-year-old black female for
+      MDA-MB-468, male Northern European donor for KOLF2.1J) but cells are de-identified and
+      cannot be matched to individuals. Commercially available through ATCC and HipSci with
+      standard MTAs. No genetic data linked to identifiable individuals.
+    sensitive_elements_present: false
+    sensitivity_details:
+      - De-identified commercial cell lines
+      - No link to identifiable human subjects
+      - Demographic information limited to cell line characterization
+  - id: cm4ai:sensitive:002
+    description: >
+      Some datasets under temporary pre-publication embargo pending completion and validation.
+      Not related to human subjects sensitivity but to scientific publication timing. Data
+      Access Committee oversees release timing.
+    sensitive_elements_present: false
+    sensitivity_details:
+      - Temporary pre-publication embargo on some datasets
+      - Not related to human subjects
+      - Data Access Committee oversight
 
-  - id: cm4ai:ethics:stakeholder-engagement
-    name: Stakeholder engagement research
-    description: >
-      Mixed empirical research combining qualitative and quantitative methods to
-      capture community insights.
-    review_details:
-      - Diverse perspective integration in ethical guidelines
-      - Community insights on values and concerns
-      - Tools for ethical, legal, and social ramifications awareness
-
-  - id: cm4ai:ethics:code-of-conduct
-    name: Bridge2AI Code of Conduct
-    description: >
-      Bridge2AI Data Sharing and Dissemination Working Group Code of Conduct for
-      data access.
-    review_details:
-      - Basic requirements for Bridge2AI Open House participants
-      - Attestation required prior to accessing CM4AI datasets
-      - Ethical commitments from data users
-
-data_protection_impacts:
-  - id: cm4ai:protection:licensing
-    name: Licensing and data governance
-    description: >
-      Ethical preparation, licensing, dissemination, and data access supervision
-      balancing openness with intellectual property protection.
-    impact_details:
-      - CC BY-NC-SA 4.0 for open non-commercial use
-      - Commercial use requires separate licensing
-      - Data Access Committee supervision
-      - Protection of copyright holders' intellectual property
-
-  - id: cm4ai:protection:responsible-ai
-    name: Responsible AI development framework
-    description: >
-      Guidelines and best practices for ethical development of AI systems leveraging
-      CM4AI data.
-    impact_details:
-      - Anticipation of potential AI/ML applications
-      - Integration into data governance frameworks
-      - Optimization of benefits and risk mitigation
-      - Promotion of use for collective good
+# Data Governance and External Resources
+external_resources:
+  - id: cm4ai:resource:001
+    description: CM4AI Project Website with data portal and resources
+    external_resources:
+      - https://www.cm4ai.org
+  - id: cm4ai:resource:002
+    description: University of Virginia Dataverse repository for data packages
+    external_resources:
+      - https://doi.org/10.18130/V3/B35XWX
+      - https://doi.org/10.18130/V3/F3TD5R
+  - id: cm4ai:resource:003
+    description: NIH RePORTER Project Details
+    external_resources:
+      - https://reporter.nih.gov/project-details/11211616
+  - id: cm4ai:resource:004
+    description: Bridge2AI Program
+    external_resources:
+      - https://bridge2ai.org
+      - https://commonfund.nih.gov/bridge2ai
+  - id: cm4ai:resource:005
+    description: Related Publication - bioRxiv preprint describing project methods and status
+    external_resources:
+      - https://doi.org/10.1101/2024.05.21.589311
+  - id: cm4ai:resource:006
+    description: FAIRSCAPE framework documentation and installation
+    external_resources:
+      - https://fairscape.github.io
+  - id: cm4ai:resource:007
+    description: Network Data Exchange (NDEx) for cell map sharing
+    external_resources:
+      - https://www.ndexbio.org
+  - id: cm4ai:resource:008
+    description: MassIVE Repository for mass spectrometry data
+    external_resources:
+      - MassIVE Repository (Human iPSCs)
+      - MassIVE Repository (Human Cancer Cells)
+  - id: cm4ai:resource:009
+    description: NCBI Sequence Read Archive (SRA) BioProject for raw sequence data
+    external_resources:
+      - NCBI BioProject SRA
+  - id: cm4ai:resource:010
+    description: Related Publication - Perturbation Cell Atlas preprint
+    external_resources:
+      - https://doi.org/10.1101/2024.11.03.621734
+  - id: cm4ai:resource:011
+    description: Cytoscape software for network visualization
+    external_resources:
+      - http://www.cytoscape.org
+  - id: cm4ai:resource:012
+    description: Integrative Modeling Platform (IMP) for structure modeling
+    external_resources:
+      - http://integrativemodeling.org
+  - id: cm4ai:resource:013
+    description: U-BRITE platform for CM4AI web portal and data sharing
+    external_resources:
+      - https://www.cm4ai.org

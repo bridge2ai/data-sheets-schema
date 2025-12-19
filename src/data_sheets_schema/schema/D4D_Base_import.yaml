@@ -21,6 +21,7 @@ prefixes:
   mediatypes: https://www.iana.org/assignments/media-types/
   prov: http://www.w3.org/ns/prov#
   qudt: http://qudt.org/schema/qudt/
+  rai: http://mlcommons.org/croissant/RAI/
   schema: http://schema.org/
   sh: https://w3id.org/shacl/
   skos: http://www.w3.org/2004/02/skos/core#

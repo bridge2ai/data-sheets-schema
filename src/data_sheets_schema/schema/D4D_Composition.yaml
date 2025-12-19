@@ -200,6 +200,8 @@ classes:
       or prejudices that may affect the representativeness or fairness of the data.
       Distinct from anomalies (data quality issues) and limitations (scope constraints).
     is_a: DatasetProperty
+    exact_mappings:
+      - rai:dataBiases
     attributes:
       bias_type:
         description: >
@@ -229,6 +231,8 @@ classes:
       or interpretation. Distinct from biases (systematic errors) and
       anomalies (data quality issues).
     is_a: DatasetProperty
+    exact_mappings:
+      - rai:dataLimitations
     attributes:
       limitation_type:
         description: >
@@ -363,6 +367,8 @@ classes:
       Does the dataset contain data that might be considered sensitive
       (e.g., race, sexual orientation, religion, biometrics)?
     is_a: DatasetProperty
+    exact_mappings:
+      - rai:personalSensitiveInformation
     attributes:
       sensitive_elements_present:
         range: boolean
