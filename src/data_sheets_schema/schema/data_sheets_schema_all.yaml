@@ -64,6 +64,9 @@ prefixes:
   shex:
     prefix_prefix: shex
     prefix_reference: http://www.w3.org/ns/shex#
+  rai:
+    prefix_prefix: rai
+    prefix_reference: http://mlcommons.org/croissant/RAI/
   d4dmotivation:
     prefix_prefix: d4dmotivation
     prefix_reference: https://w3id.org/bridge2ai/data-sheets-schema/motivation#
@@ -2056,6 +2059,30 @@ classes:
         multivalued: true
         inlined: true
         inlined_as_list: true
+      missing_data_documentation:
+        name: missing_data_documentation
+        description: Documentation of missing data patterns and handling strategies.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: missing_data_documentation
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: MissingDataDocumentation
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      raw_data_sources:
+        name: raw_data_sources
+        description: Description of raw data sources before preprocessing.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: raw_data_sources
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: RawDataSource
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
       ethical_reviews:
         name: ethical_reviews
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2178,6 +2205,42 @@ classes:
         domain_of:
         - Dataset
         range: RawData
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      imputation_protocols:
+        name: imputation_protocols
+        description: Data imputation methodology and techniques.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: imputation_protocols
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: ImputationProtocol
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      annotation_analyses:
+        name: annotation_analyses
+        description: Analysis of annotation quality and inter-annotator agreement.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: annotation_analyses
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: AnnotationAnalysis
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      machine_annotation_tools:
+        name: machine_annotation_tools
+        description: Automated annotation tools used in dataset creation.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: machine_annotation_tools
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: MachineAnnotationTools
         multivalued: true
         inlined: true
         inlined_as_list: true
@@ -3245,6 +3308,28 @@ classes:
         range: CollectionTimeframe
         multivalued: true
         inlined_as_list: true
+      missing_data_documentation:
+        name: missing_data_documentation
+        description: Documentation of missing data patterns and handling strategies.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: missing_data_documentation
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: MissingDataDocumentation
+        multivalued: true
+        inlined_as_list: true
+      raw_data_sources:
+        name: raw_data_sources
+        description: Description of raw data sources before preprocessing.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: raw_data_sources
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: RawDataSource
+        multivalued: true
+        inlined_as_list: true
       ethical_reviews:
         name: ethical_reviews
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3360,6 +3445,39 @@ classes:
         domain_of:
         - Dataset
         range: RawData
+        multivalued: true
+        inlined_as_list: true
+      imputation_protocols:
+        name: imputation_protocols
+        description: Data imputation methodology and techniques.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: imputation_protocols
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: ImputationProtocol
+        multivalued: true
+        inlined_as_list: true
+      annotation_analyses:
+        name: annotation_analyses
+        description: Analysis of annotation quality and inter-annotator agreement.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: annotation_analyses
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: AnnotationAnalysis
+        multivalued: true
+        inlined_as_list: true
+      machine_annotation_tools:
+        name: machine_annotation_tools
+        description: Automated annotation tools used in dataset creation.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: machine_annotation_tools
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: MachineAnnotationTools
         multivalued: true
         inlined_as_list: true
       existing_uses:
@@ -4157,10 +4275,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -4235,10 +4358,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -4313,10 +4441,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -4380,10 +4513,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5131,10 +5269,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5209,10 +5352,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5287,10 +5435,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5354,10 +5507,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5453,10 +5611,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5531,10 +5694,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5609,10 +5777,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5676,10 +5849,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5777,10 +5955,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5855,10 +6038,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -5933,10 +6121,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6000,10 +6193,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6130,10 +6328,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6208,10 +6411,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6286,10 +6494,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6353,10 +6566,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6467,10 +6685,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6545,10 +6768,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6623,10 +6851,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -6690,10 +6923,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7060,10 +7298,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7138,10 +7381,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7216,10 +7464,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7283,10 +7536,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7457,10 +7715,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7535,10 +7798,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7613,10 +7881,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7680,10 +7953,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7796,10 +8074,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7874,10 +8157,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -7952,10 +8240,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8019,10 +8312,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8123,10 +8421,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8201,10 +8504,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8279,10 +8587,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8346,10 +8659,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8449,10 +8767,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8527,10 +8850,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8605,10 +8933,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8672,10 +9005,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8774,10 +9112,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8852,10 +9195,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8930,10 +9278,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -8997,10 +9350,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9042,6 +9400,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataBiases
     is_a: DatasetProperty
     attributes:
       bias_type:
@@ -9137,10 +9497,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9215,10 +9580,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9293,10 +9663,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9360,10 +9735,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9405,6 +9785,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataLimitations
     is_a: DatasetProperty
     attributes:
       limitation_type:
@@ -9497,10 +9879,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9575,10 +9962,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9653,10 +10045,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9720,10 +10117,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9873,10 +10275,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -9951,10 +10358,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10029,10 +10441,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10096,10 +10513,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10208,10 +10630,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10286,10 +10713,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10364,10 +10796,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10431,10 +10868,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10540,10 +10982,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10618,10 +11065,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10696,10 +11148,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10763,10 +11220,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10882,10 +11344,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -10960,10 +11427,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11038,10 +11510,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11105,10 +11582,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11236,10 +11718,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11314,10 +11801,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11392,10 +11884,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11459,10 +11956,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11503,6 +12005,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:personalSensitiveInformation
     is_a: DatasetProperty
     attributes:
       sensitive_elements_present:
@@ -11571,10 +12075,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11649,10 +12158,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11727,10 +12241,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11794,10 +12313,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -11947,10 +12471,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12025,10 +12554,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12092,10 +12626,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12231,10 +12770,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12309,10 +12853,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12387,10 +12936,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12454,10 +13008,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12499,6 +13058,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataCollection
     is_a: DatasetProperty
     attributes:
       mechanism_details:
@@ -12558,10 +13119,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12636,10 +13202,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12714,10 +13285,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12781,10 +13357,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12894,10 +13475,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -12972,10 +13558,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13050,10 +13641,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13117,10 +13713,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13161,6 +13762,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataCollectionTimeframe
     is_a: DatasetProperty
     attributes:
       start_date:
@@ -13239,10 +13842,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13317,10 +13925,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13395,10 +14008,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13462,10 +14080,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13574,10 +14197,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13652,10 +14280,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13730,10 +14363,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13797,10 +14435,773 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  MissingDataDocumentation:
+    name: MissingDataDocumentation
+    description: 'Documentation of missing data in the dataset, including patterns,
+      causes, and strategies for handling missing values.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataCollectionMissingData
+    is_a: DatasetProperty
+    attributes:
+      missing_data_patterns:
+        name: missing_data_patterns
+        description: 'Description of patterns in missing data (e.g., missing completely
+          at random, missing at random, missing not at random).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        alias: missing_data_patterns
+        owner: MissingDataDocumentation
+        domain_of:
+        - MissingDataDocumentation
+        range: string
+        multivalued: true
+      missing_data_causes:
+        name: missing_data_causes
+        description: 'Known or suspected causes of missing data (e.g., sensor failures,
+          participant dropout, privacy constraints).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        alias: missing_data_causes
+        owner: MissingDataDocumentation
+        domain_of:
+        - MissingDataDocumentation
+        range: string
+        multivalued: true
+      handling_strategy:
+        name: handling_strategy
+        description: 'Strategy used to handle missing data (e.g., deletion, imputation,
+          flagging, multiple imputation).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        alias: handling_strategy
+        owner: MissingDataDocumentation
+        domain_of:
+        - MissingDataDocumentation
+        range: string
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: MissingDataDocumentation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: MissingDataDocumentation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: MissingDataDocumentation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        alias: used_software
+        owner: MissingDataDocumentation
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  RawDataSource:
+    name: RawDataSource
+    description: 'Description of raw data sources before preprocessing, cleaning,
+      or labeling. Documents where the original data comes from and how it can be
+      accessed.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataCollectionRawData
+    is_a: DatasetProperty
+    attributes:
+      source_description:
+        name: source_description
+        description: 'Detailed description of where raw data comes from (e.g., sensors,
+          databases, web APIs, manual collection).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        alias: source_description
+        owner: RawDataSource
+        domain_of:
+        - RawDataSource
+        range: string
+        required: true
+      source_type:
+        name: source_type
+        description: 'Type of raw source (sensor, database, user input, web scraping,
+          etc.).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        alias: source_type
+        owner: RawDataSource
+        domain_of:
+        - RawDataSource
+        range: string
+        multivalued: true
+      access_details:
+        name: access_details
+        description: 'Information on how to access or retrieve the raw source data.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        alias: access_details
+        owner: RawDataSource
+        domain_of:
+        - RawDataSource
+        range: string
+      raw_data_format:
+        name: raw_data_format
+        description: 'Format of the raw data before any preprocessing.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        alias: raw_data_format
+        owner: RawDataSource
+        domain_of:
+        - RawDataSource
+        range: string
+        multivalued: true
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: RawDataSource
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: RawDataSource
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: RawDataSource
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        alias: used_software
+        owner: RawDataSource
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13841,6 +15242,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataPreprocessingProtocol
     is_a: DatasetProperty
     attributes:
       preprocessing_details:
@@ -13900,10 +15303,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -13978,10 +15386,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14056,10 +15469,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14123,10 +15541,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14167,6 +15590,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataManipulationProtocol
     is_a: DatasetProperty
     attributes:
       cleaning_details:
@@ -14226,10 +15651,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14304,10 +15734,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14382,10 +15817,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14449,10 +15889,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14495,22 +15940,40 @@ classes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     is_a: DatasetProperty
     attributes:
-      annotation_platform:
-        name: annotation_platform
+      data_annotation_platform:
+        name: data_annotation_platform
         description: Platform or tool used for annotation (e.g., Label Studio, Prodigy,
           Amazon Mechanical Turk, custom annotation tool).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        exact_mappings:
+        - rai:dataAnnotationPlatform
         slot_uri: schema:instrument
-        alias: annotation_platform
+        alias: data_annotation_platform
         owner: LabelingStrategy
         domain_of:
         - LabelingStrategy
         range: string
+      data_annotation_protocol:
+        name: data_annotation_protocol
+        description: Annotation methodology, tasks, and protocols followed during
+          labeling. Includes annotation guidelines, quality control procedures, and
+          task definitions.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        exact_mappings:
+        - rai:dataAnnotationProtocol
+        alias: data_annotation_protocol
+        owner: LabelingStrategy
+        domain_of:
+        - LabelingStrategy
+        range: string
+        multivalued: true
       annotations_per_item:
         name: annotations_per_item
         description: Number of annotations collected per data item. Multiple annotations
           per item enable calculation of inter-annotator agreement.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        exact_mappings:
+        - rai:annotationsPerItem
         alias: annotations_per_item
         owner: LabelingStrategy
         domain_of:
@@ -14533,6 +15996,8 @@ classes:
         description: Demographic information about annotators, if available and relevant
           (e.g., geographic location, language background, expertise level).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        exact_mappings:
+        - rai:annotatorDemographics
         alias: annotator_demographics
         owner: LabelingStrategy
         domain_of:
@@ -14596,10 +16061,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14674,10 +16144,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14752,10 +16227,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14819,10 +16299,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -14931,10 +16416,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15009,10 +16499,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15087,10 +16582,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15154,10 +16654,1173 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  ImputationProtocol:
+    name: ImputationProtocol
+    description: 'Description of data imputation methodology, including techniques
+      used to handle missing values and rationale for chosen approaches.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataImputationProtocol
+    is_a: DatasetProperty
+    attributes:
+      imputation_method:
+        name: imputation_method
+        description: 'Specific imputation technique used (mean, median, mode, forward
+          fill, backward fill, interpolation, model-based imputation, etc.).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: imputation_method
+        owner: ImputationProtocol
+        domain_of:
+        - ImputationProtocol
+        range: string
+        multivalued: true
+      imputed_fields:
+        name: imputed_fields
+        description: 'Fields or columns where imputation was applied.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: imputed_fields
+        owner: ImputationProtocol
+        domain_of:
+        - ImputationProtocol
+        range: string
+        multivalued: true
+      imputation_rationale:
+        name: imputation_rationale
+        description: 'Justification for the imputation approach chosen, including
+          assumptions made about missing data mechanisms.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: imputation_rationale
+        owner: ImputationProtocol
+        domain_of:
+        - ImputationProtocol
+        range: string
+      imputation_validation:
+        name: imputation_validation
+        description: 'Methods used to validate imputation quality (if any).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: imputation_validation
+        owner: ImputationProtocol
+        domain_of:
+        - ImputationProtocol
+        range: string
+        multivalued: true
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: ImputationProtocol
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: ImputationProtocol
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: ImputationProtocol
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        alias: used_software
+        owner: ImputationProtocol
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  AnnotationAnalysis:
+    name: AnnotationAnalysis
+    description: 'Analysis of annotation quality, inter-annotator agreement metrics,
+      and systematic patterns in annotation disagreements.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataAnnotationAnalysis
+    is_a: DatasetProperty
+    attributes:
+      inter_annotator_agreement_score:
+        name: inter_annotator_agreement_score
+        description: 'Measured agreement between annotators (e.g., Cohen''s kappa
+          value, Fleiss'' kappa, Krippendorff''s alpha).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: inter_annotator_agreement_score
+        owner: AnnotationAnalysis
+        domain_of:
+        - AnnotationAnalysis
+        range: float
+      agreement_metric:
+        name: agreement_metric
+        description: 'Type of agreement metric used (Cohen''s kappa, Fleiss'' kappa,
+          Krippendorff''s alpha, percentage agreement, etc.).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: agreement_metric
+        owner: AnnotationAnalysis
+        domain_of:
+        - AnnotationAnalysis
+        range: string
+      analysis_method:
+        name: analysis_method
+        description: 'Methodology used to assess annotation quality and resolve disagreements.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: analysis_method
+        owner: AnnotationAnalysis
+        domain_of:
+        - AnnotationAnalysis
+        range: string
+      disagreement_patterns:
+        name: disagreement_patterns
+        description: 'Systematic patterns in annotator disagreements (e.g., by demographic
+          group, annotation difficulty, task type).
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: disagreement_patterns
+        owner: AnnotationAnalysis
+        domain_of:
+        - AnnotationAnalysis
+        range: string
+        multivalued: true
+      annotation_quality_details:
+        name: annotation_quality_details
+        description: 'Additional details on annotation quality assessment and findings.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: annotation_quality_details
+        owner: AnnotationAnalysis
+        domain_of:
+        - AnnotationAnalysis
+        range: string
+        multivalued: true
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: AnnotationAnalysis
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: AnnotationAnalysis
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: AnnotationAnalysis
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        alias: used_software
+        owner: AnnotationAnalysis
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  MachineAnnotationTools:
+    name: MachineAnnotationTools
+    description: 'Automated or machine-learning-based annotation tools used in dataset
+      creation, including NLP pipelines, computer vision models, or other automated
+      labeling systems.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:machineAnnotationTools
+    is_a: DatasetProperty
+    attributes:
+      tools:
+        name: tools
+        description: 'List of automated annotation tools with their versions. Format
+          each entry as "ToolName version" (e.g., "spaCy 3.5.0", "NLTK 3.8", "GPT-4
+          turbo"). Use "unknown" for version if not available (e.g., "Custom NER Model
+          unknown").
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: tools
+        owner: MachineAnnotationTools
+        domain_of:
+        - MachineAnnotationTools
+        range: string
+        multivalued: true
+      tool_descriptions:
+        name: tool_descriptions
+        description: 'Descriptions of what each tool does in the annotation process
+          and what types of annotations it produces. Should correspond to the tools
+          list.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: tool_descriptions
+        owner: MachineAnnotationTools
+        domain_of:
+        - MachineAnnotationTools
+        range: string
+        multivalued: true
+      tool_accuracy:
+        name: tool_accuracy
+        description: 'Known accuracy or performance metrics for the automated tools
+          (if available). Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4
+          Accuracy: 92%").
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        alias: tool_accuracy
+        owner: MachineAnnotationTools
+        domain_of:
+        - MachineAnnotationTools
+        range: string
+        multivalued: true
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: MachineAnnotationTools
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: MachineAnnotationTools
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: MachineAnnotationTools
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        alias: used_software
+        owner: MachineAnnotationTools
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15255,10 +17918,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15333,10 +18001,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15411,10 +18084,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15478,10 +18156,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15590,10 +18273,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15668,10 +18356,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15746,10 +18439,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15813,10 +18511,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15915,10 +18618,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -15993,10 +18701,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16071,10 +18784,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16138,10 +18856,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16184,6 +18907,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataSocialImpact
     is_a: DatasetProperty
     attributes:
       impact_details:
@@ -16244,10 +18969,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16322,10 +19052,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16400,10 +19135,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16467,10 +19207,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16569,10 +19314,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16647,10 +19397,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16725,10 +19480,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16792,10 +19552,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16837,6 +19602,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataUseCases
     is_a: DatasetProperty
     attributes:
       examples:
@@ -16915,10 +19682,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -16993,10 +19765,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17071,10 +19848,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17138,10 +19920,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17240,10 +20027,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17318,10 +20110,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17396,10 +20193,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17463,10 +20265,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17567,10 +20374,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17645,10 +20457,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17723,10 +20540,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17790,10 +20612,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17891,10 +20718,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -17969,10 +20801,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18047,10 +20884,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18114,10 +20956,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18217,10 +21064,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18295,10 +21147,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18373,10 +21230,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18440,10 +21302,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18555,10 +21422,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18633,10 +21505,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18711,10 +21588,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18778,10 +21660,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18890,10 +21777,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -18968,10 +21860,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19046,10 +21943,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19113,10 +22015,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19158,6 +22065,8 @@ classes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - rai:dataReleaseMaintenancePlan
     is_a: DatasetProperty
     attributes:
       frequency:
@@ -19227,10 +22136,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19305,10 +22219,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19383,10 +22302,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19450,10 +22374,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19564,10 +22493,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19642,10 +22576,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19720,10 +22659,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19787,10 +22731,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19909,10 +22858,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -19987,10 +22941,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20065,10 +23024,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20132,10 +23096,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20246,10 +23215,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20324,10 +23298,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20402,10 +23381,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20469,10 +23453,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20603,10 +23592,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20681,10 +23675,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20759,10 +23758,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20826,10 +23830,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -20932,10 +23941,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21010,10 +24024,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21088,10 +24107,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21155,10 +24179,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21259,10 +24288,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21337,10 +24371,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21415,10 +24454,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21482,10 +24526,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21586,10 +24635,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21664,10 +24718,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21742,10 +24801,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21809,10 +24873,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21913,10 +24982,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -21991,10 +25065,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22069,10 +25148,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22136,10 +25220,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22287,10 +25376,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22365,10 +25459,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22443,10 +25542,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22510,10 +25614,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22661,10 +25770,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22739,10 +25853,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22817,10 +25936,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -22884,10 +26008,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23026,10 +26155,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23104,10 +26238,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23182,10 +26321,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23249,10 +26393,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23387,10 +26536,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23465,10 +26619,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23543,10 +26702,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23610,10 +26774,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23751,10 +26920,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23829,10 +27003,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23907,10 +27086,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -23974,10 +27158,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24111,10 +27300,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24189,10 +27383,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24267,10 +27466,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24334,10 +27538,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24441,10 +27650,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24519,10 +27733,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24597,10 +27816,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24664,10 +27888,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24820,10 +28049,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24898,10 +28132,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -24976,10 +28215,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -25043,10 +28287,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -25296,10 +28545,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -25374,10 +28628,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -25452,10 +28711,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
@@ -25519,10 +28783,15 @@ classes:
         - DataCollector
         - CollectionTimeframe
         - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
         - PreprocessingStrategy
         - CleaningStrategy
         - LabelingStrategy
         - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
         - ExistingUse
         - UseRepository
         - OtherTask
