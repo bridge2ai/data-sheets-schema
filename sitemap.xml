@@ -121,6 +121,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/D4D_GAPS_COMPLETED/</loc>
+         <lastmod>2025-12-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/DataAnomaly/</loc>
          <lastmod>2025-12-20</lastmod>
          <changefreq>daily</changefreq>
@@ -607,6 +612,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/Uses/</loc>
+         <lastmod>2025-12-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/VERSIONING/</loc>
          <lastmod>2025-12-20</lastmod>
          <changefreq>daily</changefreq>
     </url>

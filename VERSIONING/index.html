@@ -1,0 +1,743 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/VERSIONING/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>D4D Datasheet Versioning Guide - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#d4d-datasheet-versioning-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              D4D Datasheet Versioning Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_examples/" class="md-nav__link">
+        D4D Examples
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-numbering" class="md-nav__link">
+    Version Numbering
+  </a>
+  
+    <nav class="md-nav" aria-label="Version Numbering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#current-version" class="md-nav__link">
+    Current Version
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-increment-versions" class="md-nav__link">
+    When to Increment Versions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#versioning-workflow" class="md-nav__link">
+    Versioning Workflow
+  </a>
+  
+    <nav class="md-nav" aria-label="Versioning Workflow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-by-step-process" class="md-nav__link">
+    Step-by-Step Process
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-Step Process">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-regenerate-d4d-yamls-if-needed" class="md-nav__link">
+    1. Regenerate D4D YAMLs (if needed)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-generate-html-from-yamls" class="md-nav__link">
+    2. Generate HTML from YAMLs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-version-the-html-files-automated" class="md-nav__link">
+    3. Version the HTML Files (AUTOMATED)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-review-versioned-files" class="md-nav__link">
+    4. Review Versioned Files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-deploy-to-github-pages" class="md-nav__link">
+    5. Deploy to GitHub Pages
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-commit-and-push" class="md-nav__link">
+    6. Commit and Push
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-verify-deployment" class="md-nav__link">
+    7. Verify Deployment
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#file-naming-convention" class="md-nav__link">
+    File Naming Convention
+  </a>
+  
+    <nav class="md-nav" aria-label="File Naming Convention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#unversioned-generated" class="md-nav__link">
+    Unversioned (Generated)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#versioned-deployed" class="md-nav__link">
+    Versioned (Deployed)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-history" class="md-nav__link">
+    Version History
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintaining-previous-versions" class="md-nav__link">
+    Maintaining Previous Versions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#missing-html-files" class="md-nav__link">
+    Missing HTML Files
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-errors" class="md-nav__link">
+    Validation Errors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-size-anomalies" class="md-nav__link">
+    File Size Anomalies
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-manual-versioning-legacy" class="md-nav__link">
+    Advanced: Manual Versioning (Legacy)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    Related Documentation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#questions" class="md-nav__link">
+    Questions?
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/VERSIONING.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="d4d-datasheet-versioning-guide">D4D Datasheet Versioning Guide</h1>
+<p>This document explains the versioning process for Bridge2AI D4D (Datasheets for Datasets) HTML publications.</p>
+<h2 id="version-numbering">Version Numbering</h2>
+<p>D4D datasheets use <strong>sequential integer versioning</strong> (v1, v2, v3, etc.). Each version represents a stable snapshot of the datasheets published to GitHub Pages.</p>
+<h3 id="current-version">Current Version</h3>
+<p><strong>v5</strong> - Published December 2024
+- Method: <code>claudecode_agent</code> (Claude Code with Task tool for parallel extraction)
+- Projects: AI_READI, CHORUS, CM4AI, VOICE
+- Location: https://bridge2ai.github.io/data-sheets-schema/html_output/</p>
+<h2 id="when-to-increment-versions">When to Increment Versions</h2>
+<p>Create a new version when:</p>
+<ol>
+<li><strong>Schema Changes</strong>: The D4D LinkML schema has been modified in ways that affect datasheet structure or content</li>
+<li><strong>Source Updates</strong>: New or updated source documents are available for the Bridge2AI projects</li>
+<li><strong>Method Improvements</strong>: The extraction/synthesis method has been significantly improved</li>
+<li><strong>Error Corrections</strong>: Substantial errors or omissions in the current version need correction</li>
+<li><strong>Quarterly Updates</strong>: Regular updates to keep datasheets current (recommended every 3-6 months)</li>
+</ol>
+<p><strong>Do NOT create new versions for</strong>:
+- Minor typo fixes
+- CSS/styling changes only
+- Documentation updates
+- Schema changes that don't affect generated content</p>
+<h2 id="versioning-workflow">Versioning Workflow</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Ensure you have:
+- Updated D4D YAML files in <code>data/d4d_concatenated/claudecode_agent/</code>
+- Generated HTML files in <code>data/d4d_html/concatenated/claudecode_agent/</code>
+- Validated all YAML files against the schema</p>
+<h3 id="step-by-step-process">Step-by-Step Process</h3>
+<h4 id="1-regenerate-d4d-yamls-if-needed">1. Regenerate D4D YAMLs (if needed)</h4>
+<p>If source documents or schema have changed:</p>
+<pre><code class="language-bash"># For all projects using claudecode_agent method
+make d4d-agent PROJECT=AI_READI
+make d4d-agent PROJECT=CHORUS
+make d4d-agent PROJECT=CM4AI
+make d4d-agent PROJECT=VOICE
+</code></pre>
+<h4 id="2-generate-html-from-yamls">2. Generate HTML from YAMLs</h4>
+<pre><code class="language-bash">make gen-d4d-html
+</code></pre>
+<p>This creates HTML files in <code>data/d4d_html/concatenated/claudecode_agent/</code>:
+- <code>{PROJECT}_d4d_human_readable.html</code> - Human-readable datasheet
+- <code>{PROJECT}_evaluation.html</code> - Evaluation report</p>
+<h4 id="3-version-the-html-files-automated">3. Version the HTML Files (AUTOMATED)</h4>
+<p>Use the new <code>version-html</code> target to automatically copy and rename files:</p>
+<pre><code class="language-bash">make version-html VERSION=6
+</code></pre>
+<p>This will:
+- Copy HTML files from <code>data/d4d_html/concatenated/claudecode_agent/</code>
+- Rename to versioned format: <code>D4D_-_{PROJECT}_v6_*.html</code>
+- Place in <code>src/html/output/</code> directory
+- Create both human-readable and evaluation HTML for all 4 projects</p>
+<p><strong>Example output:</strong></p>
+<pre><code>Creating v6 HTML files from claudecode_agent output...
+  Versioning AI_READI...
+    ✓ Created D4D_-_AI_READI_v6_human_readable.html
+    ✓ Created D4D_-_AI_READI_v6_evaluation.html
+  Versioning CHORUS...
+    ✓ Created D4D_-_CHORUS_v6_human_readable.html
+    ✓ Created D4D_-_CHORUS_v6_evaluation.html
+  Versioning CM4AI...
+    ✓ Created D4D_-_CM4AI_v6_human_readable.html
+    ✓ Created D4D_-_CM4AI_v6_evaluation.html
+  Versioning VOICE...
+    ✓ Created D4D_-_VOICE_v6_human_readable.html
+    ✓ Created D4D_-_VOICE_v6_evaluation.html
+
+✅ v6 HTML files created in src/html/output/
+</code></pre>
+<h4 id="4-review-versioned-files">4. Review Versioned Files</h4>
+<p>Manually review the generated files in <code>src/html/output/</code>:</p>
+<pre><code class="language-bash">ls -lh src/html/output/D4D_-_*_v6_*.html
+</code></pre>
+<p>Check for:
+- File sizes are reasonable (30-80KB typical)
+- Both human_readable and evaluation files for each project
+- HTML renders correctly in browser</p>
+<h4 id="5-deploy-to-github-pages">5. Deploy to GitHub Pages</h4>
+<pre><code class="language-bash">make gendoc
+</code></pre>
+<p>This copies versioned files to <code>docs/html_output/</code> for GitHub Pages deployment.</p>
+<h4 id="6-commit-and-push">6. Commit and Push</h4>
+<pre><code class="language-bash">git add src/html/output/D4D_-_*_v6_*.html
+git add docs/html_output/D4D_-_*_v6_*.html
+git add data/d4d_concatenated/claudecode_agent/*.yaml  # If YAMLs changed
+git commit -m &quot;Add v6 D4D datasheets&quot;
+git push
+</code></pre>
+<h4 id="7-verify-deployment">7. Verify Deployment</h4>
+<p>After GitHub Pages builds (2-5 minutes), verify the new version is accessible:</p>
+<ul>
+<li>https://bridge2ai.github.io/data-sheets-schema/html_output/D4D_-_AI-READI_v6_human_readable.html</li>
+<li>https://bridge2ai.github.io/data-sheets-schema/html_output/D4D_-_CHORUS_v6_human_readable.html</li>
+<li>https://bridge2ai.github.io/data-sheets-schema/html_output/D4D_-_CM4AI_v6_human_readable.html</li>
+<li>https://bridge2ai.github.io/data-sheets-schema/html_output/D4D_-_VOICE_v6_human_readable.html</li>
+</ul>
+<h2 id="file-naming-convention">File Naming Convention</h2>
+<h3 id="unversioned-generated">Unversioned (Generated)</h3>
+<p>Located in <code>data/d4d_html/concatenated/claudecode_agent/</code>:
+- <code>{PROJECT}_d4d_human_readable.html</code> - Human-readable datasheet
+- <code>{PROJECT}_evaluation.html</code> - Evaluation report with quality metrics</p>
+<h3 id="versioned-deployed">Versioned (Deployed)</h3>
+<p>Located in <code>src/html/output/</code> and <code>docs/html_output/</code>:
+- <code>D4D_-_{PROJECT}_v{N}_human_readable.html</code> - Versioned human-readable datasheet
+- <code>D4D_-_{PROJECT}_v{N}_evaluation.html</code> - Versioned evaluation report</p>
+<p><strong>Naming Pattern</strong>: <code>D4D_-_{PROJECT}_v{VERSION}_{TYPE}.html</code></p>
+<p>Where:
+- <code>{PROJECT}</code>: AI-READI, CHORUS, CM4AI, or VOICE (note hyphen in AI-READI)
+- <code>{VERSION}</code>: Integer version number (5, 6, 7, etc.)
+- <code>{TYPE}</code>: <code>human_readable</code> or <code>evaluation</code></p>
+<h2 id="version-history">Version History</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Method</th>
+<th>Changes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v5</td>
+<td>2024-12-18</td>
+<td>claudecode_agent</td>
+<td>Current version with comprehensive evaluation metrics</td>
+</tr>
+<tr>
+<td>v4</td>
+<td>2024-11</td>
+<td>claudecode</td>
+<td>Standardized naming, improved structure</td>
+</tr>
+<tr>
+<td>v3</td>
+<td>2024-10</td>
+<td>curated</td>
+<td>Original FAIRHub/PhysioNet/Dataverse-specific variants</td>
+</tr>
+</tbody>
+</table>
+<h2 id="maintaining-previous-versions">Maintaining Previous Versions</h2>
+<p><strong>All versions are preserved</strong> in <code>src/html/output/</code> and <code>docs/html_output/</code>. This allows:
+- Version comparison and auditing
+- Rollback if needed
+- Historical reference
+- Citation stability (users can cite specific versions)</p>
+<p>To remove old versions (if needed):</p>
+<pre><code class="language-bash"># Remove v4 files
+rm src/html/output/D4D_-_*_v4_*.html
+rm docs/html_output/D4D_-_*_v4_*.html
+</code></pre>
+<p><strong>Recommendation</strong>: Keep at least the last 2-3 versions published.</p>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="missing-html-files">Missing HTML Files</h3>
+<p>If <code>make version-html</code> reports missing files:</p>
+<pre><code>⚠️  Missing: VOICE_d4d_human_readable.html
+</code></pre>
+<p><strong>Solution</strong>: Regenerate HTML first:</p>
+<pre><code class="language-bash">make gen-d4d-html
+</code></pre>
+<h3 id="validation-errors">Validation Errors</h3>
+<p>Before creating a new version, validate all YAMLs:</p>
+<pre><code class="language-bash">make validate-d4d-all GENERATOR=claudecode_agent
+</code></pre>
+<p>Fix any validation errors before proceeding.</p>
+<h3 id="file-size-anomalies">File Size Anomalies</h3>
+<p>Typical file sizes:
+- Human-readable: 30-50KB (VOICE may be larger at ~70KB)
+- Evaluation: 30-80KB</p>
+<p>If files are unexpectedly small (&lt;10KB) or large (&gt;200KB), investigate:</p>
+<pre><code class="language-bash">wc -l src/html/output/D4D_-_*_v6_*.html
+</code></pre>
+<h2 id="advanced-manual-versioning-legacy">Advanced: Manual Versioning (Legacy)</h2>
+<p>If automation fails, you can version manually:</p>
+<pre><code class="language-bash">VERSION=6
+for project in AI_READI CHORUS CM4AI VOICE; do
+  cp data/d4d_html/concatenated/claudecode_agent/${project}_d4d_human_readable.html \
+     src/html/output/D4D_-_${project}_v${VERSION}_human_readable.html
+
+  cp data/d4d_html/concatenated/claudecode_agent/${project}_evaluation.html \
+     src/html/output/D4D_-_${project}_v${VERSION}_evaluation.html
+done
+</code></pre>
+<p>Note: The hyphen in <code>AI-READI</code> matches the project naming convention.</p>
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li><a href="../notes/D4D_PIPELINE.md">D4D Pipeline Documentation</a> - Complete pipeline overview</li>
+<li><a href="/.claude/plans/streamed-painting-catmull.md">Critical Paths Plan</a> - Detailed path documentation</li>
+<li><a href="../CLAUDE.md">CLAUDE.md</a> - D4D pipeline section for full workflow</li>
+</ul>
+<h2 id="questions">Questions?</h2>
+<p>If you encounter issues with versioning:
+1. Check <code>make data-status</code> to verify pipeline state
+2. Validate YAMLs with <code>make validate-d4d-all</code>
+3. Review HTML generation logs from <code>make gen-d4d-html</code>
+4. Consult the critical paths plan for complete pipeline flow</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>
