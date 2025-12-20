@@ -1,0 +1,26 @@
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CM4AI/doi_row3.json
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "cm4ai:doi_reference"
+name: "CM4AI bioRxiv DOI Reference"
+title: "DOI Reference for Cell Maps for AI Preprint"
+description: |
+  DOI reference pointing to the Cell Maps for Artificial Intelligence bioRxiv preprint
+  at https://doi.org/10.1101/2024.05.21.589311
+page: "https://doi.org/10.1101/2024.05.21.589311"
+
+external_resources:
+  - id: "cm4ai:extres_biorxiv"
+    name: "bioRxiv Preprint"
+    description: "Cell Maps for AI preprint on bioRxiv"
+    external_resources:
+      - "https://doi.org/10.1101/2024.05.21.589311"
+
+keywords:
+  - "CM4AI"
+  - "DOI"
+  - "bioRxiv"
+  - "preprint"

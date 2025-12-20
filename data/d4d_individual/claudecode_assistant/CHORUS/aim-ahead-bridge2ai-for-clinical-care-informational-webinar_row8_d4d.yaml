@@ -1,0 +1,25 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "chorus:aim_ahead_webinar_row8"
+name: "AIM-AHEAD Bridge2AI Training Program Webinar (row8)"
+title: "AIM-AHEAD Bridge2AI for Clinical Care Training Program Cohort I - Informational Webinar"
+description: |
+  Informational webinar for the AIM-AHEAD Bridge2AI for Clinical Care Training Program Cohort I.
+  The AIM-AHEAD Coordinating Center consists of four cores: Leadership Core, Data Science
+  Training Core, Data and Research Core, and Infrastructure Core.
+
+purposes:
+  - id: "chorus:purpose_training"
+    name: "AI/ML training"
+    description: "Develop skills and workforce for next generation AI scientists"
+    response: "Develop skills and workforce for a next generation of diverse academic and community AI scientists"
+
+keywords:
+  - "AIM-AHEAD"
+  - "Bridge2AI"
+  - "training"
+  - "data science"

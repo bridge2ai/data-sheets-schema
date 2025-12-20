@@ -1,0 +1,399 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/2024.05.21.589311v1.full.txt
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: https://doi.org/10.1101/2024.05.21.589311
+name: CM4AI_Cell_Maps_for_AI
+title: Cell Maps for Artificial Intelligence - AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines
+description: |
+  Cell Maps for Artificial Intelligence (CM4AI) is an NIH-funded Bridge to Artificial Intelligence (Bridge2AI) Data Generation Project in the area of Functional Genomics. CM4AI's objective is to deliver machine-readable hierarchical maps of cell architecture as AI-Ready data produced from multimodal interrogation of 100 chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders in disease-relevant cell lines under perturbed and unperturbed conditions. The project utilizes state-of-the-art mass spectrometry based proteomics, spatial proteomics / cell imaging, and genetic perturbations using CRISPR to generate comprehensive cell maps.
+
+  Input data streams are generated using immunofluorescence (IF) subcellular microscopy for spatial proteomics data, affinity purification mass spectroscopy (AP-MS) and size exclusion mass spectroscopy (SEC-MS) methods for protein-protein interaction (PPI) data, and single-cell CRISPR-Cas perturbation screens by cell type. Data streams are integrated via the multi-scale integrated cell (MuSIC) software pipeline employing deep learning models and community detection algorithms, and output cell maps are packaged with provenance graphs and rich metadata as AI-Ready datasets in RO-Crate format using an extended, client-server version of the FAIRSCAPE framework.
+
+version: null
+issued: 2024-05-24
+modified: null
+was_derived_from: null
+has_part: null
+conforms_to: null
+conforms_to_schema: null
+conforms_to_class: null
+resources: null
+
+standards_and_requirements_id: null
+rai_citation: null
+
+creators:
+  - id: null
+    name: Timothy Clark
+    affiliation: University of Virginia
+    email: null
+  - id: null
+    name: Jillian Mohan
+    affiliation: University of California San Diego
+    email: null
+  - id: null
+    name: Leah Schaffer
+    affiliation: University of California San Diego
+    email: null
+  - id: null
+    name: Kirsten Obernier
+    affiliation: University of California San Francisco
+    email: null
+  - id: null
+    name: Trey Ideker
+    affiliation: University of California San Diego
+    email: tideker@health.ucsd.edu
+
+contributors:
+  - id: null
+    name: Jean-Christophe Bélisle-Pipon
+    affiliation: Simon Fraser University
+    role: null
+  - id: null
+    name: Cynthia Brandt
+    affiliation: Yale University
+    role: null
+  - id: null
+    name: Jake Chen
+    affiliation: University of Alabama at Birmingham
+    role: null
+  - id: null
+    name: Ying Ding
+    affiliation: University of Texas at Austin
+    role: null
+  - id: null
+    name: Samah Fodeh
+    affiliation: Yale University
+    role: null
+  - id: null
+    name: Nevan Krogan
+    affiliation: University of California San Francisco
+    role: null
+  - id: null
+    name: Emma Lundberg
+    affiliation: Stanford University
+    role: null
+  - id: null
+    name: Prashant Mali
+    affiliation: University of California San Diego
+    role: null
+  - id: null
+    name: Pamela Payne-Foster
+    affiliation: University of Alabama
+    role: null
+  - id: null
+    name: Sarah Ratcliffe
+    affiliation: University of Virginia
+    role: null
+  - id: null
+    name: Vardit Ravitsky
+    affiliation: University of Montreal
+    role: null
+  - id: null
+    name: Andrej Sali
+    affiliation: University of California San Francisco
+    role: null
+  - id: null
+    name: Wade Schulz
+    affiliation: Yale University
+    role: null
+
+contacts:
+  - id: null
+    name: Trey Ideker
+    affiliation: University of California San Diego
+    email: tideker@health.ucsd.edu
+
+publishers: null
+
+domain_experts: null
+
+funders:
+  - id: null
+    name: National Institutes of Health
+    description: Bridge2AI Functional Genomics and Bridge Center awards
+    award_number: 1OT2OD032742-01 and 5U54HG012513-02
+
+licenses:
+  - id: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    name: Creative Commons Attribution Non-Commercial Share-Alike International 4.0 License
+    description: Data packages are licensed under CC-BY-NC-SA 4.0 license terms, which include a requirement for attribution to the dataset authors and the copyright holding institutions, and citation of this article. Commercial use requires a separate license negotiation with the copyright holder (UCSD, Stanford, and/or UCSF depending upon the specific data package in question).
+    legal_code_url: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+    deed_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+rights_holder:
+  - id: null
+    name: The Regents of the University of California
+    description: Copyright holder for most datasets
+  - id: null
+    name: The Board of Trustees of the Leland Stanford Junior University
+    description: Copyright holder for spatial proteomics raw image data
+
+citation: |
+  Clark T, Mohan J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. BioRXiv, May 2024. doi: http://doi.org/10.1101/2024.05.21.589311
+
+references: null
+
+keywords:
+  - AI-Ready datasets
+  - cell architecture
+  - hierarchical cell maps
+  - protein-protein interactions
+  - spatial proteomics
+  - immunofluorescence imaging
+  - affinity purification mass spectrometry
+  - size exclusion chromatography
+  - CRISPR perturbation
+  - breast cancer
+  - MDA-MB-468
+  - induced pluripotent stem cells
+  - KOLF2.1J
+  - Bridge2AI
+  - functional genomics
+  - FAIR data
+  - RO-Crate
+  - FAIRSCAPE
+
+alternative_names: null
+
+motivation_why_created:
+  motivation_for_creation: |
+    CM4AI was created to deliver machine-readable hierarchical maps of cell architecture as AI-Ready data to enable transformative biomedical AI research. The project aims to ethically leverage state-of-the-art computational and experimental tools in biomedical science to enable a new generation of transformative artificial intelligence research to benefit humanity. The project addresses the need for interpretable genotype-phenotype learning by providing multi-scale cell maps that can be used in "visible machine learning" or "visible neural networks" (VNNs) to interrogate how protein assemblies in the cell affect cell-level phenotype predictions.
+
+  primary_use: |
+    The datasets and cell maps are intended for AI/ML research in functional genomics, particularly for creating "visible" ML systems that are built directly on knowledge maps of cell and tissue architecture rather than being difficult-to-interpret "black boxes". The cell maps provide a foundation for downstream applications in human genomics, including interpretation of genetic variants and mutations.
+
+  other_tasks: null
+
+  gap_in_knowledge: |
+    Machine learning models show great promise in analyzing the human genome to make predictions, but the inner workings of these models are typically difficult-to-interpret "black boxes." CM4AI addresses this gap by providing comprehensive cell architecture maps that enable the creation of interpretable AI systems where predictions can be explained and validated against known cellular structures and functions.
+
+composition_what_data:
+  instance_type: |
+    The dataset contains multiple types of instances:
+    1. Hierarchical cell maps (directed acyclic graphs where nodes represent protein assemblies at different scales)
+    2. Protein-protein interaction networks from AP-MS and SEC-MS
+    3. Immunofluorescence microscopy images showing protein localization
+    4. Single-cell CRISPR perturbation screen data
+    5. Provenance graphs documenting data lineage and computational workflows
+    6. Rich metadata describing all components in RO-Crate format
+
+  instance_count: null
+
+  instance_structure: |
+    Cell maps are hierarchical directed acyclic graphs (DAG) where each node represents an assembly of proteins in proximity at a given scale, spanning from large assemblies representing cell compartments (e.g., nucleus, mitochondria) to small assemblies of proteins in close proximity (e.g., protein complexes or subunits). The hierarchical cell map contains 10 layers of depth representing communities at multiple resolutions.
+
+  data_splits: null
+
+  de_identification_methods: |
+    CM4AI data are non-clinical (from tissue cultures) and are considered to be de-identified as they cannot be matched, with current knowledge, to a human subject. The data is derived from established cell lines (MDA-MB-468 breast cancer cells and KOLF2.1J induced pluripotent stem cells) that are ethically sourced but not traceable to individual human subjects.
+
+  sensitive_information_risk: |
+    The datasets are derived from established, de-identified cell lines and do not contain information that could be matched to individual human subjects. The MDA-MB-468 cell line was established from a metastatic site pleural effusion of a 51-year-old black female, and KOLF2.1J was derived from a healthy male Northern European donor, but these cell lines cannot be linked back to identifiable individuals with current knowledge.
+
+  confidential_items: null
+
+  individual_instances: null
+
+  subpopulation_description: |
+    The datasets include two main cell lines: MDA-MB-468 (triple negative breast cancer cell line from a 51-year-old black female) under three treatment conditions (untreated, paclitaxel-treated, and vorinostat-treated), and KOLF2.1J (induced pluripotent stem cells from a healthy male Northern European donor) in undifferentiated state and differentiated into neurons and cardiomyocytes.
+
+  missing_info: null
+
+  relationship_between_instances: |
+    Instances are related through multiple hierarchies and networks:
+    1. Protein-protein interactions form networks
+    2. Proteins are organized into hierarchical communities based on co-embedding of interaction and localization data
+    3. Cell maps for different treatment conditions or cell types are related and can be compared
+    4. All data instances are linked through provenance graphs showing their derivation and relationships
+
+  other_information: null
+
+  recommended_data_splits: null
+
+  error_sources: null
+
+collection_how_collected:
+  collection_method: |
+    Data acquisition involves three complementary mapping approaches:
+    1. Protein-protein interaction mapping using affinity purification mass spectrometry (AP-MS) on endogenously tagged cell lines and size-exclusion chromatography coupled to mass spectrometry (SEC-MS) for proteome-wide complex/interaction mapping
+    2. Spatial proteomics mapping using automated immunofluorescence (IF) staining and high-resolution confocal microscopy with antibodies from the Human Protein Atlas
+    3. Genetic perturbation mapping using single-cell CRISPR screens with inducible dCas9 and lentiviral libraries targeting chromatin regulators
+
+  sampling_strategy: |
+    The project focused on 100 chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders. Cell lines were selected for disease relevance: MDA-MB-468 for breast cancer and KOLF2.1J for neuronal and cardiac differentiation studies. The sampling strategy ensures coverage of key regulatory proteins across different cellular conditions and perturbations.
+
+  data_collection_timeframe: null
+
+  data_source_description: |
+    Primary data sources include:
+    1. MDA-MB-468 breast cancer cell line (RRID:CVCL_0419) from ATCC, established from a metastatic mammary adenocarcinoma
+    2. KOLF2.1J induced pluripotent stem cell line (RRID:CVCL_B5P3) from the Human Induced Pluripotent Stem Cells Initiative (HipSci) resource
+    3. Antibodies from the Human Protein Atlas for immunofluorescence imaging
+    4. Protein interaction data generated in the Krogan Laboratory at UCSF
+    5. Imaging data generated in the Lundberg Laboratory at Stanford
+    6. CRISPR perturbation data generated in the Mali Laboratory at UCSD
+
+  who_collected_data:
+    - id: null
+      name: Data Acquisition Module
+      description: Multi-institution team including UCSD, UCSF, and Stanford laboratories
+      affiliation: null
+
+  collection_mechanisms: null
+
+  validation_and_verification: null
+
+  ethical_review_status: null
+
+preprocessing_cleaning_labeling_what_preprocessing:
+  preprocessing_strategy: |
+    Data integration is performed through the Multi-Scale Integrated Cell (MuSIC) pipeline with the following steps:
+    1. PPI networks are processed using the node2vec deep learning model to reduce dimensionality, producing PPI embeddings
+    2. IF images are processed using a Human Protein Atlas deep learning model to reduce dimensionality, producing image embeddings
+    3. PPI and image embeddings are integrated using contrastive deep learning to obtain co-embeddings
+    4. Community detection is performed on co-embedding similarities to generate hierarchical cell maps
+    5. Cell maps are annotated by alignment to Gene Ontology and Reactome, and using large language models for naming protein assemblies
+
+  preprocessing_tools:
+    - id: null
+      name: MuSIC Pipeline
+      description: Multi-Scale Integrated Cell data integration and map production system
+      version: null
+    - id: null
+      name: node2vec
+      description: Deep learning model for graph embedding
+      version: null
+    - id: null
+      name: Human Protein Atlas deep learning model
+      description: Image processing and embedding model for protein localization
+      version: null
+    - id: null
+      name: FAIRSCAPE
+      description: Framework for AI-readiness packaging with provenance graphs and metadata
+      version: null
+
+  raw_data_availability: null
+
+  cleaned_data_availability: null
+
+uses_when_appropriate:
+  appropriate_use_cases: |
+    The dataset is intended for:
+    1. AI-Ready datasets to support research in functional genomics
+    2. AI model training, particularly for visible machine learning systems
+    3. Cellular process analysis
+    4. Understanding cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations
+    5. Interpretation of genetic variants and mutations through cell architecture context
+    6. Training and education in biomedical AI/ML workforce development
+
+  inappropriate_use_cases: |
+    These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval. The data should not be used for applications that could lead to harm or misuse without proper ethical review.
+
+  repository_tasks: null
+
+  impact_on_underserved_populations: null
+
+  unsuitable_applications: null
+
+  further_research_questions: |
+    The project aims to stimulate research in visible machine learning, interpretable AI, and the integration of multi-modal biological data. Future research questions include understanding how protein assemblies affect phenotypes, identifying new drug targets, and developing ethical frameworks for AI in genomic medicine.
+
+distribution_how_distributed:
+  distribution_formats:
+    - id: null
+      name: RO-Crate packages
+      description: Research Object Crate format containing datasets, metadata, software, and provenance graphs
+      format: null
+      media_type: null
+      compression: null
+      encoding: null
+      dialect: null
+    - id: null
+      name: Network Data Exchange (NDEx)
+      description: Cell maps shared via NDEx platform for visualization and access
+      format: null
+      media_type: null
+      compression: null
+      encoding: null
+      dialect: null
+
+  distribution_location:
+    - id: null
+      name: CM4AI Web Portal
+      url: http://www.cm4ai.org
+      description: Primary distribution platform for CM4AI datasets, maps, and tools using the U-BRITE platform
+    - id: https://doi.org/10.18130/V3/DXWOS5
+      name: LibraData (University of Virginia Dataverse)
+      url: https://doi.org/10.18130/V3/DXWOS5
+      description: NIH-approved generalist repository for archival data storage
+    - id: null
+      name: Network Data Exchange (NDEx)
+      url: null
+      description: Platform for sharing and visualizing cell maps
+
+  distribution_date: null
+
+  doi: https://doi.org/10.1101/2024.05.21.589311
+
+  persistent_identifier:
+    - https://doi.org/10.1101/2024.05.21.589311
+    - https://doi.org/10.18130/V3/DXWOS5
+
+  access_control: |
+    The data is distributed under Creative Commons CC-BY-NC-SA 4.0 license which requires attribution to the dataset authors and copyright holding institutions, and citation of the article. Commercial use requires a separate license negotiation with the copyright holder. A Data Access Committee will supervise ethical matters related to dataset distribution and potential dual licensing for commercial use.
+
+  dataset_ip_and_licensing: null
+
+  fee: null
+
+  export_controls_or_restrictions: null
+
+maintenance_who_maintains:
+  maintenance_contact:
+    - id: null
+      name: Trey Ideker
+      email: tideker@health.ucsd.edu
+      affiliation: University of California San Diego
+
+  maintenance_period: null
+
+  update_frequency: null
+
+  versioning: null
+
+  updates_to_tasks: null
+
+  retention_limits: null
+
+  errata: null
+
+ethics_institutional_review: null
+
+human_subject_research: null
+
+vulnerable_populations: null
+
+ethics_deidentification: |
+  CM4AI data are distinctive within Bridge2AI in that they are non-clinical (from tissue cultures) and are considered to be de-identified as they cannot be matched, with current knowledge, to a human subject. The cell lines used (MDA-MB-468 and KOLF2.1J) are established, ethically sourced cell lines available from public repositories.
+
+ethics_consent_and_notification: |
+  The cell lines used are ethically sourced: MDA-MB-468 is available from ATCC, and KOLF2.1J is available from the Human Induced Pluripotent Stem Cells Initiative (HipSci) resource for access by non-for-profit organizations via a simple MTA. Original consent for these established cell lines was obtained at the time of their derivation according to applicable regulations.
+
+ethics_privacy: |
+  Since the datasets are derived from established cell lines and cannot be matched to individual human subjects, privacy concerns related to personal data are minimal. However, the project implements comprehensive ethical guidelines and oversight through its Ethics Module to ensure responsible data use.
+
+ethics_impact_assessment: |
+  The Ethics team established guidelines addressing socio-ethical challenges and developed a Value Repository to support ethical decision-making. The team employs Value-Sensitive Design methodology, created the CM4AI Life Cycle framework for governance milestones, and conducts mixed empirical research to capture diverse community insights. Tools are being developed to enhance awareness of ethical, legal, and social ramifications.
+
+data_governance_process: |
+  The project has developed a comprehensive plan for ethical preparation, licensing, dissemination, and Data Access supervision that balances data openness with intellectual property protection and supervision of potential commercialization. The Ethics team works closely with Data Acquisition, Tools, and Standards Modules to implement governance throughout the data lifecycle. A Data Access Committee will supervise ethical matters related to dataset distribution.
+
+third_party_sharing: null
+
+access_restrictions: |
+  All CM4AI integration and packaging software is freely available under nonrestrictive open-source licenses (MIT license for FAIRSCAPE, BSD-3 license for Tools pipeline). Data packages are licensed under Creative Commons CC-BY-NC-SA 4.0 which permits sharing and adaptation with attribution, but requires ShareAlike and prohibits commercial use without separate licensing arrangement.

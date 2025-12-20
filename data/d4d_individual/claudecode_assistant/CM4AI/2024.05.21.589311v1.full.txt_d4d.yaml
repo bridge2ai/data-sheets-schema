@@ -1,0 +1,186 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/2024.05.21.589311v1.full.txt
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Workflow: .github/workflows/d4d_assistant_create.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: cm4ai-biorxiv-preprint-2024
+name: Cell Maps for Artificial Intelligence - AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines
+description: |
+  This bioRxiv preprint describes the Cell Maps for Artificial Intelligence (CM4AI) project,
+  a Functional Genomics Data Generation Project in the NIH Bridge2AI program. The project produces
+  ethical, AI-ready datasets of cell architecture inferred from multimodal data collected for human
+  cell lines including MDA-MB-468 breast cancer cells and KOLF2.1J induced pluripotent stem cells (iPSCs).
+
+version: "2024.05.21"
+url: https://doi.org/10.1101/2024.05.21.589311
+distribution:
+  - name: bioRxiv preprint
+    access_url: https://doi.org/10.1101/2024.05.21.589311
+    available: true
+    license: CC-BY-NC-ND 4.0
+
+creators:
+  - name: Timothy Clark
+    affiliation: University of Virginia
+  - name: Jillian Mohan
+    affiliation: University of California San Diego
+  - name: Leah Schaffer
+    affiliation: University of California San Diego
+  - name: Kirsten Obernier
+    affiliation: University of California San Francisco
+  - name: Trey Ideker
+    affiliation: University of California San Diego
+    role: corresponding author
+    email: tideker@health.ucsd.edu
+
+funders:
+  - name: National Institutes of Health
+    grant_id: 1OT2OD032742-01
+    program: Bridge2AI Functional Genomics
+  - name: National Institutes of Health
+    grant_id: 5U54HG012513-02
+    program: Bridge2AI Bridge Center
+  - name: Frederick Thomas Fund
+    organization: University of Virginia
+
+purposes:
+  - purpose: To produce ethical, AI-ready datasets of cell architecture for transformative biomedical AI research
+  - purpose: To create machine-readable hierarchical maps of cell architecture from multimodal interrogation of chromatin modifiers and metabolic enzymes
+  - purpose: To enable visible machine learning systems informed by multi-scale cell architecture
+
+tasks:
+  - task: Mapping protein-protein interactions using AP-MS and SEC-MS
+  - task: Spatial proteomics mapping using immunofluorescence microscopy
+  - task: Genetic perturbation mapping using CRISPR-Cas9
+  - task: Integration of multimodal data using MuSIC pipeline and deep learning
+  - task: AI model training for genotype-phenotype predictions
+
+instances:
+  - instance_type: Cell line data
+    instance_count: 2
+    instance_description: MDA-MB-468 breast cancer cell line and KOLF2.1J iPSC line
+
+composition:
+  - data_type: Protein-protein interaction networks
+    source: AP-MS and SEC-MS on endogenously tagged cell lines
+  - data_type: Spatial proteomics images
+    source: Immunofluorescence staining and confocal microscopy
+  - data_type: Genetic perturbation data
+    source: Single-cell CRISPR screens with 10x Genomics 3'HT kit
+  - data_type: Hierarchical cell maps
+    source: Integration via MuSIC pipeline using deep learning
+
+acquisition_methods:
+  - method: Affinity purification mass spectrometry (AP-MS)
+    targets: Endogenously tagged chromatin regulators
+  - method: Size exclusion chromatography mass spectrometry (SEC-MS)
+    targets: Proteome-wide complex mapping
+  - method: Immunofluorescence microscopy
+    targets: Spatial localization of proteins
+  - method: CRISPR-Cas9 perturbation screens
+    targets: 100 chromatin regulators
+
+preprocessing:
+  - preprocessing_strategy: Deep learning embeddings from PPI networks using node2vec
+  - preprocessing_strategy: Image embeddings from IF images using Human Protein Atlas deep learning model
+  - preprocessing_strategy: Co-embedding integration using contrastive deep learning
+  - preprocessing_strategy: Community detection for hierarchy creation
+
+cell_lines:
+  - name: MDA-MB-468
+    description: Triple negative breast cancer cell line from metastatic pleural effusion
+    source: ATCC
+    rrid: CVCL_0419
+    treatments:
+      - paclitaxel
+      - vorinostat
+      - untreated
+  - name: KOLF2.1J
+    description: Induced pluripotent stem cell line from healthy male Northern European donor
+    source: HipSci resource
+    rrid: CVCL_B5P3
+    differentiation_states:
+      - undifferentiated
+      - neurons
+      - cardiomyocytes
+
+standards:
+  - standard: FAIR principles
+    compliance: Required for all data and software
+  - standard: RO-Crate format
+    usage: AI-ready dataset packaging with provenance graphs
+  - standard: FAIRSCAPE framework
+    usage: AI-readiness metadata and validation
+  - standard: JSON-Schema
+    usage: Dataset schema definitions and validation
+
+ai_readiness_criteria:
+  - criterion: FAIR compliance
+    description: Datasets comply with FAIR Principles for data and software
+  - criterion: Provenanced
+    description: Complete provenance graphs of computations, data, software, and models
+  - criterion: Characterized
+    description: Complete schemas, validation procedures, and datasheets for all datasets
+  - criterion: Explainable
+    description: Fully provenanced and statistically characterized with limitations documented
+  - criterion: Ethical
+    description: Ethically obtained, validated, documented, licensed, and distributed
+
+ethics:
+  - consideration: Non-clinical data from tissue cultures, considered de-identified
+  - consideration: Ethical sourcing of cell lines verified
+  - consideration: Data governance framework for licensing and distribution
+  - consideration: Anticipation of potential applications and risks
+  - consideration: Promotion of use for collective good
+
+known_limitations:
+  - limitation: Data from limited set of cell lines (MDA-MB-468 and KOLF2.1J)
+  - limitation: Incomplete overlap of interrogated proteins across data modalities
+  - limitation: Interim data releases pending final complete dataset
+
+intended_use:
+  - use: Training AI/ML models for visible machine learning
+  - use: Interpretation of genetic variants and mutations
+  - use: Genotype-phenotype learning in genomics and precision medicine
+  - use: Research in cancer, neuropsychiatric, and cardiac disorders
+
+prohibited_use:
+  - use: Clinical decision-making without appropriate validation
+  - use: Commercial use without separate license negotiation
+
+software:
+  - name: MuSIC pipeline
+    description: Multi-Scale Integrated Cell pipeline for dataset integration and map production
+    components:
+      - Download PPI and image data
+      - Generate embeddings using node2vec and HPA models
+      - Co-embedding integration
+      - Community detection and hierarchy creation
+      - Hierarchy evaluation with GO and Reactome annotation
+  - name: FAIRSCAPE
+    description: Framework for FAIR and AI-ready data packaging
+    license: MIT
+    url: https://fairscape.github.io
+  - name: Cytoscape
+    description: Cell map visualization
+  - name: HiView
+    description: Hierarchical cell map visualization
+  - name: NDEx
+    description: Network Data Exchange for sharing cell maps
+
+repositories:
+  - name: LibraData
+    institution: University of Virginia
+    platform: Dataverse
+    status: NIH-approved generalist repository
+
+publications:
+  - citation: |
+      Clark T, Mohan J, Schaffer L, Obernier K, Al Manir S, Churas CP, et al.
+      Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture
+      from Disease-Relevant Cell Lines. BioRXiv, May 2024.
+    doi: https://doi.org/10.1101/2024.05.21.589311
+    type: preprint

@@ -1,0 +1,212 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/doi_row3.json
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: https://doi.org/10.1101/2024.05.21.589311
+name: CM4AI_DOI_Reference
+title: Cell Maps for Artificial Intelligence DOI Reference
+description: |
+  This is a DOI reference record pointing to the primary publication describing the Cell Maps for Artificial Intelligence (CM4AI) project. The DOI resolves to a bioRxiv preprint article that describes the project goals, methods, standards, current datasets, software tools, status, and future directions.
+
+version: null
+issued: null
+modified: null
+was_derived_from: null
+has_part: null
+conforms_to: null
+conforms_to_schema: null
+conforms_to_class: null
+resources: null
+
+standards_and_requirements_id: null
+rai_citation: null
+
+creators: null
+
+contributors: null
+
+contacts: null
+
+publishers:
+  - id: null
+    name: bioRxiv
+    description: Preprint server for biology
+
+domain_experts: null
+
+funders: null
+
+licenses: null
+
+rights_holder: null
+
+citation: null
+
+references: null
+
+keywords:
+  - DOI
+  - digital object identifier
+  - persistent identifier
+  - bioRxiv
+  - preprint
+
+alternative_names: null
+
+motivation_why_created:
+  motivation_for_creation: |
+    This DOI reference was created to provide a persistent, resolvable identifier to the primary publication describing the CM4AI project.
+
+  primary_use: |
+    The DOI is used for citation, reference, and persistent access to the CM4AI publication.
+
+  other_tasks: null
+
+  gap_in_knowledge: null
+
+composition_what_data:
+  instance_type: |
+    This is a digital object identifier (DOI) metadata record containing the DOI string and URL for resolution.
+
+  instance_count: null
+
+  instance_structure: |
+    JSON format with fields: type (DOI), url (https://doi.org/10.1101/2024.05.21.589311), row (3), and doi (10.1101/2024.05.21.589311).
+
+  data_splits: null
+
+  de_identification_methods: null
+
+  sensitive_information_risk: null
+
+  confidential_items: null
+
+  individual_instances: null
+
+  subpopulation_description: null
+
+  missing_info: null
+
+  relationship_between_instances: null
+
+  other_information: null
+
+  recommended_data_splits: null
+
+  error_sources: null
+
+collection_how_collected:
+  collection_method: |
+    DOI was assigned by bioRxiv preprint server upon article submission and publication.
+
+  sampling_strategy: null
+
+  data_collection_timeframe: null
+
+  data_source_description: |
+    bioRxiv preprint server (https://doi.org/10.1101/2024.05.21.589311)
+
+  who_collected_data: null
+
+  collection_mechanisms: null
+
+  validation_and_verification: null
+
+  ethical_review_status: null
+
+preprocessing_cleaning_labeling_what_preprocessing:
+  preprocessing_strategy: null
+
+  preprocessing_tools: null
+
+  raw_data_availability: null
+
+  cleaned_data_availability: null
+
+uses_when_appropriate:
+  appropriate_use_cases: |
+    The DOI should be used for:
+    1. Citation of the CM4AI publication
+    2. Persistent reference to the article
+    3. Resolution to the full article content
+
+  inappropriate_use_cases: null
+
+  repository_tasks: null
+
+  impact_on_underserved_populations: null
+
+  unsuitable_applications: null
+
+  further_research_questions: null
+
+distribution_how_distributed:
+  distribution_formats:
+    - id: null
+      name: JSON
+      description: Metadata in JSON format
+      format: JSON
+      media_type: application/json
+      compression: null
+      encoding: null
+      dialect: null
+
+  distribution_location:
+    - id: https://doi.org/10.1101/2024.05.21.589311
+      name: bioRxiv
+      url: https://doi.org/10.1101/2024.05.21.589311
+      description: DOI resolution URL to bioRxiv preprint
+
+  distribution_date: null
+
+  doi: https://doi.org/10.1101/2024.05.21.589311
+
+  persistent_identifier:
+    - https://doi.org/10.1101/2024.05.21.589311
+
+  access_control: |
+    The DOI resolves to a publicly accessible bioRxiv preprint article.
+
+  dataset_ip_and_licensing: null
+
+  fee: null
+
+  export_controls_or_restrictions: null
+
+maintenance_who_maintains:
+  maintenance_contact: null
+
+  maintenance_period: null
+
+  update_frequency: null
+
+  versioning: null
+
+  updates_to_tasks: null
+
+  retention_limits: null
+
+  errata: null
+
+ethics_institutional_review: null
+
+human_subject_research: null
+
+vulnerable_populations: null
+
+ethics_deidentification: null
+
+ethics_consent_and_notification: null
+
+ethics_privacy: null
+
+ethics_impact_assessment: null
+
+data_governance_process: null
+
+third_party_sharing: null
+
+access_restrictions: null

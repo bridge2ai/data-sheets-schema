@@ -9,7 +9,7 @@ _A software program or library._
 
 
 
-URI: [data_sheets_schema:Software](https://w3id.org/bridge2ai/data-sheets-schema/Software)
+URI: [schema:SoftwareApplication](http://schema.org/SoftwareApplication)
 
 
 
@@ -78,26 +78,36 @@ URI: [data_sheets_schema:Software](https://w3id.org/bridge2ai/data-sheets-schema
 | [Relationships](Relationships.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [Splits](Splits.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [DataAnomaly](DataAnomaly.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [DatasetBias](DatasetBias.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [DatasetLimitation](DatasetLimitation.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [ExternalResource](ExternalResource.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [Confidentiality](Confidentiality.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [ContentWarning](ContentWarning.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [Subpopulation](Subpopulation.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [Deidentification](Deidentification.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [SensitiveElement](SensitiveElement.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [DatasetRelationship](DatasetRelationship.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [InstanceAcquisition](InstanceAcquisition.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [CollectionMechanism](CollectionMechanism.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [DataCollector](DataCollector.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [CollectionTimeframe](CollectionTimeframe.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [DirectCollection](DirectCollection.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [MissingDataDocumentation](MissingDataDocumentation.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [RawDataSource](RawDataSource.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [PreprocessingStrategy](PreprocessingStrategy.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [CleaningStrategy](CleaningStrategy.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [LabelingStrategy](LabelingStrategy.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [RawData](RawData.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [ImputationProtocol](ImputationProtocol.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [AnnotationAnalysis](AnnotationAnalysis.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [MachineAnnotationTools](MachineAnnotationTools.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [ExistingUse](ExistingUse.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [UseRepository](UseRepository.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [OtherTask](OtherTask.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [FutureUseImpact](FutureUseImpact.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [DiscouragedUse](DiscouragedUse.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [IntendedUse](IntendedUse.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [ProhibitedUse](ProhibitedUse.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [ThirdPartySharing](ThirdPartySharing.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [DistributionFormat](DistributionFormat.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [DistributionDate](DistributionDate.md) | [used_software](used_software.md) | range | [Software](Software.md) |
@@ -120,6 +130,7 @@ URI: [data_sheets_schema:Software](https://w3id.org/bridge2ai/data-sheets-schema
 | [LicenseAndUseTerms](LicenseAndUseTerms.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [IPRestrictions](IPRestrictions.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 | [ExportControlRegulatoryRestrictions](ExportControlRegulatoryRestrictions.md) | [used_software](used_software.md) | range | [Software](Software.md) |
+| [VariableMetadata](VariableMetadata.md) | [used_software](used_software.md) | range | [Software](Software.md) |
 
 
 
@@ -146,8 +157,9 @@ URI: [data_sheets_schema:Software](https://w3id.org/bridge2ai/data-sheets-schema
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:Software |
+| self | schema:SoftwareApplication |
 | native | data_sheets_schema:Software |
+| exact | schema:SoftwareApplication |
 
 
 
@@ -165,11 +177,14 @@ URI: [data_sheets_schema:Software](https://w3id.org/bridge2ai/data-sheets-schema
 name: Software
 description: A software program or library.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- schema:SoftwareApplication
 is_a: NamedThing
 attributes:
   version:
     name: version
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:softwareVersion
     domain_of:
     - Software
     - Information
@@ -177,6 +192,7 @@ attributes:
   license:
     name: license
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:license
     domain_of:
     - Software
     - Information
@@ -185,9 +201,11 @@ attributes:
     name: url
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: schema:url
     domain_of:
     - Software
     range: string
+class_uri: schema:SoftwareApplication
 
 ```
 </details>
@@ -199,11 +217,14 @@ attributes:
 name: Software
 description: A software program or library.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- schema:SoftwareApplication
 is_a: NamedThing
 attributes:
   version:
     name: version
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:softwareVersion
     alias: version
     owner: Software
     domain_of:
@@ -213,6 +234,7 @@ attributes:
   license:
     name: license
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:license
     alias: license
     owner: Software
     domain_of:
@@ -223,6 +245,7 @@ attributes:
     name: url
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: schema:url
     alias: url
     owner: Software
     domain_of:
@@ -239,6 +262,7 @@ attributes:
     owner: Software
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -251,6 +275,7 @@ attributes:
     owner: Software
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -262,44 +287,10 @@ attributes:
     owner: Software
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
+class_uri: schema:SoftwareApplication
 
 ```
 </details>

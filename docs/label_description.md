@@ -11,7 +11,7 @@ __
 
 
 
-URI: [data_sheets_schema:label_description](https://w3id.org/bridge2ai/data-sheets-schema/label_description)
+URI: [schema:description](http://schema.org/description)
 Alias: label_description
 
 <!-- no inheritance hierarchy -->
@@ -57,7 +57,7 @@ Alias: label_description
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:label_description |
+| self | schema:description |
 | native | data_sheets_schema:label_description |
 
 
@@ -73,6 +73,7 @@ description: 'If labeled, what pattern or format do labels follow?
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:description
 alias: label_description
 owner: Instance
 domain_of:

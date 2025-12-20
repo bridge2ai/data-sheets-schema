@@ -11,7 +11,7 @@ __
 
 
 
-URI: [data_sheets_schema:data_substrate](https://w3id.org/bridge2ai/data-sheets-schema/data_substrate)
+URI: [dcterms:format](http://purl.org/dc/terms/format)
 Alias: data_substrate
 
 <!-- no inheritance hierarchy -->
@@ -57,7 +57,7 @@ Alias: data_substrate
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:data_substrate |
+| self | dcterms:format |
 | native | data_sheets_schema:data_substrate |
 
 
@@ -75,6 +75,7 @@ from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 values_from:
 - B2AI_SUBSTRATE
+slot_uri: dcterms:format
 alias: data_substrate
 owner: Instance
 domain_of:

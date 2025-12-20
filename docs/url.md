@@ -4,7 +4,7 @@
 
 
 
-URI: [data_sheets_schema:url](https://w3id.org/bridge2ai/data-sheets-schema/url)
+URI: [schema:url](http://schema.org/url)
 Alias: url
 
 <!-- no inheritance hierarchy -->
@@ -50,7 +50,7 @@ Alias: url
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:url |
+| self | schema:url |
 | native | data_sheets_schema:url |
 
 
@@ -63,6 +63,7 @@ Alias: url
 name: url
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:url
 alias: url
 owner: Software
 domain_of:

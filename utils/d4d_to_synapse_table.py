@@ -77,7 +77,7 @@ def main():
 	table_id = "syn68885644"  # if provided, the table associated with this ID will be cleared before being updated with new entries
 	table_name = "D4D_content"  # if table_id was provided, table_name should match the name of the table associated with table_id
 	source_folder = "src/html/output"  # folder containing HTML and CSS files
-	html_name_parts = ["D4D_-_", "_v3_human_readable.html"]  # joined with org name in in org_id_map to create HTML paths
+	html_name_parts = ["D4D_-_", "_v4_human_readable.html"]  # joined with org name in in org_id_map to create HTML paths
 	css_name = "datasheet-common.css"  # since a single CSS is in use, no need to select multiple or build distinct paths
 
 	d4d_dict = {  # initialize dict to store D4D info
@@ -87,9 +87,10 @@ def main():
 		}
     
 	org_id_map = {  # define relationships between GC labels and ORG_IDs
-		"AI-READI_FAIRHub": "B2AI_ORG:114",
-		"CM4AI_Dataverse": "B2AI_ORG:116",
-		"VOICE_PhysioNet": "B2AI_ORG:117"
+		"AI-READI": "B2AI_ORG:114",
+		"CM4AI": "B2AI_ORG:116",
+		"VOICE": "B2AI_ORG:117",
+		"CHORUS": "B2AI_ORG:115"
 	}
 
 	updated_d4d_dict = add_css(css_name, source_folder, d4d_dict)

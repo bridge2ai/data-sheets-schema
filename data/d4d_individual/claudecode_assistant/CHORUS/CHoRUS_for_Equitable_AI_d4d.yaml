@@ -1,0 +1,54 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CHORUS/CHoRUS for Equitable AI.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "chorus:github_readme"
+name: "CHoRUS for Equitable AI - GitHub README"
+title: "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI"
+description: |
+  The goal of the CHoRUS Network is to develop the most diverse, high-resolution, ethically
+  sourced, AI-ready data set to answer the grand challenge of improving recovery from acute
+  illness. This collaboration spans 20 academic centers, of which 14 will contribute as Data
+  Acquisition centers.
+page: "https://chorus4ai.org/"
+license: "MIT"
+
+purposes:
+  - id: "chorus:purpose_diverse_dataset"
+    name: "Diverse AI-ready dataset"
+    description: "Develop the most diverse, high-resolution, ethically sourced, AI-ready dataset"
+    response: "Develop the most diverse, high-resolution, ethically sourced, AI-ready data set to answer the grand challenge of improving recovery from acute illness"
+
+tasks:
+  - id: "chorus:task_harmonize_data"
+    name: "Harmonize multi-modal data"
+    description: "Unified standards to harmonize multi-modal EHR, waveform, imaging, and text data"
+    response: "Unified standards will harmonize multi-modal EHR, waveform, imaging, and text data"
+  - id: "chorus:task_ethical_approaches"
+    name: "Ethical and legal approaches"
+    description: "Determine ethical and legal approaches to manage privacy and bias"
+    response: "Patient-focused efforts will determine the ethical and legal approaches to manage privacy and bias, while accounting for Social Determinants of Health"
+
+instances:
+  - id: "chorus:instance_patient_data"
+    name: "Patient hospital data"
+    description: "Multi-modal hospital data from 20 academic centers"
+    instance_type: "clinical data"
+
+external_resources:
+  - id: "chorus:extres_github"
+    name: "CHoRUS GitHub"
+    description: "CHoRUS GitHub organization with 28 repositories"
+    external_resources:
+      - "https://github.com/chorus-ai"
+
+keywords:
+  - "CHoRUS"
+  - "Bridge2AI"
+  - "acute illness"
+  - "AI-ready"
+  - "health equity"
+  - "multi-modal data"
+  - "OMOP"

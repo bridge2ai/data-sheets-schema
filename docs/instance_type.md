@@ -11,7 +11,7 @@ __
 
 
 
-URI: [data_sheets_schema:instance_type](https://w3id.org/bridge2ai/data-sheets-schema/instance_type)
+URI: [dcterms:type](http://purl.org/dc/terms/type)
 Alias: instance_type
 
 <!-- no inheritance hierarchy -->
@@ -57,7 +57,7 @@ Alias: instance_type
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:instance_type |
+| self | dcterms:type |
 | native | data_sheets_schema:instance_type |
 
 
@@ -73,6 +73,7 @@ description: 'Multiple types of instances? (e.g., movies, users, and ratings).
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcterms:type
 alias: instance_type
 owner: Instance
 domain_of:

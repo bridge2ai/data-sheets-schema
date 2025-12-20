@@ -3,7 +3,7 @@
 # Slot: regulatory_compliance 
 
 
-_What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, GDPR, HIPAA)?_
+_What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?_
 
 __
 
@@ -71,7 +71,7 @@ Alias: regulatory_compliance
 ```yaml
 name: regulatory_compliance
 description: 'What regulatory frameworks govern this human subjects research (e.g.,
-  45 CFR 46, GDPR, HIPAA)?
+  45 CFR 46, HIPAA)?
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema

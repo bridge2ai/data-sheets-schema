@@ -83,9 +83,8 @@ URI: [data_sheets_schema:Instance](https://w3id.org/bridge2ai/data-sheets-schema
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **Instance**
+* [DatasetProperty](DatasetProperty.md)
+    * **Instance**
 
 
 
@@ -101,10 +100,10 @@ URI: [data_sheets_schema:Instance](https://w3id.org/bridge2ai/data-sheets-schema
 | [label_description](label_description.md) | 0..1 <br/> [String](String.md) | If labeled, what pattern or format do labels follow? | direct |
 | [sampling_strategies](sampling_strategies.md) | * <br/> [SamplingStrategy](SamplingStrategy.md) | References to one or more SamplingStrategy objects | direct |
 | [missing_information](missing_information.md) | * <br/> [MissingInfo](MissingInfo.md) | References to one or more MissingInfo objects describing missing data | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
-| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -175,6 +174,7 @@ attributes:
     rank: 1000
     values_from:
     - B2AI_TOPIC
+    slot_uri: dcat:theme
     domain_of:
     - Instance
     range: uriorcurie
@@ -185,6 +185,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:type
     domain_of:
     - Instance
     range: string
@@ -197,6 +198,7 @@ attributes:
     rank: 1000
     values_from:
     - B2AI_SUBSTRATE
+    slot_uri: dcterms:format
     domain_of:
     - Instance
     range: uriorcurie
@@ -207,6 +209,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: schema:numberOfItems
     domain_of:
     - Instance
     range: integer
@@ -227,6 +230,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: schema:description
     domain_of:
     - Instance
     range: string
@@ -278,6 +282,7 @@ attributes:
     rank: 1000
     values_from:
     - B2AI_TOPIC
+    slot_uri: dcat:theme
     alias: data_topic
     owner: Instance
     domain_of:
@@ -290,6 +295,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:type
     alias: instance_type
     owner: Instance
     domain_of:
@@ -304,6 +310,7 @@ attributes:
     rank: 1000
     values_from:
     - B2AI_SUBSTRATE
+    slot_uri: dcterms:format
     alias: data_substrate
     owner: Instance
     domain_of:
@@ -316,6 +323,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: schema:numberOfItems
     alias: counts
     owner: Instance
     domain_of:
@@ -340,6 +348,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: schema:description
     alias: label_description
     owner: Instance
     domain_of:
@@ -372,6 +381,40 @@ attributes:
     - Instance
     range: MissingInfo
     multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: Instance
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: Instance
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
+    alias: description
+    owner: Instance
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    - DatasetRelationship
+    range: string
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -383,78 +426,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: Instance
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: Instance
-    domain_of:
-    - NamedThing
-    range: string
-  description:
-    name: description
-    description: A human-readable description for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:description
-    alias: description
-    owner: Instance
-    domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

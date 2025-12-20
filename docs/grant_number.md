@@ -9,7 +9,7 @@ _The alphanumeric identifier for the grant._
 
 
 
-URI: [data_sheets_schema:grant_number](https://w3id.org/bridge2ai/data-sheets-schema/grant_number)
+URI: [schema:identifier](http://schema.org/identifier)
 Alias: grant_number
 
 <!-- no inheritance hierarchy -->
@@ -55,7 +55,7 @@ Alias: grant_number
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:grant_number |
+| self | schema:identifier |
 | native | data_sheets_schema:grant_number |
 
 
@@ -69,6 +69,7 @@ name: grant_number
 description: The alphanumeric identifier for the grant.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:identifier
 alias: grant_number
 owner: Grant
 domain_of:

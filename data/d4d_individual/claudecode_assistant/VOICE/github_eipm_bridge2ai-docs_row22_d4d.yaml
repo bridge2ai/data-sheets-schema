@@ -1,0 +1,29 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/github_eipm_bridge2ai-docs_row22.json
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "voice:github_eipm_docs"
+name: "Bridge2AI Voice Documentation Dashboard"
+title: "bridge2ai-docs GitHub Repository"
+description: |
+  GitHub repository for Bridge2AI Voice documentation dashboard. A Streamlit-based
+  Python application for viewing and interacting with Bridge2AI Voice project documentation.
+page: "https://github.com/eipm/bridge2ai-docs"
+license: "MIT"
+
+external_resources:
+  - id: "voice:extres_github_docs"
+    name: "GitHub Repository"
+    description: "Source code for Bridge2AI Voice documentation dashboard (Streamlit, Python 3.12.0)"
+    external_resources:
+      - "https://github.com/eipm/bridge2ai-docs"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "documentation"
+  - "Streamlit"
+  - "Python"
+  - "dashboard"

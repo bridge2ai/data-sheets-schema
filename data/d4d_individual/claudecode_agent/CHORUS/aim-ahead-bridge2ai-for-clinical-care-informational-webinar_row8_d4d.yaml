@@ -1,0 +1,184 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Agent Deterministic
+# Source: data/preprocessed/individual/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: https://chorus4ai.org/dataset/bridge2ai-clinical-care
+name: CHoRUS Dataset
+title: Bridge2AI for Clinical Care Dataset - CHoRUS
+description: >
+  Multicenter, multimodal, high-resolution clinical dataset developed by the CHoRUS Network. As of November 2024,
+  covers 14 different hospitals with 23.4K unique admissions. Retrospective data collection with controlled access,
+  containing demographics, medications, procedures, nursing flowsheets, diagnoses, clinical notes, imaging, and
+  waveform telemetry in OMOP, DICOM, WFDB, and other standardized formats.
+page: https://www.bridge2ai.org/chorus
+language: en
+keywords:
+  - CHoRUS
+  - Bridge2AI
+  - Clinical care
+  - OMOP
+  - DICOM
+  - WFDB
+  - OHNLP
+  - EEG
+  - AIM-AHEAD
+  - Acute illness recovery
+  - Multi-modal clinical data
+
+# Motivation
+purposes:
+  - description: >
+      To provide AI-ready clinical care datasets for training and research on acute illness recovery
+      with emphasis on equitable access for underrepresented trainees.
+  - description: >
+      To enable data-driven research addressing health disparities using diverse, multi-modal datasets.
+
+tasks:
+  - description: >
+      Training AI/ML models for clinical applications using multi-modal EHR, waveform, imaging, and text data.
+  - description: >
+      Training programs on AI/ML and big data analysis for clinical care through AIM-AHEAD Bridge2AI partnership.
+  - description: >
+      Developing use cases for Bridge2AI Data Topics focused on improving recovery from acute illness.
+
+addressing_gaps:
+  - description: >
+      Limited access to diverse, multi-modal clinical datasets for AI/ML research.
+  - description: >
+      Need for AI/ML training focused on health disparities and underrepresented communities.
+
+creators:
+  - name: Bridge2AI CHoRUS Network Leadership
+    description: >
+      Multi-institutional consortium led by Massachusetts General Hospital (Eric Rosenthal),
+      University of Florida (Azra Bihorac, Yulia Strekalova, Parisa Rashidi),
+      University of Texas Health (Xiaoqian Jiang), and Tufts (Andrew Williams).
+
+# Composition
+instances:
+  - description: >
+      As of November 2024, 23,400 unique hospital admissions from 14 different hospitals with
+      multi-modal clinical data including demographics, medications, procedures, nursing flowsheets,
+      diagnoses, clinical notes, imaging, and waveforms.
+
+subsets:
+  - id: chorus:demographics
+    name: Demographics
+    description: OMOP-formatted demographic data with controlled access and published OMOP schema metadata
+  - id: chorus:medications
+    name: Medication Administration
+    description: >
+      OMOP-formatted medication dosing data time-stamped upon each infusion change or dose administration
+      with controlled access
+  - id: chorus:procedures
+    name: Procedures
+    description: OMOP-formatted procedure documentation by providers with controlled access
+  - id: chorus:nursing-flowsheets
+    name: Nursing Flowsheets
+    description: >
+      High-frequency documentation in OMOP format with extensions, controlled access
+  - id: chorus:diagnoses
+    name: Diagnoses
+    description: OMOP-formatted diagnosis documentation by providers with controlled access
+  - id: chorus:clinical-notes
+    name: Clinical Notes
+    description: >
+      Clinical notes extracted and tokenized using OHNLP toolkit. Stored locally except tokens.
+      De-identification in progress.
+  - id: chorus:imaging
+    name: Imaging
+    description: DICOM-formatted imaging data from PACS. De-identification in process.
+  - id: chorus:waveform-telemetry
+    name: Waveform Telemetry
+    description: >
+      WFDB-formatted waveform data from bedside monitors and gateway/middleware with PhysioNet schema (extended)
+  - id: chorus:waveform-eeg
+    name: Waveform EEG
+    description: >
+      EEG data in EDF+ and Persyst formats from hospital database. Extraction in process.
+
+# Collection
+acquisition_methods:
+  - description: >
+      Retrospective data collection from electronic health records at 14 participating hospitals
+      through November 2024.
+    was_directly_observed: true
+
+sampling_strategies:
+  - description: >
+      Multicenter sampling across diverse academic medical centers to ensure balanced and diverse cohort representation.
+
+data_collectors:
+  - description: >
+      14 Data Acquisition Centers (participating hospitals) contributing clinical data extracts.
+
+# Preprocessing
+preprocessing_strategies:
+  - description: >
+      Multi-modal data standardized using OMOP Common Data Model for structured EHR, WFDB for waveforms,
+      DICOM for imaging, OHNLP for clinical notes, EDF+ and Persyst for EEG. Data stored in enclave with
+      controlled access.
+
+# Uses
+existing_uses:
+  - examples:
+      - "doi:10.1007/s12028-024-02007"
+      - "Training activities and publications using CHoRUS dataset"
+
+# Distribution
+distribution_formats:
+  - description: >
+      OMOP Common Data Model for demographics, medications, procedures, nursing flowsheets, and diagnoses
+  - description: WFDB (Waveform Database) format for telemetry data
+  - description: DICOM (Digital Imaging and Communications in Medicine) for medical imaging
+  - description: OHNLP (Open Health Natural Language Processing) toolkit for clinical notes
+  - description: EDF+ and Persyst formats for EEG waveforms
+
+license_and_use_terms:
+  id: chorus:license_controlled
+  name: Controlled Access License
+  description: >
+    Controlled access through Bridge2AI AI/ML for Clinical Care Collaborative Cloud platform.
+    Registration required with name, email, and institution. Institutional email required (not personal).
+    Signed licensing agreement required. Clinical notes stored locally except tokens.
+
+# Maintenance
+maintainers:
+  - name: Bridge2AI CHoRUS Network
+    description: >
+      Multi-institutional consortium responsible for dataset maintenance and ongoing updates.
+
+updates:
+  description: >
+    Regular updates as extraction and de-identification processes complete for clinical notes, imaging, and EEG data.
+
+# Ethics and Human Subjects
+ethical_reviews:
+  - description: >
+      Patient-focused efforts determine ethical and legal approaches to manage privacy and bias
+      while accounting for Social Determinants of Health.
+
+# Data Governance
+confidential_elements:
+  - description: >
+      Clinical patient data with ongoing de-identification. Clinical notes stored locally except tokens.
+      Imaging de-identification in process. EEG extraction in process.
+
+# Data Standards
+external_resources:
+  - name: AIM-AHEAD Partnership
+    description: >
+      Partnership with AIM-AHEAD Consortium providing training programs for underrepresented communities
+      to access and analyze CHoRUS datasets.
+    external_resources:
+      - https://www.bridge2ai.org/chorus
+
+# Related Training Programs
+# AIM-AHEAD Bridge2AI for Clinical Care Training Program
+# - 8-month program starting January 15, 2025
+# - Up to 25 trainees selected
+# - $8,000 stipend plus $2,000 travel allowance
+# - Hands-on training on AI/ML, Python, EHR data, OMOP/OHDSI tools
+# - Curriculum includes ethics of AI in clinical practice

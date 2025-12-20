@@ -250,34 +250,446 @@ This repository includes AI-powered scripts and make targets to extract D4D meta
 
 ### Data Organization Structure
 
-All data is organized under the `data/` directory:
+All data is organized under the `data/` directory with **standardized naming conventions**:
 
 ```
 data/
-  raw/                            # Raw downloads (moved from downloads_by_column/)
+  raw/                            # Raw downloads from Google Sheet
     AI_READI/, CHORUS/, CM4AI/, VOICE/
+      {source}_row{N}.pdf         # PDFs (e.g., e097449.full_row2.pdf)
+      {source}_row{N}.html        # HTML files
+      {source}_row{N}.txt         # Text files
+      {source}_row{N}.json        # JSON metadata
 
   preprocessed/
-    individual/                   # Transformed source files (PDF→text, HTML→text)
+    individual/                   # Transformed source files (standardized to TXT/JSON)
       AI_READI/, CHORUS/, CM4AI/, VOICE/
-    concatenated/                 # All docs per project concatenated
-      {PROJECT}_concatenated.txt
+        {source}_row{N}.txt       # PDF→TXT, HTML→TXT (via pdfminer, BeautifulSoup)
+        {source}_row{N}.json      # JSON preserved as-is
+    concatenated/                 # Concatenated files per project (alphabetically sorted)
+      {PROJECT}_preprocessed.txt  # All preprocessed source docs concatenated
+      {PROJECT}_concatenated.txt  # All individual D4D YAMLs concatenated
+      {PROJECT}_raw.txt          # All raw downloads concatenated (optional)
 
   d4d_individual/                 # D4D YAMLs from individual docs
-    gpt5/AI_READI/, CHORUS/, CM4AI/, VOICE/
-    claudecode/AI_READI/, CHORUS/, CM4AI/, VOICE/
+    claudecode_agent/AI_READI/, CHORUS/, CM4AI/, VOICE/    # ✅ Current (v5+)
+      {source}_row{N}_d4d.yaml    # D4D YAML for each source
+      {source}_row{N}_d4d_metadata.yaml  # Extraction metadata
+    claudecode_assistant/AI_READI/, CHORUS/, CM4AI/, VOICE/
+      {source}_row{N}_d4d.yaml
+    claudecode/AI_READI/, CHORUS/, CM4AI/, VOICE/          # Legacy
+      {source}_row{N}_d4d.yaml
+    gpt5/AI_READI/, CHORUS/, CM4AI/, VOICE/                # Comparison
+      {source}_row{N}_d4d.yaml
+      {source}_row{N}_d4d_metadata.yaml
 
-  d4d_concatenated/               # D4D YAMLs from concatenated docs
-    gpt5/{PROJECT}_d4d.yaml
-    claudecode/{PROJECT}_d4d.yaml
-    curated/{PROJECT}_curated.yaml
+  d4d_concatenated/               # D4D YAMLs from concatenated docs (synthesized)
+    claudecode_agent/
+      AI_READI_d4d.yaml           # ✅ Current (v5+)
+      CHORUS_d4d.yaml
+      CM4AI_d4d.yaml
+      VOICE_d4d.yaml
+    claudecode_assistant/
+      {PROJECT}_d4d.yaml
+    claudecode/                   # Legacy
+      {PROJECT}_d4d.yaml
+    gpt5/                         # Comparison
+      {PROJECT}_d4d.yaml
+    curated/                      # Reference
+      AI_READI_curated.yaml
+      CHORUS_curated.yaml
+      CM4AI_curated.yaml
+      VOICE_curated.yaml
 
   d4d_html/                       # HTML renderings
-    individual/gpt5/, individual/claudecode/
-    concatenated/gpt5/, concatenated/claudecode/, concatenated/curated/
+    individual/
+      claudecode_agent/AI_READI/, CHORUS/, CM4AI/, VOICE/
+        {source}_row{N}.html      # Individual HTML for each source
+      claudecode_assistant/, claudecode/, gpt5/
+        {PROJECT}/{source}_row{N}.html
+    concatenated/
+      claudecode_agent/
+        AI_READI_d4d_human_readable.html    # ✅ Current (v5+)
+        AI_READI_evaluation.html
+        CHORUS_d4d_human_readable.html
+        CHORUS_evaluation.html
+        CM4AI_d4d_human_readable.html
+        CM4AI_evaluation.html
+        VOICE_d4d_human_readable.html
+        VOICE_evaluation.html
+      curated/
+        {PROJECT}_human_readable.html
+        {PROJECT}_linkml.html
+      claudecode_assistant/, claudecode/, gpt5/
+        {PROJECT}_{type}.html
 
-  ATTIC/                          # Archived old data
+  ATTIC/                          # Archived legacy data (see ATTIC/README.md)
+    root_downloads/               # Old download structures from repository root
+      downloads_by_column_enhanced/
+      downloads_by_column_combined/
+      test_downloads/
+      old/
+    sheets_concatenated/          # Old concatenation structure
+    validated_extracted/          # Legacy extraction outputs
+    [19+ other legacy dirs]       # Early extraction experiments
 ```
+
+### File Naming Conventions
+
+#### Raw Source Files
+
+**Pattern**: `{source}_row{N}.{ext}`
+
+**Components**:
+- `{source}`: Domain or source identifier (e.g., `docs_aireadi_org_docs-2`, `fairhub`, `doi`)
+- `row{N}`: Row number from Google Sheet (e.g., `row2`, `row10`)
+- `{ext}`: File extension (`.pdf`, `.html`, `.txt`, `.json`)
+
+**Examples**:
+```
+e097449.full_row2.pdf
+docs_aireadi_org_docs-2_row10.html
+fairhub_row12.json
+RePORT ⟩ RePORTER - AI-READI.pdf
+```
+
+**Location**: `data/raw/{PROJECT}/`
+
+#### Preprocessed Individual Files
+
+**Pattern**: `{source}_row{N}.{ext}`
+
+**Transformations**:
+- `.pdf` → `.txt` (using pdfminer)
+- `.html` → `.txt` (using BeautifulSoup)
+- `.json` → `.json` (preserved)
+- `.txt` → `.txt` (preserved)
+- `.md` → `.md` (preserved)
+
+**Examples**:
+```
+e097449.full_row2.txt              # PDF→TXT
+docs_aireadi_org_docs-2_row10.txt  # HTML→TXT
+fairhub_row12.json                 # Preserved
+```
+
+**Location**: `data/preprocessed/individual/{PROJECT}/`
+
+**Script**: `src/download/preprocess_sources.py`
+**Make target**: `make preprocess-sources`
+
+#### Concatenated Files
+
+**Three types per project**:
+
+1. **`{PROJECT}_preprocessed.txt`** - All preprocessed source documents concatenated
+   - **Purpose**: Input for D4D synthesis from original sources
+   - **Contents**: All `.txt` and `.json` files from `data/preprocessed/individual/{PROJECT}/`
+   - **Sorting**: Alphabetical by filename (reproducible)
+   - **Make target**: `make concat-preprocessed`
+
+2. **`{PROJECT}_concatenated.txt`** - All individual D4D YAMLs concatenated
+   - **Purpose**: Synthesis of multiple D4D extractions
+   - **Contents**: All `*_d4d.yaml` files from `data/d4d_individual/{method}/{PROJECT}/`
+   - **Sorting**: Alphabetical by filename (reproducible)
+   - **Make target**: `make concat-extracted`
+
+3. **`{PROJECT}_raw.txt`** - All raw downloads concatenated (optional)
+   - **Purpose**: Complete raw source archive
+   - **Contents**: All files from `data/raw/{PROJECT}/`
+   - **Make target**: `make concat-raw`
+
+**Features**:
+- File headers with metadata (filename, path, size)
+- Table of contents at beginning
+- Separator markers between files
+- Reproducible alphabetical ordering
+
+**Location**: `data/preprocessed/concatenated/`
+
+**Script**: `src/download/concatenate_documents.py`
+
+#### Individual D4D YAMLs
+
+**Pattern**: `{source}_row{N}_d4d.yaml`
+
+**Metadata**: `{source}_row{N}_d4d_metadata.yaml` (extraction provenance)
+
+**Location**: `data/d4d_individual/{METHOD}/{PROJECT}/`
+
+**Methods**: `claudecode_agent`, `claudecode_assistant`, `claudecode`, `gpt5`
+
+#### Concatenated D4D YAMLs
+
+**Pattern**: `{PROJECT}_d4d.yaml`
+
+**Special case**: Curated uses `{PROJECT}_curated.yaml` suffix
+
+**Location**: `data/d4d_concatenated/{METHOD}/`
+
+**Methods**: `claudecode_agent` (current), `claudecode_assistant`, `claudecode`, `gpt5`, `curated`
+
+#### HTML Files
+
+**Individual HTML**:
+- Pattern: `{source}_row{N}.html`
+- Location: `data/d4d_html/individual/{METHOD}/{PROJECT}/`
+
+**Concatenated HTML**:
+- Human-readable: `{PROJECT}_d4d_human_readable.html`
+- Evaluation: `{PROJECT}_evaluation.html`
+- LinkML (curated only): `{PROJECT}_linkml.html`
+- Location: `data/d4d_html/concatenated/{METHOD}/`
+
+**Versioned HTML** (for deployment):
+- Human-readable: `D4D_-_{PROJECT}_v{N}_human_readable.html`
+- Evaluation: `D4D_-_{PROJECT}_v{N}_evaluation.html`
+- Location: `src/html/output/` → `docs/html_output/` (GitHub Pages)
+
+### Input Document Pipeline
+
+Complete transformation path from raw sources to preprocessed files:
+
+```
+STEP 1: Download Raw Sources
+├─ Script: src/download/organized_dataset_extractor.py
+├─ Make: make download-sources
+├─ Input: Google Sheet URLs
+└─ Output: data/raw/{PROJECT}/{source}_row{N}.{pdf,html,json,txt}
+
+STEP 2: Preprocess to Standard Formats
+├─ Script: src/download/preprocess_sources.py
+├─ Make: make preprocess-sources
+├─ Input: data/raw/{PROJECT}/
+├─ Transformations:
+│  ├─ PDF → TXT (pdfminer.six)
+│  ├─ HTML → TXT (BeautifulSoup)
+│  └─ JSON/TXT/MD → Preserved
+└─ Output: data/preprocessed/individual/{PROJECT}/{source}_row{N}.{txt,json,md}
+
+STEP 2.5: Validate Preprocessing Quality ⚠️ CRITICAL
+├─ Script: src/download/validate_preprocessing_quality.py
+├─ Make: make validate-preprocessing
+├─ Input: data/raw/ and data/preprocessed/individual/
+├─ Checks:
+│  ├─ Empty or near-empty extractions
+│  ├─ Stub files (only headers/navigation)
+│  ├─ Significant text volume loss (>99% data loss)
+│  ├─ Missing expected outputs
+│  └─ Extraction quality ratios
+├─ Output: Quality report with issues flagged
+└─ **IMPORTANT**: Address all quality issues before proceeding to concatenation
+
+Common Quality Issues:
+• Google Docs URLs: Extract only headers (need direct download links or export URLs)
+• Scanned PDFs: Low text extraction (may need OCR preprocessing)
+• JavaScript-rendered HTML: Missing content (need alternative source)
+• Drive/SharePoint URLs: Access restricted (need direct download links)
+
+STEP 3: Concatenate by Project
+├─ Script: src/download/concatenate_documents.py
+├─ Make targets:
+│  ├─ make concat-preprocessed  # Preprocessed sources
+│  ├─ make concat-extracted     # Individual D4D YAMLs
+│  └─ make concat-raw           # Raw downloads (optional)
+├─ Input: data/preprocessed/individual/{PROJECT}/ or data/d4d_individual/{METHOD}/{PROJECT}/
+├─ Features:
+│  ├─ Alphabetical sorting (reproducible)
+│  ├─ File headers with metadata
+│  ├─ Table of contents
+│  └─ Separator markers
+└─ Output: data/preprocessed/concatenated/
+   ├─ {PROJECT}_preprocessed.txt    # For D4D synthesis
+   ├─ {PROJECT}_concatenated.txt    # D4D YAML synthesis
+   └─ {PROJECT}_raw.txt             # Raw archive
+```
+
+**Example for AI_READI**:
+```bash
+# Step 1: Download (16 files)
+make download-sources
+# → data/raw/AI_READI/*.{pdf,html,json,txt}
+
+# Step 2: Preprocess (PDF→TXT, HTML→TXT)
+make preprocess-sources
+# → data/preprocessed/individual/AI_READI/*.{txt,json}
+
+# Step 2.5: Validate preprocessing quality ⚠️ IMPORTANT
+make validate-preprocessing
+# → Quality report showing any issues
+# If issues found: fix sources and re-run preprocessing
+
+# Step 3: Concatenate all preprocessed files
+make concat-preprocessed
+# → data/preprocessed/concatenated/AI_READI_preprocessed.txt
+
+# Step 4: Extract D4D from concatenated sources
+make d4d-agent PROJECT=AI_READI
+# → data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml
+```
+
+### Standardization Guarantees
+
+1. **Reproducible Ordering**: All concatenation uses alphabetical sorting
+2. **Consistent Naming**: All files follow `{source}_row{N}` pattern from Google Sheet
+3. **Format Standardization**: All text content converted to UTF-8 `.txt` files
+4. **Metadata Preservation**: File headers track original paths and sizes
+5. **Version Control**: All transformations are deterministic and repeatable
+6. **Quality Validation**: Preprocessing quality checked for empty files, stubs, and data loss
+
+### D4D Generation Methods
+
+Multiple methods exist for generating D4D metadata from source documents. Each has specific use cases:
+
+#### Current Canonical Method: `claudecode_agent` ✅
+
+**Status**: Active for v5+ versioned datasheets (December 2024+)
+
+**Location**: `data/d4d_concatenated/claudecode_agent/`, `data/d4d_individual/claudecode_agent/`
+
+**Use for**:
+- Creating new versioned datasheets for GitHub Pages deployment
+- Production-quality D4D generation with comprehensive synthesis
+- Multi-document synthesis requiring intelligent information merging
+
+**Advantages**:
+- Superior synthesis quality (3.26× better than GPT-5 on concatenated files)
+- Parallel processing via Claude Code Task tool (faster for multiple files)
+- Interactive validation and refinement
+- Best performance on complex multi-source documents
+
+**How to use**:
+```bash
+# For versioned datasheets (recommended)
+make d4d-agent PROJECT=AI_READI
+make gen-d4d-html
+make version-html VERSION=6
+make gendoc
+```
+
+#### Alternative Methods
+
+**`claudecode_assistant`** - Interactive Claude Code synthesis
+
+**Status**: Alternative approach, similar quality to claudecode_agent
+
+**Use for**:
+- Interactive refinement workflows
+- Custom synthesis with user guidance
+- Experimentation with different prompts
+
+**Advantages**:
+- Full user control over synthesis process
+- Can ask clarifying questions during generation
+- Good for prototyping new extraction patterns
+
+---
+
+**`claudecode`** - Deterministic API-based Claude Code (Older)
+
+**Status**: Superseded by claudecode_agent for most use cases
+
+**Location**: `data/d4d_concatenated/claudecode/`, `data/d4d_individual/claudecode/`
+
+**Use for**:
+- Reproducible API-based generation (temperature=0.0)
+- Automated batch processing without interaction
+- Single-source document extraction
+
+**Advantages**:
+- Fully deterministic with temperature=0.0
+- No interactive session required
+- Good provenance tracking with SHA-256 hashes
+
+**Limitations**:
+- Weaker on multi-document synthesis vs claudecode_agent
+- Requires ANTHROPIC_API_KEY and incurs API costs
+
+**How to use**:
+```bash
+make extract-d4d-concat-all-claude
+```
+
+---
+
+**`gpt5`** - GPT-5 validated wrapper
+
+**Status**: For comparison and benchmarking only
+
+**Location**: `data/d4d_concatenated/gpt5/`, `data/d4d_individual/gpt5/`
+
+**Use for**:
+- Performance comparison with Claude methods
+- Cross-validation of extraction quality
+- Research and evaluation benchmarks
+
+**Advantages**:
+- Independent validation of extraction approach
+- Useful for identifying method-specific biases
+
+**Limitations**:
+- Significantly weaker synthesis (3.26× worse than claudecode_agent)
+- Identical performance to Claude on single-source files
+- Requires OPENAI_API_KEY and incurs API costs
+
+**How to use**:
+```bash
+make extract-d4d-individual-all-gpt5
+make extract-d4d-concat-all-gpt5
+```
+
+---
+
+**`curated`** - Hand-curated reference datasheets
+
+**Status**: Reference implementation, not for generation
+
+**Location**: `data/d4d_concatenated/curated/`
+
+**Use for**:
+- Gold standard reference
+- Evaluation baseline
+- Understanding ideal D4D structure
+
+**Note**: These are manually created, not generated by automated methods.
+
+#### Method Comparison Summary
+
+| Method | Status | Best For | Synthesis Quality | Speed | Cost |
+|--------|--------|----------|-------------------|-------|------|
+| **claudecode_agent** | ✅ **Current** | Versioned datasheets | ⭐⭐⭐⭐⭐ | Fast (parallel) | Interactive |
+| claudecode_assistant | Alternative | Interactive refinement | ⭐⭐⭐⭐⭐ | Medium | Interactive |
+| claudecode | Legacy | Deterministic API | ⭐⭐⭐ | Medium | API costs |
+| gpt5 | Comparison | Benchmarking | ⭐⭐ | Slow | API costs |
+| curated | Reference | Gold standard | ⭐⭐⭐⭐⭐ | N/A (manual) | Manual labor |
+
+#### When to Use Each Method
+
+**For versioned production datasheets** → Use `claudecode_agent`
+
+**For interactive experimentation** → Use `claudecode_assistant`
+
+**For reproducible automation** → Use `claudecode` (legacy)
+
+**For method comparison** → Use `gpt5` + `claudecode_agent`
+
+**For reference examples** → Use `curated`
+
+#### Migration Path
+
+If using older methods, migrate to `claudecode_agent`:
+
+```bash
+# Old approach (deprecated)
+make extract-d4d-concat-all-gpt5
+
+# New approach (recommended)
+make d4d-agent PROJECT=AI_READI  # Repeat for all projects
+make gen-d4d-html
+make version-html VERSION=6
+```
+
+See `docs/VERSIONING.md` for complete versioning workflow.
 
 ### Complete D4D Pipeline (Recommended)
 
@@ -1024,3 +1436,4 @@ poetry run python -m unittest tests.test_d4d_full_schema.TestD4DFullSchema.test_
 - Module files are in `src/data_sheets_schema/schema/` (NOT in a `modules/` subdirectory)
 - When adding new classes, prefer inheriting from existing base classes in `D4D_Base_import.yaml`
 - The `aurelian/` directory is a git submodule - initialize with `git submodule update --init --recursive`
+- **Legacy data** is archived in `data/ATTIC/` - see `data/ATTIC/README.md` for details on archived directories and migration timeline

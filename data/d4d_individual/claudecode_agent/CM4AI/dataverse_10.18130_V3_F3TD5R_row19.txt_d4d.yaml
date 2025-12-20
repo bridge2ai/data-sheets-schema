@@ -1,0 +1,421 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.txt
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: https://doi.org/10.18130/V3/F3TD5R
+name: CM4AI_June_2025_Beta_Release
+title: Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)
+description: |
+  This dataset is a revision of the June 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This revision includes adding RGB immunofluorescent images, corrections to ro-crate metadata, and changes to naming conventions.
+
+  This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated MDA-MB468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+
+  External Data Links:
+  - Sequence Read Archive (SRA) Data: NCBI BioProject
+  - Mass Spectrometry Data (Human iPSCs): MassIVE Repository
+  - Mass Spectrometry Data (Human Cancer Cells): MassIVE Repository
+
+  Data Governance & Ethics:
+  - Human Subjects: No
+  - De-identified Samples: Yes
+  - FDA Regulated: No
+  - Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu)
+  - Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+
+  Completeness: These data are not yet in completed final form. Some datasets are under temporary pre-publication embargo. Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap. Computed cell maps not included in this release.
+
+  Maintenance Plan: Dataset will be regularly updated and augmented through the end of the project in November 2026 on a quarterly basis. Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds.
+
+  Limitations: This is an interim release. Does not contain predicted cell maps, which will be added in future releases. The current release is most suitable for bioinformatics analysis of the individual datasets. Requires domain expertise for meaningful analysis.
+
+  Prohibited Uses: These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval.
+
+  Potential Sources of Bias: Data in this release was derived from commercially available de-identified human cell lines and does not represent all biological variants which may be seen in the population at large.
+
+version: V2
+issued: 2025-07-01
+modified: 2025-06-30
+was_derived_from: null
+has_part:
+  - id: null
+    name: release-ro-crate-datasheet.html
+    description: HTML datasheet summarizing key release information (89.5 KB)
+  - id: null
+    name: release-ro-crate-metadata.json
+    description: Release RO-Crate with pointers to sub ro-crates (35.0 KB)
+  - id: null
+    name: cm4ai_ifimages_MDA-MB-468_paclitaxel.zip
+    description: Spatial localization of 464 proteins in paclitaxel-treated MDA-MB-468 cells (3.8 GB)
+  - id: null
+    name: cm4ai_ifimages_MDA-MB-468_untreated.zip
+    description: Spatial localization of 464 proteins in untreated MDA-MB-468 cells (4.6 GB)
+  - id: null
+    name: cm4ai_ifimages_MDA-MB-468_vorinostat.zip
+    description: Spatial localization of 464 proteins in vorinostat-treated MDA-MB-468 cells (4.2 GB)
+  - id: null
+    name: mass-spec-cancer-cells-ro-crate-metadata.json
+    description: Mass spectrometry metadata for cancer cells (343.4 KB)
+conforms_to: null
+conforms_to_schema: null
+conforms_to_class: null
+resources:
+  - id: null
+    name: NCBI BioProject
+    url: null
+    description: Sequence Read Archive (SRA) Data
+  - id: null
+    name: MassIVE Repository - iPSCs
+    url: null
+    description: Mass Spectrometry Data for Human iPSCs
+  - id: null
+    name: MassIVE Repository - Cancer Cells
+    url: null
+    description: Mass Spectrometry Data for Human Cancer Cells
+
+standards_and_requirements_id: null
+rai_citation: null
+
+creators:
+  - id: https://orcid.org/0000-0003-4060-7360
+    name: Clark T
+    affiliation: University of Virginia
+    email: null
+  - id: https://orcid.org/0000-0003-4535-3486
+    name: Parker J
+    affiliation: University of California, San Diego
+    email: null
+  - id: https://orcid.org/0000-0002-1708-8454
+    name: Ideker T
+    affiliation: University of California San Diego
+    email: null
+
+contributors: null
+
+contacts:
+  - id: null
+    name: Ideker Trey
+    affiliation: University of California San Diego
+    email: null
+
+publishers: null
+
+domain_experts:
+  - id: null
+    name: Jillian Parker
+    email: jillianparker@health.ucsd.edu
+    description: Data Governance Committee contact
+
+funders:
+  - id: null
+    name: National Institutes of Health
+    description: null
+    award_number: 1OT2OD032742-01
+
+licenses:
+  - id: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    name: CC BY-NC-SA 4.0
+    description: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license
+    legal_code_url: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+    deed_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+rights_holder:
+  - id: null
+    name: The Regents of the University of California
+    description: Copyright holder for most data (2025)
+  - id: null
+    name: The Board of Trustees of the Leland Stanford Junior University
+    description: Copyright holder for spatial proteomics raw image data (2025)
+
+citation: |
+  Clark T, Parker J, Al Manir S, Axelsson U, Ballllosero Navarro F, Chinn B, Churas CP, Dailamy A, Doctor Y, Fall J, Forget A, Gao J, Hansen JN, Hu M, Johannesson A, Khaliq H, Lee YH, Lenkiewicz J, Levinson MA, Marquez C, Metallo C, Muralidharan M, Nourreddine S, Niestroy J, Obernier K, Pan E, Polacco B, Pratt D, Qian G, Schaffer L, Sigaeva A, Thaker S, Zhang Y, Bélisle-Pipon JC, Brandt C, Chen JY, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T, 2025, "Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)", https://doi.org/10.18130/V3/F3TD5R, University of Virginia Dataverse, V2
+
+references:
+  - Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence - AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. 2024. doi http://doi.org/10.1101/2024.05.21.589311
+  - Nourreddine S, Doctor Y, Dailamy A, Forget A, Lee YH, Chinn B, Khaliq H, Polacco B, Muralidharan M, Pan E, Zhang Y, Sigaeva A, Hansen JN, Gao J, Parker JA, Obernier K, Clark T, Chen JY, Metallo C, Lundberg E, Ideker T, Krogan N, Mali P. A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS. bioRxiv. 2024 Nov 4;2024.11.03.621734. PMCID - PMC11580897 doi https://doi.org/10.1101/2024.11.03.621734
+
+keywords:
+  - AI
+  - affinity purification
+  - AP-MS
+  - artificial intelligence
+  - breast cancer
+  - Bridge2AI
+  - cardiomyocyte
+  - CM4AI
+  - CRISPR/Cas9
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - machine learning
+  - mass spectroscopy
+  - MDA-MB-468
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - paclitaxel
+  - perturb-seq
+  - perturbation sequencing
+  - protein-protein interaction
+  - protein localization
+  - single-cell RNA sequencing
+  - scRNAseq
+  - SEC-MS
+  - size exclusion chromatography
+  - subcellular imaging
+  - vorinostat
+
+alternative_names: null
+
+motivation_why_created:
+  motivation_for_creation: |
+    This revised June 2025 release was created to provide enhanced AI-ready datasets with RGB immunofluorescent images, corrected metadata, and improved naming conventions. The dataset supports research in functional genomics and enables AI model training and cellular process analysis.
+
+  primary_use: |
+    The dataset is intended for:
+    1. AI-ready datasets to support research in functional genomics
+    2. AI model training
+    3. Cellular process analysis
+    4. Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations
+
+  other_tasks: null
+
+  gap_in_knowledge: null
+
+composition_what_data:
+  instance_type: |
+    The dataset contains:
+    1. Perturb-seq data in undifferentiated KOLF2.1J iPSCs
+    2. SEC-MS data in KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, and cardiomyocytes
+    3. SEC-MS data in treated and untreated MDA-MB468 breast cancer cells
+    4. IF RGB images for 464 proteins in MDA-MB-468 cells under three conditions
+    5. RO-Crate metadata with provenance graphs
+    6. HTML datasheets
+
+  instance_count: |
+    - 256 total downloads as of publication
+    - 464 proteins with spatial localization data
+    - 21 data files (3 ZIP archives, 12 text files, 5 data files, 1 metadata file)
+
+  instance_structure: |
+    Data is organized by modality (images, mass-spec, perturb-seq) and condition (untreated, paclitaxel, vorinostat). Images show spatial localization with DAPI (nuclei, blue), calreticulin (ER, yellow), tubulin (microtubules, red), and protein of interest (green) channels. All data packaged in RO-Crate format.
+
+  data_splits: null
+
+  de_identification_methods: |
+    Data is derived from de-identified cell lines (MDA-MB-468 and KOLF2.1J) that cannot be matched to individual human subjects. Human Subjects: No. De-identified Samples: Yes.
+
+  sensitive_information_risk: |
+    No sensitive information risk. Data derived from commercially available de-identified human cell lines. FDA Regulated: No.
+
+  confidential_items: null
+
+  individual_instances: null
+
+  subpopulation_description: |
+    Two cell line systems:
+    1. MDA-MB-468 breast cancer cells (untreated, paclitaxel-treated, vorinostat-treated)
+    2. KOLF2.1J iPSCs (undifferentiated, NPCs, neurons, cardiomyocytes)
+
+    Note: Data does not represent all biological variants in the population at large.
+
+  missing_info: |
+    Some datasets are under temporary pre-publication embargo. Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap. Computed cell maps not included in this release.
+
+  relationship_between_instances: |
+    Instances are related through cell lines, treatment conditions, and protein targets studied across multiple modalities. Relationships documented in RO-Crate provenance metadata.
+
+  other_information: null
+
+  recommended_data_splits: null
+
+  error_sources: null
+
+collection_how_collected:
+  collection_method: |
+    Data collection used three complementary approaches:
+    1. Immunofluorescence-based staining (ICC-IF) and confocal microscopy
+    2. Size exclusion chromatography coupled to mass spectrometry (SEC-MS)
+    3. CRISPRi perturbation sequencing (perturb-seq)
+
+  sampling_strategy: |
+    Focused on proteins of interest across disease-relevant cell lines under perturbed and unperturbed conditions.
+
+  data_collection_timeframe:
+    start_date: null
+    end_date: 2025-02-27
+
+  data_source_description: |
+    Cell lines: MDA-MB-468 breast cancer cells and KOLF2.1J induced pluripotent stem cells
+    Imaging facility: Lundberg Laboratory at Stanford University
+    Mass spectrometry: available via MassIVE Repository
+    Sequence data: available via NCBI BioProject
+
+  who_collected_data:
+    - id: null
+      name: Lundberg Lab
+      description: Immunofluorescence imaging
+      affiliation: Stanford University
+    - id: null
+      name: Krogan Lab
+      description: Mass spectrometry
+      affiliation: University of California San Francisco
+    - id: null
+      name: Mali Lab
+      description: Perturbation sequencing
+      affiliation: University of California San Diego
+
+  collection_mechanisms: null
+
+  validation_and_verification: null
+
+  ethical_review_status: |
+    Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+
+preprocessing_cleaning_labeling_what_preprocessing:
+  preprocessing_strategy: |
+    Data is packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. This revision includes corrections to ro-crate metadata and changes to naming conventions. RGB immunofluorescent images added.
+
+  preprocessing_tools:
+    - id: null
+      name: FAIRSCAPE framework
+      description: Framework for packaging AI-ready datasets
+      version: null
+    - id: null
+      name: RO-Crate
+      description: Research Object packaging format
+      version: null
+
+  raw_data_availability: |
+    Raw data available via external repositories:
+    - Sequence Read Archive (SRA): NCBI BioProject
+    - Mass Spectrometry: MassIVE Repository
+
+  cleaned_data_availability: null
+
+uses_when_appropriate:
+  appropriate_use_cases: |
+    Intended Use:
+    1. AI-ready datasets to support research in functional genomics
+    2. AI model training
+    3. Cellular process analysis
+    4. Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations
+
+  inappropriate_use_cases: |
+    Prohibited Uses: These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval.
+
+  repository_tasks: null
+
+  impact_on_underserved_populations: null
+
+  unsuitable_applications: |
+    Not suitable for clinical decision-making or patient care without regulatory oversight.
+
+  further_research_questions: null
+
+distribution_how_distributed:
+  distribution_formats:
+    - id: null
+      name: ZIP Archive
+      description: Compressed image files
+      format: ZIP
+      media_type: application/zip
+      compression: zip
+      encoding: null
+      dialect: null
+    - id: null
+      name: HTML
+      description: Datasheets and provenance graphs
+      format: HTML
+      media_type: text/html
+      compression: null
+      encoding: null
+      dialect: null
+    - id: null
+      name: JSON
+      description: RO-Crate metadata
+      format: JSON
+      media_type: application/json
+      compression: null
+      encoding: null
+      dialect: null
+
+  distribution_location:
+    - id: https://doi.org/10.18130/V3/F3TD5R
+      name: University of Virginia Dataverse
+      url: https://dataverse.lib.virginia.edu
+      description: Primary distribution via LibraData
+
+  distribution_date: 2025-07-01
+
+  doi: https://doi.org/10.18130/V3/F3TD5R
+
+  persistent_identifier:
+    - https://doi.org/10.18130/V3/F3TD5R
+
+  access_control: |
+    All files are publicly accessible. Dataset is too large to download as a single archive (must select individual files).
+
+  dataset_ip_and_licensing: |
+    Copyright (c) 2025 The Regents of the University of California and The Board of Trustees of the Leland Stanford Junior University. Licensed under CC BY-NC-SA 4.0. Attribution and citation required.
+
+  fee: null
+
+  export_controls_or_restrictions: null
+
+maintenance_who_maintains:
+  maintenance_contact:
+    - id: null
+      name: Niestroy, Justin
+      email: null
+      affiliation: University of Virginia
+    - id: null
+      name: Jillian Parker
+      email: jillianparker@health.ucsd.edu
+      affiliation: University of California San Diego
+
+  maintenance_period:
+    start_date: null
+    end_date: 2026-11-30
+
+  update_frequency: |
+    Dataset will be regularly updated and augmented through the end of the project in November 2026. Updates on a quarterly basis.
+
+  versioning: |
+    Current version: V2.1. Uses semantic versioning. Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds.
+
+  updates_to_tasks: null
+
+  retention_limits: |
+    Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds.
+
+  errata: null
+
+ethics_institutional_review: |
+  Ethical Review: Vardit Ravitsky (ravitskyv@thehastingscenter.org) and Jean-Christophe Belisle-Pipon (jean-christophe_belisle-pipon@sfu.ca)
+
+human_subject_research: |
+  Human Subjects: No. Data is derived from de-identified cell lines.
+
+vulnerable_populations: null
+
+ethics_deidentification: |
+  De-identified Samples: Yes. Data derived from commercially available de-identified human cell lines that cannot be matched to individual human subjects.
+
+ethics_consent_and_notification: null
+
+ethics_privacy: null
+
+ethics_impact_assessment: |
+  Researchers should be aware of inherent limitations: This is an interim release. Does not contain predicted cell maps. Requires domain expertise for meaningful analysis.
+
+data_governance_process: |
+  Data Governance Committee: Jillian Parker (jillianparker@health.ucsd.edu). Ethical Review: Vardit Ravitsky and Jean-Christophe Belisle-Pipon.
+
+third_party_sharing: |
+  Data is publicly shared via University of Virginia Dataverse under CC BY-NC-SA 4.0 license. External data also available via NCBI BioProject and MassIVE Repository.
+
+access_restrictions: |
+  Publicly accessible with no restrictions for non-commercial use. Commercial use requires separate licensing arrangement.

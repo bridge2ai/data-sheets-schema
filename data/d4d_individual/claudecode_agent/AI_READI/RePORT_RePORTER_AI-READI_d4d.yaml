@@ -1,0 +1,141 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Agent Deterministic (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/RePORT ⟩ RePORTER - AI-READI.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: aireadi:nih_grant_1OT2OD032644-01
+name: Bridge2AI AI-READI NIH Grant
+title: 'Bridge2AI: Salutogenesis Data Generation (AI-READI)'
+description: 'The Artificial Intelligence Ready and Exploratory Atlas for Diabetes
+  Insights (AI-READI)
+
+  project is one of the data generation projects in the NIH Common Fund''s Bridge2AI
+  program.
+
+  The project seeks to create a flagship ethically-sourced dataset to enable future
+  generations
+
+  of artificial intelligence/machine learning (AI/ML) research to provide critical
+  insights into
+
+  type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health.
+  The team
+
+  will aim to collect a cross-sectional dataset of 4,000+ people and longitudinal
+  data from 10%
+
+  of the study cohort across the US. The study cohort will be balanced for diabetes
+  disease stage.
+
+  The long-term objective is to develop a foundational dataset in diabetes, agnostic
+  to existing
+
+  classification criteria, which can be used to reconstruct a temporal atlas of T2DM
+  development
+
+  and reversal towards health (i.e., salutogenesis).
+
+  '
+page: https://reporter.nih.gov/project-details/10471118
+purposes:
+- id: aireadi:purpose_salutogenesis
+  name: Salutogenesis research
+  description: Enable AI/ML research on pathways from T2DM to health
+  response: Create a flagship ethically-sourced dataset to enable future generations
+    of AI/ML research to provide critical insights into type 2 diabetes mellitus (T2DM),
+    including salutogenic pathways to return to health
+- id: aireadi:purpose_temporal_atlas
+  name: Temporal disease atlas
+  description: Reconstruct temporal atlas of T2DM development and reversal
+  response: Develop a foundational dataset in diabetes, agnostic to existing classification
+    criteria, which can be used to reconstruct a temporal atlas of T2DM development
+    and reversal towards health (i.e., salutogenesis)
+- id: aireadi:purpose_scalable_model
+  name: Scalable dataset model
+  description: Create a model for developing large scalable datasets
+  response: Create a model for developing large scalable datasets
+- id: aireadi:purpose_training
+  name: Personnel training
+  description: Increase access to and quality of AI/ML research by recruiting and
+    training personnel
+  response: Increase access to and quality of AI/ML research by recruiting and training
+    personnel
+creators:
+- id: aireadi:pi_lee_aaron
+  name: Aaron Lee
+  description: Contact PI/Project Leader, University of Washington, Assistant Professor
+- id: aireadi:pi_baxter
+  name: Sally Liu Baxter
+  description: Co-PI
+- id: aireadi:pi_chute
+  name: Christopher G Chute
+  description: Co-PI
+- id: aireadi:pi_collins
+  name: Megan E Collins
+  description: Co-PI
+- id: aireadi:pi_ferryman
+  name: Kadija Ferryman
+  description: Co-PI
+- id: aireadi:pi_hribar
+  name: Michelle Hribar
+  description: Co-PI
+- id: aireadi:pi_hurst
+  name: Samantha Hurst
+  description: Co-PI
+- id: aireadi:pi_ishikawa
+  name: Hiroshi Ishikawa
+  description: Co-PI
+- id: aireadi:pi_liu
+  name: Alvin Y Liu
+  description: Co-PI
+- id: aireadi:pi_lee_cecilia
+  name: Cecilia Sungmin Lee
+  description: Co-PI
+- id: aireadi:pi_mcgwin
+  name: Gerald McGwin
+  description: Co-PI
+- id: aireadi:pi_mcweeney
+  name: Shannon K McWeeney
+  description: Co-PI
+- id: aireadi:pi_nebeker
+  name: Camille Nebeker
+  description: Co-PI
+- id: aireadi:pi_owsley
+  name: Cynthia Owsley
+  description: Co-PI
+- id: aireadi:pi_patel
+  name: Bhavesh Patel
+  description: Co-PI
+- id: aireadi:pi_snyder
+  name: Michael P Snyder
+  description: Co-PI
+- id: aireadi:pi_singer
+  name: Sara Jean Singer
+  description: Co-PI
+- id: aireadi:pi_yracheta
+  name: Joseph Manuel Yracheta
+  description: Co-PI
+- id: aireadi:pi_zangwill
+  name: Linda M Zangwill
+  description: Co-PI
+funders:
+- id: aireadi:funder_nih
+  name: NIH Office of the Director
+  description: Funding through grant 1OT2OD032644-01, Fiscal Year 2022, Total $5,026,499
+    (Direct Costs $4,569,437, Indirect Costs $457,062)
+keywords:
+- Bridge2AI
+- AI-READI
+- NIH
+- type 2 diabetes mellitus
+- salutogenesis
+- machine learning
+- artificial intelligence
+- FAIR principles
+- temporal atlas
+- health disparities
+- Native American
+- tribal consultation
+- pseudotime manifold analysis
+- multimodal data

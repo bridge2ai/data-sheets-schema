@@ -1,0 +1,150 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/physionet_b2ai-voice_1.1_row14.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "doi:10.13026/249v-w155"
+name: "Bridge2AI-Voice Dataset v1.1"
+title: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
+description: |
+  The human voice contains complex acoustic markers which have been linked to important health
+  conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice
+  is a promising characteristic to measure as it is simple to collect, cost-effective, and has
+  broad clinical utility. Bridge2AI-Voice v1.0 provides 12,523 recordings for 306 participants
+  collected across five sites in North America. Participants were selected based on known
+  conditions which manifest within the voice waveform including voice disorders, neurological
+  disorders, mood disorders, and respiratory disorders.
+page: "https://physionet.org/content/b2ai-voice/1.1/"
+version: "1.1"
+license: "Bridge2AI Voice Registered Access License"
+issued: "2025-01-17T00:00:00Z"
+
+purposes:
+  - id: "voice:purpose_biomarker"
+    name: "Voice biomarker research"
+    description: "Enable AI research on voice as a biomarker of health"
+    response: "Create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health"
+
+creators:
+  - id: "voice:creator_johnson"
+    name: "Alistair Johnson"
+    description: "Lead author, PhysioNet"
+  - id: "voice:creator_bensoussan"
+    name: "Yael Bensoussan"
+    description: "Corresponding author"
+  - id: "voice:creator_ghosh"
+    name: "Satrajit Ghosh"
+    description: "Co-author"
+  - id: "voice:creator_rameau"
+    name: "Anais Rameau"
+    description: "Co-author"
+  - id: "voice:creator_elemento"
+    name: "Olivier Elemento"
+    description: "Co-author"
+
+funders:
+  - id: "voice:funder_nih"
+    name: "NIH Bridge2AI"
+    description: "NIH project number 3OT2OD032720-01S1: Bridge2AI Voice as a Biomarker of Health"
+
+instances:
+  - id: "voice:instance_v1"
+    name: "Bridge2AI-Voice v1.0"
+    description: "12,523 recordings from 306 adult participants across 5 North American sites"
+
+subsets:
+  - id: "voice:subset_voice_disorders"
+    name: "Voice Disorders"
+    description: "Laryngeal cancers, vocal fold paralysis, benign laryngeal lesions"
+  - id: "voice:subset_neurological"
+    name: "Neurological Disorders"
+    description: "Alzheimer's, Parkinson's, Stroke, ALS"
+  - id: "voice:subset_mood"
+    name: "Mood Disorders"
+    description: "Depression, schizophrenia, bipolar disorders"
+  - id: "voice:subset_respiratory"
+    name: "Respiratory Disorders"
+    description: "Pneumonia, COPD, heart failure, OSA"
+  - id: "voice:subset_pediatric"
+    name: "Pediatric Disorders"
+    description: "Autism, speech delay (not included in v1.1)"
+
+collection_mechanisms:
+  - id: "voice:mech_tablet"
+    name: "Tablet data collection"
+    description: "Custom application on tablet with headset for voice recording"
+  - id: "voice:mech_redcap"
+    name: "REDCap questionnaires"
+    description: "Demographic, health, and disease-specific questionnaires via REDCap"
+
+preprocessing_strategies:
+  - id: "voice:proc_audio"
+    name: "Audio preprocessing"
+    description: "Monaural conversion, 16kHz resampling with Butterworth anti-aliasing filter"
+  - id: "voice:proc_spectrogram"
+    name: "Spectrogram extraction"
+    description: "Short-time FFT with 25ms window, 10ms hop, 512-point FFT"
+  - id: "voice:proc_mfcc"
+    name: "MFCC extraction"
+    description: "60 Mel-frequency cepstral coefficients from spectrograms"
+  - id: "voice:proc_opensmile"
+    name: "OpenSMILE features"
+    description: "Acoustic features capturing temporal dynamics"
+  - id: "voice:proc_praat"
+    name: "Praat/Parselmouth features"
+    description: "Fundamental frequency, formants, and voice quality measures"
+  - id: "voice:proc_whisper"
+    name: "Whisper transcription"
+    description: "Transcriptions generated using OpenAI Whisper Large model"
+
+distribution_formats:
+  - id: "voice:format_parquet"
+    name: "Parquet"
+    description: "Spectrograms and MFCC data in Parquet format"
+  - id: "voice:format_tsv"
+    name: "TSV"
+    description: "Phenotype and static features in tab-separated values"
+  - id: "voice:format_json"
+    name: "JSON"
+    description: "Data dictionaries in JSON format"
+
+confidential_elements:
+  - id: "voice:access_restricted"
+    name: "Registered access"
+    description: "Only registered users who sign the data use agreement can access files. Raw audio waveforms omitted; only spectrogram data and derived features available."
+
+external_resources:
+  - id: "voice:extres_physionet"
+    name: "PhysioNet"
+    description: "Primary data repository"
+    external_resources:
+      - "https://doi.org/10.13026/249v-w155"
+  - id: "voice:extres_docs"
+    name: "B2AI-Voice Documentation"
+    description: "Project documentation website"
+    external_resources:
+      - "https://docs.b2ai-voice.org"
+  - id: "voice:extres_b2aiprep"
+    name: "b2aiprep library"
+    description: "Open source preprocessing code"
+    external_resources:
+      - "https://github.com/sensein/b2aiprep"
+
+ethical_reviews:
+  - id: "voice:ethics_usf"
+    name: "University of South Florida IRB"
+    description: "Data collection and sharing approved by USF Institutional Review Board"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "voice biomarker"
+  - "PhysioNet"
+  - "spectrogram"
+  - "MFCC"
+  - "acoustic biomarker"
+  - "speech"
+  - "neurological disorders"
+  - "mood disorders"
+  - "respiratory disorders"

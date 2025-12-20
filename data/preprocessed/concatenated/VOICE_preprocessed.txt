@@ -1,0 +1,2288 @@
+================================================================================
+CONCATENATED DOCUMENT
+================================================================================
+Input Directory: data/preprocessed/individual/VOICE
+Total Files: 9
+Extensions: All
+Recursive: False
+================================================================================
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+  1. B2AI-Voice DTUA 2025 2025-09-04.txt
+  2. B2AI-Voice_DTUA_2025.txt
+  3. RePORT ⟩ RePORTER - VOICE.txt
+  4. docs_google_com_document-d_row13.txt
+  5. github_eipm_bridge2ai-docs_README_row22.md
+  6. github_eipm_bridge2ai-docs_row22.json
+  7. healthnexus_row13.json
+  8. physionet_b2ai-voice_1.1_row14.txt
+  9. physionet_b2ai-voice_1.1_row17.txt
+================================================================================
+
+FILE: B2AI-Voice DTUA 2025 2025-09-04.txt
+PATH: data/preprocessed/individual/VOICE/B2AI-Voice DTUA 2025 2025-09-04.txt
+SIZE: 16810 bytes
+--------------------------------------------------------------------------------
+
+Data Transfer and Use Agreement (“Agreement”) 
+
+Provider Institution: University of South Florida Board of Trustees pursuant to Agreement 
+concerning: Bridge2AI: Voice as a Biomarker of Health – Building an ethically sourced, 
+bioaccoustic database to understand disease like never before. 
+
+Recipient Institution / Company: 
+
+Recipient Scientist: 
+
+Recipient Authorized Institutional Offical: 
+
+Project Title: 
+
+Agreement Term: 
+
+Start Date: 
+
+End Date:  Two years after the Start Date, upon completion of the project, upon expiration of 
+the applicable ethics approval, or termination by Provider Institution, whichever occurs first. 
+
+1.  Reimbursement of Costs:  
+
+Terms and Conditions: 
+
+If applicable, Recipient shall reimburse Provider for any costs associated with the 
+preparation, compilation, and transfer of the Data to the Recipient.  Costs shall not 
+include payments for research effort by the Provider. 
+
+A.  This Agreement is in support of Agreement # _______________, which shall 
+
+cover reimbursement of costs.  
+B.  Costs as set forth in Attachement I.  
+
+2.  Provider shall provide the data set described in Attachment 1 (the “Data”) to Recipient 
+
+for the research purpose set forth in Attachment 1 (the “Project”).  
+
+3.   Recipient shall not use the Data except as authorized under this Agreement. The Data 
+
+will be used solely to conduct the Project and solely by Recipient Scientist and 
+Recipient’s faculty, employees, fellows, students, and agents (“Recipient Personnel”) (as 
+approved and listed in Attachment 3) that have a need to use, or provide a service in 
+respect of, the Data in connection with the Project and whose obligations of use are 
+consistent with the terms of this Agreement (collectively, “Authorized Persons”). 
+Collaborators at other research organizations, and other research teams at the same 
+organization, must apply independently for access to the Data and sign a Data Transfer 
+and Use Agreement (DTUA) with the Provider, before accessing the data.  
+
+Page 1 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+ 
+4.  Except as authorized under this Agreement or otherwise required by law, Recipient 
+
+agrees to retain control over the Data and shall not disclose, release, sell, rent, lease, loan, 
+or otherwise grant access to the Data to any third party, except Authorized Persons, 
+without the prior written consent of Provider. Recipient agrees to establish appropriate 
+administrative, technical, and physical safeguards to prevent unauthorized use of or 
+access to the Data and comply with any other special requirements relating to 
+safeguarding of the Data as may be set forth in Attachment 2. Recipient must also bind 
+Authorized Persons to hold the Data according to standards of confidentiality and 
+security that are equivalent to those described in this Agreement. 
+
+5.  Recipient agrees to use the Data in compliance with all applicable laws, rules, and 
+regulations, as well as all professional standards applicable to such research.  
+
+6.  Recipient is encouraged to make publicly available the results of the Project, in open-
+
+access journals or pre-print servers where possible.  
+
+7.  Recipient agrees to recognize the contribution of the Provider as the source of the Data in 
+all written, visual, or oral public disclosures of recipient’s research using the Data, as 
+appropriate in accordance with scholarly standards and any specific format that has been 
+indicated in Attachment 1. 
+
+8.  Unless terminated earlier in accordance with this section or extended via a modification 
+in accordance with Section 13, this Agreement shall expire as of the End Date set forth 
+above. Either party may terminate this Agreement with thirty (30) days written notice to 
+the other party’s Authorized Official as set forth below. Upon expiration or early 
+termination of this Agreement, Recipient shall follow the disposition instructions 
+provided in Attachment 1, provided, however, that Recipient may retain one (1) copy of 
+the Data to the extent necessary to comply with the records retention requirements: 
+
+I. under any law, regulation, or Recipient institutional policy, and  
+
+II. for the purposes of research integrity and verification. 
+
+The restrictions set forth in this Agreement (as applicable) shall survive and apply to such 
+archival copy so long as Recipient holds the Data. 
+
+9.  Except as provided below or prohibited by law, any Data delivered pursuant to this 
+
+Agreement is understood to be provided “AS IS.” PROVIDER MAKES NO 
+REPRESENTATIONS AND EXTENDS NO WARRANTIES OF ANY KIND, EITHER 
+EXPRESSED OR IMPLIED. THERE ARE NO EXPRESS OR IMPLIED 
+WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR 
+PURPOSE, OR THAT THE USE OF THE DATA WILL NOT INFRINGE ANY 
+PATENT, COPYRIGHT, TRADEMARK, OR OTHER PROPRIETARY RIGHTS. 
+Notwithstanding, Provider, to the best of its knowledge and belief, has the right and 
+authority to provide the Data to Recipient for use in the Project. 
+
+Page 2 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+10. The Data Provider provides no guarantees that the Data is free of third-party intellectual 
+property rights, database rights, and other related rights. Nothing in this Agreement shall 
+operate to transfer to the Recipient any intellectual property rights in or relating to the 
+Data. Recipient agrees not to use intellectual property protection, database rights, or 
+related rights in a way that could prevent or limit access to, or use of, any element of the 
+Data or research conclusion derived from it. Recipient can elect to perform further 
+research that would add intellectual and resource capital to the Data and decide to obtain 
+intellectual property rights on these downstream discoveries. 
+
+11. Except to the extent prohibited by law, the Recipient assumes all liability for damages 
+which may arise from its use, storage, disclosure, or disposal of the Data. The Provider 
+will not be liable to the Recipient for any loss, claim, or demand made by the Recipient, 
+or made against the Recipient by any other party, due to or arising from the use of the 
+Data by the Recipient.  No indemnification for any loss, claim, damage, or liability is 
+intended or provided by either party under this Agreement. 
+
+12. Neither party shall use the other party’s name, trademarks, or other logos in any publicity, 
+
+advertising, or news release without the prior written approval of an authorized 
+representative of that party. The parties agree that each party may disclose factual 
+information regarding the existence and purpose of the relationship that is the subject of 
+this Agreement for other purposes without written permission from the other party 
+provided that any such statement shall accurately and appropriately describe the 
+relationship of the parties and shall not in any manner imply endorsement by the other 
+party whose name is being used. 
+
+13. Unless otherwise specified, this Agreement and the below listed Attachments embody the 
+entire understanding between Provider and Recipient regarding the transfer of the Data to 
+Recipient for the Project: 
+
+I. Attachment 1: Project Specific Information. 
+
+II. Attachment 2: Data-specific Terms and Conditions. 
+
+III. Attachment 3: Identification of Permitted Collaborators (if any). 
+
+14. No modification or waiver of this Agreement shall be valid unless in writing and 
+
+executed by duly-authorized representatives of both parties.  This Agreement shall only 
+be effective upon the review and subject ot the approval of the Data Access Compliance 
+Office (“DACO”) requiring a distinct application. 
+
+15. The undersigned Authorized Officials of Provider and Recipient expressly represent and 
+affirm that the contents of any statements made herein are truthful and accurate and that 
+they are duly authorized to sign this Agreement on behalf of their institution. This 
+Agreement may be executed in counterparts, including both counterparts that are 
+executed on paper and counterparts that are in the form of electronic records and are 
+
+Page 3 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+executed electronically. All executed counterparts shall constitute one agreement, and 
+each counterpart shall be deemed an original. The parties hereby acknowledge and agree 
+that electronic records and electronic signatures may be used in connection with the 
+execution of this Agreement and electronic signatures or signatures transmitted by 
+electronic mail in so-called pdf format shall be legal and binding and shall have the same 
+full force and effect as if a paper original of this Agreement had been delivered and 
+signed using a handwritten signature. 
+
+Signatures: 
+
+Provider Institutional Offical:  
+
+Provider Scientist: 
+
+_______________________   
+
+____________________ 
+
+Print: 
+
+Recipient Institutional Offical: 
+
+______________________ 
+
+Print: 
+
+Print: 
+
+Recipient Scientist: 
+
+___________________ 
+
+Print: 
+
+Notice Address: 
+
+Notice Address: 
+
+Page 4 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1.  Description of the Data: 
+
+Attachment 1: 
+
+The Bridge2AI-Voice dataset contains samples from conventional acoustic tasks including 
+respiratory sounds, cough sounds, and free speech prompts, capturing voice, speech and 
+language data relating to health and other health information. Participants who consent are 
+asked  to  perform  speaking  tasks  and  complete  self-reported  demographic  and  medical 
+history  questionnaires,  as  well  as  disease-specific  validated  questionnaires.  Participants 
+who  consent  also  permit  investigators  to  access  medical  information  through  EHR 
+platforms in order to perform gold standard validation of diagnoses and symptoms. 
+
+2.  Description of Project: 
+
+[Instructions to Drafter – Delete after completion.] 
+
+This section of this attachment should provide sufficient information such that each party 
+understands the project that the Recipient will perform using the Data. Content of this 
+section will be very similar to the Statement of Work used in other types of Agreements. 
+Examples of information that should be provided include: 
+
+* Objective or purpose of the Recipient’s work 
+
+* A general description of the actions to be performed by the Recipient using the Data 
+and possibly the anticipated results 
+
+* Include whether or not the Recipient is permitted to link the Data with other data sets 
+(If yes, be sure to include any special disposition requirements related to the linked data 
+sets in Section 4 of this attachment) 
+
+* Include application of costs, if any. 
+
+3.  Provider Support and Data Transmission: 
+
+Provider shall transmit the Data to Recipient:  
+
+Upon execution of this Agreement, Provider shall send any specific instructions 
+necessary to complete the transfer of the Data to the contact person listed above, if not 
+already included below in this section of Attachment 1.  
+
+Page 5 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+4.  Disposition Requirements upon the termination or expiration of the Agreement: 
+
+Two years after the Start Date, upon completion of the project, upon termination, or upon 
+expiration of the applicable ethics approval, whichever occurs first.  Data shall be 
+destroyed in accordance with instructions of Provider.  Recipient shall submit to Provider 
+a written certification of such data destruction within thirty (30) days after termination or 
+expiration signed by an appropriate representative of Recipient. 
+
+Page 6 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+Additional Terms and Conditions:  
+
+Attachment 2: 
+
+1.  The Data is Personally Identifiable Information, as that is defined in OMB Memorandum 
+
+M-07-16, and not covered under HIPAA, FERPA, or similar laws or regulations 
+governing personal information that require the addition of special terms beyond those 
+included in this Attachment.  
+☐ If checked, the Data is subject to the Federal Privacy Act of 1974, as amended, at 5 
+U.S.C. § 552a.  
+
+x If checked, the Data is covered under a Certificate of Confidentiality, which must be 
+asserted against compulsory legal demands, such as court orders and subpoenas for 
+identifying information or characteristics of a research participant. See Certificates of 
+Confidentiality (CoC) | Grants & Funding for further information.  
+
+2.  Notwithstanding any statement herein to the contrary, Provider represents that it has full 
+authority to share the Data it has collected with the Recipient and has confirmed that the 
+Project is consistent with such consents as Provider may have obtained from individuals 
+who are the subjects of the Data. 
+
+3.  Unless otherwise required by law or legal process, Recipient shall not use or further 
+
+disclose the Data other than as permitted by this Agreement. If Recipient believes it is 
+required by law or legal process to use or disclose the Data, it will promptly notify 
+Provider, to the extent allowed by law, prior to such use or disclosure and will disclose 
+the least possible amount of Data necessary to fulfill its legal obligations. 
+
+4.  In the event Recipient becomes aware of any use or disclosure of the Data not provided 
+for by this Agreement, Recipient shall take any appropriate steps to minimize the impact 
+of such unauthorized use or disclosure as soon as practicable and shall notify Provider of 
+such use or disclosure as soon as possible, but no later than 5 business days after 
+discovery of the unauthorized use or disclosure. Recipient shall cooperate with Provider 
+to investigate, correct, and/or mitigate such unauthorized use or disclosure. Recipient 
+acknowledges that Provider may have an obligation to make further notifications under 
+applicable state law and shall cooperate with the Provider to the extent necessary to 
+enable Provider to meet all such obligations. 
+
+5.  Recipient will not use the Data, either alone or in concert with any other information, to 
+
+make any effort to contact individuals who are the subjects of the Data without 
+appropriate Institutional Review Board (IRB) approval, specific written approval from 
+Provider, and informed consent from the individual, if required. 
+
+Page 7 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+6.  Recipient agrees to store Data with security controls adequate to protect Personally 
+
+Identifiable Information, to ensure that only Authorized Persons have access to the Data, 
+and to maintain appropriate control over the Data at all times. The controls shall include 
+administrative, physical, and technical safeguards that covered entities and business 
+associates must put in place to secure individuals’ electronic protected health information.  
+Recipient further agrees to remove and securely destroy or return, as directed by the 
+Provider in Attachment 1, the Data at the earliest time at which removal and destruction 
+or return can be accomplished, consistent with the purpose of the Project. 
+
+7.  By signing this Agreement, Recipient provides assurance that its relevant institutional 
+policies and applicable federal, state, or local laws and regulations (if any) have been 
+followed, including the completion of any IRB review or approval that may be required 
+prior to Recipient’s use of the Data. Upon Provider’s written request to the Recipient’s 
+Contact for Formal Notices identified in the signature block, Recipient shall provide 
+documentation of its IRB-Approved Protocol. 
+
+8.  Recipient futher agrees to adhere to the specific requirements of PhysioNet.Org managed 
+by the MIT Laboratory for Computational Physiology and supported by the National 
+Institute of Biomedical Imaging and Bioengineering (NIBIB) under NIH grant number 
+R01EB030362 or other data distribution as may be utilized by Provider. 
+
+9.  Provider may unilaterally amend this Agreement should the Federal sponsor require 
+
+revision.  Should recipient object to any amendment, this Agreement shall immediately 
+terminate and Resipient shall immediately return or destroy all Data. 
+
+10. The Authorized Representative of Recipient signing this agreement below warrants and 
+declares, to the best of their knowledge and belief, that Recipeint does not use coercion 
+for labor or services as defined in §787.06, F.S. This Agreement shall immediately 
+terminate upon a breach of this section by Recipient. 
+
+Page 8 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Attachment 3: 
+
+To be replaced with a list of approved recipient personnel.  [any changes to the list require 
+amendment of the Agreement] 
+
+Name, Title and Signature of each individual 
+
+Page 9 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+
+
+================================================================================
+
+FILE: B2AI-Voice_DTUA_2025.txt
+PATH: data/preprocessed/individual/VOICE/B2AI-Voice_DTUA_2025.txt
+SIZE: 16810 bytes
+--------------------------------------------------------------------------------
+
+Data Transfer and Use Agreement (“Agreement”) 
+
+Provider Institution: University of South Florida Board of Trustees pursuant to Agreement 
+concerning: Bridge2AI: Voice as a Biomarker of Health – Building an ethically sourced, 
+bioaccoustic database to understand disease like never before. 
+
+Recipient Institution / Company: 
+
+Recipient Scientist: 
+
+Recipient Authorized Institutional Offical: 
+
+Project Title: 
+
+Agreement Term: 
+
+Start Date: 
+
+End Date:  Two years after the Start Date, upon completion of the project, upon expiration of 
+the applicable ethics approval, or termination by Provider Institution, whichever occurs first. 
+
+1.  Reimbursement of Costs:  
+
+Terms and Conditions: 
+
+If applicable, Recipient shall reimburse Provider for any costs associated with the 
+preparation, compilation, and transfer of the Data to the Recipient.  Costs shall not 
+include payments for research effort by the Provider. 
+
+A.  This Agreement is in support of Agreement # _______________, which shall 
+
+cover reimbursement of costs.  
+B.  Costs as set forth in Attachement I.  
+
+2.  Provider shall provide the data set described in Attachment 1 (the “Data”) to Recipient 
+
+for the research purpose set forth in Attachment 1 (the “Project”).  
+
+3.   Recipient shall not use the Data except as authorized under this Agreement. The Data 
+
+will be used solely to conduct the Project and solely by Recipient Scientist and 
+Recipient’s faculty, employees, fellows, students, and agents (“Recipient Personnel”) (as 
+approved and listed in Attachment 3) that have a need to use, or provide a service in 
+respect of, the Data in connection with the Project and whose obligations of use are 
+consistent with the terms of this Agreement (collectively, “Authorized Persons”). 
+Collaborators at other research organizations, and other research teams at the same 
+organization, must apply independently for access to the Data and sign a Data Transfer 
+and Use Agreement (DTUA) with the Provider, before accessing the data.  
+
+Page 1 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+ 
+4.  Except as authorized under this Agreement or otherwise required by law, Recipient 
+
+agrees to retain control over the Data and shall not disclose, release, sell, rent, lease, loan, 
+or otherwise grant access to the Data to any third party, except Authorized Persons, 
+without the prior written consent of Provider. Recipient agrees to establish appropriate 
+administrative, technical, and physical safeguards to prevent unauthorized use of or 
+access to the Data and comply with any other special requirements relating to 
+safeguarding of the Data as may be set forth in Attachment 2. Recipient must also bind 
+Authorized Persons to hold the Data according to standards of confidentiality and 
+security that are equivalent to those described in this Agreement. 
+
+5.  Recipient agrees to use the Data in compliance with all applicable laws, rules, and 
+regulations, as well as all professional standards applicable to such research.  
+
+6.  Recipient is encouraged to make publicly available the results of the Project, in open-
+
+access journals or pre-print servers where possible.  
+
+7.  Recipient agrees to recognize the contribution of the Provider as the source of the Data in 
+all written, visual, or oral public disclosures of recipient’s research using the Data, as 
+appropriate in accordance with scholarly standards and any specific format that has been 
+indicated in Attachment 1. 
+
+8.  Unless terminated earlier in accordance with this section or extended via a modification 
+in accordance with Section 13, this Agreement shall expire as of the End Date set forth 
+above. Either party may terminate this Agreement with thirty (30) days written notice to 
+the other party’s Authorized Official as set forth below. Upon expiration or early 
+termination of this Agreement, Recipient shall follow the disposition instructions 
+provided in Attachment 1, provided, however, that Recipient may retain one (1) copy of 
+the Data to the extent necessary to comply with the records retention requirements: 
+
+I. under any law, regulation, or Recipient institutional policy, and  
+
+II. for the purposes of research integrity and verification. 
+
+The restrictions set forth in this Agreement (as applicable) shall survive and apply to such 
+archival copy so long as Recipient holds the Data. 
+
+9.  Except as provided below or prohibited by law, any Data delivered pursuant to this 
+
+Agreement is understood to be provided “AS IS.” PROVIDER MAKES NO 
+REPRESENTATIONS AND EXTENDS NO WARRANTIES OF ANY KIND, EITHER 
+EXPRESSED OR IMPLIED. THERE ARE NO EXPRESS OR IMPLIED 
+WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR 
+PURPOSE, OR THAT THE USE OF THE DATA WILL NOT INFRINGE ANY 
+PATENT, COPYRIGHT, TRADEMARK, OR OTHER PROPRIETARY RIGHTS. 
+Notwithstanding, Provider, to the best of its knowledge and belief, has the right and 
+authority to provide the Data to Recipient for use in the Project. 
+
+Page 2 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+10. The Data Provider provides no guarantees that the Data is free of third-party intellectual 
+property rights, database rights, and other related rights. Nothing in this Agreement shall 
+operate to transfer to the Recipient any intellectual property rights in or relating to the 
+Data. Recipient agrees not to use intellectual property protection, database rights, or 
+related rights in a way that could prevent or limit access to, or use of, any element of the 
+Data or research conclusion derived from it. Recipient can elect to perform further 
+research that would add intellectual and resource capital to the Data and decide to obtain 
+intellectual property rights on these downstream discoveries. 
+
+11. Except to the extent prohibited by law, the Recipient assumes all liability for damages 
+which may arise from its use, storage, disclosure, or disposal of the Data. The Provider 
+will not be liable to the Recipient for any loss, claim, or demand made by the Recipient, 
+or made against the Recipient by any other party, due to or arising from the use of the 
+Data by the Recipient.  No indemnification for any loss, claim, damage, or liability is 
+intended or provided by either party under this Agreement. 
+
+12. Neither party shall use the other party’s name, trademarks, or other logos in any publicity, 
+
+advertising, or news release without the prior written approval of an authorized 
+representative of that party. The parties agree that each party may disclose factual 
+information regarding the existence and purpose of the relationship that is the subject of 
+this Agreement for other purposes without written permission from the other party 
+provided that any such statement shall accurately and appropriately describe the 
+relationship of the parties and shall not in any manner imply endorsement by the other 
+party whose name is being used. 
+
+13. Unless otherwise specified, this Agreement and the below listed Attachments embody the 
+entire understanding between Provider and Recipient regarding the transfer of the Data to 
+Recipient for the Project: 
+
+I. Attachment 1: Project Specific Information. 
+
+II. Attachment 2: Data-specific Terms and Conditions. 
+
+III. Attachment 3: Identification of Permitted Collaborators (if any). 
+
+14. No modification or waiver of this Agreement shall be valid unless in writing and 
+
+executed by duly-authorized representatives of both parties.  This Agreement shall only 
+be effective upon the review and subject ot the approval of the Data Access Compliance 
+Office (“DACO”) requiring a distinct application. 
+
+15. The undersigned Authorized Officials of Provider and Recipient expressly represent and 
+affirm that the contents of any statements made herein are truthful and accurate and that 
+they are duly authorized to sign this Agreement on behalf of their institution. This 
+Agreement may be executed in counterparts, including both counterparts that are 
+executed on paper and counterparts that are in the form of electronic records and are 
+
+Page 3 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+executed electronically. All executed counterparts shall constitute one agreement, and 
+each counterpart shall be deemed an original. The parties hereby acknowledge and agree 
+that electronic records and electronic signatures may be used in connection with the 
+execution of this Agreement and electronic signatures or signatures transmitted by 
+electronic mail in so-called pdf format shall be legal and binding and shall have the same 
+full force and effect as if a paper original of this Agreement had been delivered and 
+signed using a handwritten signature. 
+
+Signatures: 
+
+Provider Institutional Offical:  
+
+Provider Scientist: 
+
+_______________________   
+
+____________________ 
+
+Print: 
+
+Recipient Institutional Offical: 
+
+______________________ 
+
+Print: 
+
+Print: 
+
+Recipient Scientist: 
+
+___________________ 
+
+Print: 
+
+Notice Address: 
+
+Notice Address: 
+
+Page 4 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+1.  Description of the Data: 
+
+Attachment 1: 
+
+The Bridge2AI-Voice dataset contains samples from conventional acoustic tasks including 
+respiratory sounds, cough sounds, and free speech prompts, capturing voice, speech and 
+language data relating to health and other health information. Participants who consent are 
+asked  to  perform  speaking  tasks  and  complete  self-reported  demographic  and  medical 
+history  questionnaires,  as  well  as  disease-specific  validated  questionnaires.  Participants 
+who  consent  also  permit  investigators  to  access  medical  information  through  EHR 
+platforms in order to perform gold standard validation of diagnoses and symptoms. 
+
+2.  Description of Project: 
+
+[Instructions to Drafter – Delete after completion.] 
+
+This section of this attachment should provide sufficient information such that each party 
+understands the project that the Recipient will perform using the Data. Content of this 
+section will be very similar to the Statement of Work used in other types of Agreements. 
+Examples of information that should be provided include: 
+
+* Objective or purpose of the Recipient’s work 
+
+* A general description of the actions to be performed by the Recipient using the Data 
+and possibly the anticipated results 
+
+* Include whether or not the Recipient is permitted to link the Data with other data sets 
+(If yes, be sure to include any special disposition requirements related to the linked data 
+sets in Section 4 of this attachment) 
+
+* Include application of costs, if any. 
+
+3.  Provider Support and Data Transmission: 
+
+Provider shall transmit the Data to Recipient:  
+
+Upon execution of this Agreement, Provider shall send any specific instructions 
+necessary to complete the transfer of the Data to the contact person listed above, if not 
+already included below in this section of Attachment 1.  
+
+Page 5 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+4.  Disposition Requirements upon the termination or expiration of the Agreement: 
+
+Two years after the Start Date, upon completion of the project, upon termination, or upon 
+expiration of the applicable ethics approval, whichever occurs first.  Data shall be 
+destroyed in accordance with instructions of Provider.  Recipient shall submit to Provider 
+a written certification of such data destruction within thirty (30) days after termination or 
+expiration signed by an appropriate representative of Recipient. 
+
+Page 6 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+Additional Terms and Conditions:  
+
+Attachment 2: 
+
+1.  The Data is Personally Identifiable Information, as that is defined in OMB Memorandum 
+
+M-07-16, and not covered under HIPAA, FERPA, or similar laws or regulations 
+governing personal information that require the addition of special terms beyond those 
+included in this Attachment.  
+☐ If checked, the Data is subject to the Federal Privacy Act of 1974, as amended, at 5 
+U.S.C. § 552a.  
+
+x If checked, the Data is covered under a Certificate of Confidentiality, which must be 
+asserted against compulsory legal demands, such as court orders and subpoenas for 
+identifying information or characteristics of a research participant. See Certificates of 
+Confidentiality (CoC) | Grants & Funding for further information.  
+
+2.  Notwithstanding any statement herein to the contrary, Provider represents that it has full 
+authority to share the Data it has collected with the Recipient and has confirmed that the 
+Project is consistent with such consents as Provider may have obtained from individuals 
+who are the subjects of the Data. 
+
+3.  Unless otherwise required by law or legal process, Recipient shall not use or further 
+
+disclose the Data other than as permitted by this Agreement. If Recipient believes it is 
+required by law or legal process to use or disclose the Data, it will promptly notify 
+Provider, to the extent allowed by law, prior to such use or disclosure and will disclose 
+the least possible amount of Data necessary to fulfill its legal obligations. 
+
+4.  In the event Recipient becomes aware of any use or disclosure of the Data not provided 
+for by this Agreement, Recipient shall take any appropriate steps to minimize the impact 
+of such unauthorized use or disclosure as soon as practicable and shall notify Provider of 
+such use or disclosure as soon as possible, but no later than 5 business days after 
+discovery of the unauthorized use or disclosure. Recipient shall cooperate with Provider 
+to investigate, correct, and/or mitigate such unauthorized use or disclosure. Recipient 
+acknowledges that Provider may have an obligation to make further notifications under 
+applicable state law and shall cooperate with the Provider to the extent necessary to 
+enable Provider to meet all such obligations. 
+
+5.  Recipient will not use the Data, either alone or in concert with any other information, to 
+
+make any effort to contact individuals who are the subjects of the Data without 
+appropriate Institutional Review Board (IRB) approval, specific written approval from 
+Provider, and informed consent from the individual, if required. 
+
+Page 7 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+6.  Recipient agrees to store Data with security controls adequate to protect Personally 
+
+Identifiable Information, to ensure that only Authorized Persons have access to the Data, 
+and to maintain appropriate control over the Data at all times. The controls shall include 
+administrative, physical, and technical safeguards that covered entities and business 
+associates must put in place to secure individuals’ electronic protected health information.  
+Recipient further agrees to remove and securely destroy or return, as directed by the 
+Provider in Attachment 1, the Data at the earliest time at which removal and destruction 
+or return can be accomplished, consistent with the purpose of the Project. 
+
+7.  By signing this Agreement, Recipient provides assurance that its relevant institutional 
+policies and applicable federal, state, or local laws and regulations (if any) have been 
+followed, including the completion of any IRB review or approval that may be required 
+prior to Recipient’s use of the Data. Upon Provider’s written request to the Recipient’s 
+Contact for Formal Notices identified in the signature block, Recipient shall provide 
+documentation of its IRB-Approved Protocol. 
+
+8.  Recipient futher agrees to adhere to the specific requirements of PhysioNet.Org managed 
+by the MIT Laboratory for Computational Physiology and supported by the National 
+Institute of Biomedical Imaging and Bioengineering (NIBIB) under NIH grant number 
+R01EB030362 or other data distribution as may be utilized by Provider. 
+
+9.  Provider may unilaterally amend this Agreement should the Federal sponsor require 
+
+revision.  Should recipient object to any amendment, this Agreement shall immediately 
+terminate and Resipient shall immediately return or destroy all Data. 
+
+10. The Authorized Representative of Recipient signing this agreement below warrants and 
+declares, to the best of their knowledge and belief, that Recipeint does not use coercion 
+for labor or services as defined in §787.06, F.S. This Agreement shall immediately 
+terminate upon a breach of this section by Recipient. 
+
+Page 8 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Attachment 3: 
+
+To be replaced with a list of approved recipient personnel.  [any changes to the list require 
+amendment of the Agreement] 
+
+Name, Title and Signature of each individual 
+
+Page 9 of 9 
+
+Approved for use through August 31, 2025 
+
+ 
+ 
+
+
+================================================================================
+
+FILE: RePORT ⟩ RePORTER - VOICE.txt
+PATH: data/preprocessed/individual/VOICE/RePORT ⟩ RePORTER - VOICE.txt
+SIZE: 8319 bytes
+--------------------------------------------------------------------------------
+
+12/5/25, 9:09 PM
+
+RePORT ⟩ RePORTER
+
+NIH RePORTER Announcement:
+
+A "No Cost Extension" indicator is now available on RePORTER! The indicator appears in the "Other Information"
+
+section on the "Project Details" page.
+
+
+
+RePORT
+
+RePORTER
+
+Project Details
+
+ Share
+
+ Description
+
+ Details
+
+ Sub-Projects
+
+ Publications
+
+ Patents
+
+ Outcomes
+
+ Clinical Studies
+
+ News and More
+
+ History
+
+
+
+Bridge2AI: Voice as a Biomarker of Health -
+
+Building an ethically sourced, bioaccoustic
+
+database to understand disease like never
+
+before
+
+Project
+Number
+
+Contact
+PI/Project
+
+Awardee
+Organization
+
+3OT2OD032720-
+01S3
+
+Leader
+BENSOUSSAN,
+
+YAEL
+EMILIE
+
+Other PIs
+
+ Description
+
+ Similar Projects
+
+Abstract Text
+
+Our group aims to integrate the use of voice as biomarker
+
+of health in clinical care by generating a substantial multi-
+institutional, ethically sourced, and diverse voice database
+linked to multimodal health biomarkers to fuel voice AI
+research and build predictive models to assist in
+
+screening, diagnosis, and treatment of a broad range of
+diseases. Data collection will be made possible by
+software through a smartphone application linked to
+electronic health records (EHR) and other health
+
+Privacy  -  Terms
+
+https://reporter.nih.gov/project-details/11376382
+
+1/8
+
+12/5/25, 9:09 PM
+
+RePORT ⟩ RePORTER
+
+biomarkers such as radiomics, and genomics, and
+
+supported by federated learning technology to protect
+
+data privacy. Based on the existing literature and ongoing
+
+research in different fields of voice research, our group
+
+has identified 5 disease categories for which voice
+
+changes have been associated to specific diseases and
+
+around which we aim to center the data acquisition
+
+efforts: 1. Vocal Pathologies (Laryngeal cancers, Vocal
+
+fold paralysis, Benign laryngeal lesions) 2. Neurological
+
+and Neurodegenerative Disorders (Alzheimer’s,
+
+Parkinson’s, Stroke, ALS) 3. Mood and Psychiatric
+
+Disorders (Depression, Schizophrenia, Bipolar Disorders)
+
+4. Respiratory disorders (Pneumonia, COPD, Heart Failure,
+
+OSA) 5. Pediatric diseases (Autism, Speech Delay)
+
+Specific Aim #1: Data Acquisition Module: - To build a
+multi-modal, multi-institutional, large scale, diverse and
+ethically sourced human voice database linked to other
+biomarkers of health that is AI/ML friendly to fuel voice AI
+research Specific Aim #2: Standard Module: - To introduce
+the field of acoustic biomarkers by developing new
+
+standards of acoustic and voice data collection and
+analysis for voice AI research. Specific Aim #3: Tool
+Development and optimization - To develop a software
+and cloud infrastructure for automated voice data
+collection through a smartphone application that allows
+non-invasive, user-friendly, high quality voice data
+collection while minimizing human manipulation. This will
+include integrated acoustic amplifiers and acoustic
+
+quality standardization. - To implement Federated
+Learning technology to allow analysis of multi-
+institutional data while minimizing data sharing and
+preserving patient privacy Specific Aim #4: Ethics Module
+- To integrate existing scholarship, tools, and guidance
+with development of new standard and normative insights
+for identifying, anticipating, addressing, and providing
+guidance on ethical and trustworthy issues from voice
+data generation and AI/ML research and development to
+
+clinical adoption and downstream health decisions and
+outcomes. - To develop new guidelines for consenting to
+voice data collection, voice data sharing and utilization in
+
+https://reporter.nih.gov/project-details/11376382
+
+2/8
+
+12/5/25, 9:09 PM
+
+RePORT ⟩ RePORTER
+
+the context of voice AI technology Specific Aim # 5:
+
+Teaming Module: - To build bridges between the medical
+
+voice research world, the acoustic engineers, and the
+
+AI/ML world to promote the integration of tangible clinical
+
+application for Voice AI algorithms Specific Aim #6: Skills
+
+and Workforce Development Module - To develop a
+
+unique curriculum on voice biomarkers of health and the
+
+development, validation, and implementation for AI
+
+models that are FAIR and CARE - To create a community
+
+of voice AI researchers, especially those from
+
+underserved communities, and foster collaborations to
+
+promote application of ML for Voice Research - To
+
+engage a broad range of learners with competency
+
+assessment and mentorship
+
+Public Health Relevance Statement
+
+As Voice is increasingly being recognized as a biomarker
+of health by the tech world and Voice AI is gaining
+attention from multi-nationals such as Google, Amazon,
+Mozilla and Apple amongst others, many important
+issues related to patient privacy protection, ethical and
+fair representation of population, and clinical accuracy are
+
+arising. As a multidisciplinary group of academic experts,
+we aim to influence and guide the world of Voice AI by
+ensuring patient protection through ethical and fairness
+principles and create safe, innovative infrastructures to
+disseminate ethically sourced data for the future
+generations of Voice AI researchers.
+
+NIH Spending Category
+
+No NIH Spending Category available.
+
+Project Terms
+
+Acoustics
+
+Address
+
+Adoption
+
+Alzheimer's Disease
+
+Amplifiers
+
+Apple
+
+https://reporter.nih.gov/project-details/11376382
+
+3/8
+
+12/5/25, 9:09 PM
+
+RePORT ⟩ RePORTER
+
+Attention
+
+Benign
+
+Biological Markers
+
+Bipolar Disorder
+
+Bridge to Artificial Intelligence
+
+Categories
+
+Childhood
+
+Chronic Obstructive Pulmonary Disease
+
+Clinical
+
+Cloud Computing
+
+Collaborations
+
+Communities
+Read More
+Computer software
+
+Competence
+
+ Details
+
+Contact PI/
+Project
+Leader
+
+Name
+BENSOUSSAN,
+YAEL EMILIE
+
+
+Title
+ASSISTANT
+PROFESSOR
+
+Contact
+
+View
+Email
+
+Consent
+
+Data
+
+Program
+Official
+
+Name
+KUXHAUS,
+LAUREL
+CATHERINE
+
+Contact
+
+View
+Email
+
+Other PIs
+
+
+
+Name
+BÉLISLE-
+PIPON,
+JEAN-
+CHRISTOPHE
+DORR,
+
+DAVID A. 
+
+ELEMENTO,
+OLIVIER 
+
+GHOSH,
+SATRAJIT
+SUJIT 
+PAYNE,
+PHILIP R.O.
+POWELL,
+
+MARIA
+ELLEN 
+
+RAMEAU,
+ANAIS 
+
+RAVITSKY,
+VARDIT 
+
+SIGARAS,
+ALEXANDROS
+SIU,
+
+JENNIFER 
+
+
+
+Organization
+
+Name
+UNIVERSITY OF SOUTH FLORIDA
+
+City
+
+https://reporter.nih.gov/project-details/11376382
+
+4/8
+
+12/5/25, 9:09 PM
+
+RePORT ⟩ RePORTER
+
+TAMPA
+
+Country
+UNITED STATES (US)
+
+Department Type
+OTOLARYNGOLOGY
+
+Organization Type
+SCHOOLS OF MEDICINE
+
+State Code
+FL
+
+Congressional District
+15
+
+Other Information
+
+Opportunity Number
+OTA-21-008
+
+Study Section
+Data Coordination, Mapping, and Modeling[DCMM]
+
+Fiscal Year
+2025
+
+Award Notice Date
+05-September-2025
+
+Administering Institutes or Centers
+NIH Office of the Director
+
+Assistance Listing Number
+93.310
+
+DUNS Number
+069687242
+UEI
+NKAZLXLL7Z91
+
+Project Start Date
+
+01-September-2022
+
+Project End Date
+
+30-November-2026
+
+Budget Start Date
+15-September-2025
+
+Budget End Date
+30-November-2026
+
+https://reporter.nih.gov/project-details/11376382
+
+5/8
+
+12/5/25, 9:09 PM
+
+RePORT ⟩ RePORTER
+
+No Cost Extension
+N
+
+Project Funding Information for 2025
+
+Total Funding
+$4,660,942
+
+Direct Costs
+$4,072,321
+
+Indirect Costs
+$588,621
+
+Year
+Year
+
+Funding IC
+
+Funding IC
+
+FY Total Cost by IC
+
+2025 NIH Office of the Director
+
+$4,660,942
+
+ Sub Projects
+
+No Sub Projects information available for
+3OT2OD032720-01S3
+
+ Publications
+
+ Disclaimer
+
+No Publications available for 3OT2OD032720-01S3
+
+ Patents
+
+No Patents information available for
+3OT2OD032720-01S3
+
+https://reporter.nih.gov/project-details/11376382
+
+6/8
+
+12/5/25, 9:09 PM
+
+RePORT ⟩ RePORTER
+
+ Outcomes
+
+The Project Outcomes shown here are displayed verbatim as submitted
+by the Principal Investigator (PI) for this award. Any opinions, findings,
+and conclusions or recommendations expressed are those of the PI
+and do not necessarily reflect the views of the National Institutes of
+Health. NIH has not endorsed the content below.
+
+No Outcomes available for 3OT2OD032720-
+01S3
+
+ Clinical Studies
+
+No Clinical Studies information available for
+3OT2OD032720-01S3
+
+ News and More
+
+Related News Releases
+
+No news release information available for
+3OT2OD032720-01S3
+
+ History
+
+No Historical information available for
+3OT2OD032720-01S3
+
+https://reporter.nih.gov/project-details/11376382
+
+7/8
+
+12/5/25, 9:09 PM
+
+RePORT ⟩ RePORTER
+
+ Similar Projects
+
+No Similar Projects information available for
+3OT2OD032720-01S3
+
+https://reporter.nih.gov/project-details/11376382
+
+8/8
+
+
+
+================================================================================
+
+FILE: docs_google_com_document-d_row13.txt
+PATH: data/preprocessed/individual/VOICE/docs_google_com_document-d_row13.txt
+SIZE: 219 bytes
+--------------------------------------------------------------------------------
+
+B2AI Voice IRB Protocol v14 clean 2025-09-04.docx - Google DocsB2AI Voice IRB Protocol v14 clean 2025-09-04Tab  External         ShareSign inFileEditViewToolsHelpAccessibilityDebug  Unsaved changes to Drive
+
+================================================================================
+
+FILE: github_eipm_bridge2ai-docs_README_row22.md
+PATH: data/preprocessed/individual/VOICE/github_eipm_bridge2ai-docs_README_row22.md
+SIZE: 1311 bytes
+--------------------------------------------------------------------------------
+
+<p align="center">
+    <img src="images/main_logo_black.svg#gh-light-mode-only" width="200" alt="B2Ai Voice Logo">
+    <img src="images/main_logo_white.svg#gh-dark-mode-only" width="200" alt="B2Ai Voice Logo"><br>
+    Voice as a Biomarker of Health
+</p>
+
+# bridge2ai-docs
+
+Docs for the Bridge2AI Voice Project.
+
+[![GitHub](https://img.shields.io/badge/github-2.0.5-green?style=flat&logo=github)](https://github.com/eipm/bridge2ai-docs) [![Python 3.12.0](https://img.shields.io/badge/python-3.12.0-blue.svg)](https://www.python.org/downloads/release/python-3120/) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)  [![DOI](https://zenodo.org/badge/860006845.svg)](https://zenodo.org/doi/10.5281/zenodo.13834653)
+
+
+## 🤝 License
+See [LICENSE](./LICENSE)
+
+## 📚 How to Cite
+> Sigaras, A., Zisimopoulos, P., Tang, J., Bevers, I., Gallois, H., Bernier, A., Bensoussan, Y., Ghosh, S. S., Rameau, A., Powell, M. E., Belisle-Pipon, J.-C., Ravitsky, V., Johnson, A., Elemento, O., Dorr, D., … Bridge2AI-Voice. (2024). eipm/bridge2ai-docs. Zenodo. [https://zenodo.org/doi/10.5281/zenodo.13834653](https://zenodo.org/doi/10.5281/zenodo.13834653)
+
+## Prerequisites
+
+```bash
+pip install -r requirements.txt
+```
+
+## How to run the app
+
+```bash
+sh startup.sh
+```
+
+================================================================================
+
+FILE: github_eipm_bridge2ai-docs_row22.json
+PATH: data/preprocessed/individual/VOICE/github_eipm_bridge2ai-docs_row22.json
+SIZE: 369 bytes
+--------------------------------------------------------------------------------
+
+{
+  "url": "https://github.com/eipm/bridge2ai-docs/tree/main/docs",
+  "name": "bridge2ai-docs",
+  "description": "Bridge2AI Voice | Documentation Dashboard",
+  "license": "MIT License",
+  "topics": [
+    "ai",
+    "bridge2ai",
+    "bridge2ai-voice",
+    "python",
+    "streamlit-dashboard"
+  ],
+  "clone_url": "https://github.com/eipm/bridge2ai-docs.git",
+  "row": 22
+}
+
+================================================================================
+
+FILE: healthnexus_row13.json
+PATH: data/preprocessed/individual/VOICE/healthnexus_row13.json
+SIZE: 109 bytes
+--------------------------------------------------------------------------------
+
+{
+  "type": "Health Data Nexus",
+  "url": "https://healthdatanexus.ai/content/b2ai-voice/1.0/",
+  "row": 13
+}
+
+================================================================================
+
+FILE: physionet_b2ai-voice_1.1_row14.txt
+PATH: data/preprocessed/individual/VOICE/physionet_b2ai-voice_1.1_row14.txt
+SIZE: 21806 bytes
+--------------------------------------------------------------------------------
+
+
+
+
+
+Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v1.1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Share
+About
+
+          Explore 
+
+
+
+
+
+Data
+View datasets
+
+
+
+
+
+
+Software
+View software
+
+
+
+
+
+
+Tutorials
+View tutorials
+
+
+
+
+
+
+Challenges
+View challenges
+
+
+
+
+
+
+
+
+
+
+
+Search
+
+
+
+
+
+
+
+
+
+
+
+Share
+About
+
+      Explore 
+
+
+
+
+
+Data
+View datasets
+
+
+
+
+
+
+Software
+View software
+
+
+
+
+
+
+Tutorials
+View tutorials
+
+
+
+
+
+
+Challenges
+View challenges
+
+
+
+
+
+
+
+
+
+
+
+ Database
+ Restricted Access
+
+Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information
+
+
+Alistair Johnson 
+        , 
+      
+        Jean-Christophe Bélisle-Pipon 
+        , 
+      
+        David Dorr 
+        , 
+      
+        Satrajit Ghosh 
+        , 
+      
+        Philip Payne 
+        , 
+      
+        Maria Powell 
+        , 
+      
+        Anais Rameau 
+        , 
+      
+        Vardit Ravitsky 
+        , 
+      
+        Alexandros Sigaras 
+        , 
+      
+        Olivier Elemento 
+        , 
+      
+        Yael Bensoussan 
+
+
+Published: Jan. 17, 2025. Version:
+      1.1
+      <View latest version>
+
+
+      This is not the latest version. Click here for the latest version.
+      
+×
+
+
+
+
+
+
+
+
+
+When using this resource, please cite: 
+(show more options)
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/249v-w155
+
+
+
+
+
+Cite
+
+×
+
+
+
+
+
+MLA
+Johnson, Alistair, et al. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 1.1). PhysioNet (2025). RRID:SCR_007345. https://doi.org/10.13026/249v-w155
+
+
+APA
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/249v-w155
+
+
+Chicago
+Johnson, Alistair, Bélisle-Pipon, Jean-Christophe, Dorr, David, Ghosh, Satrajit, Payne, Philip, Powell, Maria, Rameau, Anais, Ravitsky, Vardit, Sigaras, Alexandros, Elemento, Olivier, and Yael Bensoussan. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 1.1). PhysioNet (2025). RRID:SCR_007345. https://doi.org/10.13026/249v-w155
+
+
+Harvard
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., and Bensoussan, Y. (2025) 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information' (version 1.1), PhysioNet. RRID:SCR_007345. Available at: https://doi.org/10.13026/249v-w155
+
+
+Vancouver
+Johnson A, Bélisle-Pipon J, Dorr D, Ghosh S, Payne P, Powell M, Rameau A, Ravitsky V, Sigaras A, Elemento O, Bensoussan Y. Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. 2025. RRID:SCR_007345. Available from: https://doi.org/10.13026/249v-w155
+
+
+
+
+Close
+
+
+
+
+
+Please include the standard citation for PhysioNet:
+(show more options)
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+
+
+
+
+
+Cite
+
+×
+
+
+
+
+
+APA
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+
+
+MLA
+Goldberger, A., et al. "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220." (2000). RRID:SCR_007345.
+
+
+CHICAGO
+Goldberger, A., L. Amaral, L. Glass, J. Hausdorff, P. C. Ivanov, R. Mark, J. E. Mietus, G. B. Moody, C. K. Peng, and H. E. Stanley. "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220." (2000). RRID:SCR_007345.
+
+
+HARVARD
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P.C., Mark, R., Mietus, J.E., Moody, G.B., Peng, C.K. and Stanley, H.E., 2000. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+
+
+VANCOUVER
+Goldberger A, Amaral L, Glass L, Hausdorff J, Ivanov PC, Mark R, Mietus JE, Moody GB, Peng CK, Stanley HE. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+
+
+
+
+Close
+
+
+
+
+
+Abstract
+The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information. Bridge2AI-Voice v1.0, the initial release, provides 12,523 recordings for 306 participants collected across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The initial release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.
+
+Background
+The production of human voice involves the complex interaction among respiration, phonation, resonation, and articulation. The respiratory system provides the air flow and pressure to initiate and maintain vocal fold vibration. The vocal folds generate the sound source which is then modified within the vocal tract by the oral and nasal cavities and the articulators involved in speech production. Each of these processes is influenced by the speaker’s ability to adjust and shape these interacting systems.
+Although many use the terms voice and speech interchangeably, it is important to understand the distinction between the different terms used to describe human sounds:
+Voice: In the voice research field, refers to sound production and is the phonatory aspect of speech. In other words, it is the sound produced by the larynx and the resonators. For example, voice can be assessed by asking someone to do a prolonged vowel sound like /e/.
+Speech: Speech is the result of the voice being modified by the articulators and is produced with intonation and prosody. For example, a patient having a stroke can have abnormal speech production due to difficulty with articulating words but have a normal voice. For this project, the term Voice as a Biomarker of Health will include speech in its definition.
+For voice to emerge as a biomarker of health, there is a pressing need for large, high quality, multi-institutional and diverse voice database linked to other health biomarkers from various data of different modality (demographics, imaging, genomics, risk factors, etc.) to fuel voice AI research and answer tangible clinical questions. Such an endeavor is only achievable through multi-institutional collaborations between voice experts and AI engineers, supported by bioethicists and social scientists to ensure the creation of ethically sourced voice databases representing our populations.
+Based on the existing literature and ongoing research in different fields of voice research, our group identified 5 disease cohort categories for which voice changes have been associated to specific diseases with well-recognized unmet needs. These categories were:
+
+Voice Disorders: Laryngeal disorders are the most studied pathologies linked to vocal changes. Benign and malignant lesions can affect the shape, mass, density, and tension of the vocal folds resulting in changes in vibratory function resulting in changes in phonation.
+Neurological and Neurodegenerative Disorders: Changes in voice have been linked to depression, and other mood disorders. Individuals with depression have been found to have decreased fundamental frequency (f0) as well as a monotonous speech, while individuals with anxiety disorders have a significant increase in F0. Regrettably, much of the literature examining the intersection of voice and speech changes in psychiatric conditions have used small datasets with limited demographic diversity reporting, lack of standardized data collection protocol precluding meta-analysis and possible confounders, all limiting external validity and clinical usability.
+Mood and Psychiatric Disorders: Voice and speech are altered in many neurological and neurodegenerative conditions. Acute strokes can present with slurred speech (Dysarthria) or expressive deficits speech (Aphasia). Voice and speech changes can be the presenting symptoms of many neurodegenerative conditions, such as Parkinson’s and ALS with changes such as slowed, low frequency, monotonous speech as well as vocal tremor.
+Respiratory disorders: Respiratory sounds, including breath, cough and voice have long been used for diagnostic purposes. For instance, pediatric croup can be suspected based on the presence of barking cough, stridor and dysphonia. With advances in acoustic recording and analysis in the second half on the twentieth century, increasing interest has emerged in the use of respiratory sounds for disease screening and therapeutic monitoring, especially with cough sounds.
+Pediatric Voice and Speech Disorders: The literature is sparser in terms of pediatric voice and speech analysis partly due to ethical concerns and challenges in data acquisition for this cohort. However, many studies have investigated the use of machine learning models for voice and speech analysis for detection of Autism and Speech Delays in the pediatric population.
+
+The protocols used for data collection in this study have been extensively described [1].
+
+Methods
+Patients presenting at specialty clinics and institutions were considered for enrolment. Patients were selected based on membership to five predetermined groups (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric). Patients presenting at the given clinic were screened for inclusion and exclusion criteria prior to their visit by the project investigators. If eligible for enrolment, patient consent was sought for the data collection initiative and to share the acquired research data. Once consented, a standardized protocol for data collection was adopted. This protocol involved the collection of demographic information, health questionnaires, targeted questionnaires inquiring about known confounders for voice, disease specific information, and voice recording tasks such as sustained phonation of a vowel sound. Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible. For most participants a single session was sufficient to collect all relevant data. However, a subset of participants required multiple sessions to complete the data collection. As a result, there may be more than one session per participant in the current dataset. Data were exported and converted from RedCap using an open source library developed by our team [2].
+Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied. From this standardized audio, we extracted five types of derived data:
+
+Spectrograms - Time-frequency representations were computed using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 512-point FFT.
+Mel-frequency cepstral coefficients (MFCC) - 60 MFCCs were extracted using the above spectrograms.
+Acoustic features were extracted using OpenSMILE, capturing temporal dynamics and acoustic characteristics.
+Phonetic and prosodic features were computed using Parselmouth and Praat, providing measures of fundamental frequency, formants, and voice quality.
+Transcriptions were generated using OpenAI's Whisper Large model.
+
+The following de-identification steps were taken in the process of preparing the dataset:
+
+HIPAA Safe Harbor identifiers were removed.
+	
+While not all relevant to this dataset, these identifiers include: names, geographic locators, date information (at resolution finer than years), phone/fax numbers, email addresses, IP addresses, Social Security Numbers, medical record numbers, health plan beneficiary numbers, device identifiers, license numbers, account numbers, vehicle identifiers, website URLs, full face photos, biometric identifiers, and any unique identifiers.
+		
+State and province were removed. Country of data collection was retained.
+
+
+
+
+Transcripts of free speech audio were removed.
+In this release, audio waveforms were omitted, and only spectrograph data and other derived features are made available.
+
+We aim to include voice data on future releases with additional precautions taken to ensure data security.
+
+
+
+Data Description
+As of v1.1, only data from the adult cohort is available.
+The dataset has been made available in three files:
+
+spectrograms.parquet - a Parquet file storing dense data derived from voice waveforms.
+mfcc.parquet - a Parquet file storing MFCC data derived from the above spectrograms
+phenotype.tsv - Information collected during the visit including demographics, acoustic confounders, and responses to validated questionnaires.
+phenotype.json - A data dictionary for the phenotype data.
+static_features.tsv - Features derived from the raw audio, with one feature per audio recording.
+static_features.json - A data dictionary for the features data.
+
+The above data dictionaries have the same overall structure: a dictionary where keys are the column names matching the associated data file, and values are dictionaries with further detail. The description value in the data dictionary provides a one sentence summary of the respective column.
+The spectrograms.parquet file contains the majority of the data derived from the raw audio. Each element of the parquet formatted dataset contains a unique identifier for the participant (participant_id), a unique identifier for the recording session (session_id), the task performed (task_name), and the a 513xN dimension spectrogram of the raw audio waveform. The mfcc.parquet file contains MFCCs derived from the spectrograms, and is of size 60xN, where N is proportional to the length of the audio recording.
+Features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [3]), Praat [4], parselmouth [5], and torchaudio [6, 7] are provided. Each feature is present in the static_features.tsv file, with the data dictionary providing a description of each feature, and one row per unique recording. The phenotype.tsv file is similarly a tab delimited file with one row per unique participant. Each column is the response to a question asked during clinical data collection within the custom data collection app. The phenotype.json file provides a description of each column of data.
+The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files has been made open source in the b2aiprep library [8].
+
+Usage Notes
+If using Python, the parquet dataset can be loaded in with the following code:
+from datasets import Dataset
+ds = Dataset.from_parquet("spectrograms.parquet")
+
+A spectrogram can be plotted in decibels by converting it from its original power representation:
+import librosa
+spectrogram = librosa.power_to_db(ds[0]['spectrogram'])
+plt.figure(figsize=(10, 4))
+plt.imshow(spectrogram, aspect='auto', origin='lower')
+plt.title('Spectrogram')
+plt.xlabel('Time')
+plt.ylabel('Frequency')
+plt.colorbar()
+
+The phenotype file can be loaded with any statistical analysis tool. For example, the pandas library in Python can read the data:
+import pandas as pd
+df = pd.read_csv("phenotype.tsv", sep="\t", header=0)
+
+
+Release Notes
+b2ai-voice v1.1: This release added Mel-frequency cepstral coefficients (MFCCs).
+b2ai-voice v1.0: This was the first release of the Bridge2AI voice as a biomarker of health dataset [9].
+
+Ethics
+Data collection and sharing was approved by the University of South Florida Institutional Review Board.
+
+Acknowledgements
+This project was funded by NIH project number 3OT2OD032720-01S1: Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before. We would like to acknowledge that this release would not be possible without the graceful contribution of data from all the participants of the study. We would also like to thank the NIH for their continued support of the project.
+
+Conflicts of Interest
+None to declare.
+
+References
+
+Rameau, A., Ghosh, S., Sigaras, A., Elemento, O., Belisle-Pipon, J.-C., Ravitsky, V., Powell, M., Johnson, A., Dorr, D., Payne, P., Boyer, M., Watts, S., Bahr, R., Rudzicz, F., Lerner-Ellis, J., Awan, S., Bolser, D., Bensoussan, Y. (2024) Developing Multi-Disorder Voice Protocols: A team science approach involving clinical expertise, bioethics, standards, and DEI.. Proc. Interspeech 2024, 1445-1449, doi: 10.21437/Interspeech.2024-1926
+Bensoussan, Y., Ghosh, S. S., Rameau, A., Boyer, M., Bahr, R., Watts, S., Rudzicz, F., Bolser, D., Lerner-Ellis, J., Awan, S., Powell, M. E., Belisle-Pipon, J.-C., Ravitsky, V., Johnson, A., Zisimopoulos, P., Tang, J., Sigaras, A., Elemento, O., Dorr, D., … Bridge2AI-Voice. (2024). Bridge2AI Voice REDCap (v3.20.0). Zenodo. https://doi.org/10.5281/zenodo.14148755
+Florian Eyben, Martin Wöllmer, Björn Schuller: "openSMILE - The Munich Versatile and Fast Open-Source Audio Feature Extractor", Proc. ACM Multimedia (MM), ACM, Florence, Italy, ISBN 978-1-60558-933-6, pp. 1459-1462, 25.-29.10.2010.
+Boersma P, Van Heuven V. Speak and unSpeak with PRAAT. Glot International. 2001 Nov;5(9/10):341-7.
+Jadoul Y, Thompson B, De Boer B. Introducing parselmouth: A python interface to praat. Journal of Phonetics. 2018 Nov 1;71:1-5.
+Hwang, J., Hira, M., Chen, C., Zhang, X., Ni, Z., Sun, G., Ma, P., Huang, R., Pratap, V., Zhang, Y., Kumar, A., Yu, C.-Y., Zhu, C., Liu, C., Kahn, J., Ravanelli, M., Sun, P., Watanabe, S., Shi, Y., Tao, T., Scheibler, R., Cornell, S., Kim, S., & Petridis, S. (2023). TorchAudio 2.1: Advancing speech recognition, self-supervised learning, and audio processing components for PyTorch. arXiv preprint arXiv:2310.17864
+Yang, Y.-Y., Hira, M., Ni, Z., Chourdia, A., Astafurov, A., Chen, C., Yeh, C.-F., Puhrsch, C., Pollack, D., Genzel, D., Greenberg, D., Yang, E. Z., Lian, J., Mahadeokar, J., Hwang, J., Chen, J., Goldsborough, P., Roy, P., Narenthiran, S., Watanabe, S., Chintala, S., Quenneville-Bélair, V, & Shi, Y. (2021). TorchAudio: Building Blocks for Audio and Speech Processing. arXiv preprint arXiv:2110.15018.
+Bevers, I., Ghosh, S., Johnson, A., Brito, R., Bedrick, S., Catania, F., & Ng, E. (2017). My Research Software (Version 0.21.0) [Computer software]. https://github.com/sensein/b2aiprep
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2024). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.0). Health Data Nexus. https://doi.org/10.57764/qb6h-em84
+
+
+
+
+
+
+
+
+          Contents
+          
+
+Abstract
+Background
+Methods
+Data Description
+Usage Notes
+Release Notes
+Ethics
+Acknowledgements
+Conflicts of Interest
+References
+Files
+
+
+
+Share
+
+
+
+
+
+
+
+
+
+Access
+
+
+Access Policy:
+
+              Only registered users who sign the specified data use agreement can access the files.
+            
+
+License (for files):
+
+Bridge2AI Voice Registered Access License
+
+
+Data Use Agreement:
+
+Bridge2AI Voice Registered Access Agreement
+
+
+
+
+Discovery
+
+DOI (version 1.1):
+
+https://doi.org/10.13026/249v-w155
+
+DOI (latest version):
+
+https://doi.org/10.13026/37yb-1t42
+
+Topics:
+
+voice
+bridge2ai
+
+Project Website:
+
+ https://docs.b2ai-voice.org
+
+
+
+
+Corresponding Author
+
+You must be logged in to view the contact information.
+
+
+
+Versions
+
+1.1
+                  - Jan. 17, 2025
+                
+2.0.0
+                  - April 16, 2025
+                
+2.0.1
+                  - Aug. 18, 2025
+                
+
+
+
+
+
+Files
+
+        
+          The files for this version of the project (1.1) are no longer available. The
+          latest version of this project is
+          2.0.1
+
+
+
+
+
+
+
+
+
+
+
+MIT Laboratory for Computational Physiology
+National Institute of Biomedical Imaging and Bioengineering (NIBIB) under NIH grant number R01EB030362
+
+
+Navigation
+Discover Data
+Share Data
+About
+News
+
+
+Explore
+Data
+Software
+Tutorials
+Challenges
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+================================================================================
+
+FILE: physionet_b2ai-voice_1.1_row17.txt
+PATH: data/preprocessed/individual/VOICE/physionet_b2ai-voice_1.1_row17.txt
+SIZE: 21521 bytes
+--------------------------------------------------------------------------------
+
+Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information v1.1
+Menu
+Share
+About
+Explore
+Data
+View datasets
+Software
+View software
+Challenges
+View challenges
+Tutorials
+View tutorials
+Cancel
+Search
+Search PhysioNet
+Log in
+Share
+About
+Data
+View datasets
+Software
+View software
+Challenges
+View challenges
+Tutorials
+View tutorials
+Database
+Restricted Access
+Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information
+Alistair Johnson
+,
+Jean-Christophe Bélisle-Pipon
+,
+David Dorr
+,
+Satrajit Ghosh
+,
+Philip Payne
+,
+Maria Powell
+,
+Anais Rameau
+,
+Vardit Ravitsky
+,
+Alexandros Sigaras
+,
+Olivier Elemento
+,
+Yael Bensoussan
+Published: Jan. 17, 2025. Version:
+1.1
+<View latest version>
+This is not the latest version. Click here for the latest version.
+×
+Bridge2AI Raw Audio Data Access
+(Sept. 11, 2025, 3:47 p.m.)
+The published Bridge2AI-Voice dataset contains derived features from the audio waveforms. Interested users can request access to the original raw audio data by contacting: DACO@b2ai-voice.org
+The raw audio data will be disseminated through controlled access only to protect participant's privacy.
+When using this resource, please cite:
+(show more options)
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/249v-w155
+Cite
+×
+MLA
+Johnson, Alistair, et al. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 1.1). PhysioNet (2025). RRID:SCR_007345. https://doi.org/10.13026/249v-w155
+APA
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/249v-w155
+Chicago
+Johnson, Alistair, Bélisle-Pipon, Jean-Christophe, Dorr, David, Ghosh, Satrajit, Payne, Philip, Powell, Maria, Rameau, Anais, Ravitsky, Vardit, Sigaras, Alexandros, Elemento, Olivier, and Yael Bensoussan. "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information" (version 1.1). PhysioNet (2025). RRID:SCR_007345. https://doi.org/10.13026/249v-w155
+Harvard
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., and Bensoussan, Y. (2025) 'Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information' (version 1.1), PhysioNet. RRID:SCR_007345. Available at: https://doi.org/10.13026/249v-w155
+Vancouver
+Johnson A, Bélisle-Pipon J, Dorr D, Ghosh S, Payne P, Powell M, Rameau A, Ravitsky V, Sigaras A, Elemento O, Bensoussan Y. Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.1). PhysioNet. 2025. RRID:SCR_007345. Available from: https://doi.org/10.13026/249v-w155
+Close
+Please include the standard citation for PhysioNet:
+(show more options)
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+Cite
+×
+APA
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P. C., Mark, R., ... & Stanley, H. E. (2000). PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+MLA
+Goldberger, A., et al. "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220." (2000). RRID:SCR_007345.
+CHICAGO
+Goldberger, A., L. Amaral, L. Glass, J. Hausdorff, P. C. Ivanov, R. Mark, J. E. Mietus, G. B. Moody, C. K. Peng, and H. E. Stanley. "PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220." (2000). RRID:SCR_007345.
+HARVARD
+Goldberger, A., Amaral, L., Glass, L., Hausdorff, J., Ivanov, P.C., Mark, R., Mietus, J.E., Moody, G.B., Peng, C.K. and Stanley, H.E., 2000. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+VANCOUVER
+Goldberger A, Amaral L, Glass L, Hausdorff J, Ivanov PC, Mark R, Mietus JE, Moody GB, Peng CK, Stanley HE. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. Circulation [Online]. 101 (23), pp. e215–e220. RRID:SCR_007345.
+Close
+Abstract
+The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information. Bridge2AI-Voice v1.0, the initial release, provides 12,523 recordings for 306 participants collected across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The initial release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.
+Background
+The production of human voice involves the complex interaction among respiration, phonation, resonation, and articulation. The respiratory system provides the air flow and pressure to initiate and maintain vocal fold vibration. The vocal folds generate the sound source which is then modified within the vocal tract by the oral and nasal cavities and the articulators involved in speech production. Each of these processes is influenced by the speaker’s ability to adjust and shape these interacting systems.
+Although many use the terms voice and speech interchangeably, it is important to understand the distinction between the different terms used to describe human sounds:
+Voice: In the voice research field, refers to sound production and is the phonatory aspect of speech. In other words, it is the sound produced by the larynx and the resonators. For example, voice can be assessed by asking someone to do a prolonged vowel sound like /e/.
+Speech: Speech is the result of the voice being modified by the articulators and is produced with intonation and prosody. For example, a patient having a stroke can have abnormal speech production due to difficulty with articulating words but have a normal voice. For this project, the term Voice as a Biomarker of Health will include speech in its definition.
+For voice to emerge as a biomarker of health, there is a pressing need for large, high quality, multi-institutional and diverse voice database linked to other health biomarkers from various data of different modality (demographics, imaging, genomics, risk factors, etc.) to fuel voice AI research and answer tangible clinical questions. Such an endeavor is only achievable through multi-institutional collaborations between voice experts and AI engineers, supported by bioethicists and social scientists to ensure the creation of ethically sourced voice databases representing our populations.
+Based on the existing literature and ongoing research in different fields of voice research, our group identified 5 disease cohort categories for which voice changes have been associated to specific diseases with well-recognized unmet needs. These categories were:
+Voice Disorders: Laryngeal disorders are the most studied pathologies linked to vocal changes. Benign and malignant lesions can affect the shape, mass, density, and tension of the vocal folds resulting in changes in vibratory function resulting in changes in phonation.
+Neurological and Neurodegenerative Disorders: Changes in voice have been linked to depression, and other mood disorders. Individuals with depression have been found to have decreased fundamental frequency (f0) as well as a monotonous speech, while individuals with anxiety disorders have a significant increase in F0. Regrettably, much of the literature examining the intersection of voice and speech changes in psychiatric conditions have used small datasets with limited demographic diversity reporting, lack of standardized data collection protocol precluding meta-analysis and possible confounders, all limiting external validity and clinical usability.
+Mood and Psychiatric Disorders: Voice and speech are altered in many neurological and neurodegenerative conditions. Acute strokes can present with slurred speech (Dysarthria) or expressive deficits speech (Aphasia). Voice and speech changes can be the presenting symptoms of many neurodegenerative conditions, such as Parkinson’s and ALS with changes such as slowed, low frequency, monotonous speech as well as vocal tremor.
+Respiratory disorders: Respiratory sounds, including breath, cough and voice have long been used for diagnostic purposes. For instance, pediatric croup can be suspected based on the presence of barking cough, stridor and dysphonia. With advances in acoustic recording and analysis in the second half on the twentieth century, increasing interest has emerged in the use of respiratory sounds for disease screening and therapeutic monitoring, especially with cough sounds.
+Pediatric Voice and Speech Disorders: The literature is sparser in terms of pediatric voice and speech analysis partly due to ethical concerns and challenges in data acquisition for this cohort. However, many studies have investigated the use of machine learning models for voice and speech analysis for detection of Autism and Speech Delays in the pediatric population.
+The protocols used for data collection in this study have been extensively described [1].
+Methods
+Patients presenting at specialty clinics and institutions were considered for enrolment. Patients were selected based on membership to five predetermined groups (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric). Patients presenting at the given clinic were screened for inclusion and exclusion criteria prior to their visit by the project investigators. If eligible for enrolment, patient consent was sought for the data collection initiative and to share the acquired research data. Once consented, a standardized protocol for data collection was adopted. This protocol involved the collection of demographic information, health questionnaires, targeted questionnaires inquiring about known confounders for voice, disease specific information, and voice recording tasks such as sustained phonation of a vowel sound. Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible. For most participants a single session was sufficient to collect all relevant data. However, a subset of participants required multiple sessions to complete the data collection. As a result, there may be more than one session per participant in the current dataset. Data were exported and converted from RedCap using an open source library developed by our team [2].
+Raw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied. From this standardized audio, we extracted five types of derived data:
+Spectrograms - Time-frequency representations were computed using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 512-point FFT.
+Mel-frequency cepstral coefficients (MFCC) - 60 MFCCs were extracted using the above spectrograms.
+Acoustic features were extracted using OpenSMILE, capturing temporal dynamics and acoustic characteristics.
+Phonetic and prosodic features were computed using Parselmouth and Praat, providing measures of fundamental frequency, formants, and voice quality.
+Transcriptions were generated using OpenAI's Whisper Large model.
+The following de-identification steps were taken in the process of preparing the dataset:
+HIPAA Safe Harbor identifiers were removed.
+While not all relevant to this dataset, these identifiers include: names, geographic locators, date information (at resolution finer than years), phone/fax numbers, email addresses, IP addresses, Social Security Numbers, medical record numbers, health plan beneficiary numbers, device identifiers, license numbers, account numbers, vehicle identifiers, website URLs, full face photos, biometric identifiers, and any unique identifiers.
+State and province were removed. Country of data collection was retained.
+Transcripts of free speech audio were removed.
+In this release, audio waveforms were omitted, and only spectrograph data and other derived features are made available.
+We aim to include voice data on future releases with additional precautions taken to ensure data security.
+Data Description
+As of v1.1, only data from the adult cohort is available.
+The dataset has been made available in three files:
+spectrograms.parquet - a Parquet file storing dense data derived from voice waveforms.
+mfcc.parquet - a Parquet file storing MFCC data derived from the above spectrograms
+phenotype.tsv - Information collected during the visit including demographics, acoustic confounders, and responses to validated questionnaires.
+phenotype.json - A data dictionary for the phenotype data.
+static_features.tsv - Features derived from the raw audio, with one feature per audio recording.
+static_features.json - A data dictionary for the features data.
+The above data dictionaries have the same overall structure: a dictionary where keys are the column names matching the associated data file, and values are dictionaries with further detail. The description value in the data dictionary provides a one sentence summary of the respective column.
+The spectrograms.parquet file contains the majority of the data derived from the raw audio. Each element of the parquet formatted dataset contains a unique identifier for the participant (participant_id), a unique identifier for the recording session (session_id), the task performed (task_name), and the a 513xN dimension spectrogram of the raw audio waveform. The mfcc.parquet file contains MFCCs derived from the spectrograms, and is of size 60xN, where N is proportional to the length of the audio recording.
+Features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [3]), Praat [4], parselmouth [5], and torchaudio [6, 7] are provided. Each feature is present in the static_features.tsv file, with the data dictionary providing a description of each feature, and one row per unique recording. The phenotype.tsv file is similarly a tab delimited file with one row per unique participant. Each column is the response to a question asked during clinical data collection within the custom data collection app. The phenotype.json file provides a description of each column of data.
+The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files has been made open source in the b2aiprep library [8].
+Usage Notes
+If using Python, the parquet dataset can be loaded in with the following code:
+from datasets import Dataset
+ds = Dataset.from_parquet("spectrograms.parquet")
+A spectrogram can be plotted in decibels by converting it from its original power representation:
+import librosa
+spectrogram = librosa.power_to_db(ds[0]['spectrogram'])
+plt.figure(figsize=(10, 4))
+plt.imshow(spectrogram, aspect='auto', origin='lower')
+plt.title('Spectrogram')
+plt.xlabel('Time')
+plt.ylabel('Frequency')
+plt.colorbar()
+The phenotype file can be loaded with any statistical analysis tool. For example, the pandas library in Python can read the data:
+import pandas as pd
+df = pd.read_csv("phenotype.tsv", sep="\t", header=0)
+Release Notes
+b2ai-voice v1.1: This release added Mel-frequency cepstral coefficients (MFCCs).
+b2ai-voice v1.0: This was the first release of the Bridge2AI voice as a biomarker of health dataset [9].
+Ethics
+Data collection and sharing was approved by the University of South Florida Institutional Review Board.
+Acknowledgements
+This project was funded by NIH project number 3OT2OD032720-01S1: Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before. We would like to acknowledge that this release would not be possible without the graceful contribution of data from all the participants of the study. We would also like to thank the NIH for their continued support of the project.
+Conflicts of Interest
+None to declare.
+References
+Rameau, A., Ghosh, S., Sigaras, A., Elemento, O., Belisle-Pipon, J.-C., Ravitsky, V., Powell, M., Johnson, A., Dorr, D., Payne, P., Boyer, M., Watts, S., Bahr, R., Rudzicz, F., Lerner-Ellis, J., Awan, S., Bolser, D., Bensoussan, Y. (2024) Developing Multi-Disorder Voice Protocols: A team science approach involving clinical expertise, bioethics, standards, and DEI.. Proc. Interspeech 2024, 1445-1449, doi: 10.21437/Interspeech.2024-1926
+Bensoussan, Y., Ghosh, S. S., Rameau, A., Boyer, M., Bahr, R., Watts, S., Rudzicz, F., Bolser, D., Lerner-Ellis, J., Awan, S., Powell, M. E., Belisle-Pipon, J.-C., Ravitsky, V., Johnson, A., Zisimopoulos, P., Tang, J., Sigaras, A., Elemento, O., Dorr, D., … Bridge2AI-Voice. (2024). Bridge2AI Voice REDCap (v3.20.0). Zenodo. https://doi.org/10.5281/zenodo.14148755
+Florian Eyben, Martin Wöllmer, Björn Schuller: "openSMILE - The Munich Versatile and Fast Open-Source Audio Feature Extractor", Proc. ACM Multimedia (MM), ACM, Florence, Italy, ISBN 978-1-60558-933-6, pp. 1459-1462, 25.-29.10.2010.
+Boersma P, Van Heuven V. Speak and unSpeak with PRAAT. Glot International. 2001 Nov;5(9/10):341-7.
+Jadoul Y, Thompson B, De Boer B. Introducing parselmouth: A python interface to praat. Journal of Phonetics. 2018 Nov 1;71:1-5.
+Hwang, J., Hira, M., Chen, C., Zhang, X., Ni, Z., Sun, G., Ma, P., Huang, R., Pratap, V., Zhang, Y., Kumar, A., Yu, C.-Y., Zhu, C., Liu, C., Kahn, J., Ravanelli, M., Sun, P., Watanabe, S., Shi, Y., Tao, T., Scheibler, R., Cornell, S., Kim, S., & Petridis, S. (2023). TorchAudio 2.1: Advancing speech recognition, self-supervised learning, and audio processing components for PyTorch. arXiv preprint arXiv:2310.17864
+Yang, Y.-Y., Hira, M., Ni, Z., Chourdia, A., Astafurov, A., Chen, C., Yeh, C.-F., Puhrsch, C., Pollack, D., Genzel, D., Greenberg, D., Yang, E. Z., Lian, J., Mahadeokar, J., Hwang, J., Chen, J., Goldsborough, P., Roy, P., Narenthiran, S., Watanabe, S., Chintala, S., Quenneville-Bélair, V, & Shi, Y. (2021). TorchAudio: Building Blocks for Audio and Speech Processing. arXiv preprint arXiv:2110.15018.
+Bevers, I., Ghosh, S., Johnson, A., Brito, R., Bedrick, S., Catania, F., & Ng, E. (2017). My Research Software (Version 0.21.0) [Computer software]. https://github.com/sensein/b2aiprep
+Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras, A., Elemento, O., & Bensoussan, Y. (2024). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.0). Health Data Nexus. https://doi.org/10.57764/qb6h-em84
+Contents
+Abstract
+Background
+Methods
+Data Description
+Usage Notes
+Release Notes
+Ethics
+Acknowledgements
+Conflicts of Interest
+References
+Files
+Share
+Access
+Access Policy:
+Only registered users who sign the specified data use agreement can access the files.
+License (for files):
+Bridge2AI Voice Registered Access License
+Data Use Agreement:
+Bridge2AI Voice Registered Access Agreement
+Discovery
+DOI (version 1.1):
+https://doi.org/10.13026/249v-w155
+DOI (latest version):
+https://doi.org/10.13026/37yb-1t42
+Topics:
+voice
+bridge2ai
+Project Website:
+https://docs.b2ai-voice.org
+Corresponding Author
+You must be logged in to view the contact information.
+Versions
+1.1
+- Jan. 17, 2025
+2.0.0
+- April 16, 2025
+2.0.1
+- Aug. 18, 2025
+Files
+The files for this version of the project (1.1) are no longer available. The
+latest version of this project is
+2.0.1
+Maintained by the MIT Laboratory for Computational Physiology
+Supported by the National Institute of Biomedical Imaging and Bioengineering (NIBIB), National Heart Lung and Blood Institute (NHLBI), and NIH Office of the Director under NIH grant numbers U24EB037545 and R01EB030362
+Navigation
+Discover Data
+Share Data
+About
+News
+Explore
+Data
+Software
+Challenges
+Tutorials
+Accessibility

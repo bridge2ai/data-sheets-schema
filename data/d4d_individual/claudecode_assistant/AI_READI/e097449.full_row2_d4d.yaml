@@ -1,0 +1,96 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/e097449.full_row2.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "doi:10.1136/bmjopen-2024-097449"
+name: "AI-READI BMJ Open Protocol Paper"
+title: "Cross-sectional design and protocol for Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)"
+description: |
+  AI-READI is a cross-sectional study whose target enrollment is 4000 people aged 40 and older,
+  triple-balanced by self-reported race/ethnicity (Asian, black, Hispanic, white), T2DM severity
+  (no diabetes, pre-diabetes, lifestyle-controlled, oral medications, insulin-controlled) and
+  biological sex (male, female). Data are collected in a multivariable protocol containing over
+  10 domains across three study sites: Birmingham, Alabama; San Diego, California; and Seattle, Washington.
+page: "https://doi.org/10.1136/bmjopen-2024-097449"
+license: "CC BY-NC"
+
+creators:
+  - id: "aireadi:creator_owsley"
+    name: "Cynthia Owsley"
+    description: "Lead author, Ophthalmology and Visual Sciences, University of Alabama at Birmingham"
+  - id: "aireadi:creator_matthies"
+    name: "Dawn S Matthies"
+    description: "Author, University of Alabama at Birmingham"
+  - id: "aireadi:creator_mcgwin"
+    name: "Gerald McGwin"
+    description: "Author, Epidemiology, University of Alabama at Birmingham"
+  - id: "aireadi:creator_baxter"
+    name: "Sally L Baxter"
+    description: "Author, Ophthalmology, University of California San Diego"
+  - id: "aireadi:creator_zangwill"
+    name: "Linda M Zangwill"
+    description: "Author, Ophthalmology, University of California San Diego"
+  - id: "aireadi:creator_owen"
+    name: "Julia P Owen"
+    description: "Author, Ophthalmology, University of Washington"
+  - id: "aireadi:creator_lee_cecilia"
+    name: "Cecilia S Lee"
+    description: "Author, Ophthalmology, University of Washington"
+
+purposes:
+  - id: "aireadi:purpose_t2dm_salutogenesis"
+    name: "T2DM salutogenesis research"
+    description: "Facilitate AI/ML approaches to study salutogenesis in T2DM"
+    response: "Facilitate the widespread use of AI/ML approaches to study salutogenesis (transitioning from T2DM to health resilience)"
+
+sampling_strategies:
+  - id: "aireadi:sampling_triple_balanced"
+    name: "Triple-balanced sampling"
+    description: "Sample balanced by race/ethnicity, T2DM severity, and biological sex"
+
+collection_timeframes:
+  - id: "aireadi:timeframe_cross_sectional"
+    name: "Cross-sectional study"
+    description: "Target enrollment of 4000 people aged 40 and older"
+
+acquisition_methods:
+  - id: "aireadi:acq_vitals"
+    name: "Vitals collection"
+    description: "Vital signs measurement"
+    was_directly_observed: true
+    acquisition_details:
+      - "Vital signs measured at study visits"
+  - id: "aireadi:acq_retinal"
+    name: "Retinal imaging"
+    description: "Retinal imaging acquisition"
+    was_directly_observed: true
+    acquisition_details:
+      - "Retinal images captured at study sites"
+  - id: "aireadi:acq_ecg"
+    name: "Electrocardiogram"
+    description: "ECG data collection"
+    was_directly_observed: true
+    acquisition_details:
+      - "ECG recorded at study visits"
+  - id: "aireadi:acq_cgm"
+    name: "Continuous glucose monitoring"
+    description: "CGM data collection"
+    was_directly_observed: true
+    acquisition_details:
+      - "Continuous glucose monitoring data collected"
+
+ethical_reviews:
+  - id: "aireadi:ethics_irb"
+    name: "IRB approval"
+    description: "ClinicalTrials.org approval number STUDY00016228"
+
+keywords:
+  - "AI-READI"
+  - "T2DM"
+  - "type 2 diabetes"
+  - "salutogenesis"
+  - "cross-sectional study"
+  - "BMJ Open"
+  - "FAIR principles"

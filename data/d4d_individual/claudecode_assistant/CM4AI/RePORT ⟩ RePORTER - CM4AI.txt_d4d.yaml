@@ -1,0 +1,149 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/RePORT ⟩ RePORTER - CM4AI.txt
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Workflow: .github/workflows/d4d_assistant_create.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: cm4ai-nih-reporter-grant
+name: Bridge2AI - Cell Maps for AI (CM4AI) Data Generation Project
+description: |
+  NIH Common Fund Bridge2AI program grant for the CM4AI data generation project to map
+  the spatiotemporal architecture of human cells and use these maps toward the grand challenge
+  of interpretable genotype-phenotype learning. The project creates visible machine learning
+  systems informed by multi-scale cell and tissue architecture.
+
+version: "2025"
+
+funders:
+  - name: National Institutes of Health
+    program: Bridge to Artificial Intelligence (Bridge2AI)
+    grant_id: 3OT2OD032742-01S2
+    administering_ic: NIH Office of the Director
+    opportunity_number: OTA-21-008
+    fiscal_year: 2025
+    total_funding: $5,289,382
+    direct_costs: $4,632,095
+    indirect_costs: $657,287
+    project_start_date: "2022-09-01"
+    project_end_date: "2026-08-31"
+    budget_start_date: "2024-12-01"
+    budget_end_date: "2025-11-30"
+
+contact_pi:
+  - name: Trey Ideker
+    affiliation: University of California, San Diego
+    department: Internal Medicine/Medicine
+    organization_type: Schools of Medicine
+    city: La Jolla
+    state: CA
+    country: United States
+    congressional_district: 50
+
+other_pis:
+  - name: Jean-Christophe Bélisle-Pipon
+  - name: Timothy W Clark
+  - name: Jake Yue Chen
+  - name: Nevan J Krogan
+  - name: Emma Lundberg
+  - name: Prashant Mali
+  - name: Sarah J Ratcliffe
+  - name: Vardit Ravitsky
+  - name: Wade Loren Schulz
+
+organization:
+  - name: University of California, San Diego
+    city: La Jolla
+    state: CA
+    country: United States
+    duns_number: "804355790"
+    uei: UYTTZT6G9DT1
+
+study_section: Data Coordination, Mapping, and Modeling [DCMM]
+assistance_listing_number: "93.310"
+
+abstract: |
+  As part of the NIH Common Fund's Bridge2AI program, the CM4AI data generation project
+  seeks to map the spatiotemporal architecture of human cells and use these maps toward
+  the grand challenge of interpretable genotype-phenotype learning. In genomics and precision
+  medicine, machine learning models are often "black boxes," predicting phenotypes from genotypes
+  without understanding the mechanisms by which such translation occurs. To address this deficiency,
+  project will launch a coordinated effort involving three complementary mapping approaches –
+  proteomic mass spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9 –
+  creating a library of large-scale maps of cellular structure/function across demographic and
+  disease contexts. These data will broadly stimulate research and development in "visible"
+  machine learning systems informed by multi-scale cell and tissue architecture. In addition
+  to data and tools, this project will implement a standards data management approach based
+  on FAIR access and software principles, with deep provenance and replication packages for
+  representation of cell maps and their underlying datasets; initiate a research program in
+  ethical AI, especially as it relates to how maps will be used in genomic medicine and model
+  interpretation; and stimulate a diverse portfolio of training opportunities in the emerging
+  field of biomachine learning.
+
+public_health_relevance: |
+  Machine learning (ML) models show great promise in analyzing the human genome to make
+  predictions, but the inner workings of these models are typically difficult-to-interpret
+  "black boxes." To address this challenge, this Bridge2AI data generation project will
+  generate a resource of matched data and tools to enable the creation of "visible" ML
+  systems, which are not black boxes but are built directly on knowledge maps of cell
+  and tissue architecture.
+
+purposes:
+  - purpose: Map spatiotemporal architecture of human cells for interpretable genotype-phenotype learning
+  - purpose: Create visible machine learning systems to replace black box models
+  - purpose: Generate library of large-scale maps of cellular structure/function across demographic and disease contexts
+
+tasks:
+  - task: Proteomic mass spectrometry for cellular mapping
+  - task: Cellular imaging for spatial protein localization
+  - task: Genetic perturbation via CRISPR/Cas9 for functional mapping
+  - task: Implementation of FAIR standards data management
+  - task: Ethical AI research for genomic medicine applications
+  - task: Training and workforce development in biomachine learning
+
+project_terms:
+  - Address
+  - Architecture
+  - Black Box
+  - Bridge to Artificial Intelligence
+  - CRISPR/Cas technology
+  - Cells
+  - Cellular Structures
+  - Computer software
+  - Data
+  - Data Set
+  - Disease
+  - Funding
+  - Generations
+  - Genetic
+  - Genomic medicine
+  - Genotype
+  - Human
+  - Human Genome
+  - Knowledge
+  - Learning
+  - Libraries
+  - Machine Learning
+  - Maps
+
+standards:
+  - standard: FAIR principles
+    compliance: Required for data access and software
+  - standard: Deep provenance packages
+    usage: Representation of cell maps and underlying datasets
+  - standard: Replication packages
+    usage: Reproducibility and validation
+
+ethics:
+  - consideration: Ethical AI research for genomic medicine applications
+  - consideration: Model interpretation for responsible use
+  - consideration: Diverse training opportunities to broaden workforce
+
+intended_use:
+  - use: Visible machine learning for genotype-phenotype predictions
+  - use: Understanding mechanisms of genetic translation to phenotypes
+  - use: Research in genomics and precision medicine
+  - use: Training biomachine learning researchers
+
+no_cost_extension: "N"

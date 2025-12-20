@@ -28,6 +28,8 @@ URI: [data_sheets_schema:VersionAccess](https://w3id.org/bridge2ai/data-sheets-s
         
       VersionAccess : id
         
+      VersionAccess : latest_version_doi
+        
       VersionAccess : name
         
       VersionAccess : used_software
@@ -41,6 +43,10 @@ URI: [data_sheets_schema:VersionAccess](https://w3id.org/bridge2ai/data-sheets-s
     
 
         
+      VersionAccess : version_details
+        
+      VersionAccess : versions_available
+        
       
 ```
 
@@ -49,9 +55,8 @@ URI: [data_sheets_schema:VersionAccess](https://w3id.org/bridge2ai/data-sheets-s
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **VersionAccess**
+* [DatasetProperty](DatasetProperty.md)
+    * **VersionAccess**
 
 
 
@@ -59,10 +64,13 @@ URI: [data_sheets_schema:VersionAccess](https://w3id.org/bridge2ai/data-sheets-s
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [String](String.md) | Explanation of whether and how previous dataset versions remain accessible, i... | direct |
+| [latest_version_doi](latest_version_doi.md) | 0..1 <br/> [String](String.md) | DOI or URL of the latest dataset version | direct |
+| [versions_available](versions_available.md) | * <br/> [String](String.md) | List of available versions with metadata | direct |
+| [version_details](version_details.md) | * <br/> [String](String.md) | Details on version support policies and obsolescence communication | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -124,52 +132,33 @@ description: 'Will older versions of the dataset continue to be supported/hosted
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Explanation of whether and how previous dataset versions remain
-      accessible, including versioning policies and deprecation announcements.
+  latest_version_doi:
+    name: latest_version_doi
+    description: DOI or URL of the latest dataset version.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    domain_of:
+    - VersionAccess
+    range: string
+  versions_available:
+    name: versions_available
+    description: List of available versions with metadata.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    domain_of:
+    - VersionAccess
+    range: string
+    multivalued: true
+  version_details:
+    name: version_details
+    description: 'Details on version support policies and obsolescence communication.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    slot_uri: dcterms:description
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
     - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
 
@@ -188,56 +177,75 @@ description: 'Will older versions of the dataset continue to be supported/hosted
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Explanation of whether and how previous dataset versions remain
-      accessible, including versioning policies and deprecation announcements.
+  latest_version_doi:
+    name: latest_version_doi
+    description: DOI or URL of the latest dataset version.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    alias: latest_version_doi
+    owner: VersionAccess
+    domain_of:
+    - VersionAccess
+    range: string
+  versions_available:
+    name: versions_available
+    description: List of available versions with metadata.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    alias: versions_available
+    owner: VersionAccess
+    domain_of:
+    - VersionAccess
+    range: string
+    multivalued: true
+  version_details:
+    name: version_details
+    description: 'Details on version support policies and obsolescence communication.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: version_details
+    owner: VersionAccess
+    domain_of:
+    - VersionAccess
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: VersionAccess
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: VersionAccess
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: VersionAccess
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -249,30 +257,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: VersionAccess
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: VersionAccess
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

@@ -1,0 +1,37 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "chorus:aim_ahead_webinar_row7"
+name: "AIM-AHEAD Bridge2AI for Clinical Care Training Program Webinar"
+title: "AIM-AHEAD Bridge2AI for Clinical Care Training Program Cohort I - Informational Webinar"
+description: |
+  Informational webinar for the AIM-AHEAD Bridge2AI for Clinical Care Training Program Cohort I,
+  held on November 6, 2024. The AIM-AHEAD program was established by NIH to enhance diversity
+  in AI/ML with emphasis on reducing health disparities and promoting health equity.
+page: "https://aim-ahead.net"
+
+purposes:
+  - id: "chorus:purpose_diversity"
+    name: "Enhance AI/ML diversity"
+    description: "Enhance diversity in the field of artificial intelligence and machine learning"
+    response: "Enhance diversity in the field of AI/ML with emphasis on reducing health disparities and promoting health equity"
+  - id: "chorus:purpose_health_equity"
+    name: "Promote health equity"
+    description: "Reduce health disparities and promote health equity"
+    response: "Reduce health disparities and promote health equity through fair, equitable, and transparent AI/ML partnerships"
+
+funders:
+  - id: "chorus:funder_nih_aim_ahead"
+    name: "NIH AIM-AHEAD"
+    description: "National Institutes of Health Artificial Intelligence/Machine Learning Consortium to Advance Health Equity and Research Diversity"
+
+keywords:
+  - "AIM-AHEAD"
+  - "Bridge2AI"
+  - "clinical care"
+  - "training program"
+  - "health equity"
+  - "AI/ML"

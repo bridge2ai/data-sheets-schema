@@ -1,0 +1,290 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/RePORT ⟩ RePORTER - CM4AI.txt
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: https://reporter.nih.gov/project-details/11211616
+name: CM4AI_Bridge2AI_Cell_Maps
+title: Bridge2AI - Cell Maps for AI (CM4AI) Data Generation Project
+description: |
+  As part of the NIH Common Fund's Bridge2AI program, the CM4AI data generation project seeks to map the spatiotemporal architecture of human cells and use these maps toward the grand challenge of interpretable genotype-phenotype learning. In genomics and precision medicine, machine learning models are often "black boxes," predicting phenotypes from genotypes without understanding the mechanisms by which such translation occurs. To address this deficiency, the project will launch a coordinated effort involving three complementary mapping approaches – proteomic mass spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9 – creating a library of large-scale maps of cellular structure/function across demographic and disease contexts. These data will broadly stimulate research and development in "visible" machine learning systems informed by multi-scale cell and tissue architecture. In addition to data and tools, this project will implement a standards data management approach based on FAIR access and software principles, with deep provenance and replication packages for representation of cell maps and their underlying datasets; initiate a research program in ethical AI, especially as it relates to how maps will be used in genomic medicine and model interpretation; and stimulate a diverse portfolio of training opportunities in the emerging field of biomachine learning.
+
+version: null
+issued: 2022-09-01
+modified: 2024-11-22
+was_derived_from: null
+has_part: null
+conforms_to: null
+conforms_to_schema: null
+conforms_to_class: null
+resources: null
+
+standards_and_requirements_id: null
+rai_citation: null
+
+creators:
+  - id: null
+    name: IDEKER, TREY
+    affiliation: UNIVERSITY OF CALIFORNIA, SAN DIEGO
+    email: null
+
+contributors:
+  - id: null
+    name: BÉLISLE-PIPON, JEAN-CHRISTOPHE
+    affiliation: null
+    role: Other PI
+  - id: null
+    name: CLARK, TIMOTHY W
+    affiliation: null
+    role: Other PI
+  - id: null
+    name: CHEN, JAKE YUE
+    affiliation: null
+    role: Other PI
+  - id: null
+    name: KROGAN, NEVAN J
+    affiliation: null
+    role: Other PI
+  - id: null
+    name: LUNDBERG, EMMA
+    affiliation: null
+    role: Other PI
+  - id: null
+    name: MALI, PRASHANT
+    affiliation: null
+    role: Other PI
+  - id: null
+    name: RATCLIFFE, SARAH J
+    affiliation: null
+    role: Other PI
+  - id: null
+    name: RAVITSKY, VARDIT
+    affiliation: null
+    role: Other PI
+  - id: null
+    name: SCHULZ, WADE LOREN
+    affiliation: null
+    role: Other PI
+
+contacts:
+  - id: null
+    name: IDEKER, TREY
+    affiliation: UNIVERSITY OF CALIFORNIA, SAN DIEGO
+    email: null
+
+publishers: null
+
+domain_experts: null
+
+funders:
+  - id: null
+    name: NIH Office of the Director
+    description: NIH Common Fund Bridge2AI program
+    award_number: 3OT2OD032742-01S2
+
+licenses: null
+
+rights_holder: null
+
+citation: null
+
+references: null
+
+keywords:
+  - Architecture
+  - Black Box
+  - Bridge to Artificial Intelligence
+  - CRISPR/Cas technology
+  - Cells
+  - Cellular Structures
+  - Computer software
+  - Data
+  - Data Set
+  - Disease
+  - Genomic medicine
+  - Genotype
+  - Human
+  - Human Genome
+  - Learning
+  - Machine Learning
+  - Maps
+
+alternative_names: null
+
+motivation_why_created:
+  motivation_for_creation: |
+    Machine learning (ML) models show great promise in analyzing the human genome to make predictions, but the inner workings of these models are typically difficult-to-interpret "black boxes." To address this challenge, this Bridge2AI data generation project will generate a resource of matched data and tools to enable the creation of "visible" ML systems, which are not black boxes but are built directly on knowledge maps of cell and tissue architecture.
+
+  primary_use: |
+    The datasets and tools are intended to enable the creation of "visible" machine learning systems informed by multi-scale cell and tissue architecture for interpretable genotype-phenotype learning in genomics and precision medicine.
+
+  other_tasks: null
+
+  gap_in_knowledge: |
+    The project addresses the deficiency that machine learning models in genomics are often "black boxes," predicting phenotypes from genotypes without understanding the mechanisms by which such translation occurs.
+
+composition_what_data:
+  instance_type: |
+    The dataset will contain:
+    1. Large-scale maps of cellular structure/function
+    2. Proteomic mass spectrometry data
+    3. Cellular imaging data
+    4. Genetic perturbation data via CRISPR/Cas9
+    5. Multi-scale cell and tissue architecture maps
+    6. Deep provenance and replication packages
+
+  instance_count: null
+
+  instance_structure: |
+    Maps represent cellular structure/function across demographic and disease contexts using three complementary mapping approaches: proteomic mass spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9.
+
+  data_splits: null
+
+  de_identification_methods: null
+
+  sensitive_information_risk: null
+
+  confidential_items: null
+
+  individual_instances: null
+
+  subpopulation_description: |
+    The data will cover cellular structure/function across demographic and disease contexts, creating a library of large-scale maps.
+
+  missing_info: null
+
+  relationship_between_instances: |
+    Instances are integrated through three complementary mapping approaches and linked via deep provenance packages showing their relationships and derivations.
+
+  other_information: null
+
+  recommended_data_splits: null
+
+  error_sources: null
+
+collection_how_collected:
+  collection_method: |
+    Data collection involves three complementary mapping approaches:
+    1. Proteomic mass spectrometry
+    2. Cellular imaging
+    3. Genetic perturbation via CRISPR/Cas9
+
+    These approaches are coordinated to create comprehensive maps of cellular structure/function.
+
+  sampling_strategy: |
+    The project will create a library of large-scale maps across demographic and disease contexts to ensure broad applicability and representation.
+
+  data_collection_timeframe:
+    start_date: 2022-09-01
+    end_date: 2026-08-31
+
+  data_source_description: null
+
+  who_collected_data:
+    - id: null
+      name: CM4AI Consortium
+      description: Multi-institution data generation project team
+      affiliation: University of California San Diego (lead institution)
+
+  collection_mechanisms: null
+
+  validation_and_verification: null
+
+  ethical_review_status: null
+
+preprocessing_cleaning_labeling_what_preprocessing:
+  preprocessing_strategy: |
+    The project implements a standards data management approach based on FAIR access and software principles, with deep provenance and replication packages for representation of cell maps and their underlying datasets.
+
+  preprocessing_tools: null
+
+  raw_data_availability: null
+
+  cleaned_data_availability: null
+
+uses_when_appropriate:
+  appropriate_use_cases: |
+    The dataset is intended for:
+    1. Creating "visible" machine learning systems
+    2. Interpretable genotype-phenotype learning
+    3. Genomic medicine applications
+    4. Model interpretation
+    5. Research and development in visible machine learning
+    6. Training in biomachine learning
+
+  inappropriate_use_cases: null
+
+  repository_tasks: null
+
+  impact_on_underserved_populations: |
+    The project will stimulate a diverse portfolio of training opportunities in the emerging field of biomachine learning, contributing to workforce development.
+
+  unsuitable_applications: null
+
+  further_research_questions: |
+    The project will initiate a research program in ethical AI, especially as it relates to how maps will be used in genomic medicine and model interpretation.
+
+distribution_how_distributed:
+  distribution_formats: null
+
+  distribution_location: null
+
+  distribution_date: null
+
+  doi: null
+
+  persistent_identifier: null
+
+  access_control: |
+    The project implements a standards data management approach based on FAIR access and software principles.
+
+  dataset_ip_and_licensing: null
+
+  fee: null
+
+  export_controls_or_restrictions: null
+
+maintenance_who_maintains:
+  maintenance_contact:
+    - id: null
+      name: IDEKER, TREY
+      email: null
+      affiliation: UNIVERSITY OF CALIFORNIA, SAN DIEGO
+
+  maintenance_period:
+    start_date: 2022-09-01
+    end_date: 2026-08-31
+
+  update_frequency: null
+
+  versioning: null
+
+  updates_to_tasks: null
+
+  retention_limits: null
+
+  errata: null
+
+ethics_institutional_review: null
+
+human_subject_research: null
+
+vulnerable_populations: null
+
+ethics_deidentification: null
+
+ethics_consent_and_notification: null
+
+ethics_privacy: null
+
+ethics_impact_assessment: |
+  The project will initiate a research program in ethical AI, especially as it relates to how maps will be used in genomic medicine and model interpretation.
+
+data_governance_process: |
+  The project implements a standards data management approach based on FAIR access and software principles, with deep provenance and replication packages.
+
+third_party_sharing: null
+
+access_restrictions: null

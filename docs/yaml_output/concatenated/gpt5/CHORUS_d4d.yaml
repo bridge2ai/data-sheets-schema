@@ -1,16 +1,16 @@
-id: chorus-equitable-ai
-name: CHoRUS for Equitable AI
-title: CHoRUS for Equitable AI
-description: A collection of CHORUS project documents related to equitable AI, including a GitHub PDF and an AIM-AHEAD Bridge2AI for Clinical Care informational webinar PDF.
+id: chorus-equitable-ai-document-collection
+name: CHoRUS for Equitable AI - Related Documents
+title: CHoRUS for Equitable AI Document Collection
+description: A synthesized collection of CHORUS-related documents, including a GitHub-associated PDF on CHoRUS for Equitable AI and an AIM-AHEAD Bridge2AI for Clinical Care informational webinar PDF. The collection consolidates available metadata across sources.
 keywords:
   - CHORUS
   - Equitable AI
-  - GitHub
-  - PDF
   - Bridge2AI
   - AIM-AHEAD
   - Clinical care
   - Informational webinar
+  - GitHub
+  - PDF
 resources:
   - id: chorus-for-equitable-ai-github-pdf
     name: CHoRUS for Equitable AI - GitHub PDF
@@ -23,8 +23,9 @@ resources:
       - GitHub
       - PDF
     distribution_formats:
-      - description:
-          - PDF
+      - name: PDF
+        description:
+          - Portable Document Format
           - application/pdf
   - id: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7
     name: aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.pdf
@@ -42,5 +43,7 @@ resources:
     purposes:
       - response: Informational webinar material related to Bridge2AI for Clinical Care (CHORUS).
     distribution_formats:
-      - description:
-          - Portable Document Format (application/pdf)
+      - name: PDF
+        description:
+          - Portable Document Format
+          - application/pdf
