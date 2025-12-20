@@ -24,9 +24,33 @@ URI: [data_sheets_schema:LicenseAndUseTerms](https://w3id.org/bridge2ai/data-she
       DatasetProperty <|-- LicenseAndUseTerms
         click DatasetProperty href "../DatasetProperty/"
       
+      LicenseAndUseTerms : contact_person
+        
+          
+    
+        
+        
+        LicenseAndUseTerms --> "0..1" Person : contact_person
+        click Person href "../Person/"
+    
+
+        
+      LicenseAndUseTerms : data_use_permission
+        
+          
+    
+        
+        
+        LicenseAndUseTerms --> "*" DataUsePermissionEnum : data_use_permission
+        click DataUsePermissionEnum href "../DataUsePermissionEnum/"
+    
+
+        
       LicenseAndUseTerms : description
         
       LicenseAndUseTerms : id
+        
+      LicenseAndUseTerms : license_terms
         
       LicenseAndUseTerms : name
         
@@ -49,9 +73,8 @@ URI: [data_sheets_schema:LicenseAndUseTerms](https://w3id.org/bridge2ai/data-she
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **LicenseAndUseTerms**
+* [DatasetProperty](DatasetProperty.md)
+    * **LicenseAndUseTerms**
 
 
 
@@ -59,10 +82,13 @@ URI: [data_sheets_schema:LicenseAndUseTerms](https://w3id.org/bridge2ai/data-she
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [String](String.md) | Description of the dataset's license and terms of use (including  links, cost... | direct |
+| [license_terms](license_terms.md) | * <br/> [String](String.md) | Description of the dataset's license and terms of use (including links, costs... | direct |
+| [data_use_permission](data_use_permission.md) | * <br/> [DataUsePermissionEnum](DataUsePermissionEnum.md) | Structured data use permissions using the Data Use Ontology (DUO) | direct |
+| [contact_person](contact_person.md) | 0..1 <br/> [Person](Person.md) | Contact person for licensing questions | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -125,54 +151,47 @@ description: 'Will the dataset be distributed under a copyright or other IP lice
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Description of the dataset''s license and terms of use (including  links,
-      costs, or usage constraints).
+  license_terms:
+    name: license_terms
+    description: 'Description of the dataset''s license and terms of use (including
+      links, costs, or usage constraints).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    rank: 1000
+    slot_uri: dcterms:license
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
     - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
+  data_use_permission:
+    name: data_use_permission
+    description: Structured data use permissions using the Data Use Ontology (DUO).
+      Specifies permitted uses (e.g., general research, health/medical research, disease-specific
+      research) and restrictions (e.g., non-commercial use, ethics approval required,
+      collaboration required). See https://github.com/EBISPOT/DUO
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - DUO:0000001
+    rank: 1000
+    slot_uri: DUO:0000001
+    domain_of:
+    - LicenseAndUseTerms
+    range: DataUsePermissionEnum
+    multivalued: true
+  contact_person:
+    name: contact_person
+    description: Contact person for licensing questions. Provides structured contact
+      information including name, email, affiliation, and optional ORCID. This person
+      can answer questions about licensing terms, usage restrictions, fees, and permissions.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - schema:contactPoint
+    slot_uri: schema:contactPoint
+    domain_of:
+    - EthicalReview
+    - LicenseAndUseTerms
+    range: Person
 
 ```
 </details>
@@ -190,56 +209,87 @@ description: 'Will the dataset be distributed under a copyright or other IP lice
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Description of the dataset''s license and terms of use (including  links,
-      costs, or usage constraints).
+  license_terms:
+    name: license_terms
+    description: 'Description of the dataset''s license and terms of use (including
+      links, costs, or usage constraints).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    rank: 1000
+    slot_uri: dcterms:license
+    alias: license_terms
+    owner: LicenseAndUseTerms
+    domain_of:
+    - LicenseAndUseTerms
+    range: string
+    multivalued: true
+  data_use_permission:
+    name: data_use_permission
+    description: Structured data use permissions using the Data Use Ontology (DUO).
+      Specifies permitted uses (e.g., general research, health/medical research, disease-specific
+      research) and restrictions (e.g., non-commercial use, ethics approval required,
+      collaboration required). See https://github.com/EBISPOT/DUO
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - DUO:0000001
+    rank: 1000
+    slot_uri: DUO:0000001
+    alias: data_use_permission
+    owner: LicenseAndUseTerms
+    domain_of:
+    - LicenseAndUseTerms
+    range: DataUsePermissionEnum
+    multivalued: true
+  contact_person:
+    name: contact_person
+    description: Contact person for licensing questions. Provides structured contact
+      information including name, email, affiliation, and optional ORCID. This person
+      can answer questions about licensing terms, usage restrictions, fees, and permissions.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+    exact_mappings:
+    - schema:contactPoint
+    slot_uri: schema:contactPoint
+    alias: contact_person
+    owner: LicenseAndUseTerms
+    domain_of:
+    - EthicalReview
+    - LicenseAndUseTerms
+    range: Person
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: LicenseAndUseTerms
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: LicenseAndUseTerms
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: LicenseAndUseTerms
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -251,30 +301,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: LicenseAndUseTerms
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: LicenseAndUseTerms
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

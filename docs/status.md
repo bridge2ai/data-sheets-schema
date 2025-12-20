@@ -4,7 +4,7 @@
 
 
 
-URI: [data_sheets_schema:status](https://w3id.org/bridge2ai/data-sheets-schema/status)
+URI: [dcterms:type](http://purl.org/dc/terms/type)
 Alias: status
 
 <!-- no inheritance hierarchy -->
@@ -17,10 +17,10 @@ Alias: status
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [DatasetCollection](DatasetCollection.md) | A collection of related datasets, likely containing multiple files of multipl... |  no  |
 | [Information](Information.md) | Grouping for datasets and data files |  no  |
 | [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
 | [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [DatasetCollection](DatasetCollection.md) | A collection of related datasets, likely containing multiple files of multipl... |  no  |
 
 
 
@@ -53,7 +53,7 @@ Alias: status
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:status |
+| self | dcterms:type |
 | native | data_sheets_schema:status |
 
 
@@ -66,6 +66,7 @@ Alias: status
 name: status
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcterms:type
 alias: status
 domain_of:
 - Information

@@ -1,0 +1,82 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Agent Deterministic (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/e097449.full_row2.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: aireadi:bmj_protocol_e097449
+name: AI-READI BMJ Open Protocol
+title: Cross-sectional design and protocol for Artificial Intelligence Ready and Equitable
+  Atlas for Diabetes Insights (AI-READI)
+description: 'AI-READI is a cross-sectional study whose target enrollment is 4000
+  people aged 40 and older,
+
+  triple-balanced by self-reported race/ethnicity (Asian, black, Hispanic, white),
+  T2DM severity
+
+  (no diabetes, pre-diabetes and lifestyle-controlled diabetes, diabetes treated with
+  oral
+
+  medications or non-insulin injections, and insulin-controlled diabetes) and biological
+  sex
+
+  (male, female). Data are collected in a multivariable protocol containing over 10
+  domains,
+
+  including vitals, retinal imaging, electrocardiogram, cognitive function, continuous
+  glucose
+
+  monitoring, physical activity, home air quality, blood and urine collection for
+  laboratory
+
+  testing and psychosocial variables including social determinants of health.
+
+  '
+page: https://doi.org/10.1136/bmjopen-2024-097449
+version: BMJ Open 2025;15:e097449
+purposes:
+- id: aireadi:purpose_salutogenesis_aiml
+  name: Facilitate AI/ML approaches to study salutogenesis
+  description: Enable widespread use of AI/ML approaches to study transitioning from
+    T2DM to health resilience
+  response: AI-READI is a data collection project on type 2 diabetes mellitus (T2DM)
+    to facilitate the widespread use of artificial intelligence and machine learning
+    (AI/ML) approaches to study salutogenesis (transitioning from T2DM to health resilience)
+creators:
+- id: aireadi:creator_owsley
+  name: Cynthia Owsley
+  description: Corresponding author, University of Alabama at Birmingham, Department
+    of Ophthalmology and Visual Sciences
+- id: aireadi:creator_matthies
+  name: Dawn S Matthies
+  description: University of Alabama at Birmingham
+- id: aireadi:creator_mcgwin
+  name: Gerald McGwin
+  description: University of Alabama at Birmingham, Departments of Ophthalmology and
+    Epidemiology
+- id: aireadi:creator_edberg
+  name: Jeffrey C Edberg
+  description: University of Alabama at Birmingham, Department of Medicine
+- id: aireadi:creator_baxter
+  name: Sally L Baxter
+  description: University of California San Diego, Department of Ophthalmology
+- id: aireadi:creator_zangwill
+  name: Linda M Zangwill
+  description: University of California San Diego, Department of Ophthalmology
+- id: aireadi:creator_owen
+  name: Julia P Owen
+  description: University of Washington
+- id: aireadi:creator_lee
+  name: Cecilia S Lee
+  description: University of Washington, Department of Ophthalmology
+keywords:
+- Type 2 Diabetes Mellitus
+- T2DM
+- salutogenesis
+- AI/ML
+- FAIR principles
+- cross-sectional study
+- triple-balanced sampling
+- health resilience
+- Healthsheet template
+license: CC BY-NC

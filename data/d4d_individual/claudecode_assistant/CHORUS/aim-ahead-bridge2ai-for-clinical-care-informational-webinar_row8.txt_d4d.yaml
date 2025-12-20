@@ -1,0 +1,108 @@
+# D4D Datasheet for CHORUS Dataset
+# Source: data/preprocessed/individual/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Workflow: .github/workflows/d4d_assistant_create.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: "chorus:aim-ahead-training-dataset-row8-2024"
+name: "CHoRUS Dataset for AIM-AHEAD Bridge2AI Training Program"
+title: "CHoRUS Multimodal Clinical Dataset - AIM-AHEAD Training Program"
+description: |
+  The CHoRUS dataset as described in the AIM-AHEAD Bridge2AI for Clinical Care Training Program
+  informational webinar (November 6, 2024). As of November 2024, covers 14 hospitals with
+  23,400 unique admissions. Multimodal and high-resolution dataset containing structured EHR
+  data, waveform telemetry, imaging, clinical notes, and EEG recordings. Used for AI/ML training
+  focused on health equity and reducing disparities.
+page: "https://www.bridge2ai.org/chorus"
+language: "en"
+keywords:
+  - "CHoRUS"
+  - "Bridge2AI"
+  - "AIM-AHEAD"
+  - "clinical care"
+  - "AI/ML training"
+  - "health equity"
+  - "OMOP"
+  - "EHR data"
+  - "waveform telemetry"
+  - "multimodal data"
+
+# Motivation
+purposes:
+  - id: "chorus:purpose_training"
+    name: "AI/ML training for health equity"
+    description: |
+      Provide AI-ready clinical care datasets for training underrepresented trainees
+      in AI/ML applications to address health disparities.
+
+tasks:
+  - id: "chorus:task_training_program"
+    name: "Training program support"
+    description: |
+      Support 8-month training program for 25 trainees learning AI/ML principles
+      applied to clinical care (January-July 2025).
+
+addressing_gaps:
+  - id: "chorus:gap_representation"
+    name: "Address underrepresentation in AI/ML research"
+    description: |
+      Address underrepresentation in AI/ML biomedical research by expanding access
+      to clinical datasets for trainees from diverse backgrounds.
+
+# Composition
+instances:
+  - id: "chorus:instances_admissions"
+    name: "Hospital admissions"
+    description: |
+      As of November 2024, the dataset covers 14 different hospitals with 23,400 unique
+      admissions. Multimodal and high-resolution clinical data.
+    instance_type: "hospital admission"
+
+# Collection
+data_collectors:
+  - id: "chorus:collectors_consortium"
+    name: "Bridge2AI CHoRUS Consortium"
+    description: |
+      Multi-institutional collaboration including Massachusetts General Hospital (MGH),
+      University of Florida (UF), University of Texas Health (UT Health), and Tufts University.
+
+# Preprocessing
+preprocessing_strategies:
+  - id: "chorus:preprocessing_notes"
+    name: "Clinical notes tokenization"
+    description: |
+      Clinical notes extracted and tokenized using OHNLP toolkit (stored locally except tokens).
+  - id: "chorus:preprocessing_omop"
+    name: "OMOP standardization"
+    description: |
+      Standardization to OMOP common data model for structured EHR data.
+
+# Distribution
+distribution_formats:
+  - id: "chorus:format_omop"
+    name: "OMOP format"
+    description: |
+      Demographics, medications, procedures, nursing flowsheets, and diagnoses in OMOP standard
+      with controlled access and published metadata schemas.
+  - id: "chorus:format_wfdb"
+    name: "WFDB format"
+    description: |
+      Waveform telemetry in WFDB format with controlled access and published PhysioNet schema (extended).
+
+# Maintenance
+maintainers:
+  - id: "chorus:maintainer_leadership"
+    name: "Bridge2AI CHoRUS Leadership Team"
+    description: |
+      Program leads include Eric Rosenthal (MGH), Azra Bihorac (UF), Xiaoqian Jiang (UT Health),
+      Yulia Strekalova (UF), Parisa Rashidi (UF), and Andrew Williams (Tufts).
+
+# Data Governance
+license_and_use_terms:
+  id: "chorus:license_controlled"
+  name: "Controlled access license"
+  description: |
+    Controlled access requiring signed licensing agreement. Requires registration with
+    institutional email, licensing agreement signature, and approval process.

@@ -1,0 +1,87 @@
+# D4D Datasheet for CHORUS Dataset
+# Source: data/preprocessed/individual/CHORUS/CHoRUS for Equitable AI.txt
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: chorus:github-org-documentation-alt
+name: CHoRUS GitHub Organization Documentation (Alternative Source)
+title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI
+description: >
+  The CHoRUS Network develops diverse, high-resolution, ethically sourced, AI-ready datasets
+  to address the challenge of improving recovery from acute illness. This collaboration spans
+  20 academic centers, of which 14 contribute as Data Acquisition centers. The project employs
+  unified standards to harmonize multi-modal EHR, waveform, imaging, and text data, with
+  patient-focused efforts to manage privacy and bias while accounting for Social Determinants
+  of Health.
+page: https://chorus4ai.org/
+language: en
+keywords:
+  - CHORUS
+  - Bridge2AI
+  - clinical care
+  - equitable AI
+  - acute illness
+  - EHR
+  - waveform data
+  - medical imaging
+  - OMOP
+  - MIT License
+
+# Motivation
+purposes:
+  - description: >
+      Develop the most diverse, high-resolution, ethically sourced, AI-ready dataset to answer
+      the grand challenge of improving recovery from acute illness.
+
+tasks:
+  - description: >
+      Harmonize multi-modal clinical data including EHR, waveform, imaging, and text data using
+      unified standards.
+  - description: >
+      Provide visualization and annotation environment to label data with targets important for
+      prediction.
+  - description: >
+      Enable federated access with sampling methods to ensure a balanced and diverse cohort.
+
+addressing_gaps:
+  - description: >
+      Address ethical and legal approaches to manage privacy and bias in clinical AI datasets
+      while accounting for Social Determinants of Health.
+  - description: >
+      Develop skills and workforce for next generation of diverse academic and community AI
+      scientists.
+
+# Composition
+instances:
+  - description: >
+      Multi-modal clinical data including EHR records, physiological waveforms, medical imaging,
+      and clinical text from 20 academic centers with 14 Data Acquisition centers.
+
+# Collection
+acquisition_methods:
+  - description: >
+      Data collected from 20 academic medical centers using standard operating protocols (SOPs)
+      documented in the Chorus_SOP repository. Sites extract and contribute clinical data
+      following validated workflows.
+    was_directly_observed: true
+
+data_collectors:
+  - description: >
+      Data Site Managers at 14 Data Acquisition centers across the CHoRUS consortium follow
+      standardized extraction and contribution procedures.
+
+# Distribution
+distribution_formats:
+  - description: >
+      Software and tooling provided through GitHub repositories to interact with and extract
+      insight from clinical data in diverse formats. Validated semantic mappings connect clinical
+      data in various source formats to international standards.
+
+# Maintenance
+maintainers:
+  - name: CHoRUS Consortium
+    description: >
+      Maintained by the CHoRUS Network spanning 20 academic centers. Contact for access requests:
+      dbold@emory.edu or jared.houghtaling@tuftsmedicine.org

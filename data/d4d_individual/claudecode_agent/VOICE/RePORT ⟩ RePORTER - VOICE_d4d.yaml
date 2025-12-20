@@ -1,0 +1,16 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Agent Deterministic
+# Source: data/preprocessed/individual/VOICE/RePORT ⟩ RePORTER - VOICE.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: voice:individual:RePORT ⟩ RePORTER - VOICE
+name: Bridge2AI-Voice Dataset
+title: NIH RePORTER Project Information for VOICE
+description: NIH research project information from RePORTER database
+keywords:
+- NIH
+- funding
+- grant information
+funders:
+- description: National Institutes of Health (NIH) funding for Bridge2AI-Voice project

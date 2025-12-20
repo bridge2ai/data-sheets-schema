@@ -17,8 +17,8 @@ Alias: discouraged_uses
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 | [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 
 
 
@@ -72,6 +72,8 @@ domain_of:
 - Dataset
 range: DiscouragedUse
 multivalued: true
+inlined: true
+inlined_as_list: true
 
 ```
 </details>

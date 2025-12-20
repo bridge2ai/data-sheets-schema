@@ -11,7 +11,7 @@ __
 
 
 
-URI: [data_sheets_schema:data_topic](https://w3id.org/bridge2ai/data-sheets-schema/data_topic)
+URI: [dcat:theme](http://www.w3.org/ns/dcat#theme)
 Alias: data_topic
 
 <!-- no inheritance hierarchy -->
@@ -57,7 +57,7 @@ Alias: data_topic
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:data_topic |
+| self | dcat:theme |
 | native | data_sheets_schema:data_topic |
 
 
@@ -75,6 +75,7 @@ from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 values_from:
 - B2AI_TOPIC
+slot_uri: dcat:theme
 alias: data_topic
 owner: Instance
 domain_of:

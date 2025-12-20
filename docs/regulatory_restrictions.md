@@ -17,8 +17,9 @@ Alias: regulatory_restrictions
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [ExportControlRegulatoryRestrictions](ExportControlRegulatoryRestrictions.md) | Do any export controls or other regulatory restrictions apply to the dataset ... |  no  |
 | [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 
 
 
@@ -27,7 +28,7 @@ Alias: regulatory_restrictions
 
 ## Properties
 
-* Range: [ExportControlRegulatoryRestrictions](ExportControlRegulatoryRestrictions.md)
+* Range: [String](String.md)
 
 
 
@@ -36,13 +37,6 @@ Alias: regulatory_restrictions
 
 
 
-
-
-
-### Schema Source
-
-
-* from schema: https://w3id.org/bridge2ai/data-sheets-schema
 
 
 
@@ -62,13 +56,11 @@ Alias: regulatory_restrictions
 <details>
 ```yaml
 name: regulatory_restrictions
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
 alias: regulatory_restrictions
-owner: Dataset
 domain_of:
 - Dataset
-range: ExportControlRegulatoryRestrictions
+- ExportControlRegulatoryRestrictions
+range: string
 
 ```
 </details>

@@ -1,0 +1,29 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CHORUS/CHoRUS for Equitable AI - github.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "chorus:github_readme_nov"
+name: "CHoRUS for Equitable AI - GitHub README (November 2025)"
+title: "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI"
+description: |
+  The goal of the CHoRUS Network is to develop the most diverse, high-resolution, ethically
+  sourced, AI-ready data set to answer the grand challenge of improving recovery from acute
+  illness. This collaboration spans 20 academic centers, of which 14 will contribute as Data
+  Acquisition centers.
+page: "https://chorus4ai.org/"
+license: "MIT"
+
+purposes:
+  - id: "chorus:purpose_recovery"
+    name: "Improve acute illness recovery"
+    description: "Answer the grand challenge of improving recovery from acute illness"
+    response: "Develop the most diverse, high-resolution, ethically sourced, AI-ready data set to answer the grand challenge of improving recovery from acute illness"
+
+keywords:
+  - "CHoRUS"
+  - "Bridge2AI"
+  - "acute illness"
+  - "AI-ready"
+  - "federated access"

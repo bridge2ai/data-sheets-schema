@@ -9,7 +9,7 @@ _md5 hash of the data_
 
 
 
-URI: [data_sheets_schema:md5](https://w3id.org/bridge2ai/data-sheets-schema/md5)
+URI: [dcterms:identifier](http://purl.org/dc/terms/identifier)
 Alias: md5
 
 <!-- no inheritance hierarchy -->
@@ -22,8 +22,8 @@ Alias: md5
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 | [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 
 
 
@@ -56,7 +56,7 @@ Alias: md5
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:md5 |
+| self | dcterms:identifier |
 | native | data_sheets_schema:md5 |
 
 
@@ -70,6 +70,7 @@ name: md5
 description: md5 hash of the data
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcterms:identifier
 alias: md5
 domain_of:
 - Dataset

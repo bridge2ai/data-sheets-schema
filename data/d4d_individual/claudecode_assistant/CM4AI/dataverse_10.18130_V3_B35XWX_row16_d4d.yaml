@@ -1,0 +1,99 @@
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_B35XWX_row16.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "doi:10.18130/V3/B35XWX"
+name: "CM4AI March 2025 Data Release"
+title: "Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)"
+description: |
+  This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence
+  (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI
+  program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs;
+  SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and
+  cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and
+  absence of chemotherapy (vorinostat and paclitaxel).
+page: "https://doi.org/10.18130/V3/B35XWX"
+version: "1.4"
+license: "CC BY-NC-SA 4.0"
+issued: "2025-03-03T00:00:00Z"
+
+purposes:
+  - id: "cm4ai:purpose_ai_ready"
+    name: "AI-ready functional genomics"
+    description: "Produce AI-ready datasets for functional genomics research"
+    response: "CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework"
+
+creators:
+  - id: "cm4ai:creator_clark_march"
+    name: "Timothy Clark"
+    description: "University of Virginia, ORCID: 0000-0003-4060-7360"
+  - id: "cm4ai:creator_parker"
+    name: "Jillian Parker"
+    description: "University of California San Diego, ORCID: 0000-0003-4535-3486"
+  - id: "cm4ai:creator_ideker_march"
+    name: "Trey Ideker"
+    description: "University of California San Diego, ORCID: 0000-0002-1708-8454"
+
+funders:
+  - id: "cm4ai:funder_nih_march"
+    name: "National Institutes of Health"
+    description: "Grant 1OT2OD032742-01"
+
+instances:
+  - id: "cm4ai:instance_kolf21j_march"
+    name: "KOLF2.1J iPSCs"
+    description: "Human induced pluripotent stem cells with NPCs, neurons, and cardiomyocytes"
+  - id: "cm4ai:instance_mda_march"
+    name: "MDA-MB-468 breast cancer cells"
+    description: "Breast cancer cells with vorinostat and paclitaxel treatment conditions"
+
+subsets:
+  - id: "cm4ai:subset_perturbseq"
+    name: "CRISPR Perturbation Cell Atlas"
+    description: "Genome-scale CRISPRi perturbation data mapping 11,739 targeted genes in undifferentiated KOLF2.1J iPSCs"
+  - id: "cm4ai:subset_secms"
+    name: "SEC-MS Protein Interactions"
+    description: "Size exclusion chromatography mass spectrometry data from KOLF2.1J iPSCs"
+  - id: "cm4ai:subset_if_paclitaxel"
+    name: "IF Images - Paclitaxel"
+    description: "Spatial localization of 563 proteins in MDA-MB-468 cells treated with paclitaxel (2.6 GB)"
+  - id: "cm4ai:subset_if_untreated"
+    name: "IF Images - Untreated"
+    description: "Spatial localization of 563 proteins in untreated MDA-MB-468 cells (3.2 GB)"
+  - id: "cm4ai:subset_if_vorinostat"
+    name: "IF Images - Vorinostat"
+    description: "Spatial localization of 563 proteins in MDA-MB-468 cells treated with vorinostat (2.8 GB)"
+
+distribution_formats:
+  - id: "cm4ai:format_rocrate"
+    name: "RO-Crate"
+    description: "Research Object Crate format with provenance graphs and metadata"
+  - id: "cm4ai:format_json"
+    name: "JSON"
+    description: "RO-Crate metadata in JSON format"
+  - id: "cm4ai:format_zip"
+    name: "ZIP Archive"
+    description: "Compressed image data archives"
+
+external_resources:
+  - id: "cm4ai:extres_dataverse_march"
+    name: "University of Virginia Dataverse"
+    description: "Primary data repository (LibraData)"
+    external_resources:
+      - "https://doi.org/10.18130/V3/B35XWX"
+
+keywords:
+  - "CM4AI"
+  - "Bridge2AI"
+  - "AI-ready"
+  - "RO-Crate"
+  - "FAIRSCAPE"
+  - "perturb-seq"
+  - "SEC-MS"
+  - "immunofluorescence"
+  - "KOLF2.1J"
+  - "MDA-MB-468"
+  - "iPSC"
+  - "breast cancer"

@@ -1,0 +1,33 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CHORUS/github_chorus_ai_row9.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "chorus:github_org"
+name: "CHoRUS GitHub Organization"
+title: "CHoRUS for Equitable AI GitHub Organization"
+description: |
+  GitHub organization for CHoRUS for Equitable AI with 28 repositories, 3 projects,
+  and 37 followers. The goal of the CHoRUS Network is to develop the most diverse,
+  high-resolution, ethically sourced, AI-ready data set to answer the grand challenge
+  of improving recovery from acute illness.
+page: "https://github.com/chorus-ai"
+license: "MIT"
+
+external_resources:
+  - id: "chorus:extres_github_org"
+    name: "CHoRUS GitHub Organization"
+    description: "GitHub organization with 28 repositories"
+    external_resources:
+      - "https://github.com/chorus-ai"
+  - id: "chorus:extres_website"
+    name: "CHoRUS Website"
+    description: "Official CHoRUS project website"
+    external_resources:
+      - "https://chorus4ai.org/"
+
+keywords:
+  - "CHoRUS"
+  - "GitHub"
+  - "Bridge2AI"

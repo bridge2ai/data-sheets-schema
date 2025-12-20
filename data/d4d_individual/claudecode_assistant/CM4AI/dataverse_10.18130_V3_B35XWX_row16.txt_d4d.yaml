@@ -1,0 +1,251 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_B35XWX_row16.txt
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Workflow: .github/workflows/d4d_assistant_create.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: cm4ai-march-2025-beta-release
+name: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+description: |
+  March 2025 Beta Data Release of Cell Maps for Artificial Intelligence (CM4AI), the Functional
+  Genomics Grand Challenge in the NIH Bridge2AI program. This release includes perturb-seq data
+  in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived
+  NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence
+  and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with
+  provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework.
+
+version: "1.4"
+publication_date: "2025-03-03"
+data_creation_date: "2025-02-27"
+deposit_date: "2025-02-27"
+
+doi: https://doi.org/10.18130/V3/B35XWX
+url: https://doi.org/10.18130/V3/B35XWX
+
+creators:
+  - name: Clark T
+    affiliation: University of Virginia
+    orcid: https://orcid.org/0000-0003-4060-7360
+  - name: Parker J
+    affiliation: University of California, San Diego
+    orcid: https://orcid.org/0000-0003-4535-3486
+  - name: Ideker T
+    affiliation: University of California San Diego
+    orcid: https://orcid.org/0000-0002-1708-8454
+    role: contact PI
+
+contact:
+  - name: Trey Ideker
+    affiliation: University of California San Diego
+    role: Point of Contact
+
+depositor:
+  - name: Niestroy, Justin
+
+organization:
+  - name: University of California San Diego
+  - name: University of California San Francisco
+  - name: Stanford University
+  - name: University of Virginia
+  - name: Yale University
+  - name: University of Alabama at Birmingham
+  - name: Simon Fraser University
+  - name: University of Montreal
+
+funders:
+  - name: National Institutes of Health
+    grant_id: 1OT2OD032742-01
+    program: Bridge2AI Functional Genomics
+
+production_location:
+  - University of California San Diego
+  - University of California San Francisco
+  - Stanford University
+  - University of Virginia
+
+subject: Medicine, Health and Life Sciences
+
+keywords:
+  - AI
+  - affinity purification
+  - AP-MS
+  - artificial intelligence
+  - breast cancer
+  - Bridge2AI
+  - cardiomyocyte
+  - CM4AI
+  - CRISPR/Cas9
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - machine learning
+  - mass spectroscopy
+  - MDA-MB-468
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - paclitaxel
+  - perturb-seq
+  - perturbation sequencing
+  - protein-protein interaction
+  - protein localization
+  - single-cell RNA sequencing
+  - scRNAseq
+  - SEC-MS
+  - size exclusion chromatography
+  - subcellular imaging
+  - vorinostat
+
+related_publications:
+  - citation: |
+      Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y,
+      Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J,
+      Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N,
+      Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T.
+      Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from
+      Disease-Relevant Cell Lines. 2024.
+    doi: http://doi.org/10.1101/2024.05.21.589311
+
+license:
+  - name: CC BY-NC-SA 4.0
+    full_name: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+    url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+copyright:
+  - holder: The Regents of the University of California
+    year: 2025
+    exceptions: Spatial proteomics raw image data copyright by The Board of Trustees of the Leland Stanford Junior University
+
+attribution_requirements:
+  - requirement: Attribution required to copyright holders and authors
+  - requirement: Publications must cite the related publication and directly cite this data collection
+
+dataset_metrics:
+  downloads: 302
+
+distribution:
+  - name: University of Virginia Dataverse
+    platform: LibraData
+    access_url: https://doi.org/10.18130/V3/B35XWX
+    available: true
+    size: Too large to download as single archive
+    note: Select individual files from files table
+
+files:
+  - name: ro-crate-metadata.json
+    type: CRISPR Perturbation Cell Atlas
+    format: JSON
+    size: 31.1 KB
+    published_date: "2025-03-03"
+    downloads: 36
+    md5: cbdb263b1c099396d75e16f00a79a818
+    description: |
+      Expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J
+      hiPSCs mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes.
+
+  - name: ro-crate-metadata.json
+    type: CRISPR Perturbation RNA Sequences - Raw Sequences
+    format: JSON
+    size: 1000.1 KB
+    published_date: "2025-03-03"
+    downloads: 19
+    md5: 1cafefa32a897998e3e2ba0a29a3ef5c
+    description: Raw sequence data from CRISPRi Perturbation Cell Atlas
+
+  - name: cm4ai-v0.6-beta-if-images-paclitaxel.zip
+    type: Protein Localization Subcellular Images
+    format: ZIP Archive
+    size: 2.6 GB
+    published_date: "2025-03-03"
+    downloads: 95
+    md5: 9422486c80bc9e1d35b2fbbc72a5f043
+    description: |
+      Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated with
+      paclitaxel, imaged by immunofluorescence and confocal microscopy.
+
+  - name: cm4ai-v0.6-beta-if-images-untreated.zip
+    type: Protein Localization Subcellular Images
+    format: ZIP Archive
+    size: 3.2 GB
+    published_date: "2025-03-03"
+    downloads: 70
+    md5: 0b4d129f5fbc3bb7f7ea564cd032cef7
+    description: |
+      Spatial localization of 563 proteins in untreated MDA-MB-468 breast cancer cells.
+
+  - name: cm4ai-v0.6-beta-if-images-vorinostat.zip
+    type: Protein Localization Subcellular Images
+    format: ZIP Archive
+    size: 2.8 GB
+    published_date: "2025-03-03"
+    downloads: 59
+    md5: ac577109a41a9806978461157b777d52
+    description: |
+      Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated with vorinostat.
+
+  - name: ro-crate-metadata.json
+    type: Protein-protein Interaction SEC-MS
+    format: JSON
+    size: 2.9 KB
+    published_date: "2025-03-03"
+    downloads: 23
+    md5: cb67e7749b15ce87b9042a9feba9d032
+    description: |
+      SEC-MS data on undifferentiated KOLF2.1J hiPSCs from Nevan Krogan laboratory at UCSF.
+
+composition:
+  - data_type: CRISPRi Perturbation Cell Atlas
+    instance_count: 11739 targeted genes
+    cell_line: KOLF2.1J hiPSCs undifferentiated
+  - data_type: SEC-MS protein-protein interaction data
+    cell_line: KOLF2.1J hiPSCs undifferentiated
+  - data_type: Immunofluorescence images
+    instance_count: 563 proteins
+    cell_line: MDA-MB-468 breast cancer cells
+    conditions:
+      - untreated
+      - paclitaxel treatment
+      - vorinostat treatment
+
+imaging_methodology:
+  staining:
+    - target: Nuclei
+      marker: DAPI
+      channel: blue
+    - target: Endoplasmic reticulum
+      marker: calreticulin antibody
+      channel: yellow
+    - target: Microtubules
+      marker: tubulin antibody
+      channel: red
+    - target: Protein of interest
+      marker: specific antibody
+      channel: green
+  technique: Immunofluorescence-based staining (ICC-IF) and confocal microscopy
+  laboratory: Lundberg Lab at Stanford University
+
+data_packaging:
+  - format: RO-Crate
+    framework: FAIRSCAPE
+    includes:
+      - Provenance graphs
+      - Rich metadata
+      - AI-ready datasets
+
+ai_readiness: true
+
+intended_use:
+  - use: AI-ready datasets for functional genomics research
+  - use: Training AI/ML models for cellular biology
+  - use: Understanding cell architecture in disease contexts
+  - use: Protein interaction and localization analysis
+
+data_status: Beta release - will be augmented regularly through end of project
+
+repository:
+  - name: LibraData
+    institution: University of Virginia
+    platform: Dataverse
+    status: NIH-approved generalist repository

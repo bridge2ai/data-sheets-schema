@@ -1,0 +1,27 @@
+# D4D Datasheet extracted from creativecommons_org_licenses-by-nc-sa_row15.txt
+# Project: CM4AI
+# Generation Method: Claude Code Agent
+# Source: data/preprocessed/individual/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt
+# Generated: 2025-12-05
+
+id: "cm4ai:license_cc_by_nc_sa_4"
+name: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License"
+description: |
+  The CM4AI dataset is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  International license (CC BY-NC-SA 4.0). This license allows users to share (copy and redistribute)
+  and adapt (remix, transform, and build upon) the material, subject to attribution, non-commercial use,
+  and share-alike requirements.
+page: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+license: "CC BY-NC-SA 4.0"
+
+license_and_use_terms:
+  id: "cm4ai:license_terms"
+  name: "CC BY-NC-SA 4.0 License Terms"
+  description: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license terms"
+  license_terms:
+    - "Share - copy and redistribute the material in any medium or format"
+    - "Adapt - remix, transform, and build upon the material"
+    - "Attribution - You must give appropriate credit, provide a link to the license, and indicate if changes were made"
+    - "NonCommercial - You may not use the material for commercial purposes"
+    - "ShareAlike - If you remix, transform, or build upon the material, you must distribute your contributions under the same license"
+    - "No additional restrictions - You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits"

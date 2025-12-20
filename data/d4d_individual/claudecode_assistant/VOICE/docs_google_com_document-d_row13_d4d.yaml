@@ -1,0 +1,24 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/docs_google_com_document-d_row13.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "voice:irb_protocol_v14"
+name: "B2AI Voice IRB Protocol"
+title: "B2AI Voice IRB Protocol v14 (2025-09-04)"
+description: |
+  IRB Protocol document v14 for the Bridge2AI Voice project, dated September 4, 2025.
+  This is a Google Docs reference to the IRB protocol document.
+
+ethical_reviews:
+  - id: "voice:ethics_irb_v14"
+    name: "IRB Protocol v14"
+    description: "IRB protocol for voice data collection, September 2025"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "IRB"
+  - "protocol"
+  - "ethics"

@@ -3,7 +3,7 @@
 # Class: UpdatePlan 
 
 
-_Will the dataset be updated (e.g., to correct labeling errors, add new  instances, delete instances)? If so, how often, by whom, and how will  these updates be communicated?_
+_Will the dataset be updated (e.g., to correct labeling errors, add new instances, delete instances)? If so, how often, by whom, and how will these updates be communicated?_
 
 __
 
@@ -26,9 +26,13 @@ URI: [data_sheets_schema:UpdatePlan](https://w3id.org/bridge2ai/data-sheets-sche
       
       UpdatePlan : description
         
+      UpdatePlan : frequency
+        
       UpdatePlan : id
         
       UpdatePlan : name
+        
+      UpdatePlan : update_details
         
       UpdatePlan : used_software
         
@@ -49,9 +53,8 @@ URI: [data_sheets_schema:UpdatePlan](https://w3id.org/bridge2ai/data-sheets-sche
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **UpdatePlan**
+* [DatasetProperty](DatasetProperty.md)
+    * **UpdatePlan**
 
 
 
@@ -59,10 +62,12 @@ URI: [data_sheets_schema:UpdatePlan](https://w3id.org/bridge2ai/data-sheets-sche
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [String](String.md) | Details on the dataset's update policy, schedule, responsible parties,  and c... | direct |
+| [frequency](frequency.md) | 0..1 <br/> [String](String.md) | How often updates are planned (e | direct |
+| [update_details](update_details.md) | * <br/> [String](String.md) | Details on update plans, responsible parties, and communication methods | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -102,6 +107,7 @@ URI: [data_sheets_schema:UpdatePlan](https://w3id.org/bridge2ai/data-sheets-sche
 | ---  | ---  |
 | self | data_sheets_schema:UpdatePlan |
 | native | data_sheets_schema:UpdatePlan |
+| exact | rai:dataReleaseMaintenancePlan |
 
 
 
@@ -117,59 +123,35 @@ URI: [data_sheets_schema:UpdatePlan](https://w3id.org/bridge2ai/data-sheets-sche
 <details>
 ```yaml
 name: UpdatePlan
-description: 'Will the dataset be updated (e.g., to correct labeling errors, add new  instances,
-  delete instances)? If so, how often, by whom, and how will  these updates be communicated?
+description: 'Will the dataset be updated (e.g., to correct labeling errors, add new
+  instances, delete instances)? If so, how often, by whom, and how will these updates
+  be communicated?
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:dataReleaseMaintenancePlan
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Details on the dataset''s update policy, schedule, responsible parties,  and
-      communication channels (e.g., mailing list, GitHub releases).
+  frequency:
+    name: frequency
+    description: How often updates are planned (e.g., quarterly, annually).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    domain_of:
+    - UpdatePlan
+    range: string
+  update_details:
+    name: update_details
+    description: 'Details on update plans, responsible parties, and communication
+      methods.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    slot_uri: dcterms:description
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
     - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
 
@@ -181,63 +163,75 @@ attributes:
 <details>
 ```yaml
 name: UpdatePlan
-description: 'Will the dataset be updated (e.g., to correct labeling errors, add new  instances,
-  delete instances)? If so, how often, by whom, and how will  these updates be communicated?
+description: 'Will the dataset be updated (e.g., to correct labeling errors, add new
+  instances, delete instances)? If so, how often, by whom, and how will these updates
+  be communicated?
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:dataReleaseMaintenancePlan
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Details on the dataset''s update policy, schedule, responsible parties,  and
-      communication channels (e.g., mailing list, GitHub releases).
+  frequency:
+    name: frequency
+    description: How often updates are planned (e.g., quarterly, annually).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    alias: frequency
+    owner: UpdatePlan
+    domain_of:
+    - UpdatePlan
+    range: string
+  update_details:
+    name: update_details
+    description: 'Details on update plans, responsible parties, and communication
+      methods.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: update_details
+    owner: UpdatePlan
+    domain_of:
+    - UpdatePlan
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: UpdatePlan
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: UpdatePlan
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: UpdatePlan
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -249,30 +243,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: UpdatePlan
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: UpdatePlan
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

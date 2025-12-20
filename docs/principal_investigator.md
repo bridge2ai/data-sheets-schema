@@ -9,7 +9,7 @@ _A key individual (Principal Investigator) responsible for or overseeing dataset
 
 
 
-URI: [data_sheets_schema:principal_investigator](https://w3id.org/bridge2ai/data-sheets-schema/principal_investigator)
+URI: [dcterms:creator](http://purl.org/dc/terms/creator)
 Alias: principal_investigator
 
 <!-- no inheritance hierarchy -->
@@ -55,8 +55,9 @@ Alias: principal_investigator
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:principal_investigator |
+| self | dcterms:creator |
 | native | data_sheets_schema:principal_investigator |
+| exact | schema:creator |
 
 
 
@@ -69,7 +70,10 @@ name: principal_investigator
 description: A key individual (Principal Investigator) responsible for or overseeing
   dataset creation.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- schema:creator
 rank: 1000
+slot_uri: dcterms:creator
 alias: principal_investigator
 owner: Creator
 domain_of:

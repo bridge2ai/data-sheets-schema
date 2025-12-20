@@ -1,0 +1,26 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "chorus:aim_ahead_webinar_row9"
+name: "AIM-AHEAD Bridge2AI Training Program Webinar (row9)"
+title: "AIM-AHEAD Bridge2AI for Clinical Care Training Program Cohort I - Informational Webinar"
+description: |
+  Informational webinar for the AIM-AHEAD Bridge2AI for Clinical Care Training Program.
+  Bridge2AI Consortium focuses on generating diverse, FAIR, AI-ready data that is
+  accurate, reliable, and ethically sourced with diverse teams and research cohorts.
+
+purposes:
+  - id: "chorus:purpose_fair_data"
+    name: "FAIR AI-ready data"
+    description: "Generate diverse, FAIR, AI-ready data"
+    response: "Generate new data and best practices to propel modern AI/ML models, advance ethical considerations, and create a modernized workforce"
+
+keywords:
+  - "AIM-AHEAD"
+  - "Bridge2AI"
+  - "FAIR"
+  - "AI-ready"
+  - "ethics"

@@ -1,0 +1,17 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/fairhub_row10.json
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "https://fairhub.io/datasets/2/row10"
+name: "FAIRhub Dataset Reference (row10)"
+description: "Reference to AI-READI dataset on FAIRhub data portal."
+page: "https://fairhub.io/datasets/2"
+
+external_resources:
+  - id: "aireadi:extres_fairhub_row10"
+    name: "FAIRhub Data Portal"
+    description: "AI-READI dataset on FAIRhub"
+    external_resources:
+      - "https://fairhub.io/datasets/2"

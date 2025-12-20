@@ -1,0 +1,26 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/healthnexus_row13.json
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "voice:healthnexus_reference"
+name: "Health Data Nexus Reference"
+title: "Bridge2AI-Voice Health Data Nexus Dataset Reference"
+description: |
+  Reference to the Bridge2AI-Voice dataset version 1.0 available through Health Data Nexus,
+  a platform for sharing and discovering health-related datasets.
+page: "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
+
+external_resources:
+  - id: "voice:extres_healthnexus"
+    name: "Health Data Nexus"
+    description: "B2AI-Voice dataset on Health Data Nexus"
+    external_resources:
+      - "https://healthdatanexus.ai/content/b2ai-voice/1.0/"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "Health Data Nexus"
+  - "voice biomarker"

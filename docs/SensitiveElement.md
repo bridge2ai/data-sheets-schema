@@ -32,6 +32,8 @@ URI: [data_sheets_schema:SensitiveElement](https://w3id.org/bridge2ai/data-sheet
         
       SensitiveElement : sensitive_elements_present
         
+      SensitiveElement : sensitivity_details
+        
       SensitiveElement : used_software
         
           
@@ -51,9 +53,8 @@ URI: [data_sheets_schema:SensitiveElement](https://w3id.org/bridge2ai/data-sheet
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **SensitiveElement**
+* [DatasetProperty](DatasetProperty.md)
+    * **SensitiveElement**
 
 
 
@@ -62,10 +63,11 @@ URI: [data_sheets_schema:SensitiveElement](https://w3id.org/bridge2ai/data-sheet
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
 | [sensitive_elements_present](sensitive_elements_present.md) | 0..1 <br/> [Boolean](Boolean.md) | Indicates whether sensitive data elements are present | direct |
-| [description](description.md) | * <br/> [String](String.md) |  | direct |
+| [sensitivity_details](sensitivity_details.md) | * <br/> [String](String.md) | Details on sensitive data elements present and handling procedures | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -105,6 +107,7 @@ URI: [data_sheets_schema:SensitiveElement](https://w3id.org/bridge2ai/data-sheet
 | ---  | ---  |
 | self | data_sheets_schema:SensitiveElement |
 | native | data_sheets_schema:SensitiveElement |
+| exact | rai:personalSensitiveInformation |
 
 
 
@@ -125,6 +128,8 @@ description: 'Does the dataset contain data that might be considered sensitive (
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:personalSensitiveInformation
 is_a: DatasetProperty
 attributes:
   sensitive_elements_present:
@@ -135,48 +140,16 @@ attributes:
     domain_of:
     - SensitiveElement
     range: boolean
-  description:
-    name: description
+  sensitivity_details:
+    name: sensitivity_details
+    description: 'Details on sensitive data elements present and handling procedures.
+
+      '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    rank: 1000
+    slot_uri: dcterms:description
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
     - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
 
@@ -193,6 +166,8 @@ description: 'Does the dataset contain data that might be considered sensitive (
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:personalSensitiveInformation
 is_a: DatasetProperty
 attributes:
   sensitive_elements_present:
@@ -205,52 +180,54 @@ attributes:
     domain_of:
     - SensitiveElement
     range: boolean
+  sensitivity_details:
+    name: sensitivity_details
+    description: 'Details on sensitive data elements present and handling procedures.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: sensitivity_details
+    owner: SensitiveElement
+    domain_of:
+    - SensitiveElement
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: SensitiveElement
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: SensitiveElement
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
   description:
     name: description
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: SensitiveElement
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -262,30 +239,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: SensitiveElement
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: SensitiveElement
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

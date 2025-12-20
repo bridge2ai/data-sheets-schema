@@ -9,7 +9,7 @@ _Represents a group or organization._
 
 
 
-URI: [data_sheets_schema:Organization](https://w3id.org/bridge2ai/data-sheets-schema/Organization)
+URI: [schema:Organization](http://schema.org/Organization)
 
 
 
@@ -64,7 +64,8 @@ URI: [data_sheets_schema:Organization](https://w3id.org/bridge2ai/data-sheets-sc
 | used by | used in | type | used |
 | ---  | --- | --- | --- |
 | [Person](Person.md) | [affiliation](affiliation.md) | range | [Organization](Organization.md) |
-| [Creator](Creator.md) | [affiliation](affiliation.md) | range | [Organization](Organization.md) |
+| [Creator](Creator.md) | [affiliations](affiliations.md) | range | [Organization](Organization.md) |
+| [EthicalReview](EthicalReview.md) | [reviewing_organization](reviewing_organization.md) | range | [Organization](Organization.md) |
 
 
 
@@ -91,7 +92,7 @@ URI: [data_sheets_schema:Organization](https://w3id.org/bridge2ai/data-sheets-sc
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:Organization |
+| self | schema:Organization |
 | native | data_sheets_schema:Organization |
 
 
@@ -111,6 +112,7 @@ name: Organization
 description: Represents a group or organization.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: NamedThing
+class_uri: schema:Organization
 
 ```
 </details>
@@ -135,6 +137,7 @@ attributes:
     owner: Organization
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -147,6 +150,7 @@ attributes:
     owner: Organization
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -158,44 +162,10 @@ attributes:
     owner: Organization
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
+class_uri: schema:Organization
 
 ```
 </details>

@@ -1,0 +1,103 @@
+# D4D Datasheet for CHORUS Dataset
+# Source: data/preprocessed/individual/CHORUS/aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: chorus:clinical-care-dataset-webinar-v1
+name: CHoRUS Dataset for Clinical Care
+title: CHoRUS - Bridge2AI for Clinical Care Multicenter Multimodal Dataset
+description: >
+  The CHoRUS Dataset is a multicenter, multimodal, and high-resolution clinical care dataset
+  developed as part of the Bridge2AI program. As of November 2024, it covers 14 different
+  hospitals with 23,400 unique admissions. The dataset includes retrospective data collection
+  with controlled access, incorporating OMOP-standardized data and telemetry stored in an enclave,
+  with additional data types including clinical notes, imaging, and EEG in various stages of
+  processing and de-identification.
+page: https://www.bridge2ai.org/chorus
+language: en
+keywords:
+  - CHORUS
+  - Bridge2AI
+  - clinical care
+  - OMOP
+  - EHR
+  - telemetry
+  - waveform
+  - DICOM
+  - WFDB
+  - multicenter
+  - multimodal
+
+# Motivation
+purposes:
+  - description: >
+      Develop AI-ready clinical care datasets for the AIM-AHEAD Bridge2AI Training Program to
+      increase access to Bridge2AI AI/ML datasets, especially for underrepresented trainees.
+  - description: >
+      Enable data-driven research addressing health disparities through training and mentorship
+      on AI/ML and big data analysis.
+
+tasks:
+  - description: >
+      Provide training datasets for AI/ML applications in clinical care, supporting diverse,
+      multi-modal analysis of patient data from a broad cohort.
+
+addressing_gaps:
+  - description: >
+      Expand AI/ML proficiency in communities historically underrepresented in biomedical research.
+  - description: >
+      Equip trainees to work with diverse, multi-modal datasets for impactful AI/ML research
+      addressing health disparities.
+
+# Composition
+instances:
+  - description: >
+      As of November 2024, the dataset includes 23,400 unique hospital admissions from 14 different
+      hospitals. Data types include demographics, medication administration, procedures, nursing
+      flowsheets, diagnoses, clinical notes, imaging, and waveform telemetry.
+
+# Collection
+acquisition_methods:
+  - description: >
+      Retrospective data collection from 14 hospitals participating in the CHoRUS consortium.
+      Data collected includes OMOP-standardized clinical data and waveform telemetry from bedside
+      monitors.
+    was_directly_observed: true
+
+# Preprocessing
+preprocessing_strategies:
+  - description: >
+      Clinical notes extracted and tokenized using OHNLP toolkit. Imaging data undergoing
+      de-identification process. EEG waveform extraction in process.
+
+# Distribution
+distribution_formats:
+  - description: >
+      Demographics: OMOP standard, controlled access, with published metadata schema
+  - description: >
+      Medication administration: OMOP standard with time-stamped dosing, controlled access
+  - description: >
+      Procedures: OMOP standard with provider documentation, controlled access
+  - description: >
+      Nursing flowsheets: OMOP standard with high-frequency documentation, controlled access
+  - description: >
+      Diagnoses: OMOP standard with provider documentation, controlled access
+  - description: >
+      Clinical notes: OHNLP format with tokenization, controlled access (stored locally except tokens),
+      planned metadata
+  - description: >
+      Imaging: DICOM standard from PACS, controlled access, de-identification in process, planned metadata
+  - description: >
+      Waveform telemetry: WFDB standard from bedside monitors, controlled access, published PhysioNet
+      schema extended. DOI: 10.1007/s12028-024-02007
+  - description: >
+      Waveform EEG: EDF+ and Persyst formats from hospital database, controlled access, planned metadata
+
+# Maintenance
+maintainers:
+  - name: Bridge2AI CHoRUS Leadership Team
+    description: >
+      Program Leads from Massachusetts General Hospital, University of Florida, UT Health, and
+      Tufts University.

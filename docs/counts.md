@@ -11,7 +11,7 @@ __
 
 
 
-URI: [data_sheets_schema:counts](https://w3id.org/bridge2ai/data-sheets-schema/counts)
+URI: [schema:numberOfItems](http://schema.org/numberOfItems)
 Alias: counts
 
 <!-- no inheritance hierarchy -->
@@ -57,7 +57,7 @@ Alias: counts
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:counts |
+| self | schema:numberOfItems |
 | native | data_sheets_schema:counts |
 
 
@@ -73,6 +73,7 @@ description: 'How many instances are there in total (of each type, if appropriat
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:numberOfItems
 alias: counts
 owner: Instance
 domain_of:

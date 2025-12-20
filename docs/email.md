@@ -3,13 +3,13 @@
 # Slot: email 
 
 
-_The email address of the person._
+_The email address of the person. Represents current/preferred contact information in the context of this dataset._
 
 
 
 
 
-URI: [data_sheets_schema:email](https://w3id.org/bridge2ai/data-sheets-schema/email)
+URI: [schema:email](http://schema.org/email)
 Alias: email
 
 <!-- no inheritance hierarchy -->
@@ -55,7 +55,7 @@ Alias: email
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:email |
+| self | schema:email |
 | native | data_sheets_schema:email |
 
 
@@ -66,9 +66,11 @@ Alias: email
 <details>
 ```yaml
 name: email
-description: The email address of the person.
+description: The email address of the person. Represents current/preferred contact
+  information in the context of this dataset.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:email
 alias: email
 owner: Person
 domain_of:

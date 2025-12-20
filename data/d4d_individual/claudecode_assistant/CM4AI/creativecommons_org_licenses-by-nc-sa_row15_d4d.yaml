@@ -1,0 +1,44 @@
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "cm4ai:license_cc_by_nc_sa_4"
+name: "CC BY-NC-SA 4.0 License"
+title: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International"
+description: |
+  The CC BY-NC-SA 4.0 license is the data licensing framework used for CM4AI datasets.
+  This license allows users to share (copy and redistribute) and adapt (remix, transform,
+  and build upon) the material, subject to attribution, non-commercial use, and share-alike
+  requirements.
+page: "https://creativecommons.org/licenses/by-nc-sa/4.0/"
+license: "CC BY-NC-SA 4.0"
+
+license_and_use_terms:
+  id: "cm4ai:license_terms_cc"
+  name: "CC BY-NC-SA 4.0 Terms"
+  description: "Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license terms"
+  license_terms:
+    - "Share: Copy and redistribute the material in any medium or format"
+    - "Adapt: Remix, transform, and build upon the material"
+    - "Attribution: Must give appropriate credit, provide a link to the license, and indicate if changes were made"
+    - "NonCommercial: May not use the material for commercial purposes"
+    - "ShareAlike: If you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original"
+    - "No additional restrictions: You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits"
+  data_use_permission:
+    - no_commercial_use
+
+discouraged_uses:
+  - id: "cm4ai:discouraged_no_restrictions"
+    name: "Additional restrictions"
+    description: "You may not apply legal terms or technological measures that legally restrict others from doing anything the license permits"
+
+keywords:
+  - "Creative Commons"
+  - "CC BY-NC-SA 4.0"
+  - "license"
+  - "attribution"
+  - "non-commercial"
+  - "share-alike"
+  - "open access"

@@ -9,7 +9,7 @@ _Name/identifier of the organization providing monetary or resource support._
 
 
 
-URI: [data_sheets_schema:grantor](https://w3id.org/bridge2ai/data-sheets-schema/grantor)
+URI: [schema:funder](http://schema.org/funder)
 Alias: grantor
 
 <!-- no inheritance hierarchy -->
@@ -55,7 +55,7 @@ Alias: grantor
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:grantor |
+| self | schema:funder |
 | native | data_sheets_schema:grantor |
 
 
@@ -69,6 +69,7 @@ name: grantor
 description: Name/identifier of the organization providing monetary or resource support.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:funder
 alias: grantor
 owner: FundingMechanism
 domain_of:

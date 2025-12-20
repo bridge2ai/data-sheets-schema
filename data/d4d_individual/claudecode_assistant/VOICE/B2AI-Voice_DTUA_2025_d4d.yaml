@@ -1,0 +1,56 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/B2AI-Voice_DTUA_2025.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "voice:dtua_2025"
+name: "Bridge2AI Voice Data Transfer and Use Agreement"
+title: "B2AI-Voice Data Transfer and Use Agreement (DTUA) 2025"
+description: |
+  The Data Transfer and Use Agreement (DTUA) governing access to the Bridge2AI-Voice
+  dataset. Provider is the University of South Florida Board of Trustees. The agreement
+  covers terms for data use, security, attribution, and disposition. Data is covered
+  under a Certificate of Confidentiality. Access requires DACO approval.
+
+future_use_impacts:
+  - id: "voice:term_authorized_use"
+    name: "Authorized use only"
+    description: "Data will be used solely to conduct the Project and solely by Recipient Scientist and Recipient Personnel that have a need to use the Data in connection with the Project"
+  - id: "voice:term_security"
+    name: "Data security required"
+    description: "Recipient agrees to establish appropriate administrative, technical, and physical safeguards to prevent unauthorized use of or access to the Data"
+  - id: "voice:term_attribution"
+    name: "Attribution required"
+    description: "Recipient agrees to recognize the contribution of the Provider as the source of the Data in all written, visual, or oral public disclosures"
+  - id: "voice:term_open_access"
+    name: "Open access publication encouraged"
+    description: "Recipient is encouraged to make publicly available the results of the Project, in open-access journals or pre-print servers where possible"
+  - id: "voice:term_destruction"
+    name: "Data destruction at term end"
+    description: "Data shall be destroyed in accordance with instructions of Provider. Recipient shall submit written certification of data destruction within thirty days after termination"
+
+discouraged_uses:
+  - id: "voice:term_no_reidentification"
+    name: "No re-identification"
+    description: "Recipient will not use the Data to make any effort to contact individuals who are the subjects of the Data without appropriate IRB approval"
+
+confidential_elements:
+  - id: "voice:access_certificate"
+    name: "Certificate of Confidentiality"
+    description: "The Data is covered under a Certificate of Confidentiality, which must be asserted against compulsory legal demands"
+  - id: "voice:access_daco"
+    name: "DACO approval required"
+    description: "This Agreement shall only be effective upon the review and approval of the Data Access Compliance Office (DACO)"
+  - id: "voice:access_term"
+    name: "Two year term"
+    description: "Agreement valid for two years or until project completion, ethics approval expiration, or termination"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "DTUA"
+  - "data use agreement"
+  - "Certificate of Confidentiality"
+  - "data governance"
+  - "privacy"

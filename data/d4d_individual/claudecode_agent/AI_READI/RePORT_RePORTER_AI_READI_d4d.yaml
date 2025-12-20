@@ -1,0 +1,88 @@
+# D4D Datasheet for AI_READI Dataset
+# Source: data/preprocessed/individual/AI_READI/RePORT ⟩ RePORTER - AI-READI.txt
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: https://reporter.nih.gov/project-details/10471118
+name: AI-READI
+title: Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights
+description: >
+  The Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project
+  is one of the data generation projects in the NIH Common Fund's Bridge2AI program. The project seeks
+  to create a flagship ethically-sourced dataset to enable future generations of artificial intelligence/machine
+  learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including
+  salutogenic pathways to return to health. The team of investigators will aim to collect a cross-sectional
+  dataset of 4,000+ people and longitudinal data from 10% of the study cohort across the US. The study cohort
+  will be balanced for diabetes disease stage. Data collection will be specifically designed to permit downstream
+  pseudotime manifold analysis, an approach used to predict disease trajectories by collecting and learning from
+  complex, multimodal data from participants with differing disease severity (normal to insulin-dependent T2DM).
+  The long-term objective for this project is to develop a foundational dataset in diabetes, agnostic to existing
+  classification criteria, which can be used to reconstruct a temporal atlas of T2DM development and reversal
+  towards health (i.e., salutogenesis).
+page: https://reporter.nih.gov/project-details/10471118
+language: en
+keywords:
+  - Type 2 Diabetes
+  - T2DM
+  - AI-READI
+  - Bridge2AI
+  - Machine Learning
+  - Artificial Intelligence
+  - salutogenesis
+  - multimodal
+  - FAIR principles
+  - cross-sectional
+  - longitudinal
+
+# Motivation
+purposes:
+  - description: >
+      Better understand salutogenic pathways to return to health in type 2 diabetes mellitus
+      using ethically-sourced multimodal datasets designed for AI/ML research.
+
+tasks:
+  - description: >
+      Enable pseudotime manifold analysis to predict disease trajectories by learning from
+      complex, multimodal data from participants with differing disease severity.
+  - description: >
+      Reconstruct a temporal atlas of T2DM development and reversal towards health.
+
+addressing_gaps:
+  - description: >
+      Address the lack of well-designed, high quality, and large multimodal datasets needed
+      to understand and affect the course of complex, multi-organ diseases such as T2DM.
+
+# Composition
+instances:
+  - description: >
+      Individual participants with different severities of type 2 diabetes mellitus (normal
+      to insulin-dependent T2DM), with multimodal data including molecular, physiological,
+      pathological, and clinical measurements at various stages of illness.
+
+# Collection
+collection_mechanisms:
+  - description: >
+      Cross-sectional data collection from 4,000+ participants and longitudinal data from
+      10% of the study cohort across multiple US sites. Study cohort balanced for diabetes
+      disease stage. Data collection designed specifically for downstream pseudotime manifold
+      analysis.
+
+sampling_strategies:
+  - description: >
+      Targeted recruitment to achieve balanced representation across diabetes disease stages,
+      from normal to insulin-dependent T2DM.
+    is_sample:
+      - true
+    is_random:
+      - false
+    is_representative:
+      - true
+
+# Uses
+intended_uses:
+  - description: >
+      AI/ML research to provide critical insights into type 2 diabetes mellitus, including
+      salutogenic pathways to return to health, using pseudotime manifold analysis to predict
+      disease trajectories and reconstruct temporal atlas of T2DM development and reversal.

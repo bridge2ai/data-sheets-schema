@@ -4,7 +4,7 @@
 
 
 
-URI: [data_sheets_schema:identification](https://w3id.org/bridge2ai/data-sheets-schema/identification)
+URI: [dcterms:description](http://purl.org/dc/terms/description)
 Alias: identification
 
 <!-- no inheritance hierarchy -->
@@ -52,7 +52,7 @@ Alias: identification
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:identification |
+| self | dcterms:description |
 | native | data_sheets_schema:identification |
 
 
@@ -65,6 +65,7 @@ Alias: identification
 name: identification
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcterms:description
 alias: identification
 owner: Subpopulation
 domain_of:

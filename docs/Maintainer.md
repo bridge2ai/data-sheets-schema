@@ -26,18 +26,22 @@ URI: [data_sheets_schema:Maintainer](https://w3id.org/bridge2ai/data-sheets-sche
       
       Maintainer : description
         
+      Maintainer : id
+        
+      Maintainer : maintainer_details
+        
+      Maintainer : name
+        
+      Maintainer : role
+        
           
     
         
         
-        Maintainer --> "*" CreatorOrMaintainerEnum : description
+        Maintainer --> "0..1" CreatorOrMaintainerEnum : role
         click CreatorOrMaintainerEnum href "../CreatorOrMaintainerEnum/"
     
 
-        
-      Maintainer : id
-        
-      Maintainer : name
         
       Maintainer : used_software
         
@@ -58,9 +62,8 @@ URI: [data_sheets_schema:Maintainer](https://w3id.org/bridge2ai/data-sheets-sche
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **Maintainer**
+* [DatasetProperty](DatasetProperty.md)
+    * **Maintainer**
 
 
 
@@ -68,10 +71,12 @@ URI: [data_sheets_schema:Maintainer](https://w3id.org/bridge2ai/data-sheets-sche
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [CreatorOrMaintainerEnum](CreatorOrMaintainerEnum.md) | Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum... | direct |
+| [role](role.md) | 0..1 <br/> [CreatorOrMaintainerEnum](CreatorOrMaintainerEnum.md) | Role of the maintainer (e | direct |
+| [maintainer_details](maintainer_details.md) | * <br/> [String](String.md) | Details on who will support, host, or maintain the dataset | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -132,53 +137,28 @@ description: 'Who will be supporting/hosting/maintaining the dataset?
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum
-      or other details.
+  role:
+    name: role
+    description: 'Role of the maintainer (e.g., researcher, platform, organization).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    slot_uri: schema:maintainer
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
     - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
     - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: CreatorOrMaintainerEnum
+  maintainer_details:
+    name: maintainer_details
+    description: 'Details on who will support, host, or maintain the dataset.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    slot_uri: dcterms:description
+    domain_of:
+    - Maintainer
+    range: string
     multivalued: true
 
 ```
@@ -195,56 +175,67 @@ description: 'Who will be supporting/hosting/maintaining the dataset?
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Name or role of the maintainer, possibly referencing  CreatorOrMaintainerEnum
-      or other details.
+  role:
+    name: role
+    description: 'Role of the maintainer (e.g., researcher, platform, organization).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    slot_uri: schema:maintainer
+    alias: role
+    owner: Maintainer
+    domain_of:
+    - DataCollector
+    - Maintainer
+    range: CreatorOrMaintainerEnum
+  maintainer_details:
+    name: maintainer_details
+    description: 'Details on who will support, host, or maintain the dataset.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: maintainer_details
+    owner: Maintainer
+    domain_of:
+    - Maintainer
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: Maintainer
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: Maintainer
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: Maintainer
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
-    range: CreatorOrMaintainerEnum
-    multivalued: true
+    - DatasetProperty
+    - DatasetRelationship
+    range: string
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -256,30 +247,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: Maintainer
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: Maintainer
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

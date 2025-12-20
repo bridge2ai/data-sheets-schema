@@ -1,0 +1,169 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Agent (Comprehensive)
+# Generated: 2025-12-15
+# Source: data/preprocessed/concatenated/VOICE_preprocessed.txt (89K, 9 source files)
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Model: claude-sonnet-4-5-20250929
+
+id: https://doi.org/10.13026/249v-w155
+name: Bridge2AI-Voice Dataset
+title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information
+description: The Bridge2AI-Voice project creates an ethically sourced flagship dataset to enable future research in artificial
+  intelligence and support critical insights into the use of voice as a biomarker of health. The human voice contains complex
+  acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. Version
+  1.1 provides 12,523 recordings for 306 adult participants collected across five sites in North America. Participants were
+  selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders,
+  mood disorders, and respiratory disorders. The initial release contains data considered low risk, including derivations
+  such as spectrograms and MFCCs but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire
+  data are also made available.
+page: https://physionet.org/content/b2ai-voice/1.1/
+language: en
+version: '1.1'
+keywords:
+- Bridge2AI
+- voice biomarker
+- speech
+- health
+- voice disorders
+- neurological disorders
+- neurodegenerative disorders
+- mood disorders
+- psychiatric disorders
+- respiratory disorders
+- pediatric disorders
+- spectrogram
+- MFCC
+- acoustic features
+- PhysioNet
+- AI
+- machine learning
+- clinical care
+- diagnosis
+- screening
+- FAIR
+- CARE
+- ethics
+- federated learning
+citation: 'Johnson, A., Bélisle-Pipon, J., Dorr, D., Ghosh, S., Payne, P., Powell, M., Rameau, A., Ravitsky, V., Sigaras,
+  A., Elemento, O., & Bensoussan, Y. (2025). Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health
+  information (version 1.1). PhysioNet. RRID:SCR_007345. https://doi.org/10.13026/249v-w155'
+purposes:
+- id: voice:purpose:ai-research
+  description: Create an ethically sourced flagship dataset to enable future research in artificial intelligence and support
+    critical insights into the use of voice as a biomarker of health. Voice is a promising biomarker as it is simple to collect,
+    cost-effective, and has broad clinical utility. Recent AI advances enable extraction of prognostically useful information
+    from voice data through multi-institutional collaboration ensuring diverse, representative datasets with ethical framework
+    for trustworthy AI development.
+- id: voice:purpose:clinical-integration
+  description: Integrate the use of voice as biomarker of health in clinical care by generating a substantial multi-institutional,
+    ethically sourced, and diverse voice database linked to multimodal health biomarkers (EHR, radiomics, genomics) to fuel
+    voice AI research and build predictive models to assist in screening, diagnosis, and treatment of a broad range of diseases.
+- id: voice:purpose:ethical-infrastructure
+  description: Influence and guide the world of Voice AI by ensuring patient protection through ethical and fairness principles
+    and create safe, innovative infrastructures to disseminate ethically sourced data for future generations of Voice AI researchers,
+    addressing privacy protection, ethical and fair representation of populations, and clinical accuracy.
+- id: voice:purpose:standards-development
+  description: Introduce the field of acoustic biomarkers by developing new standards of acoustic and voice data collection
+    and analysis for voice AI research, including standardized protocols, acoustic quality standardization and calibration,
+    integration of acoustic amplifiers, and best practices development.
+tasks:
+- id: voice:task:disease-screening
+  description: 'Enable AI research on voice as a biomarker for screening, diagnosis, and treatment of five disease categories:
+    (1) Vocal Pathologies (laryngeal cancers, vocal fold paralysis, benign laryngeal lesions), (2) Neurological and Neurodegenerative
+    Disorders (Alzheimer''s, Parkinson''s, Stroke, ALS), (3) Mood and Psychiatric Disorders (Depression, Schizophrenia, Bipolar
+    Disorders), (4) Respiratory disorders (Pneumonia, COPD, Heart Failure, OSA), and (5) Pediatric diseases (Autism, Speech
+    Delay).'
+- id: voice:task:predictive-modeling
+  description: Build predictive models to assist in screening, diagnosis, and treatment of diseases using voice features linked
+    to electronic health records and other health biomarkers such as radiomics and genomics, enabled by federated learning
+    technology for privacy-preserving multi-institutional analysis.
+- id: voice:task:biomarker-validation
+  description: Perform gold standard validation of diagnoses and symptoms through access to medical information via EHR platforms
+    with participant consent, enabling discovery and validation of novel acoustic biomarkers associated with health conditions
+    beyond currently recognized voice-disease associations.
+addressing_gaps:
+- id: voice:gap:database-size
+  description: Address the pressing need for large, high quality, multi-institutional and diverse voice database linked to
+    other health biomarkers from various data modalities (demographics, imaging, genomics, risk factors) to fuel voice AI
+    research and answer tangible clinical questions. Such large-scale multimodal database is only achievable through multi-institutional
+    collaborations between voice experts and AI engineers.
+- id: voice:gap:standardization
+  description: Address lack of standardized data collection protocols that have limited external validity and clinical usability
+    in prior voice research. Previous studies, especially for mood and psychiatric disorders, have used small datasets with
+    limited demographic diversity reporting, lack of standardized protocols precluding meta-analysis, and possible confounders.
+- id: voice:gap:ethical-framework
+  description: Address critical issues related to patient privacy protection, ethical and fair representation of population,
+    and clinical accuracy that are arising as voice AI gains attention from multi-nationals such as Google, Amazon, Mozilla
+    and Apple. Develop new guidelines for consenting to voice data collection, sharing, and utilization in the context of
+    voice AI technology.
+- id: voice:gap:multimodal-integration
+  description: Enable multi-institutional data analysis while minimizing data sharing and preserving patient privacy through
+    federated learning technology, allowing analysis of distributed data without centralized aggregation.
+creators:
+- id: voice:creator:bensoussan
+  description: Yael Emilie Bensoussan, Contact PI/Project Leader, University of South Florida
+- id: voice:creator:belisle-pipon
+  description: Jean-Christophe Bélisle-Pipon, Principal Investigator
+- id: voice:creator:dorr
+  description: David A. Dorr, Principal Investigator
+- id: voice:creator:elemento
+  description: Olivier Elemento, Principal Investigator
+- id: voice:creator:ghosh
+  description: Satrajit Sujit Ghosh, Principal Investigator
+- id: voice:creator:payne
+  description: Philip R.O. Payne, Principal Investigator
+- id: voice:creator:powell
+  description: Maria Ellen Powell, Principal Investigator
+- id: voice:creator:rameau
+  description: Anais Rameau, Principal Investigator
+- id: voice:creator:ravitsky
+  description: Vardit Ravitsky, Principal Investigator
+- id: voice:creator:sigaras
+  description: Alexandros Sigaras, Principal Investigator
+- id: voice:creator:siu
+  description: Jennifer Siu, Principal Investigator
+- id: voice:creator:johnson
+  description: Alistair Johnson, Principal Investigator
+funders:
+- id: voice:funder:nih-od
+  name: NIH Office of the Director
+  description: 'Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand
+    disease like never before. NIH grant 3OT2OD032720-01S3, Opportunity Number OTA-21-008, Study Section Data Coordination,
+    Mapping, and Modeling (DCMM). Total funding $4,660,942 for fiscal year 2025. Project dates: September 1, 2022 to November
+    30, 2026. Administered by NIH Office of the Director, DUNS 069687242, UEI NKAZLXLL7Z91.'
+instances:
+- id: voice:instance:v1.1
+  description: Version 1.1 contains 12,523 recordings from 306 adult participants collected across five sites in North America.
+    Participants were selected based on membership to five predetermined disease groups (Respiratory disorders, Voice disorders,
+    Neurological disorders, Mood disorders, Pediatric). Patients presenting at specialty clinics were screened for inclusion/exclusion
+    criteria prior to visit. Most participants completed one session, with a subset completing multiple sessions resulting
+    in more than one session per participant. Each recording includes participant_id, session_id, and task_name identifiers.
+subsets:
+- id: voice:subset:spectrograms
+  name: spectrograms.parquet
+  description: Time-frequency power spectrograms (513 x N dimension) computed using short-time Fast Fourier Transform (FFT)
+    with 25ms window size, 10ms hop length, and 512-point FFT. Each element contains participant_id, session_id, task_name,
+    and the 513xN spectrogram matrix where N is proportional to recording length.
+- id: voice:subset:mfcc
+  name: mfcc.parquet
+  description: 60 Mel-frequency cepstral coefficients (MFCCs) extracted from spectrograms, 60 x N dimension per recording
+    where N is proportional to the length of the audio recording. Added in v1.1 release.
+- id: voice:subset:phenotype
+  name: phenotype.tsv
+  description: Information collected during the visit including demographics, acoustic confounders, and responses to validated
+    questionnaires. Tab-delimited file with one row per unique participant. Each column is a response to a question asked
+    during clinical data collection within the custom data collection app.
+  format: TSV
+  media_type: text/tab-separated-values
+- id: voice:subset:static-features
+  name: static_features.tsv
+  description: Acoustic features derived from the raw audio using openSMILE, Praat, parselmouth, and torchaudio. One row per
+    unique recording with features capturing temporal dynamics, acoustic characteristics, fundamental frequency (f0), formants,
+    and voice quality measures.
+  format: TSV
+  media_type: text/tab-separated-values
+is_tabular: true
+is_deidentified:
+  description: Dataset de-identified using HIPAA Safe Harbor method. All 18 Safe Harbor identifier categories addressed. Geographic
+    precision reduced to country. Temporal precision reduced to year. Free speech transcripts removed. Raw biometric audio
+    omitted from v1.1.

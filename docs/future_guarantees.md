@@ -11,7 +11,7 @@ __
 
 
 
-URI: [data_sheets_schema:future_guarantees](https://w3id.org/bridge2ai/data-sheets-schema/future_guarantees)
+URI: [dcterms:description](http://purl.org/dc/terms/description)
 Alias: future_guarantees
 
 <!-- no inheritance hierarchy -->
@@ -59,7 +59,7 @@ Alias: future_guarantees
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:future_guarantees |
+| self | dcterms:description |
 | native | data_sheets_schema:future_guarantees |
 
 
@@ -76,6 +76,7 @@ description: 'Explanation of any commitments that external resources will remain
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcterms:description
 alias: future_guarantees
 owner: ExternalResource
 domain_of:

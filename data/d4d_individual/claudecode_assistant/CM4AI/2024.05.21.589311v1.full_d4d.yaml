@@ -1,0 +1,140 @@
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CM4AI/2024.05.21.589311v1.full.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "doi:10.1101/2024.05.21.589311"
+name: "Cell Maps for AI bioRxiv Preprint"
+title: "Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines"
+description: |
+  This article describes the Cell Maps for Artificial Intelligence (CM4AI) project and its
+  goals, methods, standards, current datasets, software tools, status, and future directions.
+  CM4AI is the Functional Genomics Data Generation Project in the U.S. National Institute of
+  Health's (NIH) Bridge2AI program. Its overarching mission is to produce ethical, AI-ready
+  datasets of cell architecture, inferred from multimodal data collected for human cell lines,
+  to enable transformative biomedical AI research.
+page: "https://doi.org/10.1101/2024.05.21.589311"
+version: "May 24, 2024"
+license: "CC-BY-NC-ND 4.0"
+
+purposes:
+  - id: "cm4ai:purpose_cell_maps"
+    name: "AI-ready cell architecture maps"
+    description: "Produce ethical, AI-ready datasets of cell architecture from multimodal data"
+    response: "Produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data collected for human cell lines, to enable transformative biomedical AI research"
+  - id: "cm4ai:purpose_visible_ml"
+    name: "Visible machine learning"
+    description: "Enable visible machine learning systems for interpretable AI"
+    response: "Stimulate research and development in visible machine learning systems informed by multi-scale cell and tissue architecture"
+
+tasks:
+  - id: "cm4ai:task_ppi_mapping"
+    name: "Protein-protein interaction mapping"
+    description: "Map protein-protein interactions using AP-MS and SEC-MS methods"
+    response: "Map protein-protein interactions (PPIs) of 100 chromatin regulators under different conditions using AP-MS on endogenously tagged cell lines and SEC-MS for proteome-wide complex/interaction mapping"
+  - id: "cm4ai:task_spatial_proteomics"
+    name: "Spatial proteomics mapping"
+    description: "Map spatial subcellular organization using immunofluorescence microscopy"
+    response: "Map the spatial subcellular organization of key chromatin modifiers, their interactors and key signaling molecules involved in cancer using the Human Protein Atlas resource of antibodies"
+  - id: "cm4ai:task_genetic_perturbation"
+    name: "Genetic perturbation mapping"
+    description: "CRISPR-Cas perturbation screens for transcriptional analysis"
+    response: "Perform single-cell CRISPR screens perturbing 100 chromatin regulators in multiple cell lines under various conditions"
+
+creators:
+  - id: "cm4ai:creator_ideker"
+    name: "Trey Ideker"
+    description: "Principal Investigator, University of California San Diego"
+  - id: "cm4ai:creator_clark"
+    name: "Timothy Clark"
+    description: "Co-corresponding author, University of Virginia"
+  - id: "cm4ai:creator_krogan"
+    name: "Nevan Krogan"
+    description: "Co-corresponding author, University of California San Francisco"
+  - id: "cm4ai:creator_lundberg"
+    name: "Emma Lundberg"
+    description: "Co-corresponding author, Stanford University"
+
+funders:
+  - id: "cm4ai:funder_nih_bridge2ai"
+    name: "NIH Common Fund Bridge2AI"
+    description: "National Institutes of Health awards 1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center)"
+  - id: "cm4ai:funder_uva"
+    name: "Frederick Thomas Fund"
+    description: "Frederick Thomas Fund of the University of Virginia"
+
+instances:
+  - id: "cm4ai:instance_mda_mb_468"
+    name: "MDA-MB-468 breast cancer cells"
+    description: "Triple negative breast cancer cell line from 51-year-old black female, treated and untreated with paclitaxel and vorinostat"
+  - id: "cm4ai:instance_kolf21j"
+    name: "KOLF2.1J iPSCs"
+    description: "Induced pluripotent stem cells from healthy male Northern European donor, with neuronal and cardiomyocytic differentiation"
+
+subsets:
+  - id: "cm4ai:subset_ppi"
+    name: "Protein-protein interaction data"
+    description: "AP-MS and SEC-MS protein interaction networks"
+  - id: "cm4ai:subset_if_images"
+    name: "Immunofluorescence images"
+    description: "Spatial proteomics subcellular microscopy images"
+  - id: "cm4ai:subset_crispr"
+    name: "CRISPR perturbation data"
+    description: "Single-cell CRISPR-Cas perturbation screen data"
+  - id: "cm4ai:subset_cell_maps"
+    name: "Integrated cell maps"
+    description: "Hierarchical directed acyclic graphs of cell architecture"
+
+collection_mechanisms:
+  - id: "cm4ai:mech_ap_ms"
+    name: "Affinity purification mass spectrometry (AP-MS)"
+    description: "Endogenous tagging and affinity purification for protein-protein interactions"
+  - id: "cm4ai:mech_sec_ms"
+    name: "Size exclusion chromatography mass spectrometry (SEC-MS)"
+    description: "Proteome-wide complex/interaction mapping"
+  - id: "cm4ai:mech_if"
+    name: "Immunofluorescence microscopy"
+    description: "Spatial proteomics using IF staining and high-resolution confocal microscopy"
+  - id: "cm4ai:mech_crispr"
+    name: "CRISPRi perturbation sequencing"
+    description: "Single-cell CRISPR screens using 10x Genomics 3'HT kit"
+
+preprocessing_strategies:
+  - id: "cm4ai:proc_music"
+    name: "MuSIC pipeline"
+    description: "Multi-Scale Integrated Cell data integration pipeline for cell map generation using node2vec deep learning for PPI embeddings, HPA deep learning for image embeddings, contrastive learning for co-embedding, and community detection for hierarchy creation"
+  - id: "cm4ai:proc_fairscape"
+    name: "FAIRSCAPE framework"
+    description: "AI-readiness packaging with provenance graphs and RO-Crate format using FAIRSCAPE client-server framework to create RO-Crate packages with metadata, provenance graphs, and persistent identifiers (ARK scheme)"
+
+external_resources:
+  - id: "cm4ai:extres_portal"
+    name: "CM4AI Web Portal"
+    description: "Official CM4AI project portal"
+    external_resources:
+      - "http://www.cm4ai.org"
+  - id: "cm4ai:extres_fairscape"
+    name: "FAIRSCAPE Documentation"
+    description: "FAIRSCAPE AI-readiness framework"
+    external_resources:
+      - "https://fairscape.github.io"
+  - id: "cm4ai:extres_ndex"
+    name: "Network Data Exchange"
+    description: "Cell map sharing and visualization"
+    external_resources:
+      - "https://ndex.org"
+
+keywords:
+  - "CM4AI"
+  - "Bridge2AI"
+  - "cell maps"
+  - "AI-ready"
+  - "FAIR"
+  - "functional genomics"
+  - "mass spectrometry"
+  - "immunofluorescence"
+  - "CRISPR"
+  - "RO-Crate"
+  - "FAIRSCAPE"
+  - "visible machine learning"

@@ -1,0 +1,108 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/RePORT ⟩ RePORTER - VOICE.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "voice:nih_grant_3OT2OD032720-01S3"
+name: "Bridge2AI Voice NIH Grant"
+title: "Bridge2AI: Voice as a Biomarker of Health - Building an ethically sourced, bioaccoustic database to understand disease like never before"
+description: |
+  NIH grant for integrating the use of voice as biomarker of health in clinical care by
+  generating a substantial multi-institutional, ethically sourced, and diverse voice database
+  linked to multimodal health biomarkers to fuel voice AI research and build predictive models
+  to assist in screening, diagnosis, and treatment of a broad range of diseases.
+page: "https://reporter.nih.gov/project-details/11376382"
+
+purposes:
+  - id: "voice:purpose_clinical"
+    name: "Clinical voice biomarker integration"
+    description: "Integrate voice as biomarker in clinical care"
+    response: "Integrate the use of voice as biomarker of health in clinical care by generating a substantial multi-institutional, ethically sourced, and diverse voice database linked to multimodal health biomarkers"
+  - id: "voice:purpose_standards"
+    name: "Acoustic standards development"
+    description: "Develop new standards for voice data collection and analysis"
+    response: "Introduce the field of acoustic biomarkers by developing new standards of acoustic and voice data collection and analysis for voice AI research"
+  - id: "voice:purpose_tools"
+    name: "Tool development"
+    description: "Software and cloud infrastructure for voice data collection"
+    response: "Develop a software and cloud infrastructure for automated voice data collection through a smartphone application that allows non-invasive, user-friendly, high quality voice data collection"
+  - id: "voice:purpose_ethics"
+    name: "Ethics integration"
+    description: "Ethical and trustworthy AI guidance"
+    response: "Integrate existing scholarship, tools, and guidance with development of new standard and normative insights for identifying, anticipating, addressing, and providing guidance on ethical and trustworthy issues"
+  - id: "voice:purpose_federated"
+    name: "Federated learning"
+    description: "Privacy-preserving multi-institutional analysis"
+    response: "Implement Federated Learning technology to allow analysis of multi-institutional data while minimizing data sharing and preserving patient privacy"
+  - id: "voice:purpose_workforce"
+    name: "Workforce development"
+    description: "Curriculum on voice biomarkers and AI"
+    response: "Develop a unique curriculum on voice biomarkers of health and the development, validation, and implementation for AI models that are FAIR and CARE"
+
+creators:
+  - id: "voice:pi_bensoussan"
+    name: "Yael Emilie Bensoussan"
+    description: "Contact PI/Project Leader, Assistant Professor, University of South Florida"
+  - id: "voice:pi_belisle_pipon"
+    name: "Jean-Christophe Bélisle-Pipon"
+    description: "Co-PI, Ethics"
+  - id: "voice:pi_dorr"
+    name: "David A. Dorr"
+    description: "Co-PI"
+  - id: "voice:pi_elemento"
+    name: "Olivier Elemento"
+    description: "Co-PI"
+  - id: "voice:pi_ghosh"
+    name: "Satrajit Sujit Ghosh"
+    description: "Co-PI"
+  - id: "voice:pi_payne"
+    name: "Philip R.O. Payne"
+    description: "Co-PI"
+  - id: "voice:pi_powell"
+    name: "Maria Ellen Powell"
+    description: "Co-PI"
+  - id: "voice:pi_rameau"
+    name: "Anais Rameau"
+    description: "Co-PI"
+  - id: "voice:pi_ravitsky"
+    name: "Vardit Ravitsky"
+    description: "Co-PI, Ethics"
+  - id: "voice:pi_sigaras"
+    name: "Alexandros Sigaras"
+    description: "Co-PI"
+
+funders:
+  - id: "voice:funder_nih_od"
+    name: "NIH Office of the Director"
+    description: "Grant 3OT2OD032720-01S3, FY2025 Total $4,660,942"
+
+subsets:
+  - id: "voice:cohort_voice"
+    name: "Voice Disorders Cohort"
+    description: "Laryngeal cancers, vocal fold paralysis, benign laryngeal lesions"
+  - id: "voice:cohort_neuro"
+    name: "Neurological Disorders Cohort"
+    description: "Alzheimer's, Parkinson's, Stroke, ALS"
+  - id: "voice:cohort_mood"
+    name: "Mood/Psychiatric Disorders Cohort"
+    description: "Depression, Schizophrenia, Bipolar Disorders"
+  - id: "voice:cohort_respiratory"
+    name: "Respiratory Disorders Cohort"
+    description: "Pneumonia, COPD, Heart Failure, OSA"
+  - id: "voice:cohort_pediatric"
+    name: "Pediatric Disorders Cohort"
+    description: "Autism, Speech Delay"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "NIH"
+  - "voice biomarker"
+  - "acoustic biomarker"
+  - "federated learning"
+  - "speech"
+  - "clinical care"
+  - "AI/ML"
+  - "FAIR"
+  - "CARE"
