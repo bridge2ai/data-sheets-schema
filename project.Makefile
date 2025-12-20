@@ -78,10 +78,19 @@ preprocess-sources:
 		-o $(PREPROCESSED_INDIVIDUAL_DIR) \
 		-p $(PROJECTS)
 
-# Full download + preprocess pipeline
+# Validate preprocessing quality (check for empty files, stubs, data loss)
+validate-preprocessing:
+	@echo "Validating preprocessing quality..."
+	$(RUN) python src/download/validate_preprocessing_quality.py \
+		--raw-dir $(RAW_DIR) \
+		--preprocessed-dir $(PREPROCESSED_INDIVIDUAL_DIR) \
+		--projects $(PROJECTS)
+
+# Full download + preprocess + validate pipeline
 download-and-preprocess:
 	$(MAKE) download-sources
 	$(MAKE) preprocess-sources
+	$(MAKE) validate-preprocessing
 
 # Generate minimal example files for all classes
 # For each file in the list, populate it with an id field
@@ -1066,6 +1075,39 @@ gen-d4d-html:
 	@mkdir -p $(D4D_HTML_DIR)/concatenated/claudecode
 	$(RUN) python src/html/human_readable_renderer.py
 	@echo "✅ HTML generation complete!"
+
+# Version HTML files for deployment
+# Usage: make version-html VERSION=6
+# This automates copying and renaming HTML files from claudecode_agent to versioned output
+version-html:
+ifndef VERSION
+	$(error VERSION is not defined. Usage: make version-html VERSION=6)
+endif
+	@echo "Creating v$(VERSION) HTML files from claudecode_agent output..."
+	@mkdir -p src/html/output
+	@for project in $(PROJECTS); do \
+		echo "  Versioning $$project..."; \
+		if [ -f data/d4d_html/concatenated/claudecode_agent/$${project}_d4d_human_readable.html ]; then \
+			cp data/d4d_html/concatenated/claudecode_agent/$${project}_d4d_human_readable.html \
+			   src/html/output/D4D_-_$${project}_v$(VERSION)_human_readable.html; \
+			echo "    ✓ Created D4D_-_$${project}_v$(VERSION)_human_readable.html"; \
+		else \
+			echo "    ⚠️  Missing: $${project}_d4d_human_readable.html"; \
+		fi; \
+		if [ -f data/d4d_html/concatenated/claudecode_agent/$${project}_evaluation.html ]; then \
+			cp data/d4d_html/concatenated/claudecode_agent/$${project}_evaluation.html \
+			   src/html/output/D4D_-_$${project}_v$(VERSION)_evaluation.html; \
+			echo "    ✓ Created D4D_-_$${project}_v$(VERSION)_evaluation.html"; \
+		else \
+			echo "    ⚠️  Missing: $${project}_evaluation.html"; \
+		fi; \
+	done
+	@echo ""
+	@echo "✅ v$(VERSION) HTML files created in src/html/output/"
+	@echo "📋 Next steps:"
+	@echo "   1. Review the files in src/html/output/"
+	@echo "   2. Run 'make gendoc' to deploy to GitHub Pages"
+	@echo "   3. Commit and push to publish"
 
 # ============================================================================
 # D4D Pipeline: Complete workflows
