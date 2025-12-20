@@ -1,0 +1,17 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/docs_google_com_document-d_row11.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "aireadi:irb_protocol_v3.92"
+name: "AI-READI IRB Protocol"
+title: "APPLICATION_IRB_Protocol_v3.92_2022.08.01 OT2 MAIN MOD17 25Mar2025"
+description: |
+  IRB Protocol document for the AI-READI project. Document version 3.92 dated 2022.08.01,
+  with OT2 MAIN MOD17 modification dated 25 March 2025. Document hosted on Google Docs.
+
+ethical_reviews:
+  - id: "aireadi:ethics_irb_protocol"
+    name: "IRB Protocol v3.92"
+    description: "IRB protocol document with modification MOD17"

@@ -1,0 +1,17 @@
+# D4D Datasheet extracted from doi_row3.json
+# Project: CM4AI
+# Generation Method: Claude Code Agent
+# Source: data/preprocessed/individual/CM4AI/doi_row3.json
+# Generated: 2025-12-05
+
+id: "cm4ai:doi_reference"
+name: "CM4AI bioRxiv Preprint DOI Reference"
+description: "DOI reference to the CM4AI bioRxiv preprint publication."
+page: "https://doi.org/10.1101/2024.05.21.589311"
+
+external_resources:
+  - id: "cm4ai:extres_biorxiv"
+    name: "bioRxiv Preprint"
+    description: "CM4AI bioRxiv preprint publication"
+    external_resources:
+      - "https://doi.org/10.1101/2024.05.21.589311"

@@ -1,0 +1,50 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Agent Deterministic
+# Source: data/preprocessed/individual/VOICE/physionet_b2ai-voice_1.1_row14.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: https://doi.org/10.13026/249v-w155
+name: Bridge2AI-Voice Dataset
+title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health
+  information
+description: Voice biomarker dataset from Bridge2AI project with de-identified derived
+  data including spectrograms, MFCCs, and acoustic features.
+page: https://physionet.org/content/b2ai-voice/
+language: en
+keywords:
+- Bridge2AI
+- voice biomarker
+- speech
+- health
+version: '1.1'
+creators:
+- description: Bridge2AI-Voice research team including Alistair Johnson, Jean-Christophe
+    Bélisle-Pipon, David Dorr, Satrajit Ghosh, Philip Payne, Maria Powell, Anais Rameau,
+    Vardit Ravitsky, Alexandros Sigaras, Olivier Elemento, and Yael Bensoussan
+funders:
+- description: 'NIH project 3OT2OD032720-01S1: Bridge2AI: Voice as a Biomarker of
+    Health'
+purposes:
+- description: Create an ethically sourced dataset to enable AI research on voice
+    as a biomarker of health
+ethical_reviews:
+- description: Data collection and sharing approved by the University of South Florida
+    Institutional Review Board
+informed_consent:
+- consent_obtained: true
+  description: Participants provided consent for data collection and sharing of de-identified
+    research data
+subsets:
+- id: voice:spectrograms
+  name: spectrograms.parquet
+  description: Time-frequency power spectrograms computed using short-time FFT
+- id: voice:mfcc
+  name: mfcc.parquet
+  description: Mel-frequency cepstral coefficients derived from spectrograms
+- id: voice:phenotype
+  name: phenotype.tsv
+  description: Participant demographics and questionnaire responses
+is_deidentified:
+  description: De-identification using HIPAA Safe Harbor method with all identifiers
+    removed

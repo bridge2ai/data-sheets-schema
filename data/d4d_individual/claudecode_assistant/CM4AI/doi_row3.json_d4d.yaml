@@ -1,0 +1,42 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/doi_row3.json
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Workflow: .github/workflows/d4d_assistant_create.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: cm4ai-doi-metadata
+name: CM4AI bioRxiv DOI Metadata
+description: |
+  Digital Object Identifier (DOI) metadata for the CM4AI bioRxiv preprint describing
+  the Cell Maps for Artificial Intelligence project and its AI-ready datasets.
+
+doi: https://doi.org/10.1101/2024.05.21.589311
+doi_type: DOI
+url: https://doi.org/10.1101/2024.05.21.589311
+source_row: 3
+
+identifier:
+  - type: DOI
+    value: 10.1101/2024.05.21.589311
+    url: https://doi.org/10.1101/2024.05.21.589311
+
+publication_type: bioRxiv preprint
+
+title: Cell Maps for Artificial Intelligence - AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines
+
+purposes:
+  - purpose: Provide persistent identifier for CM4AI bioRxiv preprint
+  - purpose: Enable citation and reference of CM4AI project description
+
+intended_use:
+  - use: Citation in academic publications
+  - use: Reference to CM4AI project methodology
+  - use: Persistent link to preprint publication
+
+distribution:
+  - name: bioRxiv
+    access_url: https://doi.org/10.1101/2024.05.21.589311
+    available: true
+    identifier_type: DOI

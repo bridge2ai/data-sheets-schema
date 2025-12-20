@@ -1,0 +1,22 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Agent Deterministic
+# Source: data/preprocessed/individual/VOICE/github_eipm_bridge2ai-docs_README_row22.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: voice:individual:github_eipm_bridge2ai-docs_README_row22
+name: Bridge2AI-Voice Dataset
+title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health
+  information
+description: Voice biomarker dataset from Bridge2AI project with de-identified derived
+  data including spectrograms, MFCCs, and acoustic features.
+page: https://physionet.org/content/b2ai-voice/
+language: en
+keywords:
+- Bridge2AI
+- voice biomarker
+- speech
+- health
+purposes:
+- description: Create an ethically sourced dataset to enable AI research on voice
+    as a biomarker of health

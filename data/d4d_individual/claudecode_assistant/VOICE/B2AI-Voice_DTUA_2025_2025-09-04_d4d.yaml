@@ -1,0 +1,47 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/B2AI-Voice DTUA 2025 2025-09-04.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "voice:dtua_2025_0904"
+name: "Bridge2AI Voice DTUA September 2025"
+title: "B2AI-Voice Data Transfer and Use Agreement (DTUA) - September 4, 2025 Version"
+description: |
+  Data Transfer and Use Agreement for Bridge2AI-Voice dataset, approved for use through
+  August 31, 2025. Governs data access, use restrictions, security requirements, and
+  disposition. Provider is University of South Florida Board of Trustees.
+
+future_use_impacts:
+  - id: "voice:term_project_use"
+    name: "Project-specific use"
+    description: "Provider shall provide the data set for the research purpose set forth in Attachment 1"
+  - id: "voice:term_no_disclosure"
+    name: "No third-party disclosure"
+    description: "Recipient shall not disclose, release, sell, rent, lease, loan, or grant access to Data to any third party without prior written consent"
+  - id: "voice:term_compliance"
+    name: "Legal compliance"
+    description: "Recipient agrees to use the Data in compliance with all applicable laws, rules, regulations, and professional standards"
+  - id: "voice:term_pii"
+    name: "PII protection"
+    description: "The Data is Personally Identifiable Information as defined in OMB Memorandum M-07-16"
+  - id: "voice:term_physionet"
+    name: "PhysioNet requirements"
+    description: "Recipient agrees to adhere to the specific requirements of PhysioNet.Org managed by MIT Laboratory for Computational Physiology"
+
+confidential_elements:
+  - id: "voice:access_coc_0904"
+    name: "Certificate of Confidentiality"
+    description: "The Data is covered under a Certificate of Confidentiality, protected from compulsory legal demands"
+  - id: "voice:access_irb"
+    name: "IRB approval required"
+    description: "Recipient provides assurance that IRB review or approval has been completed as required"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "DTUA"
+  - "data governance"
+  - "PhysioNet"
+  - "Certificate of Confidentiality"
+  - "PII"

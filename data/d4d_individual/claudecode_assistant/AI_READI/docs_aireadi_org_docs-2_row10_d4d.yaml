@@ -1,0 +1,47 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/docs_aireadi_org_docs-2_row10.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "aireadi:documentation_v2"
+name: "AI-READI Dataset Documentation v2.0.0"
+title: "Documentation for the AI-READI Dataset"
+version: "2.0.0"
+description: |
+  Documentation for the AI-READI dataset called Flagship Dataset of Type 2 Diabetes from the
+  AI-READI Project. The AI-READI dataset consists of data collected from individuals with and
+  without Type 2 Diabetes Mellitus (T2DM) and harmonized across 3 data collection sites. The
+  composition was designed with future AI/ML studies in mind, including balanced recruitment
+  across diabetes severity and multi-domain data acquisition.
+page: "https://docs.aireadi.org"
+
+purposes:
+  - id: "aireadi:purpose_understand_salutogenesis"
+    name: "Understand salutogenesis"
+    description: "Better understand the pathway from disease to health in T2DM"
+    response: "Better understand salutogenesis (the pathway from disease to health) in T2DM"
+
+instances:
+  - id: "aireadi:instance_participants"
+    name: "Study participants"
+    description: "Individuals with and without Type 2 Diabetes Mellitus"
+    instance_type: "human participant"
+
+subsets:
+  - id: "aireadi:subset_public"
+    name: "Public access data"
+    description: "Survey data, lab results, fitness activity, clinical measurements, retinal images, ECG, blood sugar, environmental variables"
+  - id: "aireadi:subset_controlled"
+    name: "Controlled access data"
+    description: "5-digit zip code, sex, race, ethnicity, genetic sequencing, health records, medications, traffic/accident reports"
+
+license: "CC BY-NC 4.0"
+
+keywords:
+  - "AI-READI"
+  - "T2DM"
+  - "type 2 diabetes"
+  - "salutogenesis"
+  - "multimodal data"
+  - "FAIR principles"

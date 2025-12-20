@@ -21,8 +21,6 @@ URI: [schema:Thing](http://schema.org/Thing)
     click NamedThing href "../NamedThing/"
       NamedThing <|-- Organization
         click Organization href "../Organization/"
-      NamedThing <|-- DatasetProperty
-        click DatasetProperty href "../DatasetProperty/"
       NamedThing <|-- Software
         click Software href "../Software/"
       NamedThing <|-- Person
@@ -48,7 +46,6 @@ URI: [schema:Thing](http://schema.org/Thing)
 ## Inheritance
 * **NamedThing**
     * [Organization](Organization.md)
-    * [DatasetProperty](DatasetProperty.md)
     * [Software](Software.md)
     * [Person](Person.md)
     * [Information](Information.md)
@@ -121,6 +118,7 @@ attributes:
     identifier: true
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -131,6 +129,7 @@ attributes:
     slot_uri: schema:name
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -140,43 +139,8 @@ attributes:
     slot_uri: schema:description
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
 class_uri: schema:Thing
 
@@ -202,6 +166,7 @@ attributes:
     owner: NamedThing
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -214,6 +179,7 @@ attributes:
     owner: NamedThing
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -225,43 +191,8 @@ attributes:
     owner: NamedThing
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
 class_uri: schema:Thing
 

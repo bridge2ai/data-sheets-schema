@@ -28,6 +28,8 @@ URI: [data_sheets_schema:DataProtectionImpact](https://w3id.org/bridge2ai/data-s
         
       DataProtectionImpact : id
         
+      DataProtectionImpact : impact_details
+        
       DataProtectionImpact : name
         
       DataProtectionImpact : used_software
@@ -49,9 +51,8 @@ URI: [data_sheets_schema:DataProtectionImpact](https://w3id.org/bridge2ai/data-s
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **DataProtectionImpact**
+* [DatasetProperty](DatasetProperty.md)
+    * **DataProtectionImpact**
 
 
 
@@ -59,10 +60,11 @@ URI: [data_sheets_schema:DataProtectionImpact](https://w3id.org/bridge2ai/data-s
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [String](String.md) | Details of the data protection impact analysis, if conducted | direct |
+| [impact_details](impact_details.md) | * <br/> [String](String.md) | Details on data protection impact analysis, outcomes, and documentation | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -126,49 +128,16 @@ description: 'Has an analysis of the potential impact of the dataset and its use
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: Details of the data protection impact analysis, if conducted.
+  impact_details:
+    name: impact_details
+    description: 'Details on data protection impact analysis, outcomes, and documentation.
+
+      '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
+    slot_uri: dcterms:description
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
     - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
     - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
 
@@ -189,53 +158,54 @@ description: 'Has an analysis of the potential impact of the dataset and its use
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
+  impact_details:
+    name: impact_details
+    description: 'Details on data protection impact analysis, outcomes, and documentation.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
+    slot_uri: dcterms:description
+    alias: impact_details
+    owner: DataProtectionImpact
+    domain_of:
+    - FutureUseImpact
+    - DataProtectionImpact
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: DataProtectionImpact
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: DataProtectionImpact
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
   description:
     name: description
-    description: Details of the data protection impact analysis, if conducted.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/ethics
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: DataProtectionImpact
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -247,30 +217,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: DataProtectionImpact
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: DataProtectionImpact
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

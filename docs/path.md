@@ -4,7 +4,7 @@
 
 
 
-URI: [data_sheets_schema:path](https://w3id.org/bridge2ai/data-sheets-schema/path)
+URI: [schema:contentUrl](http://schema.org/contentUrl)
 Alias: path
 
 <!-- no inheritance hierarchy -->
@@ -17,8 +17,8 @@ Alias: path
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 | [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 
 
 
@@ -51,9 +51,8 @@ Alias: path
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:path |
+| self | schema:contentUrl |
 | native | data_sheets_schema:path |
-| close | frictionless:path |
 
 
 
@@ -64,9 +63,8 @@ Alias: path
 ```yaml
 name: path
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-close_mappings:
-- frictionless:path
 rank: 1000
+slot_uri: schema:contentUrl
 alias: path
 domain_of:
 - Dataset

@@ -1,0 +1,113 @@
+# D4D Datasheet extracted from 2024.05.21.589311v1.full.txt
+# Project: CM4AI
+# Generation Method: Claude Code Agent
+# Source: data/preprocessed/individual/CM4AI/2024.05.21.589311v1.full.txt
+# Generated: 2025-12-05
+
+id: "cm4ai:bioRxiv_preprint_2024"
+name: "Cell Maps for Artificial Intelligence (CM4AI) - bioRxiv Preprint"
+title: "Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines"
+description: |
+  This article describes the Cell Maps for Artificial Intelligence (CM4AI) project and its goals, methods,
+  standards, current datasets, software tools, status, and future directions. CM4AI is the Functional
+  Genomics Data Generation Project in the U.S. National Institute of Health's (NIH) Bridge2AI program.
+  Its overarching mission is to produce ethical, AI-ready datasets of cell architecture, inferred from
+  multimodal data collected for human cell lines, to enable transformative biomedical AI research.
+
+  CM4AI delivers machine-readable hierarchical maps of cell architecture as AI-Ready data produced from
+  multimodal interrogation of 100 chromatin modifiers and 100 metabolic enzymes involved in cancer,
+  neuropsychiatric, and cardiac disorders in disease-relevant cell lines.
+page: "https://doi.org/10.1101/2024.05.21.589311"
+license: "CC-BY-NC-ND 4.0 International"
+version: "preprint v1, May 24, 2024"
+keywords:
+  - "cell maps"
+  - "artificial intelligence"
+  - "AI-ready data"
+  - "functional genomics"
+  - "Bridge2AI"
+  - "proteomics"
+  - "mass spectrometry"
+  - "CRISPR"
+  - "iPSC"
+  - "breast cancer"
+  - "MDA-MB-468"
+  - "KOLF2.1J"
+
+creators:
+  - id: "cm4ai:creator_clark"
+    name: "Timothy Clark"
+    description: "Author affiliated with University of Virginia"
+  - id: "cm4ai:creator_mohan"
+    name: "Jillian Mohan"
+    description: "Author affiliated with University of California San Diego"
+  - id: "cm4ai:creator_schaffer"
+    name: "Leah Schaffer"
+    description: "Author affiliated with University of California San Diego"
+  - id: "cm4ai:creator_ideker"
+    name: "Trey Ideker"
+    description: "Corresponding author affiliated with University of California San Diego"
+
+purposes:
+  - id: "cm4ai:purpose_ai_ready"
+    name: "AI-ready cell architecture datasets"
+    description: "Produce ethical, AI-ready datasets of cell architecture"
+    response: "Produce ethical, AI-ready datasets of cell architecture to enable transformative biomedical AI research"
+  - id: "cm4ai:purpose_cell_maps"
+    name: "Map cell architecture"
+    description: "Map spatiotemporal architecture of human cells"
+    response: "Map spatiotemporal architecture of human cells to enable interpretable genotype-phenotype learning"
+
+tasks:
+  - id: "cm4ai:task_generate_maps"
+    name: "Generate cell maps"
+    description: "Generate cell maps from multimodal data"
+    response: "Generate cell maps from multimodal data by integrating proteomics, imaging, and CRISPR perturbation data"
+  - id: "cm4ai:task_package_data"
+    name: "Package data with provenance"
+    description: "Package data with provenance graphs and rich metadata"
+    response: "Package data with provenance graphs and rich metadata using FAIRSCAPE framework and RO-Crate format"
+
+instances:
+  - id: "cm4ai:instance_cell_maps"
+    name: "Cell maps"
+    description: "Cell maps as hierarchical directed acyclic graphs (DAGs)"
+    instance_type: "network graph"
+  - id: "cm4ai:instance_protein_assemblies"
+    name: "Protein assemblies"
+    description: "Protein assemblies at multiple scales"
+    instance_type: "molecular complex"
+  - id: "cm4ai:instance_mda_mb_468"
+    name: "MDA-MB-468 breast cancer cells"
+    description: "Treated and untreated MDA-MB-468 breast cancer cell lines"
+    instance_type: "cell line"
+  - id: "cm4ai:instance_kolf2_1j"
+    name: "KOLF2.1J iPSCs"
+    description: "Undifferentiated and differentiated KOLF2.1J iPSCs"
+    instance_type: "cell line"
+
+acquisition_methods:
+  - id: "cm4ai:acq_if"
+    name: "Immunofluorescence microscopy"
+    description: "Immunofluorescence (IF) subcellular microscopy"
+    was_directly_observed: true
+    acquisition_details:
+      - "Spatial localization of proteins using IF subcellular microscopy"
+  - id: "cm4ai:acq_apms"
+    name: "Affinity purification mass spectroscopy"
+    description: "Affinity purification mass spectroscopy (AP-MS)"
+    was_directly_observed: true
+    acquisition_details:
+      - "Protein-protein interactions via AP-MS"
+  - id: "cm4ai:acq_secms"
+    name: "Size exclusion mass spectroscopy"
+    description: "Size exclusion mass spectroscopy (SEC-MS)"
+    was_directly_observed: true
+    acquisition_details:
+      - "Protein complex analysis via SEC-MS"
+  - id: "cm4ai:acq_crispr"
+    name: "CRISPR perturbation screens"
+    description: "Single-cell CRISPR-Cas perturbation screens"
+    was_directly_observed: true
+    acquisition_details:
+      - "Functional genomics via CRISPR perturbation"

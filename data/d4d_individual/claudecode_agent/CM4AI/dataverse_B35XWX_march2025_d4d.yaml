@@ -1,0 +1,77 @@
+# D4D Datasheet extracted from dataverse_10.18130_V3_B35XWX_row16.txt
+# Project: CM4AI
+# Generation Method: Claude Code Agent
+# Source: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_B35XWX_row16.txt
+# Generated: 2025-12-05
+
+id: "doi:10.18130/V3/B35XWX"
+name: "Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)"
+title: "Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)"
+version: "1.4"
+description: |
+  This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org),
+  the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes
+  perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs
+  and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells
+  in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged
+  with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework.
+page: "https://doi.org/10.18130/V3/B35XWX"
+license: "CC BY-NC-SA 4.0"
+
+creators:
+  - id: "cm4ai:creator_clark_march"
+    name: "Timothy Clark"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_parker_march"
+    name: "Justin Parker"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_almanir"
+    name: "Sadnan Al Manir"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_axelsson"
+    name: "Ulrika Axelsson"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_navarro"
+    name: "Francisco Balllosero Navarro"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_ideker_march"
+    name: "Trey Ideker"
+    description: "Dataset creator"
+
+keywords:
+  - "AI"
+  - "artificial intelligence"
+  - "breast cancer"
+  - "Bridge2AI"
+  - "cardiomyocyte"
+  - "CM4AI"
+  - "CRISPR/Cas9"
+  - "iPSC"
+  - "KOLF2.1J"
+  - "machine learning"
+  - "mass spectroscopy"
+  - "MDA-MB-468"
+  - "neuron"
+  - "paclitaxel"
+  - "perturb-seq"
+  - "protein-protein interaction"
+  - "SEC-MS"
+  - "vorinostat"
+
+subsets:
+  - id: "cm4ai:subset_crispr_atlas"
+    name: "CRISPR Perturbation Cell Atlas"
+    description: "Expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J human iPSCs mapping transcriptional and fitness phenotypes for 11,739 targeted genes"
+  - id: "cm4ai:subset_paclitaxel"
+    name: "Protein Localization Subcellular Images - Paclitaxel"
+    description: "Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated with paclitaxel (2.6 GB)"
+  - id: "cm4ai:subset_untreated"
+    name: "Protein Localization Subcellular Images - Untreated"
+    description: "Spatial localization of 563 proteins in untreated MDA-MB-468 breast cancer cells (3.2 GB)"
+  - id: "cm4ai:subset_vorinostat"
+    name: "Protein Localization Subcellular Images - Vorinostat"
+    description: "Spatial localization of 563 proteins in MDA-MB-468 breast cancer cells treated with vorinostat (2.8 GB)"
+
+citation: |
+  Clark T, Parker J, Schaffer L, et al. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell
+  Architecture from Disease-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05.21.589311

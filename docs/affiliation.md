@@ -3,8 +3,13 @@
 # Slot: affiliation 
 
 
+_The organization(s) to which the person belongs in the context of this dataset. May vary across datasets; multivalued to support multiple affiliations._
 
-URI: [data_sheets_schema:affiliation](https://w3id.org/bridge2ai/data-sheets-schema/affiliation)
+
+
+
+
+URI: [schema:affiliation](http://schema.org/affiliation)
 Alias: affiliation
 
 <!-- no inheritance hierarchy -->
@@ -17,7 +22,6 @@ Alias: affiliation
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [Creator](Creator.md) | Who created the dataset (e |  no  |
 | [Person](Person.md) | An individual human being |  no  |
 
 
@@ -27,7 +31,9 @@ Alias: affiliation
 
 ## Properties
 
-* Range: [String](String.md)
+* Range: [Organization](Organization.md)
+
+* Multivalued: True
 
 
 
@@ -39,12 +45,19 @@ Alias: affiliation
 
 
 
+### Schema Source
+
+
+* from schema: https://w3id.org/bridge2ai/data-sheets-schema
+
+
+
 
 ## Mappings
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:affiliation |
+| self | schema:affiliation |
 | native | data_sheets_schema:affiliation |
 
 
@@ -55,11 +68,17 @@ Alias: affiliation
 <details>
 ```yaml
 name: affiliation
+description: The organization(s) to which the person belongs in the context of this
+  dataset. May vary across datasets; multivalued to support multiple affiliations.
+from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+rank: 1000
+slot_uri: schema:affiliation
 alias: affiliation
+owner: Person
 domain_of:
 - Person
-- Creator
-range: string
+range: Organization
+multivalued: true
 
 ```
 </details>

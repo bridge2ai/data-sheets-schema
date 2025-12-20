@@ -4,7 +4,7 @@
 
 
 
-URI: [data_sheets_schema:warnings](https://w3id.org/bridge2ai/data-sheets-schema/warnings)
+URI: [dcterms:description](http://purl.org/dc/terms/description)
 Alias: warnings
 
 <!-- no inheritance hierarchy -->
@@ -52,7 +52,7 @@ Alias: warnings
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | data_sheets_schema:warnings |
+| self | dcterms:description |
 | native | data_sheets_schema:warnings |
 
 
@@ -65,6 +65,7 @@ Alias: warnings
 name: warnings
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: dcterms:description
 alias: warnings
 owner: ContentWarning
 domain_of:

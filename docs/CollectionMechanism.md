@@ -3,7 +3,7 @@
 # Class: CollectionMechanism 
 
 
-_What mechanisms or procedures were used to collect the data (e.g., hardware,  manual curation, software APIs)? Also covers how these mechanisms were validated._
+_What mechanisms or procedures were used to collect the data (e.g., hardware, manual curation, software APIs)? Also covers how these mechanisms were validated._
 
 __
 
@@ -28,6 +28,8 @@ URI: [data_sheets_schema:CollectionMechanism](https://w3id.org/bridge2ai/data-sh
         
       CollectionMechanism : id
         
+      CollectionMechanism : mechanism_details
+        
       CollectionMechanism : name
         
       CollectionMechanism : used_software
@@ -49,9 +51,8 @@ URI: [data_sheets_schema:CollectionMechanism](https://w3id.org/bridge2ai/data-sh
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **CollectionMechanism**
+* [DatasetProperty](DatasetProperty.md)
+    * **CollectionMechanism**
 
 
 
@@ -59,10 +60,11 @@ URI: [data_sheets_schema:CollectionMechanism](https://w3id.org/bridge2ai/data-sh
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [String](String.md) | Free-text description of the collection mechanism(s) | direct |
+| [mechanism_details](mechanism_details.md) | * <br/> [String](String.md) | Details on mechanisms or procedures used to collect the data | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -102,6 +104,7 @@ URI: [data_sheets_schema:CollectionMechanism](https://w3id.org/bridge2ai/data-sh
 | ---  | ---  |
 | self | data_sheets_schema:CollectionMechanism |
 | native | data_sheets_schema:CollectionMechanism |
+| exact | rai:dataCollection |
 
 
 
@@ -117,56 +120,25 @@ URI: [data_sheets_schema:CollectionMechanism](https://w3id.org/bridge2ai/data-sh
 <details>
 ```yaml
 name: CollectionMechanism
-description: 'What mechanisms or procedures were used to collect the data (e.g., hardware,  manual
-  curation, software APIs)? Also covers how these mechanisms were validated.
+description: 'What mechanisms or procedures were used to collect the data (e.g., hardware,
+  manual curation, software APIs)? Also covers how these mechanisms were validated.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:dataCollection
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: Free-text description of the collection mechanism(s)
+  mechanism_details:
+    name: mechanism_details
+    description: 'Details on mechanisms or procedures used to collect the data.
+
+      '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    slot_uri: dcterms:description
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
     - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
 
@@ -178,60 +150,63 @@ attributes:
 <details>
 ```yaml
 name: CollectionMechanism
-description: 'What mechanisms or procedures were used to collect the data (e.g., hardware,  manual
-  curation, software APIs)? Also covers how these mechanisms were validated.
+description: 'What mechanisms or procedures were used to collect the data (e.g., hardware,
+  manual curation, software APIs)? Also covers how these mechanisms were validated.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+exact_mappings:
+- rai:dataCollection
 is_a: DatasetProperty
 attributes:
+  mechanism_details:
+    name: mechanism_details
+    description: 'Details on mechanisms or procedures used to collect the data.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: mechanism_details
+    owner: CollectionMechanism
+    domain_of:
+    - CollectionMechanism
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: CollectionMechanism
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: CollectionMechanism
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
   description:
     name: description
-    description: Free-text description of the collection mechanism(s)
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: CollectionMechanism
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -243,30 +218,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: CollectionMechanism
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: CollectionMechanism
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

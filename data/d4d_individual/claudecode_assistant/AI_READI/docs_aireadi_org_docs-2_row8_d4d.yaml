@@ -1,0 +1,37 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/docs_aireadi_org_docs-2_row8.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "aireadi:documentation_v1"
+name: "AI-READI Dataset Documentation v1.0"
+title: "Documentation for the AI-READI Dataset (Pilot Study Phase)"
+version: "1.0"
+description: |
+  Documentation for the AI-READI dataset (v1.0) from the pilot study phase. The AI-READI dataset
+  consists of data collected from individuals with and without Type 2 Diabetes Mellitus (T2DM)
+  and harmonized across 3 data collection sites. The dataset composition was designed for future
+  AI/ML studies with balanced recruitment across diabetes severity.
+page: "https://docs.aireadi.org"
+
+purposes:
+  - id: "aireadi:purpose_salutogenesis_v1"
+    name: "Understand T2DM salutogenesis"
+    description: "Better understand the pathway from disease to health in T2DM"
+    response: "Better understand salutogenesis (the pathway from disease to health) in T2DM"
+
+subsets:
+  - id: "aireadi:subset_public_v1"
+    name: "Public access data"
+    description: "Survey data, lab results, fitness activity, clinical measurements, retinal images, ECG, blood sugar, environmental variables"
+  - id: "aireadi:subset_controlled_v1"
+    name: "Controlled access data"
+    description: "5-digit zip code, sex, race, ethnicity, genetic sequencing, health records, medications"
+
+keywords:
+  - "AI-READI"
+  - "T2DM"
+  - "type 2 diabetes"
+  - "pilot study"
+  - "documentation"

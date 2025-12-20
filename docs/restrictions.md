@@ -3,13 +3,6 @@
 # Slot: restrictions 
 
 
-_Description of any restrictions or fees associated with external resources._
-
-__
-
-
-
-
 
 URI: [data_sheets_schema:restrictions](https://w3id.org/bridge2ai/data-sheets-schema/restrictions)
 Alias: restrictions
@@ -25,6 +18,7 @@ Alias: restrictions
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
 | [ExternalResource](ExternalResource.md) | Is the dataset self-contained or does it rely on external resources (e |  no  |
+| [IPRestrictions](IPRestrictions.md) | Have any third parties imposed IP-based or other restrictions on the data ass... |  no  |
 
 
 
@@ -35,8 +29,6 @@ Alias: restrictions
 
 * Range: [String](String.md)
 
-* Multivalued: True
-
 
 
 
@@ -44,13 +36,6 @@ Alias: restrictions
 
 
 
-
-
-
-### Schema Source
-
-
-* from schema: https://w3id.org/bridge2ai/data-sheets-schema
 
 
 
@@ -70,17 +55,11 @@ Alias: restrictions
 <details>
 ```yaml
 name: restrictions
-description: 'Description of any restrictions or fees associated with external resources.
-
-  '
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
 alias: restrictions
-owner: ExternalResource
 domain_of:
 - ExternalResource
+- IPRestrictions
 range: string
-multivalued: true
 
 ```
 </details>

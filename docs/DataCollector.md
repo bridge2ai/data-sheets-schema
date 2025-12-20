@@ -3,7 +3,7 @@
 # Class: DataCollector 
 
 
-_Who was involved in the data collection (e.g., students, crowdworkers, contractors),  and how they were compensated._
+_Who was involved in the data collection (e.g., students, crowdworkers, contractors), and how they were compensated._
 
 __
 
@@ -24,11 +24,15 @@ URI: [data_sheets_schema:DataCollector](https://w3id.org/bridge2ai/data-sheets-s
       DatasetProperty <|-- DataCollector
         click DatasetProperty href "../DatasetProperty/"
       
+      DataCollector : collector_details
+        
       DataCollector : description
         
       DataCollector : id
         
       DataCollector : name
+        
+      DataCollector : role
         
       DataCollector : used_software
         
@@ -49,9 +53,8 @@ URI: [data_sheets_schema:DataCollector](https://w3id.org/bridge2ai/data-sheets-s
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **DataCollector**
+* [DatasetProperty](DatasetProperty.md)
+    * **DataCollector**
 
 
 
@@ -59,10 +62,12 @@ URI: [data_sheets_schema:DataCollector](https://w3id.org/bridge2ai/data-sheets-s
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [String](String.md) | Free-text details about the data collectors and compensation | direct |
+| [role](role.md) | 0..1 <br/> [String](String.md) | Role of the data collector (e | direct |
+| [collector_details](collector_details.md) | * <br/> [String](String.md) | Details on who collected the data and their compensation | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -118,55 +123,31 @@ URI: [data_sheets_schema:DataCollector](https://w3id.org/bridge2ai/data-sheets-s
 ```yaml
 name: DataCollector
 description: 'Who was involved in the data collection (e.g., students, crowdworkers,
-  contractors),  and how they were compensated.
+  contractors), and how they were compensated.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: Free-text details about the data collectors and compensation
+  role:
+    name: role
+    description: Role of the data collector (e.g., researcher, crowdworker)
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
     - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
     - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    range: string
+  collector_details:
+    name: collector_details
+    description: 'Details on who collected the data and their compensation.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    slot_uri: dcterms:description
+    domain_of:
+    - DataCollector
     range: string
     multivalued: true
 
@@ -179,59 +160,71 @@ attributes:
 ```yaml
 name: DataCollector
 description: 'Who was involved in the data collection (e.g., students, crowdworkers,
-  contractors),  and how they were compensated.
+  contractors), and how they were compensated.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
+  role:
+    name: role
+    description: Role of the data collector (e.g., researcher, crowdworker)
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    alias: role
+    owner: DataCollector
+    domain_of:
+    - DataCollector
+    - Maintainer
+    range: string
+  collector_details:
+    name: collector_details
+    description: 'Details on who collected the data and their compensation.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: collector_details
+    owner: DataCollector
+    domain_of:
+    - DataCollector
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: DataCollector
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: DataCollector
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
   description:
     name: description
-    description: Free-text details about the data collectors and compensation
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: DataCollector
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -243,30 +236,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: DataCollector
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: DataCollector
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

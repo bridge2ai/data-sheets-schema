@@ -1,0 +1,39 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/github_eipm_bridge2ai-docs_README_row22.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "voice:github_docs_readme"
+name: "Bridge2AI Voice Documentation README"
+title: "bridge2ai-docs README - Voice as a Biomarker of Health"
+description: |
+  README documentation for the bridge2ai-docs repository. Provides documentation for
+  the Bridge2AI Voice Project under the MIT License. Citable via Zenodo DOI.
+page: "https://github.com/eipm/bridge2ai-docs"
+license: "MIT"
+
+creators:
+  - id: "voice:creator_sigaras"
+    name: "Alexandros Sigaras"
+    description: "Lead developer, Zenodo citation"
+  - id: "voice:creator_zisimopoulos"
+    name: "Panagiotis Zisimopoulos"
+    description: "Developer"
+  - id: "voice:creator_tang"
+    name: "Jimmy Tang"
+    description: "Developer"
+
+external_resources:
+  - id: "voice:extres_zenodo_docs"
+    name: "Zenodo DOI"
+    description: "Citable DOI for bridge2ai-docs repository"
+    external_resources:
+      - "https://zenodo.org/doi/10.5281/zenodo.13834653"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "documentation"
+  - "Zenodo"
+  - "MIT"

@@ -219,6 +219,7 @@ attributes:
     description: compression format used, if any. e.g., gzip, bzip2, zip
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcat:compressFormat
     alias: compression
     owner: Information
     domain_of:
@@ -258,7 +259,7 @@ attributes:
     name: created_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:createdBy
+    slot_uri: dcterms:creator
     alias: created_by
     owner: Information
     domain_of:
@@ -268,7 +269,7 @@ attributes:
     name: created_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:createdOn
+    slot_uri: dcterms:created
     alias: created_on
     owner: Information
     domain_of:
@@ -279,7 +280,7 @@ attributes:
     description: digital object identifier
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: void:uriRegexPattern
+    slot_uri: dcterms:identifier
     alias: doi
     owner: Information
     domain_of:
@@ -294,8 +295,6 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:url
-    close_mappings:
-    - frictionless:path
     rank: 1000
     slot_uri: dcat:downloadURL
     alias: download_url
@@ -328,7 +327,10 @@ attributes:
     name: language
     description: language in which the information is expressed
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:inLanguage
     rank: 1000
+    slot_uri: dcterms:language
     alias: language
     owner: Information
     domain_of:
@@ -338,7 +340,7 @@ attributes:
     name: last_updated_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:lastUpdatedOn
+    slot_uri: dcterms:modified
     alias: last_updated_on
     owner: Information
     domain_of:
@@ -359,7 +361,7 @@ attributes:
     name: modified_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:lastUpdateBy
+    slot_uri: dcterms:contributor
     alias: modified_by
     owner: Information
     domain_of:
@@ -389,6 +391,7 @@ attributes:
     name: status
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:type
     alias: status
     owner: Information
     domain_of:
@@ -409,7 +412,7 @@ attributes:
     name: version
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:version
+    slot_uri: dcterms:hasVersion
     alias: version
     owner: Information
     domain_of:
@@ -419,8 +422,10 @@ attributes:
   was_derived_from:
     name: was_derived_from
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - dcterms:source
     rank: 1000
-    slot_uri: pav:derivedFrom
+    slot_uri: prov:wasDerivedFrom
     alias: was_derived_from
     owner: Information
     domain_of:
@@ -437,6 +442,7 @@ attributes:
     owner: Information
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -449,6 +455,7 @@ attributes:
     owner: Information
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -460,43 +467,8 @@ attributes:
     owner: Information
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
 
 ```

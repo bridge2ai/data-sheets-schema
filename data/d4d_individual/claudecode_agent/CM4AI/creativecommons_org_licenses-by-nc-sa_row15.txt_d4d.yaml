@@ -1,0 +1,264 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: https://creativecommons.org/licenses/by-nc-sa/4.0/
+name: CC_BY_NC_SA_4_0_License
+title: Attribution-NonCommercial-ShareAlike 4.0 International
+description: |
+  This is the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license (CC BY-NC-SA 4.0) that governs the use and distribution of CM4AI datasets. This license allows users to share (copy and redistribute the material in any medium or format) and adapt (remix, transform, and build upon the material) the licensed material, but with specific terms and restrictions. The licensor cannot revoke these freedoms as long as users follow the license terms.
+
+  Under this license, users must: (1) give appropriate credit, provide a link to the license, and indicate if changes were made; (2) not use the material for commercial purposes; (3) if remixing, transforming, or building upon the material, distribute contributions under the same license as the original; and (4) not apply legal terms or technological measures that legally restrict others from doing anything the license permits.
+
+version: 4.0
+issued: null
+modified: null
+was_derived_from: null
+has_part: null
+conforms_to: null
+conforms_to_schema: null
+conforms_to_class: null
+resources: null
+
+standards_and_requirements_id: null
+rai_citation: null
+
+creators:
+  - id: null
+    name: Creative Commons
+    affiliation: null
+    email: info@creativecommons.org
+
+contributors: null
+
+contacts:
+  - id: null
+    name: Creative Commons
+    affiliation: null
+    email: info@creativecommons.org
+
+publishers:
+  - id: null
+    name: Creative Commons
+    description: Nonprofit organization behind open licenses and legal tools
+
+domain_experts: null
+
+funders: null
+
+licenses:
+  - id: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    name: CC BY-NC-SA 4.0
+    description: |
+      Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license. This license allows reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.
+    legal_code_url: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+    deed_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+rights_holder:
+  - id: null
+    name: Creative Commons
+    description: License provider and steward
+
+citation: null
+
+references: null
+
+keywords:
+  - open license
+  - Creative Commons
+  - Attribution
+  - NonCommercial
+  - ShareAlike
+  - copyright
+  - legal tools
+  - data licensing
+
+alternative_names:
+  - CC BY-NC-SA 4.0
+
+motivation_why_created:
+  motivation_for_creation: |
+    The Creative Commons licenses were created to allow creators to share their work while retaining some rights. The CC BY-NC-SA 4.0 license specifically enables sharing and adaptation with attribution, while prohibiting commercial use and requiring derivative works to be licensed under the same terms. This supports open science and data sharing while protecting creator rights and ensuring attribution.
+
+  primary_use: |
+    The license is used to govern the distribution and reuse of creative works, datasets, and other materials, ensuring that users provide appropriate credit, refrain from commercial use, and share derivatives under the same license terms.
+
+  other_tasks: null
+
+  gap_in_knowledge: null
+
+composition_what_data:
+  instance_type: |
+    This is a legal license document that defines terms and conditions for use, sharing, and adaptation of licensed materials. It includes deed summary, legal code, and machine-readable metadata.
+
+  instance_count: null
+
+  instance_structure: null
+
+  data_splits: null
+
+  de_identification_methods: null
+
+  sensitive_information_risk: null
+
+  confidential_items: null
+
+  individual_instances: null
+
+  subpopulation_description: null
+
+  missing_info: null
+
+  relationship_between_instances: null
+
+  other_information: null
+
+  recommended_data_splits: null
+
+  error_sources: null
+
+collection_how_collected:
+  collection_method: |
+    This license was developed by Creative Commons through legal and community processes to provide standardized terms for sharing creative works.
+
+  sampling_strategy: null
+
+  data_collection_timeframe: null
+
+  data_source_description: null
+
+  who_collected_data:
+    - id: null
+      name: Creative Commons
+      description: Nonprofit organization that develops and maintains open licenses
+      affiliation: null
+
+  collection_mechanisms: null
+
+  validation_and_verification: null
+
+  ethical_review_status: null
+
+preprocessing_cleaning_labeling_what_preprocessing:
+  preprocessing_strategy: null
+
+  preprocessing_tools: null
+
+  raw_data_availability: null
+
+  cleaned_data_availability: null
+
+uses_when_appropriate:
+  appropriate_use_cases: |
+    Appropriate uses include:
+    1. Sharing and redistributing licensed material in any medium or format
+    2. Adapting, remixing, transforming, and building upon the material for non-commercial purposes
+    3. Using the material for research, education, and other non-commercial applications
+    4. Creating derivative works that comply with ShareAlike requirements
+
+  inappropriate_use_cases: |
+    Inappropriate uses include:
+    1. Using the material for commercial purposes without separate licensing
+    2. Failing to provide appropriate credit to creators
+    3. Applying additional legal or technological restrictions beyond the license
+    4. Using the material in ways that violate exceptions, limitations, or other applicable laws
+
+  repository_tasks: null
+
+  impact_on_underserved_populations: null
+
+  unsuitable_applications: |
+    The license is not suitable for materials intended for unrestricted commercial use or materials that should not have ShareAlike requirements.
+
+  further_research_questions: null
+
+distribution_how_distributed:
+  distribution_formats:
+    - id: null
+      name: HTML deed
+      description: Human-readable summary of license terms
+      format: HTML
+      media_type: text/html
+      compression: null
+      encoding: null
+      dialect: null
+    - id: null
+      name: Legal code
+      description: Full legal text of the license
+      format: HTML
+      media_type: text/html
+      compression: null
+      encoding: null
+      dialect: null
+
+  distribution_location:
+    - id: https://creativecommons.org/licenses/by-nc-sa/4.0/
+      name: Creative Commons website
+      url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+      description: Official canonical URL for the license
+
+  distribution_date: null
+
+  doi: null
+
+  persistent_identifier:
+    - https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+  access_control: |
+    The license text is freely available to all without restrictions. It is not itself subject to copyright but rather defines terms for use of copyrighted materials.
+
+  dataset_ip_and_licensing: |
+    The license defines intellectual property terms for materials licensed under it. Materials must provide appropriate credit (name of creator, attribution parties, copyright notice, license notice, disclaimer notice, and link to material), indicate if changes were made, not be used for commercial purposes, and if adapted, be distributed under the same CC BY-NC-SA 4.0 license or a compatible license.
+
+  fee: |
+    There is no fee to use the license or access the license text. However, datasets distributed under this license may not be used for commercial purposes without separate licensing arrangements.
+
+  export_controls_or_restrictions: null
+
+maintenance_who_maintains:
+  maintenance_contact:
+    - id: null
+      name: Creative Commons
+      email: info@creativecommons.org
+      affiliation: null
+
+  maintenance_period: null
+
+  update_frequency: null
+
+  versioning: |
+    The license is version 4.0 International. Creative Commons maintains multiple versions of its licenses and provides guidance on compatibility between versions.
+
+  updates_to_tasks: null
+
+  retention_limits: null
+
+  errata: null
+
+ethics_institutional_review: null
+
+human_subject_research: null
+
+vulnerable_populations: null
+
+ethics_deidentification: null
+
+ethics_consent_and_notification: |
+    The license includes provisions that users may need to get additional permissions before using material as intended, particularly regarding publicity, privacy, or moral rights.
+
+ethics_privacy: |
+  Users must comply with applicable exceptions and limitations such as fair use and fair dealing. The license does not affect rights of privacy, publicity, or moral rights that may limit how material is used.
+
+ethics_impact_assessment: null
+
+data_governance_process: |
+  Creative Commons provides the legal framework for licensing but does not govern individual licensed works. Works licensed under CC BY-NC-SA 4.0 are governed by the license holders and their chosen data governance practices, subject to the license terms.
+
+third_party_sharing: |
+  The license explicitly allows sharing and redistribution of licensed material, provided users comply with the attribution, non-commercial, and ShareAlike requirements.
+
+access_restrictions: |
+  Licensed material is freely accessible, but use is restricted to non-commercial purposes unless separate commercial licensing is obtained. Users must provide attribution and share derivatives under the same license.

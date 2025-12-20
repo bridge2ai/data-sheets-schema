@@ -49,6 +49,17 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
     
 
         
+      Dataset : annotation_analyses
+        
+          
+    
+        
+        
+        Dataset --> "*" AnnotationAnalysis : annotation_analyses
+        click AnnotationAnalysis href "../AnnotationAnalysis/"
+    
+
+        
       Dataset : anomalies
         
           
@@ -61,6 +72,8 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
 
         
       Dataset : bytes
+        
+      Dataset : citation
         
       Dataset : cleaning_strategies
         
@@ -313,7 +326,40 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
         
       Dataset : hash
         
+      Dataset : human_subject_research
+        
+          
+    
+        
+        
+        Dataset --> "0..1" HumanSubjectResearch : human_subject_research
+        click HumanSubjectResearch href "../HumanSubjectResearch/"
+    
+
+        
       Dataset : id
+        
+      Dataset : imputation_protocols
+        
+          
+    
+        
+        
+        Dataset --> "*" ImputationProtocol : imputation_protocols
+        click ImputationProtocol href "../ImputationProtocol/"
+    
+
+        
+      Dataset : informed_consent
+        
+          
+    
+        
+        
+        Dataset --> "*" InformedConsent : informed_consent
+        click InformedConsent href "../InformedConsent/"
+    
+
         
       Dataset : instances
         
@@ -323,6 +369,17 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
         
         Dataset --> "*" Instance : instances
         click Instance href "../Instance/"
+    
+
+        
+      Dataset : intended_uses
+        
+          
+    
+        
+        
+        Dataset --> "*" IntendedUse : intended_uses
+        click IntendedUse href "../IntendedUse/"
     
 
         
@@ -354,6 +411,28 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
         
       Dataset : keywords
         
+      Dataset : known_biases
+        
+          
+    
+        
+        
+        Dataset --> "*" DatasetBias : known_biases
+        click DatasetBias href "../DatasetBias/"
+    
+
+        
+      Dataset : known_limitations
+        
+          
+    
+        
+        
+        Dataset --> "*" DatasetLimitation : known_limitations
+        click DatasetLimitation href "../DatasetLimitation/"
+    
+
+        
       Dataset : labeling_strategies
         
           
@@ -382,6 +461,17 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
     
 
         
+      Dataset : machine_annotation_tools
+        
+          
+    
+        
+        
+        Dataset --> "*" MachineAnnotationTools : machine_annotation_tools
+        click MachineAnnotationTools href "../MachineAnnotationTools/"
+    
+
+        
       Dataset : maintainers
         
           
@@ -406,6 +496,17 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
     
 
         
+      Dataset : missing_data_documentation
+        
+          
+    
+        
+        
+        Dataset --> "*" MissingDataDocumentation : missing_data_documentation
+        click MissingDataDocumentation href "../MissingDataDocumentation/"
+    
+
+        
       Dataset : modified_by
         
       Dataset : name
@@ -423,6 +524,39 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
         
       Dataset : page
         
+      Dataset : parent_datasets
+        
+          
+    
+        
+        
+        Dataset --> "*" Dataset : parent_datasets
+        click Dataset href "../Dataset/"
+    
+
+        
+      Dataset : participant_compensation
+        
+          
+    
+        
+        
+        Dataset --> "0..1" HumanSubjectCompensation : participant_compensation
+        click HumanSubjectCompensation href "../HumanSubjectCompensation/"
+    
+
+        
+      Dataset : participant_privacy
+        
+          
+    
+        
+        
+        Dataset --> "*" ParticipantPrivacy : participant_privacy
+        click ParticipantPrivacy href "../ParticipantPrivacy/"
+    
+
+        
       Dataset : path
         
       Dataset : preprocessing_strategies
@@ -436,6 +570,17 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
     
 
         
+      Dataset : prohibited_uses
+        
+          
+    
+        
+        
+        Dataset --> "*" ProhibitedUse : prohibited_uses
+        click ProhibitedUse href "../ProhibitedUse/"
+    
+
+        
       Dataset : publisher
         
       Dataset : purposes
@@ -446,6 +591,17 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
         
         Dataset --> "*" Purpose : purposes
         click Purpose href "../Purpose/"
+    
+
+        
+      Dataset : raw_data_sources
+        
+          
+    
+        
+        
+        Dataset --> "*" RawDataSource : raw_data_sources
+        click RawDataSource href "../RawDataSource/"
     
 
         
@@ -468,6 +624,28 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
         
         Dataset --> "0..1" ExportControlRegulatoryRestrictions : regulatory_restrictions
         click ExportControlRegulatoryRestrictions href "../ExportControlRegulatoryRestrictions/"
+    
+
+        
+      Dataset : related_datasets
+        
+          
+    
+        
+        
+        Dataset --> "*" DatasetRelationship : related_datasets
+        click DatasetRelationship href "../DatasetRelationship/"
+    
+
+        
+      Dataset : resources
+        
+          
+    
+        
+        
+        Dataset --> "*" Dataset : resources
+        click Dataset href "../Dataset/"
     
 
         
@@ -565,6 +743,17 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
     
 
         
+      Dataset : variables
+        
+          
+    
+        
+        
+        Dataset --> "*" VariableMetadata : variables
+        click VariableMetadata href "../VariableMetadata/"
+    
+
+        
       Dataset : version
         
       Dataset : version_access
@@ -575,6 +764,17 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
         
         Dataset --> "0..1" VersionAccess : version_access
         click VersionAccess href "../VersionAccess/"
+    
+
+        
+      Dataset : vulnerable_populations
+        
+          
+    
+        
+        
+        Dataset --> "0..1" VulnerablePopulations : vulnerable_populations
+        click VulnerablePopulations href "../VulnerablePopulations/"
     
 
         
@@ -608,6 +808,8 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
 | [media_type](media_type.md) | 0..1 <br/> [MediaTypeEnum](MediaTypeEnum.md) | The media type of the data | direct |
 | [path](path.md) | 0..1 <br/> [String](String.md) |  | direct |
 | [sha256](sha256.md) | 0..1 <br/> [String](String.md) | sha256 hash of the data | direct |
+| [external_resources](external_resources.md) | * <br/> [ExternalResource](ExternalResource.md) | Links or identifiers for external resources | direct |
+| [resources](resources.md) | * <br/> [Dataset](Dataset.md) | Sub-resources or component datasets that are part of this dataset | direct |
 | [purposes](purposes.md) | * <br/> [Purpose](Purpose.md) |  | direct |
 | [tasks](tasks.md) | * <br/> [Task](Task.md) |  | direct |
 | [addressing_gaps](addressing_gaps.md) | * <br/> [AddressingGap](AddressingGap.md) |  | direct |
@@ -616,7 +818,8 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
 | [subsets](subsets.md) | * <br/> [DataSubset](DataSubset.md) |  | direct |
 | [instances](instances.md) | * <br/> [Instance](Instance.md) |  | direct |
 | [anomalies](anomalies.md) | * <br/> [DataAnomaly](DataAnomaly.md) |  | direct |
-| [external_resources](external_resources.md) | * <br/> [ExternalResource](ExternalResource.md) |  | direct |
+| [known_biases](known_biases.md) | * <br/> [DatasetBias](DatasetBias.md) | Known biases present in the dataset that may affect fairness, representativen... | direct |
+| [known_limitations](known_limitations.md) | * <br/> [DatasetLimitation](DatasetLimitation.md) | Known limitations of the dataset that may affect its use or interpretation | direct |
 | [confidential_elements](confidential_elements.md) | * <br/> [Confidentiality](Confidentiality.md) |  | direct |
 | [content_warnings](content_warnings.md) | * <br/> [ContentWarning](ContentWarning.md) |  | direct |
 | [subpopulations](subpopulations.md) | * <br/> [Subpopulation](Subpopulation.md) |  | direct |
@@ -626,17 +829,29 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
 | [sampling_strategies](sampling_strategies.md) | * <br/> [SamplingStrategy](SamplingStrategy.md) |  | direct |
 | [data_collectors](data_collectors.md) | * <br/> [DataCollector](DataCollector.md) |  | direct |
 | [collection_timeframes](collection_timeframes.md) | * <br/> [CollectionTimeframe](CollectionTimeframe.md) |  | direct |
+| [missing_data_documentation](missing_data_documentation.md) | * <br/> [MissingDataDocumentation](MissingDataDocumentation.md) | Documentation of missing data patterns and handling strategies | direct |
+| [raw_data_sources](raw_data_sources.md) | * <br/> [RawDataSource](RawDataSource.md) | Description of raw data sources before preprocessing | direct |
 | [ethical_reviews](ethical_reviews.md) | * <br/> [EthicalReview](EthicalReview.md) |  | direct |
 | [data_protection_impacts](data_protection_impacts.md) | * <br/> [DataProtectionImpact](DataProtectionImpact.md) |  | direct |
+| [human_subject_research](human_subject_research.md) | 0..1 <br/> [HumanSubjectResearch](HumanSubjectResearch.md) | Information about whether dataset involves human subjects research, including... | direct |
+| [informed_consent](informed_consent.md) | * <br/> [InformedConsent](InformedConsent.md) | Details about informed consent procedures, including consent type, documentat... | direct |
+| [participant_privacy](participant_privacy.md) | * <br/> [ParticipantPrivacy](ParticipantPrivacy.md) | Privacy protections and anonymization procedures for human research participa... | direct |
+| [participant_compensation](participant_compensation.md) | 0..1 <br/> [HumanSubjectCompensation](HumanSubjectCompensation.md) | Compensation or incentives provided to human research participants | direct |
+| [vulnerable_populations](vulnerable_populations.md) | 0..1 <br/> [VulnerablePopulations](VulnerablePopulations.md) | Information about protections for vulnerable populations (e | direct |
 | [preprocessing_strategies](preprocessing_strategies.md) | * <br/> [PreprocessingStrategy](PreprocessingStrategy.md) |  | direct |
 | [cleaning_strategies](cleaning_strategies.md) | * <br/> [CleaningStrategy](CleaningStrategy.md) |  | direct |
 | [labeling_strategies](labeling_strategies.md) | * <br/> [LabelingStrategy](LabelingStrategy.md) |  | direct |
 | [raw_sources](raw_sources.md) | * <br/> [RawData](RawData.md) |  | direct |
+| [imputation_protocols](imputation_protocols.md) | * <br/> [ImputationProtocol](ImputationProtocol.md) | Data imputation methodology and techniques | direct |
+| [annotation_analyses](annotation_analyses.md) | * <br/> [AnnotationAnalysis](AnnotationAnalysis.md) | Analysis of annotation quality and inter-annotator agreement | direct |
+| [machine_annotation_tools](machine_annotation_tools.md) | * <br/> [MachineAnnotationTools](MachineAnnotationTools.md) | Automated annotation tools used in dataset creation | direct |
 | [existing_uses](existing_uses.md) | * <br/> [ExistingUse](ExistingUse.md) |  | direct |
 | [use_repository](use_repository.md) | * <br/> [UseRepository](UseRepository.md) |  | direct |
 | [other_tasks](other_tasks.md) | * <br/> [OtherTask](OtherTask.md) |  | direct |
 | [future_use_impacts](future_use_impacts.md) | * <br/> [FutureUseImpact](FutureUseImpact.md) |  | direct |
 | [discouraged_uses](discouraged_uses.md) | * <br/> [DiscouragedUse](DiscouragedUse.md) |  | direct |
+| [intended_uses](intended_uses.md) | * <br/> [IntendedUse](IntendedUse.md) | Explicit intended and recommended uses for this dataset | direct |
+| [prohibited_uses](prohibited_uses.md) | * <br/> [ProhibitedUse](ProhibitedUse.md) | Explicitly prohibited or forbidden uses for this dataset | direct |
 | [distribution_formats](distribution_formats.md) | * <br/> [DistributionFormat](DistributionFormat.md) |  | direct |
 | [distribution_dates](distribution_dates.md) | * <br/> [DistributionDate](DistributionDate.md) |  | direct |
 | [license_and_use_terms](license_and_use_terms.md) | 0..1 <br/> [LicenseAndUseTerms](LicenseAndUseTerms.md) |  | direct |
@@ -648,8 +863,12 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
 | [retention_limit](retention_limit.md) | 0..1 <br/> [RetentionLimits](RetentionLimits.md) |  | direct |
 | [version_access](version_access.md) | 0..1 <br/> [VersionAccess](VersionAccess.md) |  | direct |
 | [extension_mechanism](extension_mechanism.md) | 0..1 <br/> [ExtensionMechanism](ExtensionMechanism.md) |  | direct |
+| [variables](variables.md) | * <br/> [VariableMetadata](VariableMetadata.md) | Metadata describing individual variables, fields, or columns in the dataset | direct |
 | [is_deidentified](is_deidentified.md) | 0..1 <br/> [Deidentification](Deidentification.md) |  | direct |
 | [is_tabular](is_tabular.md) | 0..1 <br/> [Boolean](Boolean.md) |  | direct |
+| [citation](citation.md) | 0..1 <br/> [String](String.md) | Recommended citation for this dataset in DataCite or BibTeX format | direct |
+| [parent_datasets](parent_datasets.md) | * <br/> [Dataset](Dataset.md) | Parent datasets that this dataset is part of or derived from | direct |
+| [related_datasets](related_datasets.md) | * <br/> [DatasetRelationship](DatasetRelationship.md) | Related datasets with typed relationships (e | direct |
 | [compression](compression.md) | 0..1 <br/> [CompressionEnum](CompressionEnum.md) | compression format used, if any | [Information](Information.md) |
 | [conforms_to](conforms_to.md) | 0..1 <br/> [String](String.md) |  | [Information](Information.md) |
 | [conforms_to_class](conforms_to_class.md) | 0..1 <br/> [String](String.md) |  | [Information](Information.md) |
@@ -683,6 +902,10 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
 | used by | used in | type | used |
 | ---  | --- | --- | --- |
 | [DatasetCollection](DatasetCollection.md) | [resources](resources.md) | range | [Dataset](Dataset.md) |
+| [Dataset](Dataset.md) | [resources](resources.md) | range | [Dataset](Dataset.md) |
+| [Dataset](Dataset.md) | [parent_datasets](parent_datasets.md) | range | [Dataset](Dataset.md) |
+| [DataSubset](DataSubset.md) | [resources](resources.md) | range | [Dataset](Dataset.md) |
+| [DataSubset](DataSubset.md) | [parent_datasets](parent_datasets.md) | range | [Dataset](Dataset.md) |
 
 
 
@@ -696,10 +919,6 @@ URI: [dcat:Distribution](http://www.w3.org/ns/dcat#Distribution)
 * data file
 * data package
 
-
-## See Also
-
-* [https://specs.frictionlessdata.io/data-resource](https://specs.frictionlessdata.io/data-resource)
 
 ## Identifier and Mapping Information
 
@@ -741,8 +960,6 @@ name: Dataset
 description: A single component of related observations and/or information that can
   be read, manipulated, transformed, and otherwise interpreted.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-see_also:
-- https://specs.frictionlessdata.io/data-resource
 aliases:
 - data resource
 - data file
@@ -760,6 +977,18 @@ slots:
 - media_type
 - path
 - sha256
+- external_resources
+- resources
+slot_usage:
+  external_resources:
+    name: external_resources
+    range: ExternalResource
+    inlined_as_list: true
+  resources:
+    name: resources
+    description: Sub-resources or component datasets that are part of this dataset.
+      Allows datasets to contain nested resource structures.
+    inlined_as_list: true
 attributes:
   purposes:
     name: purposes
@@ -769,6 +998,8 @@ attributes:
     - Dataset
     range: Purpose
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   tasks:
     name: tasks
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -777,6 +1008,8 @@ attributes:
     - Dataset
     range: Task
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   addressing_gaps:
     name: addressing_gaps
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -785,6 +1018,8 @@ attributes:
     - Dataset
     range: AddressingGap
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   creators:
     name: creators
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -793,6 +1028,8 @@ attributes:
     - Dataset
     range: Creator
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   funders:
     name: funders
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -801,6 +1038,8 @@ attributes:
     - Dataset
     range: FundingMechanism
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   subsets:
     name: subsets
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -812,6 +1051,8 @@ attributes:
     - Dataset
     range: DataSubset
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   instances:
     name: instances
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -820,6 +1061,8 @@ attributes:
     - Dataset
     range: Instance
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   anomalies:
     name: anomalies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -828,15 +1071,33 @@ attributes:
     - Dataset
     range: DataAnomaly
     multivalued: true
-  external_resources:
-    name: external_resources
+    inlined: true
+    inlined_as_list: true
+  known_biases:
+    name: known_biases
+    description: Known biases present in the dataset that may affect fairness, representativeness,
+      or model performance. Uses BiasTypeEnum for standardized bias categorization
+      mapped to the AI Ontology (AIO).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     domain_of:
     - Dataset
-    - ExternalResource
-    range: ExternalResource
+    range: DatasetBias
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  known_limitations:
+    name: known_limitations
+    description: Known limitations of the dataset that may affect its use or interpretation.
+      Distinct from biases (systematic errors) and anomalies (data quality issues).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: DatasetLimitation
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   confidential_elements:
     name: confidential_elements
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -845,6 +1106,8 @@ attributes:
     - Dataset
     range: Confidentiality
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   content_warnings:
     name: content_warnings
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -853,6 +1116,8 @@ attributes:
     - Dataset
     range: ContentWarning
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   subpopulations:
     name: subpopulations
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -861,6 +1126,8 @@ attributes:
     - Dataset
     range: Subpopulation
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   sensitive_elements:
     name: sensitive_elements
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -869,6 +1136,8 @@ attributes:
     - Dataset
     range: SensitiveElement
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   acquisition_methods:
     name: acquisition_methods
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -877,6 +1146,8 @@ attributes:
     - Dataset
     range: InstanceAcquisition
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   collection_mechanisms:
     name: collection_mechanisms
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -885,6 +1156,8 @@ attributes:
     - Dataset
     range: CollectionMechanism
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   sampling_strategies:
     name: sampling_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -894,6 +1167,8 @@ attributes:
     - Instance
     range: SamplingStrategy
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   data_collectors:
     name: data_collectors
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -902,6 +1177,8 @@ attributes:
     - Dataset
     range: DataCollector
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   collection_timeframes:
     name: collection_timeframes
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -910,6 +1187,30 @@ attributes:
     - Dataset
     range: CollectionTimeframe
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  missing_data_documentation:
+    name: missing_data_documentation
+    description: Documentation of missing data patterns and handling strategies.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: MissingDataDocumentation
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  raw_data_sources:
+    name: raw_data_sources
+    description: Description of raw data sources before preprocessing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: RawDataSource
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   ethical_reviews:
     name: ethical_reviews
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -918,6 +1219,8 @@ attributes:
     - Dataset
     range: EthicalReview
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   data_protection_impacts:
     name: data_protection_impacts
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -926,6 +1229,61 @@ attributes:
     - Dataset
     range: DataProtectionImpact
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  human_subject_research:
+    name: human_subject_research
+    description: Information about whether dataset involves human subjects research,
+      including IRB approval, ethics review, and regulatory compliance.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: HumanSubjectResearch
+    inlined: true
+  informed_consent:
+    name: informed_consent
+    description: Details about informed consent procedures, including consent type,
+      documentation, and withdrawal mechanisms.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: InformedConsent
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  participant_privacy:
+    name: participant_privacy
+    description: Privacy protections and anonymization procedures for human research
+      participants, including reidentification risk assessment.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: ParticipantPrivacy
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  participant_compensation:
+    name: participant_compensation
+    description: Compensation or incentives provided to human research participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: HumanSubjectCompensation
+    inlined: true
+  vulnerable_populations:
+    name: vulnerable_populations
+    description: Information about protections for vulnerable populations (e.g., minors,
+      pregnant women, prisoners) including special safeguards and assent procedures.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: VulnerablePopulations
+    inlined: true
   preprocessing_strategies:
     name: preprocessing_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -934,6 +1292,8 @@ attributes:
     - Dataset
     range: PreprocessingStrategy
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   cleaning_strategies:
     name: cleaning_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -942,6 +1302,8 @@ attributes:
     - Dataset
     range: CleaningStrategy
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   labeling_strategies:
     name: labeling_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -950,6 +1312,8 @@ attributes:
     - Dataset
     range: LabelingStrategy
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   raw_sources:
     name: raw_sources
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -958,6 +1322,41 @@ attributes:
     - Dataset
     range: RawData
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  imputation_protocols:
+    name: imputation_protocols
+    description: Data imputation methodology and techniques.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: ImputationProtocol
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  annotation_analyses:
+    name: annotation_analyses
+    description: Analysis of annotation quality and inter-annotator agreement.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: AnnotationAnalysis
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  machine_annotation_tools:
+    name: machine_annotation_tools
+    description: Automated annotation tools used in dataset creation.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: MachineAnnotationTools
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   existing_uses:
     name: existing_uses
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -966,6 +1365,8 @@ attributes:
     - Dataset
     range: ExistingUse
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   use_repository:
     name: use_repository
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -974,6 +1375,8 @@ attributes:
     - Dataset
     range: UseRepository
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   other_tasks:
     name: other_tasks
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -982,6 +1385,8 @@ attributes:
     - Dataset
     range: OtherTask
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   future_use_impacts:
     name: future_use_impacts
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -990,6 +1395,8 @@ attributes:
     - Dataset
     range: FutureUseImpact
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   discouraged_uses:
     name: discouraged_uses
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -998,6 +1405,32 @@ attributes:
     - Dataset
     range: DiscouragedUse
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  intended_uses:
+    name: intended_uses
+    description: Explicit intended and recommended uses for this dataset. Complements
+      future_use_impacts by focusing on positive applications.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: IntendedUse
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  prohibited_uses:
+    name: prohibited_uses
+    description: Explicitly prohibited or forbidden uses for this dataset. Stronger
+      than discouraged_uses - these are not permitted.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: ProhibitedUse
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   distribution_formats:
     name: distribution_formats
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1006,6 +1439,8 @@ attributes:
     - Dataset
     range: DistributionFormat
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   distribution_dates:
     name: distribution_dates
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1014,6 +1449,8 @@ attributes:
     - Dataset
     range: DistributionDate
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   license_and_use_terms:
     name: license_and_use_terms
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1021,6 +1458,7 @@ attributes:
     domain_of:
     - Dataset
     range: LicenseAndUseTerms
+    inlined: true
   ip_restrictions:
     name: ip_restrictions
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1028,13 +1466,16 @@ attributes:
     domain_of:
     - Dataset
     range: IPRestrictions
+    inlined: true
   regulatory_restrictions:
     name: regulatory_restrictions
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     domain_of:
     - Dataset
+    - ExportControlRegulatoryRestrictions
     range: ExportControlRegulatoryRestrictions
+    inlined: true
   maintainers:
     name: maintainers
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1043,6 +1484,8 @@ attributes:
     - Dataset
     range: Maintainer
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   errata:
     name: errata
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1051,6 +1494,8 @@ attributes:
     - Dataset
     range: Erratum
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   updates:
     name: updates
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1058,6 +1503,7 @@ attributes:
     domain_of:
     - Dataset
     range: UpdatePlan
+    inlined: true
   retention_limit:
     name: retention_limit
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1065,6 +1511,7 @@ attributes:
     domain_of:
     - Dataset
     range: RetentionLimits
+    inlined: true
   version_access:
     name: version_access
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1072,6 +1519,7 @@ attributes:
     domain_of:
     - Dataset
     range: VersionAccess
+    inlined: true
   extension_mechanism:
     name: extension_mechanism
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1079,6 +1527,22 @@ attributes:
     domain_of:
     - Dataset
     range: ExtensionMechanism
+    inlined: true
+  variables:
+    name: variables
+    description: Metadata describing individual variables, fields, or columns in the
+      dataset.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:variableMeasured
+    rank: 1000
+    slot_uri: schema:variableMeasured
+    domain_of:
+    - Dataset
+    range: VariableMetadata
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   is_deidentified:
     name: is_deidentified
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1086,6 +1550,7 @@ attributes:
     domain_of:
     - Dataset
     range: Deidentification
+    inlined: true
   is_tabular:
     name: is_tabular
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1093,6 +1558,46 @@ attributes:
     domain_of:
     - Dataset
     range: boolean
+  citation:
+    name: citation
+    description: Recommended citation for this dataset in DataCite or BibTeX format.
+      Provides a standard way to cite the dataset in publications.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:citation
+    rank: 1000
+    slot_uri: schema:citation
+    domain_of:
+    - Dataset
+    range: string
+  parent_datasets:
+    name: parent_datasets
+    description: Parent datasets that this dataset is part of or derived from. Enables
+      hierarchical dataset composition (hasPart/isPartOf relationships).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:isPartOf
+    rank: 1000
+    slot_uri: schema:isPartOf
+    domain_of:
+    - Dataset
+    range: Dataset
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  related_datasets:
+    name: related_datasets
+    description: Related datasets with typed relationships (e.g., supplements, derives
+      from, is version of). Use DatasetRelationship class to specify relationship
+      types.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: DatasetRelationship
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
 class_uri: dcat:Distribution
 
 ```
@@ -1106,8 +1611,6 @@ name: Dataset
 description: A single component of related observations and/or information that can
   be read, manipulated, transformed, and otherwise interpreted.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-see_also:
-- https://specs.frictionlessdata.io/data-resource
 aliases:
 - data resource
 - data file
@@ -1115,6 +1618,16 @@ aliases:
 exact_mappings:
 - schema:DataDownload
 is_a: Information
+slot_usage:
+  external_resources:
+    name: external_resources
+    range: ExternalResource
+    inlined_as_list: true
+  resources:
+    name: resources
+    description: Sub-resources or component datasets that are part of this dataset.
+      Allows datasets to contain nested resource structures.
+    inlined_as_list: true
 attributes:
   purposes:
     name: purposes
@@ -1126,6 +1639,8 @@ attributes:
     - Dataset
     range: Purpose
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   tasks:
     name: tasks
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1136,6 +1651,8 @@ attributes:
     - Dataset
     range: Task
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   addressing_gaps:
     name: addressing_gaps
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1146,6 +1663,8 @@ attributes:
     - Dataset
     range: AddressingGap
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   creators:
     name: creators
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1156,6 +1675,8 @@ attributes:
     - Dataset
     range: Creator
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   funders:
     name: funders
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1166,6 +1687,8 @@ attributes:
     - Dataset
     range: FundingMechanism
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   subsets:
     name: subsets
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1179,6 +1702,8 @@ attributes:
     - Dataset
     range: DataSubset
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   instances:
     name: instances
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1189,6 +1714,8 @@ attributes:
     - Dataset
     range: Instance
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   anomalies:
     name: anomalies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1199,17 +1726,37 @@ attributes:
     - Dataset
     range: DataAnomaly
     multivalued: true
-  external_resources:
-    name: external_resources
+    inlined: true
+    inlined_as_list: true
+  known_biases:
+    name: known_biases
+    description: Known biases present in the dataset that may affect fairness, representativeness,
+      or model performance. Uses BiasTypeEnum for standardized bias categorization
+      mapped to the AI Ontology (AIO).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    alias: external_resources
+    alias: known_biases
     owner: Dataset
     domain_of:
     - Dataset
-    - ExternalResource
-    range: ExternalResource
+    range: DatasetBias
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  known_limitations:
+    name: known_limitations
+    description: Known limitations of the dataset that may affect its use or interpretation.
+      Distinct from biases (systematic errors) and anomalies (data quality issues).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: known_limitations
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: DatasetLimitation
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   confidential_elements:
     name: confidential_elements
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1220,6 +1767,8 @@ attributes:
     - Dataset
     range: Confidentiality
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   content_warnings:
     name: content_warnings
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1230,6 +1779,8 @@ attributes:
     - Dataset
     range: ContentWarning
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   subpopulations:
     name: subpopulations
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1240,6 +1791,8 @@ attributes:
     - Dataset
     range: Subpopulation
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   sensitive_elements:
     name: sensitive_elements
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1250,6 +1803,8 @@ attributes:
     - Dataset
     range: SensitiveElement
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   acquisition_methods:
     name: acquisition_methods
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1260,6 +1815,8 @@ attributes:
     - Dataset
     range: InstanceAcquisition
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   collection_mechanisms:
     name: collection_mechanisms
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1270,6 +1827,8 @@ attributes:
     - Dataset
     range: CollectionMechanism
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   sampling_strategies:
     name: sampling_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1281,6 +1840,8 @@ attributes:
     - Instance
     range: SamplingStrategy
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   data_collectors:
     name: data_collectors
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1291,6 +1852,8 @@ attributes:
     - Dataset
     range: DataCollector
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   collection_timeframes:
     name: collection_timeframes
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1301,6 +1864,34 @@ attributes:
     - Dataset
     range: CollectionTimeframe
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  missing_data_documentation:
+    name: missing_data_documentation
+    description: Documentation of missing data patterns and handling strategies.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: missing_data_documentation
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: MissingDataDocumentation
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  raw_data_sources:
+    name: raw_data_sources
+    description: Description of raw data sources before preprocessing.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: raw_data_sources
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: RawDataSource
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   ethical_reviews:
     name: ethical_reviews
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1311,6 +1902,8 @@ attributes:
     - Dataset
     range: EthicalReview
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   data_protection_impacts:
     name: data_protection_impacts
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1321,6 +1914,71 @@ attributes:
     - Dataset
     range: DataProtectionImpact
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  human_subject_research:
+    name: human_subject_research
+    description: Information about whether dataset involves human subjects research,
+      including IRB approval, ethics review, and regulatory compliance.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: human_subject_research
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: HumanSubjectResearch
+    inlined: true
+  informed_consent:
+    name: informed_consent
+    description: Details about informed consent procedures, including consent type,
+      documentation, and withdrawal mechanisms.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: informed_consent
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: InformedConsent
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  participant_privacy:
+    name: participant_privacy
+    description: Privacy protections and anonymization procedures for human research
+      participants, including reidentification risk assessment.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: participant_privacy
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: ParticipantPrivacy
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  participant_compensation:
+    name: participant_compensation
+    description: Compensation or incentives provided to human research participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: participant_compensation
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: HumanSubjectCompensation
+    inlined: true
+  vulnerable_populations:
+    name: vulnerable_populations
+    description: Information about protections for vulnerable populations (e.g., minors,
+      pregnant women, prisoners) including special safeguards and assent procedures.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: vulnerable_populations
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: VulnerablePopulations
+    inlined: true
   preprocessing_strategies:
     name: preprocessing_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1331,6 +1989,8 @@ attributes:
     - Dataset
     range: PreprocessingStrategy
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   cleaning_strategies:
     name: cleaning_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1341,6 +2001,8 @@ attributes:
     - Dataset
     range: CleaningStrategy
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   labeling_strategies:
     name: labeling_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1351,6 +2013,8 @@ attributes:
     - Dataset
     range: LabelingStrategy
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   raw_sources:
     name: raw_sources
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1361,6 +2025,47 @@ attributes:
     - Dataset
     range: RawData
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  imputation_protocols:
+    name: imputation_protocols
+    description: Data imputation methodology and techniques.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: imputation_protocols
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: ImputationProtocol
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  annotation_analyses:
+    name: annotation_analyses
+    description: Analysis of annotation quality and inter-annotator agreement.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: annotation_analyses
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: AnnotationAnalysis
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  machine_annotation_tools:
+    name: machine_annotation_tools
+    description: Automated annotation tools used in dataset creation.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: machine_annotation_tools
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: MachineAnnotationTools
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   existing_uses:
     name: existing_uses
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1371,6 +2076,8 @@ attributes:
     - Dataset
     range: ExistingUse
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   use_repository:
     name: use_repository
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1381,6 +2088,8 @@ attributes:
     - Dataset
     range: UseRepository
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   other_tasks:
     name: other_tasks
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1391,6 +2100,8 @@ attributes:
     - Dataset
     range: OtherTask
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   future_use_impacts:
     name: future_use_impacts
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1401,6 +2112,8 @@ attributes:
     - Dataset
     range: FutureUseImpact
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   discouraged_uses:
     name: discouraged_uses
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1411,6 +2124,36 @@ attributes:
     - Dataset
     range: DiscouragedUse
     multivalued: true
+    inlined: true
+    inlined_as_list: true
+  intended_uses:
+    name: intended_uses
+    description: Explicit intended and recommended uses for this dataset. Complements
+      future_use_impacts by focusing on positive applications.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: intended_uses
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: IntendedUse
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  prohibited_uses:
+    name: prohibited_uses
+    description: Explicitly prohibited or forbidden uses for this dataset. Stronger
+      than discouraged_uses - these are not permitted.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: prohibited_uses
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: ProhibitedUse
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   distribution_formats:
     name: distribution_formats
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1421,6 +2164,8 @@ attributes:
     - Dataset
     range: DistributionFormat
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   distribution_dates:
     name: distribution_dates
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1431,6 +2176,8 @@ attributes:
     - Dataset
     range: DistributionDate
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   license_and_use_terms:
     name: license_and_use_terms
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1440,6 +2187,7 @@ attributes:
     domain_of:
     - Dataset
     range: LicenseAndUseTerms
+    inlined: true
   ip_restrictions:
     name: ip_restrictions
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1449,6 +2197,7 @@ attributes:
     domain_of:
     - Dataset
     range: IPRestrictions
+    inlined: true
   regulatory_restrictions:
     name: regulatory_restrictions
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1457,7 +2206,9 @@ attributes:
     owner: Dataset
     domain_of:
     - Dataset
+    - ExportControlRegulatoryRestrictions
     range: ExportControlRegulatoryRestrictions
+    inlined: true
   maintainers:
     name: maintainers
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1468,6 +2219,8 @@ attributes:
     - Dataset
     range: Maintainer
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   errata:
     name: errata
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1478,6 +2231,8 @@ attributes:
     - Dataset
     range: Erratum
     multivalued: true
+    inlined: true
+    inlined_as_list: true
   updates:
     name: updates
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1487,6 +2242,7 @@ attributes:
     domain_of:
     - Dataset
     range: UpdatePlan
+    inlined: true
   retention_limit:
     name: retention_limit
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1496,6 +2252,7 @@ attributes:
     domain_of:
     - Dataset
     range: RetentionLimits
+    inlined: true
   version_access:
     name: version_access
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1505,6 +2262,7 @@ attributes:
     domain_of:
     - Dataset
     range: VersionAccess
+    inlined: true
   extension_mechanism:
     name: extension_mechanism
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1514,6 +2272,24 @@ attributes:
     domain_of:
     - Dataset
     range: ExtensionMechanism
+    inlined: true
+  variables:
+    name: variables
+    description: Metadata describing individual variables, fields, or columns in the
+      dataset.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:variableMeasured
+    rank: 1000
+    slot_uri: schema:variableMeasured
+    alias: variables
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: VariableMetadata
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   is_deidentified:
     name: is_deidentified
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1523,6 +2299,7 @@ attributes:
     domain_of:
     - Dataset
     range: Deidentification
+    inlined: true
   is_tabular:
     name: is_tabular
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1532,6 +2309,52 @@ attributes:
     domain_of:
     - Dataset
     range: boolean
+  citation:
+    name: citation
+    description: Recommended citation for this dataset in DataCite or BibTeX format.
+      Provides a standard way to cite the dataset in publications.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:citation
+    rank: 1000
+    slot_uri: schema:citation
+    alias: citation
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: string
+  parent_datasets:
+    name: parent_datasets
+    description: Parent datasets that this dataset is part of or derived from. Enables
+      hierarchical dataset composition (hasPart/isPartOf relationships).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:isPartOf
+    rank: 1000
+    slot_uri: schema:isPartOf
+    alias: parent_datasets
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: Dataset
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  related_datasets:
+    name: related_datasets
+    description: Related datasets with typed relationships (e.g., supplements, derives
+      from, is version of). Use DatasetRelationship class to specify relationship
+      types.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: related_datasets
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: DatasetRelationship
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   bytes:
     name: bytes
     description: Size of the data in bytes.
@@ -1547,7 +2370,6 @@ attributes:
     name: dialect
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: csvw:dialect
     alias: dialect
     owner: Dataset
     domain_of:
@@ -1581,6 +2403,7 @@ attributes:
     description: hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:identifier
     alias: hash
     owner: Dataset
     domain_of:
@@ -1591,6 +2414,7 @@ attributes:
     description: md5 hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:identifier
     alias: md5
     owner: Dataset
     domain_of:
@@ -1600,7 +2424,10 @@ attributes:
     name: media_type
     description: The media type of the data. This should be a MIME type.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:encodingFormat
     rank: 1000
+    slot_uri: dcat:mediaType
     alias: media_type
     owner: Dataset
     domain_of:
@@ -1609,9 +2436,8 @@ attributes:
   path:
     name: path
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    close_mappings:
-    - frictionless:path
     rank: 1000
+    slot_uri: schema:contentUrl
     alias: path
     owner: Dataset
     domain_of:
@@ -1622,16 +2448,48 @@ attributes:
     description: sha256 hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:identifier
     alias: sha256
     owner: Dataset
     domain_of:
     - Dataset
     range: string
+  external_resources:
+    name: external_resources
+    description: Links or identifiers for external resources. Can be used either as
+      a list of ExternalResource objects (in Dataset) or as a list of URL strings
+      (within ExternalResource class).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcterms:references
+    alias: external_resources
+    owner: Dataset
+    domain_of:
+    - Dataset
+    - ExternalResource
+    range: ExternalResource
+    multivalued: true
+    inlined_as_list: true
+  resources:
+    name: resources
+    description: Sub-resources or component datasets that are part of this dataset.
+      Allows datasets to contain nested resource structures.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: resources
+    owner: Dataset
+    domain_of:
+    - DatasetCollection
+    - Dataset
+    range: Dataset
+    multivalued: true
+    inlined_as_list: true
   compression:
     name: compression
     description: compression format used, if any. e.g., gzip, bzip2, zip
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcat:compressFormat
     alias: compression
     owner: Dataset
     domain_of:
@@ -1671,7 +2529,7 @@ attributes:
     name: created_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:createdBy
+    slot_uri: dcterms:creator
     alias: created_by
     owner: Dataset
     domain_of:
@@ -1681,7 +2539,7 @@ attributes:
     name: created_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:createdOn
+    slot_uri: dcterms:created
     alias: created_on
     owner: Dataset
     domain_of:
@@ -1692,7 +2550,7 @@ attributes:
     description: digital object identifier
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: void:uriRegexPattern
+    slot_uri: dcterms:identifier
     alias: doi
     owner: Dataset
     domain_of:
@@ -1707,8 +2565,6 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:url
-    close_mappings:
-    - frictionless:path
     rank: 1000
     slot_uri: dcat:downloadURL
     alias: download_url
@@ -1741,7 +2597,10 @@ attributes:
     name: language
     description: language in which the information is expressed
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:inLanguage
     rank: 1000
+    slot_uri: dcterms:language
     alias: language
     owner: Dataset
     domain_of:
@@ -1751,7 +2610,7 @@ attributes:
     name: last_updated_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:lastUpdatedOn
+    slot_uri: dcterms:modified
     alias: last_updated_on
     owner: Dataset
     domain_of:
@@ -1772,7 +2631,7 @@ attributes:
     name: modified_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:lastUpdateBy
+    slot_uri: dcterms:contributor
     alias: modified_by
     owner: Dataset
     domain_of:
@@ -1802,6 +2661,7 @@ attributes:
     name: status
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:type
     alias: status
     owner: Dataset
     domain_of:
@@ -1822,7 +2682,7 @@ attributes:
     name: version
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:version
+    slot_uri: dcterms:hasVersion
     alias: version
     owner: Dataset
     domain_of:
@@ -1832,8 +2692,10 @@ attributes:
   was_derived_from:
     name: was_derived_from
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - dcterms:source
     rank: 1000
-    slot_uri: pav:derivedFrom
+    slot_uri: prov:wasDerivedFrom
     alias: was_derived_from
     owner: Dataset
     domain_of:
@@ -1850,6 +2712,7 @@ attributes:
     owner: Dataset
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
     required: true
   name:
@@ -1862,6 +2725,7 @@ attributes:
     owner: Dataset
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -1873,43 +2737,8 @@ attributes:
     owner: Dataset
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
 class_uri: dcat:Distribution
 

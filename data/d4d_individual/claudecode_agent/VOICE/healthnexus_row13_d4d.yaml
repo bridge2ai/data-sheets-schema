@@ -1,0 +1,13 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Agent Deterministic
+# Source: data/preprocessed/individual/VOICE/healthnexus_row13.json
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: voice:individual:healthnexus_row13
+name: Bridge2AI-Voice Dataset
+title: Bridge2AI-Voice on Health Data Nexus
+description: Bridge2AI-Voice dataset information from Health Data Nexus platform
+keywords:
+- health data
+- data repository

@@ -1,0 +1,540 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_B35XWX_row16.txt
+# Generation Method: Claude Code Agent Deterministic
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: https://doi.org/10.18130/V3/B35XWX
+name: CM4AI_March_2025_Beta_Release
+title: Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)
+description: |
+  This dataset is the March 2025 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+
+  CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center.
+
+  This data is Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Dataset licensed for reuse under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license.
+
+version: V1
+issued: 2025-03-03
+modified: null
+was_derived_from: null
+has_part:
+  - id: null
+    name: CRISPR Perturbation Cell Atlas
+    description: Expressed genome-scale CRISPRi Perturbation Cell Atlas in undifferentiated KOLF2.1J hiPSCs mapping transcriptional and fitness phenotypes associated with 11,739 targeted genes
+  - id: null
+    name: CRISPR Perturbation RNA Sequences - Raw Sequences
+    description: Raw sequence data from the CRISPRi Perturbation Cell Atlas
+  - id: null
+    name: Protein Localization Subcellular Images - Paclitaxel
+    description: Spatial localization of 563 proteins in MDA-MB-468 cells treated with paclitaxel (2.6 GB)
+  - id: null
+    name: Protein Localization Subcellular Images - Untreated
+    description: Spatial localization of 563 proteins in untreated MDA-MB-468 cells (3.2 GB)
+  - id: null
+    name: Protein Localization Subcellular Images - Vorinostat
+    description: Spatial localization of 563 proteins in MDA-MB-468 cells treated with vorinostat (2.8 GB)
+  - id: null
+    name: Protein-protein Interaction SEC-MS
+    description: SEC-MS data on undifferentiated KOLF2.1J hiPSCs
+conforms_to: null
+conforms_to_schema: null
+conforms_to_class: null
+resources: null
+
+standards_and_requirements_id: null
+rai_citation: null
+
+creators:
+  - id: https://orcid.org/0000-0003-4060-7360
+    name: Clark T
+    affiliation: University of Virginia
+    email: null
+  - id: https://orcid.org/0000-0003-4535-3486
+    name: Parker J
+    affiliation: University of California, San Diego
+    email: null
+  - id: https://orcid.org/0000-0003-4647-3877
+    name: Al Manir S
+    affiliation: University of Virginia
+    email: null
+  - id: null
+    name: Axelsson U
+    affiliation: KTH Royal Institute of Technology
+    email: null
+  - id: https://orcid.org/0000-0002-4180-422X
+    name: Ballllosero Navarro F
+    affiliation: Stanford University
+    email: null
+  - id: null
+    name: Chinn B
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0001-9998-705X
+    name: Churas CP
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0002-6711-8260
+    name: Dailamy A
+    affiliation: University of California, San Diego
+    email: null
+  - id: https://orcid.org/0009-0009-0483-7506
+    name: Doctor Y
+    affiliation: University of California, San Diego
+    email: null
+  - id: null
+    name: Fall J
+    affiliation: KTH - Royal Institute of Technology
+    email: null
+  - id: https://orcid.org/0000-0003-0223-0312
+    name: Forget A
+    affiliation: University of California San Francisco
+    email: null
+  - id: https://orcid.org/0000-0002-6311-3526
+    name: Gao J
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0002-4650-9094
+    name: Hansen JN
+    affiliation: Stanford University
+    email: null
+  - id: https://orcid.org/0000-0002-1571-8029
+    name: Hu M
+    affiliation: University of California San Diego
+    email: null
+  - id: null
+    name: Johannesson A
+    affiliation: KTH - Royal Institute of Technology
+    email: null
+  - id: null
+    name: Khaliq H
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0003-0917-355X
+    name: Lee YH
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0001-7252-8638
+    name: Lenkiewicz J
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0003-0384-8499
+    name: Levinson MA
+    affiliation: University of Virginia
+    email: null
+  - id: https://orcid.org/0000-0003-3960-420X
+    name: Marquez C
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0003-2404-3040
+    name: Metallo C
+    affiliation: University of California San Diego
+    email: null
+  - id: null
+    name: Muralidharan M
+    affiliation: University of California San Francisco
+    email: null
+  - id: https://orcid.org/0000-0003-3881-7588
+    name: Nourreddine S
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0002-1103-3882
+    name: Niestroy J
+    affiliation: University of Virginia
+    email: null
+  - id: https://orcid.org/0000-0002-4025-1299
+    name: Obernier K
+    affiliation: University of California San Francisco
+    email: null
+  - id: null
+    name: Pan E
+    affiliation: University of California San Diego
+    email: null
+  - id: null
+    name: Polacco B
+    affiliation: University of California San Francisco
+    email: null
+  - id: https://orcid.org/0000-0002-1471-9513
+    name: Pratt D
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0009-0005-4217-2745
+    name: Qian G
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0001-6339-9141
+    name: Schaffer L
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0003-3361-3797
+    name: Sigaeva A
+    affiliation: KTH Royal Institute of Technology
+    email: null
+  - id: https://orcid.org/0000-0001-6730-2773
+    name: Thaker S
+    affiliation: University of Alabama at Birmingham
+    email: null
+  - id: null
+    name: Zhang Y
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0002-8965-8153
+    name: Bélisle-Pipon JC
+    affiliation: Simon Fraser University
+    email: null
+  - id: https://orcid.org/0000-0001-8179-1796
+    name: Brandt C
+    affiliation: Yale University
+    email: null
+  - id: https://orcid.org/0000-0002-6112-415X
+    name: Chen JY
+    affiliation: The University of Alabama at Birmingham
+    email: null
+  - id: https://orcid.org/0000-0003-2567-2009
+    name: Ding Y
+    affiliation: University of Texas at Austin
+    email: null
+  - id: https://orcid.org/0000-0003-4664-3143
+    name: Fodeh S
+    affiliation: Yale University
+    email: null
+  - id: https://orcid.org/0000-0003-4902-337X
+    name: Krogan N
+    affiliation: University of California San Francisco
+    email: null
+  - id: https://orcid.org/0000-0001-7034-0850
+    name: Lundberg E
+    affiliation: Stanford University
+    email: null
+  - id: https://orcid.org/0000-0002-3383-1287
+    name: Mali P
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0002-3508-3577
+    name: Payne-Foster P
+    affiliation: University of Alabama
+    email: null
+  - id: https://orcid.org/0000-0002-6644-8284
+    name: Ratcliffe S
+    affiliation: University of Virginia
+    email: null
+  - id: https://orcid.org/0000-0002-7080-8801
+    name: Ravitsky V
+    affiliation: University of Montreal
+    email: null
+  - id: https://orcid.org/0000-0003-0435-6197
+    name: Sali A
+    affiliation: University of California San Diego
+    email: null
+  - id: https://orcid.org/0000-0002-2048-4028
+    name: Schulz W
+    affiliation: Yale University
+    email: null
+  - id: https://orcid.org/0000-0002-1708-8454
+    name: Ideker T
+    affiliation: University of California San Diego
+    email: null
+
+contributors: null
+
+contacts:
+  - id: null
+    name: Ideker Trey
+    affiliation: University of California San Diego
+    email: null
+
+publishers: null
+
+domain_experts: null
+
+funders:
+  - id: null
+    name: National Institutes of Health
+    description: null
+    award_number: 1OT2OD032742-01
+
+licenses:
+  - id: https://creativecommons.org/licenses/by-nc-sa/4.0/
+    name: CC BY-NC-SA 4.0
+    description: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license. Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived products should cite the Related Publication below, as well as directly citing this data collection.
+    legal_code_url: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
+    deed_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+rights_holder:
+  - id: null
+    name: The Regents of the University of California
+    description: Copyright holder for most data
+  - id: null
+    name: The Board of Trustees of the Leland Stanford Junior University
+    description: Copyright holder for spatial proteomics raw image data
+
+citation: |
+  Clark T, Mohan J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon J-C, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T, 2025, "Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)", https://doi.org/10.18130/V3/B35XWX, University of Virginia Dataverse, V1
+
+references:
+  - Clark T, Parker J, Schaffer L, Obernier K, Al Manir S, Churas CP, Dailamy A, Doctor Y, Forget A, Hansen JN, Hu M, Lenkiewicz J, Levinson MA, Marquez C, Nourreddine S, Niestroy J, Pratt D, Qian G, Thaker S, Bélisle-Pipon JC, Brandt C, Chen J, Ding Y, Fodeh S, Krogan N, Lundberg E, Mali P, Payne-Foster P, Ratcliffe S, Ravitsky V, Sali A, Schulz W, Ideker T. Cell Maps for Artificial Intelligence - AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. 2024. doi http://doi.org/10.1101/2024.05.21.589311
+
+keywords:
+  - AI
+  - affinity purification
+  - AP-MS
+  - artificial intelligence
+  - breast cancer
+  - Bridge2AI
+  - cardiomyocyte
+  - CM4AI
+  - CRISPR/Cas9
+  - induced pluripotent stem cell
+  - iPSC
+  - KOLF2.1J
+  - machine learning
+  - mass spectroscopy
+  - MDA-MB-468
+  - neural progenitor cell
+  - NPC
+  - neuron
+  - paclitaxel
+  - perturb-seq
+  - perturbation sequencing
+  - protein-protein interaction
+  - protein localization
+  - single-cell RNA sequencing
+  - scRNAseq
+  - SEC-MS
+  - size exclusion chromatography
+  - subcellular imaging
+  - vorinostat
+
+alternative_names: null
+
+motivation_why_created:
+  motivation_for_creation: |
+    This dataset was created to provide AI-ready, ethically sourced datasets of cell architecture from multimodal data to enable transformative biomedical AI research as part of the NIH Bridge2AI program. The March 2025 Beta release provides comprehensive data on protein perturbations, protein-protein interactions, and spatial protein localization to support functional genomics research.
+
+  primary_use: |
+    The dataset is intended for AI-ready datasets to support research in functional genomics, AI model training, cellular process analysis, and understanding cell architectural changes and interactions in the presence of specific disease processes, treatment conditions, or genetic perturbations.
+
+  other_tasks: null
+
+  gap_in_knowledge: null
+
+composition_what_data:
+  instance_type: |
+    The dataset contains:
+    1. CRISPRi perturbation cell atlas data (JSON) mapping transcriptional and fitness phenotypes for 11,739 targeted genes
+    2. Raw RNA sequencing data from CRISPR perturbation screens (JSON)
+    3. Immunofluorescence subcellular images (ZIP archives) showing protein localization for 563 proteins under three conditions (untreated, paclitaxel, vorinostat)
+    4. Size exclusion chromatography mass spectrometry (SEC-MS) data on iPSCs (JSON)
+    5. RO-Crate metadata files with provenance information
+
+  instance_count: |
+    - 302 total downloads as of publication
+    - 11,739 targeted genes in perturbation atlas
+    - 563 proteins with spatial localization data
+    - 6 data files total (3 image archives, 3 metadata/data files)
+
+  instance_structure: |
+    Data is packaged in RO-Crate format with provenance graphs and rich metadata. Image datasets are organized by treatment condition (untreated, paclitaxel, vorinostat). Each image shows spatial localization with DAPI (nuclei, blue), calreticulin (ER, yellow), tubulin (microtubules, red), and protein of interest (green) channels.
+
+  data_splits: null
+
+  de_identification_methods: |
+    The data is derived from established, de-identified cell lines (MDA-MB-468 breast cancer and KOLF2.1J induced pluripotent stem cells) that cannot be matched to individual human subjects.
+
+  sensitive_information_risk: |
+    No sensitive information risk as data is from de-identified cell lines, not human subjects.
+
+  confidential_items: null
+
+  individual_instances: null
+
+  subpopulation_description: |
+    Two cell line systems:
+    1. MDA-MB-468 triple negative breast cancer cells under three treatment conditions (untreated, paclitaxel, vorinostat)
+    2. KOLF2.1J iPSCs in undifferentiated state and differentiated into NPCs, neurons, and cardiomyocytes
+
+  missing_info: null
+
+  relationship_between_instances: |
+    Instances are related through:
+    1. Common cell lines (MDA-MB-468, KOLF2.1J)
+    2. Treatment conditions (untreated, paclitaxel, vorinostat)
+    3. Protein targets studied across multiple modalities (perturbation, localization, interactions)
+    4. Provenance relationships documented in RO-Crate metadata
+
+  other_information: null
+
+  recommended_data_splits: null
+
+  error_sources: null
+
+collection_how_collected:
+  collection_method: |
+    Data was collected using three complementary approaches:
+    1. CRISPRi perturbation screens using 10x Genomics 3'HT kit for single-cell RNA sequencing
+    2. Immunofluorescence-based staining (ICC-IF) and confocal microscopy using Human Protein Atlas antibodies
+    3. Size exclusion chromatography coupled to mass spectrometry (SEC-MS) for protein complex mapping
+
+  sampling_strategy: |
+    Focused on chromatin regulators and proteins of interest across disease-relevant cell lines under perturbed and unperturbed conditions.
+
+  data_collection_timeframe:
+    start_date: null
+    end_date: 2025-02-27
+
+  data_source_description: |
+    Cell lines: MDA-MB-468 breast cancer cells and KOLF2.1J induced pluripotent stem cells
+    Antibodies: Human Protein Atlas resource
+    Imaging facility: Lundberg Laboratory at Stanford University
+    Mass spectrometry: Krogan Laboratory at UCSF
+    Perturbation screens: Mali Laboratory at UCSD
+
+  who_collected_data:
+    - id: null
+      name: Lundberg Laboratory
+      description: Spatial proteomics imaging at Stanford University
+      affiliation: Stanford University
+    - id: null
+      name: Krogan Laboratory
+      description: Protein-protein interaction mapping at UCSF
+      affiliation: University of California San Francisco
+    - id: null
+      name: Mali Laboratory
+      description: CRISPR perturbation screens at UCSD
+      affiliation: University of California San Diego
+
+  collection_mechanisms: null
+
+  validation_and_verification: null
+
+  ethical_review_status: null
+
+preprocessing_cleaning_labeling_what_preprocessing:
+  preprocessing_strategy: |
+    Data is packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Images are processed and organized by treatment condition. Perturbation data is quality controlled.
+
+  preprocessing_tools:
+    - id: null
+      name: FAIRSCAPE framework
+      description: Framework for packaging AI-ready datasets with provenance
+      version: null
+    - id: null
+      name: RO-Crate
+      description: Research Object packaging format
+      version: null
+
+  raw_data_availability: null
+
+  cleaned_data_availability: null
+
+uses_when_appropriate:
+  appropriate_use_cases: |
+    1. AI-ready datasets to support research in functional genomics
+    2. AI model training
+    3. Cellular process analysis
+    4. Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations
+
+  inappropriate_use_cases: null
+
+  repository_tasks: null
+
+  impact_on_underserved_populations: null
+
+  unsuitable_applications: null
+
+  further_research_questions: null
+
+distribution_how_distributed:
+  distribution_formats:
+    - id: null
+      name: ZIP Archive
+      description: Compressed image files
+      format: ZIP
+      media_type: application/zip
+      compression: zip
+      encoding: null
+      dialect: null
+    - id: null
+      name: JSON
+      description: Metadata and structured data
+      format: JSON
+      media_type: application/json
+      compression: null
+      encoding: null
+      dialect: null
+    - id: null
+      name: RO-Crate metadata
+      description: Research Object Crate metadata files
+      format: JSON
+      media_type: application/json
+      compression: null
+      encoding: null
+      dialect: null
+
+  distribution_location:
+    - id: https://doi.org/10.18130/V3/B35XWX
+      name: University of Virginia Dataverse
+      url: https://dataverse.lib.virginia.edu
+      description: Primary distribution via LibraData institutional repository
+
+  distribution_date: 2025-03-03
+
+  doi: https://doi.org/10.18130/V3/B35XWX
+
+  persistent_identifier:
+    - https://doi.org/10.18130/V3/B35XWX
+
+  access_control: |
+    All files are publicly accessible with no access restrictions. Dataset is too large to download as a single archive (must select individual files).
+
+  dataset_ip_and_licensing: |
+    Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Licensed under CC BY-NC-SA 4.0 with attribution requirements.
+
+  fee: null
+
+  export_controls_or_restrictions: null
+
+maintenance_who_maintains:
+  maintenance_contact:
+    - id: null
+      name: Niestroy, Justin
+      email: null
+      affiliation: University of Virginia
+
+  maintenance_period: null
+
+  update_frequency: |
+    Data will be augmented regularly through the end of the project.
+
+  versioning: |
+    Current version: V1. Dataset uses semantic versioning.
+
+  updates_to_tasks: null
+
+  retention_limits: null
+
+  errata: null
+
+ethics_institutional_review: null
+
+human_subject_research: null
+
+vulnerable_populations: null
+
+ethics_deidentification: |
+  Data is derived from de-identified cell lines (MDA-MB-468 and KOLF2.1J) that cannot be matched to individual human subjects.
+
+ethics_consent_and_notification: null
+
+ethics_privacy: null
+
+ethics_impact_assessment: null
+
+data_governance_process: null
+
+third_party_sharing: |
+  Data is publicly shared via University of Virginia Dataverse under CC BY-NC-SA 4.0 license terms.
+
+access_restrictions: |
+  Publicly accessible with no restrictions. Commercial use requires separate licensing arrangement with copyright holders.

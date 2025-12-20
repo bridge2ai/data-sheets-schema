@@ -4,7 +4,7 @@
 
 
 
-URI: [pav:createdBy](http://purl.org/pav/createdBy)
+URI: [dcterms:creator](http://purl.org/dc/terms/creator)
 Alias: created_by
 
 <!-- no inheritance hierarchy -->
@@ -17,10 +17,10 @@ Alias: created_by
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [DatasetCollection](DatasetCollection.md) | A collection of related datasets, likely containing multiple files of multipl... |  no  |
 | [Information](Information.md) | Grouping for datasets and data files |  no  |
 | [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
 | [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [DatasetCollection](DatasetCollection.md) | A collection of related datasets, likely containing multiple files of multipl... |  no  |
 
 
 
@@ -53,7 +53,7 @@ Alias: created_by
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | pav:createdBy |
+| self | dcterms:creator |
 | native | data_sheets_schema:created_by |
 
 
@@ -66,7 +66,7 @@ Alias: created_by
 name: created_by
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: pav:createdBy
+slot_uri: dcterms:creator
 alias: created_by
 domain_of:
 - Information

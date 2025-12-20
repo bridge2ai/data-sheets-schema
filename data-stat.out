@@ -1,0 +1,108 @@
+════════════════════════════════════════════════════════════════
+  D4D Pipeline Data Status Report
+════════════════════════════════════════════════════════════════
+
+─────────────────────────────────────────────────────────────────
+RAW DOWNLOADS (data/raw/)
+─────────────────────────────────────────────────────────────────
+  AI_READI     :   8 files
+  CHORUS       :   3 files
+  CM4AI        :   5 files
+  VOICE        :   3 files
+
+─────────────────────────────────────────────────────────────────
+PREPROCESSED INDIVIDUAL (data/preprocessed/individual/)
+─────────────────────────────────────────────────────────────────
+  AI_READI     :   6 files
+  CHORUS       :   2 files
+  CM4AI        :   4 files
+  VOICE        :   3 files
+
+─────────────────────────────────────────────────────────────────
+PREPROCESSED CONCATENATED (data/preprocessed/concatenated/)
+─────────────────────────────────────────────────────────────────
+  AI_READI     : ✓ exists (16K, 440 lines)
+  CHORUS       : ✓ exists (3.4K, 80 lines)
+  CM4AI        : ✓ exists (28K, 574 lines)
+  VOICE        : ✓ exists (17K, 321 lines)
+
+─────────────────────────────────────────────────────────────────
+D4D INDIVIDUAL - GPT-5 (data/d4d_individual/gpt5/)
+─────────────────────────────────────────────────────────────────
+  AI_READI     :   8 YAMLs
+  CHORUS       :   2 YAMLs
+  CM4AI        :   4 YAMLs
+  VOICE        :   3 YAMLs
+
+─────────────────────────────────────────────────────────────────
+D4D INDIVIDUAL - CLAUDE CODE (data/d4d_individual/claudecode/)
+─────────────────────────────────────────────────────────────────
+  AI_READI     :   0 YAMLs  ⚠️  EMPTY
+  CHORUS       :   0 YAMLs  ⚠️  EMPTY
+  CM4AI        :   0 YAMLs  ⚠️  EMPTY
+  VOICE        :   0 YAMLs  ⚠️  EMPTY
+
+─────────────────────────────────────────────────────────────────
+D4D CONCATENATED (data/d4d_concatenated/)
+─────────────────────────────────────────────────────────────────
+GPT-5:
+    AI_READI     : ✓ exists (8.6K, 132 lines)
+    CHORUS       : ✓ exists (1.9K, 48 lines)
+    CM4AI        : ✓ exists (23K, 514 lines)
+    VOICE        : ✓ exists (11K, 209 lines)
+Claude Code:
+    AI_READI     : ✓ exists (10K, 273 lines)
+    CHORUS       : ✓ exists (2.5K, 75 lines)
+    CM4AI        : ✓ exists (9.3K, 224 lines)
+    VOICE        : ✓ exists (8.5K, 232 lines)
+Curated:
+    AI_READI     : ✓ exists (7.1K, 137 lines)
+    CM4AI        : ✓ exists (83K, 2244 lines)
+    VOICE        : ✓ exists (17K, 449 lines)
+
+─────────────────────────────────────────────────────────────────
+D4D HTML (data/d4d_html/)
+─────────────────────────────────────────────────────────────────
+  concatenated - gpt5            :   0 files  ⚠️  EMPTY
+  concatenated - claudecode      :   4 files
+  concatenated - curated         :   6 files
+  individual - gpt5              :   0 files  ⚠️  EMPTY
+  individual - claudecode        :   0 files  ⚠️  EMPTY
+
+════════════════════════════════════════════════════════════════
+  Summary
+════════════════════════════════════════════════════════════════
+Total raw downloads:           19 files
+Total preprocessed individual: 15 files
+Total D4D individual (GPT-5):  17 YAMLs
+Total D4D concatenated (GPT-5): 4 YAMLs
+Total curated HTML:            6 files
+
+════════════════════════════════════════════════════════════════
+  D4D YAML Size Breakdown
+════════════════════════════════════════════════════════════════
+
+Individual D4D YAMLs (GPT-5)
+────────────────────────────────────────────────────────────────
+  PROJECT       FILES  TOTAL SIZE    AVG SIZE  LARGEST
+────────────────────────────────────────────────────────────────
+  AI_READI          8      11.6 KB       1.4 KB       8.8 KB
+  CHORUS            2       2.1 KB       1.0 KB       1.3 KB
+  CM4AI             4      24.5 KB       6.1 KB      22.7 KB
+  VOICE             3      14.5 KB       4.8 KB      13.5 KB
+
+Concatenated D4D YAMLs
+────────────────────────────────────────────────────────────────
+  PROJECT            GPT-5    LINES      CLAUDE    LINES     CURATED    LINES
+────────────────────────────────────────────────────────────────
+  AI_READI            8.5K      132       10.4K      273        7.1K      137
+  CHORUS              1.9K       48        2.4K       75           -        -
+  CM4AI              23.2K      514        9.2K      224       82.9K     2244
+  VOICE              11.1K      209        8.5K      232       16.8K      449
+
+Size Comparison Summary
+────────────────────────────────────────────────────────────────
+Total Individual D4D YAMLs (GPT-5):      52.9 KB
+Total Concatenated D4D YAMLs (GPT-5):    44.9 KB
+Total Curated D4D YAMLs:                 106.9 KB
+

@@ -3,7 +3,7 @@
 # Class: InstanceAcquisition 
 
 
-_Describes how data associated with each instance was acquired  (e.g., directly observed, reported by subjects, inferred)._
+_Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects, inferred)._
 
 __
 
@@ -24,6 +24,8 @@ URI: [data_sheets_schema:InstanceAcquisition](https://w3id.org/bridge2ai/data-sh
       DatasetProperty <|-- InstanceAcquisition
         click DatasetProperty href "../DatasetProperty/"
       
+      InstanceAcquisition : acquisition_details
+        
       InstanceAcquisition : description
         
       InstanceAcquisition : id
@@ -57,9 +59,8 @@ URI: [data_sheets_schema:InstanceAcquisition](https://w3id.org/bridge2ai/data-sh
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **InstanceAcquisition**
+* [DatasetProperty](DatasetProperty.md)
+    * **InstanceAcquisition**
 
 
 
@@ -67,14 +68,15 @@ URI: [data_sheets_schema:InstanceAcquisition](https://w3id.org/bridge2ai/data-sh
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [String](String.md) | Free-text description of the acquisition process | direct |
 | [was_directly_observed](was_directly_observed.md) | 0..1 <br/> [Boolean](Boolean.md) | Whether the data was directly observed | direct |
 | [was_reported_by_subjects](was_reported_by_subjects.md) | 0..1 <br/> [Boolean](Boolean.md) | Whether the data was reported directly by the subjects themselves | direct |
 | [was_inferred_derived](was_inferred_derived.md) | 0..1 <br/> [Boolean](Boolean.md) | Whether the data was inferred or derived from other data | direct |
 | [was_validated_verified](was_validated_verified.md) | 0..1 <br/> [Boolean](Boolean.md) | Whether the data was validated or verified in any way | direct |
+| [acquisition_details](acquisition_details.md) | * <br/> [String](String.md) | Details on how data was acquired for each instance | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -129,58 +131,13 @@ URI: [data_sheets_schema:InstanceAcquisition](https://w3id.org/bridge2ai/data-sh
 <details>
 ```yaml
 name: InstanceAcquisition
-description: 'Describes how data associated with each instance was acquired  (e.g.,
+description: 'Describes how data associated with each instance was acquired (e.g.,
   directly observed, reported by subjects, inferred).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: Free-text description of the acquisition process
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
-    domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
-    range: string
-    multivalued: true
   was_directly_observed:
     name: was_directly_observed
     description: Whether the data was directly observed
@@ -213,6 +170,18 @@ attributes:
     domain_of:
     - InstanceAcquisition
     range: boolean
+  acquisition_details:
+    name: acquisition_details
+    description: 'Details on how data was acquired for each instance.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    slot_uri: dcterms:description
+    domain_of:
+    - InstanceAcquisition
+    range: string
+    multivalued: true
 
 ```
 </details>
@@ -222,60 +191,13 @@ attributes:
 <details>
 ```yaml
 name: InstanceAcquisition
-description: 'Describes how data associated with each instance was acquired  (e.g.,
+description: 'Describes how data associated with each instance was acquired (e.g.,
   directly observed, reported by subjects, inferred).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: Free-text description of the acquisition process
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
-    alias: description
-    owner: InstanceAcquisition
-    domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
-    range: string
-    multivalued: true
   was_directly_observed:
     name: was_directly_observed
     description: Whether the data was directly observed
@@ -316,6 +238,54 @@ attributes:
     domain_of:
     - InstanceAcquisition
     range: boolean
+  acquisition_details:
+    name: acquisition_details
+    description: 'Details on how data was acquired for each instance.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: acquisition_details
+    owner: InstanceAcquisition
+    domain_of:
+    - InstanceAcquisition
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: InstanceAcquisition
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: InstanceAcquisition
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
+    alias: description
+    owner: InstanceAcquisition
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    - DatasetRelationship
+    range: string
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -327,30 +297,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: InstanceAcquisition
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: InstanceAcquisition
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

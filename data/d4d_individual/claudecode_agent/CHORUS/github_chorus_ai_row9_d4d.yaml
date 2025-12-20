@@ -1,0 +1,115 @@
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: Claude Code Agent Deterministic
+# Source: data/preprocessed/individual/CHORUS/github_chorus_ai_row9.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: https://chorus4ai.org/dataset
+name: CHoRUS for Equitable AI
+title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI
+description: >
+  The CHoRUS Network develops the most diverse, high-resolution, ethically sourced, AI-ready clinical dataset
+  to answer the grand challenge of improving recovery from acute illness. This collaboration spans 20 academic
+  centers, of which 14 contribute as Data Acquisition centers, harmonizing multi-modal EHR, waveform, imaging,
+  and text data using unified standards.
+page: https://www.bridge2ai.org/chorus
+language: en
+keywords:
+  - CHoRUS
+  - Bridge2AI
+  - Clinical care
+  - Equitable AI
+  - Acute illness recovery
+  - EHR
+  - Waveform data
+  - Medical imaging
+  - OMOP
+  - DICOM
+  - WFDB
+
+# Motivation
+purposes:
+  - description: >
+      To develop the most diverse, high-resolution, ethically sourced, AI-ready data set to answer
+      the grand challenge of improving recovery from acute illness.
+
+tasks:
+  - description: >
+      Training AI/ML models for clinical care and acute illness recovery using multi-modal clinical data.
+  - description: >
+      Developing skills and workforce for next generation of diverse academic and community AI scientists.
+  - description: >
+      Visualization and annotation of clinical data with prediction targets.
+
+addressing_gaps:
+  - description: >
+      Lack of diverse, high-resolution clinical datasets for AI/ML research that account for Social
+      Determinants of Health.
+  - description: >
+      Need for ethical and legal approaches to manage privacy and bias in clinical AI datasets.
+
+creators:
+  - name: CHoRUS Network
+    description: Bridge2AI Consortium network creating equitable AI-ready clinical datasets
+
+# Composition
+instances:
+  - description: >
+      Clinical patient records from 20 academic centers with 14 Data Acquisition centers providing
+      multi-modal EHR, waveform, imaging, and text data.
+
+# Collection
+acquisition_methods:
+  - description: >
+      Retrospective data collection from electronic health records at multiple academic medical centers.
+    was_directly_observed: true
+
+data_collectors:
+  - description: >
+      Data Site Managers at contributing sites who extract and contribute clinical data to CHoRUS
+      following standard operating protocols documented in Chorus_SOP repository.
+
+# Distribution
+distribution_formats:
+  - description: >
+      Multi-modal data in standardized formats including OMOP for structured EHR data, WFDB for
+      waveform telemetry, and DICOM for medical imaging.
+
+license_and_use_terms:
+  id: chorus:license_mit
+  name: MIT License
+  description: >
+    MIT License. Controlled access requiring institutional email registration and signed licensing agreement.
+    Access requests to dbold@emory.edu or jared.houghtaling@tuftsmedicine.org
+
+# Maintenance
+maintainers:
+  - id: chorus:maintainer_bold
+    name: CHoRUS Network
+    description: Contact dbold@emory.edu for access requests
+  - id: chorus:maintainer_houghtaling
+    name: CHoRUS Network
+    description: >
+      Bridge2AI CHoRUS consortium responsible for dataset maintenance and ongoing updates from
+      data acquisition sites. Contact jared.houghtaling@tuftsmedicine.org
+
+# Ethics and Human Subjects
+ethical_reviews:
+  - description: >
+      Patient-focused efforts determine ethical and legal approaches to manage privacy and bias
+      while accounting for Social Determinants of Health.
+
+sensitive_elements:
+  - description: >
+      Clinical patient data requiring de-identification and privacy protection measures.
+
+# Data Standards
+external_resources:
+  - name: CHoRUS GitHub Organization
+    description: Software, tooling, semantic mappings, SOPs, and project management resources
+    external_resources:
+      - https://github.com/chorus-ai
+      - https://github.com/chorus-ai/Chorus_SOP
+      - https://github.com/chorus-ai/chorus-container-apps
+      - https://github.com/chorus-ai/chorus_waveform
+      - https://www.bridge2ai.org/chorus

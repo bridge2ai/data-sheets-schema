@@ -1,0 +1,78 @@
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CM4AI/RePORT ⟩ RePORTER - CM4AI.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "cm4ai:nih_grant_3OT2OD032742-01S2"
+name: "Bridge2AI CM4AI NIH Grant"
+title: "Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project"
+description: |
+  As part of the NIH Common Fund's Bridge2AI program, the CM4AI data generation project
+  seeks to map the spatiotemporal architecture of human cells and use these maps toward
+  the grand challenge of interpretable genotype-phenotype learning. The project launches
+  a coordinated effort involving three complementary mapping approaches: proteomic mass
+  spectrometry, cellular imaging, and genetic perturbation via CRISPR/Cas9.
+page: "https://reporter.nih.gov/project-details/11211616"
+
+purposes:
+  - id: "cm4ai:purpose_cell_architecture"
+    name: "Map cell architecture"
+    description: "Map the spatiotemporal architecture of human cells"
+    response: "Map the spatiotemporal architecture of human cells and use these maps toward the grand challenge of interpretable genotype-phenotype learning"
+  - id: "cm4ai:purpose_visible_ml"
+    name: "Visible machine learning"
+    description: "Enable visible ML systems instead of black boxes"
+    response: "Broadly stimulate research and development in visible machine learning systems informed by multi-scale cell and tissue architecture"
+  - id: "cm4ai:purpose_ethical_ai"
+    name: "Ethical AI research"
+    description: "Initiate research program in ethical AI for genomic medicine"
+    response: "Initiate a research program in ethical AI, especially as it relates to how maps will be used in genomic medicine and model interpretation"
+
+creators:
+  - id: "cm4ai:pi_ideker"
+    name: "Trey Ideker"
+    description: "Contact PI/Project Leader, University of California San Diego"
+  - id: "cm4ai:pi_belisle_pipon"
+    name: "Jean-Christophe Bélisle-Pipon"
+    description: "Co-PI, Ethics"
+  - id: "cm4ai:pi_clark"
+    name: "Timothy W Clark"
+    description: "Co-PI, Standards"
+  - id: "cm4ai:pi_chen"
+    name: "Jake Yue Chen"
+    description: "Co-PI"
+  - id: "cm4ai:pi_krogan"
+    name: "Nevan J Krogan"
+    description: "Co-PI, Data Acquisition"
+  - id: "cm4ai:pi_lundberg"
+    name: "Emma Lundberg"
+    description: "Co-PI, Spatial Proteomics"
+  - id: "cm4ai:pi_mali"
+    name: "Prashant Mali"
+    description: "Co-PI, CRISPR"
+  - id: "cm4ai:pi_ratcliffe"
+    name: "Sarah J Ratcliffe"
+    description: "Co-PI"
+  - id: "cm4ai:pi_ravitsky"
+    name: "Vardit Ravitsky"
+    description: "Co-PI, Ethics"
+  - id: "cm4ai:pi_schulz"
+    name: "Wade Loren Schulz"
+    description: "Co-PI"
+
+funders:
+  - id: "cm4ai:funder_nih"
+    name: "NIH Office of the Director"
+    description: "Funding through grant 3OT2OD032742-01S2, Fiscal Year 2025, Total $5,289,382"
+
+keywords:
+  - "Bridge2AI"
+  - "CM4AI"
+  - "NIH"
+  - "machine learning"
+  - "CRISPR/Cas9"
+  - "genomic medicine"
+  - "cell architecture"
+  - "genotype-phenotype"
+  - "visible machine learning"

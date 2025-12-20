@@ -24,7 +24,11 @@ URI: [data_sheets_schema:ExtensionMechanism](https://w3id.org/bridge2ai/data-she
       DatasetProperty <|-- ExtensionMechanism
         click DatasetProperty href "../DatasetProperty/"
       
+      ExtensionMechanism : contribution_url
+        
       ExtensionMechanism : description
+        
+      ExtensionMechanism : extension_details
         
       ExtensionMechanism : id
         
@@ -49,9 +53,8 @@ URI: [data_sheets_schema:ExtensionMechanism](https://w3id.org/bridge2ai/data-she
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **ExtensionMechanism**
+* [DatasetProperty](DatasetProperty.md)
+    * **ExtensionMechanism**
 
 
 
@@ -59,10 +62,12 @@ URI: [data_sheets_schema:ExtensionMechanism](https://w3id.org/bridge2ai/data-she
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [description](description.md) | * <br/> [String](String.md) | Details on processes or tools that facilitate extensions,  augmentations, or ... | direct |
+| [contribution_url](contribution_url.md) | 0..1 <br/> [Uri](Uri.md) | URL for contribution guidelines or process | direct |
+| [extension_details](extension_details.md) | * <br/> [String](String.md) | Details on extension mechanisms, contribution validation, and communication | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -125,52 +130,24 @@ description: 'If others want to extend/augment/build on/contribute to the datase
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Details on processes or tools that facilitate extensions,  augmentations,
-      or third-party contributions, including any  review/approval workflows.
+  contribution_url:
+    name: contribution_url
+    description: URL for contribution guidelines or process.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    domain_of:
+    - ExtensionMechanism
+    range: uri
+  extension_details:
+    name: extension_details
+    description: 'Details on extension mechanisms, contribution validation, and communication.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    slot_uri: dcterms:description
     domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
     - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
     range: string
     multivalued: true
 
@@ -190,56 +167,64 @@ description: 'If others want to extend/augment/build on/contribute to the datase
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
 attributes:
-  description:
-    name: description
-    description: 'Details on processes or tools that facilitate extensions,  augmentations,
-      or third-party contributions, including any  review/approval workflows.
+  contribution_url:
+    name: contribution_url
+    description: URL for contribution guidelines or process.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    alias: contribution_url
+    owner: ExtensionMechanism
+    domain_of:
+    - ExtensionMechanism
+    range: uri
+  extension_details:
+    name: extension_details
+    description: 'Details on extension mechanisms, contribution validation, and communication.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+    rank: 1000
+    slot_uri: dcterms:description
+    alias: extension_details
+    owner: ExtensionMechanism
+    domain_of:
+    - ExtensionMechanism
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: ExtensionMechanism
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: ExtensionMechanism
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
     alias: description
     owner: ExtensionMechanism
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
-    multivalued: true
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -251,30 +236,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: ExtensionMechanism
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: ExtensionMechanism
-    domain_of:
-    - NamedThing
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

@@ -1,0 +1,103 @@
+# D4D Datasheet extracted from dataverse_10.18130_V3_F3TD5R_row19.txt
+# Project: CM4AI
+# Generation Method: Claude Code Agent
+# Source: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.txt
+# Generated: 2025-12-05
+
+id: "doi:10.18130/V3/F3TD5R"
+name: "Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)"
+title: "Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)"
+version: "2.1"
+description: |
+  This dataset is a revision of the June 2025 Data Release of Cell Maps for Artificial Intelligence
+  (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This revision
+  includes adding RGB immunofluorescent images, corrections to ro-crate metadata, and changes to naming
+  conventions.
+
+  This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in
+  undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and treated and untreated
+  MDA-MB468 breast cancer cells; and IF images in MDA-MB-468 breast cancer cells in the presence and
+  absence of chemotherapy (vorinostat and paclitaxel).
+page: "https://doi.org/10.18130/V3/F3TD5R"
+license: "CC BY-NC-SA 4.0"
+
+creators:
+  - id: "cm4ai:creator_clark_june"
+    name: "Timothy Clark"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_parker_june"
+    name: "Justin Parker"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_almanir_june"
+    name: "Sadnan Al Manir"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_axelsson_june"
+    name: "Ulrika Axelsson"
+    description: "Dataset creator"
+  - id: "cm4ai:creator_ideker_june"
+    name: "Trey Ideker"
+    description: "Dataset creator"
+
+keywords:
+  - "AI"
+  - "artificial intelligence"
+  - "breast cancer"
+  - "Bridge2AI"
+  - "cardiomyocyte"
+  - "CM4AI"
+  - "CRISPR/Cas9"
+  - "iPSC"
+  - "KOLF2.1J"
+  - "machine learning"
+  - "mass spectroscopy"
+  - "MDA-MB-468"
+  - "neuron"
+  - "paclitaxel"
+  - "perturb-seq"
+  - "protein-protein interaction"
+  - "SEC-MS"
+  - "vorinostat"
+
+human_subject_research:
+  id: "cm4ai:human_subjects"
+  name: "Human subjects research status"
+  description: "This dataset does not involve human subjects research"
+  involves_human_subjects: false
+
+external_resources:
+  - id: "cm4ai:extres_sra"
+    name: "Sequence Read Archive (SRA) Data"
+    description: "NCBI BioProject containing sequencing data"
+    external_resources:
+      - "NCBI BioProject"
+  - id: "cm4ai:extres_massive_ipsc"
+    name: "Mass Spectrometry Data (Human iPSCs)"
+    description: "MassIVE Repository containing mass spectrometry data for iPSCs"
+    external_resources:
+      - "MassIVE Repository"
+  - id: "cm4ai:extres_massive_cancer"
+    name: "Mass Spectrometry Data (Human Cancer Cells)"
+    description: "MassIVE Repository containing mass spectrometry data for cancer cells"
+    external_resources:
+      - "MassIVE Repository"
+
+discouraged_uses:
+  - id: "cm4ai:discouraged_clinical"
+    name: "Clinical decision-making"
+    description: "Clinical decision-making or any context involving patient care without appropriate regulatory oversight and approval"
+    discouragement_details:
+      - "This dataset is not intended for direct clinical decision-making without appropriate regulatory oversight and approval"
+
+intended_uses:
+  - id: "cm4ai:intended_research"
+    name: "AI-ready datasets for research"
+    description: "AI-ready datasets to support research in functional genomics"
+    examples:
+      - "AI-ready datasets to support research in functional genomics"
+      - "AI model training"
+      - "Cellular process analysis"
+      - "Cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations"
+
+citation: |
+  Clark T, Parker J, Schaffer L, et al. Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell
+  Architecture from Disease-Relevant Cell Lines. 2024. doi: http://doi.org/10.1101/2024.05.21.589311

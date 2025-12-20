@@ -26,17 +26,6 @@ URI: [data_sheets_schema:FundingMechanism](https://w3id.org/bridge2ai/data-sheet
       
       FundingMechanism : description
         
-      FundingMechanism : grant
-        
-          
-    
-        
-        
-        FundingMechanism --> "0..1" Grant : grant
-        click Grant href "../Grant/"
-    
-
-        
       FundingMechanism : grantor
         
           
@@ -45,6 +34,17 @@ URI: [data_sheets_schema:FundingMechanism](https://w3id.org/bridge2ai/data-sheet
         
         FundingMechanism --> "0..1" Grantor : grantor
         click Grantor href "../Grantor/"
+    
+
+        
+      FundingMechanism : grants
+        
+          
+    
+        
+        
+        FundingMechanism --> "*" Grant : grants
+        click Grant href "../Grant/"
     
 
         
@@ -71,9 +71,8 @@ URI: [data_sheets_schema:FundingMechanism](https://w3id.org/bridge2ai/data-sheet
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **FundingMechanism**
+* [DatasetProperty](DatasetProperty.md)
+    * **FundingMechanism**
 
 
 
@@ -82,11 +81,11 @@ URI: [data_sheets_schema:FundingMechanism](https://w3id.org/bridge2ai/data-sheet
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
 | [grantor](grantor.md) | 0..1 <br/> [Grantor](Grantor.md) | Name/identifier of the organization providing monetary or resource support | direct |
-| [grant](grant.md) | 0..1 <br/> [Grant](Grant.md) | Name/identifier of the specific grant mechanism supporting dataset creation | direct |
+| [grants](grants.md) | * <br/> [Grant](Grant.md) | Grant mechanisms supporting dataset creation | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
-| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -154,18 +153,23 @@ attributes:
       support.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     rank: 1000
+    slot_uri: schema:funder
     domain_of:
     - FundingMechanism
     range: Grantor
-  grant:
-    name: grant
-    description: Name/identifier of the specific grant mechanism supporting dataset
-      creation.
+  grants:
+    name: grants
+    description: Grant mechanisms supporting dataset creation. Multiple grants may
+      fund a single dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     rank: 1000
+    slot_uri: schema:funding
     domain_of:
     - FundingMechanism
     range: Grant
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>
@@ -188,22 +192,61 @@ attributes:
       support.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     rank: 1000
+    slot_uri: schema:funder
     alias: grantor
     owner: FundingMechanism
     domain_of:
     - FundingMechanism
     range: Grantor
-  grant:
-    name: grant
-    description: Name/identifier of the specific grant mechanism supporting dataset
-      creation.
+  grants:
+    name: grants
+    description: Grant mechanisms supporting dataset creation. Multiple grants may
+      fund a single dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     rank: 1000
-    alias: grant
+    slot_uri: schema:funding
+    alias: grants
     owner: FundingMechanism
     domain_of:
     - FundingMechanism
     range: Grant
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: FundingMechanism
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: FundingMechanism
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
+    alias: description
+    owner: FundingMechanism
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    - DatasetRelationship
+    range: string
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -215,78 +258,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: FundingMechanism
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: FundingMechanism
-    domain_of:
-    - NamedThing
-    range: string
-  description:
-    name: description
-    description: A human-readable description for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:description
-    alias: description
-    owner: FundingMechanism
-    domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

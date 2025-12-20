@@ -1,0 +1,17 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/zenodo_org_records-10642459_row11.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "doi:10.5281/zenodo.10642459/pdf"
+name: "AI-READI Zenodo Archive PDF"
+description: "PDF document from the AI-READI archive on Zenodo. Document content not extracted due to PDF format."
+page: "https://zenodo.org/records/10642459"
+
+external_resources:
+  - id: "aireadi:extres_zenodo_pdf"
+    name: "Zenodo Archive PDF"
+    description: "PDF document from AI-READI Zenodo archive"
+    external_resources:
+      - "https://zenodo.org/records/10642459"

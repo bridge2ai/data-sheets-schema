@@ -1,0 +1,21 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Agent Deterministic (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/doi_row2.json
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: aireadi:doi_row2
+name: AI-READI DOI References
+title: AI-READI Publication DOI References
+description: 'References to AI-READI publications with DOIs:
+
+  - 10.1038/s42255-024-01165-x
+
+  - 10.1136/bmjopen-2024-097449
+
+  '
+page: https://aireadi.org/publications
+keywords:
+- AI-READI
+- publications
+- DOI

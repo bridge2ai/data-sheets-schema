@@ -3,6 +3,11 @@
 # Slot: resources 
 
 
+_Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures._
+
+
+
+
 
 URI: [data_sheets_schema:resources](https://w3id.org/bridge2ai/data-sheets-schema/resources)
 Alias: resources
@@ -17,7 +22,9 @@ Alias: resources
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [DatasetCollection](DatasetCollection.md) | A collection of related datasets, likely containing multiple files of multipl... |  no  |
+| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  yes  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [DatasetCollection](DatasetCollection.md) | A collection of related datasets, likely containing multiple files of multipl... |  yes  |
 
 
 
@@ -63,12 +70,14 @@ Alias: resources
 <details>
 ```yaml
 name: resources
+description: Sub-resources or component datasets. Used in DatasetCollection to contain
+  Dataset objects, and in Dataset to allow nested resource structures.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 alias: resources
-owner: DatasetCollection
 domain_of:
 - DatasetCollection
+- Dataset
 range: Dataset
 multivalued: true
 

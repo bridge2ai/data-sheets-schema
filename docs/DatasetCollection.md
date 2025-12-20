@@ -106,7 +106,7 @@ URI: [data_sheets_schema:DatasetCollection](https://w3id.org/bridge2ai/data-shee
 
 | Name | Cardinality and Range | Description | Inheritance |
 | ---  | --- | --- | --- |
-| [resources](resources.md) | * <br/> [Dataset](Dataset.md) |  | direct |
+| [resources](resources.md) | * <br/> [Dataset](Dataset.md) | Sub-resources or component datasets | direct |
 | [compression](compression.md) | 0..1 <br/> [CompressionEnum](CompressionEnum.md) | compression format used, if any | [Information](Information.md) |
 | [conforms_to](conforms_to.md) | 0..1 <br/> [String](String.md) |  | [Information](Information.md) |
 | [conforms_to_class](conforms_to_class.md) | 0..1 <br/> [String](String.md) |  | [Information](Information.md) |
@@ -197,15 +197,12 @@ exact_mappings:
 close_mappings:
 - dcat:Catalog
 is_a: Information
-attributes:
+slots:
+- resources
+slot_usage:
   resources:
     name: resources
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    domain_of:
-    - DatasetCollection
-    range: Dataset
-    multivalued: true
+    inlined_as_list: true
 tree_root: true
 
 ```
@@ -228,22 +225,31 @@ exact_mappings:
 close_mappings:
 - dcat:Catalog
 is_a: Information
+slot_usage:
+  resources:
+    name: resources
+    inlined_as_list: true
 attributes:
   resources:
     name: resources
+    description: Sub-resources or component datasets. Used in DatasetCollection to
+      contain Dataset objects, and in Dataset to allow nested resource structures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     alias: resources
     owner: DatasetCollection
     domain_of:
     - DatasetCollection
+    - Dataset
     range: Dataset
     multivalued: true
+    inlined_as_list: true
   compression:
     name: compression
     description: compression format used, if any. e.g., gzip, bzip2, zip
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcat:compressFormat
     alias: compression
     owner: DatasetCollection
     domain_of:
@@ -283,7 +289,7 @@ attributes:
     name: created_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:createdBy
+    slot_uri: dcterms:creator
     alias: created_by
     owner: DatasetCollection
     domain_of:
@@ -293,7 +299,7 @@ attributes:
     name: created_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:createdOn
+    slot_uri: dcterms:created
     alias: created_on
     owner: DatasetCollection
     domain_of:
@@ -304,7 +310,7 @@ attributes:
     description: digital object identifier
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: void:uriRegexPattern
+    slot_uri: dcterms:identifier
     alias: doi
     owner: DatasetCollection
     domain_of:
@@ -319,8 +325,6 @@ attributes:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:url
-    close_mappings:
-    - frictionless:path
     rank: 1000
     slot_uri: dcat:downloadURL
     alias: download_url
@@ -353,7 +357,10 @@ attributes:
     name: language
     description: language in which the information is expressed
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:inLanguage
     rank: 1000
+    slot_uri: dcterms:language
     alias: language
     owner: DatasetCollection
     domain_of:
@@ -363,7 +370,7 @@ attributes:
     name: last_updated_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:lastUpdatedOn
+    slot_uri: dcterms:modified
     alias: last_updated_on
     owner: DatasetCollection
     domain_of:
@@ -384,7 +391,7 @@ attributes:
     name: modified_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:lastUpdateBy
+    slot_uri: dcterms:contributor
     alias: modified_by
     owner: DatasetCollection
     domain_of:
@@ -414,6 +421,7 @@ attributes:
     name: status
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: dcterms:type
     alias: status
     owner: DatasetCollection
     domain_of:
@@ -434,7 +442,7 @@ attributes:
     name: version
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: pav:version
+    slot_uri: dcterms:hasVersion
     alias: version
     owner: DatasetCollection
     domain_of:
@@ -444,8 +452,10 @@ attributes:
   was_derived_from:
     name: was_derived_from
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - dcterms:source
     rank: 1000
-    slot_uri: pav:derivedFrom
+    slot_uri: prov:wasDerivedFrom
     alias: was_derived_from
     owner: DatasetCollection
     domain_of:
@@ -462,8 +472,8 @@ attributes:
     owner: DatasetCollection
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: uriorcurie
-    required: true
   name:
     name: name
     description: A human-readable name for a thing.
@@ -474,6 +484,7 @@ attributes:
     owner: DatasetCollection
     domain_of:
     - NamedThing
+    - DatasetProperty
     range: string
   description:
     name: description
@@ -485,43 +496,8 @@ attributes:
     owner: DatasetCollection
     domain_of:
     - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
+    - DatasetProperty
+    - DatasetRelationship
     range: string
 tree_root: true
 

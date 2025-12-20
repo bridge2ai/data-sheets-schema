@@ -1,0 +1,99 @@
+# D4D Datasheet for CM4AI Dataset
+# Source: data/preprocessed/individual/CM4AI/creativecommons_org_licenses-by-nc-sa_row15.txt
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Workflow: .github/workflows/d4d_assistant_create.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: cm4ai-cc-by-nc-sa-4.0-license
+name: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License for CM4AI Data
+description: |
+  License terms for CM4AI datasets under Creative Commons Attribution-NonCommercial-ShareAlike 4.0
+  International (CC BY-NC-SA 4.0). This license allows users to share and adapt the material with
+  appropriate attribution, but prohibits commercial use and requires derivative works to be shared
+  under the same license.
+
+version: "4.0"
+url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+license:
+  - name: CC BY-NC-SA 4.0
+    full_name: Attribution-NonCommercial-ShareAlike 4.0 International
+    canonical_url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+
+freedoms:
+  - freedom: Share - copy and redistribute the material in any medium or format
+  - freedom: Adapt - remix, transform, and build upon the material
+
+license_terms:
+  - term: Attribution
+    description: |
+      You must give appropriate credit, provide a link to the license, and indicate if changes
+      were made. You may do so in any reasonable manner, but not in any way that suggests the
+      licensor endorses you or your use.
+
+  - term: NonCommercial
+    description: |
+      You may not use the material for commercial purposes. A commercial use is one primarily
+      intended for commercial advantage or monetary compensation.
+
+  - term: ShareAlike
+    description: |
+      If you remix, transform, or build upon the material, you must distribute your contributions
+      under the same license as the original. You may also use a license listed as compatible at
+      https://creativecommons.org/compatiblelicenses
+
+  - term: No additional restrictions
+    description: |
+      You may not apply legal terms or technological measures that legally restrict others from
+      doing anything the license permits. The license prohibits application of effective
+      technological measures, defined with reference to Article 11 of the WIPO Copyright Treaty.
+
+notices:
+  - notice: |
+      You do not have to comply with the license for elements of the material in the public domain
+      or where your use is permitted by an applicable exception or limitation.
+  - notice: |
+      No warranties are given. The license may not give you all of the permissions necessary for
+      your intended use. For example, other rights such as publicity, privacy, or moral rights may
+      limit how you use the material.
+  - notice: |
+      This deed highlights only some of the key features and terms of the actual license. It is not
+      a license and has no legal value. You should carefully review all of the terms and conditions
+      of the actual license before using the licensed material.
+
+attribution_requirements:
+  - requirement: Provide the name of the creator and attribution parties
+  - requirement: Include a copyright notice
+  - requirement: Include a license notice
+  - requirement: Include a disclaimer notice
+  - requirement: Provide a link to the material
+  - requirement: Provide the title of the material if supplied
+  - requirement: Indicate if you modified the material and retain an indication of previous modifications
+
+permitted_use:
+  - use: Educational and research purposes
+  - use: Non-commercial sharing and distribution
+  - use: Creating derivative works with same license
+
+prohibited_use:
+  - use: Commercial use without separate license negotiation
+  - use: Use without proper attribution
+  - use: Distribution under different license terms
+  - use: Application of technological restrictions
+
+legal_information:
+  - info: |
+      Creative Commons is not a law firm and does not provide legal services. Distributing,
+      displaying, or linking to this deed or the license that it summarizes does not create a
+      lawyer-client or any other relationship.
+  - info: |
+      Creative Commons is the nonprofit behind the open licenses and other legal tools that allow
+      creators to share their work. Our legal tools are free to use.
+
+contact:
+  organization: Creative Commons
+  address: PO Box 1866, Mountain View, CA 94042
+  email: info@creativecommons.org
+  phone: +1-415-429-6753

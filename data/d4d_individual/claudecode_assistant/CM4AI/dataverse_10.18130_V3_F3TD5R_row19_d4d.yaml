@@ -1,0 +1,123 @@
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/CM4AI/dataverse_10.18130_V3_F3TD5R_row19.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "doi:10.18130/V3/F3TD5R"
+name: "CM4AI June 2025 Data Release"
+title: "Cell Maps for Artificial Intelligence - June 2025 Data Release (Beta)"
+description: |
+  This dataset is a revision of the June 2025 Data Release of Cell Maps for Artificial
+  Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH
+  Bridge2AI program. This revision includes adding RGB immunofluorescent images,
+  corrections to ro-crate metadata, and changes to naming conventions. This Beta release
+  includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in
+  undifferentiated KOLF2.1J iPSCs, iPSC-derived NPCs, neurons, cardiomyocytes, and
+  treated and untreated MDA-MB468 breast cancer cells; and IF images in MDA-MB-468
+  breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel).
+
+  Human Subjects: No. De-identified Samples: Yes. FDA Regulated: No.
+
+  Known biases: Data derived from commercially available de-identified human cell lines
+  and does not represent all biological variants in the population at large.
+page: "https://doi.org/10.18130/V3/F3TD5R"
+version: "2.1"
+license: "CC BY-NC-SA 4.0"
+issued: "2025-07-01T00:00:00Z"
+
+purposes:
+  - id: "cm4ai:purpose_ai_model_training"
+    name: "AI model training"
+    description: "Support AI model training with functional genomics data"
+    response: "AI-ready datasets to support research in functional genomics and AI model training"
+  - id: "cm4ai:purpose_cellular_analysis"
+    name: "Cellular process analysis"
+    description: "Enable analysis of cell architectural changes"
+    response: "Analyze cell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations"
+
+creators:
+  - id: "cm4ai:creator_clark_june"
+    name: "Timothy Clark"
+    description: "University of Virginia, ORCID: 0000-0003-4060-7360"
+  - id: "cm4ai:creator_parker_june"
+    name: "Jillian Parker"
+    description: "University of California San Diego, ORCID: 0000-0003-4535-3486"
+  - id: "cm4ai:creator_ideker_june"
+    name: "Trey Ideker"
+    description: "University of California San Diego, ORCID: 0000-0002-1708-8454"
+
+funders:
+  - id: "cm4ai:funder_nih_june"
+    name: "National Institutes of Health"
+    description: "Grant 1OT2OD032742-01"
+
+subsets:
+  - id: "cm4ai:subset_if_paclitaxel_june"
+    name: "IF Images - Paclitaxel"
+    description: "Spatial localization of 464 proteins in MDA-MB-468 cells treated with paclitaxel (3.8 GB)"
+  - id: "cm4ai:subset_if_untreated_june"
+    name: "IF Images - Untreated"
+    description: "Spatial localization of 464 proteins in untreated MDA-MB-468 cells (4.6 GB)"
+  - id: "cm4ai:subset_if_vorinostat_june"
+    name: "IF Images - Vorinostat"
+    description: "Spatial localization of 464 proteins in MDA-MB-468 cells treated with vorinostat (4.2 GB)"
+
+updates:
+  id: "cm4ai:update_plan"
+  name: "Quarterly update plan"
+  description: "Dataset maintenance and update schedule"
+  frequency: "quarterly"
+  update_details:
+    - "Dataset will be regularly updated and augmented through the end of the project in November 2026"
+    - "Updates on a quarterly basis"
+    - "Long term preservation in the University of Virginia Dataverse, supported by committed institutional funds"
+
+anomalies:
+  - id: "cm4ai:limitation_interim"
+    name: "Interim release"
+    description: "This is an interim release without computed cell maps. Does not contain predicted cell maps, which will be added in future releases. Requires domain expertise for meaningful analysis."
+  - id: "cm4ai:limitation_incomplete_overlap"
+    name: "Incomplete protein overlap"
+    description: "Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap"
+  - id: "cm4ai:limitation_cell_lines"
+    name: "Cell line representation"
+    description: "Data derived from commercially available de-identified human cell lines. Does not represent all biological variants in the population at large."
+
+discouraged_uses:
+  - id: "cm4ai:discouraged_clinical"
+    name: "Clinical decision-making"
+    description: "These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval"
+
+external_resources:
+  - id: "cm4ai:extres_sra"
+    name: "Sequence Read Archive"
+    description: "NCBI BioProject for sequence data"
+  - id: "cm4ai:extres_massive_ipsc"
+    name: "MassIVE Repository (iPSCs)"
+    description: "Mass spectrometry data for human iPSCs"
+  - id: "cm4ai:extres_massive_cancer"
+    name: "MassIVE Repository (Cancer)"
+    description: "Mass spectrometry data for human cancer cells"
+  - id: "cm4ai:extres_dataverse_june"
+    name: "University of Virginia Dataverse"
+    description: "Primary data repository"
+    external_resources:
+      - "https://doi.org/10.18130/V3/F3TD5R"
+
+keywords:
+  - "CM4AI"
+  - "Bridge2AI"
+  - "AI-ready"
+  - "RO-Crate"
+  - "FAIRSCAPE"
+  - "perturb-seq"
+  - "SEC-MS"
+  - "immunofluorescence"
+  - "KOLF2.1J"
+  - "MDA-MB-468"
+  - "iPSC"
+  - "breast cancer"
+  - "neural progenitor cell"
+  - "neuron"
+  - "cardiomyocyte"

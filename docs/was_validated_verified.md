@@ -22,7 +22,7 @@ Alias: was_validated_verified
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [InstanceAcquisition](InstanceAcquisition.md) | Describes how data associated with each instance was acquired  (e |  no  |
+| [InstanceAcquisition](InstanceAcquisition.md) | Describes how data associated with each instance was acquired (e |  no  |
 
 
 

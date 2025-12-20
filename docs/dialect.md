@@ -4,7 +4,7 @@
 
 
 
-URI: [csvw:dialect](http://www.w3.org/ns/csvw#dialect)
+URI: [data_sheets_schema:dialect](https://w3id.org/bridge2ai/data-sheets-schema/dialect)
 Alias: dialect
 
 <!-- no inheritance hierarchy -->
@@ -17,8 +17,8 @@ Alias: dialect
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 | [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 
 
 
@@ -51,7 +51,7 @@ Alias: dialect
 
 | Mapping Type | Mapped Value |
 | ---  | ---  |
-| self | csvw:dialect |
+| self | data_sheets_schema:dialect |
 | native | data_sheets_schema:dialect |
 
 
@@ -64,7 +64,6 @@ Alias: dialect
 name: dialect
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: csvw:dialect
 alias: dialect
 domain_of:
 - Dataset

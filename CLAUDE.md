@@ -276,7 +276,15 @@ data/
     individual/gpt5/, individual/claudecode/
     concatenated/gpt5/, concatenated/claudecode/, concatenated/curated/
 
-  ATTIC/                          # Archived old data
+  ATTIC/                          # Archived legacy data (see ATTIC/README.md)
+    root_downloads/               # Old download structures from repository root
+      downloads_by_column_enhanced/
+      downloads_by_column_combined/
+      test_downloads/
+      old/
+    sheets_concatenated/          # Old concatenation structure
+    validated_extracted/          # Legacy extraction outputs
+    [19+ other legacy dirs]       # Early extraction experiments
 ```
 
 ### Complete D4D Pipeline (Recommended)
@@ -1024,3 +1032,4 @@ poetry run python -m unittest tests.test_d4d_full_schema.TestD4DFullSchema.test_
 - Module files are in `src/data_sheets_schema/schema/` (NOT in a `modules/` subdirectory)
 - When adding new classes, prefer inheriting from existing base classes in `D4D_Base_import.yaml`
 - The `aurelian/` directory is a git submodule - initialize with `git submodule update --init --recursive`
+- **Legacy data** is archived in `data/ATTIC/` - see `data/ATTIC/README.md` for details on archived directories and migration timeline

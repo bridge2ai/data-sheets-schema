@@ -57,9 +57,8 @@ URI: [data_sheets_schema:ExternalResource](https://w3id.org/bridge2ai/data-sheet
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **ExternalResource**
+* [DatasetProperty](DatasetProperty.md)
+    * **ExternalResource**
 
 
 
@@ -71,10 +70,10 @@ URI: [data_sheets_schema:ExternalResource](https://w3id.org/bridge2ai/data-sheet
 | [future_guarantees](future_guarantees.md) | * <br/> [String](String.md) | Explanation of any commitments that external resources will remain available ... | direct |
 | [archival](archival.md) | * <br/> [Boolean](Boolean.md) | Indication whether official archival versions of external resources are inclu... | direct |
 | [restrictions](restrictions.md) | * <br/> [String](String.md) | Description of any restrictions or fees associated with external resources | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
-| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -136,16 +135,14 @@ description: 'Is the dataset self-contained or does it rely on external resource
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
-attributes:
+slots:
+- external_resources
+slot_usage:
   external_resources:
     name: external_resources
     description: List of links or identifiers for external resources.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    domain_of:
-    - Dataset
-    - ExternalResource
     range: string
-    multivalued: true
+attributes:
   future_guarantees:
     name: future_guarantees
     description: 'Explanation of any commitments that external resources will remain
@@ -154,6 +151,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:description
     domain_of:
     - ExternalResource
     range: string
@@ -178,8 +176,10 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:accessRights
     domain_of:
     - ExternalResource
+    - IPRestrictions
     range: string
     multivalued: true
 
@@ -198,18 +198,12 @@ description: 'Is the dataset self-contained or does it rely on external resource
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 is_a: DatasetProperty
-attributes:
+slot_usage:
   external_resources:
     name: external_resources
     description: List of links or identifiers for external resources.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-    alias: external_resources
-    owner: ExternalResource
-    domain_of:
-    - Dataset
-    - ExternalResource
     range: string
-    multivalued: true
+attributes:
   future_guarantees:
     name: future_guarantees
     description: 'Explanation of any commitments that external resources will remain
@@ -218,6 +212,7 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:description
     alias: future_guarantees
     owner: ExternalResource
     domain_of:
@@ -246,12 +241,61 @@ attributes:
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:accessRights
     alias: restrictions
     owner: ExternalResource
     domain_of:
     - ExternalResource
+    - IPRestrictions
     range: string
     multivalued: true
+  external_resources:
+    name: external_resources
+    description: List of links or identifiers for external resources.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcterms:references
+    alias: external_resources
+    owner: ExternalResource
+    domain_of:
+    - Dataset
+    - ExternalResource
+    range: string
+    multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: ExternalResource
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: ExternalResource
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
+    alias: description
+    owner: ExternalResource
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    - DatasetRelationship
+    range: string
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -263,78 +307,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: ExternalResource
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: ExternalResource
-    domain_of:
-    - NamedThing
-    range: string
-  description:
-    name: description
-    description: A human-readable description for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:description
-    alias: description
-    owner: ExternalResource
-    domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

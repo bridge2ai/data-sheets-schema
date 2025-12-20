@@ -1,0 +1,22 @@
+# D4D Datasheet for AI_READI Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/AI_READI/doi_row2.json
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "aireadi:doi_publications"
+name: "AI-READI DOI Publications Reference"
+description: "DOI references to AI-READI publications in Nature Metabolism and BMJ Open."
+page: "https://aireadi.org/publications"
+
+external_resources:
+  - id: "aireadi:extres_nature_metabolism"
+    name: "Nature Metabolism Publication"
+    description: "AI-READI publication in Nature Metabolism"
+    external_resources:
+      - "https://doi.org/10.1038/s42255-024-01165-x"
+  - id: "aireadi:extres_bmj_open"
+    name: "BMJ Open Protocol Paper"
+    description: "AI-READI protocol paper in BMJ Open"
+    external_resources:
+      - "https://doi.org/10.1136/bmjopen-2024-097449"

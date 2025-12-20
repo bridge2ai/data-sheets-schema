@@ -1,0 +1,99 @@
+# D4D Datasheet for CHORUS Dataset
+# Source: data/preprocessed/individual/CHORUS/github_chorus_ai_row9.txt
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Workflow: .github/workflows/d4d_assistant_create.md
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Temperature: 0.0
+# Generated: 2025-12-06
+
+id: "chorus:github-overview-row9-2024-10-30"
+name: "CHoRUS for Equitable AI - GitHub Organization Overview"
+title: "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI"
+description: |
+  The CHoRUS Network GitHub organization provides software, tools, semantic mappings,
+  standard operating protocols, and project management resources to support the development
+  of diverse, high-resolution, ethically sourced, AI-ready clinical datasets. This documentation
+  describes the CHoRUS ecosystem spanning 20 academic centers (14 as Data Acquisition centers)
+  focused on improving recovery from acute illness through equitable AI.
+page: "https://github.com/chorus-ai"
+language: "en"
+license: "MIT"
+keywords:
+  - "CHoRUS"
+  - "Bridge2AI"
+  - "clinical data"
+  - "equitable AI"
+  - "acute illness"
+  - "EHR data"
+  - "waveform data"
+  - "imaging data"
+  - "OMOP"
+  - "semantic mappings"
+  - "GitHub organization"
+
+# Motivation
+purposes:
+  - id: "chorus:purpose_diverse_dataset"
+    name: "Develop diverse AI-ready dataset"
+    description: |
+      Develop the most diverse, high-resolution, ethically sourced, AI-ready dataset
+      to answer the grand challenge of improving recovery from acute illness.
+  - id: "chorus:purpose_software_tools"
+    name: "Provide software and tooling"
+    description: |
+      Provide software and tooling to interact with and extract insight from clinical
+      data in diverse formats.
+  - id: "chorus:purpose_semantic_mappings"
+    name: "Establish semantic mappings"
+    description: |
+      Establish validated semantic mappings for connecting clinical data in various
+      source formats to international standards.
+
+tasks:
+  - id: "chorus:task_harmonization"
+    name: "Multi-modal data harmonization"
+    description: |
+      Enable multi-modal clinical data harmonization across EHR, waveform, imaging,
+      and text data using unified standards.
+
+addressing_gaps:
+  - id: "chorus:gap_ethical_approaches"
+    name: "Ethical privacy and bias management"
+    description: |
+      Address the need for patient-focused ethical and legal approaches to manage
+      privacy and bias while accounting for Social Determinants of Health.
+
+# Composition
+instances:
+  - id: "chorus:instances_repositories"
+    name: "GitHub repositories"
+    description: |
+      The GitHub organization contains 28 public repositories providing software tools,
+      documentation, SOPs, and project management resources. Key repositories include
+      chorus-container-apps, privacy_scan_tool, chorus_waveform, Chorus_SOP, and data_acq_SOP.
+    instance_type: "software repository"
+
+# Collection
+data_collectors:
+  - id: "chorus:collector_contributors"
+    name: "CHoRUS software contributors"
+    description: |
+      CHoRUS software contributors from multiple sub-teams including Standards,
+      Data Acquisition, and Tooling teams within the CHoRUS DGP.
+
+# Distribution
+distribution_formats:
+  - id: "chorus:format_github"
+    name: "GitHub repositories"
+    description: |
+      Source code repositories publicly available on GitHub under various open-source licenses
+      (MIT, Apache-2.0). Primary languages include JavaScript, Python, Jupyter Notebook, MDX,
+      CSS, and R.
+
+# Maintenance
+maintainers:
+  - id: "chorus:maintainer_team"
+    name: "CHoRUS Development Team"
+    description: |
+      Distributed team of software contributors maintaining repositories. Package status
+      and maintainer information available via the chorus-developer repository documentation.

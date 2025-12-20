@@ -55,9 +55,8 @@ URI: [data_sheets_schema:Subpopulation](https://w3id.org/bridge2ai/data-sheets-s
 
 
 ## Inheritance
-* [NamedThing](NamedThing.md)
-    * [DatasetProperty](DatasetProperty.md)
-        * **Subpopulation**
+* [DatasetProperty](DatasetProperty.md)
+    * **Subpopulation**
 
 
 
@@ -68,10 +67,10 @@ URI: [data_sheets_schema:Subpopulation](https://w3id.org/bridge2ai/data-sheets-s
 | [subpopulation_elements_present](subpopulation_elements_present.md) | 0..1 <br/> [Boolean](Boolean.md) | Indicates whether any subpopulations are explicitly identified | direct |
 | [identification](identification.md) | * <br/> [String](String.md) |  | direct |
 | [distribution](distribution.md) | * <br/> [String](String.md) |  | direct |
+| [id](id.md) | 0..1 <br/> [Uriorcurie](Uriorcurie.md) | An optional identifier for this property | [DatasetProperty](DatasetProperty.md) |
+| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for this property | [DatasetProperty](DatasetProperty.md) |
+| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for this property | [DatasetProperty](DatasetProperty.md) |
 | [used_software](used_software.md) | * <br/> [Software](Software.md) | What software was used as part of this dataset property? | [DatasetProperty](DatasetProperty.md) |
-| [id](id.md) | 1 <br/> [Uriorcurie](Uriorcurie.md) | A unique identifier for a thing | [NamedThing](NamedThing.md) |
-| [name](name.md) | 0..1 <br/> [String](String.md) | A human-readable name for a thing | [NamedThing](NamedThing.md) |
-| [description](description.md) | 0..1 <br/> [String](String.md) | A human-readable description for a thing | [NamedThing](NamedThing.md) |
 
 
 
@@ -145,6 +144,7 @@ attributes:
     name: identification
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:description
     domain_of:
     - Subpopulation
     range: string
@@ -153,6 +153,7 @@ attributes:
     name: distribution
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:description
     domain_of:
     - Subpopulation
     range: string
@@ -187,6 +188,7 @@ attributes:
     name: identification
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:description
     alias: identification
     owner: Subpopulation
     domain_of:
@@ -197,12 +199,47 @@ attributes:
     name: distribution
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
+    slot_uri: dcterms:description
     alias: distribution
     owner: Subpopulation
     domain_of:
     - Subpopulation
     range: string
     multivalued: true
+  id:
+    name: id
+    description: An optional identifier for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:identifier
+    alias: id
+    owner: Subpopulation
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: uriorcurie
+  name:
+    name: name
+    description: A human-readable name for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:name
+    alias: name
+    owner: Subpopulation
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    range: string
+  description:
+    name: description
+    description: A human-readable description for this property.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+    slot_uri: schema:description
+    alias: description
+    owner: Subpopulation
+    domain_of:
+    - NamedThing
+    - DatasetProperty
+    - DatasetRelationship
+    range: string
   used_software:
     name: used_software
     description: What software was used as part of this dataset property?
@@ -214,78 +251,8 @@ attributes:
     - DatasetProperty
     range: Software
     multivalued: true
-  id:
-    name: id
-    description: A unique identifier for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:identifier
-    identifier: true
-    alias: id
-    owner: Subpopulation
-    domain_of:
-    - NamedThing
-    range: uriorcurie
-    required: true
-  name:
-    name: name
-    description: A human-readable name for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:name
-    alias: name
-    owner: Subpopulation
-    domain_of:
-    - NamedThing
-    range: string
-  description:
-    name: description
-    description: A human-readable description for a thing.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
-    rank: 1000
-    slot_uri: schema:description
-    alias: description
-    owner: Subpopulation
-    domain_of:
-    - NamedThing
-    - Relationships
-    - Splits
-    - DataAnomaly
-    - Confidentiality
-    - Deidentification
-    - SensitiveElement
-    - InstanceAcquisition
-    - CollectionMechanism
-    - DataCollector
-    - CollectionTimeframe
-    - DirectCollection
-    - PreprocessingStrategy
-    - CleaningStrategy
-    - LabelingStrategy
-    - RawData
-    - ExistingUse
-    - UseRepository
-    - OtherTask
-    - FutureUseImpact
-    - DiscouragedUse
-    - ThirdPartySharing
-    - DistributionFormat
-    - DistributionDate
-    - Maintainer
-    - Erratum
-    - UpdatePlan
-    - RetentionLimits
-    - VersionAccess
-    - ExtensionMechanism
-    - EthicalReview
-    - DataProtectionImpact
-    - CollectionNotification
-    - CollectionConsent
-    - ConsentRevocation
-    - LicenseAndUseTerms
-    - IPRestrictions
-    - ExportControlRegulatoryRestrictions
-    range: string
+    inlined: true
+    inlined_as_list: true
 
 ```
 </details>

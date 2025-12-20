@@ -1,0 +1,79 @@
+# D4D Datasheet extracted from RePORT > RePORTER - CM4AI.txt
+# Project: CM4AI
+# Generation Method: Claude Code Agent
+# Source: data/preprocessed/individual/CM4AI/RePORT > RePORTER - CM4AI.txt
+# Generated: 2025-12-05
+
+id: "cm4ai:nih_grant_3OT2OD032742"
+name: "Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project - NIH Grant"
+title: "Bridge2AI: Cell Maps for AI (CM4AI) Data Generation Project"
+description: |
+  As part of the NIH Common Fund's Bridge2AI program, the CM4AI data generation project seeks to map
+  the spatiotemporal architecture of human cells and use these maps toward the grand challenge of
+  interpretable genotype-phenotype learning. The project launches a coordinated effort involving three
+  complementary mapping approaches - proteomic mass spectrometry, cellular imaging, and genetic
+  perturbation via CRISPR/Cas9 - creating a library of large-scale maps of cellular structure/function
+  across demographic and disease contexts.
+page: "https://reporter.nih.gov/project-details/11211616"
+
+funders:
+  - id: "cm4ai:funder_nih"
+    name: "NIH Office of the Director"
+    description: "Primary funder of the CM4AI project through grant 3OT2OD032742-01S2 ($5,289,382 in FY2025)"
+
+creators:
+  - id: "cm4ai:creator_ideker_pi"
+    name: "Trey Ideker"
+    description: "Contact PI/Project Leader at University of California, San Diego"
+  - id: "cm4ai:creator_belisle_pipon"
+    name: "Jean-Christophe Belisle-Pipon"
+    description: "Other PI on the CM4AI project"
+  - id: "cm4ai:creator_clark_pi"
+    name: "Timothy W Clark"
+    description: "Other PI on the CM4AI project"
+  - id: "cm4ai:creator_chen"
+    name: "Jake Yue Chen"
+    description: "Other PI on the CM4AI project"
+  - id: "cm4ai:creator_krogan"
+    name: "Nevan J Krogan"
+    description: "Other PI on the CM4AI project"
+  - id: "cm4ai:creator_lundberg"
+    name: "Emma Lundberg"
+    description: "Other PI on the CM4AI project"
+  - id: "cm4ai:creator_mali"
+    name: "Prashant Mali"
+    description: "Other PI on the CM4AI project"
+  - id: "cm4ai:creator_ratcliffe"
+    name: "Sarah J Ratcliffe"
+    description: "Other PI on the CM4AI project"
+  - id: "cm4ai:creator_ravitsky"
+    name: "Vardit Ravitsky"
+    description: "Other PI on the CM4AI project"
+  - id: "cm4ai:creator_schulz"
+    name: "Wade Loren Schulz"
+    description: "Other PI on the CM4AI project"
+
+purposes:
+  - id: "cm4ai:purpose_cell_mapping"
+    name: "Map cell architecture"
+    description: "Map spatiotemporal architecture of human cells"
+    response: "Map spatiotemporal architecture of human cells"
+  - id: "cm4ai:purpose_genotype_phenotype"
+    name: "Genotype-phenotype learning"
+    description: "Enable interpretable genotype-phenotype learning"
+    response: "Enable interpretable genotype-phenotype learning through visible machine learning systems"
+  - id: "cm4ai:purpose_fair_data"
+    name: "FAIR data management"
+    description: "Implement FAIR data management standards"
+    response: "Implement FAIR data management standards for AI-ready datasets"
+  - id: "cm4ai:purpose_ethical_ai"
+    name: "Ethical AI research"
+    description: "Initiate research program in ethical AI"
+    response: "Initiate research program in ethical AI"
+
+keywords:
+  - "Bridge to Artificial Intelligence"
+  - "CRISPR/Cas technology"
+  - "Machine Learning"
+  - "Genomic medicine"
+  - "Cell maps"

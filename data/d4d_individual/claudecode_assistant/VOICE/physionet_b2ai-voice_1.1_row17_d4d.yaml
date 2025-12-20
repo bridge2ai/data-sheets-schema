@@ -1,0 +1,56 @@
+# D4D Datasheet for VOICE Dataset
+# Generation Method: Claude Code Deterministic ASSISTANT (in-session synthesis)
+# Source: data/preprocessed/individual/VOICE/physionet_b2ai-voice_1.1_row17.txt
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Generated: 2025-12-06
+
+id: "voice:physionet_v1.1_alt"
+name: "Bridge2AI-Voice PhysioNet v1.1 (row17)"
+title: "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information"
+description: |
+  Alternative source entry for the Bridge2AI-Voice dataset v1.1 on PhysioNet. The dataset
+  provides 12,523 recordings from 306 participants across five North American sites.
+  Versions include v1.1 (January 2025), v2.0.0 (April 2025), and v2.0.1 (August 2025).
+  Raw audio data available through controlled access via DACO@b2ai-voice.org.
+page: "https://physionet.org/content/b2ai-voice/1.1/"
+version: "1.1"
+license: "Bridge2AI Voice Registered Access License"
+issued: "2025-01-17T00:00:00Z"
+
+instances:
+  - id: "voice:instance_v11"
+    name: "v1.1"
+    description: "January 17, 2025 - Added Mel-frequency cepstral coefficients (MFCCs)"
+  - id: "voice:instance_v200"
+    name: "v2.0.0"
+    description: "April 16, 2025"
+  - id: "voice:instance_v201"
+    name: "v2.0.1"
+    description: "August 18, 2025 - Latest version"
+
+distribution_formats:
+  - id: "voice:format_spectrograms"
+    name: "spectrograms.parquet"
+    description: "Dense data derived from voice waveforms in Parquet format"
+  - id: "voice:format_mfcc"
+    name: "mfcc.parquet"
+    description: "Mel-frequency cepstral coefficients derived from spectrograms"
+  - id: "voice:format_phenotype"
+    name: "phenotype.tsv"
+    description: "Demographics, acoustic confounders, and validated questionnaire responses"
+  - id: "voice:format_features"
+    name: "static_features.tsv"
+    description: "Features derived from raw audio, one feature per recording"
+
+external_resources:
+  - id: "voice:extres_raw_audio"
+    name: "Raw Audio Access"
+    description: "Controlled access to original raw audio data via DACO@b2ai-voice.org"
+
+keywords:
+  - "Bridge2AI"
+  - "VOICE"
+  - "PhysioNet"
+  - "spectrogram"
+  - "MFCC"
+  - "voice biomarker"
