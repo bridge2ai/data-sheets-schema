@@ -91,7 +91,7 @@ Score **0** (absent/fail) if:
 **Question:** Can a user or system discover and uniquely identify this dataset?
 
 **Sub-elements:**
-1. **Persistent Identifier (DOI, RRID, etc.)**
+1. **Persistent Identifier (DOI, RRID, or URI)**
    - Fields: `doi`, `rrid`, `id`
    - Look for: Properly formatted persistent identifiers (DOI, RRID, or unique dataset ID)
    - **Semantic Check:**
@@ -108,13 +108,13 @@ Score **0** (absent/fail) if:
    - Fields: `keywords`
    - Look for: Multiple relevant keywords (≥5) covering domain, methods, conditions
 
-4. **Dataset Landing Page or Platform URL**
-   - Fields: `page`, `external_resources`
-   - Look for: Accessible landing page URL where users can learn more
+4. **Landing Page and Resources (page, hierarchical resources)**
+   - Fields: `page`, `resources`
+   - Look for: Accessible landing page URL and/or hierarchical resource structures
 
-5. **Associated Project or Program**
-   - Fields: `project`, `keywords`
-   - Look for: Clear association with project (e.g., Bridge2AI, AIM-AHEAD)
+5. **Hierarchical Structure (parent datasets, relationships)**
+   - Fields: `parent_datasets`, `related_datasets`
+   - Look for: Links to parent datasets or related datasets with typed relationships
 
 ---
 
@@ -122,25 +122,25 @@ Score **0** (absent/fail) if:
 **Question:** Can the dataset and its associated resources be located, accessed, and downloaded?
 
 **Sub-elements:**
-1. **Access Mechanism Defined**
-   - Fields: `access_and_licensing.access_policy`
-   - Look for: Clear statement (open, restricted, registered access)
+1. **Access Policy and IP Restrictions Defined**
+   - Fields: `license_and_use_terms`, `ip_restrictions`
+   - Look for: Clear access policy, IP-based restrictions, or licensing terms
 
-2. **Data Use Agreement Required?**
-   - Fields: `access_and_licensing.data_use_agreement`
-   - Look for: Whether DUA is required and how to sign it
+2. **Regulatory Restrictions and Confidentiality Level Specified**
+   - Fields: `regulatory_restrictions`, `confidentiality_level`
+   - Look for: Export control restrictions, GDPR compliance, data sensitivity classification
 
 3. **Download URL or Platform Link Available**
-   - Fields: `distribution_formats`, `download_url`
+   - Fields: `download_url`
    - Look for: Direct download links or platform access instructions
 
-4. **File Formats Specified**
-   - Fields: `data_characteristics.data_formats`, `files.listing.type`
-   - Look for: Specific file formats (TSV, Parquet, DICOM, etc.)
+4. **Distribution Formats and File Types Specified**
+   - Fields: `distribution_formats`, `format`, `media_type`
+   - Look for: Specific file formats (TSV, Parquet, DICOM, etc.) and MIME types
 
-5. **External Links to Similar or Related Datasets**
-   - Fields: `external_resources`, `project_website`
-   - Look for: Links to related resources, repositories, or datasets
+5. **Related Datasets and External Resources Linked**
+   - Fields: `related_datasets`, `external_resources`
+   - Look for: Links to related datasets and external documentation
 
 ---
 
@@ -149,24 +149,24 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **License Terms Allow Reuse**
-   - Fields: `license_and_use_terms.description`
+   - Fields: `license_and_use_terms`
    - Look for: Clear license (CC BY, CC BY-NC-SA, etc.) with reuse permissions
 
-2. **Data Formats Are Standardized**
-   - Fields: `data_characteristics.data_formats`
-   - Look for: Use of standard formats (JSON, TSV, Parquet, DICOM, WFDB)
+2. **Data Formats Are Standardized (encoding, format)**
+   - Fields: `format`, `encoding`
+   - Look for: Use of standard formats (JSON, TSV, Parquet, DICOM, WFDB) and character encoding
 
 3. **Schema or Ontology Conformance Stated**
-   - Fields: `conforms_to`
+   - Fields: `conforms_to`, `conforms_to_schema`
    - Look for: References to schemas (OMOP, FHIR, schema.org, etc.)
 
-4. **Identifiers Defined for Linking**
-   - Fields: `data_characteristics.identifiers_in_files`
-   - Look for: Participant IDs, linking keys, unique identifiers
+4. **Variable Metadata with Identifiers Defined**
+   - Fields: `variables`
+   - Look for: Variable-level metadata with identifiers and descriptions
 
-5. **Documentation of Processing Tools for Reproducibility**
-   - Fields: `software_and_tools`, `open_source_code`
-   - Look for: Software names, versions, processing pipelines, code repos
+5. **Use Guidance Provided (intended, prohibited uses)**
+   - Fields: `intended_uses`, `prohibited_uses`, `discouraged_uses`
+   - Look for: Clear guidance on allowed, prohibited, and discouraged uses
 
 ---
 
@@ -174,32 +174,32 @@ Score **0** (absent/fail) if:
 **Question:** Does the dataset provide clear information about consent, privacy, and ethical oversight?
 
 **Consistency Checks (apply across all sub-elements):**
-- IF `human_subject_research=True` → EXPECT sub-element 1 (IRB approval) AND sub-element 4 (consent) to score 1
-- IF `is_deidentified=True` → EXPECT sub-element 2 (deidentification method) AND sub-element 3 (identifiers removed) to score 1
+- IF `human_subject_research.involves_human_subjects=True` → EXPECT sub-element 1 (IRB approval) AND sub-element 4 (consent) to score 1
+- IF `is_deidentified` present → EXPECT deidentification method described
 - IF IRB approval documented → EXPECT consent procedures also described
 - Flag any inconsistencies in semantic_analysis.issues_detected
 
 **Sub-elements:**
 1. **IRB or Ethics Review Documented**
-   - Fields: `ethics.irb_approval`
-   - Look for: IRB approval details, institutional oversight
-   - **Semantic Check:** If `human_subject_research=True`, this MUST be populated
+   - Fields: `ethical_reviews`, `human_subject_research`
+   - Look for: IRB approval details, institutional oversight, ethics review boards
+   - **Semantic Check:** If `human_subject_research.involves_human_subjects=True`, this MUST be populated
 
 2. **Deidentification Method Described**
-   - Fields: `deidentification_and_privacy.approach`
-   - Look for: Specific method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
+   - Fields: `is_deidentified`
+   - Look for: Specific deidentification method (HIPAA Safe Harbor, Expert Determination, k-anonymity)
 
-3. **Identifiers Removed or Masked**
-   - Fields: `deidentification_and_privacy.examples_of_identifiers_removed`
-   - Look for: List of removed identifiers (names, dates, SSNs, etc.)
+3. **Privacy Protections Beyond Deidentification**
+   - Fields: `participant_privacy`
+   - Look for: Privacy protections, anonymization procedures, reidentification risk assessment
 
 4. **Informed Consent Obtained from Participants**
-   - Fields: `collection_process.consent`
-   - Look for: Consent procedures, consent type (written, verbal)
+   - Fields: `informed_consent`
+   - Look for: Consent procedures, consent type (written, verbal), withdrawal mechanisms
 
-5. **Ethical Sourcing Statement Included**
-   - Fields: `ethics.ethical_position`
-   - Look for: Statement on ethical data collection practices
+5. **Vulnerable Populations and Compensation Documented**
+   - Fields: `vulnerable_populations`, `participant_compensation`
+   - Look for: Protections for vulnerable populations, compensation details
 
 ---
 
@@ -207,25 +207,25 @@ Score **0** (absent/fail) if:
 **Question:** Can the dataset's structure, modality, and population be understood from metadata?
 
 **Sub-elements:**
-1. **Cohort or Population Characteristics Described**
-   - Fields: `composition.population`
-   - Look for: Demographics, inclusion/exclusion criteria
+1. **Cohort or Subpopulations Characteristics Described**
+   - Fields: `subpopulations`
+   - Look for: Demographics, inclusion/exclusion criteria, population characteristics
 
-2. **Number of Participants or Samples Reported**
-   - Fields: `composition.population.participants`
+2. **Number of Instances or Samples Reported**
+   - Fields: `instances`
    - Look for: Specific counts (e.g., 306 participants, 12,523 recordings)
 
-3. **Modalities or Data Types Listed**
-   - Fields: `data_characteristics.modalities`
-   - Look for: EHR, imaging, waveforms, genomics, voice, etc.
+3. **Variable-Level Metadata and Tabular Flag**
+   - Fields: `variables`, `is_tabular`
+   - Look for: Variable/column descriptions, data dictionary, tabular data indicator
 
-4. **Conditions or Phenotypes Represented**
-   - Fields: `composition.condition_groups`
-   - Look for: Disease conditions, phenotypes studied
+4. **Data Topics or Conditions Represented**
+   - Fields: `instances`
+   - Look for: Disease conditions, phenotypes, topics covered in the dataset
 
-5. **File Dimensions or Sampling Rates Provided**
-   - Fields: `data_characteristics.sampling_and_dimensions`
-   - Look for: Array dimensions (513×N), sampling rates (16 kHz), file sizes
+5. **Data Quality Issues and Anomalies Documented**
+   - Fields: `anomalies`, `sampling_strategies`
+   - Look for: Known data quality issues, anomalies, sampling methods
 
 ---
 
@@ -234,24 +234,24 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Dataset Version Number Provided**
-   - Fields: `dataset_version`, `version`
+   - Fields: `version`
    - Look for: Version number (1.0, 1.1, 2.0.1)
 
-2. **Version History Documented**
-   - Fields: `release_notes`
-   - Look for: Release notes or change log
+2. **Version Access Methods Documented**
+   - Fields: `version_access`
+   - Look for: How to access different versions of the dataset
 
-3. **Change Descriptions for Each Version**
-   - Fields: `release_notes.notes`
-   - Look for: Specific changes made in each version
+3. **Change Descriptions and Errata Provided**
+   - Fields: `errata`, `updates`
+   - Look for: Errata documentation, update descriptions, change logs
 
 4. **Update Schedule or Frequency Indicated**
    - Fields: `updates`
-   - Look for: Update schedule, maintenance plan
+   - Look for: Update schedule, maintenance plan, update frequency
 
-5. **Versioned Documentation or External References**
-   - Fields: `version_access`, `external_resources`
-   - Look for: Links to version-specific documentation
+5. **Provenance and Source Derivation Documented**
+   - Fields: `was_derived_from`, `release_notes`
+   - Look for: Source provenance, dataset derivation, release notes
 
 ---
 
@@ -259,29 +259,29 @@ Score **0** (absent/fail) if:
 **Question:** Does the metadata clearly state why the dataset exists and who funded it?
 
 **Sub-elements:**
-1. **Motivation or Rationale for Dataset Creation**
-   - Fields: `motivation`
-   - Look for: Scientific rationale, research gaps addressed
+1. **Motivation or Purpose for Dataset Creation**
+   - Fields: `purposes`
+   - Look for: Scientific rationale, research gaps addressed, dataset purposes
 
-2. **Primary Research Objective or Task**
-   - Fields: `intended_uses.primary`
-   - Look for: Specific research questions or ML tasks
+2. **Primary Research Objectives or Tasks**
+   - Fields: `tasks`
+   - Look for: Specific research questions, ML tasks, intended analyses
 
-3. **Funding Source or Grant Agency Listed**
-   - Fields: `funding_and_acknowledgements.funding.agency`
-   - Look for: NIH, NSF, specific grant agency
+3. **Funding Sources and Mechanisms Listed**
+   - Fields: `funders`
+   - Look for: NIH, NSF, specific grant agencies and funding mechanisms
 
-4. **Award Number or Grant ID Present**
-   - Fields: `funding_and_acknowledgements.funding.award_number`
-   - Look for: Grant numbers (1OT2OD032742-01, etc.)
+4. **Grant IDs or Award Numbers Present**
+   - Fields: `funders`
+   - Look for: Grant numbers (1OT2OD032742-01, etc.) within funder descriptions
    - **Semantic Check:**
      - NIH format: `[Type][Number][Institute][Digits]` (e.g., `OT2OD032742`, `R01GM123456`)
      - NSF format: `[Division]-[Number]` (e.g., `DBI-1234567`)
      - Score 1 if grant number follows expected pattern for stated agency
 
-5. **Acknowledgement of Platform or Participant Support**
-   - Fields: `funding_and_acknowledgements.acknowledgements`
-   - Look for: Acknowledgements section
+5. **Creators and Acknowledgements Documented**
+   - Fields: `creators`, `funders`
+   - Look for: Dataset creators, contributor acknowledgements, institutional support
 
 ---
 
@@ -289,25 +289,25 @@ Score **0** (absent/fail) if:
 **Question:** Can data collection and processing steps be replicated or understood?
 
 **Sub-elements:**
-1. **Collection Setting or Sites Described**
-   - Fields: `collection_process.setting`
-   - Look for: Clinical sites, institutions, collection locations
+1. **Collection Mechanisms and Settings Described**
+   - Fields: `collection_mechanisms`
+   - Look for: Collection procedures, settings, timeframes
 
-2. **Data Capture Method or Device Listed**
-   - Fields: `collection_process.data_capture`
-   - Look for: Instruments, devices, software used for data capture
+2. **Data Acquisition Methods Listed**
+   - Fields: `acquisition_methods`
+   - Look for: Instruments, devices, software used for data capture and acquisition
 
-3. **Preprocessing or Cleaning Steps Documented**
-   - Fields: `preprocessing_and_derived_data.raw_audio_processing`
-   - Look for: Preprocessing pipeline, cleaning steps
+3. **Preprocessing, Cleaning, and Labeling Strategies**
+   - Fields: `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`
+   - Look for: Preprocessing pipeline, cleaning steps, labeling methods
 
-4. **Open-Source Processing Code Provided**
-   - Fields: `software_and_tools.preprocessing_code`
-   - Look for: GitHub repos, code availability
+4. **Software and Tools Documented**
+   - Fields: `software_and_tools`
+   - Look for: Software names, versions, processing tools, GitHub repos
 
-5. **External Standards or References Cited**
-   - Fields: `references`
-   - Look for: Published papers, standards documents
+5. **External Standards and Resources Referenced**
+   - Fields: `external_resources`, `conforms_to`
+   - Look for: Published papers, standards documents, external documentation
 
 ---
 
@@ -315,25 +315,25 @@ Score **0** (absent/fail) if:
 **Question:** Does the metadata communicate known risks, biases, or dataset limitations?
 
 **Sub-elements:**
-1. **Limitations Section Present**
-   - Fields: `limitations`
+1. **Known Limitations Documented**
+   - Fields: `known_limitations`
    - Look for: Explicit limitations section with known issues
 
-2. **Sampling Bias or Representativeness Noted**
-   - Fields: `composition.population`, `sampling_and_dimensions`
-   - Look for: Discussion of sampling biases, representativeness
+2. **Systematic Biases Identified and Described**
+   - Fields: `known_biases`
+   - Look for: Discussion of systematic biases, fairness issues, representativeness
 
-3. **Quality Control or Validation Steps Mentioned**
-   - Fields: `preprocessing_and_derived_data`, `data_quality`
-   - Look for: QC procedures, validation steps
+3. **Data Anomalies and Quality Issues Noted**
+   - Fields: `anomalies`
+   - Look for: Data quality issues, anomalies, outliers documented
 
-4. **Known Risks or Use Constraints Listed**
-   - Fields: `intended_uses.usage_notes`
-   - Look for: Discouraged uses, known constraints
+4. **Sensitive Content and Warnings Provided**
+   - Fields: `sensitive_elements`, `content_warnings`
+   - Look for: Sensitive content descriptions, content warnings
 
-5. **Conflicts of Interest Declared**
-   - Fields: `ethics.conflicts_of_interest`
-   - Look for: COI statement
+5. **Ethical Review Details Including Conflicts**
+   - Fields: `ethical_reviews`
+   - Look for: Ethical review documentation, conflicts of interest
 
 ---
 
@@ -342,24 +342,24 @@ Score **0** (absent/fail) if:
 
 **Sub-elements:**
 1. **Dataset Published on a Recognized Platform**
-   - Fields: `publisher`, `access_and_licensing.platform`
-   - Look for: PhysioNet, Dataverse, FAIRhub, Zenodo, etc.
+   - Fields: `publisher`
+   - Look for: PhysioNet, Dataverse, FAIRhub, Zenodo, institutional repository
 
-2. **Cross-referenced DOIs or Related Dataset Links**
-   - Fields: `external_resources`, `references`
-   - Look for: DOI links to related work
+2. **Citation and DOI for Cross-referencing**
+   - Fields: `citation`, `doi`
+   - Look for: Recommended citation format, DOI for cross-referencing
 
-3. **Community Standards or Schema Reference**
+3. **Community Standards or Schema Conformance**
    - Fields: `conforms_to`
-   - Look for: OMOP, FHIR, schema.org, Dublin Core
+   - Look for: OMOP, FHIR, schema.org, Dublin Core, other community standards
 
-4. **Associated Outreach Materials**
-   - Fields: `external_resources`, `distribution_formats`
-   - Look for: Webinars, tutorials, documentation
+4. **Outreach Materials and Documentation Links**
+   - Fields: `external_resources`, `page`
+   - Look for: Webinars, tutorials, documentation links, landing pages
 
-5. **Similar Dataset Links or Thematic Grouping**
-   - Fields: `project`, `related_datasets`
-   - Look for: Related datasets, thematic collections
+5. **Related Datasets with Typed Relationships**
+   - Fields: `related_datasets`
+   - Look for: Related datasets with relationship types (supplements, derives from, is version of)
 
 ---
 

@@ -71,13 +71,13 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 
 3. **Cross-Field Consistency Checking**
    - **Human Subjects Logic:**
-     - IF `human_subject_research=True` → EXPECT `ethics.irb_approval` populated
-     - IF `human_subject_research=True` → EXPECT `collection_process.consent` described
+     - IF `human_subject_research.involves_human_subjects=True` → EXPECT `ethical_reviews` populated
+     - IF `human_subject_research.involves_human_subjects=True` → EXPECT `informed_consent` described
    - **Privacy Logic:**
-     - IF `is_deidentified=True` → EXPECT `deidentification_and_privacy.approach` specified
-     - IF `is_deidentified=True` → EXPECT `deidentification_and_privacy.examples_of_identifiers_removed` listed
+     - IF `is_deidentified` present → EXPECT deidentification method documented
+     - IF `is_deidentified` present → EXPECT `participant_privacy` protections listed
    - **Funding Logic:**
-     - IF `funders` present → EXPECT `funding_and_acknowledgements.funding.agency` matches
+     - IF `funders` present → EXPECT grant details and award numbers
      - IF funding present → EXPECT `purposes` aligns with funding goals
    - **FAIR Logic:**
      - IF DOI present → EXPECT publicly accessible landing page
@@ -111,16 +111,16 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 ---
 
 #### Question 2: Entry Length Adequacy
-**Description:** Whether narrative fields (description, motivation) have meaningful content length.
+**Description:** Whether narrative fields (description, purposes) have meaningful content length.
 
-**Fields:** `description`, `motivation`
+**Fields:** `description`, `purposes`
 
 **Scoring (numeric 0-5):**
 - **0:** <50 chars
 - **3:** 50–200 chars
 - **5:** >200 chars
 
-**Assessment:** Measure average string length of narrative fields. Longer descriptions typically provide better context.
+**Assessment:** Measure average string length of narrative fields. Longer descriptions and purpose statements typically provide better context.
 
 ---
 
@@ -139,29 +139,29 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 ---
 
 #### Question 4: File Enumeration and Type Variety
-**Description:** Number of files and file type diversity in distribution_formats or files.listing.
+**Description:** Number of distribution formats and file type diversity.
 
-**Fields:** `files`, `distribution_formats`
+**Fields:** `distribution_formats`, `format`, `media_type`
 
 **Scoring (numeric 0-5):**
 - **0:** 1 file type only
 - **3:** 2–3 file types
 - **5:** >3 file types
 
-**Assessment:** Count unique file extensions (TSV, Parquet, JSON, DICOM, etc.). Variety indicates multi-modal data.
+**Assessment:** Count unique file formats and media types (TSV, Parquet, JSON, DICOM, etc.). Variety indicates multi-modal data.
 
 ---
 
 #### Question 5: Data File Size Availability
-**Description:** Presence of file size or dimensional metadata (e.g., 513×N spectrogram).
+**Description:** Presence of file size or instance count metadata.
 
-**Fields:** `files`, `data_characteristics`
+**Fields:** `bytes`, `instances`
 
 **Scoring (pass/fail):**
-- **Pass:** Numeric file size or dimension info found
-- **Fail:** No file size/dimension metadata
+- **Pass:** Numeric file size or instance count found
+- **Fail:** No file size/instance metadata
 
-**Assessment:** Look for dimensional metadata (array shapes, file sizes, sample counts).
+**Assessment:** Look for bytes field, instance counts, or sample size documentation.
 
 ---
 
@@ -181,46 +181,46 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 ---
 
 #### Question 7: Funding and Acknowledgements Completeness
-**Description:** Presence of funding sources, grants, or institutional sponsors.
+**Description:** Presence of funding sources, grants, creator affiliations, and institutional sponsors.
 
-**Fields:** `funding_and_acknowledgements`, `funding`
+**Fields:** `funders`, `creators`
 
 **Scoring (numeric 0-5):**
 - **0:** No funding data
-- **3:** Funding agency but missing award number
-- **5:** Funding agency + award number + acknowledgment
+- **3:** Funding agency or creator info but missing grants/affiliations
+- **5:** Funders with grants + creators with affiliations
 
-**Assessment:** Look for funding agency, grant numbers, and acknowledgements.
+**Assessment:** Look for funders list with grant numbers and creators with institutional affiliations.
 
 ---
 
 #### Question 8: Ethical and Privacy Declarations
-**Description:** Presence of deidentification methods, IRB approvals, or ethical sourcing notes.
+**Description:** Comprehensive ethics coverage including IRB approval, deidentification, privacy protections, informed consent, participant compensation, and vulnerable population safeguards.
 
-**Fields:** `deidentification_and_privacy`, `ethics`
+**Fields:** `ethical_reviews`, `human_subject_research`, `is_deidentified`, `participant_privacy`, `participant_compensation`, `vulnerable_populations`, `informed_consent`
 
 **Scoring (numeric 0-5):**
 - **0:** No ethics fields present
-- **3:** Ethical note but no IRB or deidentification method
-- **5:** IRB approval + deidentification + ethical sourcing details
+- **3:** Basic ethics (IRB + deidentification)
+- **5:** Comprehensive (all human subjects protections documented)
 
-**Assessment:** Evaluate comprehensiveness of ethical documentation.
+**Assessment:** Evaluate comprehensiveness of ethical documentation across all protection areas.
 
 **Applies to:** Bridge2AI-Voice, AI-READI
 
 ---
 
-#### Question 9: Access Requirements Documentation
-**Description:** Whether access policy and license are clearly defined (open, registered, restricted).
+#### Question 9: Access Requirements and Governance Documentation
+**Description:** Whether access policy, license, IP restrictions, regulatory restrictions, and confidentiality level are clearly defined.
 
-**Fields:** `access_and_licensing`, `license_and_use_terms`
+**Fields:** `license_and_use_terms`, `ip_restrictions`, `regulatory_restrictions`, `confidentiality_level`
 
 **Scoring (numeric 0-5):**
-- **0:** No license info
-- **3:** License type only
-- **5:** License + Data Use Agreement + platform access description
+- **0:** No license or access info
+- **3:** License only
+- **5:** License + restrictions + confidentiality classification
 
-**Assessment:** Evaluate clarity and completeness of access documentation.
+**Assessment:** Evaluate clarity and completeness of governance and access documentation.
 
 **Applies to:** Bridge2AI-Voice, Dataverse
 
@@ -229,14 +229,14 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 10: Interoperability and Standardization
 **Description:** Presence of standard formats, ontologies, or schema conformance.
 
-**Fields:** `data_characteristics.data_formats`, `conforms_to`
+**Fields:** `format`, `encoding`, `conforms_to`, `conforms_to_schema`
 
 **Scoring (numeric 0-5):**
 - **0:** Non-standard or unspecified format
 - **3:** Standard format but no schema reference
 - **5:** Standard formats + schema/ontology compliance
 
-**Assessment:** Check for standard formats (Parquet, TSV, OMOP, FHIR, DICOM) and schema references.
+**Assessment:** Check for standard formats (Parquet, TSV, OMOP, FHIR, DICOM), encoding, and schema conformance references.
 
 **Applies to:** Bridge2AI-Voice, Health Nexus
 
@@ -245,64 +245,64 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 ### Category 3: Technical Documentation (Questions 11-15)
 
 #### Question 11: Tool and Software Transparency
-**Description:** Mentions of preprocessing libraries or tools used in data preparation.
+**Description:** Mentions of preprocessing, cleaning, and labeling strategies with software tools used in data preparation.
 
-**Fields:** `software_and_tools`
+**Fields:** `preprocessing_strategies`, `cleaning_strategies`, `labeling_strategies`, `software_and_tools`
 
 **Scoring (numeric 0-5):**
 - **0:** No software tools documented
-- **3:** At least one preprocessing tool listed
-- **5:** Comprehensive list with versions or URLs
+- **3:** At least one strategy or tool listed
+- **5:** Comprehensive strategies with software versions/URLs
 
-**Assessment:** Look for software names, versions, and links to preprocessing tools.
+**Assessment:** Look for strategy documentation and software names, versions, and links.
 
 **Applies to:** Bridge2AI-Voice
 
 ---
 
 #### Question 12: Collection Protocol Clarity
-**Description:** Description completeness of participant recruitment and data acquisition.
+**Description:** Description completeness of data collection mechanisms, acquisition methods, data collectors, and collection timeframes.
 
-**Fields:** `collection_process`
+**Fields:** `acquisition_methods`, `collection_mechanisms`, `data_collectors`, `collection_timeframes`
 
 **Scoring (numeric 0-5):**
 - **0:** No collection description
-- **3:** Partial description (e.g., general setting only)
-- **5:** Full recruitment and procedural details included
+- **3:** Partial description (e.g., mechanism only)
+- **5:** Full collection protocol with methods, collectors, and timeframes
 
-**Assessment:** Evaluate detail level of collection protocols.
+**Assessment:** Evaluate detail level and completeness of collection protocol documentation.
 
 **Applies to:** Bridge2AI-Voice, AI-READI
 
 ---
 
 #### Question 13: Version History Documentation
-**Description:** Presence of multiple version records and associated dates.
+**Description:** Presence of version information, version access methods, errata, update plans, and release notes with dates.
 
-**Fields:** `release_notes`, `versions_available_on_platform`
+**Fields:** `version`, `version_access`, `errata`, `updates`, `release_notes`
 
 **Scoring (numeric 0-5):**
 - **0:** Single version only
-- **3:** Two versions listed without detail
-- **5:** ≥2 versions with change summaries and release dates
+- **3:** Version number + basic access info
+- **5:** Comprehensive versioning with errata, updates, and release notes
 
-**Assessment:** Count versions and evaluate quality of change documentation.
+**Assessment:** Evaluate completeness of version tracking infrastructure.
 
 **Applies to:** Bridge2AI-Voice, Dataverse
 
 ---
 
 #### Question 14: Associated Publications
-**Description:** Presence of formal citations or DOI-linked references.
+**Description:** Presence of formal citations or external resources with DOI-linked references.
 
-**Fields:** `citations`, `references`
+**Fields:** `citation`, `external_resources`
 
 **Scoring (numeric 0-5):**
 - **0:** No publications cited
-- **3:** One DOI or paper cited
-- **5:** Multiple references and dataset DOI cross-links
+- **3:** One citation or external resource
+- **5:** Multiple references and dataset citation
 
-**Assessment:** Count publications and check for bidirectional citations.
+**Assessment:** Count publications, external resources, and check for formal dataset citation.
 
 **Applies to:** Bridge2AI-Voice, AI-READI
 
@@ -311,14 +311,14 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 15: Human Subject Representation
 **Description:** Inclusion of human subjects, demographic diversity, or subgroup details.
 
-**Fields:** `composition.population`, `subpopulations`
+**Fields:** `instances`, `subpopulations`
 
 **Scoring (numeric 0-5):**
 - **0:** No human subject information
 - **3:** General human data without subgroup description
 - **5:** Detailed demographics and inclusion/exclusion criteria
 
-**Assessment:** Evaluate demographic detail and population characterization.
+**Assessment:** Evaluate demographic detail and population characterization through instances and subpopulations.
 
 **Applies to:** Bridge2AI-Voice, AI-READI
 
@@ -342,14 +342,14 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 17: Accessibility (Access Mechanism)
 **Description:** Describes how users can obtain the dataset (download, DUA, login).
 
-**Fields:** `distribution_formats`, `access_and_licensing`
+**Fields:** `distribution_formats`, `license_and_use_terms`
 
 **Scoring (numeric 0-5):**
 - **0:** Unclear access method
 - **3:** Partially described access mechanism
 - **5:** Fully defined access path (platform, login, policy)
 
-**Assessment:** Evaluate clarity of access instructions.
+**Assessment:** Evaluate clarity of access instructions through distribution formats and licensing.
 
 **Applies to:** Dataverse, PhysioNet
 
@@ -386,13 +386,13 @@ Read the provided D4D YAML file and perform a **semantic quality assessment** th
 #### Question 20: Interlinking Across Platforms
 **Description:** Metadata connects dataset records across multiple platforms.
 
-**Fields:** `external_resources`, `project_website`
+**Fields:** `external_resources`, `page`
 
 **Scoring (pass/fail):**
 - **Pass:** Cross-platform links verified
 - **Fail:** No external linkages found
 
-**Assessment:** Look for links to related platforms (FAIRhub, PhysioNet, GitHub).
+**Assessment:** Look for external resources linking to related platforms (FAIRhub, PhysioNet, GitHub, etc.).
 
 **Applies to:** Health Nexus, PhysioNet, FAIRhub
 

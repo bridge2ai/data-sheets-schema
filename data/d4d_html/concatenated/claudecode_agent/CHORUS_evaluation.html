@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rubric10-Semantic Evaluation: CHORUS</title>
+    <title>Rubric10-Semantic Evaluation: Unknown</title>
     <style>
         * {
             margin: 0;
@@ -278,7 +278,7 @@
             <div class="metadata-grid">
                 <div class="metadata-item">
                     <div class="metadata-label">Dataset</div>
-                    <div class="metadata-value">CHORUS</div>
+                    <div class="metadata-value">Unknown</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Generation Method</div>
@@ -298,13 +298,13 @@
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Evaluation Date</div>
-                    <div class="metadata-value">2025-12-09</div>
+                    <div class="metadata-value">2025-12-20</div>
                 </div>
             </div>
         </div>
 
         <div class="score-card">
-            <div class="score-large">26/50</div>
+            <div class="score-large">0/50</div>
             <div class="score-subtitle">0.0% Overall Score</div>
         </div>
 
@@ -325,11 +325,11 @@
                     <span class="detail-label">Fields:</span> publisher
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No publisher field; hosted on collaborative cloud enclave but not a recognized data repository
+                    <span class="detail-label">Rationale:</span> No publisher field; distribution through CHoRUS Consortium secure enclave and maintainers field documents consortium structure, but lacks formal publisher designation
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Federated access model through enclave, not published on platform like PhysioNet or Zenodo
+                    <span class="detail-label">Semantic Notes:</span> Dataset distributed by CHoRUS Consortium (20 academic centers, 14 data acquisition sites) but lacks structured publisher field; NIH-funded infrastructure
                 </div>
 
             </div>
@@ -343,47 +343,47 @@
                     <span class="detail-label">Fields:</span> citation, doi
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No citation or doi fields
+                    <span class="detail-label">Rationale:</span> No citation or doi fields for dataset; external_resources references published research (DOI: 10.1007/s12028-024-02007) about CHoRUS but not dataset DOI/citation
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Subset DOI mentioned in subset-waveforms (10.1007/s12028-024-02007) but no dataset-level DOI/citation
+                    <span class="detail-label">Semantic Notes:</span> Related publication DOI provided but dataset lacks own DOI and citation; limits scholarly referencing and tracking
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Community Standards Conformance
+                    Community Standards
                     <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> conforms_to
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No conforms_to field; standards mentioned in descriptions only
+                    <span class="detail-label">Rationale:</span> No conforms_to field; extensive standards usage documented throughout (OMOP CDM, DICOM, WFDB/PhysioNet, OHNLP, EDF+, Persyst) but not in structured conforms_to field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> OMOP, WFDB, DICOM, OHNLP, EDF+ standards used but not in structured conforms_to
+                    <span class="detail-label">Semantic Notes:</span> Comprehensive standards conformance described narratively (5 major standards); lacks machine-readable conforms_to declarations
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Outreach Documentation Links
+                    Documentation Links
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> external_resources, page
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Has page field and 2 external_resources entries with 8 URLs total
+                    <span class="detail-label">Rationale:</span> page field (https://chorus4ai.org/) plus 10 external_resources entries covering: project websites (chorus4ai.org, bridge2ai.org/chorus), GitHub organization (github.com/chorus-ai, 28 repos), Chorus_SOP documentation, developer documentation, NIH RePORTER (reporter.nih.gov/project-details/10472824), Bridge2AI program, AIM-AHEAD partnership, OHDSI community, published research, and contact emails
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Rich documentation including websites, GitHub repos, SOPs, and mappings
+                    <span class="detail-label">Semantic Notes:</span> Extensive documentation ecosystem with landing page, GitHub infrastructure, SOPs, developer guides, training partnerships, and community resources
                 </div>
 
             </div>
@@ -397,11 +397,11 @@
                     <span class="detail-label">Fields:</span> related_datasets
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No related_datasets field with typed relationships
+                    <span class="detail-label">Rationale:</span> No related_datasets field; external_resources mentions Bridge2AI program and OHDSI community but no typed dataset relationships
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Part of Bridge2AI ecosystem but no explicit dataset relationships
+                    <span class="detail-label">Semantic Notes:</span> Part of Bridge2AI ecosystem (4 data generation projects) but lacks structured relationships to AI-READI, CM4AI, VOICE, or other critical care datasets
                 </div>
 
             </div>
@@ -423,11 +423,11 @@
                     <span class="detail-label">Fields:</span> doi, rrid, id
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Has id field (https://chorus4ai.org/) as URL identifier; lacks DOI and RRID
+                    <span class="detail-label">Rationale:</span> Has id field (https://chorus4ai.org/) as URL identifier; lacks DOI and RRID for persistent scholarly identification
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> URL is valid and resolvable but not a persistent scholarly identifier like DOI
+                    <span class="detail-label">Semantic Notes:</span> URL is valid and resolvable project landing page but lacks persistence guarantees of DOI; no research resource identifier
                 </div>
 
             </div>
@@ -441,11 +441,11 @@
                     <span class="detail-label">Fields:</span> title, description
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Complete title (68 chars) and comprehensive description (218 words with technical details)
+                    <span class="detail-label">Rationale:</span> Complete title (88 chars with full acronym expansion) and comprehensive description (238 words covering scope, modalities, ethics, standards, partnerships, status)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Description includes dataset size, modalities, ethics approach, and contact information
+                    <span class="detail-label">Semantic Notes:</span> Description exceptionally detailed with project overview, dataset characteristics, ethical framework, standardization approach, training programs, and current metrics
                 </div>
 
             </div>
@@ -459,11 +459,11 @@
                     <span class="detail-label">Fields:</span> keywords
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 18 keywords covering domain (clinical care, acute illness), standards (OMOP, OHDSI), and principles (FAIR, ethical AI)
+                    <span class="detail-label">Rationale:</span> 24 keywords covering project name (CHoRUS, Bridge2AI), domain (critical care, acute illness), data types (EHR, waveform, imaging, EEG, clinical notes), standards (OMOP, DICOM, OHNLP), and principles (health equity, ethical AI, federated access)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Keywords balance technical terms and conceptual themes; support multiple search strategies
+                    <span class="detail-label">Semantic Notes:</span> Comprehensive keyword set balancing technical terms, data modalities, standards, and conceptual themes; supports diverse search strategies
                 </div>
 
             </div>
@@ -477,11 +477,11 @@
                     <span class="detail-label">Fields:</span> page, resources
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Has page field (https://chorus4ai.org/); no hierarchical resources field
+                    <span class="detail-label">Rationale:</span> Has page field (https://chorus4ai.org/); no hierarchical resources field but external_resources provides 10 related resources
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Landing page URL provided but no structured sub-resources hierarchy
+                    <span class="detail-label">Semantic Notes:</span> Landing page URL provided; lacks structured sub-resources hierarchy but extensive external_resources compensate
                 </div>
 
             </div>
@@ -495,11 +495,11 @@
                     <span class="detail-label">Fields:</span> parent_datasets, related_datasets
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No parent_datasets or related_datasets fields present
+                    <span class="detail-label">Rationale:</span> No parent_datasets or related_datasets fields present despite being part of Bridge2AI program ecosystem
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Missing hierarchical relationships despite being part of Bridge2AI ecosystem
+                    <span class="detail-label">Semantic Notes:</span> Missing hierarchical relationships to Bridge2AI parent program and potential related datasets in the ecosystem
                 </div>
 
             </div>
@@ -521,11 +521,11 @@
                     <span class="detail-label">Fields:</span> license_and_use_terms, ip_restrictions
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Detailed license_and_use_terms with licensing requirements, institutional email, registration; no ip_restrictions field
+                    <span class="detail-label">Rationale:</span> Detailed license_and_use_terms with 6 specific license_terms including institutional email requirement, signed agreement, controlled access, data use agreement, re-identification prohibition, and compliance requirements; no ip_restrictions field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Access policy clearly defined with 6 specific license_terms; institutional access implied but no IP restrictions
+                    <span class="detail-label">Semantic Notes:</span> Access policy comprehensively defined with registration, approval, and enclave access process; institutional access implied but no structured IP restrictions
                 </div>
 
             </div>
@@ -539,11 +539,11 @@
                     <span class="detail-label">Fields:</span> regulatory_restrictions, confidentiality_level
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No regulatory_restrictions or confidentiality_level fields; confidentiality discussed in confidential_elements only
+                    <span class="detail-label">Rationale:</span> No regulatory_restrictions or confidentiality_level enum fields; HIPAA compliance and privacy requirements mentioned in sensitive_elements descriptions
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> HIPAA compliance mentioned but not in structured regulatory_restrictions field
+                    <span class="detail-label">Semantic Notes:</span> Regulatory framework (HIPAA, IRB) discussed narratively but lacks structured regulatory_restrictions and confidentiality_level classification
                 </div>
 
             </div>
@@ -557,11 +557,11 @@
                     <span class="detail-label">Fields:</span> download_url
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No download_url field; only landing page URLs in distribution_formats.access_urls
+                    <span class="detail-label">Rationale:</span> No download_url field; access through secure enclave only; distribution_formats.access_urls all point to landing page (https://chorus4ai.org/)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Access through collaborative cloud enclave, not direct download; missing explicit download_url
+                    <span class="detail-label">Semantic Notes:</span> Federated enclave-based access model without direct download URLs; controlled access requires registration and approval
                 </div>
 
             </div>
@@ -575,11 +575,11 @@
                     <span class="detail-label">Fields:</span> distribution_formats, format, media_type
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> distribution_formats with access_urls and detailed format descriptions (OMOP, WFDB, DICOM, OHNLP); lacks format/media_type fields
+                    <span class="detail-label">Rationale:</span> 5 distribution_formats entries with names, descriptions, and access_urls covering OMOP CDM, WFDB waveforms, DICOM imaging, OHNLP text, and EDF+/Persyst EEG; lacks top-level format/media_type fields
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Formats described narratively (SQL database, WFDB, DICOM) but not as structured format/media_type fields
+                    <span class="detail-label">Semantic Notes:</span> Formats comprehensively described with standards (OMOP, WFDB, DICOM, OHNLP, EDF+) but not as structured format/media_type/encoding fields; access URLs provided for each modality
                 </div>
 
             </div>
@@ -593,11 +593,11 @@
                     <span class="detail-label">Fields:</span> related_datasets, external_resources
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 2 external_resources entries with 8 URLs (GitHub repos, project websites); no related_datasets
+                    <span class="detail-label">Rationale:</span> 10 external_resources entries covering project websites (chorus4ai.org, bridge2ai.org), GitHub organization (chorus-ai), documentation (Chorus_SOP), NIH RePORTER, AIM-AHEAD partnership, OHDSI community, published research (DOI: 10.1007/s12028-024-02007), and contact emails; no related_datasets
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Rich external resources including SOPs, mappings, and documentation; missing dataset relationships
+                    <span class="detail-label">Semantic Notes:</span> Rich external resources including infrastructure, documentation, training partnerships, and publications; missing typed dataset relationships
                 </div>
 
             </div>
@@ -619,11 +619,11 @@
                     <span class="detail-label">Fields:</span> license_and_use_terms
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> license_and_use_terms specifies controlled access with signed agreements; permits research use
+                    <span class="detail-label">Rationale:</span> license_and_use_terms with 6 specific terms defining controlled access, permitted uses (research), and restrictions (re-identification prohibited); enables reuse within approved framework
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> License allows reuse for research with agreements; MIT for software repositories
+                    <span class="detail-label">Semantic Notes:</span> License clearly permits research reuse with controlled access requirements; appropriate for protected health information
                 </div>
 
             </div>
@@ -637,11 +637,11 @@
                     <span class="detail-label">Fields:</span> format, encoding
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No format or encoding fields; formats described in distribution_formats.description only
+                    <span class="detail-label">Rationale:</span> No top-level format or encoding fields; formats described in distribution_formats.description only (OMOP, WFDB, DICOM, OHNLP, EDF+)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Uses international standards (OMOP, WFDB, DICOM) but lacks structured format/encoding fields
+                    <span class="detail-label">Semantic Notes:</span> Uses international standards (OMOP CDM, DICOM, WFDB, OHNLP, EDF+) comprehensively but lacks structured format/encoding fields for machine-readable interoperability
                 </div>
 
             </div>
@@ -655,11 +655,11 @@
                     <span class="detail-label">Fields:</span> conforms_to, conforms_to_schema
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No conforms_to or conforms_to_schema fields; standards mentioned only in descriptions
+                    <span class="detail-label">Rationale:</span> No conforms_to or conforms_to_schema fields; standards mentioned narratively in descriptions (OMOP CDM, DICOM schema, WFDB/PhysioNet schema, OHNLP schema, EDF+ schema)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> OMOP, WFDB, DICOM, OHNLP conformance stated narratively but not in structured fields
+                    <span class="detail-label">Semantic Notes:</span> Multiple schema conformance statements in descriptions but lacks structured conforms_to fields for formal declaration
                 </div>
 
             </div>
@@ -673,11 +673,11 @@
                     <span class="detail-label">Fields:</span> variables
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No variables field; data elements described in subsets but not as structured variable metadata
+                    <span class="detail-label">Rationale:</span> No variables field with variable-level metadata; only modality-level descriptions in subsets and acquisition_methods
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> 9 data subsets described but no schema-level variable definitions with identifiers
+                    <span class="detail-label">Semantic Notes:</span> Missing granular variable-level metadata despite using structured schemas (OMOP CDM has defined tables/columns)
                 </div>
 
             </div>
@@ -691,11 +691,11 @@
                     <span class="detail-label">Fields:</span> intended_uses, prohibited_uses, discouraged_uses
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Has intended_uses and discouraged_uses with detailed descriptions; no prohibited_uses field
+                    <span class="detail-label">Rationale:</span> 5 intended_uses covering AI/ML development, external validation, health equity research, clinical care improvement, and education; 3 discouraged_uses covering ongoing collection, clinical use without validation, and re-identification; no prohibited_uses field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Use guidance covers ML applications, health equity, and ethical constraints; re-identification discouraged
+                    <span class="detail-label">Semantic Notes:</span> Comprehensive use guidance with detailed rationale for intended and discouraged uses; lacks explicit prohibited_uses but license terms prohibit re-identification
                 </div>
 
             </div>
@@ -717,11 +717,11 @@
                     <span class="detail-label">Fields:</span> ethical_reviews, human_subject_research
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> human_subject_research with involves_human_subjects=true, irb_approval details, and ethics_review_board; no separate ethical_reviews field
+                    <span class="detail-label">Rationale:</span> Comprehensive human_subject_research field with involves_human_subjects=true, ethics_review_board listing (IRBs at 14 centers, community ethics focus groups, legal/ethical advisory teams, privacy review processes); no structured ethical_reviews list
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Multi-site IRB approvals documented; BRIDGE Center ethics expertise; patient-focused frameworks
+                    <span class="detail-label">Semantic Notes:</span> Exceptionally detailed ethics documentation including multi-site IRB approvals, community engagement, and interdisciplinary advisory teams
                 </div>
 
             </div>
@@ -735,11 +735,11 @@
                     <span class="detail-label">Fields:</span> is_deidentified
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No is_deidentified field; de-identification described in data_protection_impacts and confidential_elements
+                    <span class="detail-label">Rationale:</span> No structured is_deidentified field; de-identification described narratively in preprocessing_strategies (preproc-004: medical imaging, preproc-005: re-identification limitation) and sensitive_elements
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> HIPAA-compliant de-identification (Safe Harbor or Expert Determination) described but not in structured field
+                    <span class="detail-label">Semantic Notes:</span> De-identification methods extensively described (DICOM header removal, OHNLP tokenization, privacy-preserving transformations) but lacks structured is_deidentified field with method details
                 </div>
 
             </div>
@@ -753,11 +753,11 @@
                     <span class="detail-label">Fields:</span> participant_privacy
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No participant_privacy field; privacy measures in data_protection_impacts and sensitive_elements
+                    <span class="detail-label">Rationale:</span> No participant_privacy field; privacy protections described in preprocessing_strategies (preproc-002: OHNLP tokenization, preproc-005: privacy-preserving transformations), license_and_use_terms (re-identification prohibited), and human_subject_research (privacy review processes)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Privacy scan tools, controlled access, and audit trails described but not as participant_privacy
+                    <span class="detail-label">Semantic Notes:</span> Multiple privacy protection layers described (de-identification, tokenization, controlled access, enclave model, community ethics input) but not in structured participant_privacy field
                 </div>
 
             </div>
@@ -771,11 +771,11 @@
                     <span class="detail-label">Fields:</span> informed_consent
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No informed_consent field; retrospective data collection from clinical systems
+                    <span class="detail-label">Rationale:</span> No informed_consent field; human_subject_research mentions retrospective data collection and ethical frameworks but does not explicitly document consent procedures
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Retrospective clinical data likely under institutional oversight without individual consent
+                    <span class="detail-label">Semantic Notes:</span> Retrospective data collection likely uses IRB-approved waivers or altered consent; not explicitly documented in structured field
                 </div>
 
             </div>
@@ -789,11 +789,11 @@
                     <span class="detail-label">Fields:</span> vulnerable_populations, participant_compensation
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No vulnerable_populations or participant_compensation fields
+                    <span class="detail-label">Rationale:</span> No vulnerable_populations or participant_compensation fields; addressing_gaps mentions Social Determinants of Health and diversity focus but lacks structured documentation
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Acute illness patients potentially vulnerable; no documentation of special protections or compensation
+                    <span class="detail-label">Semantic Notes:</span> Health equity and diversity emphasized in purposes and addressing_gaps; vulnerable populations and compensation not explicitly documented
                 </div>
 
             </div>
@@ -815,29 +815,29 @@
                     <span class="detail-label">Fields:</span> subpopulations
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 1 subpopulations entry describing acute illness patients across multi-center sites
+                    <span class="detail-label">Rationale:</span> 2 subpopulations entries: critically ill patients by hospital (14 hospitals) and patients with complete multi-modal data; describes geographic and institutional diversity plus data completeness stratification
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Describes patient cohort (acute illness requiring intensive monitoring) and diversity across sites
+                    <span class="detail-label">Semantic Notes:</span> Subpopulations defined by site distribution and data modality completeness; could be expanded with demographic/clinical characteristics
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Instances Count
+                    Instances Samples
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> instances
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> instances field with detailed description including 23,400 unique admissions count
+                    <span class="detail-label">Rationale:</span> 1 instances entry describing critically ill patients with current count (23,400 admissions as of November 2024), target (100,000+), data collection approach (retrospective from ICUs), and timeframe
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Specific count (23,400 admissions from 14 hospitals as of November 2024) with data modalities
+                    <span class="detail-label">Semantic Notes:</span> Instance count clearly documented with current status and targets; instance_type describes critically ill patients in ICU settings
                 </div>
 
             </div>
@@ -851,11 +851,11 @@
                     <span class="detail-label">Fields:</span> variables, is_tabular
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No variables or is_tabular fields; data structure described in subsets
+                    <span class="detail-label">Rationale:</span> No variables or is_tabular fields; data modalities described in subsets and acquisition_methods but lacks variable-level metadata
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> 9 subsets with descriptions but no structured variable-level metadata or tabular flag
+                    <span class="detail-label">Semantic Notes:</span> OMOP CDM subset is inherently tabular but is_tabular flag absent; no structured variable-level metadata despite standardized schemas
                 </div>
 
             </div>
@@ -869,29 +869,29 @@
                     <span class="detail-label">Fields:</span> instances
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> instances description covers clinical conditions (acute illness, intensive monitoring) and data topics
+                    <span class="detail-label">Rationale:</span> instances.description documents critically ill patients requiring acute/critical care with multi-modal data types; addressing_gaps mentions comprehensive patient conditions and clinical treatment strategies
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Topics include demographics, diagnoses, procedures, medications, notes, imaging, waveforms, EEG
+                    <span class="detail-label">Semantic Notes:</span> Data topics (acute illness, critical care, treatment response) and conditions (critically ill patients) clearly described; lacks specific condition enumeration
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Quality Anomalies
+                    Quality Issues Anomalies
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> anomalies, sampling_strategies
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Has anomalies field with 4 anomaly_details; has sampling_strategies with multi-center approach
+                    <span class="detail-label">Rationale:</span> No anomalies field; comprehensive sampling_strategies with is_sample=true, is_random=false, is_representative=true, and 5 detailed strategies (federated collection, balanced sampling, contextual factors, ethics input, legal framework)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Documents ongoing data collection, imaging de-identification in progress, and evolving dataset
+                    <span class="detail-label">Semantic Notes:</span> Sampling approach well-documented but data quality issues and anomalies not explicitly documented; discouraged_uses mentions ongoing quality assurance
                 </div>
 
             </div>
@@ -901,7 +901,7 @@
         <div class="element">
             <div class="element-header">
                 <div class="element-title">Element 6: Data Provenance and Version Tracking</div>
-                <div class="element-score score-medium">3/5 (60%)</div>
+                <div class="element-score score-low">2/5 (40%)</div>
             </div>
 
             <div class="sub-element">
@@ -913,47 +913,47 @@
                     <span class="detail-label">Fields:</span> version
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No version field; generation date in header comments only
+                    <span class="detail-label">Rationale:</span> No version field; updates.description mentions ongoing collection and expansion but no version numbering scheme
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> File dated 2025-12-05 in comments but no semantic version number
+                    <span class="detail-label">Semantic Notes:</span> Dataset versioning not implemented; continuous updates model without discrete version releases
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Version Access Methods
-                    <span class="sub-element-score score-1">1/1</span>
+                    Version Access
+                    <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> version_access
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> version_access field with description and 3 version_details about enclave and GitHub versioning
+                    <span class="detail-label">Rationale:</span> No version_access field documenting how to access previous versions or version history
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Describes version management through cloud enclave, GitHub, and characterization reports
+                    <span class="detail-label">Semantic Notes:</span> Version access methods not documented; unclear if historical versions are preserved
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Errata Updates
+                    Change Descriptions Errata
                     <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> errata, updates
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Has updates field with description and 4 update_details; no errata field
+                    <span class="detail-label">Rationale:</span> No errata field; updates field with detailed update_details (7 items) describing ongoing collection, current status (23,400 admissions), targets (100,000+), site updates via GitHub/Google Forms, GitHub project tracking, documentation updates, software development, and semantic mapping expansion
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Documents ongoing updates, quality improvements, and GitHub tracking; no historical errata
+                    <span class="detail-label">Semantic Notes:</span> Update process and current status documented but no historical errata or change log; GitHub project tracking suggests version control for code
                 </div>
 
             </div>
@@ -967,11 +967,11 @@
                     <span class="detail-label">Fields:</span> updates
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> updates field describes periodic updates as sites complete extraction
+                    <span class="detail-label">Rationale:</span> updates.frequency='Continuous updates through November 2026' with detailed update_details documenting ongoing retrospective collection, site status updates, GitHub tracking, and continuous software development
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Update frequency tied to site delivery timelines; retrospective collection ongoing
+                    <span class="detail-label">Semantic Notes:</span> Update frequency and timeline clearly stated (continuous through November 2026); process documented via GitHub and Google Forms
                 </div>
 
             </div>
@@ -985,11 +985,11 @@
                     <span class="detail-label">Fields:</span> was_derived_from, release_notes
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No was_derived_from or release_notes fields
+                    <span class="detail-label">Rationale:</span> No was_derived_from or release_notes fields; collection_mechanisms describes primary data collection from EHR/PACS/monitor systems but not derivation relationships
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Source is original clinical data collection, not derived; no release documentation
+                    <span class="detail-label">Semantic Notes:</span> Source systems documented (EHR, PACS, bedside monitors) but lacks formal provenance chain or release notes
                 </div>
 
             </div>
@@ -999,7 +999,7 @@
         <div class="element">
             <div class="element-header">
                 <div class="element-title">Element 7: Scientific Motivation and Funding Transparency</div>
-                <div class="element-score score-low">2/5 (40%)</div>
+                <div class="element-score score-high">5/5 (100%)</div>
             </div>
 
             <div class="sub-element">
@@ -1011,11 +1011,11 @@
                     <span class="detail-label">Fields:</span> purposes
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 1 purposes entry with detailed description of dataset creation motivation
+                    <span class="detail-label">Rationale:</span> 4 purposes entries with IDs, names, and detailed descriptions covering: improve recovery from acute illness, create AI-ready dataset, establish data standards/tools, and promote diversity/health equity; each purpose 60-100 words
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Clear purpose: diverse, ethically sourced dataset for acute illness recovery with health equity focus
+                    <span class="detail-label">Semantic Notes:</span> Exceptionally detailed motivation with four complementary purposes addressing clinical, technical, and equity dimensions
                 </div>
 
             </div>
@@ -1029,11 +1029,11 @@
                     <span class="detail-label">Fields:</span> tasks
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 1 tasks entry describing AI/ML model development for clinical care applications
+                    <span class="detail-label">Rationale:</span> 5 tasks entries with IDs, names, and descriptions covering: characterize illness patterns, predict complications, measure treatment response, enable external validation, and label prediction targets
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Specific tasks: prediction/decision support for acute illness recovery with multi-modal integration
+                    <span class="detail-label">Semantic Notes:</span> Research tasks clearly defined with specific ML/AI applications aligned with purposes; covers both model development and validation use cases
                 </div>
 
             </div>
@@ -1041,17 +1041,17 @@
             <div class="sub-element">
                 <div class="sub-element-name">
                     Funding Sources
-                    <span class="sub-element-score score-0">0/1</span>
+                    <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> funders
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No funders field; Bridge2AI mentioned in keywords and description only
+                    <span class="detail-label">Rationale:</span> 1 funder entry (NIH Common Fund Bridge2AI) with comprehensive description including grant number (1OT2OD032701-01), administering office, opportunity number (OTA-21-008), study section (DCMM), fiscal year (2022), funding amount ($5,880,300 direct costs), and project dates (Sept 2022 - Nov 2026 with no-cost extension)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Bridge2AI program implied but no structured funders with organization/mechanism details
+                    <span class="detail-label">Semantic Notes:</span> Exceptional funding transparency with all relevant grant metadata; single primary funder comprehensively documented
                 </div>
 
             </div>
@@ -1059,17 +1059,17 @@
             <div class="sub-element">
                 <div class="sub-element-name">
                     Grant Ids Awards
-                    <span class="sub-element-score score-0">0/1</span>
+                    <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> funders
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No funders field with grant IDs or award numbers
+                    <span class="detail-label">Rationale:</span> Grant ID 1OT2OD032701-01 clearly stated in funders.description with opportunity number OTA-21-008 and study section DCMM
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> NIH Bridge2AI likely funded but no grant identifiers provided
+                    <span class="detail-label">Semantic Notes:</span> Grant identifiers in structured narrative; could benefit from structured grant_id field but information is complete
                 </div>
 
             </div>
@@ -1077,17 +1077,17 @@
             <div class="sub-element">
                 <div class="sub-element-name">
                     Creators Acknowledgements
-                    <span class="sub-element-score score-0">0/1</span>
+                    <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> creators, funders
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No creators or funders fields; program leads named in description and maintainers only
+                    <span class="detail-label">Rationale:</span> 19 creators entries with IDs, names, and descriptions including roles (Contact PI, Principal Investigators, Lecturers, Workshop Leads) and affiliations (MGH, UF, UT Health, Tufts, etc.); funders field acknowledges NIH Common Fund
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> 6 program leads named in maintainers but not as structured creators with affiliations
+                    <span class="detail-label">Semantic Notes:</span> Comprehensive creator documentation covering leadership, faculty, and training roles; institutional affiliations provided; funder acknowledged
                 </div>
 
             </div>
@@ -1109,11 +1109,11 @@
                     <span class="detail-label">Fields:</span> collection_mechanisms
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 1 collection_mechanisms entry with description and 5 mechanism_details
+                    <span class="detail-label">Rationale:</span> 5 collection_mechanisms entries with IDs, names, and descriptions covering: retrospective EHR extraction (demographics, medications, procedures, nursing flowsheets, diagnoses, notes), waveform telemetry capture (continuous bedside monitoring), medical imaging acquisition (PACS/DICOM), EEG recording extraction (EDF+/Persyst), and standardized data transformation (OMOP/OHNLP/DICOM/WFDB)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Detailed ETL pipelines, clinical validation, waveform integration, PACS integration, OHNLP processing
+                    <span class="detail-label">Semantic Notes:</span> Comprehensive collection mechanisms covering all data modalities with technical details on sources, formats, and standardization
                 </div>
 
             </div>
@@ -1127,11 +1127,11 @@
                     <span class="detail-label">Fields:</span> acquisition_methods
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 1 acquisition_methods entry with was_directly_observed=true and 4 acquisition_details
+                    <span class="detail-label">Rationale:</span> 8 acquisition_methods entries with IDs, names, and descriptions covering: structured EHR (OMOP), medication administration records, provider documentation, high-frequency nursing flowsheets, tokenized clinical notes (OHNLP), medical imaging (DICOM), waveform telemetry (WFDB), and EEG waveforms; each includes access type (controlled) and schema metadata status
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Retrospective extraction from hospital systems with multi-modal synchronization
+                    <span class="detail-label">Semantic Notes:</span> Detailed acquisition methods aligned with collection mechanisms; includes data type, access model, and schema conformance for each modality
                 </div>
 
             </div>
@@ -1145,11 +1145,11 @@
                     <span class="detail-label">Fields:</span> preprocessing_strategies, cleaning_strategies, labeling_strategies
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> Has all three: preprocessing_strategies (1 entry, 5 details), cleaning_strategies (1 entry, 4 details), labeling_strategies (1 entry, 3 details)
+                    <span class="detail-label">Rationale:</span> 5 preprocessing_strategies (OMOP transformation, OHNLP tokenization, waveform standardization, DICOM de-identification, re-identification limitation) with detailed preprocessing_details (5-6 steps each); 2 cleaning_strategies (multi-center harmonization, metadata schema validation) with cleaning_details; 1 labeling_strategies (visualization/annotation environment) with labeling_details
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> OMOP transformation, quality checks, and planned annotation environment described
+                    <span class="detail-label">Semantic Notes:</span> Comprehensive preprocessing pipeline with 5 strategies covering standardization, privacy protection, and quality assurance; cleaning focuses on harmonization and validation; labeling supports prediction task annotation
                 </div>
 
             </div>
@@ -1163,11 +1163,11 @@
                     <span class="detail-label">Fields:</span> software_and_tools
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No software_and_tools field; tools mentioned in descriptions only (OHNLP, OMOP, WFDB)
+                    <span class="detail-label">Rationale:</span> No software_and_tools field; tools mentioned in descriptions (OHDSI, OHNLP, gateway/middleware systems) and external_resources (GitHub organization with 28 repositories), but not in structured field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> OHNLP toolkit, OMOP tools, WFDB converters mentioned but not structured with versions/URLs
+                    <span class="detail-label">Semantic Notes:</span> Software tools extensively documented in external_resources (chorus-ai GitHub org, OHDSI tools, OHNLP toolkit) but lacks structured software_and_tools field with versions/citations
                 </div>
 
             </div>
@@ -1181,11 +1181,11 @@
                     <span class="detail-label">Fields:</span> external_resources, conforms_to
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 2 external_resources entries with 8 URLs; no conforms_to field
+                    <span class="detail-label">Rationale:</span> 10 external_resources entries covering project websites, GitHub (28 repos), Chorus_SOP documentation, OHDSI community, AIM-AHEAD partnership, published research (DOI: 10.1007/s12028-024-02007), and contact information; no conforms_to field but standards extensively referenced (OMOP, DICOM, WFDB, OHNLP, EDF+)
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> GitHub repos for SOPs, mappings, and tools; standards (OMOP, OHDSI) in descriptions
+                    <span class="detail-label">Semantic Notes:</span> Rich external resources including technical documentation, standards communities, and publications; standards referenced throughout but lacks structured conforms_to field
                 </div>
 
             </div>
@@ -1207,11 +1207,11 @@
                     <span class="detail-label">Fields:</span> known_limitations
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No known_limitations field
+                    <span class="detail-label">Rationale:</span> No known_limitations field; discouraged_uses mentions 'completeness limitations and ongoing expansion' and 'awareness of completeness limitations' but not in structured known_limitations
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Anomalies describe data evolution but not inherent limitations of retrospective clinical data
+                    <span class="detail-label">Semantic Notes:</span> Dataset completeness limitations implied by ongoing collection (23,400/100,000+ target) and discouraged_uses but lacks explicit known_limitations documentation
                 </div>
 
             </div>
@@ -1225,29 +1225,29 @@
                     <span class="detail-label">Fields:</span> known_biases
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No known_biases field; bias mentioned in ethics context only
+                    <span class="detail-label">Rationale:</span> No known_biases field; addressing_gaps mentions 'manage privacy and bias' and sampling_strategies mentions 'balanced and diverse cohort' but specific biases not documented
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Bias mitigation strategies mentioned but no documentation of identified biases
+                    <span class="detail-label">Semantic Notes:</span> Bias mitigation strategies described (federated sampling, diversity focus, Social Determinants of Health) but identified biases not explicitly documented
                 </div>
 
             </div>
 
             <div class="sub-element">
                 <div class="sub-element-name">
-                    Data Anomalies Quality
-                    <span class="sub-element-score score-1">1/1</span>
+                    Anomalies Quality Issues
+                    <span class="sub-element-score score-0">0/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> anomalies
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 1 anomalies entry with description and 4 anomaly_details
+                    <span class="detail-label">Rationale:</span> No anomalies field; discouraged_uses mentions 'ongoing quality assurance processes' but specific quality issues or anomalies not documented
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Documents ongoing collection, variable site timelines, in-progress de-identification and extraction
+                    <span class="detail-label">Semantic Notes:</span> Quality assurance processes mentioned but data anomalies not explicitly documented; may emerge as collection continues
                 </div>
 
             </div>
@@ -1261,11 +1261,11 @@
                     <span class="detail-label">Fields:</span> sensitive_elements, content_warnings
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> 1 sensitive_elements entry with sensitive_elements_present=true and 6 sensitivity_details; no content_warnings
+                    <span class="detail-label">Rationale:</span> 4 sensitive_elements entries (sensitive_elements_present=true for all) with detailed sensitivity_details covering: clinical/medical data (PHI, HIPAA), physiological monitoring data (health conditions, treatment responses), medical imaging (DICOM, embedded patient info), and Social Determinants of Health (geographic/contextual factors); no content_warnings field
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Detailed sensitivity documentation for PHI, demographics, clinical data; no content_warnings field
+                    <span class="detail-label">Semantic Notes:</span> Exceptionally detailed sensitivity documentation with 4 categories and 4-7 bullet points each; covers data types, privacy risks, and mitigation approaches; lacks separate content_warnings but sensitive_elements comprehensive
                 </div>
 
             </div>
@@ -1273,17 +1273,17 @@
             <div class="sub-element">
                 <div class="sub-element-name">
                     Ethical Review Conflicts
-                    <span class="sub-element-score score-0">0/1</span>
+                    <span class="sub-element-score score-1">1/1</span>
                 </div>
                 <div class="detail">
                     <span class="detail-label">Fields:</span> ethical_reviews
                 </div>
                 <div class="detail">
-                    <span class="detail-label">Rationale:</span> No ethical_reviews field; ethics information in human_subject_research.ethics_review_board only
+                    <span class="detail-label">Rationale:</span> No structured ethical_reviews list field; human_subject_research.ethics_review_board documents 4 oversight mechanisms: IRBs at 14 centers, community-facing ethics focus groups, legal/ethical advisory teams, and privacy/accountability review processes; no conflicts of interest documented
                 </div>
 
                 <div class="detail">
-                    <span class="detail-label">Semantic Notes:</span> Multi-site oversight documented but no conflict of interest disclosures
+                    <span class="detail-label">Semantic Notes:</span> Comprehensive ethics review documentation in human_subject_research with multi-layered oversight; conflicts of interest not explicitly addressed
                 </div>
 
             </div>
@@ -1299,85 +1299,8 @@
             </div>
         </div>
 
-        <h3>Strengths</h3>
-        <ul class="gap-list">
-
-            <li class="gap-item strength">Comprehensive multi-modal data composition with 9 well-documented subsets</li>
-
-            <li class="gap-item strength">Exceptional ethical framework documentation with patient-focused principles</li>
-
-            <li class="gap-item strength">Detailed technical transparency across collection, preprocessing, and cleaning</li>
-
-            <li class="gap-item strength">Strong external resources linking (8 URLs across GitHub and project sites)</li>
-
-            <li class="gap-item strength">Clear data governance with controlled access and licensing terms</li>
-
-            <li class="gap-item strength">Social Determinants of Health integration throughout metadata</li>
-
-            <li class="gap-item strength">Specific numeric details (23,400 admissions, 14 hospitals, 20-center network)</li>
-
-            <li class="gap-item strength">International standards usage (OMOP, WFDB, DICOM, OHNLP) well-documented</li>
-
-        </ul>
-
-        <h3>Weaknesses</h3>
-        <ul class="gap-list">
-
-            <li class="gap-item weakness">Missing persistent scholarly identifier (no DOI or RRID)</li>
-
-            <li class="gap-item weakness">No structured funding information (no funders field with grant IDs)</li>
-
-            <li class="gap-item weakness">No structured creator metadata (authors/contributors with affiliations)</li>
-
-            <li class="gap-item weakness">Missing critical interoperability fields (conforms_to, variables, format, encoding)</li>
-
-            <li class="gap-item weakness">No version number for dataset tracking</li>
-
-            <li class="gap-item weakness">No known_limitations or known_biases documented</li>
-
-            <li class="gap-item weakness">Missing structured ethical fields (is_deidentified, participant_privacy, informed_consent)</li>
-
-            <li class="gap-item weakness">No dataset relationships or hierarchy (related_datasets, parent_datasets)</li>
-
-            <li class="gap-item weakness">No citation or publisher for scholarly integration</li>
-
-            <li class="gap-item weakness">No download_url (access through enclave only)</li>
-
-        </ul>
-
-        <h2>Recommendations</h2>
-
-        <div class="recommendation-section">
-            <h3>Recommendations</h3>
-
-            <div class="recommendation-item">Obtain DOI for persistent identification and citation</div>
-
-            <div class="recommendation-item">Add structured funders field with Bridge2AI grant information</div>
-
-            <div class="recommendation-item">Create creators field with program leads and institutional affiliations</div>
-
-            <div class="recommendation-item">Add conforms_to field listing OMOP, WFDB, DICOM, OHNLP, OHDSI standards</div>
-
-            <div class="recommendation-item">Populate variables field with schema-level metadata for key data elements</div>
-
-            <div class="recommendation-item">Document known_limitations of retrospective clinical data collection</div>
-
-            <div class="recommendation-item">Add is_deidentified structured field with method details (currently in descriptions)</div>
-
-            <div class="recommendation-item">Create related_datasets linking to other Bridge2AI datasets</div>
-
-            <div class="recommendation-item">Generate recommended citation and publish on recognized platform</div>
-
-            <div class="recommendation-item">Assign version number aligned with dataset releases</div>
-
-            <div class="recommendation-item">Add format/encoding/media_type structured fields for each data modality</div>
-
-            <div class="recommendation-item">Document known_biases in multi-center clinical data</div>
-
-        </div>
-
         <div class="timestamp">
-            Generated on 2025-12-17 10:15:39 using Bridge2AI Data Sheets Schema
+            Generated on 2025-12-20 19:23:41 using Bridge2AI Data Sheets Schema
         </div>
     </div>
 </body>

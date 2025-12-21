@@ -1,0 +1,415 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="datasheet-common.css">
+    <title>AI READI Dataset Documentation - Datasheet for Dataset</title>
+</head>
+<body>
+    <div class="header">
+        <h1>AI READI Dataset Documentation</h1>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
+    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">Why was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Better understand salutogenesis (the pathway from disease to health) in Type 2 Diabetes Mellitus usi...</td><td>purpose-001</td></tr><tr><td>Establish standards, best practices, and guidelines for collection, preparation, and sharing of medi...</td><td>purpose-002</td></tr><tr><td>Address the lack of racial and ethnic diversity in T2DM research by creating a dataset that is tripl...</td><td>purpose-003</td></tr><tr><td>Create a flagship biomedical dataset as part of the NIH Bridge2AI program that is ethically sourced,...</td><td>purpose-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>funder-001</dd><dt>Description</dt><dd><div class="long-description">NIH Common Fund Bridge2AI Program funded through National Institutes of Health grant 1OT2OD032644-01 (Bridge2AI Salutogenesis Data Generation), administered by NIH Office of the Director. Opportunity Number OTA-21-008. Project dates: September 1, 2022 to August 31, 2025 (later extended to November 30, 2026). Total funding in 2022: $5,026,499 (Direct: $4,569,437, Indirect: $457,062). Additional support from NIH grants P30DK035816 (University of Washington Nutrition and Obesity Research Center), UL1TR003096, and Research to Prevent Blindness.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>instance-001</dd><dt>Description</dt><dd><div class="long-description">Individual participants aged 40 and older with and without Type 2 Diabetes Mellitus (T2DM). Target enrollment is 4,000 people, triple-balanced by self-reported race/ethnicity (Asian, Black, Hispanic, White), T2DM severity (no diabetes, pre-diabetes/lifestyle-controlled diabetes, diabetes treated with oral medications or non-insulin injections, insulin-controlled diabetes), and biological sex (male, female). Participants must speak, read, and understand English. Exclusion criteria include pregnancy and type 1 diabetes mellitus. Recruitment occurs from patients aged ≥40 years who had medical encounters within each health system site (UAB, UCSD, UW) between 2020 and 2025.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subpopulations
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>No Diabetes - Participants without Type 2 Diabetes Mellitus (no ICD-10 codes R73.09 or E11.X in elec...</td><td>subpop-001</td></tr><tr><td>Pre-diabetes or Lifestyle-Controlled Diabetes - Participants with pre-diabetes or diabetes controlle...</td><td>subpop-002</td></tr><tr><td>Medication-Controlled Diabetes - Participants with T2DM treated with oral medications or non-insulin...</td><td>subpop-003</td></tr><tr><td>Insulin-Controlled Diabetes - Participants with T2DM requiring insulin treatment</td><td>subpop-004</td></tr><tr><td>Asian Participants - Self-reported race/ethnicity Asian</td><td>subpop-005</td></tr><tr><td>Black Participants - Self-reported race/ethnicity Black</td><td>subpop-006</td></tr><tr><td>Hispanic Participants - Self-reported race/ethnicity Hispanic</td><td>subpop-007</td></tr><tr><td>White Participants - Self-reported race/ethnicity White</td><td>subpop-008</td></tr><tr><td>Male Participants - Biological sex male</td><td>subpop-009</td></tr><tr><td>Female Participants - Biological sex female</td><td>subpop-010</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Formats
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Access Urls</th><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>https://fairhub.io/datasets/2, https://aireadi.org/goals/data-sharing</td><td>Publicly accessible dataset distributed through FAIRhub platform (https://fairhub.io/), a Microsoft ...</td><td>format-001</td><td>FAIRhub Public Access Dataset</td></tr><tr><td>https://fairhub.io/datasets/2, https://aireadi.org/goals/data-sharing</td><td>Controlled access dataset contains all data in publicly accessible set plus more sensitive data avai...</td><td>format-002</td><td>FAIRhub Controlled Access Dataset</td></tr><tr><td>https://fairhub.io/datasets/2</td><td>Retinal imaging data in DICOM (Digital Imaging and Communications in Medicine) standard format. 44 i...</td><td>format-003</td><td>Retinal Imaging Data - DICOM Format</td></tr><tr><td>https://fairhub.io/datasets/2</td><td>Clinical data mapped to Observational Medical Outcomes Partnership (OMOP) Common Data Model standard...</td><td>format-004</td><td>Clinical Data - OMOP Common Data Model</td></tr><tr><td>https://fairhub.io/datasets/2</td><td>Wearable device data (Garmin VivoSmart 5 fitness tracker) transformed from proprietary .FIT format t...</td><td>format-005</td><td>Wearable Device Data - mHealth Standard</td></tr><tr><td>Contact UAB CCTS for biorepository access procedures</td><td>Biospecimen samples stored at UAB Center for Clinical and Translational Science biorepository availa...</td><td>format-006</td><td>Biorepository Access</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label required-field">
+                            ID
+                            <span class="required-indicator" title="Required field">*</span>
+                        </label>
+                        <div class="item-value"><a href="https://fairhub.io/datasets/2" target="_blank">https://fairhub.io/datasets/2</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Name
+                            
+                        </label>
+                        <div class="item-value">AI-READI</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Title
+                            
+                        </label>
+                        <div class="item-value">Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Description
+                            
+                        </label>
+                        <div class="item-value"><div class="long-description">The AI-READI is a flagship dataset consisting of multimodal data collected from 4,000 individuals with and without Type 2 Diabetes Mellitus (T2DM), harmonized across 3 data collection sites (Birmingham, Alabama; San Diego, California; Seattle, Washington). The dataset was designed with future AI/Machine Learning studies in mind, including recruitment sampling procedures aimed at achieving approximately equal distribution of participants across diabetes severity (triple-balanced by race/ethnicity, biological sex, and T2DM severity), as well as a multi-domain data acquisition protocol (survey data, physical measurements, clinical data, retinal imaging, wearable device data, environmental sensors, biospecimens) to enable downstream AI/ML analyses that may not be feasible with existing data sources such as claims or electronic health records data. The goal is to better understand salutogenesis (the pathway from disease to health) in T2DM. The study follows FAIR principles and incorporates ethical and equitable data collection and management practices.
+</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Page
+                            
+                        </label>
+                        <div class="item-value"><a href="https://fairhub.io/datasets/2" target="_blank">https://fairhub.io/datasets/2</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Language
+                            
+                        </label>
+                        <div class="item-value">en</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>Type 2 Diabetes Mellitus</li><li>T2DM</li><li>AI-READI</li><li>Machine Learning</li><li>Artificial Intelligence</li><li>multimodal dataset</li><li>harmonized data</li><li>multi-site study</li><li>salutogenesis</li><li>FAIR principles</li><li>retinal imaging</li><li>continuous glucose monitoring</li><li>wearable devices</li><li>biorepository</li><li>biospecimens</li><li>triple-balanced sampling</li><li>health equity</li><li>Bridge2AI</li><li>cross-sectional study</li><li>pseudotime manifold analysis</li><li>FAIRhub</li><li>health disparities</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Addressing Gaps
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Provide the largest publicly accessible multimodal T2DM dataset with 4,000 participants and over 10 ...</td><td>gap-001</td></tr><tr><td>Address demographic underrepresentation in T2DM research by recruiting equal proportions across four...</td><td>gap-002</td></tr><tr><td>Create a model for future AI-ready medical datasets through comprehensive metadata, standardized dat...</td><td>gap-003</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Creators
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Contributor</td><td></td><td>creator-001</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-002</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-003</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-004</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-005</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-006</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-007</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-008</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-009</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-010</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-011</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-012</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-013</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subsets
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Survey and Questionnaire Data: Demographics, Center for Epidemiological Studies Depression Scale, Pr...</td><td>subset-001</td></tr><tr><td>Physical Measurements and Vitals: Height, weight, waist and hip circumference, waist-hip ratio, body...</td><td>subset-002</td></tr><tr><td>Retinal Imaging Data: Multidevice retinal imaging including Aurora IQ (undilated fundus photos), EID...</td><td>subset-003</td></tr><tr><td>Electrocardiogram Data: 12-lead ECG performed using Philips Pagewriter TC30 Cardiograph while partic...</td><td>subset-004</td></tr><tr><td>Cognitive Function Testing: Montreal Cognitive Assessment (MoCA) administered electronically on iPad...</td><td>subset-005</td></tr><tr><td>Peripheral Neuropathy Assessment: Monofilament test assessing touch perception on both feet using 10...</td><td>subset-006</td></tr><tr><td>Visual Function Testing: Photopic and mesopic visual acuity measured with Electronic Visual Acuity t...</td><td>subset-007</td></tr><tr><td>Clinical Laboratory Tests: Comprehensive blood and urine testing including HbA1c, complete blood cou...</td><td>subset-008</td></tr><tr><td>Continuous Glucose Monitoring: Dexcom G6 Continuous Glucose Monitor worn for 10 days at home, measur...</td><td>subset-009</td></tr><tr><td>Physical Activity Monitoring: Garmin VivoSmart 5 fitness tracker worn for 10 days at home, collectin...</td><td>subset-010</td></tr><tr><td>Home Environmental Monitoring: Custom-designed environmental sensor placed in home for 10 days, coll...</td><td>subset-011</td></tr><tr><td>Biorepository Specimens: Blood derivatives including buffy coats (for DNA extractions and future gen...</td><td>subset-012</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Triple-Balanced Sampling Design: Purposive recruitment to achieve approximately equal distribution a...</td><td>sampling-001</td></tr><tr><td>Multi-Site Geographic Sampling: Recruitment across three geographically diverse data collection site...</td><td>sampling-002</td></tr><tr><td>Wave-Based Recruitment: Participants recruited in waves to facilitate efficient sampling and allow c...</td><td>sampling-003</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Mechanisms
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Electronic Health Record Screening and Mail/Email Recruitment: Source population identified by scree...</td><td>collection-001</td></tr><tr><td>Online Informed Consent and Questionnaire Completion: Most participants provide informed consent rem...</td><td>collection-002</td></tr><tr><td>Single-Visit In-Person Data Collection: Protocol performed as single visit lasting 2.5-4 hours at on...</td><td>collection-003</td></tr><tr><td>Home-Based 10-Day Monitoring: At end of in-person visit, participants sent home with three data moni...</td><td>collection-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Acquisition Methods
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Standardized Clinical Assessment Protocol: Vitals measured using automatic oscillometric medically a...</td><td>acquisition-001</td></tr><tr><td>Multidevice Retinal Imaging Protocol: Both eyes imaged on each participant using six retinal imaging...</td><td>acquisition-002</td></tr><tr><td>Biospecimen Collection and Processing: Blood (53 mL total) collected in multiple vacutainer types: E...</td><td>acquisition-003</td></tr><tr><td>REDCap Data Management and Cloud Upload: REDCap used for collecting patient-reported questionnaire d...</td><td>acquisition-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Preprocessing Strategies
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Data Format Standardization and Transformation: Raw data from imaging devices transformed from propr...</td><td>preproc-001</td></tr><tr><td>Quality Control and Data Validation: Data managers at each data collection site (UAB, UCSD, UW) resp...</td><td>preproc-002</td></tr><tr><td>De-identification and Privacy Protection: Data de-identified before release. Controlled access datas...</td><td>preproc-003</td></tr><tr><td>AI-Readiness Preparation: All data stored and shared using FAIRhub as 'AI-ready' which enables immed...</td><td>preproc-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Cleaning Strategies
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Multi-Site Data Harmonization: Data collected from three geographically diverse sites (Birmingham, S...</td><td>cleaning-001</td></tr><tr><td>Biospecimen Batch Processing: Centralized processing strategies implemented for consistency. Samples...</td><td>cleaning-002</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Labeling Strategies
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Comprehensive Metadata and Documentation: Detailed dataset documentation provided using Healthsheet ...</td><td>labeling-001</td></tr><tr><td>Community Advisory Board Input: Community Advisory Board of 11 persons from three sites including di...</td><td>labeling-002</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Maintainers
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Maintainer Details</th><th>Name</th></tr></thead><tbody><tr><td>Multi-institutional consortium managing dataset maintenance including three data collection sites (U...</td><td>maintainer-001</td><td>University of Washington - Contact PI site, data collection, biospecimen processing (NORC lab), University of Alabama at Birmingham - Data collection, central biorepository (CCTS), ... (+3 more)</td><td>AI-READI Consortium</td></tr><tr><td>Committee responsible for developing and overseeing requirements for controlled access dataset. Mana...</td><td>maintainer-002</td><td>Develops controlled access requirements, Reviews institutional data use agreements, ... (+2 more)</td><td>Data Access Committee</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sensitive Elements
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Name</th><th>Sensitive Elements Present</th><th>Sensitivity Details</th></tr></thead><tbody><tr><td>Dataset contains protected health information requiring de-identification before release. Controlled...</td><td>sensitive-001</td><td>Protected Health Information and Demographics</td><td>True</td><td>5-digit zip code (controlled access only), Sex, race, ethnicity (controlled access only), ... (+6 more)</td></tr><tr><td>Comprehensive clinical laboratory test results including HbA1c, complete blood count, biomarkers for...</td><td>sensitive-002</td><td>Clinical and Laboratory Data</td><td>True</td><td>HbA1c and other diabetes biomarkers, Complete blood count results, ... (+5 more)</td></tr><tr><td>Comprehensive retinal imaging from multiple devices (44 images per participant) potentially revealin...</td><td>sensitive-003</td><td>Retinal Imaging and Medical Images</td><td>True</td><td>44 retinal images per participant from six devices, Potential detection of diabetic retinopathy, cardiovascular disease, neurological conditions, ... (+2 more)</td></tr><tr><td>Ten-day home monitoring data from environmental sensors, continuous glucose monitors, and fitness tr...</td><td>sensitive-004</td><td>Home Monitoring and Behavioral Data</td><td>True</td><td>Physical activity patterns and sleep duration, Continuous glucose measurements (every 5 minutes for 10 days), ... (+3 more)</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Retention Limit
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>retention-001</dd><dt>Name</dt><dd>Long-term Preservation via FAIRhub and NIH Repositories</dd><dt>Description</dt><dd><div class="long-description">Dataset preserved long-term through FAIRhub platform (Microsoft Azure cloud-based) and NIH-approved repositories. All dataset versions preserved with persistent identifiers for reproducibility. Biorepository samples stored at -70°C at UAB Center for Clinical and Translational Science with institutional support. No planned deletion or retention limits. Project funded through November 30, 2026 with data releases continuing through that date. Long-term maintenance supported through institutional commitments and NIH data sharing policies.
+</div></dd><dt>Retention Details</dt><dd><ul class='formatted-list'><li>Indefinite preservation through FAIRhub platform</li><li>Biospecimens stored at -70°C at UAB CCTS biorepository</li><li>All dataset versions preserved with persistent identifiers</li><li>No planned deletion or data expiration</li><li>NIH data sharing policy compliance</li><li>Institutional support for long-term maintenance</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">What (other) tasks could the dataset be used for?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Enable multi-domain AI/ML analyses for T2DM by collecting data across survey, clinical, imaging, wea...</td><td>task-001</td></tr><tr><td>Support the development of unbiased machine learning models through balanced data collection across ...</td><td>task-002</td></tr><tr><td>Study disease trajectories and salutogenesis pathways in T2DM through cross-sectional analysis of pa...</td><td>task-003</td></tr><tr><td>Recruit and train a diverse biomedical AI/ML workforce by increasing access to and quality of AI/ML ...</td><td>task-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intended Uses
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>AI/ML Model Training and Development for T2DM Research: Primary intended use is training and develop...</td><td>use-001</td></tr><tr><td>Salutogenesis and Disease Trajectory Analysis: Study of salutogenesis pathways (transitions from dis...</td><td>use-002</td></tr><tr><td>Health Equity and Disparities Research: Research into health disparities and development of equitabl...</td><td>use-003</td></tr><tr><td>Biospecimen-Based Ancillary Studies: Biorepository specimens (buffy coats, genomic DNA, plasma, seru...</td><td>use-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Discouraged Uses
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Clinical Decision-Making Without Validation: Dataset consists of research data from volunteer partic...</td><td>discouraged-001</td></tr><tr><td>Generalization Beyond English-Speaking Populations: Study requires participants to speak, read, and ...</td><td>discouraged-002</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License And Use Terms
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>license-001</dd><dt>Name</dt><dd>Creative Commons Attribution-NonCommercial 4.0 International</dd><dt>Description</dt><dd><div class="long-description">AI-READI dataset distributed under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) license for the publicly accessible dataset. Controlled access dataset requires additional legal and privacy use agreements between requesting institution and AI-READI research program. Public dataset available upon agreement with license defining permitted uses. Controlled access requirements currently being developed by Data Access Committee. Citation required: Owsley C, Matthies DS, McGwin G, et al. Cross-sectional design and protocol for Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI). BMJ Open 2025;15:e097449. DOI: 10.1136/bmjopen-2024-097449. Biospecimen use requires separate agreements. Commercial use may require additional licensing. All mandatory institutional compliance training for human subjects research required for data users working with identifiable or sensitive data.
+</div></dd><dt>License Terms</dt><dd><ul class='formatted-list'><li>CC BY-NC 4.0 for publicly accessible dataset</li><li>Controlled access requires institutional data use agreement</li><li>Attribution required to AI-READI Consortium and publication DOI</li><li>Citation required - BMJ Open 2025;15:e097449</li><li>NonCommercial use only without additional licensing</li><li>Biorepository access requires separate procedures</li><li>Compliance with ethical guidelines and FAIR principles</li><li>No clinical use without appropriate validation and approval</li><li>FAIRhub platform terms of service apply</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <div>
+                        <h2 class="section-title">Distribution</h2>
+                        <p class="section-description">How will the dataset be distributed?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License
+                            
+                        </label>
+                        <div class="item-value">CC BY-NC 4.0</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔄</span>
+                    <div>
+                        <h2 class="section-title">Maintenance</h2>
+                        <p class="section-description">How will the dataset be maintained?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Updates
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>updates-001</dd><dt>Name</dt><dd>Yearly Dataset Releases and Ongoing Enrollment</dd><dt>Description</dt><dd><div class="long-description">Dataset released approximately yearly with progressive accumulation of participants. Pilot data from July 18 - November 30, 2023 released May 2024. Data collected through July 31, 2024 released November 2024. Enrollment continues until November 30, 2026 with target of 4,000 total participants. After one year of enrollment, sites on schedule for reaching final sample of 4,000 within three years of data collection. As enrollment is ongoing, pilot data release and periodic updates may not have achieved balanced distribution across groups yet. Final dataset expected late 2026 or early 2027. Long-term preservation plans through FAIRhub platform and NIH data repositories.
+</div></dd><dt>Frequency</dt><dd>Approximately yearly releases through November 2026</dd><dt>Update Details</dt><dd><ul class='formatted-list'><li>Pilot data release (May 2024) - Data from July 18 - November 30, 2023</li><li>Version 1.0 release (November 2024) - Data collected through July 31, 2024</li><li>Ongoing enrollment until November 30, 2026</li><li>Target enrollment 4,000 participants</li><li>Final dataset release expected late 2026 or early 2027</li><li>Each release includes updated documentation at https://docs.aireadi.org/</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">👥</span>
+                    <div>
+                        <h2 class="section-title">Human Subjects</h2>
+                        <p class="section-description">Does the dataset relate to people?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Human Subject Research
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>hsr-001</dd><dt>Name</dt><dd>AI-READI Human Subjects Research</dd><dt>Description</dt><dd><div class="long-description">Cross-sectional study of 4,000 human participants aged 40 and older with and without Type 2 Diabetes Mellitus. Approved by Institutional Review Board (IRB) of University of Washington (approval number STUDY00016228) including reliance agreements with IRBs of University of Alabama at Birmingham and University of California San Diego. Written informed consent provided by all participants (electronic consent via REDCap or in-person consent for those without internet access). Community Advisory Board of 11 persons from three sites contributes to protocol development. Study incorporates ethical and equitable data collection and management practices with guidance from bioethicists. Recruitment designed to address historical underrepresentation of racial and ethnic minorities in T2DM research.
+</div></dd><dt>Involves Human Subjects</dt><dd>True</dd><dt>Ethics Review Board</dt><dd><ul class='formatted-list'><li>University of Washington Institutional Review Board (approval STUDY00016228)</li><li>University of Alabama at Birmingham IRB (reliance agreement)</li><li>University of California San Diego IRB (reliance agreement)</li><li>Community Advisory Board (11 members across three sites)</li><li>Bioethics guidance team (Kadija Ferryman, Camille Nebeker)</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
+    <div class="timestamp">
+        Generated on 2025-12-20 19:24:21 using Bridge2AI Data Sheets Schema
+    </div>
+</body>
+</html>

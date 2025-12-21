@@ -1,0 +1,408 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="datasheet-common.css">
+    <title>CM4AI Dataset Documentation - Datasheet for Dataset</title>
+</head>
+<body>
+    <div class="header">
+        <h1>CM4AI Dataset Documentation</h1>
+        <p class="subtitle">Datasheet for Dataset - Human Readable Format</p>
+    </div>
+    
+    
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🎯</span>
+                    <div>
+                        <h2 class="section-title">Motivation</h2>
+                        <p class="section-description">Why was the dataset created?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Purposes
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Deliver machine-readable hierarchical maps of cell architecture as AI-Ready data from multimodal int...</td><td>purpose-001</td></tr><tr><td>Address the grand challenge of interpretable genotype-phenotype learning in genomics and precision m...</td><td>purpose-002</td></tr><tr><td>Establish standards, best practices, and guidelines for ethical AI-readiness in biomedical data. Thi...</td><td>purpose-003</td></tr><tr><td>Enable development of visible neural networks (VNNs) and visible machine learning tools that use hie...</td><td>purpose-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Funders
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>funder-001</dd><dt>Description</dt><dd><div class="long-description">NIH Common Fund Bridge2AI Program funded through National Institutes of Health grant 1OT2OD032742-01 (Bridge2AI Functional Genomics) and 5U54HG012513-02 (Bridge2AI Bridge Center), administered by NIH Office of the Director. Opportunity Number OTA-21-008. Project dates: September 1, 2022 to August 31, 2026. FY 2025 funding: $5,289,382 (Direct: $4,632,095, Indirect: $657,287). Additional funding from the Frederick Thomas Fund of the University of Virginia.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📊</span>
+                    <div>
+                        <h2 class="section-title">Composition</h2>
+                        <p class="section-description">What do the instances represent?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Instances
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>MDA-MB-468 Breast Cancer Cell Line (RRID:CVCL_0419): Triple negative breast cancer cell line establi...</td><td>instance-001</td></tr><tr><td>KOLF2.1J Induced Pluripotent Stem Cells (RRID:CVCL_B5P3): Human induced pluripotent stem cell (iPSC)...</td><td>instance-002</td></tr><tr><td>100 Chromatin Regulators: Near-comprehensive set of chromatin regulators encoded by the human genome...</td><td>instance-003</td></tr><tr><td>100 Metabolic Enzymes: Set of metabolic enzymes involved in cancer, neuropsychiatric, and cardiac di...</td><td>instance-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subpopulations
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>MDA-MB-468 Untreated - MDA-MB-468 breast cancer cells in control/untreated condition</td><td>subpop-001</td></tr><tr><td>MDA-MB-468 Paclitaxel-Treated - MDA-MB-468 breast cancer cells treated with paclitaxel chemotherapy</td><td>subpop-002</td></tr><tr><td>MDA-MB-468 Vorinostat-Treated - MDA-MB-468 breast cancer cells treated with vorinostat chemotherapy</td><td>subpop-003</td></tr><tr><td>KOLF2.1J Undifferentiated iPSCs - KOLF2.1J induced pluripotent stem cells in undifferentiated/naive ...</td><td>subpop-004</td></tr><tr><td>KOLF2.1J iPSC-Derived Neurons - KOLF2.1J iPSCs differentiated into neurons</td><td>subpop-005</td></tr><tr><td>KOLF2.1J iPSC-Derived Neural Progenitor Cells (NPCs) - KOLF2.1J iPSCs differentiated into neural pro...</td><td>subpop-006</td></tr><tr><td>KOLF2.1J iPSC-Derived Cardiomyocytes - KOLF2.1J iPSCs differentiated into cardiomyocytes</td><td>subpop-007</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Distribution Formats
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Access Urls</th><th>Description</th><th>ID</th><th>Name</th></tr></thead><tbody><tr><td>https://doi.org/10.18130/V3/DXWOS5, https://doi.org/10.18130/V3/F3TD5R, https://dataverse.lib.virginia.edu/</td><td>Primary distribution through LibraData, University of Virginia's Dataverse instance (an NIH-approved...</td><td>format-001</td><td>University of Virginia Dataverse - RO-Crate Packages</td></tr><tr><td>https://dataverse.lib.virginia.edu/</td><td>Immunofluorescence images in standard confocal microscopy formats distributed as ZIP archives (2.6-4...</td><td>format-002</td><td>Immunofluorescence Imaging Data - ZIP Archives</td></tr><tr><td>https://massive.ucsd.edu/</td><td>AP-MS and SEC-MS data in standard mass spectrometry data formats suitable for deposition to MassIVE ...</td><td>format-003</td><td>Mass Spectrometry Data - MassIVE Repository</td></tr><tr><td>https://www.ncbi.nlm.nih.gov/bioproject/, https://www.ncbi.nlm.nih.gov/sra/</td><td>Raw sequence data from CRISPR perturbation screens in FASTQ format deposited to NCBI BioProject and ...</td><td>format-004</td><td>CRISPR Perturbation Screens - NCBI SRA</td></tr><tr><td>https://www.ndexbio.org/</td><td>Hierarchical cell maps as directed acyclic graphs (DAG) compatible with Cytoscape, HiView, and NDEx....</td><td>format-005</td><td>Hierarchical Cell Maps - NDEx</td></tr><tr><td>http://www.cm4ai.org</td><td>Open dissemination of CM4AI-generated data, maps, and tools via the CM4AI web portal using the U-BRI...</td><td>format-006</td><td>CM4AI Web Portal</td></tr></tbody></table></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔍</span>
+                    <div>
+                        <h2 class="section-title">Collection Process</h2>
+                        <p class="section-description">How was the data acquired?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label required-field">
+                            ID
+                            <span class="required-indicator" title="Required field">*</span>
+                        </label>
+                        <div class="item-value"><a href="https://doi.org/10.18130/V3/DXWOS5" target="_blank">https://doi.org/10.18130/V3/DXWOS5</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Name
+                            
+                        </label>
+                        <div class="item-value">CM4AI</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Title
+                            
+                        </label>
+                        <div class="item-value">Cell Maps for Artificial Intelligence (CM4AI)</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Description
+                            
+                        </label>
+                        <div class="item-value"><div class="long-description">CM4AI is the Functional Genomics Data Generation Project in the U.S. National Institutes of Health's (NIH) Bridge to Artificial Intelligence (Bridge2AI) program. Its overarching mission is to produce ethical, AI-ready datasets of cell architecture, inferred from multimodal data collected for human cell lines, to enable transformative biomedical AI research. The project delivers machine-readable hierarchical maps of cell architecture as AI-Ready data produced from multimodal interrogation of 100 chromatin modifiers and 100 metabolic enzymes involved in cancer, neuropsychiatric, and cardiac disorders in disease-relevant cell lines under perturbed and unperturbed conditions. Data streams include immunofluorescence (IF) subcellular microscopy for spatial proteomics, affinity purification mass spectroscopy (AP-MS) and size exclusion mass spectroscopy (SEC-MS) for protein-protein interaction (PPI) data, and single-cell CRISPR-Cas perturbation screens by cell type. Input data streams are integrated via the Multi-Scale Integrated Cell (MuSIC) software pipeline employing deep learning models and community detection algorithms, and output cell maps are packaged with provenance graphs and rich metadata as AI-Ready datasets in RO-Crate format using the FAIRSCAPE framework.
+</div></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Page
+                            
+                        </label>
+                        <div class="item-value"><a href="https://www.cm4ai.org" target="_blank">https://www.cm4ai.org</a></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Language
+                            
+                        </label>
+                        <div class="item-value">en</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Keywords
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li>Cell Maps</li><li>Artificial Intelligence</li><li>AI-Ready Data</li><li>Bridge2AI</li><li>Functional Genomics</li><li>Protein-Protein Interactions</li><li>Spatial Proteomics</li><li>CRISPR Perturbation</li><li>Hierarchical Cell Maps</li><li>MDA-MB-468</li><li>KOLF2.1J</li><li>iPSC</li><li>Breast Cancer</li><li>Chromatin Modifiers</li><li>Metabolic Enzymes</li><li>Immunofluorescence</li><li>Mass Spectrometry</li><li>AP-MS</li><li>SEC-MS</li><li>Perturb-Seq</li><li>FAIR Principles</li><li>RO-Crate</li><li>FAIRSCAPE</li><li>Visible Neural Networks</li><li>Deep Learning</li><li>MuSIC Pipeline</li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Addressing Gaps
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Address the limitation that machine learning models in genomics and precision medicine are typically...</td><td>gap-001</td></tr><tr><td>Provide fully provenanced, ethically validated, and FAIR-compliant AI-ready datasets with machine-re...</td><td>gap-002</td></tr><tr><td>Create integrated datasets combining protein localization (spatial proteomics), protein-protein inte...</td><td>gap-003</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Creators
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Role</th><th>Name</th><th>ORCID</th><th>Affiliation</th></tr></thead><tbody><tr><td>Contributor</td><td></td><td>creator-001</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-002</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-003</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-004</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-005</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-006</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-007</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-008</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-009</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-010</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-011</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-012</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-013</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-014</td><td>-</td></tr><tr><td>Contributor</td><td></td><td>creator-015</td><td>-</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Subsets
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Spatial Proteomics IF Images - MDA-MB-468: Immunofluorescence-based staining (ICC-IF) and confocal m...</td><td>subset-001</td></tr><tr><td>Protein-Protein Interaction AP-MS Data: Affinity purification mass spectrometry (AP-MS) data on endo...</td><td>subset-002</td></tr><tr><td>Protein-Protein Interaction SEC-MS Data: Size exclusion chromatography coupled to mass spectrometry ...</td><td>subset-003</td></tr><tr><td>CRISPR Perturbation Cell Atlas: Genome-scale CRISPRi perturbation cell atlas in undifferentiated KOL...</td><td>subset-004</td></tr><tr><td>Hierarchical Cell Maps via MuSIC: Integrated hierarchical cell maps produced by Multi-Scale Integrat...</td><td>subset-005</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sampling Strategies
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>sampling-001</dd><dt>Description</dt><dd><div class="long-description">Disease-Relevant Cell Line Selection: Purposive selection of two disease-relevant cell lines: MDA-MB-468 triple negative breast cancer cell line for cancer research, and KOLF2.1J iPSCs for neuropsychiatric and cardiac disorder research. Both cell lines ethically sourced and well-characterized in the literature. MDA-MB-468 chosen for triple-negative breast cancer research applications. KOLF2.1J chosen as reference iPSC line for large-scale collaborative studies. Both cell lines have extensive existing characterization data. Not a representative sample of all biological variants.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Collection Mechanisms
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Immunofluorescence Spatial Proteomics Imaging: Automated fixation and permeabilization protocols usi...</td><td>collection-001</td></tr><tr><td>Affinity Purification Mass Spectrometry: Endogenous tagging of genes in cell lines followed by affin...</td><td>collection-002</td></tr><tr><td>Size Exclusion Chromatography Mass Spectrometry: Size exclusion chromatography coupled to mass spect...</td><td>collection-003</td></tr><tr><td>CRISPR Perturbation Screens: Single-cell CRISPR screens using CRISPR lentiviral library targeting 10...</td><td>collection-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Acquisition Methods
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Confocal Microscopy for Subcellular Imaging: High-resolution confocal microscopy of immunofluorescen...</td><td>acquisition-001</td></tr><tr><td>Mass Spectrometry for Protein Interactions: State-of-the-art mass spectrometry-based proteomics incl...</td><td>acquisition-002</td></tr><tr><td>Single-Cell RNA Sequencing for Perturbation Mapping: Single-cell RNA sequencing using 10x Genomics 3...</td><td>acquisition-003</td></tr><tr><td>MuSIC Pipeline Integration: Multi-Scale Integrated Cell (MuSIC) pipeline integrates PPI embeddings a...</td><td>acquisition-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Preprocessing Strategies
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Deep Learning Embedding Generation: PPI networks processed using node2vec deep learning model to red...</td><td>preproc-001</td></tr><tr><td>Hierarchical Community Detection: Community detection performed on co-embedding space using multisca...</td><td>preproc-002</td></tr><tr><td>Cell Map Annotation: Two-pronged annotation approach: (1) Alignment to known protein function and pa...</td><td>preproc-003</td></tr><tr><td>Quality Control for Imaging Data: Standardized automated fixation and permeabilization protocols usi...</td><td>preproc-004</td></tr><tr><td>Quality Control for Mass Spectrometry Data: Quality control and validation of AP-MS and SEC-MS data....</td><td>preproc-005</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Cleaning Strategies
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>FAIRSCAPE AI-Readiness Packaging: All datasets packaged using FAIRSCAPE framework which creates RO-C...</td><td>cleaning-001</td></tr><tr><td>Data Standard Mapping: Data mapped to applicable standards and ontologies including Gene Ontology (G...</td><td>cleaning-002</td></tr><tr><td>Integrative Structure Modeling Annotation: Bioinformatics pipeline developed for annotating MuSIC co...</td><td>cleaning-003</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Maintainers
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th><th>Maintainer Details</th><th>Name</th></tr></thead><tbody><tr><td>Multi-institutional consortium managing dataset maintenance including University of California San D...</td><td>maintainer-001</td><td>UCSD - Project leadership and data integration, Stanford - Spatial proteomics imaging, ... (+3 more)</td><td>CM4AI Consortium</td></tr><tr><td>Supervised by Data Access Committee for ethical matters related to dataset distribution and potentia...</td><td>maintainer-002</td><td>Data Access Committee oversight, Contact - jillianparker@health.ucsd.edu, ... (+2 more)</td><td>Data Governance Committee</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Sensitive Elements
+                            
+                        </label>
+                        <div class="item-value"><ol class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>sensitive-001</dd><dt>Name</dt><dd>De-identified Cell Line Data</dd><dt>Description</dt><dd><div class="long-description">Data derived from commercially available de-identified human cell lines. While cell lines are considered de-identified and cannot be matched to human subjects with current knowledge, ethical considerations are embedded throughout data generation and AI system development. Ethics team develops tools for enhancing awareness of ethical, legal, and social ramifications. Mixed empirical research combines qualitative and quantitative methods to capture community insights for guidelines and best practices.
+</div></dd><dt>Sensitive Elements Present</dt><dd>False</dd><dt>Sensitivity Details</dt><dd><ul class='formatted-list'><li>De-identified cell lines (MDA-MB-468, KOLF2.1J)</li><li>No patient-identifiable information</li><li>Commercially available with MTAs</li><li>Ethically sourced from ATCC and HipSci</li><li>Value-Sensitive Design framework applied</li><li>Axiological repository of values for design standards</li></ul></dd></dl></li></ol></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Retention Limit
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>retention-001</dd><dt>Name</dt><dd>Long-term Preservation in UVA Dataverse</dd><dt>Description</dt><dd><div class="long-description">Long-term preservation in the University of Virginia Dataverse, supported by committed institutional funds. All dataset versions preserved with persistent DOIs for reproducibility. No planned deletion or retention limits. Quarterly updates through November 2026, with final release preserved indefinitely.
+</div></dd><dt>Retention Details</dt><dd><ul class='formatted-list'><li>Indefinite preservation in UVA Dataverse</li><li>Committed institutional funding for long-term hosting</li><li>All versions preserved with persistent DOIs</li><li>No planned deletion or data expiration</li><li>Quarterly updates through project end (November 2026)</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🚀</span>
+                    <div>
+                        <h2 class="section-title">Uses</h2>
+                        <p class="section-description">What (other) tasks could the dataset be used for?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Tasks
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>Multi-Scale Cell Mapping via MuSIC Pipeline: Integrate multimodal data streams (spatial proteomics v...</td><td>task-001</td></tr><tr><td>Disease-Relevant Cell Line Characterization: Characterize cell architecture and protein interactions...</td><td>task-002</td></tr><tr><td>Ethical AI Framework Development: Develop ethical AI frameworks and governance structures for biomed...</td><td>task-003</td></tr><tr><td>Skills and Workforce Development: Recruit and train a diverse biomedical AI/ML workforce through asy...</td><td>task-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Intended Uses
+                            
+                        </label>
+                        <div class="item-value"><table class="data-table"><thead><tr><th>Description</th><th>ID</th></tr></thead><tbody><tr><td>AI Model Training for Functional Genomics: Primary intended use is training and development of artif...</td><td>use-001</td></tr><tr><td>Visible Neural Network Development: Development of visible neural networks (VNNs) that use hierarchi...</td><td>use-002</td></tr><tr><td>Genotype-Phenotype Mapping Research: Research into interpretable genotype-phenotype learning using m...</td><td>use-003</td></tr><tr><td>Cellular Process Analysis: Analysis of cell architectural changes and interactions in presence of sp...</td><td>use-004</td></tr></tbody></table></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Prohibited Uses
+                            
+                        </label>
+                        <div class="item-value"><ul class='formatted-list'><li><dl class='nested-dict'><dt>ID</dt><dd>prohibited-001</dd><dt>Description</dt><dd><div class="long-description">Clinical Decision-Making: Laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval. This is research data from cell lines, not clinical diagnostic data.
+</div></dd></dl></li></ul></div>
+                    </div>
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License And Use Terms
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>license-001</dd><dt>Name</dt><dd>Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</dd><dt>Description</dt><dd><div class="long-description">Dataset licensed for reuse under CC BY-NC-SA 4.0 license (https://creativecommons.org/licenses/by-nc-sa/4.0/). Attribution is required to the copyright holders and the authors. Data are Copyright (c) 2025 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2025 The Board of Trustees of the Leland Stanford Junior University. Commercial use of data requires a separate license negotiation with the copyright holder (UCSD, Stanford, and/or UCSF depending upon the specific data package in question). A Data Access Committee will supervise ethical matters related to dataset distribution and potential dual licensing for commercial use. All CM4AI integration and packaging software is freely available and licensed under nonrestrictive open-source licenses (FAIRSCAPE: MIT License, MuSIC: BSD-3 License, IMP: open source). No regulatory restrictions apply. Data derived from commercially available de-identified human cell lines. No human subjects research. No FDA regulation applicable. No export control restrictions.
+</div></dd><dt>License Terms</dt><dd><ul class='formatted-list'><li>CC BY-NC-SA 4.0 license for dataset</li><li>Attribution required to copyright holders and authors</li><li>Copyright 2025 Regents of University of California (UCSD)</li><li>Spatial proteomics copyright 2025 Stanford University</li><li>Commercial use requires separate license negotiation</li><li>Contact UCSD, Stanford, or UCSF for commercial licensing</li><li>Data Access Committee supervises dual licensing</li><li>Citation required - Clark T, Parker J, et al. BioRxiv 2024 DOI 10.1101/2024.05.21.589311</li><li>Software under open source licenses (MIT, BSD-3)</li><li>No regulatory restrictions or export controls</li><li>No FDA regulation applicable</li><li>Ethically sourced de-identified cell lines</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">📤</span>
+                    <div>
+                        <h2 class="section-title">Distribution</h2>
+                        <p class="section-description">How will the dataset be distributed?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            License
+                            
+                        </label>
+                        <div class="item-value">CC BY-NC-SA 4.0</div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">🔄</span>
+                    <div>
+                        <h2 class="section-title">Maintenance</h2>
+                        <p class="section-description">How will the dataset be maintained?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Updates
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>updates-001</dd><dt>Name</dt><dd>Quarterly Data Releases and Augmentation</dd><dt>Description</dt><dd><div class="long-description">Dataset regularly updated and augmented through the end of the project in November 2026. Updates on a quarterly basis. Current releases are interim beta releases with some datasets under temporary pre-publication embargo. Computed cell maps will be added in future releases. Dataset versioned with major and minor releases tracked in Dataverse. March 2025 release (V1) and June 2025 release (V2) with corrections to ro-crate metadata and naming conventions. All versions preserved with DOIs for reproducibility. Long-term preservation in the University of Virginia Dataverse, supported by committed institutional funds.
+</div></dd><dt>Frequency</dt><dd>Quarterly updates through November 2026</dd><dt>Update Details</dt><dd><ul class='formatted-list'><li>Quarterly data releases with version tracking</li><li>March 2025 release (V1) - Initial beta release</li><li>June 2025 release (V2) - Corrections and RGB images</li><li>Computed cell maps planned for future releases</li><li>All versions preserved with persistent DOIs</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+            
+            <div class="section">
+                <div class="section-header">
+                    <span class="section-icon">👥</span>
+                    <div>
+                        <h2 class="section-title">Human Subjects</h2>
+                        <p class="section-description">Does the dataset relate to people?</p>
+                    </div>
+                </div>
+                <div class="section-content">
+                    
+                    <div class="data-item">
+                        
+                        <label class="item-label optional-field">
+                            Human Subject Research
+                            
+                        </label>
+                        <div class="item-value"><dl class='nested-dict'><dt>ID</dt><dd>hsr-001</dd><dt>Name</dt><dd>CM4AI Non-Clinical Cell Line Data</dd><dt>Description</dt><dd><div class="long-description">CM4AI data are distinctive within Bridge2AI in that they are non-clinical (from tissue cultures) and are considered to be de-identified as they cannot be matched, with current knowledge, to a human subject. Data derived from commercially available de-identified human cell lines: MDA-MB-468 breast cancer cells (ATCC, RRID:CVCL_0419) and KOLF2.1J induced pluripotent stem cells (HipSci, RRID:CVCL_B5P3). No direct human subjects research. FDA Regulated: No. Ethically sourced cell lines with appropriate material transfer agreements. Ethics team employs Value-Sensitive Design (VSD) methodology, CM4AI Life Cycle framework, and mixed empirical research to ensure responsible design of datasets and AI technologies.
+</div></dd><dt>Involves Human Subjects</dt><dd>False</dd><dt>Ethics Review Board</dt><dd><ul class='formatted-list'><li>Data Access Committee for ethical oversight</li><li>Ethics team (Vardit Ravitsky, Jean-Christophe Belisle-Pipon)</li><li>Value-Sensitive Design methodology framework</li><li>CM4AI Life Cycle governance framework</li></ul></dd></dl></div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        
+    
+    
+    <div class="timestamp">
+        Generated on 2025-12-20 19:24:21 using Bridge2AI Data Sheets Schema
+    </div>
+</body>
+</html>
