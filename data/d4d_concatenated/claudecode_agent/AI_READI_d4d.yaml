@@ -2,7 +2,9 @@
 # Generation Method: Claude Code Agent Deterministic
 # Source: data/preprocessed/concatenated/AI_READI_preprocessed.txt (245K, 13 source files)
 # Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
-# Generated: 2025-12-16
+# Generated: 2025-12-20
+# Model: claude-sonnet-4-5-20250929
+# Temperature: 0.0
 
 id: https://fairhub.io/datasets/2
 name: AI-READI
@@ -51,7 +53,7 @@ purposes:
       Better understand salutogenesis (the pathway from disease to health) in Type 2 Diabetes
       Mellitus using a hypothesis-agnostic, harmonized, multi-domain dataset designed specifically
       for AI/ML research. The dataset aims to provide critical insights into how individuals can
-      transition from diabetes toward health resilience.
+      transition from diabetes toward health resilience through pseudotime manifold analysis.
   - id: purpose-002
     name: Establishing AI/ML data standards
     description: >
@@ -95,7 +97,7 @@ addressing_gaps:
       Provide a large-scale, harmonized, multi-site, multi-domain dataset enabling AI/ML
       analyses not feasible with existing sources (e.g., claims or EHR alone). With 4,000
       participants and over 10 variable domains, this is the largest publicly accessible
-      dataset of its kind.
+      dataset of its kind for T2DM research.
   - id: gap-002
     name: Demographic underrepresentation
     description: >
