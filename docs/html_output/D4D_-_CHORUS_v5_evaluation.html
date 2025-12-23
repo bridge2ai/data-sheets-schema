@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rubric20-Semantic Evaluation: CHORUS</title>
+    <title>Rubric20-Semantic Evaluation: Unknown</title>
     <style>
         * {
             margin: 0;
@@ -351,15 +351,15 @@
             <div class="metadata-grid">
                 <div class="metadata-item">
                     <div class="metadata-label">Project</div>
-                    <div class="metadata-value">CHORUS</div>
+                    <div class="metadata-value">Unknown</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">D4D File</div>
-                    <div class="metadata-value">CHORUS_d4d.yaml</div>
+                    <div class="metadata-value">A</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Evaluator Model</div>
-                    <div class="metadata-value">claude-sonnet-4-5-20250929</div>
+                    <div class="metadata-value">Unknown</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Rubric Type</div>
@@ -367,26 +367,534 @@
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Temperature</div>
-                    <div class="metadata-value">0.0</div>
+                    <div class="metadata-value">N/A</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Evaluation Date</div>
-                    <div class="metadata-value">2025-12-20</div>
+                    <div class="metadata-value">N/A</div>
                 </div>
             </div>
         </div>
 
         <div class="score-card">
-            <div class="score-large">0/84</div>
-            <div class="score-subtitle">0.0% Overall Score · Grade: N/A</div>
+            <div class="score-large">71.0/84</div>
+            <div class="score-subtitle">84.5% Overall Score · Grade: B</div>
         </div>
 
         <h2>Category Performance</h2>
         <div class="category-grid">
 
+            <div class="category-card">
+                <div class="category-header">Category</div>
+                <div class="category-title">Structural Completeness</div>
+                <div class="category-score">21/21</div>
+                <div class="category-percentage">100.0%</div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">Category</div>
+                <div class="category-title">Metadata Quality & Content</div>
+                <div class="category-score">21/21</div>
+                <div class="category-percentage">100.0%</div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">Category</div>
+                <div class="category-title">Technical Documentation</div>
+                <div class="category-score">21/25</div>
+                <div class="category-percentage">84.0%</div>
+            </div>
+
+            <div class="category-card">
+                <div class="category-header">Category</div>
+                <div class="category-title">FAIRness & Accessibility</div>
+                <div class="category-score">15/17</div>
+                <div class="category-percentage">88.2%</div>
+            </div>
+
         </div>
 
         <h2>Question-Level Assessment</h2>
+
+        <div class="category-section">
+            <h3>Structural Completeness</h3>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q1.</span>
+                        Field Completeness
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">All mandatory fields present with comprehensive, high-quality content. ID uses project homepage URL, title is descriptive, description is detailed (576 characters), keywords extensive (26 unique terms), and license fully documented with terms and contact information.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">id: https://chorus4ai.org/, title: 'Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI', description: 576 chars, keywords: 26 keywords, license_and_use_terms: comprehensive with detailed terms</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q2.</span>
+                        Entry Length Adequacy
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Excellent narrative depth. Main description is comprehensive at 576 characters covering dataset scope, scale, methodology, and current status. Purpose statements average 282 characters each with detailed rationale and context.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">description: 576 chars, purposes (4 entries): avg 282 chars per entry</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q3.</span>
+                        Keyword Diversity
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Outstanding keyword coverage with 26 diverse terms spanning dataset name, domain (critical care), data types (EHR, waveforms, imaging, EEG), standards (OMOP, DICOM, OHNLP), and cross-cutting themes (equity, ethics, privacy).</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">keywords: 26 unique keywords including 'CHoRUS', 'Bridge2AI', 'critical care', 'OMOP Common Data Model', 'health equity', 'social determinants of health', 'multi-modal data', 'ethical AI', 'workforce development', 'privacy preservation', 'bias mitigation'</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q4.</span>
+                        File Enumeration and Type Variety
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Excellent format diversity reflecting multi-modal dataset. Five distinct distribution formats, each using appropriate international standards: OMOP for structured EHR, WFDB for waveforms, DICOM for imaging, OHNLP for text, EDF+/Persyst for EEG.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">distribution_formats: 5 formats listed - (1) OMOP Common Data Model, (2) WFDB waveform format, (3) DICOM imaging format, (4) OHNLP tokenized text, (5) EDF+ and Persyst EEG formats</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q5.</span>
+                        Data File Size Availability
+                        <span class="badge badge-success">pass_fail</span>
+                    </div>
+                    <div class="question-score score-perfect">1/1</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Clear instance count metadata. Dataset size documented as 23,400 unique admissions with target of 100,000+ patients. Metadata header also documents source concatenated file size (79K) and source file count (7).</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">instances: 23,400 unique admissions (as of November 2024), target: 100,000+ critically ill patients. Source file metrics in header: 79K size, 7 source files</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="category-section">
+            <h3>Metadata Quality & Content</h3>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q6.</span>
+                        Dataset Identification Metadata
+                        <span class="badge badge-success">pass_fail</span>
+                    </div>
+                    <div class="question-score score-perfect">1/1</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Multiple persistent identifiers present. Project homepage URL used as primary ID and page. NIH RePORTER project number (10472824) provides federal grant tracking. Publication DOI available (though format has minor issue). No dataset-specific DOI yet, but project URL is persistent.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">id: https://chorus4ai.org/, page: https://chorus4ai.org/, external_resources: NIH RePORTER URL (https://reporter.nih.gov/project-details/10472824), publication DOI (http://doi:10.1007/s12028-024-02007)</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q7.</span>
+                        Funding and Acknowledgements Completeness
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Comprehensive funding and creator documentation. Funder entry includes grant number (1OT2OD032701-01), opportunity number (OTA-21-008), study section, fiscal year, total funding amount ($5,880,300 all direct costs), and project timeline. All 19 creators have institutional affiliations and specific roles.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">funders: NIH Common Fund Bridge2AI Program with grant 1OT2OD032701-01, fiscal year 2022, total funding $5,880,300, project dates Sept 2022 - Nov 2026. creators: 19 creators listed, all with institutional affiliations (MGH, UF, UT Health, Tufts, Emory) and specific roles (Contact PI, Principal Investigator, Lecturer, Workshop Lead)</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q8.</span>
+                        Ethical and Privacy Declarations
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Outstanding ethical documentation. Human subjects research clearly acknowledged with multi-level ethics review (institutional IRBs at 14 centers, community ethics focus groups, legal advisory teams). Comprehensive sensitive element enumeration with privacy protections documented for each data type. Strong emphasis on privacy preservation, bias mitigation, and Social Determinants of Health.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">human_subject_research: involves_human_subjects=true, ethics_review_board: IRBs at 14 data acquisition centers + community-facing ethics focus groups + legal/ethical advisory teams. sensitive_elements: 4 detailed entries covering clinical data (HIPAA-protected), physiological monitoring, medical imaging (de-identified), Social Determinants of Health. Privacy approaches: de-identification, tokenization, controlled access, privacy-preserving transformations, risk assessment</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q9.</span>
+                        Access Requirements and Governance Documentation
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Excellent governance documentation. Controlled access model clearly defined with institutional email requirement, signed licensing agreement, secure enclave infrastructure. Prohibition on re-identification attempts explicitly stated. Contact information provided for access requests. Appropriate for sensitive clinical data containing PHI.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">license: 'Controlled Access with Data Use Agreement', license_and_use_terms: detailed requirements (institutional email, signed licensing agreement, secure enclave access), contact emails provided (dbold@emory.edu, jared.houghtaling@tuftsmedicine.org). Explicit terms: prohibition on re-identification, compliance with ethical/legal requirements, HIPAA protection</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q10.</span>
+                        Interoperability and Standardization
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Exceptional interoperability through consistent use of international standards. Every data modality has documented schema conformance: OMOP CDM enables OHDSI tool stack, WFDB follows PhysioNet standards, DICOM for imaging, OHNLP for NLP, EDF+ for EEG. Metadata schema validation documented as part of cleaning strategies.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">Standard formats documented for all modalities: OMOP Common Data Model (structured EHR), WFDB format (waveforms, PhysioNet schema extended), DICOM (imaging with metadata schema), OHNLP open source schema (tokenized notes), EDF+ and Persyst open source schemas (EEG). Explicit schema conformance and metadata validation mentioned for each format.</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="category-section">
+            <h3>Technical Documentation</h3>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q11.</span>
+                        Tool and Software Transparency
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-high">4/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Very good technical documentation with comprehensive strategy descriptions. Each preprocessing, cleaning, and labeling strategy includes detailed preprocessing_details, cleaning_details, or labeling_details arrays. Software tools mentioned (OHDSI, OHNLP, WFDB) but specific version numbers not provided. GitHub organization (chorus-ai) with 28 repositories documented but individual tool versions missing. Minor deduction for lack of specific software versions.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">preprocessing_strategies: 5 detailed strategies (OMOP transformation, OHNLP tokenization, WFDB waveform standardization, DICOM de-identification, re-identification limitation). cleaning_strategies: 2 strategies (multi-center harmonization with SOPs, metadata schema validation). labeling_strategies: 1 strategy (visualization and annotation environment). Software mentioned: OMOP/OHDSI tools, OHNLP toolkit, PhysioNet WFDB. GitHub organization with 28 repositories documented.</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q12.</span>
+                        Collection Protocol Clarity
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Excellent collection protocol documentation. Five comprehensive collection mechanisms each with detailed descriptions. Eight acquisition methods specify exact data types, storage formats, and metadata schemas. Timeframes clearly documented (Sept 2022 - Nov 2026 with current status Nov 2024). Data collectors identified (14 acquisition centers, consortium structure). Retrospective study design explicit.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">collection_mechanisms: 5 detailed mechanisms (retrospective EHR extraction, waveform telemetry capture, medical imaging acquisition, EEG recording extraction, standardized data transformation). acquisition_methods: 8 detailed methods with specifics on data sources, formats, and access. Timeframes: project dates Sept 1, 2022 to Nov 30, 2026, current status as of November 2024. Data collectors: 14 data acquisition centers, multi-institutional consortium.</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q13.</span>
+                        Version History Documentation
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-high">4/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Good update and provenance documentation. Ongoing expansion clearly described with current metrics (23,400 admissions), target (100,000+), and timeline (through Nov 2026). GitHub project management tracks deliverables and site updates. However, no explicit version numbering scheme (e.g., v1.0, v2.0) or formal release notes documented. Deduction for lack of discrete version numbers and formal errata tracking.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">updates: 'Ongoing data collection and expansion' with current status (23,400 admissions Nov 2024), target (100,000+ patients), timeline (through Nov 2026), frequency (continuous updates). GitHub project management for tracking. version_access: not explicitly documented but GitHub organization and secure enclave infrastructure mentioned. No explicit version numbering system.</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q14.</span>
+                        Associated Publications
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-high">4/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Very good external resource documentation with multiple references. One peer-reviewed publication documented with DOI (though URL format needs correction). NIH RePORTER link provides federal grant context. GitHub organization with 28 repositories. Links to related platforms (OHDSI, Bridge2AI, AIM-AHEAD). No formal dataset citation field or additional publication references. Minor deduction for single publication and DOI format issue.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">external_resources: 10 entries including published research DOI (http://doi:10.1007/s12028-024-02007), NIH RePORTER project details (https://reporter.nih.gov/project-details/10472824), project website (https://chorus4ai.org/), GitHub organization (https://github.com/chorus-ai), Bridge2AI program reference, OHDSI community reference, AIM-AHEAD partnership. No formal dataset citation field.</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q15.</span>
+                        Human Subject Representation
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-high">4/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Good demographic and subpopulation documentation. Instance counts clear (23,400 current, 100,000+ target). Subpopulations documented by hospital (14 sites for geographic diversity) and by data completeness. Sampling strategies emphasize balanced and diverse cohorts with Social Determinants of Health. Strong equity focus with community ethics input. However, specific demographic breakdowns (age ranges, race/ethnicity, gender distributions) not provided. Minor deduction for lack of detailed demographic statistics.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">instances: 23,400 unique admissions from critically ill patients across 14 hospitals, target 100,000+ patients. subpopulations: 2 documented (patients by hospital for geographic diversity, patients with complete multi-modal data). sampling_strategies: multi-center federated sampling for balanced/diverse cohort, contextual factors (geographic distance, Social Determinants of Health). Emphasis on diversity and equity throughout.</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <div class="category-section">
+            <h3>FAIRness & Accessibility</h3>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q16.</span>
+                        Findability (Persistent Links)
+                        <span class="badge badge-success">pass_fail</span>
+                    </div>
+                    <div class="question-score score-perfect">1/1</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Multiple persistent URLs provided. Project homepage (chorus4ai.org) serves as primary landing page. GitHub organization provides persistent code/documentation repository. NIH RePORTER provides federal grant tracking. Bridge2AI program page. Publication DOI for peer-reviewed article.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">page: https://chorus4ai.org/, external_resources: https://bridge2ai.org/chorus, https://github.com/chorus-ai, https://reporter.nih.gov/project-details/10472824, publication DOI</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q17.</span>
+                        Accessibility (Access Mechanism)
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Excellent access mechanism documentation. Clear step-by-step process: (1) registration with institutional email, (2) complete registration form, (3) sign licensing agreement, (4) approval review, (5) receive access instructions via email, (6) access secure enclave. Specific contact emails provided. All distribution formats reference https://chorus4ai.org/ for access. Controlled access model appropriate for sensitive clinical data.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">distribution_formats: 5 formats documented with access_urls. license_and_use_terms: step-by-step process (institutional email registration → signed licensing agreement → approval review → email with access instructions → secure enclave access). Contact emails: dbold@emory.edu, jared.houghtaling@tuftsmedicine.org</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q18.</span>
+                        Reusability (License Clarity)
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-perfect">5/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Excellent license clarity with explicit reuse terms. Controlled access license appropriate for sensitive clinical data containing PHI. Six explicit license terms documented. Data use agreement specifies permitted uses. Intended uses clearly enumerated (AI/ML development, external validation, health equity research, clinical care improvement, education). Discouraged uses explicitly stated (clinical decision-making without validation, re-identification attempts). Reuse constraints justified by privacy and ethical requirements.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">license: 'Controlled Access with Data Use Agreement', license_terms: 6 explicit terms including institutional email requirement, signed licensing agreement, data use agreement specifies permitted uses, prohibition on re-identification, compliance requirements. Permitted uses documented in intended_uses (5 entries) and discouraged_uses (3 entries).</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q19.</span>
+                        Data Integrity and Provenance
+                        <span class="badge badge-success">numeric</span>
+                    </div>
+                    <div class="question-score score-good">3/5</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Good provenance and update documentation but lacks structured change log. Continuous update model clearly described with current status snapshots (Nov 2024: 23,400 admissions). GitHub organization provides version control infrastructure (28 repositories, Chorus_SOP documentation, project tracking). However, no structured change log with specific timestamps for dataset releases or detailed version history. Generation timestamp in metadata header. Deduction for lack of formal versioning scheme and detailed change logs.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">updates: frequency='Continuous updates through November 2026', update_details include current status (23,400 admissions Nov 2024), target metrics, GitHub project tracking, documentation updates in Chorus_SOP repository, ongoing semantic mapping validation. GitHub organization for version control. Timestamp in D4D file header: 'Generated: 2025-12-20'</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="question">
+                <div class="question-header">
+                    <div class="question-title">
+                        <span class="question-number">Q20.</span>
+                        Interlinking Across Platforms
+                        <span class="badge badge-success">pass_fail</span>
+                    </div>
+                    <div class="question-score score-perfect">1/1</div>
+                </div>
+                <div class="question-body">
+                    <div class="detail">
+                        <span class="detail-label">Assessment</span>
+                        <div class="detail-content">Strong cross-platform interlinking. Ten external resource entries connect to diverse platforms: project website (chorus4ai.org), GitHub (chorus-ai organization), NIH RePORTER (federal grant tracking), Bridge2AI program page, peer-reviewed publication, OHDSI community (for OMOP CDM), AIM-AHEAD training partnership. Links span data repositories, code repositories, documentation sites, funding agencies, and research communities.</div>
+                    </div>
+
+                    <div class="detail">
+                        <span class="detail-label">Evidence Found</span>
+                        <div class="detail-content">external_resources: 10 entries linking to multiple platforms - CHoRUS website, GitHub organization (https://github.com/chorus-ai with 28 repos), NIH RePORTER (https://reporter.nih.gov/project-details/10472824), Bridge2AI program (https://bridge2ai.org/chorus), OHDSI community, AIM-AHEAD training partnership, published research DOI</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
 
         <h2>Semantic Analysis Summary</h2>
 
@@ -450,7 +958,7 @@
         </div>
 
         <div class="timestamp">
-            Generated on 2025-12-20 19:09:13 using Bridge2AI Data Sheets Schema
+            Generated on 2025-12-23 12:34:22 using Bridge2AI Data Sheets Schema
         </div>
     </div>
 </body>

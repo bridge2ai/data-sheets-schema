@@ -10,17 +10,41 @@ from datetime import datetime
 def generate_evaluation_html(eval_data, output_path):
     """Generate HTML from rubric20 evaluation JSON data"""
 
-    metadata = eval_data.get("evaluation_metadata", {})
-    category_scores = eval_data.get("category_scores", [])
-    question_scores = eval_data.get("question_scores", [])
-    overall = eval_data.get("overall_summary", {})
-    semantic = eval_data.get("semantic_analysis", {})
+    # Extract metadata from root level and nested structures
+    project = eval_data.get("project", "Unknown")
+    rubric = eval_data.get("rubric", "rubric20-semantic")
+    d4d_file = eval_data.get("d4d_file", "N/A")
+    method = eval_data.get("method", "N/A")
+    timestamp = eval_data.get("evaluation_timestamp", "N/A")
+    model_info = eval_data.get("model", {})
 
-    # Calculate overall stats
-    total_score = overall.get("total_score", 0)
-    max_score = metadata.get("max_score", 84)
+    # Extract overall score
+    overall = eval_data.get("overall_score", {})
+    total_score = overall.get("total_points", 0)
+    max_score = overall.get("max_points", 84)
     percentage = overall.get("percentage", 0)
-    grade = overall.get("grade", "N/A")
+
+    # Calculate grade
+    if percentage >= 95:
+        grade = "A+"
+    elif percentage >= 90:
+        grade = "A"
+    elif percentage >= 85:
+        grade = "B+"
+    elif percentage >= 80:
+        grade = "B"
+    elif percentage >= 75:
+        grade = "C+"
+    elif percentage >= 70:
+        grade = "C"
+    else:
+        grade = "D"
+
+    # Extract categories (with nested questions)
+    categories = eval_data.get("categories", [])
+
+    # Extract semantic analysis
+    semantic = eval_data.get("semantic_analysis", {})
 
     # Start HTML
     html = f"""<!DOCTYPE html>
@@ -28,7 +52,7 @@ def generate_evaluation_html(eval_data, output_path):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rubric20-Semantic Evaluation: {metadata.get('project', 'Unknown')}</title>
+    <title>Rubric20-Semantic Evaluation: {project}</title>
     <style>
         * {{
             margin: 0;
@@ -376,27 +400,27 @@ def generate_evaluation_html(eval_data, output_path):
             <div class="metadata-grid">
                 <div class="metadata-item">
                     <div class="metadata-label">Project</div>
-                    <div class="metadata-value">{metadata.get('project', 'Unknown')}</div>
+                    <div class="metadata-value">{project}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">D4D File</div>
-                    <div class="metadata-value">{Path(metadata.get('d4d_file', '')).name}</div>
+                    <div class="metadata-value">{Path(d4d_file).name}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Evaluator Model</div>
-                    <div class="metadata-value">{metadata.get('evaluator_model', 'Unknown')}</div>
+                    <div class="metadata-value">{model_info.get('name', 'Unknown')}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Rubric Type</div>
-                    <div class="metadata-value">{metadata.get('rubric', 'rubric20-semantic')}</div>
+                    <div class="metadata-value">{rubric}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Temperature</div>
-                    <div class="metadata-value">{metadata.get('temperature', 'N/A')}</div>
+                    <div class="metadata-value">{model_info.get('temperature', 'N/A')}</div>
                 </div>
                 <div class="metadata-item">
                     <div class="metadata-label">Evaluation Date</div>
-                    <div class="metadata-value">{metadata.get('evaluation_date', 'Unknown')}</div>
+                    <div class="metadata-value">{timestamp}</div>
                 </div>
             </div>
         </div>
@@ -411,11 +435,14 @@ def generate_evaluation_html(eval_data, output_path):
 """
 
     # Add category cards
-    for cat in category_scores:
-        cat_name = cat.get('category', 'Unknown')
-        cat_score = cat.get('score', 0)
-        cat_max = cat.get('max_score', 0)
-        cat_pct = cat.get('percentage', 0)
+    for cat in categories:
+        cat_name = cat.get('name', 'Unknown')
+        questions = cat.get('questions', [])
+
+        # Calculate category totals from questions
+        cat_score = sum(q.get('score', 0) for q in questions)
+        cat_max = sum(q.get('max_score', 5) for q in questions)
+        cat_pct = (cat_score / cat_max * 100) if cat_max > 0 else 0
 
         html += f"""
             <div class="category-card">
@@ -430,35 +457,31 @@ def generate_evaluation_html(eval_data, output_path):
         </div>
 """
 
-    # Group questions by category
-    questions_by_category = {}
-    for q in question_scores:
-        cat = q.get('category', 'Unknown')
-        if cat not in questions_by_category:
-            questions_by_category[cat] = []
-        questions_by_category[cat].append(q)
-
     # Add questions organized by category
     html += """
         <h2>Question-Level Assessment</h2>
 """
 
-    for cat_name, questions in questions_by_category.items():
+    for cat in categories:
+        cat_name = cat.get('name', 'Unknown')
+        questions = cat.get('questions', [])
         html += f"""
         <div class="category-section">
             <h3>{cat_name}</h3>
 """
 
         for q in questions:
-            q_num = q.get('question_number', 0)
-            q_text = q.get('question', 'Unknown')
+            q_num = q.get('id', 0)
+            q_text = q.get('name', 'Unknown')
+            q_desc = q.get('description', '')
             q_score = q.get('score', 0)
             q_max = q.get('max_score', 5)
             q_pct = (q_score / q_max * 100) if q_max > 0 else 0
-            q_type = q.get('scoring_type', '0-5 scale')
-            justification = q.get('justification', '')
-            evidence = q.get('evidence', [])
-            semantic_checks = q.get('semantic_checks', {})
+            q_type = q.get('score_type', '0-5 scale')
+            q_label = q.get('score_label', '')
+            justification = q.get('quality_note', '')
+            evidence = q.get('evidence', '')
+            semantic_analysis = q.get('semantic_analysis', '')
 
             # Determine score class
             if q_pct == 100:
@@ -490,30 +513,18 @@ def generate_evaluation_html(eval_data, output_path):
 """
 
             if evidence:
-                html += """
+                html += f"""
                     <div class="detail">
                         <span class="detail-label">Evidence Found</span>
-                        <ul class="evidence-list">
-"""
-                for e in evidence:
-                    html += f"""
-                            <li class="evidence-item">{e}</li>
-"""
-                html += """
-                        </ul>
+                        <div class="detail-content">{evidence}</div>
                     </div>
 """
 
-            if semantic_checks:
-                html += """
-                    <div class="semantic-checks">
-                        <strong>Semantic Analysis:</strong>
-"""
-                for check_type, check_value in semantic_checks.items():
-                    html += f"""
-                        <div><strong>{check_type.replace('_', ' ').title()}:</strong> {check_value}</div>
-"""
-                html += """
+            if semantic_analysis:
+                html += f"""
+                    <div class="detail">
+                        <span class="detail-label">Semantic Analysis</span>
+                        <div class="detail-content">{semantic_analysis}</div>
                     </div>
 """
 
