@@ -17,8 +17,8 @@ Alias: response
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [Purpose](Purpose.md) | For what purpose was the dataset created? |  no  |
 | [AddressingGap](AddressingGap.md) | Was there a specific gap that needed to be filled by creation of the dataset? |  no  |
+| [Purpose](Purpose.md) | For what purpose was the dataset created? |  no  |
 | [Task](Task.md) | Was there a specific task in mind for the dataset's application? |  no  |
 
 

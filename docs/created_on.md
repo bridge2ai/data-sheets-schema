@@ -17,10 +17,10 @@ Alias: created_on
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [Information](Information.md) | Grouping for datasets and data files |  no  |
 | [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
-| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 | [DatasetCollection](DatasetCollection.md) | A collection of related datasets, likely containing multiple files of multipl... |  no  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [Information](Information.md) | Grouping for datasets and data files |  no  |
 
 
 

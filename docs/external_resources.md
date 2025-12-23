@@ -23,8 +23,8 @@ Alias: external_resources
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
 | [ExternalResource](ExternalResource.md) | Is the dataset self-contained or does it rely on external resources (e |  yes  |
-| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  yes  |
 | [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  yes  |
 
 
 

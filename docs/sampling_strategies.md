@@ -17,9 +17,9 @@ Alias: sampling_strategies
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
-| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 | [Instance](Instance.md) | What do the instances that comprise the dataset represent (e |  no  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
 
 
 

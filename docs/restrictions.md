@@ -17,8 +17,8 @@ Alias: restrictions
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [ExternalResource](ExternalResource.md) | Is the dataset self-contained or does it rely on external resources (e |  no  |
 | [IPRestrictions](IPRestrictions.md) | Have any third parties imposed IP-based or other restrictions on the data ass... |  no  |
+| [ExternalResource](ExternalResource.md) | Is the dataset self-contained or does it rely on external resources (e |  no  |
 
 
 

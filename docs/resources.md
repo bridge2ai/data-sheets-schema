@@ -22,9 +22,9 @@ Alias: resources
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  yes  |
-| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
 | [DatasetCollection](DatasetCollection.md) | A collection of related datasets, likely containing multiple files of multipl... |  yes  |
+| [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  yes  |
 
 
 

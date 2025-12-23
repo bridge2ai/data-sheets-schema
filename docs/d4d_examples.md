@@ -70,30 +70,6 @@ These datasheets were automatically synthesized using Claude Sonnet 4.5 with **d
 - [Download YAML](yaml_output/concatenated/claudecode/VOICE_d4d.yaml)
 - [Download Metadata](yaml_output/concatenated/claudecode/VOICE_d4d_metadata.yaml)
 
-## Latest: v5 Datasheets and Semantic Evaluations (December 2025)
-
-**NEW**: These are the latest datasheets (v5) with comprehensive semantic evaluation results.
-
-### AI-READI v5
-- [D4D Datasheet (Human-Readable HTML)](html_output/D4D_-_AI-READI_v5_human_readable.html) - Comprehensive project metadata
-- [Semantic Evaluation Report](html_output/D4D_-_AI-READI_v5_evaluation.html) - Rubric20 assessment (79/84, 94.0%)
-
-### CHORUS v5
-- [D4D Datasheet (Human-Readable HTML)](html_output/D4D_-_CHORUS_v5_human_readable.html) - Comprehensive project metadata
-- [Semantic Evaluation Report](html_output/D4D_-_CHORUS_v5_evaluation.html) - Rubric20 assessment (71/84, 84.5%)
-
-### CM4AI v5
-- [D4D Datasheet (Human-Readable HTML)](html_output/D4D_-_CM4AI_v5_human_readable.html) - Comprehensive project metadata
-- [Semantic Evaluation Report](html_output/D4D_-_CM4AI_v5_evaluation.html) - Rubric20 assessment (77/84, 91.7%)
-
-### VOICE v5
-- [D4D Datasheet (Human-Readable HTML)](html_output/D4D_-_VOICE_v5_human_readable.html) - Comprehensive project metadata
-- [Semantic Evaluation Report](html_output/D4D_-_VOICE_v5_evaluation.html) - Rubric20 assessment (81/84, 96.4%)
-
-**About v5 Datasheets**: Generated using Claude Sonnet 4.5 with deterministic settings (temperature=0.0, model: claude-sonnet-4-5-20250929) on December 20, 2025. Each datasheet has been evaluated using the Rubric20-Semantic framework, which assesses 20 questions across 4 categories (Structural Completeness, Metadata Quality, Technical Documentation, FAIRness & Accessibility) with semantic validation of correctness and consistency.
-
-**Average Score**: 77.0/84 (91.7%) across all 4 projects.
-
 ## Individual Dataset Datasheets
 
 These datasheets were created from specific dataset metadata sources:
@@ -157,45 +133,6 @@ See [DETERMINISM.md](https://github.com/bridge2ai/data-sheets-schema/blob/main/D
 
 ### Individual Dataset Datasheets
 The **Individual Dataset Datasheets** provide detailed metadata for specific datasets from each project's primary data repository (FAIRHub, Dataverse, PhysioNet). These focus on individual dataset instances rather than project-level metadata.
-
-### v5 Datasheets and Semantic Evaluations
-The **v5 Datasheets** represent the latest generation (December 2025) of comprehensive project metadata created using Claude Sonnet 4.5 with fully deterministic settings:
-
-**Generation Process:**
-1. Multiple project-related documents concatenated in reproducible order
-2. AI-powered extraction and synthesis using Claude Sonnet 4.5
-3. Temperature=0.0 for deterministic output
-4. Pinned model version (claude-sonnet-4-5-20250929) for reproducibility
-5. Validation against the LinkML D4D schema
-
-**Semantic Evaluation Framework:**
-Each v5 datasheet has been evaluated using the **Rubric20-Semantic** framework, which provides:
-
-- **20 Questions** across 4 categories:
-  1. Structural Completeness (max 24 points) - Schema field population and required elements
-  2. Metadata Quality (max 22 points) - Accuracy, specificity, and completeness of information
-  3. Technical Documentation (max 25 points) - Collection, preprocessing, and reproducibility details
-  4. FAIRness & Accessibility (max 13 points) - Findability, Accessibility, Interoperability, Reusability
-
-- **Semantic Analysis:**
-  - Correctness validation (DOI formats, grant IDs, RRID identifiers)
-  - Consistency checking (cross-field validation, logical coherence)
-  - Content accuracy assessment
-  - Evidence-based scoring with detailed justifications
-
-**Evaluation Results:**
-- **VOICE**: 81/84 points (96.4%) - Highest scoring project
-- **AI-READI**: 79/84 points (94.0%)
-- **CM4AI**: 77/84 points (91.7%)
-- **CHORUS**: 71/84 points (84.5%)
-- **Average**: 77.0/84 points (91.7%)
-
-Each evaluation report provides:
-- Category-level score breakdown
-- Question-by-question assessment with evidence
-- Semantic analysis findings (correctness and consistency checks)
-- Strengths, weaknesses, and recommendations
-- Detailed justifications for all scoring decisions
 
 ## Schema Information
 

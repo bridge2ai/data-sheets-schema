@@ -18,8 +18,8 @@ Alias: regulatory_restrictions
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
 | [ExportControlRegulatoryRestrictions](ExportControlRegulatoryRestrictions.md) | Do any export controls or other regulatory restrictions apply to the dataset ... |  no  |
-| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
 | [DataSubset](DataSubset.md) | A subset of a dataset, likely containing multiple files of multiple potential... |  no  |
+| [Dataset](Dataset.md) | A single component of related observations and/or information that can be rea... |  no  |
 
 
 

@@ -17,8 +17,8 @@ Alias: impact_details
 
 | Name | Description | Modifies Slot |
 | --- | --- | --- |
-| [FutureUseImpact](FutureUseImpact.md) | Is there anything about the dataset's composition or collection that might im... |  no  |
 | [DataProtectionImpact](DataProtectionImpact.md) | Has an analysis of the potential impact of the dataset and its use on data su... |  no  |
+| [FutureUseImpact](FutureUseImpact.md) | Is there anything about the dataset's composition or collection that might im... |  no  |
 
 
 
