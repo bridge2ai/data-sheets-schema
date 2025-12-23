@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubric10-Semantic Evaluation: Unknown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .metadata {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metadata-label {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .metadata-value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-large {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .element {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .element-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .element-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .element-score {
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: #ecf0f1;
+        }
+
+        .score-high { background: #2ecc71; color: white; }
+        .score-medium { background: #f39c12; color: white; }
+        .score-low { background: #e74c3c; color: white; }
+
+        .sub-element {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .sub-element:last-child {
+            border-bottom: none;
+        }
+
+        .sub-element-name {
+            font-weight: 500;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .sub-element-score {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .score-1 { background: #2ecc71; color: white; }
+        .score-0 { background: #e74c3c; color: white; }
+
+        .detail {
+            margin-top: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-right: 5px;
+        }
+
+        .semantic-section {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .validation-item {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #3498db;
+        }
+
+        .gap-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .gap-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .gap-item.medium {
+            border-left-color: #f39c12;
+        }
+
+        .gap-item.low {
+            border-left-color: #95a5a6;
+        }
+
+        .strength {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .weakness {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .recommendation-section {
+            margin-top: 20px;
+        }
+
+        .recommendation-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #e7f3ff;
+            border-radius: 4px;
+            border-left: 3px solid #2196f3;
+        }
+
+        .recommendation-item.critical {
+            background: #fee;
+            border-left-color: #e74c3c;
+        }
+
+        .recommendation-item.important {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e8ed;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rubric10-Semantic Evaluation Report</h1>
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <div class="metadata-label">Dataset</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Generation Method</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Evaluator</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Rubric Type</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Temperature</div>
+                    <div class="metadata-value">N/A</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Evaluation Date</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="score-card">
+            <div class="score-large">0/50</div>
+            <div class="score-subtitle">0.0% Overall Score</div>
+        </div>
+
+        <h2>Element Scores</h2>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Persistent Identifier (DOI, RRID, or URI)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> id: https://doi.org/10.13026/37yb-1t42 (line 7)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Title and Description Completeness
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information (line 9); description: comprehensive 17-line description (lines 10-26)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Keywords or Tags for Searchability
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> keywords: 45 keyword entries covering voice biomarker, disorders, methods, standards (lines 29-72)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Landing Page and Resources (page, hierarchical resources)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> page: https://docs.b2ai-voice.org (line 27); external_resources: 11 resource entries (lines 708-765)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Hierarchical Structure (parent datasets, relationships)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> External resources section implicitly documents hierarchical relationships through platform linkages (PhysioNet, Health Data Nexus, Zenodo)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Access Policy and IP Restrictions Defined
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> license_and_use_terms: comprehensive section with license terms list (lines 508-531)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Regulatory Restrictions and Confidentiality Level Specified
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Certificate of Confidentiality protections documented (lines 528, 696-705); HIPAA Safe Harbor de-identification (lines 418-430)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Download URL or Platform Link Available
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> access_urls in distribution_formats: https://physionet.org/content/b2ai-voice/ (lines 541, 549, 557, 565)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Distribution Formats and File Types Specified
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> distribution_formats: 5 format entries covering Parquet (spectrograms, MFCCs), TSV (phenotype, static features), and raw audio (lines 533-573)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Related Datasets and External Resources Linked
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources: 11 entries covering PhysioNet, GitHub, NIH RePORTER, Health Data Nexus, Zenodo, publications, DACO contact (lines 708-765)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    License Terms Allow Reuse
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> license_and_use_terms with explicit reuse provisions: public disclosure encouraged, recognition required, open-access publication preferred (lines 526-527)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Formats Are Standardized (encoding, format)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Standardized formats: Parquet for arrays (spectrograms, MFCCs), TSV for tabular data, JSON for dictionaries (lines 533-573)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Schema or Ontology Conformance Stated
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Schema conformance documented in header: Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml (line 4); FAIR principles mentioned in keywords (line 70)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Variable Metadata with Identifiers Defined
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Data dictionaries provided: phenotype.json for demographics/questionnaires, static_features.json for acoustic features (lines 555, 563)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Use Guidance Provided (intended, prohibited uses)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> intended_uses: 5 use cases (lines 454-480); discouraged_uses: 4 discouraged use cases (lines 482-504)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    IRB or Ethics Review Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> human_subject_research: comprehensive section documenting USF IRB approval, informed consent, bioethics guidance (lines 641-658)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Deidentification Method Described
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> HIPAA Safe Harbor de-identification comprehensively documented with 18 identifier categories removed (lines 418-430)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Privacy Protections Beyond Deidentification
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Certificate of Confidentiality (lines 696-705); raw audio controlled access (lines 239-245, 664-671); free speech transcript removal (lines 399-405)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Informed Consent Obtained from Participants
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Written informed consent documented for data collection initiative, data sharing, EHR access, and research data sharing (lines 645-648)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Vulnerable Populations and Compensation Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Pediatric cohort with special ethical considerations documented (lines 296-301); additional privacy precautions for pediatric data noted (line 608)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Cohort or Subpopulations Characteristics Described
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> subpopulations: 5 cohorts detailed (Voice Disorders, Neurological, Mood/Psychiatric, Respiratory, Pediatric) with clinical characteristics (lines 270-301)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Number of Instances or Samples Reported
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> instances: 306 participants, 12,523 recordings documented (lines 214-225)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Variable-Level Metadata and Tabular Flag
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> JSON data dictionaries for phenotype and static features (lines 555, 563); tabular data explicitly documented as TSV format
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Topics or Conditions Represented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Five disease cohort categories detailed in instances and subpopulations sections (lines 220-225, 270-301)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Quality Issues and Anomalies Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> sampling_strategies: detailed sampling methodology with non-random, non-representative sampling explicitly stated (lines 247-268)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Version Number Provided
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Version progression documented: v1.0, v1.1, v2.0.0, v2.0.1 with dates (lines 603-615)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Version Access Methods Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Version-specific documentation and DOI system mentioned (lines 606, 619); PhysioNet platform provides versioned access
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Change Descriptions and Errata Provided
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> updates: detailed version history with specific changes (v1.1 added MFCCs, v2.0.0 expanded cohort, etc.) lines 599-619
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Update Schedule or Frequency Indicated
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> frequency: Periodic versioned releases during data collection period (2022-2026) (line 609); future releases planned (lines 616-617)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Provenance and Source Derivation Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Generation provenance in header: Source: data/preprocessed/concatenated/VOICE_preprocessed.txt (89K, 9 source files) (line 3); preprocessing strategies document feature derivation (lines 345-415)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Motivation or Purpose for Dataset Creation
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> purposes: 3 comprehensive purpose statements covering clinical integration, flagship dataset creation, and standards development (lines 76-93)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Primary Research Objectives or Tasks
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> tasks: 6 task entries covering AI/ML development for voice disorders, neurological, mood, respiratory, pediatric disorders, and workforce development (lines 95-128)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Funding Sources and Mechanisms Listed
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> funders: 2 entries - NIH Office of the Director and NIBIB with detailed grant information (lines 195-210)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Grant IDs or Award Numbers Present
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Grant numbers: 3OT2OD032720-01S3 (NIH OD), R01EB030362 (NIBIB) with opportunity number OTA-21-008 (lines 199, 208)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Creators and Acknowledgements Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> creators: 13 entries including contact PI, co-PIs, co-investigators, and consortium (lines 154-193)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Collection Mechanisms and Settings Described
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> collection_mechanisms: 3 detailed entries covering smartphone app protocol, multi-institutional collection, and comprehensive data collection protocol (lines 304-323)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Acquisition Methods Listed
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> acquisition_methods: 3 entries covering voice recordings, questionnaires, and EHR access (lines 325-342)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Preprocessing, Cleaning, and Labeling Strategies
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> preprocessing_strategies: 7 entries with detailed technical specifications (lines 345-415); cleaning_strategies: 3 entries (lines 417-451)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Software and Tools Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Software tools documented throughout preprocessing: OpenSMILE, Praat, Parselmouth, Whisper, b2aiprep library, REDCap (lines 378-415)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    External Standards and Resources Referenced
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources: 11 entries including standards publications, platforms, repositories (lines 708-765); FAIR principles in keywords (line 70)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Known Limitations Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Limitations implicitly documented: non-representative sampling (line 263), pediatric data not yet released (line 301), multi-session requirements for subset of participants (lines 308-310)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Systematic Biases Identified and Described
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No explicit known_biases field present
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Anomalies and Quality Issues Noted
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No explicit anomalies field present
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Sensitive Content and Warnings Provided
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> sensitive_elements: 4 comprehensive entries covering voice biometrics, EHR data, demographic data, and Certificate of Confidentiality (lines 660-705)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Ethical Review Details Including Conflicts
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> human_subject_research includes IRB approval and ethics review board identification (lines 655-658); bioethics guidance integration documented (lines 649-653)
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">0/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Published on a Recognized Platform
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> PhysioNet distribution documented throughout (lines 207-210, 533-573, 592-596, 710-713); Health Data Nexus alternative platform (lines 730-733)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Citation and DOI for Cross-referencing
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> DOI: https://doi.org/10.13026/37yb-1t42 (line 7); recognition of data source required in publications (line 527)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Community Standards or Schema Conformance
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> FAIR principles (line 70), CARE principles (line 71), D4D schema conformance (line 4), PhysioNet requirements (line 518)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Outreach Materials and Documentation Links
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> page: https://docs.b2ai-voice.org (line 27); external_resources: comprehensive documentation including GitHub, publications, NIH RePORTER (lines 708-765)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Related Datasets with Typed Relationships
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No explicit related_datasets field with typed relationships present
+                </div>
+
+            </div>
+
+        </div>
+
+        <h2>Semantic Analysis</h2>
+
+        <h3>Strengths</h3>
+        <ul class="gap-list">
+
+            <li class="gap-item strength">Exceptional completeness across all discovery, access, and retrieval dimensions (100% for elements 1-2)</li>
+
+            <li class="gap-item strength">Outstanding ethical documentation including IRB approval, informed consent, deidentification, and privacy protections beyond standard requirements</li>
+
+            <li class="gap-item strength">Comprehensive technical transparency with detailed preprocessing strategies documenting 7 processing steps with technical parameters</li>
+
+            <li class="gap-item strength">Excellent funding and motivation transparency with complete grant information, creator attribution, and scientific objectives</li>
+
+            <li class="gap-item strength">Strong data composition documentation with 5 subpopulations, instance counts, and sampling methodology</li>
+
+            <li class="gap-item strength">Robust version tracking with 4 documented releases and clear update schedule through 2026</li>
+
+            <li class="gap-item strength">Extensive external resources section with 11 documented links to platforms, documentation, and publications</li>
+
+            <li class="gap-item strength">Well-documented use guidance with 5 intended uses and 4 discouraged uses covering ethical considerations</li>
+
+            <li class="gap-item strength">Comprehensive license terms with 12 specific provisions for registered access and data use</li>
+
+        </ul>
+
+        <h3>Weaknesses</h3>
+        <ul class="gap-list">
+
+            <li class="gap-item weakness">No explicit known_biases field to document systematic biases, though non-representative sampling is acknowledged</li>
+
+            <li class="gap-item weakness">No explicit anomalies field to document data quality issues or outliers</li>
+
+            <li class="gap-item weakness">No explicit related_datasets field with typed relationships to other datasets in the Bridge2AI program or broader ecosystem</li>
+
+            <li class="gap-item weakness">While limitations are documented throughout, they are not consolidated in a dedicated known_limitations field for easy reference</li>
+
+        </ul>
+
+        <h2>Recommendations</h2>
+
+        <div class="recommendation-section">
+            <h3>Recommendations</h3>
+
+            <div class="recommendation-item">Add explicit known_biases section to document potential biases from non-representative sampling, specialty clinic recruitment, and cohort selection</div>
+
+            <div class="recommendation-item">Create anomalies section to document any data quality issues encountered during collection or processing</div>
+
+            <div class="recommendation-item">Add related_datasets field with typed relationships to other Bridge2AI datasets (AI-READI, CHORUS, CM4AI) and complementary voice datasets</div>
+
+            <div class="recommendation-item">Consolidate limitations into dedicated known_limitations field while retaining context-specific documentation</div>
+
+            <div class="recommendation-item">Consider adding explicit publisher field naming PhysioNet/MIT as primary publisher organization</div>
+
+        </div>
+
+        <div class="timestamp">
+            Generated on 2025-12-20 19:23:41 using Bridge2AI Data Sheets Schema
+        </div>
+    </div>
+</body>
+</html>
