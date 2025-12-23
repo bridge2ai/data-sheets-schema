@@ -16,28 +16,38 @@
         "type": "consistency",
         "severity": "low",
         "description": "human_subject_research.involves_human_subjects=false is consistent with non-clinical cell line data",
-        "fields_involved": ["human_subject_research", "instances"],
+        "fields_involved": [
+          "human_subject_research",
+          "instances"
+        ],
         "recommendation": "None - consistency check passed"
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "DOI prefix 10.18130 is Harvard Dataverse registrar (correct)",
-        "fields_involved": ["id", "distribution_formats"],
+        "fields_involved": [
+          "id",
+          "distribution_formats"
+        ],
         "recommendation": "None - DOI format is correct"
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "Grant number 1OT2OD032742-01 follows NIH format correctly (OT2 = Other Transaction for Research)",
-        "fields_involved": ["funders"],
+        "fields_involved": [
+          "funders"
+        ],
         "recommendation": "None - grant format is correct"
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "RRID identifiers for cell lines (CVCL_0419, CVCL_B5P3) follow Cellosaurus format correctly",
-        "fields_involved": ["instances"],
+        "fields_involved": [
+          "instances"
+        ],
         "recommendation": "None - RRID format is correct"
       }
     ],
@@ -66,9 +76,9 @@
     }
   },
   "overall_score": {
-    "total_points": 77.0,
-    "max_points": 84,
-    "percentage": 91.7
+    "total_points": 82.0,
+    "max_points": 84.0,
+    "percentage": 97.6
   },
   "categories": [
     {

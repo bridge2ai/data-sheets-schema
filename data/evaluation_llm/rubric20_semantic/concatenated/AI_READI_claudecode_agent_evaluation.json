@@ -16,21 +16,30 @@
         "type": "correctness",
         "severity": "low",
         "description": "DOI 10.5281/zenodo.10642459 is for Zenodo archive, not the primary dataset - dataset uses FAIRhub without DOI",
-        "fields_involved": ["external_resources", "id"],
+        "fields_involved": [
+          "external_resources",
+          "id"
+        ],
         "recommendation": "Consider registering primary dataset DOI through DataCite for the FAIRhub dataset"
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "id field uses FAIRhub URL rather than DOI, but external_resources includes DOI to Zenodo - could improve primary identifier",
-        "fields_involved": ["id", "external_resources"],
+        "fields_involved": [
+          "id",
+          "external_resources"
+        ],
         "recommendation": "Use DOI as primary identifier (id field) if available"
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "Distribution formats mention data types but don't explicitly enumerate all formats (XML for ECG mentioned in acquisition but not in distribution_formats)",
-        "fields_involved": ["distribution_formats", "acquisition_methods"],
+        "fields_involved": [
+          "distribution_formats",
+          "acquisition_methods"
+        ],
         "recommendation": "Add XML/ECG format to distribution_formats section"
       }
     ],
@@ -65,9 +74,9 @@
     }
   },
   "overall_score": {
-    "total_points": 79.0,
-    "max_points": 84,
-    "percentage": 94.0
+    "total_points": 82.0,
+    "max_points": 84.0,
+    "percentage": 97.6
   },
   "categories": [
     {

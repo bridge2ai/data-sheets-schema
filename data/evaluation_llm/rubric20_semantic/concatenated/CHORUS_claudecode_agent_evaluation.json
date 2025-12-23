@@ -16,28 +16,36 @@
         "type": "correctness",
         "severity": "medium",
         "description": "DOI format in external_resources appears malformed: 'http://doi:10.1007/s12028-024-02007' uses 'doi:' instead of standard 'doi.org/'",
-        "fields_involved": ["external_resources"],
+        "fields_involved": [
+          "external_resources"
+        ],
         "recommendation": "Correct DOI URL to https://doi.org/10.1007/s12028-024-02007"
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "Grant number format '1OT2OD032701-01' follows NIH pattern correctly but fiscal year and total funding information only in funder description, not structured",
-        "fields_involved": ["funders"],
+        "fields_involved": [
+          "funders"
+        ],
         "recommendation": "Consider adding structured grant award fields separate from description"
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "RRID identifiers not present despite software tools and datasets being mentioned",
-        "fields_involved": ["external_resources"],
+        "fields_involved": [
+          "external_resources"
+        ],
         "recommendation": "Add RRID identifiers for software tools (OMOP, OHDSI, OHNLP) where available"
       },
       {
         "type": "semantic_understanding",
         "severity": "low",
         "description": "External resources include placeholders for some URLs (e.g., 'AIM-AHEAD Consortium website', 'OHDSI website') without actual URLs",
-        "fields_involved": ["external_resources"],
+        "fields_involved": [
+          "external_resources"
+        ],
         "recommendation": "Replace placeholder descriptions with actual URLs for all external resources"
       }
     ],
@@ -66,9 +74,9 @@
     }
   },
   "overall_score": {
-    "total_points": 71.0,
-    "max_points": 84,
-    "percentage": 84.5
+    "total_points": 78.0,
+    "max_points": 84.0,
+    "percentage": 92.9
   },
   "categories": [
     {
@@ -369,5 +377,16 @@
     "d4d_file_size": "770 lines, 32KB",
     "d4d_source_files": "7 source files (79K concatenated)",
     "generation_method": "Claude Code Agent Deterministic"
+  },
+  "rubric": "rubric20-semantic",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/unknown/unknown_d4d.yaml",
+  "project": "CHORUS",
+  "method": "claudecode_agent",
+  "evaluation_timestamp": "2025-12-23T13:06:02.880640",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
   }
 }

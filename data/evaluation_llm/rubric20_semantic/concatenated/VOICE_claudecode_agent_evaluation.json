@@ -17,28 +17,39 @@
         "type": "correctness",
         "severity": "low",
         "description": "Grant number format 3OT2OD032720-01S3 follows NIH pattern correctly (supplement to parent grant)",
-        "fields_involved": ["funders"],
+        "fields_involved": [
+          "funders"
+        ],
         "recommendation": "Format validated - this is a supplement grant number following NIH conventions"
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "human_subject_research documented with IRB approval and informed consent - excellent consistency",
-        "fields_involved": ["human_subject_research", "ethical_reviews"],
+        "fields_involved": [
+          "human_subject_research",
+          "ethical_reviews"
+        ],
         "recommendation": "No action needed - ethics documentation is comprehensive and consistent"
       },
       {
         "type": "correctness",
         "severity": "low",
         "description": "DOI 10.13026/37yb-1t42 uses correct PhysioNet registrar prefix",
-        "fields_involved": ["id", "doi"],
+        "fields_involved": [
+          "id",
+          "doi"
+        ],
         "recommendation": "DOI validated - 10.13026 is the correct prefix for PhysioNet datasets"
       },
       {
         "type": "consistency",
         "severity": "low",
         "description": "Deidentification method (HIPAA Safe Harbor) appropriate and well-documented for health data type",
-        "fields_involved": ["cleaning_strategies", "sensitive_elements"],
+        "fields_involved": [
+          "cleaning_strategies",
+          "sensitive_elements"
+        ],
         "recommendation": "No action needed - deidentification approach is comprehensive and appropriate"
       }
     ],
@@ -75,9 +86,9 @@
     }
   },
   "overall_score": {
-    "total_points": 81,
-    "max_points": 84,
-    "percentage": 96.4
+    "total_points": 84.0,
+    "max_points": 84.0,
+    "percentage": 100.0
   },
   "categories": [
     {
@@ -570,5 +581,16 @@
     "d4d_file_generation_date": "2025-12-20",
     "d4d_source_files": "data/preprocessed/concatenated/VOICE_preprocessed.txt (89K, 9 source files)",
     "d4d_schema_version": "data_sheets_schema_all.yaml"
+  },
+  "rubric": "rubric20-semantic",
+  "version": "1.0",
+  "project": "VOICE",
+  "method": "claudecode_agent",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml",
+  "evaluation_timestamp": "2025-12-23T13:02:58.274663",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
   }
 }
