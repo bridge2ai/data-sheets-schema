@@ -304,6 +304,7 @@ gendoc: $(DOCDIR)
 	cp $(SRC)/html/output/*.css $(DOCDIR)/html_output/ 2>/dev/null || true ; \
 	cp -r data/d4d_html/concatenated/curated/*.html $(DOCDIR)/html_output/concatenated/curated/ 2>/dev/null || true ; \
 	cp -r data/d4d_html/concatenated/claudecode/*.html $(DOCDIR)/html_output/concatenated/claudecode/ 2>/dev/null || true ; \
+	cp -r data/d4d_html/concatenated/claudecode_agent/*.html $(DOCDIR)/html_output/ 2>/dev/null || true ; \
 	cp data/d4d_concatenated/gpt5/*_d4d.yaml $(DOCDIR)/yaml_output/concatenated/gpt5/ 2>/dev/null || true ; \
 	cp data/d4d_concatenated/curated/*_curated.yaml $(DOCDIR)/yaml_output/concatenated/curated/ 2>/dev/null || true ; \
 	cp data/d4d_concatenated/claudecode/*_d4d.yaml $(DOCDIR)/yaml_output/concatenated/claudecode/ 2>/dev/null || true ; \

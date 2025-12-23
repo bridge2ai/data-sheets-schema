@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubric10-Semantic Evaluation: Unknown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .metadata {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metadata-label {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .metadata-value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-large {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .element {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .element-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .element-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .element-score {
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: #ecf0f1;
+        }
+
+        .score-high { background: #2ecc71; color: white; }
+        .score-medium { background: #f39c12; color: white; }
+        .score-low { background: #e74c3c; color: white; }
+
+        .sub-element {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .sub-element:last-child {
+            border-bottom: none;
+        }
+
+        .sub-element-name {
+            font-weight: 500;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .sub-element-score {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .score-1 { background: #2ecc71; color: white; }
+        .score-0 { background: #e74c3c; color: white; }
+
+        .detail {
+            margin-top: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-right: 5px;
+        }
+
+        .semantic-section {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .validation-item {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #3498db;
+        }
+
+        .gap-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .gap-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .gap-item.medium {
+            border-left-color: #f39c12;
+        }
+
+        .gap-item.low {
+            border-left-color: #95a5a6;
+        }
+
+        .strength {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .weakness {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .recommendation-section {
+            margin-top: 20px;
+        }
+
+        .recommendation-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #e7f3ff;
+            border-radius: 4px;
+            border-left: 3px solid #2196f3;
+        }
+
+        .recommendation-item.critical {
+            background: #fee;
+            border-left-color: #e74c3c;
+        }
+
+        .recommendation-item.important {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e8ed;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rubric10-Semantic Evaluation Report</h1>
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <div class="metadata-label">Dataset</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Generation Method</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Evaluator</div>
+                    <div class="metadata-value">claude-sonnet-4-5-20250929</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Rubric Type</div>
+                    <div class="metadata-value">rubric10_semantic</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Temperature</div>
+                    <div class="metadata-value">0.0</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Evaluation Date</div>
+                    <div class="metadata-value">2025-12-20T00:30:00Z</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="score-card">
+            <div class="score-large">0/50</div>
+            <div class="score-subtitle">0.0% Overall Score</div>
+        </div>
+
+        <h2>Element Scores</h2>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 1: Dataset Discovery and Identification</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Persistent Identifier (DOI, RRID, or URI)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> id present (https://fairhub.io/datasets/2). DOI absent - should be 10.5281/zenodo.10642459 based on external_resources. RRID absent.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Title and Description Completeness
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Both title and description present and comprehensive. Description includes study design, participant count, sites, data domains, and scientific rationale.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Keywords or Tags for Searchability
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> 17 keywords provided covering disease (T2DM), methodology (AI/ML, multimodal), study design (triple-balanced, cross-sectional), and data types (retinal imaging, wearables, biospecimens).
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Landing Page and Resources (page, hierarchical resources)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Page field present (https://fairhub.io/datasets/2). Resources field absent but external_resources provides extensive documentation links.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Hierarchical Structure (parent datasets, relationships)
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Neither parent_datasets nor related_datasets fields present. This is a standalone dataset but could reference Bridge2AI program datasets.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 2: Dataset Access and Retrieval</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Access Policy and IP Restrictions Defined
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> license_and_use_terms present and comprehensive with CC BY-NC 4.0 license details. ip_restrictions field absent but not critical for this public dataset.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Regulatory Restrictions and Confidentiality Level Specified
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Neither regulatory_restrictions nor confidentiality_level present despite having controlled access data with genetic sequencing and PHI.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Download URL or Platform Link Available
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> download_url field absent but access_urls provided in distribution_formats (all pointing to https://fairhub.io/datasets/2).
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Distribution Formats and File Types Specified
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> distribution_formats comprehensively documented with 4 formats: DICOM (imaging), CSV (tabular/time-series), mHealth (wearables), REDCap (metadata). Top-level format/media_type absent.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Related Datasets and External Resources Linked
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources extensively documented with 9 resources including project website, documentation, FAIRhub, Bridge2AI, NIH RePORTER, Zenodo, and publications. related_datasets absent.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 3: Data Reuse and Interoperability</div>
+                <div class="element-score score-low">3/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    License Terms Allow Reuse
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> CC BY-NC 4.0 license clearly allows reuse with attribution for non-commercial purposes. Controlled access terms mentioned but not detailed.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Formats Are Standardized (encoding, format)
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Top-level format and encoding fields absent. Formats documented in distribution_formats but not at dataset level.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Schema or Ontology Conformance Stated
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Neither conforms_to nor conforms_to_schema present despite documentation referencing OMOP CDM, DICOM, mHealth standards.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Variable Metadata with Identifiers Defined
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> variables field completely absent despite extensive multi-domain data collection documented in acquisition_methods.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Use Guidance Provided (intended, prohibited uses)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> intended_uses (5 items) and discouraged_uses (3 items) present. prohibited_uses absent.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> N/A
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 4: Ethical Use and Privacy Safeguards</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    IRB or Ethics Review Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> human_subject_research extensively documented with IRB approvals from University of Washington (STUDY00016228) and reliance agreements from UAB and UCSD. ethical_reviews field absent but covered in human_subject_research.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Deidentification Method Described
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> is_deidentified field completely absent despite clear documentation of de-identification practices in subset descriptions.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Privacy Protections Beyond Deidentification
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> participant_privacy field absent. Privacy mentioned in sensitive_elements but no structured privacy protections documented.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Informed Consent Obtained from Participants
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> informed_consent mentioned in human_subject_research (written informed consent provided by all participants) but no separate informed_consent structured field.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Vulnerable Populations and Compensation Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> vulnerable_populations mentioned in human_subject_research (special_populations includes racial/ethnic minorities, tribal consultation). participant_compensation field absent.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> N/A
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 5: Data Composition and Structure</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Cohort or Subpopulations Characteristics Described
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> subpopulations comprehensively documented with 8 subpopulations: 4 race/ethnicity groups (Asian, Black, Hispanic, White) and 4 diabetes severity levels. Target distributions specified (25% each, ~1,000 participants).
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Number of Instances or Samples Reported
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> instances documented with target 4,000 participants, inclusion/exclusion criteria, age requirement (40+), and instance_type specifying human participants from three sites.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Variable-Level Metadata and Tabular Flag
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Both variables and is_tabular fields absent. Multiple tabular data sources documented (surveys, labs, wearables) but no variable metadata or tabular flag.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Topics or Conditions Represented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Data topics clear from instances (T2DM participants) and throughout metadata. Medical condition (Type 2 Diabetes Mellitus) and research focus (salutogenesis) well-documented.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Quality Issues and Anomalies Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> sampling_strategies extensively documented (triple-balanced recruitment with detailed methodology). anomalies field absent but quality control documented in preprocessing.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 6: Data Provenance and Version Tracking</div>
+                <div class="element-score score-low">3/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Version Number Provided
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> version field absent despite updates documenting specific versions (pilot, v1.0.0, v2.0.0, v3.0.0).
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Version Access Methods Documented
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> version_access field absent. No documentation of how to access previous versions or version-specific downloads.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Change Descriptions and Errata Provided
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> updates field comprehensive with release timeline (pilot May 2024, v1.0.0 Nov 2024, ongoing through Nov 2026). errata field absent.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Update Schedule or Frequency Indicated
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Update frequency documented: periodic releases during enrollment (through Nov 2026), final release late 2026. Specific release dates provided for pilot and v1.0.0.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Provenance and Source Derivation Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> was_derived_from and release_notes fields absent but provenance documented through collection_mechanisms, acquisition_methods, and preprocessing_strategies.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 7: Scientific Motivation and Funding Transparency</div>
+                <div class="element-score score-low">5/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Motivation or Purpose for Dataset Creation
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> purposes comprehensively documented with 3 items: T2DM salutogenesis understanding, AI/ML standards establishment, addressing demographic inequities. Each with detailed descriptions.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Primary Research Objectives or Tasks
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> tasks well-documented with 3 items: multi-domain AI/ML analyses, unbiased model development, disease trajectory studies. Clear alignment with purposes.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Funding Sources and Mechanisms Listed
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> funders documented with NIH Common Fund Bridge2AI Program, primary grant OT2OD032644, additional grants (P30DK035816, UL1TR003096), Research to Prevent Blindness.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Grant IDs or Award Numbers Present
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Grant numbers present: OT2OD032644 (primary), P30DK035816, UL1TR003096. Funding amount ($5,026,499 in 2022), opportunity number (OTA-21-008), and project dates (Sept 1, 2022 - Aug 31, 2025) documented.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Creators and Acknowledgements Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> creators extensively documented with 20 investigators including Contact PI/Project Leader (Aaron Lee), PIs, Co-Investigators with institutional affiliations and roles. Funders also documented.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 8: Technical Transparency (Data Collection and Processing)</div>
+                <div class="element-score score-low">5/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Collection Mechanisms and Settings Described
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> collection_mechanisms comprehensively documented with 5 mechanisms: in-person visits (2.5-4 hours, 3 sites), EHR screening (ICD-10 codes), wave-based recruitment, home wearable monitoring (10 days), biospecimen collection/banking.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Acquisition Methods Listed
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> acquisition_methods extensively documented with 12 methods covering all data domains: surveys (REDCap), physical measurements, retinal imaging (7 devices), visual function, clinical labs (local and central), ECG, cognitive testing (MoCA), neuropathy (monofilament), continuous glucose (Dexcom G6), activity (Garmin), environmental sensors, biospecimens.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Preprocessing, Cleaning, and Labeling Strategies
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> preprocessing_strategies (5 items) and cleaning_strategies (1 item) comprehensively documented. labeling_strategies absent but not applicable for this observational dataset.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Software and Tools Documented
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> software_and_tools field absent despite extensive software/equipment use documented in acquisition_methods (REDCap, DICOM tools, various imaging devices, Dexcom, Garmin, MoCA Duo).
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    External Standards and Resources Referenced
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources extensively documented (9 resources). conforms_to absent but standards mentioned in preprocessing (OMOP CDM, DICOM, mHealth, RxNorm, ICD-10).
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 9: Dataset Evaluation and Limitations Disclosure</div>
+                <div class="element-score score-low">3/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Known Limitations Documented
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> known_limitations field absent. Limitations implied in discouraged_uses (ongoing enrollment, need for clinical validation) but not formally documented.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Systematic Biases Identified and Described
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> known_biases field absent. No documentation of potential biases despite targeted recruitment and exclusion criteria.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Anomalies and Quality Issues Noted
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> anomalies field absent. Quality control documented but no specific anomalies, data quality issues, or missing data patterns described.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Sensitive Content and Warnings Provided
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> sensitive_elements comprehensively documented with 3 items: genetic/biospecimen data, geographic/demographic identifiers, medical history/records. content_warnings absent.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Ethical Review Details Including Conflicts
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> ethical_reviews absent as structured field but extensively covered in human_subject_research (IRB approvals, community advisory board, bioethics guidance). No conflicts of interest documented.
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element 10: Cross-Platform and Community Integration</div>
+                <div class="element-score score-low">2/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Published on a Recognized Platform
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> publisher field absent. Dataset hosted on FAIRhub and Zenodo but no formal publisher designation.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Citation and DOI for Cross-referencing
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Both citation and doi fields absent. DOI exists (10.5281/zenodo.10642459) but only in external_resources, not as top-level field.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Community Standards or Schema Conformance
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> conforms_to field absent despite extensive standards use (OMOP CDM, DICOM, mHealth, FAIR principles).
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Outreach Materials and Documentation Links
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources extensively documented (9 resources) including project website, documentation, publications, data sharing policies. page field present.
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Related Datasets with Typed Relationships
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> related_datasets field absent. No typed relationships to other Bridge2AI datasets, prior T2DM studies, or derived datasets.
+                </div>
+
+            </div>
+
+        </div>
+
+        <h2>Semantic Analysis</h2>
+
+        <div class="timestamp">
+            Generated on 2025-12-20 19:23:41 using Bridge2AI Data Sheets Schema
+        </div>
+    </div>
+</body>
+</html>
