@@ -1,6 +1,17 @@
 #!/usr/bin/env python3
 """
 Render rubric20-semantic evaluation JSON files to HTML
+
+This renderer expects evaluation JSON files to conform to the rubric20-semantic schema
+defined in: src/download/prompts/rubric20_semantic_schema.json
+
+The schema ensures:
+1. Standardized agent output across different evaluation runs
+2. Consistent structure for HTML rendering
+3. Validation of evaluation completeness
+
+To validate evaluations against the schema, run:
+  poetry run python scripts/validate_evaluation_schema.py
 """
 import json
 from pathlib import Path

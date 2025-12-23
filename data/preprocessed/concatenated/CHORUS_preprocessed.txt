@@ -2,7 +2,7 @@
 CONCATENATED DOCUMENT
 ================================================================================
 Input Directory: data/preprocessed/individual/CHORUS
-Total Files: 6
+Total Files: 7
 Extensions: All
 Recursive: False
 ================================================================================
@@ -11,10 +11,11 @@ TABLE OF CONTENTS
 --------------------------------------------------------------------------------
   1. CHoRUS for Equitable AI - github.txt
   2. CHoRUS for Equitable AI.txt
-  3. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt
-  4. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt
-  5. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.txt
-  6. github_chorus_ai_row9.txt
+  3. RePORT ⟩ RePORTER - CHORUS.txt
+  4. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row7.txt
+  5. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row8.txt
+  6. aim-ahead-bridge2ai-for-clinical-care-informational-webinar_row9.txt
+  7. github_chorus_ai_row9.txt
 ================================================================================
 
 FILE: CHoRUS for Equitable AI - github.txt
@@ -1162,6 +1163,545 @@ Report abuse
 https://github.com/chorus-ai#table-of-contents
 
 7/7
+
+
+
+================================================================================
+
+FILE: RePORT ⟩ RePORTER - CHORUS.txt
+PATH: data/preprocessed/individual/CHORUS/RePORT ⟩ RePORTER - CHORUS.txt
+SIZE: 8256 bytes
+--------------------------------------------------------------------------------
+
+12/5/25, 9:08 PM
+
+RePORT ⟩ RePORTER
+
+NIH RePORTER Announcement:
+
+A "No Cost Extension" indicator is now available on RePORTER! The indicator appears in the "Other Information"
+
+section on the "Project Details" page.
+
+
+
+RePORT
+
+RePORTER
+
+Project Details
+
+ Share
+
+ Description
+
+ Details
+
+ Sub-Projects
+
+ Publications
+
+ Patents
+
+ Outcomes
+
+ Clinical Studies
+
+ News and More
+
+ History
+
+ Similar Projects
+
+
+
+Bridge2AI: Patient-Focused Collaborative
+
+Hospital Repository Uniting Standards
+
+(CHoRUS) for Equitable AI
+
+Project
+Number
+
+Contact
+PI/Project
+
+Awardee
+Organization
+
+1OT2OD032701-
+01
+
+Leader
+ROSENTHAL,
+
+ERIC S.
+Other PIs
+
+ Description
+
+Abstract Text
+
+Abstract Text There is an urgent need for infrastructure to
+support artificial intelligence and machine learning
+
+(AI/ML) in critical care. Developing high-resolution multi-
+center data sets is a critical first step towards actionable
+and trustworthy AI. As part of the NIH Common Fund’s
+Bridge2AI program, the CPatient-Focused Collaborative
+
+Hospital Repository Uniting Standards (CHoRUS) for
+Clinical Care AI data generation project will meet the need
+of generating data for ML/AI applications aimed at
+characterizing acute and critical care illness, predicting
+complications, and measuring treatment response among
+
+https://reporter.nih.gov/project-details/10472824
+
+Privacy  -  Terms
+
+1/8
+
+12/5/25, 9:08 PM
+
+RePORT ⟩ RePORTER
+
+patients with acute or critical illness. Through 3 pillars, the
+
+CHoRUS data generation project will addresses multiple
+
+challenges relevant for acquiring an AI-ready data set
+
+from more than 100,000 critically ill patients: 1) Data
+
+(Standards, Tool Development and Optimization, and Data
+
+Acquistion) 2) Ethics (Ethical and Trustworthy AI) and 3)
+
+People (Team Science and Skill and Workforce
+
+Development). The project’s overarching goal is to
+
+develop a publicly available, AI-ready critical care dataset,
+
+while ensuring the methods promote privacy,
+
+accountability, and clinical benefit, while promoting a new
+
+generation of AI clinicians and scientists. The dataset will
+
+also provision a holdout test set, accessible for model
+
+external validation to aid marketplace adoption of AI-
+
+developed models for implementation in acute and
+critical care. Drawing expertise from a comprehensive set
+of disciplines such as team science, law, ethics, health
+services, biomedical science, engineering, and scientific
+journal publications, this project will A) establish a legal
+framework for collecting data at scale, sampling to ensure
+
+comprehensive sets of patient conditions and clinical
+treatment strategies; B) perform community-facing ethics
+focus groups to determine what data is appropriate for
+public sharing; C) ensure that data elements feature
+appropriate contextual factors such as geographic
+distance to the nearest hospital; D) develop capabilities
+across a multi-center network to acquire, standardize,
+tokenize, store, visualize, and label data such as
+
+structured electronic health record data, tokenized
+unstructured electronic health record data, telemetry and
+EEG waveforms, imaging, and social determinants of
+health; E) acquire data, standardize data to the OMOP
+Common Data Model, transform data using approaches
+that limit re-identification, and label data for ; and F)
+cultivate expertise in the lay and scientific community to
+improve AI literacy nd utilization through multimodal
+educational approaches. To accomplish this, the project
+
+will involve extensive collaboration between centers as
+well as through the NIH Bridge2AI program, the NIH
+
+https://reporter.nih.gov/project-details/10472824
+
+2/8
+
+12/5/25, 9:08 PM
+
+RePORT ⟩ RePORTER
+
+Bridge2AI Bridge Center, external biomedical and clinical
+
+organizations, industry, and regulatory agencies.
+
+Public Health Relevance Statement
+
+The Patient-Focused Collaborative Hospital Repository
+
+Uniting Standards (CHoRUS) for Equitable AI will develop
+
+the necessary network, tools, standards, data, and
+
+education to build machine-learning (ML) and artificial
+
+intelligence (AI)-derived models to improve the care and
+
+outcomes of patients requiring critical care. By
+
+performing legal and ethical research, developing tools
+
+for data storage, labeling and analysis, acquiring and
+
+standardizing a dataset of unprecedented diversity and
+
+high resolution, sequestering holdout datasets for
+external validation, and enriching the community through
+education, this data generation project will catalyze the
+biomedical research and expertise necessary to promote
+the patient-focused deployment of AI in acute and critical
+care.
+
+NIH Spending Category
+
+Bioengineering
+
+Clinical Research
+
+Data Science
+
+Machine Learning and Artificial Intelligence
+
+Networking and Information Technology R&D
+(NITRD)
+
+Social Determinants of Health
+
+Project Terms
+
+Accountability
+
+Acute
+
+Address
+
+Adoption
+
+Artificial Intelligence
+
+Biomedical Research
+
+Bridge to Artificial Intelligence
+
+Clinical
+
+https://reporter.nih.gov/project-details/10472824
+
+3/8
+
+12/5/25, 9:08 PM
+
+RePORT ⟩ RePORTER
+
+Collaborations
+
+Communities
+
+Critical Care
+
+Critical Illness
+
+Data
+
+Data Element
+
+Data Set
+
+Data Storage and Retrieval
+
+Deterioration
+
+Diagnosis
+
+Discipline
+
+Education
+Read More
+
+Electroencephalography
+
+ Details
+
+Contact PI/
+Project
+Leader
+
+Name
+ROSENTHAL,
+ERIC S. 
+
+
+
+Title
+DIRECTOR,
+MGH
+NEUROSCIENCES
+ICU
+
+Contact
+
+View
+Email
+
+Program
+Official
+
+Name
+KUXHAUS,
+LAUREL
+CATHERINE
+
+Contact
+
+View
+Email
+
+Other PIs
+
+Name
+BIHORAC,
+AZRA 
+
+CORDES,
+ASHLEY 
+
+CLERMONT,
+GILLES 
+
+CLIFFORD,
+GARI DAVID
+EVANS,
+
+BARBARA J.
+HU, XIAO
+
+
+KAMALESWARAN,
+RISHIKESAN
+LEVITES
+
+STREKALOVA,
+YULIA A. 
+RASHIDI,
+PARISA 
+RUDIN,
+CYNTHIA 
+WILLIAMS,
+ISHAN
+CANTY 
+
+WILLIAMS,
+ANDREW
+EWING 
+
+
+
+
+
+
+
+
+Organization
+
+Name
+MASSACHUSETTS GENERAL HOSPITAL
+
+City
+
+https://reporter.nih.gov/project-details/10472824
+
+4/8
+
+12/5/25, 9:08 PM
+
+RePORT ⟩ RePORTER
+
+BOSTON
+
+Country
+UNITED STATES (US)
+
+Department Type
+Unavailable
+
+Organization Type
+Independent Hospitals
+
+State Code
+MA
+
+Congressional District
+08
+
+Other Information
+
+Opportunity Number
+OTA-21-008
+
+Study Section
+Data Coordination, Mapping, and Modeling[DCMM]
+
+Fiscal Year
+2022
+
+Award Notice Date
+01-September-2022
+
+Administering Institutes or Centers
+NIH Office of the Director
+
+Assistance Listing Number
+93.310
+
+DUNS Number
+073130411
+UEI
+FLJ7DQKLL226
+
+Project Start Date
+
+01-September-2022
+
+Project End Date
+
+30-November-2026
+
+Budget Start Date
+01-September-2022
+
+Budget End Date
+30-November-2026
+
+https://reporter.nih.gov/project-details/10472824
+
+5/8
+
+12/5/25, 9:08 PM
+
+RePORT ⟩ RePORTER
+
+No Cost Extension
+Y
+
+Project Funding Information for 2022
+
+Total Funding
+$5,880,300
+
+Direct Costs
+$5,880,300
+
+Indirect Costs
+
+Year
+Year
+
+Funding IC
+
+Funding IC
+
+FY Total Cost by IC
+
+2022 NIH Office of the Director
+
+$5,880,300
+
+NIH Categorical Spending
+Click here for more information on NIH Categorical
+
+Spending
+
+Funding
+IC
+
+FY Total Cost by IC NIH Spending Category
+
+RM
+
+$5,880,300
+
+101; 176; 4531; 4372; 329;
+4793
+
+ Sub Projects
+
+No Sub Projects information available for
+1OT2OD032701-01
+
+ Publications
+
+ Disclaimer
+
+https://reporter.nih.gov/project-details/10472824
+
+6/8
+
+12/5/25, 9:08 PM
+
+RePORT ⟩ RePORTER
+
+No Publications available for 1OT2OD032701-01
+
+ Patents
+
+No Patents information available for
+1OT2OD032701-01
+
+ Outcomes
+
+The Project Outcomes shown here are displayed verbatim as submitted
+by the Principal Investigator (PI) for this award. Any opinions, findings,
+and conclusions or recommendations expressed are those of the PI
+and do not necessarily reflect the views of the National Institutes of
+Health. NIH has not endorsed the content below.
+
+No Outcomes available for 1OT2OD032701-01
+
+ Clinical Studies
+
+No Clinical Studies information available for
+1OT2OD032701-01
+
+ News and More
+
+Related News Releases
+
+No news release information available for
+
+https://reporter.nih.gov/project-details/10472824
+
+7/8
+
+12/5/25, 9:08 PM
+
+RePORT ⟩ RePORTER
+
+1OT2OD032701-01
+
+ History
+
+No Historical information available for
+1OT2OD032701-01
+
+ Similar Projects
+
+No Similar Projects information available for
+1OT2OD032701-01
+
+https://reporter.nih.gov/project-details/10472824
+
+8/8
 
 
 
