@@ -734,5 +734,21 @@
     "context": "GPT-5 generated comprehensive identification metadata and excellent attribution, but failed to populate fields requiring domain expertise (preprocessing, quality metrics, limitations) or fields that may be truly N/A (human subjects ethics).",
     "comparison_to_ideal": "Strong foundation (discovery, funding, hierarchical structure) but needs substantial enhancement in transparency (quality, biases, limitations) and reusability (preprocessing, tools, use guidance) to meet full D4D standards.",
     "semantic_quality": "MIXED - Excellent format compliance (DOIs, ORCIDs, grants, dates) and consistency across dataset/subsets, but semantic completeness limited by missing domain-specific documentation."
+  },
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "CM4AI",
+  "method": "gpt5",
+  "d4d_file": "data/d4d_concatenated/gpt5/CM4AI_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.228818",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 0.0,
+    "total_max_score": 0.0,
+    "overall_percentage": 0
   }
 }

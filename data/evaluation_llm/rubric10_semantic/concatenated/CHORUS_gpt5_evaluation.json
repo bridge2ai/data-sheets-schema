@@ -106,7 +106,11 @@
       "sub_elements": [
         {
           "name": "Persistent Identifier (DOI, RRID, or URI)",
-          "fields": ["doi", "rrid", "id"],
+          "fields": [
+            "doi",
+            "rrid",
+            "id"
+          ],
           "score": 1,
           "rationale": "ID present at top level ('chorus-equitable-ai-document-collection') and for both resources. No DOI or RRID present.",
           "semantic_validation": {
@@ -119,7 +123,10 @@
         },
         {
           "name": "Dataset Title and Description Completeness",
-          "fields": ["title", "description"],
+          "fields": [
+            "title",
+            "description"
+          ],
           "score": 1,
           "rationale": "Both title and description present at top level. Title is clear, description explains it's a synthesized collection of CHORUS documents.",
           "semantic_validation": {
@@ -132,7 +139,9 @@
         },
         {
           "name": "Keywords or Tags for Searchability",
-          "fields": ["keywords"],
+          "fields": [
+            "keywords"
+          ],
           "score": 1,
           "rationale": "Keywords present at top level (8 keywords: CHORUS, Equitable AI, Bridge2AI, AIM-AHEAD, Clinical care, Informational webinar, GitHub, PDF) and for both resources.",
           "semantic_validation": {
@@ -144,7 +153,10 @@
         },
         {
           "name": "Landing Page and Resources (page, hierarchical resources)",
-          "fields": ["page", "resources"],
+          "fields": [
+            "page",
+            "resources"
+          ],
           "score": 1,
           "rationale": "Resources field present with 2 nested dataset objects (PDFs). No landing page URL present.",
           "semantic_validation": {
@@ -157,7 +169,10 @@
         },
         {
           "name": "Hierarchical Structure (parent datasets, relationships)",
-          "fields": ["parent_datasets", "related_datasets"],
+          "fields": [
+            "parent_datasets",
+            "related_datasets"
+          ],
           "score": 0,
           "rationale": "Neither parent_datasets nor related_datasets fields present. No explicit dataset relationships defined.",
           "semantic_validation": {
@@ -175,7 +190,10 @@
       "sub_elements": [
         {
           "name": "Access Policy and IP Restrictions Defined",
-          "fields": ["license_and_use_terms", "ip_restrictions"],
+          "fields": [
+            "license_and_use_terms",
+            "ip_restrictions"
+          ],
           "score": 0,
           "rationale": "No license_and_use_terms or ip_restrictions fields present at any level.",
           "semantic_validation": {
@@ -186,7 +204,10 @@
         },
         {
           "name": "Regulatory Restrictions and Confidentiality Level Specified",
-          "fields": ["regulatory_restrictions", "confidentiality_level"],
+          "fields": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ],
           "score": 0,
           "rationale": "No regulatory_restrictions or confidentiality_level fields present.",
           "semantic_validation": {
@@ -197,7 +218,9 @@
         },
         {
           "name": "Download URL or Platform Link Available",
-          "fields": ["download_url"],
+          "fields": [
+            "download_url"
+          ],
           "score": 0,
           "rationale": "No download_url field present at any level. Path field present for one resource but not a downloadable URL.",
           "semantic_validation": {
@@ -209,7 +232,11 @@
         },
         {
           "name": "Distribution Formats and File Types Specified",
-          "fields": ["distribution_formats", "format", "media_type"],
+          "fields": [
+            "distribution_formats",
+            "format",
+            "media_type"
+          ],
           "score": 1,
           "rationale": "Both resources have distribution_formats and media_type='application/pdf'. Format structure includes name and description.",
           "semantic_validation": {
@@ -222,7 +249,10 @@
         },
         {
           "name": "Related Datasets and External Resources Linked",
-          "fields": ["related_datasets", "external_resources"],
+          "fields": [
+            "related_datasets",
+            "external_resources"
+          ],
           "score": 0,
           "rationale": "No related_datasets or external_resources fields present.",
           "semantic_validation": {
@@ -239,7 +269,9 @@
       "sub_elements": [
         {
           "name": "License Terms Allow Reuse",
-          "fields": ["license_and_use_terms"],
+          "fields": [
+            "license_and_use_terms"
+          ],
           "score": 0,
           "rationale": "No license_and_use_terms field present.",
           "semantic_validation": {
@@ -249,7 +281,10 @@
         },
         {
           "name": "Data Formats Are Standardized (encoding, format)",
-          "fields": ["format", "encoding"],
+          "fields": [
+            "format",
+            "encoding"
+          ],
           "score": 0,
           "rationale": "Media_type present but no format or encoding fields. Distribution_formats describes PDF but lacks technical encoding details.",
           "semantic_validation": {
@@ -261,7 +296,10 @@
         },
         {
           "name": "Schema or Ontology Conformance Stated",
-          "fields": ["conforms_to", "conforms_to_schema"],
+          "fields": [
+            "conforms_to",
+            "conforms_to_schema"
+          ],
           "score": 0,
           "rationale": "No conforms_to or conforms_to_schema fields present.",
           "semantic_validation": {
@@ -272,7 +310,9 @@
         },
         {
           "name": "Variable Metadata with Identifiers Defined",
-          "fields": ["variables"],
+          "fields": [
+            "variables"
+          ],
           "score": 0,
           "rationale": "No variables field present. Document collection, not structured data.",
           "semantic_validation": {
@@ -282,7 +322,11 @@
         },
         {
           "name": "Use Guidance Provided (intended, prohibited uses)",
-          "fields": ["intended_uses", "prohibited_uses", "discouraged_uses"],
+          "fields": [
+            "intended_uses",
+            "prohibited_uses",
+            "discouraged_uses"
+          ],
           "score": 0,
           "rationale": "No use guidance fields present. Purposes field present for one resource but is generic informational text, not structured use guidance.",
           "semantic_validation": {
@@ -301,7 +345,10 @@
       "sub_elements": [
         {
           "name": "IRB or Ethics Review Documented",
-          "fields": ["ethical_reviews", "human_subject_research"],
+          "fields": [
+            "ethical_reviews",
+            "human_subject_research"
+          ],
           "score": 0,
           "rationale": "No ethical_reviews or human_subject_research fields present.",
           "semantic_validation": {
@@ -312,7 +359,9 @@
         },
         {
           "name": "Deidentification Method Described",
-          "fields": ["is_deidentified"],
+          "fields": [
+            "is_deidentified"
+          ],
           "score": 0,
           "rationale": "No is_deidentified field present.",
           "semantic_validation": {
@@ -322,7 +371,9 @@
         },
         {
           "name": "Privacy Protections Beyond Deidentification",
-          "fields": ["participant_privacy"],
+          "fields": [
+            "participant_privacy"
+          ],
           "score": 0,
           "rationale": "No participant_privacy field present.",
           "semantic_validation": {
@@ -332,7 +383,9 @@
         },
         {
           "name": "Informed Consent Obtained from Participants",
-          "fields": ["informed_consent"],
+          "fields": [
+            "informed_consent"
+          ],
           "score": 0,
           "rationale": "No informed_consent field present.",
           "semantic_validation": {
@@ -342,7 +395,10 @@
         },
         {
           "name": "Vulnerable Populations and Compensation Documented",
-          "fields": ["vulnerable_populations", "participant_compensation"],
+          "fields": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
           "score": 0,
           "rationale": "No vulnerable_populations or participant_compensation fields present.",
           "semantic_validation": {
@@ -359,7 +415,9 @@
       "sub_elements": [
         {
           "name": "Cohort or Subpopulations Characteristics Described",
-          "fields": ["subpopulations"],
+          "fields": [
+            "subpopulations"
+          ],
           "score": 0,
           "rationale": "No subpopulations field present.",
           "semantic_validation": {
@@ -369,7 +427,9 @@
         },
         {
           "name": "Number of Instances or Samples Reported",
-          "fields": ["instances"],
+          "fields": [
+            "instances"
+          ],
           "score": 0,
           "rationale": "No instances field present.",
           "semantic_validation": {
@@ -380,7 +440,10 @@
         },
         {
           "name": "Variable-Level Metadata and Tabular Flag",
-          "fields": ["variables", "is_tabular"],
+          "fields": [
+            "variables",
+            "is_tabular"
+          ],
           "score": 0,
           "rationale": "No variables or is_tabular fields present.",
           "semantic_validation": {
@@ -391,7 +454,9 @@
         },
         {
           "name": "Data Topics or Conditions Represented",
-          "fields": ["instances"],
+          "fields": [
+            "instances"
+          ],
           "score": 0,
           "rationale": "No instances field. Topics inferred from keywords but not explicitly structured.",
           "semantic_validation": {
@@ -402,7 +467,10 @@
         },
         {
           "name": "Data Quality Issues and Anomalies Documented",
-          "fields": ["anomalies", "sampling_strategies"],
+          "fields": [
+            "anomalies",
+            "sampling_strategies"
+          ],
           "score": 0,
           "rationale": "No anomalies or sampling_strategies fields present.",
           "semantic_validation": {
@@ -419,7 +487,9 @@
       "sub_elements": [
         {
           "name": "Dataset Version Number Provided",
-          "fields": ["version"],
+          "fields": [
+            "version"
+          ],
           "score": 0,
           "rationale": "No version field present.",
           "semantic_validation": {
@@ -429,7 +499,9 @@
         },
         {
           "name": "Version Access Methods Documented",
-          "fields": ["version_access"],
+          "fields": [
+            "version_access"
+          ],
           "score": 0,
           "rationale": "No version_access field present.",
           "semantic_validation": {
@@ -439,7 +511,10 @@
         },
         {
           "name": "Change Descriptions and Errata Provided",
-          "fields": ["errata", "updates"],
+          "fields": [
+            "errata",
+            "updates"
+          ],
           "score": 0,
           "rationale": "No errata or updates fields present.",
           "semantic_validation": {
@@ -450,7 +525,9 @@
         },
         {
           "name": "Update Schedule or Frequency Indicated",
-          "fields": ["updates"],
+          "fields": [
+            "updates"
+          ],
           "score": 0,
           "rationale": "No updates field present.",
           "semantic_validation": {
@@ -460,7 +537,10 @@
         },
         {
           "name": "Provenance and Source Derivation Documented",
-          "fields": ["was_derived_from", "release_notes"],
+          "fields": [
+            "was_derived_from",
+            "release_notes"
+          ],
           "score": 0,
           "rationale": "No was_derived_from or release_notes fields present. Description mentions synthesis but lacks formal provenance.",
           "semantic_validation": {
@@ -478,7 +558,9 @@
       "sub_elements": [
         {
           "name": "Motivation or Purpose for Dataset Creation",
-          "fields": ["purposes"],
+          "fields": [
+            "purposes"
+          ],
           "score": 1,
           "rationale": "Purposes field present for one resource with informational text about webinar material.",
           "semantic_validation": {
@@ -490,7 +572,9 @@
         },
         {
           "name": "Primary Research Objectives or Tasks",
-          "fields": ["tasks"],
+          "fields": [
+            "tasks"
+          ],
           "score": 0,
           "rationale": "No tasks field present.",
           "semantic_validation": {
@@ -500,7 +584,9 @@
         },
         {
           "name": "Funding Sources and Mechanisms Listed",
-          "fields": ["funders"],
+          "fields": [
+            "funders"
+          ],
           "score": 0,
           "rationale": "No funders field present.",
           "semantic_validation": {
@@ -511,7 +597,9 @@
         },
         {
           "name": "Grant IDs or Award Numbers Present",
-          "fields": ["funders"],
+          "fields": [
+            "funders"
+          ],
           "score": 0,
           "rationale": "No funders field, therefore no grant IDs or award numbers.",
           "semantic_validation": {
@@ -521,7 +609,10 @@
         },
         {
           "name": "Creators and Acknowledgements Documented",
-          "fields": ["creators", "funders"],
+          "fields": [
+            "creators",
+            "funders"
+          ],
           "score": 0,
           "rationale": "No creators or funders fields present.",
           "semantic_validation": {
@@ -538,7 +629,9 @@
       "sub_elements": [
         {
           "name": "Collection Mechanisms and Settings Described",
-          "fields": ["collection_mechanisms"],
+          "fields": [
+            "collection_mechanisms"
+          ],
           "score": 0,
           "rationale": "No collection_mechanisms field present.",
           "semantic_validation": {
@@ -548,7 +641,9 @@
         },
         {
           "name": "Data Acquisition Methods Listed",
-          "fields": ["acquisition_methods"],
+          "fields": [
+            "acquisition_methods"
+          ],
           "score": 0,
           "rationale": "No acquisition_methods field present.",
           "semantic_validation": {
@@ -558,7 +653,11 @@
         },
         {
           "name": "Preprocessing, Cleaning, and Labeling Strategies",
-          "fields": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "fields": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
           "score": 0,
           "rationale": "No preprocessing_strategies, cleaning_strategies, or labeling_strategies fields present.",
           "semantic_validation": {
@@ -570,7 +669,9 @@
         },
         {
           "name": "Software and Tools Documented",
-          "fields": ["software_and_tools"],
+          "fields": [
+            "software_and_tools"
+          ],
           "score": 0,
           "rationale": "No software_and_tools field present.",
           "semantic_validation": {
@@ -580,7 +681,10 @@
         },
         {
           "name": "External Standards and Resources Referenced",
-          "fields": ["external_resources", "conforms_to"],
+          "fields": [
+            "external_resources",
+            "conforms_to"
+          ],
           "score": 0,
           "rationale": "No external_resources or conforms_to fields present.",
           "semantic_validation": {
@@ -597,7 +701,9 @@
       "sub_elements": [
         {
           "name": "Known Limitations Documented",
-          "fields": ["known_limitations"],
+          "fields": [
+            "known_limitations"
+          ],
           "score": 0,
           "rationale": "No known_limitations field present.",
           "semantic_validation": {
@@ -607,7 +713,9 @@
         },
         {
           "name": "Systematic Biases Identified and Described",
-          "fields": ["known_biases"],
+          "fields": [
+            "known_biases"
+          ],
           "score": 0,
           "rationale": "No known_biases field present.",
           "semantic_validation": {
@@ -617,7 +725,9 @@
         },
         {
           "name": "Data Anomalies and Quality Issues Noted",
-          "fields": ["anomalies"],
+          "fields": [
+            "anomalies"
+          ],
           "score": 0,
           "rationale": "No anomalies field present. One resource notes 'Source content text not available; metadata inferred from file name'.",
           "semantic_validation": {
@@ -628,7 +738,10 @@
         },
         {
           "name": "Sensitive Content and Warnings Provided",
-          "fields": ["sensitive_elements", "content_warnings"],
+          "fields": [
+            "sensitive_elements",
+            "content_warnings"
+          ],
           "score": 0,
           "rationale": "No sensitive_elements or content_warnings fields present.",
           "semantic_validation": {
@@ -639,7 +752,9 @@
         },
         {
           "name": "Ethical Review Details Including Conflicts",
-          "fields": ["ethical_reviews"],
+          "fields": [
+            "ethical_reviews"
+          ],
           "score": 0,
           "rationale": "No ethical_reviews field present.",
           "semantic_validation": {
@@ -655,7 +770,9 @@
       "sub_elements": [
         {
           "name": "Dataset Published on a Recognized Platform",
-          "fields": ["publisher"],
+          "fields": [
+            "publisher"
+          ],
           "score": 0,
           "rationale": "No publisher field present.",
           "semantic_validation": {
@@ -665,7 +782,10 @@
         },
         {
           "name": "Citation and DOI for Cross-referencing",
-          "fields": ["citation", "doi"],
+          "fields": [
+            "citation",
+            "doi"
+          ],
           "score": 0,
           "rationale": "No citation or doi fields present.",
           "semantic_validation": {
@@ -676,7 +796,9 @@
         },
         {
           "name": "Community Standards or Schema Conformance",
-          "fields": ["conforms_to"],
+          "fields": [
+            "conforms_to"
+          ],
           "score": 0,
           "rationale": "No conforms_to field present.",
           "semantic_validation": {
@@ -686,7 +808,10 @@
         },
         {
           "name": "Outreach Materials and Documentation Links",
-          "fields": ["external_resources", "page"],
+          "fields": [
+            "external_resources",
+            "page"
+          ],
           "score": 1,
           "rationale": "No external_resources or page fields present, but keywords mention 'GitHub' indicating potential documentation.",
           "semantic_validation": {
@@ -698,7 +823,9 @@
         },
         {
           "name": "Related Datasets with Typed Relationships",
-          "fields": ["related_datasets"],
+          "fields": [
+            "related_datasets"
+          ],
           "score": 0,
           "rationale": "No related_datasets field present.",
           "semantic_validation": {
@@ -807,7 +934,9 @@
         "findings": "Descriptions present at all levels. Top-level explains synthesis, resource-level provides specifics."
       },
       "format_consistency": {
-        "media_types": ["application/pdf"],
+        "media_types": [
+          "application/pdf"
+        ],
         "media_type_valid": true,
         "format_standardized": true,
         "findings": "Consistent PDF media type across all resources. Valid MIME type."
@@ -884,5 +1013,21 @@
       "Add conforms_to for metadata standard compliance",
       "Include external_resources for supporting documentation"
     ]
+  },
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "CHORUS",
+  "method": "gpt5",
+  "d4d_file": "data/d4d_concatenated/gpt5/CHORUS_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.227483",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 0.0,
+    "total_max_score": 50.0,
+    "overall_percentage": 0.0
   }
 }

@@ -30,8 +30,14 @@
         {
           "name": "Persistent Identifier (DOI, RRID, or URI)",
           "score": 1,
-          "field": ["doi", "rrid", "id"],
-          "present": ["id"],
+          "field": [
+            "doi",
+            "rrid",
+            "id"
+          ],
+          "present": [
+            "id"
+          ],
           "values": {
             "id": "https://chorus4ai.org/"
           },
@@ -40,8 +46,14 @@
         {
           "name": "Dataset Title and Description Completeness",
           "score": 1,
-          "field": ["title", "description"],
-          "present": ["title", "description"],
+          "field": [
+            "title",
+            "description"
+          ],
+          "present": [
+            "title",
+            "description"
+          ],
           "values": {
             "title": "Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI",
             "description": "Multi-paragraph comprehensive description (689 chars)"
@@ -51,8 +63,12 @@
         {
           "name": "Keywords or Tags for Searchability",
           "score": 1,
-          "field": ["keywords"],
-          "present": ["keywords"],
+          "field": [
+            "keywords"
+          ],
+          "present": [
+            "keywords"
+          ],
           "values": {
             "keywords": 18
           },
@@ -61,8 +77,13 @@
         {
           "name": "Landing Page and Resources (page, hierarchical resources)",
           "score": 1,
-          "field": ["page", "resources"],
-          "present": ["page"],
+          "field": [
+            "page",
+            "resources"
+          ],
+          "present": [
+            "page"
+          ],
           "values": {
             "page": "https://chorus4ai.org/"
           },
@@ -71,7 +92,10 @@
         {
           "name": "Hierarchical Structure (parent datasets, relationships)",
           "score": 0,
-          "field": ["parent_datasets", "related_datasets"],
+          "field": [
+            "parent_datasets",
+            "related_datasets"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No parent_datasets or related_datasets documented. Subsets are documented but not as formal relationships."
@@ -88,8 +112,13 @@
         {
           "name": "Access Policy and IP Restrictions Defined",
           "score": 1,
-          "field": ["license_and_use_terms", "ip_restrictions"],
-          "present": ["license_and_use_terms"],
+          "field": [
+            "license_and_use_terms",
+            "ip_restrictions"
+          ],
+          "present": [
+            "license_and_use_terms"
+          ],
           "values": {
             "license_and_use_terms": "Comprehensive class with 5 license_terms items"
           },
@@ -98,8 +127,14 @@
         {
           "name": "Regulatory Restrictions and Confidentiality Level Specified",
           "score": 1,
-          "field": ["regulatory_restrictions", "confidentiality_level"],
-          "present": ["confidential_elements", "sensitive_elements"],
+          "field": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ],
+          "present": [
+            "confidential_elements",
+            "sensitive_elements"
+          ],
           "values": {
             "confidential_elements_present": true,
             "sensitive_elements_present": true
@@ -109,7 +144,9 @@
         {
           "name": "Download URL or Platform Link Available",
           "score": 0,
-          "field": ["download_url"],
+          "field": [
+            "download_url"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No download_url field. Access is federated via secure collaborative cloud enclave, not direct download. Access URLs in distribution_formats point to informational pages, not data downloads."
@@ -117,8 +154,14 @@
         {
           "name": "Distribution Formats and File Types Specified",
           "score": 1,
-          "field": ["distribution_formats", "format", "media_type"],
-          "present": ["distribution_formats"],
+          "field": [
+            "distribution_formats",
+            "format",
+            "media_type"
+          ],
+          "present": [
+            "distribution_formats"
+          ],
           "values": {
             "distribution_formats": "Comprehensive description including OMOP (SQL), WFDB, DICOM, OHNLP tokens, EDF+/Persyst"
           },
@@ -127,8 +170,13 @@
         {
           "name": "Related Datasets and External Resources Linked",
           "score": 1,
-          "field": ["related_datasets", "external_resources"],
-          "present": ["external_resources"],
+          "field": [
+            "related_datasets",
+            "external_resources"
+          ],
+          "present": [
+            "external_resources"
+          ],
           "values": {
             "external_resources": "CHoRUS GitHub Organization with 3 URLs"
           },
@@ -146,8 +194,12 @@
         {
           "name": "License Terms Allow Reuse",
           "score": 1,
-          "field": ["license_and_use_terms"],
-          "present": ["license_and_use_terms"],
+          "field": [
+            "license_and_use_terms"
+          ],
+          "present": [
+            "license_and_use_terms"
+          ],
           "values": {
             "license_and_use_terms": "Controlled access with signed licensing agreement"
           },
@@ -156,8 +208,13 @@
         {
           "name": "Data Formats Are Standardized (encoding, format)",
           "score": 1,
-          "field": ["format", "encoding"],
-          "present": ["distribution_formats"],
+          "field": [
+            "format",
+            "encoding"
+          ],
+          "present": [
+            "distribution_formats"
+          ],
           "values": {
             "formats": "OMOP, WFDB, DICOM, OHNLP, EDF+, Persyst"
           },
@@ -166,8 +223,14 @@
         {
           "name": "Schema or Ontology Conformance Stated",
           "score": 1,
-          "field": ["conforms_to", "conforms_to_schema"],
-          "present": ["distribution_formats", "labeling_strategies"],
+          "field": [
+            "conforms_to",
+            "conforms_to_schema"
+          ],
+          "present": [
+            "distribution_formats",
+            "labeling_strategies"
+          ],
           "values": {
             "standards": "OMOP, WFDB, DICOM, OHNLP, OHDSI, PhysioNet schema, ICD, RxNorm, CPT, SNOMED CT, LOINC"
           },
@@ -176,7 +239,9 @@
         {
           "name": "Variable Metadata with Identifiers Defined",
           "score": 0,
-          "field": ["variables"],
+          "field": [
+            "variables"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No variables field. Subsets describe data categories but not individual variables. OMOP vocabularies mentioned for labeling but variable-level metadata not provided."
@@ -184,8 +249,14 @@
         {
           "name": "Use Guidance Provided (intended, prohibited uses)",
           "score": 0,
-          "field": ["intended_uses", "prohibited_uses", "discouraged_uses"],
-          "present": ["discouraged_uses"],
+          "field": [
+            "intended_uses",
+            "prohibited_uses",
+            "discouraged_uses"
+          ],
+          "present": [
+            "discouraged_uses"
+          ],
           "values": {
             "discouraged_uses": "Re-identification, bias perpetuation, commercial without licensing"
           },
@@ -203,8 +274,13 @@
         {
           "name": "IRB or Ethics Review Documented",
           "score": 1,
-          "field": ["ethical_reviews", "human_subject_research"],
-          "present": ["human_subject_research"],
+          "field": [
+            "ethical_reviews",
+            "human_subject_research"
+          ],
+          "present": [
+            "human_subject_research"
+          ],
           "values": {
             "involves_human_subjects": true,
             "irb_approval": "Multi-site IRB approvals at data acquisition centers",
@@ -215,8 +291,13 @@
         {
           "name": "Deidentification Method Described",
           "score": 1,
-          "field": ["is_deidentified"],
-          "present": ["cleaning_strategies", "data_protection_impacts"],
+          "field": [
+            "is_deidentified"
+          ],
+          "present": [
+            "cleaning_strategies",
+            "data_protection_impacts"
+          ],
           "values": {
             "deidentification": "HIPAA-compliant (Safe Harbor or Expert Determination)"
           },
@@ -225,8 +306,13 @@
         {
           "name": "Privacy Protections Beyond Deidentification",
           "score": 1,
-          "field": ["participant_privacy"],
-          "present": ["data_protection_impacts", "acquisition_methods"],
+          "field": [
+            "participant_privacy"
+          ],
+          "present": [
+            "data_protection_impacts",
+            "acquisition_methods"
+          ],
           "values": {
             "privacy_protections": "Privacy scan tools, tokenization, local full-text storage, controlled access, audit trails"
           },
@@ -235,7 +321,9 @@
         {
           "name": "Informed Consent Obtained from Participants",
           "score": 0,
-          "field": ["informed_consent"],
+          "field": [
+            "informed_consent"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No informed_consent field. Retrospective clinical data collection mentioned but consent process not explicitly documented."
@@ -243,8 +331,14 @@
         {
           "name": "Vulnerable Populations and Compensation Documented",
           "score": 1,
-          "field": ["vulnerable_populations", "participant_compensation"],
-          "present": ["purposes", "data_protection_impacts"],
+          "field": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
+          "present": [
+            "purposes",
+            "data_protection_impacts"
+          ],
           "values": {
             "equity_focus": "Social Determinants of Health, AIM-AHEAD partnership, health equity, diverse populations"
           },
@@ -262,8 +356,12 @@
         {
           "name": "Cohort or Subpopulations Characteristics Described",
           "score": 1,
-          "field": ["subpopulations"],
-          "present": ["subpopulations"],
+          "field": [
+            "subpopulations"
+          ],
+          "present": [
+            "subpopulations"
+          ],
           "values": {
             "subpopulations": "Patients admitted with acute illness requiring intensive monitoring"
           },
@@ -272,8 +370,12 @@
         {
           "name": "Number of Instances or Samples Reported",
           "score": 1,
-          "field": ["instances"],
-          "present": ["instances"],
+          "field": [
+            "instances"
+          ],
+          "present": [
+            "instances"
+          ],
           "values": {
             "instances": "23,400 unique admissions from 14 hospitals (as of November 2024)"
           },
@@ -282,8 +384,14 @@
         {
           "name": "Variable-Level Metadata and Tabular Flag",
           "score": 1,
-          "field": ["variables", "is_tabular"],
-          "present": ["subsets", "instances"],
+          "field": [
+            "variables",
+            "is_tabular"
+          ],
+          "present": [
+            "subsets",
+            "instances"
+          ],
           "values": {
             "data_structure": "9 subsets including demographics, diagnoses, procedures, medications, nursing, notes, imaging, waveforms, EEG"
           },
@@ -292,8 +400,14 @@
         {
           "name": "Data Topics or Conditions Represented",
           "score": 1,
-          "field": ["instances"],
-          "present": ["instances", "purposes", "description"],
+          "field": [
+            "instances"
+          ],
+          "present": [
+            "instances",
+            "purposes",
+            "description"
+          ],
           "values": {
             "conditions": "Acute illness requiring intensive monitoring and treatment"
           },
@@ -302,8 +416,14 @@
         {
           "name": "Data Quality Issues and Anomalies Documented",
           "score": 1,
-          "field": ["anomalies", "sampling_strategies"],
-          "present": ["anomalies", "sampling_strategies"],
+          "field": [
+            "anomalies",
+            "sampling_strategies"
+          ],
+          "present": [
+            "anomalies",
+            "sampling_strategies"
+          ],
           "values": {
             "anomalies": "Ongoing data collection, variable site timelines, imaging de-identification in progress, EEG extraction in process",
             "sampling": "Multi-center retrospective with federated sampling for balanced representation"
@@ -322,7 +442,9 @@
         {
           "name": "Dataset Version Number Provided",
           "score": 0,
-          "field": ["version"],
+          "field": [
+            "version"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No version field. Temporal snapshot provided (November 2024) but not formal version number."
@@ -330,8 +452,12 @@
         {
           "name": "Version Access Methods Documented",
           "score": 0,
-          "field": ["version_access"],
-          "present": ["version_access"],
+          "field": [
+            "version_access"
+          ],
+          "present": [
+            "version_access"
+          ],
           "values": {
             "version_access": "Collaborative cloud enclave for data version management"
           },
@@ -340,8 +466,13 @@
         {
           "name": "Change Descriptions and Errata Provided",
           "score": 0,
-          "field": ["errata", "updates"],
-          "present": ["updates"],
+          "field": [
+            "errata",
+            "updates"
+          ],
+          "present": [
+            "updates"
+          ],
           "values": {
             "updates": "Retrospective collection ongoing, periodic updates, iterative quality improvements"
           },
@@ -350,8 +481,12 @@
         {
           "name": "Update Schedule or Frequency Indicated",
           "score": 0,
-          "field": ["updates"],
-          "present": ["updates"],
+          "field": [
+            "updates"
+          ],
+          "present": [
+            "updates"
+          ],
           "values": {
             "updates": "Periodic updates as sites complete extraction, regular status updates via GitHub/Google Forms"
           },
@@ -360,7 +495,10 @@
         {
           "name": "Provenance and Source Derivation Documented",
           "score": 0,
-          "field": ["was_derived_from", "release_notes"],
+          "field": [
+            "was_derived_from",
+            "release_notes"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No was_derived_from or release_notes fields. Source data described (multi-center EHR) but not formal provenance documentation."
@@ -377,8 +515,12 @@
         {
           "name": "Motivation or Purpose for Dataset Creation",
           "score": 1,
-          "field": ["purposes"],
-          "present": ["purposes"],
+          "field": [
+            "purposes"
+          ],
+          "present": [
+            "purposes"
+          ],
           "values": {
             "purposes": "Develop diverse, high-resolution, ethically sourced, AI-ready dataset for acute illness recovery"
           },
@@ -387,8 +529,12 @@
         {
           "name": "Primary Research Objectives or Tasks",
           "score": 1,
-          "field": ["tasks"],
-          "present": ["tasks"],
+          "field": [
+            "tasks"
+          ],
+          "present": [
+            "tasks"
+          ],
           "values": {
             "tasks": "AI/ML model development for clinical care, prediction and decision support for acute illness recovery"
           },
@@ -397,7 +543,9 @@
         {
           "name": "Funding Sources and Mechanisms Listed",
           "score": 0,
-          "field": ["funders"],
+          "field": [
+            "funders"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No funders field. Bridge2AI consortium mentioned but no formal funding information."
@@ -405,7 +553,9 @@
         {
           "name": "Grant IDs or Award Numbers Present",
           "score": 0,
-          "field": ["funders"],
+          "field": [
+            "funders"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No grant IDs or award numbers documented."
@@ -413,8 +563,13 @@
         {
           "name": "Creators and Acknowledgements Documented",
           "score": 1,
-          "field": ["creators", "funders"],
-          "present": ["creators"],
+          "field": [
+            "creators",
+            "funders"
+          ],
+          "present": [
+            "creators"
+          ],
           "values": {
             "creators": "CHoRUS Network with 6 named program leads (Rosenthal, Bihorac, Jiang, Strekalova, Rashidi, Williams)"
           },
@@ -432,8 +587,12 @@
         {
           "name": "Collection Mechanisms and Settings Described",
           "score": 1,
-          "field": ["collection_mechanisms"],
-          "present": ["collection_mechanisms"],
+          "field": [
+            "collection_mechanisms"
+          ],
+          "present": [
+            "collection_mechanisms"
+          ],
           "values": {
             "collection_mechanisms": "Multi-modal using OMOP, WFDB, DICOM, OHNLP, secure Azure cloud enclave"
           },
@@ -442,8 +601,12 @@
         {
           "name": "Data Acquisition Methods Listed",
           "score": 1,
-          "field": ["acquisition_methods"],
-          "present": ["acquisition_methods"],
+          "field": [
+            "acquisition_methods"
+          ],
+          "present": [
+            "acquisition_methods"
+          ],
           "values": {
             "acquisition_methods": "Retrospective from EHR, clinical notes, PACS imaging, bedside monitors, EEG databases"
           },
@@ -452,8 +615,16 @@
         {
           "name": "Preprocessing, Cleaning, and Labeling Strategies",
           "score": 1,
-          "field": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
-          "present": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "field": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
+          "present": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
           "values": {
             "preprocessing": "OMOP transformation, WFDB conversion, DICOM standardization, OHNLP tokenization",
             "cleaning": "HIPAA de-identification, privacy scan validation, quality characterization",
@@ -464,8 +635,14 @@
         {
           "name": "Software and Tools Documented",
           "score": 1,
-          "field": ["software_and_tools"],
-          "present": ["collection_mechanisms", "preprocessing_strategies", "external_resources"],
+          "field": [
+            "software_and_tools"
+          ],
+          "present": [
+            "collection_mechanisms",
+            "preprocessing_strategies",
+            "external_resources"
+          ],
           "values": {
             "tools": "OMOP CDM, WFDB, DICOM, OHNLP toolkit, OHDSI, PhysioNet, privacy scan tools, Azure cloud"
           },
@@ -474,8 +651,13 @@
         {
           "name": "External Standards and Resources Referenced",
           "score": 1,
-          "field": ["external_resources", "conforms_to"],
-          "present": ["external_resources"],
+          "field": [
+            "external_resources",
+            "conforms_to"
+          ],
+          "present": [
+            "external_resources"
+          ],
           "values": {
             "external_resources": "GitHub organization, SOP repository, Bridge2AI project page",
             "standards": "OMOP, WFDB, DICOM, OHNLP, HIPAA, PhysioNet, OHDSI"
@@ -494,7 +676,9 @@
         {
           "name": "Known Limitations Documented",
           "score": 0,
-          "field": ["known_limitations"],
+          "field": [
+            "known_limitations"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No known_limitations field. Future use impacts mention multi-center heterogeneity and temporal dynamics but not as formal limitations."
@@ -502,7 +686,9 @@
         {
           "name": "Systematic Biases Identified and Described",
           "score": 0,
-          "field": ["known_biases"],
+          "field": [
+            "known_biases"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No known_biases field. Bias mitigation mentioned (BRIDGE Center, AIM-AHEAD partnership) but specific biases not identified."
@@ -510,8 +696,12 @@
         {
           "name": "Data Anomalies and Quality Issues Noted",
           "score": 1,
-          "field": ["anomalies"],
-          "present": ["anomalies"],
+          "field": [
+            "anomalies"
+          ],
+          "present": [
+            "anomalies"
+          ],
           "values": {
             "anomalies": "Ongoing collection, variable site timelines, imaging de-identification in progress, EEG extraction in process"
           },
@@ -520,8 +710,13 @@
         {
           "name": "Sensitive Content and Warnings Provided",
           "score": 0,
-          "field": ["sensitive_elements", "content_warnings"],
-          "present": ["sensitive_elements"],
+          "field": [
+            "sensitive_elements",
+            "content_warnings"
+          ],
+          "present": [
+            "sensitive_elements"
+          ],
           "values": {
             "sensitive_elements": "Demographics, diagnoses, procedures, notes, imaging, waveforms, Social Determinants of Health"
           },
@@ -530,8 +725,12 @@
         {
           "name": "Ethical Review Details Including Conflicts",
           "score": 0,
-          "field": ["ethical_reviews"],
-          "present": ["human_subject_research"],
+          "field": [
+            "ethical_reviews"
+          ],
+          "present": [
+            "human_subject_research"
+          ],
           "values": {
             "ethics_info": "Multi-site IRB approvals, institutional oversight, patient-focused frameworks, BRIDGE Center"
           },
@@ -549,7 +748,9 @@
         {
           "name": "Dataset Published on a Recognized Platform",
           "score": 0,
-          "field": ["publisher"],
+          "field": [
+            "publisher"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No publisher field. CHoRUS Network and Bridge2AI mentioned but not as formal publisher designation."
@@ -557,7 +758,10 @@
         {
           "name": "Citation and DOI for Cross-referencing",
           "score": 0,
-          "field": ["citation", "doi"],
+          "field": [
+            "citation",
+            "doi"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No citation or DOI fields. Dataset not yet formally published with DOI."
@@ -565,7 +769,9 @@
         {
           "name": "Community Standards or Schema Conformance",
           "score": 0,
-          "field": ["conforms_to"],
+          "field": [
+            "conforms_to"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No conforms_to field. However, extensive standards conformance documented throughout (OMOP, WFDB, DICOM, OHNLP, HIPAA, PhysioNet, OHDSI)."
@@ -573,8 +779,14 @@
         {
           "name": "Outreach Materials and Documentation Links",
           "score": 0,
-          "field": ["external_resources", "page"],
-          "present": ["external_resources", "page"],
+          "field": [
+            "external_resources",
+            "page"
+          ],
+          "present": [
+            "external_resources",
+            "page"
+          ],
           "values": {
             "page": "https://chorus4ai.org/",
             "external_resources": "GitHub, SOP repository, Bridge2AI page"
@@ -584,7 +796,9 @@
         {
           "name": "Related Datasets with Typed Relationships",
           "score": 0,
-          "field": ["related_datasets"],
+          "field": [
+            "related_datasets"
+          ],
           "present": [],
           "values": {},
           "semantic_notes": "No related_datasets field. Subsets documented but not as formal dataset relationships."
@@ -613,7 +827,10 @@
     },
     "consistency_checking": {
       "date_consistency": {
-        "temporal_references": ["November 2024", "2025-12-06"],
+        "temporal_references": [
+          "November 2024",
+          "2025-12-06"
+        ],
         "consistent": true,
         "notes": "Generation date (2025-12-06) post-dates data snapshot (November 2024). Reasonable temporal alignment."
       },
@@ -626,14 +843,21 @@
         "notes": "Counts consistent across document. 14 hospitals = 14 data acquisition sites. 20 total centers in collaboration."
       },
       "terminology_consistency": {
-        "dataset_names": ["CHoRUS", "CHoRUS Dataset", "CHoRUS Network"],
+        "dataset_names": [
+          "CHoRUS",
+          "CHoRUS Dataset",
+          "CHoRUS Network"
+        ],
         "consistent": true,
         "notes": "Terminology consistent. CHoRUS = Patient-Focused Collaborative Hospital Repository Uniting Standards."
       },
       "url_consistency": {
         "primary_url": "https://chorus4ai.org/",
         "occurrence_count": 3,
-        "variants": ["https://www.bridge2ai.org/chorus", "https://github.com/chorus-ai"],
+        "variants": [
+          "https://www.bridge2ai.org/chorus",
+          "https://github.com/chorus-ai"
+        ],
         "consistent": true,
         "notes": "URL usage consistent. Primary site (chorus4ai.org), Bridge2AI project page, and GitHub organization all appropriate."
       }
@@ -750,5 +974,21 @@
       "Priority 3: Add formal conforms_to with standards URIs",
       "Priority 4: Specify publisher and add content warnings"
     ]
+  },
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "CHORUS",
+  "method": "claudecode_assistant",
+  "d4d_file": "data/d4d_concatenated/claudecode_assistant/CHORUS_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.226872",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 29.0,
+    "total_max_score": 50.0,
+    "overall_percentage": 58.0
   }
 }

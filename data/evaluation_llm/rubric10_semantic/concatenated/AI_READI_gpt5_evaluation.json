@@ -87,35 +87,50 @@
       "sub_elements": [
         {
           "name": "Persistent Identifier (DOI, RRID, or URI)",
-          "fields": ["doi", "rrid", "id"],
+          "fields": [
+            "doi",
+            "rrid",
+            "id"
+          ],
           "score": 1,
           "rationale": "Collection has id='ai-readi-dataset-collection'. Resource has id='https://fairhub.io/datasets/2' and same_as contains DOI 'https://doi.org/10.5281/zenodo.10642459'.",
           "semantic_notes": "DOI format is valid (10.5281 is Zenodo prefix). URI is HTTPS URL (fairhub.io). No RRID present."
         },
         {
           "name": "Dataset Title and Description Completeness",
-          "fields": ["title", "description"],
+          "fields": [
+            "title",
+            "description"
+          ],
           "score": 1,
           "rationale": "Both collection and resource have title and comprehensive descriptions.",
           "semantic_notes": "Descriptions are detailed and specific, mentioning T2DM, AI/ML, multi-domain data, and data access tiers."
         },
         {
           "name": "Keywords or Tags for Searchability",
-          "fields": ["keywords"],
+          "fields": [
+            "keywords"
+          ],
           "score": 1,
           "rationale": "Resource contains 20 keywords including domain terms (T2DM, AI, Machine Learning), data types (multimodal, ECG, retinal images), and metadata standards (FAIR principles, Healthsheet).",
           "semantic_notes": "Keywords are comprehensive and cover disease domain, technical approaches, data modalities, and standards."
         },
         {
           "name": "Landing Page and Resources (page, hierarchical resources)",
-          "fields": ["page", "resources"],
+          "fields": [
+            "page",
+            "resources"
+          ],
           "score": 1,
           "rationale": "Collection has resources list with one Dataset. Resource has page='https://fairhub.io/datasets/2'.",
           "semantic_notes": "Hierarchical structure present with collection containing nested resource. Landing page URL is valid HTTPS."
         },
         {
           "name": "Hierarchical Structure (parent datasets, relationships)",
-          "fields": ["parent_datasets", "related_datasets"],
+          "fields": [
+            "parent_datasets",
+            "related_datasets"
+          ],
           "score": 0,
           "rationale": "No parent_datasets or related_datasets fields present.",
           "semantic_notes": "Missing typed relationships despite having external_resources. No formal dataset lineage documented."
@@ -129,35 +144,50 @@
       "sub_elements": [
         {
           "name": "Access Policy and IP Restrictions Defined",
-          "fields": ["license_and_use_terms", "ip_restrictions"],
+          "fields": [
+            "license_and_use_terms",
+            "ip_restrictions"
+          ],
           "score": 1,
           "rationale": "license_and_use_terms present with description of public download requiring license agreement and controlled access via DUA. No ip_restrictions field.",
           "semantic_notes": "Access policy clearly describes two-tier system (public + controlled). IP restrictions not explicitly documented."
         },
         {
           "name": "Regulatory Restrictions and Confidentiality Level Specified",
-          "fields": ["regulatory_restrictions", "confidentiality_level"],
+          "fields": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ],
           "score": 0,
           "rationale": "Neither regulatory_restrictions nor confidentiality_level fields present.",
           "semantic_notes": "Contains PHI (protected health information) mentioned in confidential_elements but no formal confidentiality classification."
         },
         {
           "name": "Download URL or Platform Link Available",
-          "fields": ["download_url"],
+          "fields": [
+            "download_url"
+          ],
           "score": 1,
           "rationale": "No direct download_url field, but page field provides landing page URL (https://fairhub.io/datasets/2) where data can be accessed.",
           "semantic_notes": "Landing page serves as access point. No direct file download URL, appropriate for controlled-access datasets."
         },
         {
           "name": "Distribution Formats and File Types Specified",
-          "fields": ["distribution_formats", "format", "media_type"],
+          "fields": [
+            "distribution_formats",
+            "format",
+            "media_type"
+          ],
           "score": 1,
           "rationale": "distribution_formats contains description mentioning 'Multiple modalities spanning tabular data, images, and time-series; file formats and standards are documented per domain.'",
           "semantic_notes": "High-level format description present but lacks specific MIME types or format specifications (e.g., CSV, DICOM, JSON)."
         },
         {
           "name": "Related Datasets and External Resources Linked",
-          "fields": ["related_datasets", "external_resources"],
+          "fields": [
+            "related_datasets",
+            "external_resources"
+          ],
           "score": 1,
           "rationale": "external_resources list contains 4 resources: publications page, Nature Metabolism article (DOI), BMJ Open article (DOI), and Zenodo record (DOI).",
           "semantic_notes": "All DOIs follow proper format. External resources include both documentation and related publications. No formal related_datasets relationships."
@@ -171,35 +201,49 @@
       "sub_elements": [
         {
           "name": "License Terms Allow Reuse",
-          "fields": ["license_and_use_terms"],
+          "fields": [
+            "license_and_use_terms"
+          ],
           "score": 1,
           "rationale": "license_and_use_terms describes public data available with 'license defining permitted uses' and full dataset via DUA.",
           "semantic_notes": "General licensing framework described but specific license type not named (e.g., CC-BY, CC0, custom)."
         },
         {
           "name": "Data Formats Are Standardized (encoding, format)",
-          "fields": ["format", "encoding"],
+          "fields": [
+            "format",
+            "encoding"
+          ],
           "score": 0,
           "rationale": "No format or encoding fields present at collection or resource level.",
           "semantic_notes": "Missing technical format specifications. Distribution_formats mentions formats are 'documented per domain' but not in D4D metadata."
         },
         {
           "name": "Schema or Ontology Conformance Stated",
-          "fields": ["conforms_to", "conforms_to_schema"],
+          "fields": [
+            "conforms_to",
+            "conforms_to_schema"
+          ],
           "score": 0,
           "rationale": "No conforms_to or conforms_to_schema fields present.",
           "semantic_notes": "Keywords mention 'FAIR principles' and 'Healthsheet' but no formal schema conformance declarations."
         },
         {
           "name": "Variable Metadata with Identifiers Defined",
-          "fields": ["variables"],
+          "fields": [
+            "variables"
+          ],
           "score": 0,
           "rationale": "No variables field present.",
           "semantic_notes": "Instances describe data domains (survey, clinical, imaging, etc.) but lack variable-level metadata."
         },
         {
           "name": "Use Guidance Provided (intended, prohibited uses)",
-          "fields": ["intended_uses", "prohibited_uses", "discouraged_uses"],
+          "fields": [
+            "intended_uses",
+            "prohibited_uses",
+            "discouraged_uses"
+          ],
           "score": 1,
           "rationale": "discouraged_uses present with description 'Not specified; users must adhere to license terms and the Data Use Agreement.' future_use_impacts describes considerations for model fairness and privacy.",
           "semantic_notes": "Minimal use guidance. Discouraged uses acknowledge reliance on external documents (license, DUA) rather than explicit prohibitions."
@@ -213,35 +257,47 @@
       "sub_elements": [
         {
           "name": "IRB or Ethics Review Documented",
-          "fields": ["ethical_reviews", "human_subject_research"],
+          "fields": [
+            "ethical_reviews",
+            "human_subject_research"
+          ],
           "score": 0,
           "rationale": "No ethical_reviews or human_subject_research fields present.",
           "semantic_notes": "Dataset clearly involves human subjects (T2DM participants) but IRB/ethics review not documented in metadata."
         },
         {
           "name": "Deidentification Method Described",
-          "fields": ["is_deidentified"],
+          "fields": [
+            "is_deidentified"
+          ],
           "score": 1,
           "rationale": "is_deidentified present with description 'Public data are released under licensing terms; sensitive elements are held under controlled access via DUA to protect participant privacy.'",
           "semantic_notes": "Describes access control approach but not technical deidentification methods (e.g., k-anonymity, date shifting)."
         },
         {
           "name": "Privacy Protections Beyond Deidentification",
-          "fields": ["participant_privacy"],
+          "fields": [
+            "participant_privacy"
+          ],
           "score": 0,
           "rationale": "No participant_privacy field present.",
           "semantic_notes": "Access controls (DUA) and tiered data release described but no additional privacy safeguards documented."
         },
         {
           "name": "Informed Consent Obtained from Participants",
-          "fields": ["informed_consent"],
+          "fields": [
+            "informed_consent"
+          ],
           "score": 0,
           "rationale": "No informed_consent field present.",
           "semantic_notes": "Consent process not documented despite human subject research with PHI collection."
         },
         {
           "name": "Vulnerable Populations and Compensation Documented",
-          "fields": ["vulnerable_populations", "participant_compensation"],
+          "fields": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
           "score": 0,
           "rationale": "No vulnerable_populations or participant_compensation fields present.",
           "semantic_notes": "Dataset involves health condition (T2DM) which could constitute vulnerability, but not documented. No compensation info."
@@ -255,35 +311,47 @@
       "sub_elements": [
         {
           "name": "Cohort or Subpopulations Characteristics Described",
-          "fields": ["subpopulations"],
+          "fields": [
+            "subpopulations"
+          ],
           "score": 1,
           "rationale": "subpopulations present with description: 'Participants with and without T2DM; diabetes severity strata with recruitment aimed at approximate balance by severity.'",
           "semantic_notes": "Describes case/control structure and stratification strategy but lacks demographic details."
         },
         {
           "name": "Number of Instances or Samples Reported",
-          "fields": ["instances"],
+          "fields": [
+            "instances"
+          ],
           "score": 1,
           "rationale": "instances present with detailed description of data modalities but no specific count: 'Individuals (participants) with and without T2DM with multi-domain measurements including survey responses; physical and clinical measurements; blood and urine lab results; retinal imaging; ECG; wearable device time-series; blood glucose; and environmental sensor data.'",
           "semantic_notes": "Describes instance structure comprehensively but lacks N (sample size). Mentions 'ongoing enrollment'."
         },
         {
           "name": "Variable-Level Metadata and Tabular Flag",
-          "fields": ["variables", "is_tabular"],
+          "fields": [
+            "variables",
+            "is_tabular"
+          ],
           "score": 0,
           "rationale": "Neither variables nor is_tabular fields present.",
           "semantic_notes": "Multimodal dataset (tabular + images + time-series) but structure not formally declared."
         },
         {
           "name": "Data Topics or Conditions Represented",
-          "fields": ["instances"],
+          "fields": [
+            "instances"
+          ],
           "score": 1,
           "rationale": "instances description comprehensively covers data domains: survey, clinical, lab, imaging (retinal), ECG, wearables, glucose monitoring, environmental sensors.",
           "semantic_notes": "Rich description of multimodal data types and medical measurements relevant to T2DM."
         },
         {
           "name": "Data Quality Issues and Anomalies Documented",
-          "fields": ["anomalies", "sampling_strategies"],
+          "fields": [
+            "anomalies",
+            "sampling_strategies"
+          ],
           "score": 0,
           "rationale": "anomalies present with description 'Ongoing enrollment means early releases may exhibit unbalanced distributions across groups.' sampling_strategies present describing recruitment targeting balance. However, no systematic quality metrics or anomaly detection results.",
           "semantic_notes": "Acknowledges enrollment-related imbalance but lacks technical quality metrics (missingness, outliers, errors). Changed to 0 because anomalies describes anticipated issues, not documented quality assessments."
@@ -297,35 +365,47 @@
       "sub_elements": [
         {
           "name": "Dataset Version Number Provided",
-          "fields": ["version"],
+          "fields": [
+            "version"
+          ],
           "score": 0,
           "rationale": "No version field present.",
           "semantic_notes": "version_access mentions version numbers (e.g., v1.0.0, v2.0.0) but current version not specified."
         },
         {
           "name": "Version Access Methods Documented",
-          "fields": ["version_access"],
+          "fields": [
+            "version_access"
+          ],
           "score": 1,
           "rationale": "version_access present with description: 'Separate documentation versions align to dataset versions (e.g., v1.0.0, v2.0.0); users can navigate between versions via the documentation site.'",
           "semantic_notes": "Describes version navigation mechanism via documentation site but lacks specific URL or access protocol."
         },
         {
           "name": "Change Descriptions and Errata Provided",
-          "fields": ["errata", "updates"],
+          "fields": [
+            "errata",
+            "updates"
+          ],
           "score": 0,
           "rationale": "errata is empty list. updates present with description 'Periodic updates to data releases are planned as enrollment proceeds; documentation versions align with dataset versions.' but no specific changelog.",
           "semantic_notes": "Update plan described but no actual errata or version-specific changes documented."
         },
         {
           "name": "Update Schedule or Frequency Indicated",
-          "fields": ["updates"],
+          "fields": [
+            "updates"
+          ],
           "score": 0,
           "rationale": "updates describes 'periodic updates' and 'planned' releases but no specific schedule (e.g., quarterly, annual).",
           "semantic_notes": "General update policy without concrete timeline or frequency."
         },
         {
           "name": "Provenance and Source Derivation Documented",
-          "fields": ["was_derived_from", "release_notes"],
+          "fields": [
+            "was_derived_from",
+            "release_notes"
+          ],
           "score": 0,
           "rationale": "Neither was_derived_from nor release_notes fields present.",
           "semantic_notes": "No formal provenance chain. external_resources link to publications but not source datasets."
@@ -339,35 +419,46 @@
       "sub_elements": [
         {
           "name": "Motivation or Purpose for Dataset Creation",
-          "fields": ["purposes"],
+          "fields": [
+            "purposes"
+          ],
           "score": 1,
           "rationale": "purposes present with description: 'Better understand salutogenesis (pathway from disease to health) in T2DM using a harmonized, multi-domain dataset designed for AI/ML research.'",
           "semantic_notes": "Clear scientific motivation focused on salutogenesis research and AI/ML applications in T2DM."
         },
         {
           "name": "Primary Research Objectives or Tasks",
-          "fields": ["tasks"],
+          "fields": [
+            "tasks"
+          ],
           "score": 1,
           "rationale": "tasks present with description: 'Enable downstream AI/ML analyses across survey, clinical, imaging, wearable, and environmental domains related to T2DM.'",
           "semantic_notes": "Tasks align with purpose and specify target analytical approaches and data domains."
         },
         {
           "name": "Funding Sources and Mechanisms Listed",
-          "fields": ["funders"],
+          "fields": [
+            "funders"
+          ],
           "score": 0,
           "rationale": "No funders field present.",
           "semantic_notes": "AI-READI is NIH-funded (Bridge2AI program) but funding not documented in D4D metadata."
         },
         {
           "name": "Grant IDs or Award Numbers Present",
-          "fields": ["funders"],
+          "fields": [
+            "funders"
+          ],
           "score": 0,
           "rationale": "No funders field present, therefore no grant IDs.",
           "semantic_notes": "Missing NIH grant number (known to be OT2OD032644 from external sources)."
         },
         {
           "name": "Creators and Acknowledgements Documented",
-          "fields": ["creators", "funders"],
+          "fields": [
+            "creators",
+            "funders"
+          ],
           "score": 0,
           "rationale": "No creators or funders fields present.",
           "semantic_notes": "Only maintainers field present ('AI-READI Project Team'). Missing institutional affiliations and individual contributors."
@@ -381,35 +472,48 @@
       "sub_elements": [
         {
           "name": "Collection Mechanisms and Settings Described",
-          "fields": ["collection_mechanisms"],
+          "fields": [
+            "collection_mechanisms"
+          ],
           "score": 1,
           "rationale": "collection_mechanisms present with description: 'Hardware devices and sensors (e.g., retinal imaging, ECG, wearables, environmental monitors), clinical procedures (e.g., monofilament and cognitive testing), and software-driven capture with manual curation as needed.'",
           "semantic_notes": "Describes device types and procedures but lacks specific models, settings, or protocols."
         },
         {
           "name": "Data Acquisition Methods Listed",
-          "fields": ["acquisition_methods"],
+          "fields": [
+            "acquisition_methods"
+          ],
           "score": 1,
           "rationale": "acquisition_methods present with description: 'Harmonized, multi-domain data acquisition across three collection sites using surveys, clinical exams, imaging devices, wearable sensors, and environmental monitors.'",
           "semantic_notes": "High-level acquisition strategy described. Mentions harmonization and multi-site collection but lacks protocol details."
         },
         {
           "name": "Preprocessing, Cleaning, and Labeling Strategies",
-          "fields": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "fields": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
           "score": 1,
           "rationale": "All three fields present. preprocessing_strategies: 'Domain-specific processing and harmonization described in the dataset documentation (file formats, standards, metadata, example outputs).' cleaning_strategies: 'Harmonization and processing across three sites with domain-specific details provided in the documentation.' labeling_strategies: 'Domain-specific labeling/annotation where applicable (e.g., clinical test outputs, imaging outputs), as described in the documentation.'",
           "semantic_notes": "All present but defer to external documentation rather than providing inline details. Harmonization emphasized."
         },
         {
           "name": "Software and Tools Documented",
-          "fields": ["software_and_tools"],
+          "fields": [
+            "software_and_tools"
+          ],
           "score": 0,
           "rationale": "No software_and_tools field present.",
           "semantic_notes": "Missing information about analysis software, data management platforms, or processing pipelines used."
         },
         {
           "name": "External Standards and Resources Referenced",
-          "fields": ["external_resources", "conforms_to"],
+          "fields": [
+            "external_resources",
+            "conforms_to"
+          ],
           "score": 0,
           "rationale": "external_resources present with 4 items (publications and Zenodo record) but no technical standards. No conforms_to field.",
           "semantic_notes": "External resources are publications, not technical standards or specifications. Keywords mention 'FAIR principles' but not as conformance claim."
@@ -423,35 +527,46 @@
       "sub_elements": [
         {
           "name": "Known Limitations Documented",
-          "fields": ["known_limitations"],
+          "fields": [
+            "known_limitations"
+          ],
           "score": 0,
           "rationale": "No known_limitations field present.",
           "semantic_notes": "anomalies and future_use_impacts mention imbalance issues but no formal limitations field."
         },
         {
           "name": "Systematic Biases Identified and Described",
-          "fields": ["known_biases"],
+          "fields": [
+            "known_biases"
+          ],
           "score": 0,
           "rationale": "No known_biases field present.",
           "semantic_notes": "Sampling strategy targets balance but no discussion of representativeness, selection bias, or measurement bias."
         },
         {
           "name": "Data Anomalies and Quality Issues Noted",
-          "fields": ["anomalies"],
+          "fields": [
+            "anomalies"
+          ],
           "score": 1,
           "rationale": "anomalies present with description: 'Ongoing enrollment means early releases may exhibit unbalanced distributions across groups.'",
           "semantic_notes": "Describes anticipated distributional anomaly related to phased enrollment. Lacks systematic quality assessment."
         },
         {
           "name": "Sensitive Content and Warnings Provided",
-          "fields": ["sensitive_elements", "content_warnings"],
+          "fields": [
+            "sensitive_elements",
+            "content_warnings"
+          ],
           "score": 0,
           "rationale": "sensitive_elements present with description of genetic data, PHI, demographics, and location data. content_warnings is empty list.",
           "semantic_notes": "Sensitive data cataloged but no explicit warnings about potential misuse or re-identification risks."
         },
         {
           "name": "Ethical Review Details Including Conflicts",
-          "fields": ["ethical_reviews"],
+          "fields": [
+            "ethical_reviews"
+          ],
           "score": 0,
           "rationale": "No ethical_reviews field present.",
           "semantic_notes": "Human subjects research without documented ethical oversight or conflict of interest disclosures."
@@ -465,35 +580,47 @@
       "sub_elements": [
         {
           "name": "Dataset Published on a Recognized Platform",
-          "fields": ["publisher"],
+          "fields": [
+            "publisher"
+          ],
           "score": 0,
           "rationale": "No publisher field present.",
           "semantic_notes": "Hosted on FAIRhub.io (page URL) but publisher organization not formally declared."
         },
         {
           "name": "Citation and DOI for Cross-referencing",
-          "fields": ["citation", "doi"],
+          "fields": [
+            "citation",
+            "doi"
+          ],
           "score": 0,
           "rationale": "No citation or doi fields present. DOI exists in same_as field (https://doi.org/10.5281/zenodo.10642459) but not in dedicated fields.",
           "semantic_notes": "DOI present in same_as but no recommended citation text. DOI is Zenodo format (valid)."
         },
         {
           "name": "Community Standards or Schema Conformance",
-          "fields": ["conforms_to"],
+          "fields": [
+            "conforms_to"
+          ],
           "score": 0,
           "rationale": "No conforms_to field present.",
           "semantic_notes": "Keywords mention 'FAIR principles' and 'Healthsheet' but no formal conformance declarations."
         },
         {
           "name": "Outreach Materials and Documentation Links",
-          "fields": ["external_resources", "page"],
+          "fields": [
+            "external_resources",
+            "page"
+          ],
           "score": 0,
           "rationale": "external_resources contains 4 items: publications page, 2 journal articles, 1 Zenodo record. page field present with FAIRhub URL. However, no links to tutorials, documentation site, or user guides.",
           "semantic_notes": "Has landing page and publication links but missing educational materials. Documentation deferred to external site per text."
         },
         {
           "name": "Related Datasets with Typed Relationships",
-          "fields": ["related_datasets"],
+          "fields": [
+            "related_datasets"
+          ],
           "score": 0,
           "rationale": "No related_datasets field present.",
           "semantic_notes": "Zenodo record and publications linked via external_resources but no formal dataset relationships (e.g., isPartOf, isDerivedFrom)."
@@ -627,7 +754,10 @@
       },
       "privacy_framework": {
         "tiered_access": true,
-        "tiers": ["public", "controlled"],
+        "tiers": [
+          "public",
+          "controlled"
+        ],
         "access_mechanism": "License agreement for public; Data Use Agreement (DUA) for controlled",
         "phi_present": true,
         "genetic_data": true,
@@ -717,5 +847,21 @@
       "Add participant_compensation details if relevant",
       "Document vulnerable_populations considerations"
     ]
+  },
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "AI",
+  "method": "READI_gpt5",
+  "d4d_file": "data/d4d_concatenated/READI_gpt5/AI_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.224994",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 0.0,
+    "total_max_score": 0.0,
+    "overall_percentage": 0
   }
 }

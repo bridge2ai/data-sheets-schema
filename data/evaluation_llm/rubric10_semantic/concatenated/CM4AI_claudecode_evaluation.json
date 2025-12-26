@@ -88,13 +88,41 @@
     "metadata_richness": {
       "keyword_count": 19,
       "keyword_categories": {
-        "general": ["AI", "artificial intelligence", "machine learning", "Bridge2AI"],
-        "project": ["CM4AI", "functional genomics"],
-        "methods": ["perturb-seq", "CRISPR/Cas9", "SEC-MS"],
-        "biology": ["induced pluripotent stem cell", "iPSC", "KOLF2.1J", "protein-protein interaction", "protein localization", "subcellular imaging"],
-        "disease": ["MDA-MB-468", "breast cancer"],
-        "drugs": ["paclitaxel", "vorinostat"],
-        "standards": ["RO-Crate", "FAIRSCAPE"]
+        "general": [
+          "AI",
+          "artificial intelligence",
+          "machine learning",
+          "Bridge2AI"
+        ],
+        "project": [
+          "CM4AI",
+          "functional genomics"
+        ],
+        "methods": [
+          "perturb-seq",
+          "CRISPR/Cas9",
+          "SEC-MS"
+        ],
+        "biology": [
+          "induced pluripotent stem cell",
+          "iPSC",
+          "KOLF2.1J",
+          "protein-protein interaction",
+          "protein localization",
+          "subcellular imaging"
+        ],
+        "disease": [
+          "MDA-MB-468",
+          "breast cancer"
+        ],
+        "drugs": [
+          "paclitaxel",
+          "vorinostat"
+        ],
+        "standards": [
+          "RO-Crate",
+          "FAIRSCAPE"
+        ]
       },
       "semantic_coherence": "EXCELLENT - Keywords span technical, biological, and methodological domains"
     },
@@ -180,8 +208,15 @@
         {
           "name": "Persistent Identifier (DOI, RRID, or URI)",
           "score": 1,
-          "fields_checked": ["doi", "rrid", "id"],
-          "found": ["doi", "id"],
+          "fields_checked": [
+            "doi",
+            "rrid",
+            "id"
+          ],
+          "found": [
+            "doi",
+            "id"
+          ],
           "values": {
             "doi": null,
             "id": "https://doi.org/10.18130/V3/B35XWX"
@@ -191,8 +226,14 @@
         {
           "name": "Dataset Title and Description Completeness",
           "score": 1,
-          "fields_checked": ["title", "description"],
-          "found": ["title", "description"],
+          "fields_checked": [
+            "title",
+            "description"
+          ],
+          "found": [
+            "title",
+            "description"
+          ],
           "values": {
             "title": "Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)",
             "description_length": 597
@@ -202,8 +243,12 @@
         {
           "name": "Keywords or Tags for Searchability",
           "score": 1,
-          "fields_checked": ["keywords"],
-          "found": ["keywords"],
+          "fields_checked": [
+            "keywords"
+          ],
+          "found": [
+            "keywords"
+          ],
           "values": {
             "keyword_count": 19
           },
@@ -212,8 +257,13 @@
         {
           "name": "Landing Page and Resources (page, hierarchical resources)",
           "score": 1,
-          "fields_checked": ["page", "resources"],
-          "found": ["page"],
+          "fields_checked": [
+            "page",
+            "resources"
+          ],
+          "found": [
+            "page"
+          ],
           "values": {
             "page": "https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/B35XWX"
           },
@@ -222,8 +272,13 @@
         {
           "name": "Hierarchical Structure (parent datasets, relationships)",
           "score": 1,
-          "fields_checked": ["parent_datasets", "related_datasets"],
-          "found": ["external_resources"],
+          "fields_checked": [
+            "parent_datasets",
+            "related_datasets"
+          ],
+          "found": [
+            "external_resources"
+          ],
           "values": {
             "subsets_count": 5,
             "external_resources_count": 3
@@ -243,8 +298,13 @@
         {
           "name": "Access Policy and IP Restrictions Defined",
           "score": 1,
-          "fields_checked": ["license_and_use_terms", "ip_restrictions"],
-          "found": ["license_and_use_terms"],
+          "fields_checked": [
+            "license_and_use_terms",
+            "ip_restrictions"
+          ],
+          "found": [
+            "license_and_use_terms"
+          ],
           "values": {
             "license": "CC BY-NC-SA 4.0",
             "ip_restrictions": null
@@ -254,7 +314,10 @@
         {
           "name": "Regulatory Restrictions and Confidentiality Level Specified",
           "score": 0,
-          "fields_checked": ["regulatory_restrictions", "confidentiality_level"],
+          "fields_checked": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No regulatory restrictions or confidentiality level specified; cell line data may not require this"
@@ -262,7 +325,9 @@
         {
           "name": "Download URL or Platform Link Available",
           "score": 0,
-          "fields_checked": ["download_url"],
+          "fields_checked": [
+            "download_url"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No explicit download_url field; distribution_formats contains access_urls pointing to Dataverse landing page"
@@ -270,8 +335,14 @@
         {
           "name": "Distribution Formats and File Types Specified",
           "score": 1,
-          "fields_checked": ["distribution_formats", "format", "media_type"],
-          "found": ["distribution_formats"],
+          "fields_checked": [
+            "distribution_formats",
+            "format",
+            "media_type"
+          ],
+          "found": [
+            "distribution_formats"
+          ],
           "values": {
             "access_urls_count": 1,
             "format": null,
@@ -282,8 +353,13 @@
         {
           "name": "Related Datasets and External Resources Linked",
           "score": 1,
-          "fields_checked": ["related_datasets", "external_resources"],
-          "found": ["external_resources"],
+          "fields_checked": [
+            "related_datasets",
+            "external_resources"
+          ],
+          "found": [
+            "external_resources"
+          ],
           "values": {
             "external_resources_count": 3,
             "related_datasets": null
@@ -303,8 +379,12 @@
         {
           "name": "License Terms Allow Reuse",
           "score": 1,
-          "fields_checked": ["license_and_use_terms"],
-          "found": ["license_and_use_terms"],
+          "fields_checked": [
+            "license_and_use_terms"
+          ],
+          "found": [
+            "license_and_use_terms"
+          ],
           "values": {
             "license": "CC BY-NC-SA 4.0",
             "reuse_allowed": "Yes, non-commercial with attribution"
@@ -314,7 +394,10 @@
         {
           "name": "Data Formats Are Standardized (encoding, format)",
           "score": 0,
-          "fields_checked": ["format", "encoding"],
+          "fields_checked": [
+            "format",
+            "encoding"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No top-level format or encoding fields; RO-Crate mentioned but not formally specified in schema fields"
@@ -322,7 +405,10 @@
         {
           "name": "Schema or Ontology Conformance Stated",
           "score": 0,
-          "fields_checked": ["conforms_to", "conforms_to_schema"],
+          "fields_checked": [
+            "conforms_to",
+            "conforms_to_schema"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No explicit conforms_to or conforms_to_schema fields; FAIRSCAPE framework mentioned but not formalized"
@@ -330,7 +416,9 @@
         {
           "name": "Variable Metadata with Identifiers Defined",
           "score": 0,
-          "fields_checked": ["variables"],
+          "fields_checked": [
+            "variables"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No variables field; dataset contains multiple heterogeneous data types not suited to variable-level metadata"
@@ -338,8 +426,14 @@
         {
           "name": "Use Guidance Provided (intended, prohibited uses)",
           "score": 1,
-          "fields_checked": ["intended_uses", "prohibited_uses", "discouraged_uses"],
-          "found": ["discouraged_uses"],
+          "fields_checked": [
+            "intended_uses",
+            "prohibited_uses",
+            "discouraged_uses"
+          ],
+          "found": [
+            "discouraged_uses"
+          ],
           "values": {
             "discouraged_uses": "Commercial use restrictions (CC BY-NC-SA 4.0)",
             "future_use_impacts": "Cell line-specific characteristics warning"
@@ -359,7 +453,10 @@
         {
           "name": "IRB or Ethics Review Documented",
           "score": 0,
-          "fields_checked": ["ethical_reviews", "human_subject_research"],
+          "fields_checked": [
+            "ethical_reviews",
+            "human_subject_research"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No ethical review documentation; dataset uses cell lines (iPSCs, cancer cell lines) not human subjects research"
@@ -367,7 +464,9 @@
         {
           "name": "Deidentification Method Described",
           "score": 0,
-          "fields_checked": ["is_deidentified"],
+          "fields_checked": [
+            "is_deidentified"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No deidentification field; not applicable to cell line data"
@@ -375,7 +474,9 @@
         {
           "name": "Privacy Protections Beyond Deidentification",
           "score": 0,
-          "fields_checked": ["participant_privacy"],
+          "fields_checked": [
+            "participant_privacy"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "Not applicable - cell line research without human participants"
@@ -383,7 +484,9 @@
         {
           "name": "Informed Consent Obtained from Participants",
           "score": 0,
-          "fields_checked": ["informed_consent"],
+          "fields_checked": [
+            "informed_consent"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "Not applicable - cell line research without human participants"
@@ -391,7 +494,10 @@
         {
           "name": "Vulnerable Populations and Compensation Documented",
           "score": 0,
-          "fields_checked": ["vulnerable_populations", "participant_compensation"],
+          "fields_checked": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "Not applicable - cell line research without human participants"
@@ -409,7 +515,9 @@
         {
           "name": "Cohort or Subpopulations Characteristics Described",
           "score": 0,
-          "fields_checked": ["subpopulations"],
+          "fields_checked": [
+            "subpopulations"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No subpopulations field; not applicable to cell line data (no demographic cohorts)"
@@ -417,8 +525,12 @@
         {
           "name": "Number of Instances or Samples Reported",
           "score": 1,
-          "fields_checked": ["instances"],
-          "found": ["instances"],
+          "fields_checked": [
+            "instances"
+          ],
+          "found": [
+            "instances"
+          ],
           "values": {
             "instance_description": "11,739 targeted genes (CRISPRi), 563 proteins (IF imaging), multiple cell types (SEC-MS)"
           },
@@ -427,7 +539,10 @@
         {
           "name": "Variable-Level Metadata and Tabular Flag",
           "score": 0,
-          "fields_checked": ["variables", "is_tabular"],
+          "fields_checked": [
+            "variables",
+            "is_tabular"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No variables or is_tabular fields; multi-modal dataset (sequencing, mass spec, imaging) not purely tabular"
@@ -435,19 +550,38 @@
         {
           "name": "Data Topics or Conditions Represented",
           "score": 1,
-          "fields_checked": ["instances"],
-          "found": ["instances"],
+          "fields_checked": [
+            "instances"
+          ],
+          "found": [
+            "instances"
+          ],
           "values": {
-            "cell_types": ["iPSCs", "NPCs", "neurons", "cardiomyocytes", "MDA-MB-468 breast cancer"],
-            "conditions": ["untreated", "paclitaxel", "vorinostat"]
+            "cell_types": [
+              "iPSCs",
+              "NPCs",
+              "neurons",
+              "cardiomyocytes",
+              "MDA-MB-468 breast cancer"
+            ],
+            "conditions": [
+              "untreated",
+              "paclitaxel",
+              "vorinostat"
+            ]
           },
           "semantic_notes": "Instances description covers cell types, experimental conditions, and biological topics"
         },
         {
           "name": "Data Quality Issues and Anomalies Documented",
           "score": 1,
-          "fields_checked": ["anomalies", "sampling_strategies"],
-          "found": ["sampling_strategies"],
+          "fields_checked": [
+            "anomalies",
+            "sampling_strategies"
+          ],
+          "found": [
+            "sampling_strategies"
+          ],
           "values": {
             "sampling_strategy": "Disease-relevant cell lines selected for AI-ready functional genomics mapping"
           },
@@ -466,7 +600,9 @@
         {
           "name": "Dataset Version Number Provided",
           "score": 0,
-          "fields_checked": ["version"],
+          "fields_checked": [
+            "version"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No top-level version field; version 1.4 mentioned in updates section"
@@ -474,8 +610,12 @@
         {
           "name": "Version Access Methods Documented",
           "score": 1,
-          "fields_checked": ["version_access"],
-          "found": ["version_access"],
+          "fields_checked": [
+            "version_access"
+          ],
+          "found": [
+            "version_access"
+          ],
           "values": {
             "version_access": "Dataset versioned through University of Virginia Dataverse with DOI persistence"
           },
@@ -484,8 +624,13 @@
         {
           "name": "Change Descriptions and Errata Provided",
           "score": 1,
-          "fields_checked": ["errata", "updates"],
-          "found": ["updates"],
+          "fields_checked": [
+            "errata",
+            "updates"
+          ],
+          "found": [
+            "updates"
+          ],
           "values": {
             "updates": "Data will be augmented regularly through end of Bridge2AI project"
           },
@@ -494,8 +639,12 @@
         {
           "name": "Update Schedule or Frequency Indicated",
           "score": 1,
-          "fields_checked": ["updates"],
-          "found": ["updates"],
+          "fields_checked": [
+            "updates"
+          ],
+          "found": [
+            "updates"
+          ],
           "values": {
             "update_schedule": "Regular data augmentation planned through Bridge2AI project end"
           },
@@ -504,7 +653,10 @@
         {
           "name": "Provenance and Source Derivation Documented",
           "score": 0,
-          "fields_checked": ["was_derived_from", "release_notes"],
+          "fields_checked": [
+            "was_derived_from",
+            "release_notes"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No was_derived_from or release_notes fields; provenance described narratively in preprocessing section (FAIRSCAPE provenance graphs)"
@@ -522,8 +674,12 @@
         {
           "name": "Motivation or Purpose for Dataset Creation",
           "score": 1,
-          "fields_checked": ["purposes"],
-          "found": ["purposes"],
+          "fields_checked": [
+            "purposes"
+          ],
+          "found": [
+            "purposes"
+          ],
           "values": {
             "purpose": "Create AI-ready maps of human cell architecture from disease-relevant cell lines"
           },
@@ -532,8 +688,12 @@
         {
           "name": "Primary Research Objectives or Tasks",
           "score": 1,
-          "fields_checked": ["tasks"],
-          "found": ["tasks"],
+          "fields_checked": [
+            "tasks"
+          ],
+          "found": [
+            "tasks"
+          ],
           "values": {
             "task": "Enable AI/machine learning research on functional genomics data"
           },
@@ -542,7 +702,9 @@
         {
           "name": "Funding Sources and Mechanisms Listed",
           "score": 0,
-          "fields_checked": ["funders"],
+          "fields_checked": [
+            "funders"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No funders field; funding information present only in comment (NIH 1OT2OD032742-01)"
@@ -550,7 +712,9 @@
         {
           "name": "Grant IDs or Award Numbers Present",
           "score": 0,
-          "fields_checked": ["funders"],
+          "fields_checked": [
+            "funders"
+          ],
           "found": [],
           "values": {
             "grant_in_comment": "NIH 1OT2OD032742-01 (Bridge2AI CM4AI)"
@@ -560,7 +724,10 @@
         {
           "name": "Creators and Acknowledgements Documented",
           "score": 0,
-          "fields_checked": ["creators", "funders"],
+          "fields_checked": [
+            "creators",
+            "funders"
+          ],
           "found": [],
           "values": {
             "creators_in_comment": "Multi-institutional consortium led by Trey Ideker, Tim Clark, Nevan Krogan, Emma Lundberg, Prashant Mali, Andrej Sali"
@@ -580,28 +747,50 @@
         {
           "name": "Collection Mechanisms and Settings Described",
           "score": 1,
-          "fields_checked": ["collection_mechanisms"],
-          "found": ["collection_mechanisms"],
+          "fields_checked": [
+            "collection_mechanisms"
+          ],
+          "found": [
+            "collection_mechanisms"
+          ],
           "values": {
-            "mechanisms": ["CRISPRi gene knockdown", "SEC-MS", "Confocal microscopy with multi-stain protocol"]
+            "mechanisms": [
+              "CRISPRi gene knockdown",
+              "SEC-MS",
+              "Confocal microscopy with multi-stain protocol"
+            ]
           },
           "semantic_notes": "Collection mechanisms well documented with specific instruments and protocols"
         },
         {
           "name": "Data Acquisition Methods Listed",
           "score": 1,
-          "fields_checked": ["acquisition_methods"],
-          "found": ["acquisition_methods"],
+          "fields_checked": [
+            "acquisition_methods"
+          ],
+          "found": [
+            "acquisition_methods"
+          ],
           "values": {
-            "methods": ["CRISPRi perturbation sequencing", "SEC-MS", "ICC-IF confocal microscopy"]
+            "methods": [
+              "CRISPRi perturbation sequencing",
+              "SEC-MS",
+              "ICC-IF confocal microscopy"
+            ]
           },
           "semantic_notes": "Acquisition methods comprehensive with was_directly_observed flag and detailed acquisition_details"
         },
         {
           "name": "Preprocessing, Cleaning, and Labeling Strategies",
           "score": 1,
-          "fields_checked": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
-          "found": ["preprocessing_strategies"],
+          "fields_checked": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
+          "found": [
+            "preprocessing_strategies"
+          ],
           "values": {
             "preprocessing": "RO-Crate packaging with FAIRSCAPE framework, provenance metadata, ontology annotations"
           },
@@ -610,7 +799,9 @@
         {
           "name": "Software and Tools Documented",
           "score": 0,
-          "fields_checked": ["software_and_tools"],
+          "fields_checked": [
+            "software_and_tools"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No software_and_tools field; specific analysis software not documented"
@@ -618,11 +809,22 @@
         {
           "name": "External Standards and Resources Referenced",
           "score": 1,
-          "fields_checked": ["external_resources", "conforms_to"],
-          "found": ["external_resources"],
+          "fields_checked": [
+            "external_resources",
+            "conforms_to"
+          ],
+          "found": [
+            "external_resources"
+          ],
           "values": {
-            "external_resources": ["CM4AI.org", "bioRxiv publications"],
-            "standards_mentioned": ["RO-Crate", "FAIRSCAPE"]
+            "external_resources": [
+              "CM4AI.org",
+              "bioRxiv publications"
+            ],
+            "standards_mentioned": [
+              "RO-Crate",
+              "FAIRSCAPE"
+            ]
           },
           "semantic_notes": "External resources linked; RO-Crate and FAIRSCAPE standards mentioned but not in conforms_to field"
         }
@@ -639,7 +841,9 @@
         {
           "name": "Known Limitations Documented",
           "score": 0,
-          "fields_checked": ["known_limitations"],
+          "fields_checked": [
+            "known_limitations"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No known_limitations field; cell line-specific warnings in future_use_impacts but not formalized"
@@ -647,7 +851,9 @@
         {
           "name": "Systematic Biases Identified and Described",
           "score": 0,
-          "fields_checked": ["known_biases"],
+          "fields_checked": [
+            "known_biases"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No known_biases field present"
@@ -655,7 +861,9 @@
         {
           "name": "Data Anomalies and Quality Issues Noted",
           "score": 0,
-          "fields_checked": ["anomalies"],
+          "fields_checked": [
+            "anomalies"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No anomalies field present"
@@ -663,7 +871,10 @@
         {
           "name": "Sensitive Content and Warnings Provided",
           "score": 0,
-          "fields_checked": ["sensitive_elements", "content_warnings"],
+          "fields_checked": [
+            "sensitive_elements",
+            "content_warnings"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No sensitive_elements or content_warnings fields; not applicable to cell line data"
@@ -671,7 +882,9 @@
         {
           "name": "Ethical Review Details Including Conflicts",
           "score": 0,
-          "fields_checked": ["ethical_reviews"],
+          "fields_checked": [
+            "ethical_reviews"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No ethical_reviews field; not applicable to cell line research"
@@ -689,7 +902,9 @@
         {
           "name": "Dataset Published on a Recognized Platform",
           "score": 0,
-          "fields_checked": ["publisher"],
+          "fields_checked": [
+            "publisher"
+          ],
           "found": [],
           "values": {
             "platform": "University of Virginia Dataverse (mentioned in URLs)"
@@ -699,8 +914,13 @@
         {
           "name": "Citation and DOI for Cross-referencing",
           "score": 1,
-          "fields_checked": ["citation", "doi"],
-          "found": ["doi (in id field)"],
+          "fields_checked": [
+            "citation",
+            "doi"
+          ],
+          "found": [
+            "doi (in id field)"
+          ],
           "values": {
             "doi": "10.18130/V3/B35XWX",
             "citation": null
@@ -710,18 +930,29 @@
         {
           "name": "Community Standards or Schema Conformance",
           "score": 0,
-          "fields_checked": ["conforms_to"],
+          "fields_checked": [
+            "conforms_to"
+          ],
           "found": [],
           "values": {
-            "standards_mentioned": ["RO-Crate", "FAIRSCAPE"]
+            "standards_mentioned": [
+              "RO-Crate",
+              "FAIRSCAPE"
+            ]
           },
           "semantic_notes": "Standards mentioned in preprocessing but not in conforms_to field"
         },
         {
           "name": "Outreach Materials and Documentation Links",
           "score": 1,
-          "fields_checked": ["external_resources", "page"],
-          "found": ["external_resources", "page"],
+          "fields_checked": [
+            "external_resources",
+            "page"
+          ],
+          "found": [
+            "external_resources",
+            "page"
+          ],
           "values": {
             "external_resources_count": 3,
             "page": "Dataverse landing page"
@@ -731,7 +962,9 @@
         {
           "name": "Related Datasets with Typed Relationships",
           "score": 0,
-          "fields_checked": ["related_datasets"],
+          "fields_checked": [
+            "related_datasets"
+          ],
           "found": [],
           "values": {},
           "semantic_notes": "No related_datasets field with typed relationships"
@@ -835,5 +1068,21 @@
       "Formalize subset relationships using related_datasets with typed relationships",
       "Add variables metadata for tabular subsets (e.g., perturb-seq data)"
     ]
+  },
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "CM4AI",
+  "method": "claudecode",
+  "d4d_file": "data/d4d_concatenated/claudecode/CM4AI_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.228460",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 24.0,
+    "total_max_score": 50.0,
+    "overall_percentage": 48.0
   }
 }

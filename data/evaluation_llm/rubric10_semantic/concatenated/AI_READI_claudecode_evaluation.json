@@ -24,8 +24,14 @@
         {
           "name": "Persistent Identifier (DOI, RRID, or URI)",
           "score": 1,
-          "fields_checked": ["doi", "rrid", "id"],
-          "fields_present": ["id"],
+          "fields_checked": [
+            "doi",
+            "rrid",
+            "id"
+          ],
+          "fields_present": [
+            "id"
+          ],
           "values_found": {
             "id": "https://fairhub.io/datasets/2"
           },
@@ -40,8 +46,14 @@
         {
           "name": "Dataset Title and Description Completeness",
           "score": 1,
-          "fields_checked": ["title", "description"],
-          "fields_present": ["title", "description"],
+          "fields_checked": [
+            "title",
+            "description"
+          ],
+          "fields_present": [
+            "title",
+            "description"
+          ],
           "values_found": {
             "title": "Flagship Dataset of Type 2 Diabetes from the AI-READI Project",
             "description_length": 599
@@ -50,18 +62,46 @@
             "title_informative": true,
             "description_comprehensive": true,
             "description_word_count": 87,
-            "includes_key_concepts": ["Type 2 Diabetes", "AI/ML", "multi-domain", "harmonized"]
+            "includes_key_concepts": [
+              "Type 2 Diabetes",
+              "AI/ML",
+              "multi-domain",
+              "harmonized"
+            ]
           },
           "notes": "Comprehensive title and description with clear scope and purpose."
         },
         {
           "name": "Keywords or Tags for Searchability",
           "score": 1,
-          "fields_checked": ["keywords"],
-          "fields_present": ["keywords"],
+          "fields_checked": [
+            "keywords"
+          ],
+          "fields_present": [
+            "keywords"
+          ],
           "values_found": {
             "keywords_count": 18,
-            "keywords": ["Type 2 Diabetes", "T2DM", "AI-READI", "Machine Learning", "multimodal", "harmonized", "multi-site", "survey data", "clinical data", "imaging data", "wearable device data", "ECG", "retinal images", "blood glucose", "laboratory results", "environmental data", "FAIR principles", "Healthsheet"]
+            "keywords": [
+              "Type 2 Diabetes",
+              "T2DM",
+              "AI-READI",
+              "Machine Learning",
+              "multimodal",
+              "harmonized",
+              "multi-site",
+              "survey data",
+              "clinical data",
+              "imaging data",
+              "wearable device data",
+              "ECG",
+              "retinal images",
+              "blood glucose",
+              "laboratory results",
+              "environmental data",
+              "FAIR principles",
+              "Healthsheet"
+            ]
           },
           "semantic_validation": {
             "keyword_coverage": "excellent",
@@ -74,8 +114,13 @@
         {
           "name": "Landing Page and Resources (page, hierarchical resources)",
           "score": 1,
-          "fields_checked": ["page", "resources"],
-          "fields_present": ["page"],
+          "fields_checked": [
+            "page",
+            "resources"
+          ],
+          "fields_present": [
+            "page"
+          ],
           "values_found": {
             "page": "https://fairhub.io/datasets/2"
           },
@@ -89,7 +134,10 @@
         {
           "name": "Hierarchical Structure (parent datasets, relationships)",
           "score": 0,
-          "fields_checked": ["parent_datasets", "related_datasets"],
+          "fields_checked": [
+            "parent_datasets",
+            "related_datasets"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -112,8 +160,13 @@
         {
           "name": "Access Policy and IP Restrictions Defined",
           "score": 1,
-          "fields_checked": ["license_and_use_terms", "ip_restrictions"],
-          "fields_present": ["license_and_use_terms"],
+          "fields_checked": [
+            "license_and_use_terms",
+            "ip_restrictions"
+          ],
+          "fields_present": [
+            "license_and_use_terms"
+          ],
           "values_found": {
             "license_and_use_terms": "Present with description and license_terms"
           },
@@ -129,7 +182,10 @@
         {
           "name": "Regulatory Restrictions and Confidentiality Level Specified",
           "score": 1,
-          "fields_checked": ["regulatory_restrictions", "confidentiality_level"],
+          "fields_checked": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ],
           "fields_present": [],
           "values_found": {
             "confidential_elements": "Present with PHI details",
@@ -147,10 +203,14 @@
         {
           "name": "Download URL or Platform Link Available",
           "score": 0,
-          "fields_checked": ["download_url"],
+          "fields_checked": [
+            "download_url"
+          ],
           "fields_present": [],
           "values_found": {
-            "access_urls_in_distribution": ["https://fairhub.io/datasets/2"],
+            "access_urls_in_distribution": [
+              "https://fairhub.io/datasets/2"
+            ],
             "page": "https://fairhub.io/datasets/2"
           },
           "semantic_validation": {
@@ -163,8 +223,14 @@
         {
           "name": "Distribution Formats and File Types Specified",
           "score": 1,
-          "fields_checked": ["distribution_formats", "format", "media_type"],
-          "fields_present": ["distribution_formats"],
+          "fields_checked": [
+            "distribution_formats",
+            "format",
+            "media_type"
+          ],
+          "fields_present": [
+            "distribution_formats"
+          ],
           "values_found": {
             "distribution_formats": "Present with description and access_urls"
           },
@@ -179,18 +245,29 @@
         {
           "name": "Related Datasets and External Resources Linked",
           "score": 1,
-          "fields_checked": ["related_datasets", "external_resources"],
-          "fields_present": ["external_resources"],
+          "fields_checked": [
+            "related_datasets",
+            "external_resources"
+          ],
+          "fields_present": [
+            "external_resources"
+          ],
           "values_found": {
             "external_resources_count": 3,
             "external_resources": [
               {
                 "name": "AI-READI Dataset Documentation",
-                "urls": ["https://docs.aireadi.org", "https://fairhub.io/datasets/2"]
+                "urls": [
+                  "https://docs.aireadi.org",
+                  "https://fairhub.io/datasets/2"
+                ]
               },
               {
                 "name": "Related Publications",
-                "dois": ["10.1038/s42255-024-01165-x", "10.1136/bmjopen-2024-097449"]
+                "dois": [
+                  "10.1038/s42255-024-01165-x",
+                  "10.1136/bmjopen-2024-097449"
+                ]
               },
               {
                 "name": "Zenodo Archive",
@@ -222,8 +299,12 @@
         {
           "name": "License Terms Allow Reuse",
           "score": 1,
-          "fields_checked": ["license_and_use_terms"],
-          "fields_present": ["license_and_use_terms"],
+          "fields_checked": [
+            "license_and_use_terms"
+          ],
+          "fields_present": [
+            "license_and_use_terms"
+          ],
           "values_found": {
             "license_and_use_terms": "Public data with license, full dataset with DUA"
           },
@@ -237,7 +318,10 @@
         {
           "name": "Data Formats Are Standardized (encoding, format)",
           "score": 0,
-          "fields_checked": ["format", "encoding"],
+          "fields_checked": [
+            "format",
+            "encoding"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -250,7 +334,10 @@
         {
           "name": "Schema or Ontology Conformance Stated",
           "score": 0,
-          "fields_checked": ["conforms_to", "conforms_to_schema"],
+          "fields_checked": [
+            "conforms_to",
+            "conforms_to_schema"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -263,7 +350,9 @@
         {
           "name": "Variable Metadata with Identifiers Defined",
           "score": 0,
-          "fields_checked": ["variables"],
+          "fields_checked": [
+            "variables"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -275,8 +364,14 @@
         {
           "name": "Use Guidance Provided (intended, prohibited uses)",
           "score": 1,
-          "fields_checked": ["intended_uses", "prohibited_uses", "discouraged_uses"],
-          "fields_present": ["discouraged_uses"],
+          "fields_checked": [
+            "intended_uses",
+            "prohibited_uses",
+            "discouraged_uses"
+          ],
+          "fields_present": [
+            "discouraged_uses"
+          ],
           "values_found": {
             "future_use_impacts": "Present with bias and privacy considerations",
             "discouraged_uses": "Present with license adherence requirements"
@@ -301,7 +396,10 @@
         {
           "name": "IRB or Ethics Review Documented",
           "score": 0,
-          "fields_checked": ["ethical_reviews", "human_subject_research"],
+          "fields_checked": [
+            "ethical_reviews",
+            "human_subject_research"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -314,7 +412,9 @@
         {
           "name": "Deidentification Method Described",
           "score": 0,
-          "fields_checked": ["is_deidentified"],
+          "fields_checked": [
+            "is_deidentified"
+          ],
           "fields_present": [],
           "values_found": {
             "controlled_access_elements": "PHI documented in confidential_elements"
@@ -329,7 +429,9 @@
         {
           "name": "Privacy Protections Beyond Deidentification",
           "score": 1,
-          "fields_checked": ["participant_privacy"],
+          "fields_checked": [
+            "participant_privacy"
+          ],
           "fields_present": [],
           "values_found": {
             "confidential_elements": "PHI under controlled access",
@@ -346,7 +448,9 @@
         {
           "name": "Informed Consent Obtained from Participants",
           "score": 0,
-          "fields_checked": ["informed_consent"],
+          "fields_checked": [
+            "informed_consent"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -358,7 +462,10 @@
         {
           "name": "Vulnerable Populations and Compensation Documented",
           "score": 1,
-          "fields_checked": ["vulnerable_populations", "participant_compensation"],
+          "fields_checked": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
           "fields_present": [],
           "values_found": {
             "subpopulations": "T2DM stratified by severity"
@@ -383,8 +490,12 @@
         {
           "name": "Cohort or Subpopulations Characteristics Described",
           "score": 1,
-          "fields_checked": ["subpopulations"],
-          "fields_present": ["subpopulations"],
+          "fields_checked": [
+            "subpopulations"
+          ],
+          "fields_present": [
+            "subpopulations"
+          ],
           "values_found": {
             "subpopulations": "T2DM stratified by severity, ongoing enrollment"
           },
@@ -398,8 +509,12 @@
         {
           "name": "Number of Instances or Samples Reported",
           "score": 1,
-          "fields_checked": ["instances"],
-          "fields_present": ["instances"],
+          "fields_checked": [
+            "instances"
+          ],
+          "fields_present": [
+            "instances"
+          ],
           "values_found": {
             "instances": "Individual participants with multi-domain measurements"
           },
@@ -413,7 +528,10 @@
         {
           "name": "Variable-Level Metadata and Tabular Flag",
           "score": 0,
-          "fields_checked": ["variables", "is_tabular"],
+          "fields_checked": [
+            "variables",
+            "is_tabular"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -426,11 +544,24 @@
         {
           "name": "Data Topics or Conditions Represented",
           "score": 1,
-          "fields_checked": ["instances"],
-          "fields_present": ["instances"],
+          "fields_checked": [
+            "instances"
+          ],
+          "fields_present": [
+            "instances"
+          ],
           "values_found": {
             "primary_condition": "Type 2 Diabetes Mellitus",
-            "data_domains": ["survey", "clinical", "imaging", "wearable", "environmental", "lab results", "ECG", "blood glucose"]
+            "data_domains": [
+              "survey",
+              "clinical",
+              "imaging",
+              "wearable",
+              "environmental",
+              "lab results",
+              "ECG",
+              "blood glucose"
+            ]
           },
           "semantic_validation": {
             "condition_clear": true,
@@ -442,8 +573,14 @@
         {
           "name": "Data Quality Issues and Anomalies Documented",
           "score": 1,
-          "fields_checked": ["anomalies", "sampling_strategies"],
-          "fields_present": ["anomalies", "sampling_strategies"],
+          "fields_checked": [
+            "anomalies",
+            "sampling_strategies"
+          ],
+          "fields_present": [
+            "anomalies",
+            "sampling_strategies"
+          ],
           "values_found": {
             "anomalies": "Unbalanced distribution in early releases",
             "sampling_strategies": "Targeted recruitment for diabetes severity balance"
@@ -468,7 +605,9 @@
         {
           "name": "Dataset Version Number Provided",
           "score": 0,
-          "fields_checked": ["version"],
+          "fields_checked": [
+            "version"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -480,8 +619,12 @@
         {
           "name": "Version Access Methods Documented",
           "score": 1,
-          "fields_checked": ["version_access"],
-          "fields_present": ["version_access"],
+          "fields_checked": [
+            "version_access"
+          ],
+          "fields_present": [
+            "version_access"
+          ],
           "values_found": {
             "version_access": "Documentation version dropdown available"
           },
@@ -494,8 +637,13 @@
         {
           "name": "Change Descriptions and Errata Provided",
           "score": 0,
-          "fields_checked": ["errata", "updates"],
-          "fields_present": ["updates"],
+          "fields_checked": [
+            "errata",
+            "updates"
+          ],
+          "fields_present": [
+            "updates"
+          ],
           "values_found": {
             "updates": "Periodic releases planned, documentation versioned with dataset"
           },
@@ -509,8 +657,12 @@
         {
           "name": "Update Schedule or Frequency Indicated",
           "score": 1,
-          "fields_checked": ["updates"],
-          "fields_present": ["updates"],
+          "fields_checked": [
+            "updates"
+          ],
+          "fields_present": [
+            "updates"
+          ],
           "values_found": {
             "updates": "Periodic data releases as enrollment continues"
           },
@@ -524,7 +676,10 @@
         {
           "name": "Provenance and Source Derivation Documented",
           "score": 1,
-          "fields_checked": ["was_derived_from", "release_notes"],
+          "fields_checked": [
+            "was_derived_from",
+            "release_notes"
+          ],
           "fields_present": [],
           "values_found": {
             "data_sources": "3 harmonized collection sites",
@@ -550,8 +705,12 @@
         {
           "name": "Motivation or Purpose for Dataset Creation",
           "score": 1,
-          "fields_checked": ["purposes"],
-          "fields_present": ["purposes"],
+          "fields_checked": [
+            "purposes"
+          ],
+          "fields_present": [
+            "purposes"
+          ],
           "values_found": {
             "purposes": "Understand salutogenesis in T2DM using AI/ML"
           },
@@ -565,8 +724,12 @@
         {
           "name": "Primary Research Objectives or Tasks",
           "score": 1,
-          "fields_checked": ["tasks"],
-          "fields_present": ["tasks"],
+          "fields_checked": [
+            "tasks"
+          ],
+          "fields_present": [
+            "tasks"
+          ],
           "values_found": {
             "tasks": "Enable AI/ML analyses not feasible with existing sources"
           },
@@ -580,7 +743,9 @@
         {
           "name": "Funding Sources and Mechanisms Listed",
           "score": 0,
-          "fields_checked": ["funders"],
+          "fields_checked": [
+            "funders"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -592,7 +757,9 @@
         {
           "name": "Grant IDs or Award Numbers Present",
           "score": 0,
-          "fields_checked": ["funders"],
+          "fields_checked": [
+            "funders"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -603,7 +770,10 @@
         {
           "name": "Creators and Acknowledgements Documented",
           "score": 0,
-          "fields_checked": ["creators", "funders"],
+          "fields_checked": [
+            "creators",
+            "funders"
+          ],
           "fields_present": [],
           "values_found": {
             "maintainers": "AI-READI Project Team"
@@ -627,8 +797,12 @@
         {
           "name": "Collection Mechanisms and Settings Described",
           "score": 1,
-          "fields_checked": ["collection_mechanisms"],
-          "fields_present": ["collection_mechanisms"],
+          "fields_checked": [
+            "collection_mechanisms"
+          ],
+          "fields_present": [
+            "collection_mechanisms"
+          ],
           "values_found": {
             "collection_mechanisms": "Multi-modal hardware, clinical procedures, software-driven capture"
           },
@@ -643,8 +817,12 @@
         {
           "name": "Data Acquisition Methods Listed",
           "score": 1,
-          "fields_checked": ["acquisition_methods"],
-          "fields_present": ["acquisition_methods"],
+          "fields_checked": [
+            "acquisition_methods"
+          ],
+          "fields_present": [
+            "acquisition_methods"
+          ],
           "values_found": {
             "acquisition_methods": "Direct observation, subject reporting, imaging, wearables, environmental sensors"
           },
@@ -658,8 +836,16 @@
         {
           "name": "Preprocessing, Cleaning, and Labeling Strategies",
           "score": 1,
-          "fields_checked": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
-          "fields_present": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "fields_checked": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
+          "fields_present": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
           "values_found": {
             "preprocessing_strategies": "Domain-specific processing and harmonization",
             "cleaning_strategies": "Cross-site harmonization",
@@ -675,7 +861,9 @@
         {
           "name": "Software and Tools Documented",
           "score": 0,
-          "fields_checked": ["software_and_tools"],
+          "fields_checked": [
+            "software_and_tools"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -687,8 +875,13 @@
         {
           "name": "External Standards and Resources Referenced",
           "score": 1,
-          "fields_checked": ["external_resources", "conforms_to"],
-          "fields_present": ["external_resources"],
+          "fields_checked": [
+            "external_resources",
+            "conforms_to"
+          ],
+          "fields_present": [
+            "external_resources"
+          ],
           "values_found": {
             "external_resources_count": 3,
             "fair_principles_keyword": true
@@ -713,7 +906,9 @@
         {
           "name": "Known Limitations Documented",
           "score": 0,
-          "fields_checked": ["known_limitations"],
+          "fields_checked": [
+            "known_limitations"
+          ],
           "fields_present": [],
           "values_found": {
             "anomalies_as_limitations": "Unbalanced early releases documented"
@@ -727,7 +922,9 @@
         {
           "name": "Systematic Biases Identified and Described",
           "score": 0,
-          "fields_checked": ["known_biases"],
+          "fields_checked": [
+            "known_biases"
+          ],
           "fields_present": [],
           "values_found": {
             "potential_bias_mentioned": "Future use impacts mention potential bias from unbalanced releases"
@@ -741,8 +938,12 @@
         {
           "name": "Data Anomalies and Quality Issues Noted",
           "score": 1,
-          "fields_checked": ["anomalies"],
-          "fields_present": ["anomalies"],
+          "fields_checked": [
+            "anomalies"
+          ],
+          "fields_present": [
+            "anomalies"
+          ],
           "values_found": {
             "anomalies": "Unbalanced distribution across diabetes severity groups in early releases"
           },
@@ -756,8 +957,13 @@
         {
           "name": "Sensitive Content and Warnings Provided",
           "score": 1,
-          "fields_checked": ["sensitive_elements", "content_warnings"],
-          "fields_present": ["sensitive_elements"],
+          "fields_checked": [
+            "sensitive_elements",
+            "content_warnings"
+          ],
+          "fields_present": [
+            "sensitive_elements"
+          ],
           "values_found": {
             "sensitive_elements": "Demographics, genetic data, health records, traffic/accident reports",
             "confidential_elements": "PHI including health records, medications, genetic data"
@@ -773,7 +979,9 @@
         {
           "name": "Ethical Review Details Including Conflicts",
           "score": 0,
-          "fields_checked": ["ethical_reviews"],
+          "fields_checked": [
+            "ethical_reviews"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -794,7 +1002,9 @@
         {
           "name": "Dataset Published on a Recognized Platform",
           "score": 1,
-          "fields_checked": ["publisher"],
+          "fields_checked": [
+            "publisher"
+          ],
           "fields_present": [],
           "values_found": {
             "platform": "FAIRhub",
@@ -811,10 +1021,17 @@
         {
           "name": "Citation and DOI for Cross-referencing",
           "score": 1,
-          "fields_checked": ["citation", "doi"],
+          "fields_checked": [
+            "citation",
+            "doi"
+          ],
           "fields_present": [],
           "values_found": {
-            "dois_in_external_resources": ["10.1038/s42255-024-01165-x", "10.1136/bmjopen-2024-097449", "10.5281/zenodo.10642459"]
+            "dois_in_external_resources": [
+              "10.1038/s42255-024-01165-x",
+              "10.1136/bmjopen-2024-097449",
+              "10.5281/zenodo.10642459"
+            ]
           },
           "semantic_validation": {
             "citation_field_absent": true,
@@ -828,7 +1045,9 @@
         {
           "name": "Community Standards or Schema Conformance",
           "score": 0,
-          "fields_checked": ["conforms_to"],
+          "fields_checked": [
+            "conforms_to"
+          ],
           "fields_present": [],
           "values_found": {
             "fair_principles_mentioned": true,
@@ -845,8 +1064,14 @@
         {
           "name": "Outreach Materials and Documentation Links",
           "score": 1,
-          "fields_checked": ["external_resources", "page"],
-          "fields_present": ["external_resources", "page"],
+          "fields_checked": [
+            "external_resources",
+            "page"
+          ],
+          "fields_present": [
+            "external_resources",
+            "page"
+          ],
           "values_found": {
             "documentation_site": "https://docs.aireadi.org",
             "landing_page": "https://fairhub.io/datasets/2",
@@ -862,7 +1087,9 @@
         {
           "name": "Related Datasets with Typed Relationships",
           "score": 0,
-          "fields_checked": ["related_datasets"],
+          "fields_checked": [
+            "related_datasets"
+          ],
           "fields_present": [],
           "values_found": {},
           "semantic_validation": {
@@ -1059,5 +1286,21 @@
       "Add informed_consent details",
       "Include software_and_tools used for data collection"
     ]
+  },
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "AI",
+  "method": "READI_claudecode",
+  "d4d_file": "data/d4d_concatenated/READI_claudecode/AI_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.224642",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 30.0,
+    "total_max_score": 50.0,
+    "overall_percentage": 60.0
   }
 }

@@ -19,8 +19,14 @@
       "sub_elements": {
         "persistent_identifier": {
           "score": 1,
-          "field": ["doi", "rrid", "id"],
-          "found": ["id"],
+          "field": [
+            "doi",
+            "rrid",
+            "id"
+          ],
+          "found": [
+            "id"
+          ],
           "values": {
             "id": "https://doi.org/10.13026/249v-w155"
           },
@@ -28,8 +34,14 @@
         },
         "title_and_description": {
           "score": 1,
-          "field": ["title", "description"],
-          "found": ["title", "description"],
+          "field": [
+            "title",
+            "description"
+          ],
+          "found": [
+            "title",
+            "description"
+          ],
           "values": {
             "title": "Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information",
             "description": "The Bridge2AI-Voice project creates an ethically sourced flagship dataset..."
@@ -37,17 +49,39 @@
         },
         "keywords": {
           "score": 1,
-          "field": ["keywords"],
-          "found": ["keywords"],
+          "field": [
+            "keywords"
+          ],
+          "found": [
+            "keywords"
+          ],
           "values": {
-            "keywords": ["Bridge2AI", "voice biomarker", "speech", "health", "voice disorders", "neurological disorders", "mood disorders", "respiratory disorders", "spectrogram", "MFCC", "acoustic features", "PhysioNet"]
+            "keywords": [
+              "Bridge2AI",
+              "voice biomarker",
+              "speech",
+              "health",
+              "voice disorders",
+              "neurological disorders",
+              "mood disorders",
+              "respiratory disorders",
+              "spectrogram",
+              "MFCC",
+              "acoustic features",
+              "PhysioNet"
+            ]
           },
           "notes": "12 relevant keywords provided"
         },
         "landing_page_and_resources": {
           "score": 1,
-          "field": ["page", "resources"],
-          "found": ["page"],
+          "field": [
+            "page",
+            "resources"
+          ],
+          "found": [
+            "page"
+          ],
           "values": {
             "page": "https://physionet.org/content/b2ai-voice/1.1/"
           },
@@ -55,7 +89,10 @@
         },
         "hierarchical_structure": {
           "score": 0,
-          "field": ["parent_datasets", "related_datasets"],
+          "field": [
+            "parent_datasets",
+            "related_datasets"
+          ],
           "found": [],
           "notes": "No parent_datasets or related_datasets fields present"
         }
@@ -68,37 +105,59 @@
       "sub_elements": {
         "access_policy_and_restrictions": {
           "score": 1,
-          "field": ["license_and_use_terms", "ip_restrictions"],
-          "found": ["license_and_use_terms"],
+          "field": [
+            "license_and_use_terms",
+            "ip_restrictions"
+          ],
+          "found": [
+            "license_and_use_terms"
+          ],
           "values": {
             "license_and_use_terms": {
               "description": "Bridge2AI Voice Registered Access License. Only registered users who sign the specified data use agreement can access the files.",
-              "license_terms": ["Bridge2AI Voice Registered Access License", "Requires signing Bridge2AI Voice Registered Access Agreement", "Registered access on PhysioNet"]
+              "license_terms": [
+                "Bridge2AI Voice Registered Access License",
+                "Requires signing Bridge2AI Voice Registered Access Agreement",
+                "Registered access on PhysioNet"
+              ]
             }
           },
           "notes": "License terms present, ip_restrictions not specified"
         },
         "regulatory_restrictions": {
           "score": 0,
-          "field": ["regulatory_restrictions", "confidentiality_level"],
+          "field": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ],
           "found": [],
           "notes": "No regulatory_restrictions or confidentiality_level fields"
         },
         "download_url": {
           "score": 0,
-          "field": ["download_url"],
+          "field": [
+            "download_url"
+          ],
           "found": [],
           "notes": "No download_url field, though access_urls in distribution_formats"
         },
         "distribution_formats": {
           "score": 1,
-          "field": ["distribution_formats", "format", "media_type"],
-          "found": ["distribution_formats"],
+          "field": [
+            "distribution_formats",
+            "format",
+            "media_type"
+          ],
+          "found": [
+            "distribution_formats"
+          ],
           "values": {
             "distribution_formats": [
               {
                 "description": "Dataset available via PhysioNet in Parquet, TSV, and JSON formats.",
-                "access_urls": ["https://physionet.org/content/b2ai-voice/1.1/"]
+                "access_urls": [
+                  "https://physionet.org/content/b2ai-voice/1.1/"
+                ]
               }
             ]
           },
@@ -106,7 +165,10 @@
         },
         "related_datasets_and_resources": {
           "score": 1,
-          "field": ["related_datasets", "external_resources"],
+          "field": [
+            "related_datasets",
+            "external_resources"
+          ],
           "found": [],
           "notes": "Subsets field provides related data components but not related_datasets structure. Awarding 1 point for subset relationships."
         }
@@ -119,43 +181,68 @@
       "sub_elements": {
         "license_allows_reuse": {
           "score": 1,
-          "field": ["license_and_use_terms"],
-          "found": ["license_and_use_terms"],
+          "field": [
+            "license_and_use_terms"
+          ],
+          "found": [
+            "license_and_use_terms"
+          ],
           "values": {
             "license_and_use_terms": {
               "description": "Bridge2AI Voice Registered Access License. Only registered users who sign the specified data use agreement can access the files.",
-              "license_terms": ["Bridge2AI Voice Registered Access License", "Requires signing Bridge2AI Voice Registered Access Agreement", "Registered access on PhysioNet"]
+              "license_terms": [
+                "Bridge2AI Voice Registered Access License",
+                "Requires signing Bridge2AI Voice Registered Access Agreement",
+                "Registered access on PhysioNet"
+              ]
             }
           },
           "notes": "License specifies registered access with agreement"
         },
         "standardized_formats": {
           "score": 0,
-          "field": ["format", "encoding"],
+          "field": [
+            "format",
+            "encoding"
+          ],
           "found": [],
           "notes": "Format and encoding not explicitly specified in top-level fields"
         },
         "schema_conformance": {
           "score": 0,
-          "field": ["conforms_to", "conforms_to_schema"],
+          "field": [
+            "conforms_to",
+            "conforms_to_schema"
+          ],
           "found": [],
           "notes": "No conformance metadata provided"
         },
         "variable_metadata": {
           "score": 0,
-          "field": ["variables"],
+          "field": [
+            "variables"
+          ],
           "found": [],
           "notes": "No variables field, though subsets describe data structure"
         },
         "use_guidance": {
           "score": 1,
-          "field": ["intended_uses", "prohibited_uses", "discouraged_uses"],
-          "found": ["discouraged_uses"],
+          "field": [
+            "intended_uses",
+            "prohibited_uses",
+            "discouraged_uses"
+          ],
+          "found": [
+            "discouraged_uses"
+          ],
           "values": {
             "discouraged_uses": [
               {
                 "description": "Access requires signing the Bridge2AI Voice Registered Access Agreement. Use governed by the agreement terms.",
-                "discouragement_details": ["Registered access required", "Must sign data use agreement"]
+                "discouragement_details": [
+                  "Registered access required",
+                  "Must sign data use agreement"
+                ]
               }
             ]
           },
@@ -170,13 +257,20 @@
       "sub_elements": {
         "ethics_review": {
           "score": 1,
-          "field": ["ethical_reviews", "human_subject_research"],
-          "found": ["ethical_reviews"],
+          "field": [
+            "ethical_reviews",
+            "human_subject_research"
+          ],
+          "found": [
+            "ethical_reviews"
+          ],
           "values": {
             "ethical_reviews": [
               {
                 "description": "Data collection and sharing approved by the University of South Florida Institutional Review Board.",
-                "review_details": ["IRB approval from University of South Florida"]
+                "review_details": [
+                  "IRB approval from University of South Florida"
+                ]
               }
             ]
           },
@@ -184,8 +278,12 @@
         },
         "deidentification": {
           "score": 1,
-          "field": ["is_deidentified"],
-          "found": ["is_deidentified"],
+          "field": [
+            "is_deidentified"
+          ],
+          "found": [
+            "is_deidentified"
+          ],
           "values": {
             "is_deidentified": {
               "description": "De-identification using HIPAA Safe Harbor method. All Safe Harbor identifiers removed including names, geographic locators, dates, contact information, government identifiers, and biometric identifiers."
@@ -195,19 +293,28 @@
         },
         "privacy_protections": {
           "score": 1,
-          "field": ["participant_privacy"],
+          "field": [
+            "participant_privacy"
+          ],
           "found": [],
           "notes": "Privacy protections evident in cleaning_strategies (free speech transcripts removed, raw audio omitted). Awarding 1 point for comprehensive privacy approach."
         },
         "informed_consent": {
           "score": 1,
-          "field": ["informed_consent"],
-          "found": ["informed_consent"],
+          "field": [
+            "informed_consent"
+          ],
+          "found": [
+            "informed_consent"
+          ],
           "values": {
             "informed_consent": [
               {
                 "consent_obtained": true,
-                "consent_type": ["Written consent for data collection", "Consent for research data sharing"],
+                "consent_type": [
+                  "Written consent for data collection",
+                  "Consent for research data sharing"
+                ],
                 "description": "Participants provided consent for data collection and sharing of de-identified research data."
               }
             ]
@@ -216,7 +323,10 @@
         },
         "vulnerable_populations": {
           "score": 1,
-          "field": ["vulnerable_populations", "participant_compensation"],
+          "field": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
           "found": [],
           "notes": "Adult cohort explicitly stated in future_use_impacts. Awarding 1 point for documenting population restrictions."
         }
@@ -229,45 +339,75 @@
       "sub_elements": {
         "subpopulations": {
           "score": 1,
-          "field": ["subpopulations"],
-          "found": ["subpopulations"],
+          "field": [
+            "subpopulations"
+          ],
+          "found": [
+            "subpopulations"
+          ],
           "values": {
             "subpopulations": [
-              {"description": "Voice disorders (benign and malignant lesions affecting vocal folds)"},
-              {"description": "Neurological and neurodegenerative disorders (including Parkinson's, ALS)"},
-              {"description": "Mood and psychiatric disorders (depression, anxiety)"},
-              {"description": "Respiratory disorders (cough, breathing sounds)"}
+              {
+                "description": "Voice disorders (benign and malignant lesions affecting vocal folds)"
+              },
+              {
+                "description": "Neurological and neurodegenerative disorders (including Parkinson's, ALS)"
+              },
+              {
+                "description": "Mood and psychiatric disorders (depression, anxiety)"
+              },
+              {
+                "description": "Respiratory disorders (cough, breathing sounds)"
+              }
             ]
           },
           "notes": "Four disease cohorts clearly described"
         },
         "instances": {
           "score": 1,
-          "field": ["instances"],
-          "found": ["instances"],
+          "field": [
+            "instances"
+          ],
+          "found": [
+            "instances"
+          ],
           "values": {
             "instances": [
-              {"description": "Version 1.1 contains 12,523 recordings from 306 adult participants collected across five sites in North America. Most participants completed one session, with a subset completing multiple sessions."}
+              {
+                "description": "Version 1.1 contains 12,523 recordings from 306 adult participants collected across five sites in North America. Most participants completed one session, with a subset completing multiple sessions."
+              }
             ]
           },
           "notes": "Specific instance counts: 12,523 recordings, 306 participants"
         },
         "variable_metadata": {
           "score": 1,
-          "field": ["variables", "is_tabular"],
+          "field": [
+            "variables",
+            "is_tabular"
+          ],
           "found": [],
           "notes": "Subsets describe data structure (spectrograms, MFCCs, phenotype TSV, static features TSV). Awarding 1 point for comprehensive structural metadata."
         },
         "data_topics": {
           "score": 1,
-          "field": ["instances"],
-          "found": ["instances"],
+          "field": [
+            "instances"
+          ],
+          "found": [
+            "instances"
+          ],
           "notes": "Data topics comprehensively covered in subpopulations and subsets"
         },
         "quality_issues": {
           "score": 1,
-          "field": ["anomalies", "sampling_strategies"],
-          "found": ["sampling_strategies"],
+          "field": [
+            "anomalies",
+            "sampling_strategies"
+          ],
+          "found": [
+            "sampling_strategies"
+          ],
           "values": {
             "sampling_strategies": [
               {
@@ -286,44 +426,71 @@
       "sub_elements": {
         "version_number": {
           "score": 1,
-          "field": ["version"],
+          "field": [
+            "version"
+          ],
           "found": [],
           "notes": "Version 1.1 mentioned in description and throughout but no explicit version field. Awarding 1 point for clear version identification."
         },
         "version_access": {
           "score": 1,
-          "field": ["version_access"],
-          "found": ["version_access"],
+          "field": [
+            "version_access"
+          ],
+          "found": [
+            "version_access"
+          ],
           "values": {
             "version_access": {
               "description": "Multiple versions available through PhysioNet. Files for v1.1 may no longer be available; latest version is 2.0.1.",
               "latest_version_doi": "https://doi.org/10.13026/37yb-1t42",
-              "versions_available": ["1.1 (January 2025)", "2.0.0 (April 2025)", "2.0.1 (August 2025)"]
+              "versions_available": [
+                "1.1 (January 2025)",
+                "2.0.0 (April 2025)",
+                "2.0.1 (August 2025)"
+              ]
             }
           },
           "notes": "Comprehensive version access documentation with DOI for latest"
         },
         "errata_and_updates": {
           "score": 1,
-          "field": ["errata", "updates"],
-          "found": ["updates"],
+          "field": [
+            "errata",
+            "updates"
+          ],
+          "found": [
+            "updates"
+          ],
           "values": {
             "updates": {
               "description": "Version 1.1 released January 17, 2025 adding MFCCs. Project subsequently updated to versions 2.0.0 and 2.0.1.",
-              "update_details": ["v1.0 initial release 2024", "v1.1 released 2025-01-17 (added MFCCs)", "v2.0.0 released 2025-04-16", "v2.0.1 released 2025-08-18"]
+              "update_details": [
+                "v1.0 initial release 2024",
+                "v1.1 released 2025-01-17 (added MFCCs)",
+                "v2.0.0 released 2025-04-16",
+                "v2.0.1 released 2025-08-18"
+              ]
             }
           },
           "notes": "Update history documented"
         },
         "update_schedule": {
           "score": 0,
-          "field": ["updates"],
-          "found": ["updates"],
+          "field": [
+            "updates"
+          ],
+          "found": [
+            "updates"
+          ],
           "notes": "Update history present but no future update schedule specified"
         },
         "provenance": {
           "score": 0,
-          "field": ["was_derived_from", "release_notes"],
+          "field": [
+            "was_derived_from",
+            "release_notes"
+          ],
           "found": [],
           "notes": "No was_derived_from or release_notes fields"
         }
@@ -336,41 +503,60 @@
       "sub_elements": {
         "purpose": {
           "score": 1,
-          "field": ["purposes"],
-          "found": ["purposes"],
+          "field": [
+            "purposes"
+          ],
+          "found": [
+            "purposes"
+          ],
           "values": {
             "purposes": [
-              {"description": "Create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health."}
+              {
+                "description": "Create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health."
+              }
             ]
           },
           "notes": "Clear purpose statement"
         },
         "tasks": {
           "score": 1,
-          "field": ["tasks"],
-          "found": ["tasks"],
+          "field": [
+            "tasks"
+          ],
+          "found": [
+            "tasks"
+          ],
           "values": {
             "tasks": [
-              {"description": "Enable AI research on voice as a biomarker for health conditions including voice disorders, neurological disorders, mood disorders, and respiratory disorders."}
+              {
+                "description": "Enable AI research on voice as a biomarker for health conditions including voice disorders, neurological disorders, mood disorders, and respiratory disorders."
+              }
             ]
           },
           "notes": "Research tasks documented"
         },
         "funding_sources": {
           "score": 0,
-          "field": ["funders"],
+          "field": [
+            "funders"
+          ],
           "found": [],
           "notes": "No funders field present (Bridge2AI implied but not explicit)"
         },
         "grant_ids": {
           "score": 0,
-          "field": ["funders"],
+          "field": [
+            "funders"
+          ],
           "found": [],
           "notes": "No grant IDs or award numbers provided"
         },
         "creators": {
           "score": 0,
-          "field": ["creators", "funders"],
+          "field": [
+            "creators",
+            "funders"
+          ],
           "found": [],
           "notes": "No creators field, only maintainers"
         }
@@ -383,13 +569,21 @@
       "sub_elements": {
         "collection_mechanisms": {
           "score": 1,
-          "field": ["collection_mechanisms"],
-          "found": ["collection_mechanisms"],
+          "field": [
+            "collection_mechanisms"
+          ],
+          "found": [
+            "collection_mechanisms"
+          ],
           "values": {
             "collection_mechanisms": [
               {
                 "description": "Data collection using REDCap with custom application.",
-                "mechanism_details": ["Custom tablet application for voice recording", "REDCap for clinical and questionnaire data", "Headset microphone for audio capture"]
+                "mechanism_details": [
+                  "Custom tablet application for voice recording",
+                  "REDCap for clinical and questionnaire data",
+                  "Headset microphone for audio capture"
+                ]
               }
             ]
           },
@@ -397,14 +591,22 @@
         },
         "acquisition_methods": {
           "score": 1,
-          "field": ["acquisition_methods"],
-          "found": ["acquisition_methods"],
+          "field": [
+            "acquisition_methods"
+          ],
+          "found": [
+            "acquisition_methods"
+          ],
           "values": {
             "acquisition_methods": [
               {
                 "description": "Voice tasks collected via standardized protocol including sustained vowel phonation using a custom tablet application with headset.",
                 "was_directly_observed": true,
-                "acquisition_details": ["Custom tablet application for data collection", "Headset used for voice recording when possible", "Standardized protocol across five collection sites"]
+                "acquisition_details": [
+                  "Custom tablet application for data collection",
+                  "Headset used for voice recording when possible",
+                  "Standardized protocol across five collection sites"
+                ]
               }
             ]
           },
@@ -412,19 +614,38 @@
         },
         "preprocessing_and_cleaning": {
           "score": 1,
-          "field": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
-          "found": ["preprocessing_strategies", "cleaning_strategies"],
+          "field": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
+          "found": [
+            "preprocessing_strategies",
+            "cleaning_strategies"
+          ],
           "values": {
             "preprocessing_strategies": [
               {
                 "description": "Raw audio converted to mono and resampled to 16 kHz with Butterworth anti-aliasing filter. Derived data computed using multiple feature extraction pipelines.",
-                "preprocessing_details": ["Audio resampled to 16 kHz mono", "Spectrograms computed via short-time FFT (25ms window, 10ms hop, 512-point FFT)", "60 MFCCs extracted from spectrograms", "Acoustic features extracted using openSMILE", "Phonetic and prosodic features computed using Parselmouth/Praat", "Transcriptions generated using OpenAI Whisper Large (free speech transcripts removed)"]
+                "preprocessing_details": [
+                  "Audio resampled to 16 kHz mono",
+                  "Spectrograms computed via short-time FFT (25ms window, 10ms hop, 512-point FFT)",
+                  "60 MFCCs extracted from spectrograms",
+                  "Acoustic features extracted using openSMILE",
+                  "Phonetic and prosodic features computed using Parselmouth/Praat",
+                  "Transcriptions generated using OpenAI Whisper Large (free speech transcripts removed)"
+                ]
               }
             ],
             "cleaning_strategies": [
               {
                 "description": "HIPAA Safe Harbor de-identification applied. Free speech transcripts removed to reduce re-identification risk. Raw audio waveforms not released in v1.1.",
-                "cleaning_details": ["HIPAA Safe Harbor identifiers removed", "State and province removed (country retained)", "Free speech transcripts removed", "Raw audio waveforms omitted"]
+                "cleaning_details": [
+                  "HIPAA Safe Harbor identifiers removed",
+                  "State and province removed (country retained)",
+                  "Free speech transcripts removed",
+                  "Raw audio waveforms omitted"
+                ]
               }
             ]
           },
@@ -432,13 +653,18 @@
         },
         "software_and_tools": {
           "score": 1,
-          "field": ["software_and_tools"],
+          "field": [
+            "software_and_tools"
+          ],
           "found": [],
           "notes": "Tools mentioned in preprocessing (openSMILE, Parselmouth/Praat, OpenAI Whisper) but no formal software_and_tools field. Awarding 1 point for tool documentation."
         },
         "external_standards": {
           "score": 0,
-          "field": ["external_resources", "conforms_to"],
+          "field": [
+            "external_resources",
+            "conforms_to"
+          ],
           "found": [],
           "notes": "No external_resources or conforms_to fields"
         }
@@ -451,37 +677,52 @@
       "sub_elements": {
         "known_limitations": {
           "score": 0,
-          "field": ["known_limitations"],
+          "field": [
+            "known_limitations"
+          ],
           "found": [],
           "notes": "No explicit known_limitations field, though limitations mentioned in future_use_impacts"
         },
         "known_biases": {
           "score": 0,
-          "field": ["known_biases"],
+          "field": [
+            "known_biases"
+          ],
           "found": [],
           "notes": "No known_biases field"
         },
         "anomalies": {
           "score": 0,
-          "field": ["anomalies"],
+          "field": [
+            "anomalies"
+          ],
           "found": [],
           "notes": "No anomalies field"
         },
         "sensitive_content": {
           "score": 0,
-          "field": ["sensitive_elements", "content_warnings"],
+          "field": [
+            "sensitive_elements",
+            "content_warnings"
+          ],
           "found": [],
           "notes": "No sensitive_elements or content_warnings fields"
         },
         "ethical_review_details": {
           "score": 1,
-          "field": ["ethical_reviews"],
-          "found": ["ethical_reviews"],
+          "field": [
+            "ethical_reviews"
+          ],
+          "found": [
+            "ethical_reviews"
+          ],
           "values": {
             "ethical_reviews": [
               {
                 "description": "Data collection and sharing approved by the University of South Florida Institutional Review Board.",
-                "review_details": ["IRB approval from University of South Florida"]
+                "review_details": [
+                  "IRB approval from University of South Florida"
+                ]
               }
             ]
           },
@@ -496,31 +737,45 @@
       "sub_elements": {
         "publisher": {
           "score": 1,
-          "field": ["publisher"],
+          "field": [
+            "publisher"
+          ],
           "found": [],
           "notes": "PhysioNet platform evident from URLs and maintainers. Awarding 1 point for implicit publisher."
         },
         "citation_and_doi": {
           "score": 1,
-          "field": ["citation", "doi"],
+          "field": [
+            "citation",
+            "doi"
+          ],
           "found": [],
           "notes": "DOI in id field (https://doi.org/10.13026/249v-w155), no citation field. Awarding 1 point for DOI presence."
         },
         "community_standards": {
           "score": 0,
-          "field": ["conforms_to"],
+          "field": [
+            "conforms_to"
+          ],
           "found": [],
           "notes": "No conforms_to field"
         },
         "documentation_links": {
           "score": 0,
-          "field": ["external_resources", "page"],
-          "found": ["page"],
+          "field": [
+            "external_resources",
+            "page"
+          ],
+          "found": [
+            "page"
+          ],
           "notes": "Landing page provided but no external_resources. Partial credit already counted in element 1."
         },
         "related_datasets": {
           "score": 0,
-          "field": ["related_datasets"],
+          "field": [
+            "related_datasets"
+          ],
           "found": [],
           "notes": "No related_datasets field"
         }
@@ -532,16 +787,76 @@
     "max_possible_score": 50,
     "overall_percentage": 62.0,
     "element_scores": [
-      {"element": 1, "name": "Discovery and Identification", "score": 4, "max": 5, "percentage": 80.0},
-      {"element": 2, "name": "Access and Retrieval", "score": 3, "max": 5, "percentage": 60.0},
-      {"element": 3, "name": "Reuse and Interoperability", "score": 2, "max": 5, "percentage": 40.0},
-      {"element": 4, "name": "Ethical Use and Privacy", "score": 5, "max": 5, "percentage": 100.0},
-      {"element": 5, "name": "Composition and Structure", "score": 5, "max": 5, "percentage": 100.0},
-      {"element": 6, "name": "Provenance and Versioning", "score": 3, "max": 5, "percentage": 60.0},
-      {"element": 7, "name": "Motivation and Funding", "score": 2, "max": 5, "percentage": 40.0},
-      {"element": 8, "name": "Technical Transparency", "score": 4, "max": 5, "percentage": 80.0},
-      {"element": 9, "name": "Limitations Disclosure", "score": 1, "max": 5, "percentage": 20.0},
-      {"element": 10, "name": "Integration", "score": 2, "max": 5, "percentage": 40.0}
+      {
+        "element": 1,
+        "name": "Discovery and Identification",
+        "score": 4,
+        "max": 5,
+        "percentage": 80.0
+      },
+      {
+        "element": 2,
+        "name": "Access and Retrieval",
+        "score": 3,
+        "max": 5,
+        "percentage": 60.0
+      },
+      {
+        "element": 3,
+        "name": "Reuse and Interoperability",
+        "score": 2,
+        "max": 5,
+        "percentage": 40.0
+      },
+      {
+        "element": 4,
+        "name": "Ethical Use and Privacy",
+        "score": 5,
+        "max": 5,
+        "percentage": 100.0
+      },
+      {
+        "element": 5,
+        "name": "Composition and Structure",
+        "score": 5,
+        "max": 5,
+        "percentage": 100.0
+      },
+      {
+        "element": 6,
+        "name": "Provenance and Versioning",
+        "score": 3,
+        "max": 5,
+        "percentage": 60.0
+      },
+      {
+        "element": 7,
+        "name": "Motivation and Funding",
+        "score": 2,
+        "max": 5,
+        "percentage": 40.0
+      },
+      {
+        "element": 8,
+        "name": "Technical Transparency",
+        "score": 4,
+        "max": 5,
+        "percentage": 80.0
+      },
+      {
+        "element": 9,
+        "name": "Limitations Disclosure",
+        "score": 1,
+        "max": 5,
+        "percentage": 20.0
+      },
+      {
+        "element": 10,
+        "name": "Integration",
+        "score": 2,
+        "max": 5,
+        "percentage": 40.0
+      }
     ],
     "strengths": [
       "Complete ethical use and privacy documentation (100%)",
@@ -576,7 +891,10 @@
       "grant_ids_present": false,
       "funders_field_present": false,
       "grant_patterns_detected": [],
-      "implicit_funding": ["Bridge2AI consortium (name pattern)", "NIH/NIBIB implied (Bridge2AI is NIH program)"],
+      "implicit_funding": [
+        "Bridge2AI consortium (name pattern)",
+        "NIH/NIBIB implied (Bridge2AI is NIH program)"
+      ],
       "notes": "Bridge2AI project name indicates NIH Bridge to AI program funding, but no explicit grant numbers or funder metadata provided."
     },
     "identifier_consistency": {
@@ -593,7 +911,11 @@
       "purpose_clarity": "high",
       "purpose_summary": "Create ethically sourced voice biomarker dataset for AI research on health conditions",
       "target_audience": "AI researchers, clinicians, voice scientists",
-      "target_use_cases": ["Voice biomarker research", "Health condition detection", "AI model development"],
+      "target_use_cases": [
+        "Voice biomarker research",
+        "Health condition detection",
+        "AI model development"
+      ],
       "ethical_framework": "Comprehensive (IRB approval, HIPAA Safe Harbor, informed consent, registered access)",
       "data_accessibility": "Registered access with data use agreement via PhysioNet",
       "reusability_assessment": "moderate",
@@ -605,9 +927,21 @@
       "preprocessing_reproducible": true,
       "preprocessing_details_score": "high",
       "software_documented": true,
-      "software_tools": ["REDCap", "Custom tablet application", "openSMILE", "Parselmouth/Praat", "OpenAI Whisper Large"],
+      "software_tools": [
+        "REDCap",
+        "Custom tablet application",
+        "openSMILE",
+        "Parselmouth/Praat",
+        "OpenAI Whisper Large"
+      ],
       "parameters_specified": true,
-      "parameter_examples": ["16 kHz sampling", "25ms window", "10ms hop", "512-point FFT", "60 MFCCs"],
+      "parameter_examples": [
+        "16 kHz sampling",
+        "25ms window",
+        "10ms hop",
+        "512-point FFT",
+        "60 MFCCs"
+      ],
       "reproducibility_score": "high",
       "notes": "Exceptional technical documentation with specific parameters. Collection and preprocessing methods clearly specified with tool versions and settings."
     },
@@ -615,12 +949,19 @@
       "deidentification_method": "HIPAA Safe Harbor",
       "deidentification_completeness": "high",
       "consent_documented": true,
-      "consent_type": ["Written consent for data collection", "Consent for research data sharing"],
+      "consent_type": [
+        "Written consent for data collection",
+        "Consent for research data sharing"
+      ],
       "irb_approval": true,
       "irb_institution": "University of South Florida",
       "vulnerable_populations_addressed": true,
       "vulnerable_populations_notes": "Adult cohort only (pediatric excluded)",
-      "privacy_enhancements": ["Free speech transcripts removed", "Raw audio omitted", "Geographic detail reduced"],
+      "privacy_enhancements": [
+        "Free speech transcripts removed",
+        "Raw audio omitted",
+        "Geographic detail reduced"
+      ],
       "privacy_score": "very high",
       "notes": "Exemplary privacy protections exceeding HIPAA Safe Harbor. Multiple layers of protection including omission of raw audio and free speech transcripts."
     },
@@ -636,7 +977,12 @@
       "sampling_strategy_documented": true,
       "quality_issues_documented": false,
       "limitations_explicit": false,
-      "limitations_implicit": ["v1.1 files may no longer be available", "Adult cohort only", "No raw audio", "Condition-specific selection"],
+      "limitations_implicit": [
+        "v1.1 files may no longer be available",
+        "Adult cohort only",
+        "No raw audio",
+        "Condition-specific selection"
+      ],
       "quality_score": "moderate to high",
       "notes": "Strong documentation of what is included, but limited documentation of biases, limitations, or quality issues. Implicit limitations mentioned in context but not systematically enumerated."
     },
@@ -646,7 +992,11 @@
       "version_identified": "1.1",
       "version_history_documented": true,
       "version_count": 3,
-      "versions": ["1.1 (Jan 2025)", "2.0.0 (Apr 2025)", "2.0.1 (Aug 2025)"],
+      "versions": [
+        "1.1 (Jan 2025)",
+        "2.0.0 (Apr 2025)",
+        "2.0.1 (Aug 2025)"
+      ],
       "update_frequency": "Multiple updates within 2025 (3 releases in 8 months)",
       "maintainer_specified": true,
       "maintainer": "PhysioNet platform team / MIT Laboratory for Computational Physiology",
@@ -671,7 +1021,11 @@
       },
       "interoperable": {
         "score": "moderate",
-        "standard_formats": ["Parquet", "TSV", "JSON"],
+        "standard_formats": [
+          "Parquet",
+          "TSV",
+          "JSON"
+        ],
         "schema_conformance": false,
         "vocabulary_use": false,
         "qualified_references": false
@@ -692,13 +1046,41 @@
       "fields_absent": 27,
       "completeness_percentage": 46.0,
       "field_categories": {
-        "core_metadata": {"present": 6, "absent": 2, "percentage": 75.0},
-        "ethical_privacy": {"present": 5, "absent": 1, "percentage": 83.3},
-        "technical_methods": {"present": 7, "absent": 3, "percentage": 70.0},
-        "quality_limitations": {"present": 1, "absent": 5, "percentage": 16.7},
-        "provenance_versioning": {"present": 2, "absent": 3, "percentage": 40.0},
-        "interoperability": {"present": 1, "absent": 7, "percentage": 12.5},
-        "relationships": {"present": 0, "absent": 4, "percentage": 0.0}
+        "core_metadata": {
+          "present": 6,
+          "absent": 2,
+          "percentage": 75.0
+        },
+        "ethical_privacy": {
+          "present": 5,
+          "absent": 1,
+          "percentage": 83.3
+        },
+        "technical_methods": {
+          "present": 7,
+          "absent": 3,
+          "percentage": 70.0
+        },
+        "quality_limitations": {
+          "present": 1,
+          "absent": 5,
+          "percentage": 16.7
+        },
+        "provenance_versioning": {
+          "present": 2,
+          "absent": 3,
+          "percentage": 40.0
+        },
+        "interoperability": {
+          "present": 1,
+          "absent": 7,
+          "percentage": 12.5
+        },
+        "relationships": {
+          "present": 0,
+          "absent": 4,
+          "percentage": 0.0
+        }
       },
       "notes": "Strong ethical/privacy and technical method documentation. Weak in quality/limitations, interoperability, and dataset relationships."
     },
@@ -790,5 +1172,21 @@
     "deterministic": true,
     "evaluator_model": "Claude Sonnet 4.5",
     "evaluation_timestamp": "2025-12-09T00:00:00Z"
+  },
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "VOICE",
+  "method": "claudecode_assistant",
+  "d4d_file": "data/d4d_concatenated/claudecode_assistant/VOICE_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.229459",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 0.0,
+    "total_max_score": 0.0,
+    "overall_percentage": 0
   }
 }

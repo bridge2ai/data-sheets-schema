@@ -21,35 +21,59 @@
         {
           "name": "Persistent Identifier (DOI, RRID, or URI)",
           "score": 1,
-          "fields_checked": ["doi", "rrid", "id"],
-          "fields_found": ["id"],
+          "fields_checked": [
+            "doi",
+            "rrid",
+            "id"
+          ],
+          "fields_found": [
+            "id"
+          ],
           "rationale": "URI identifier present (chorus:clinical-care-dataset) but no DOI or RRID"
         },
         {
           "name": "Dataset Title and Description Completeness",
           "score": 1,
-          "fields_checked": ["title", "description"],
-          "fields_found": ["title", "description"],
+          "fields_checked": [
+            "title",
+            "description"
+          ],
+          "fields_found": [
+            "title",
+            "description"
+          ],
           "rationale": "Both title and description present; description includes caveats about limited source content"
         },
         {
           "name": "Keywords or Tags for Searchability",
           "score": 1,
-          "fields_checked": ["keywords"],
-          "fields_found": ["keywords"],
+          "fields_checked": [
+            "keywords"
+          ],
+          "fields_found": [
+            "keywords"
+          ],
           "rationale": "7 keywords present covering project name, program, domain, and focus areas"
         },
         {
           "name": "Landing Page and Resources (page, hierarchical resources)",
           "score": 0,
-          "fields_checked": ["page", "resources"],
-          "fields_found": ["page"],
+          "fields_checked": [
+            "page",
+            "resources"
+          ],
+          "fields_found": [
+            "page"
+          ],
           "rationale": "Landing page present (https://chorus4ai.org) but no hierarchical resources defined"
         },
         {
           "name": "Hierarchical Structure (parent datasets, relationships)",
           "score": 0,
-          "fields_checked": ["parent_datasets", "related_datasets"],
+          "fields_checked": [
+            "parent_datasets",
+            "related_datasets"
+          ],
           "fields_found": [],
           "rationale": "No parent datasets or related dataset relationships documented"
         }
@@ -65,35 +89,52 @@
         {
           "name": "Access Policy and IP Restrictions Defined",
           "score": 0,
-          "fields_checked": ["license_and_use_terms", "ip_restrictions"],
+          "fields_checked": [
+            "license_and_use_terms",
+            "ip_restrictions"
+          ],
           "fields_found": [],
           "rationale": "No license terms or IP restrictions documented"
         },
         {
           "name": "Regulatory Restrictions and Confidentiality Level Specified",
           "score": 0,
-          "fields_checked": ["regulatory_restrictions", "confidentiality_level"],
+          "fields_checked": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ],
           "fields_found": [],
           "rationale": "No regulatory restrictions or confidentiality level specified"
         },
         {
           "name": "Download URL or Platform Link Available",
           "score": 0,
-          "fields_checked": ["download_url"],
+          "fields_checked": [
+            "download_url"
+          ],
           "fields_found": [],
           "rationale": "No download URL provided; only landing page available"
         },
         {
           "name": "Distribution Formats and File Types Specified",
           "score": 0,
-          "fields_checked": ["distribution_formats", "format", "media_type"],
-          "fields_found": ["distribution_formats"],
+          "fields_checked": [
+            "distribution_formats",
+            "format",
+            "media_type"
+          ],
+          "fields_found": [
+            "distribution_formats"
+          ],
           "rationale": "Distribution formats field present but contains only placeholder text with no specific format information"
         },
         {
           "name": "Related Datasets and External Resources Linked",
           "score": 0,
-          "fields_checked": ["related_datasets", "external_resources"],
+          "fields_checked": [
+            "related_datasets",
+            "external_resources"
+          ],
           "fields_found": [],
           "rationale": "No related datasets or external resources documented"
         }
@@ -109,35 +150,49 @@
         {
           "name": "License Terms Allow Reuse",
           "score": 0,
-          "fields_checked": ["license_and_use_terms"],
+          "fields_checked": [
+            "license_and_use_terms"
+          ],
           "fields_found": [],
           "rationale": "No license terms documented"
         },
         {
           "name": "Data Formats Are Standardized (encoding, format)",
           "score": 0,
-          "fields_checked": ["format", "encoding"],
+          "fields_checked": [
+            "format",
+            "encoding"
+          ],
           "fields_found": [],
           "rationale": "No format or encoding specifications provided"
         },
         {
           "name": "Schema or Ontology Conformance Stated",
           "score": 0,
-          "fields_checked": ["conforms_to", "conforms_to_schema"],
+          "fields_checked": [
+            "conforms_to",
+            "conforms_to_schema"
+          ],
           "fields_found": [],
           "rationale": "No schema or ontology conformance documented"
         },
         {
           "name": "Variable Metadata with Identifiers Defined",
           "score": 0,
-          "fields_checked": ["variables"],
+          "fields_checked": [
+            "variables"
+          ],
           "fields_found": [],
           "rationale": "No variable-level metadata provided"
         },
         {
           "name": "Use Guidance Provided (intended, prohibited uses)",
           "score": 0,
-          "fields_checked": ["intended_uses", "prohibited_uses", "discouraged_uses"],
+          "fields_checked": [
+            "intended_uses",
+            "prohibited_uses",
+            "discouraged_uses"
+          ],
           "fields_found": [],
           "rationale": "No use guidance documented"
         }
@@ -153,35 +208,47 @@
         {
           "name": "IRB or Ethics Review Documented",
           "score": 0,
-          "fields_checked": ["ethical_reviews", "human_subject_research"],
+          "fields_checked": [
+            "ethical_reviews",
+            "human_subject_research"
+          ],
           "fields_found": [],
           "rationale": "No ethical review or human subjects research documentation"
         },
         {
           "name": "Deidentification Method Described",
           "score": 0,
-          "fields_checked": ["is_deidentified"],
+          "fields_checked": [
+            "is_deidentified"
+          ],
           "fields_found": [],
           "rationale": "No deidentification information provided"
         },
         {
           "name": "Privacy Protections Beyond Deidentification",
           "score": 0,
-          "fields_checked": ["participant_privacy"],
+          "fields_checked": [
+            "participant_privacy"
+          ],
           "fields_found": [],
           "rationale": "No participant privacy protections documented"
         },
         {
           "name": "Informed Consent Obtained from Participants",
           "score": 0,
-          "fields_checked": ["informed_consent"],
+          "fields_checked": [
+            "informed_consent"
+          ],
           "fields_found": [],
           "rationale": "No informed consent information provided"
         },
         {
           "name": "Vulnerable Populations and Compensation Documented",
           "score": 0,
-          "fields_checked": ["vulnerable_populations", "participant_compensation"],
+          "fields_checked": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
           "fields_found": [],
           "rationale": "No vulnerable population or compensation documentation"
         }
@@ -197,35 +264,51 @@
         {
           "name": "Cohort or Subpopulations Characteristics Described",
           "score": 0,
-          "fields_checked": ["subpopulations"],
+          "fields_checked": [
+            "subpopulations"
+          ],
           "fields_found": [],
           "rationale": "No subpopulation characteristics documented"
         },
         {
           "name": "Number of Instances or Samples Reported",
           "score": 1,
-          "fields_checked": ["instances"],
-          "fields_found": ["instances"],
+          "fields_checked": [
+            "instances"
+          ],
+          "fields_found": [
+            "instances"
+          ],
           "rationale": "Instances field present but contains only general description without specific counts"
         },
         {
           "name": "Variable-Level Metadata and Tabular Flag",
           "score": 0,
-          "fields_checked": ["variables", "is_tabular"],
+          "fields_checked": [
+            "variables",
+            "is_tabular"
+          ],
           "fields_found": [],
           "rationale": "No variable metadata or tabular flag provided"
         },
         {
           "name": "Data Topics or Conditions Represented",
           "score": 0,
-          "fields_checked": ["instances"],
-          "fields_found": ["instances"],
+          "fields_checked": [
+            "instances"
+          ],
+          "fields_found": [
+            "instances"
+          ],
           "rationale": "Instances description is too general; lacks specific topics or conditions"
         },
         {
           "name": "Data Quality Issues and Anomalies Documented",
           "score": 0,
-          "fields_checked": ["anomalies", "sampling_strategies"],
+          "fields_checked": [
+            "anomalies",
+            "sampling_strategies"
+          ],
           "fields_found": [],
           "rationale": "No anomalies or sampling strategies documented"
         }
@@ -241,35 +324,47 @@
         {
           "name": "Dataset Version Number Provided",
           "score": 0,
-          "fields_checked": ["version"],
+          "fields_checked": [
+            "version"
+          ],
           "fields_found": [],
           "rationale": "No version number specified"
         },
         {
           "name": "Version Access Methods Documented",
           "score": 0,
-          "fields_checked": ["version_access"],
+          "fields_checked": [
+            "version_access"
+          ],
           "fields_found": [],
           "rationale": "No version access methods provided"
         },
         {
           "name": "Change Descriptions and Errata Provided",
           "score": 0,
-          "fields_checked": ["errata", "updates"],
+          "fields_checked": [
+            "errata",
+            "updates"
+          ],
           "fields_found": [],
           "rationale": "No errata or update information documented"
         },
         {
           "name": "Update Schedule or Frequency Indicated",
           "score": 0,
-          "fields_checked": ["updates"],
+          "fields_checked": [
+            "updates"
+          ],
           "fields_found": [],
           "rationale": "No update schedule specified"
         },
         {
           "name": "Provenance and Source Derivation Documented",
           "score": 0,
-          "fields_checked": ["was_derived_from", "release_notes"],
+          "fields_checked": [
+            "was_derived_from",
+            "release_notes"
+          ],
           "fields_found": [],
           "rationale": "No provenance or release notes provided in schema fields (only in YAML comments)"
         }
@@ -285,35 +380,50 @@
         {
           "name": "Motivation or Purpose for Dataset Creation",
           "score": 1,
-          "fields_checked": ["purposes"],
-          "fields_found": ["purposes"],
+          "fields_checked": [
+            "purposes"
+          ],
+          "fields_found": [
+            "purposes"
+          ],
           "rationale": "Purpose documented describing Bridge2AI program and equitable AI goals"
         },
         {
           "name": "Primary Research Objectives or Tasks",
           "score": 1,
-          "fields_checked": ["tasks"],
-          "fields_found": ["tasks"],
+          "fields_checked": [
+            "tasks"
+          ],
+          "fields_found": [
+            "tasks"
+          ],
           "rationale": "Research task documented focusing on AI research with equity emphasis"
         },
         {
           "name": "Funding Sources and Mechanisms Listed",
           "score": 0,
-          "fields_checked": ["funders"],
+          "fields_checked": [
+            "funders"
+          ],
           "fields_found": [],
           "rationale": "NIH and Bridge2AI mentioned in text but no structured funder information"
         },
         {
           "name": "Grant IDs or Award Numbers Present",
           "score": 0,
-          "fields_checked": ["funders"],
+          "fields_checked": [
+            "funders"
+          ],
           "fields_found": [],
           "rationale": "No grant IDs or award numbers provided"
         },
         {
           "name": "Creators and Acknowledgements Documented",
           "score": 0,
-          "fields_checked": ["creators", "funders"],
+          "fields_checked": [
+            "creators",
+            "funders"
+          ],
           "fields_found": [],
           "rationale": "No structured creator or acknowledgement information"
         }
@@ -329,35 +439,50 @@
         {
           "name": "Collection Mechanisms and Settings Described",
           "score": 0,
-          "fields_checked": ["collection_mechanisms"],
+          "fields_checked": [
+            "collection_mechanisms"
+          ],
           "fields_found": [],
           "rationale": "No structured collection mechanisms documented"
         },
         {
           "name": "Data Acquisition Methods Listed",
           "score": 1,
-          "fields_checked": ["acquisition_methods"],
-          "fields_found": ["acquisition_methods"],
+          "fields_checked": [
+            "acquisition_methods"
+          ],
+          "fields_found": [
+            "acquisition_methods"
+          ],
           "rationale": "Acquisition method present with general description and was_directly_observed flag"
         },
         {
           "name": "Preprocessing, Cleaning, and Labeling Strategies",
           "score": 0,
-          "fields_checked": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "fields_checked": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
           "fields_found": [],
           "rationale": "No preprocessing, cleaning, or labeling strategies documented"
         },
         {
           "name": "Software and Tools Documented",
           "score": 0,
-          "fields_checked": ["software_and_tools"],
+          "fields_checked": [
+            "software_and_tools"
+          ],
           "fields_found": [],
           "rationale": "No software or tools documented"
         },
         {
           "name": "External Standards and Resources Referenced",
           "score": 1,
-          "fields_checked": ["external_resources", "conforms_to"],
+          "fields_checked": [
+            "external_resources",
+            "conforms_to"
+          ],
           "fields_found": [],
           "rationale": "Partial credit: References to primary CHORUS materials and AIM-AHEAD mentioned but not in structured fields"
         }
@@ -373,35 +498,46 @@
         {
           "name": "Known Limitations Documented",
           "score": 1,
-          "fields_checked": ["known_limitations"],
+          "fields_checked": [
+            "known_limitations"
+          ],
           "fields_found": [],
           "rationale": "Limitations clearly stated in description and notes (limited source content, PDF extraction issues) but not in structured field"
         },
         {
           "name": "Systematic Biases Identified and Described",
           "score": 0,
-          "fields_checked": ["known_biases"],
+          "fields_checked": [
+            "known_biases"
+          ],
           "fields_found": [],
           "rationale": "No systematic biases documented"
         },
         {
           "name": "Data Anomalies and Quality Issues Noted",
           "score": 0,
-          "fields_checked": ["anomalies"],
+          "fields_checked": [
+            "anomalies"
+          ],
           "fields_found": [],
           "rationale": "No anomalies documented in structured field"
         },
         {
           "name": "Sensitive Content and Warnings Provided",
           "score": 0,
-          "fields_checked": ["sensitive_elements", "content_warnings"],
+          "fields_checked": [
+            "sensitive_elements",
+            "content_warnings"
+          ],
           "fields_found": [],
           "rationale": "No sensitive content warnings provided"
         },
         {
           "name": "Ethical Review Details Including Conflicts",
           "score": 0,
-          "fields_checked": ["ethical_reviews"],
+          "fields_checked": [
+            "ethical_reviews"
+          ],
           "fields_found": [],
           "rationale": "No ethical review documentation"
         }
@@ -417,35 +553,49 @@
         {
           "name": "Dataset Published on a Recognized Platform",
           "score": 0,
-          "fields_checked": ["publisher"],
+          "fields_checked": [
+            "publisher"
+          ],
           "fields_found": [],
           "rationale": "No publisher information documented"
         },
         {
           "name": "Citation and DOI for Cross-referencing",
           "score": 0,
-          "fields_checked": ["citation", "doi"],
+          "fields_checked": [
+            "citation",
+            "doi"
+          ],
           "fields_found": [],
           "rationale": "No citation or DOI provided"
         },
         {
           "name": "Community Standards or Schema Conformance",
           "score": 0,
-          "fields_checked": ["conforms_to"],
+          "fields_checked": [
+            "conforms_to"
+          ],
           "fields_found": [],
           "rationale": "No community standards conformance documented"
         },
         {
           "name": "Outreach Materials and Documentation Links",
           "score": 1,
-          "fields_checked": ["external_resources", "page"],
-          "fields_found": ["page"],
+          "fields_checked": [
+            "external_resources",
+            "page"
+          ],
+          "fields_found": [
+            "page"
+          ],
           "rationale": "Landing page provided (https://chorus4ai.org); references to primary documentation in notes"
         },
         {
           "name": "Related Datasets with Typed Relationships",
           "score": 0,
-          "fields_checked": ["related_datasets"],
+          "fields_checked": [
+            "related_datasets"
+          ],
           "fields_found": [],
           "rationale": "No related dataset relationships documented"
         }
@@ -505,7 +655,10 @@
       "funders_present": false,
       "grant_ids_present": false,
       "grant_id_formats": [],
-      "funding_agencies_mentioned_in_text": ["NIH", "Bridge2AI"],
+      "funding_agencies_mentioned_in_text": [
+        "NIH",
+        "Bridge2AI"
+      ],
       "nih_grant_pattern_found": false
     },
     "consistency_checks": {
@@ -605,5 +758,21 @@
     "This appears to be a skeleton D4D requiring substantial enhancement from primary sources",
     "For production use, this D4D should be regenerated with properly extracted source materials",
     "The low score (20%) accurately reflects the minimal actionable metadata rather than evaluation error"
-  ]
+  ],
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "CHORUS",
+  "method": "claudecode",
+  "d4d_file": "data/d4d_concatenated/claudecode/CHORUS_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.227175",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 10.0,
+    "total_max_score": 50.0,
+    "overall_percentage": 20.0
+  }
 }

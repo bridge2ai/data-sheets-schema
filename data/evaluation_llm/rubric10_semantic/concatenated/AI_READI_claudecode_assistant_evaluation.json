@@ -11,7 +11,6 @@
     "source_file": "data/d4d_concatenated/claudecode_assistant/AI_READI_d4d.yaml",
     "schema_version": "data_sheets_schema_all.yaml"
   },
-
   "scores": {
     "element_1_discovery": {
       "score": 4,
@@ -20,17 +19,32 @@
       "sub_elements": {
         "persistent_identifier": {
           "score": 1,
-          "field": ["doi", "rrid", "id"],
-          "present": ["id"],
-          "missing": ["doi", "rrid"],
+          "field": [
+            "doi",
+            "rrid",
+            "id"
+          ],
+          "present": [
+            "id"
+          ],
+          "missing": [
+            "doi",
+            "rrid"
+          ],
           "values": {
             "id": "https://fairhub.io/datasets/2"
           }
         },
         "title_description": {
           "score": 1,
-          "field": ["title", "description"],
-          "present": ["title", "description"],
+          "field": [
+            "title",
+            "description"
+          ],
+          "present": [
+            "title",
+            "description"
+          ],
           "missing": [],
           "values": {
             "title": "Flagship Dataset of Type 2 Diabetes from the AI-READI Project",
@@ -39,31 +53,67 @@
         },
         "keywords": {
           "score": 1,
-          "field": ["keywords"],
-          "present": ["keywords"],
+          "field": [
+            "keywords"
+          ],
+          "present": [
+            "keywords"
+          ],
           "missing": [],
           "values": {
-            "keywords": ["Type 2 Diabetes", "T2DM", "AI-READI", "Machine Learning", "multimodal", "harmonized", "multi-site", "salutogenesis", "survey data", "clinical data", "imaging data", "wearable device data", "retinal images", "ECG", "blood glucose", "laboratory results", "environmental data", "FAIR principles", "Bridge2AI"]
+            "keywords": [
+              "Type 2 Diabetes",
+              "T2DM",
+              "AI-READI",
+              "Machine Learning",
+              "multimodal",
+              "harmonized",
+              "multi-site",
+              "salutogenesis",
+              "survey data",
+              "clinical data",
+              "imaging data",
+              "wearable device data",
+              "retinal images",
+              "ECG",
+              "blood glucose",
+              "laboratory results",
+              "environmental data",
+              "FAIR principles",
+              "Bridge2AI"
+            ]
           }
         },
         "landing_page_resources": {
           "score": 1,
-          "field": ["page", "resources"],
-          "present": ["page"],
-          "missing": ["resources"],
+          "field": [
+            "page",
+            "resources"
+          ],
+          "present": [
+            "page"
+          ],
+          "missing": [
+            "resources"
+          ],
           "values": {
             "page": "https://fairhub.io/datasets/2"
           }
         },
         "hierarchical_structure": {
           "score": 0,
-          "field": ["parent_datasets", "related_datasets"],
+          "field": [
+            "parent_datasets",
+            "related_datasets"
+          ],
           "present": [],
-          "missing": ["parent_datasets", "related_datasets"]
+          "missing": [
+            "parent_datasets",
+            "related_datasets"
+          ]
         }
       }
     },
-
     "element_2_access": {
       "score": 4,
       "max_score": 5,
@@ -71,47 +121,84 @@
       "sub_elements": {
         "access_policy": {
           "score": 1,
-          "field": ["license_and_use_terms", "ip_restrictions"],
-          "present": ["license_and_use_terms"],
-          "missing": ["ip_restrictions"],
+          "field": [
+            "license_and_use_terms",
+            "ip_restrictions"
+          ],
+          "present": [
+            "license_and_use_terms"
+          ],
+          "missing": [
+            "ip_restrictions"
+          ],
           "values": {
             "license_and_use_terms": "Public data available for download upon agreement with a license defining permitted uses. Full dataset access (including controlled-access components) contingent on entering into a Data Use Agreement. Adheres to FAIR (Findable, Accessible, Interoperable, Reusable) principles."
           }
         },
         "regulatory_restrictions": {
           "score": 0,
-          "field": ["regulatory_restrictions", "confidentiality_level"],
+          "field": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ],
           "present": [],
-          "missing": ["regulatory_restrictions", "confidentiality_level"]
+          "missing": [
+            "regulatory_restrictions",
+            "confidentiality_level"
+          ]
         },
         "download_url": {
           "score": 0,
-          "field": ["download_url"],
+          "field": [
+            "download_url"
+          ],
           "present": [],
-          "missing": ["download_url"]
+          "missing": [
+            "download_url"
+          ]
         },
         "distribution_formats": {
           "score": 1,
-          "field": ["distribution_formats", "format", "media_type"],
-          "present": ["distribution_formats"],
-          "missing": ["format", "media_type"],
+          "field": [
+            "distribution_formats",
+            "format",
+            "media_type"
+          ],
+          "present": [
+            "distribution_formats"
+          ],
+          "missing": [
+            "format",
+            "media_type"
+          ],
           "values": {
             "distribution_formats": "Data formats vary by domain as documented in dataset documentation."
           }
         },
         "external_resources": {
           "score": 1,
-          "field": ["related_datasets", "external_resources"],
-          "present": ["external_resources"],
-          "missing": ["related_datasets"],
+          "field": [
+            "related_datasets",
+            "external_resources"
+          ],
+          "present": [
+            "external_resources"
+          ],
+          "missing": [
+            "related_datasets"
+          ],
           "values": {
             "external_resources_count": 4,
-            "external_resources": ["AI-READI Dataset Documentation", "Related Publications", "Zenodo Archive", "NIH RePORTER"]
+            "external_resources": [
+              "AI-READI Dataset Documentation",
+              "Related Publications",
+              "Zenodo Archive",
+              "NIH RePORTER"
+            ]
           }
         }
       }
     },
-
     "element_3_reuse": {
       "score": 3,
       "max_score": 5,
@@ -119,43 +206,76 @@
       "sub_elements": {
         "license_reuse": {
           "score": 1,
-          "field": ["license_and_use_terms"],
-          "present": ["license_and_use_terms"],
+          "field": [
+            "license_and_use_terms"
+          ],
+          "present": [
+            "license_and_use_terms"
+          ],
           "missing": [],
           "values": {
-            "license_terms": ["Public data under license with defined permitted uses", "Full dataset requires Data Use Agreement for controlled-access components", "FAIR principles for data sharing", "Attribution required"]
+            "license_terms": [
+              "Public data under license with defined permitted uses",
+              "Full dataset requires Data Use Agreement for controlled-access components",
+              "FAIR principles for data sharing",
+              "Attribution required"
+            ]
           }
         },
         "standardized_formats": {
           "score": 0,
-          "field": ["format", "encoding"],
+          "field": [
+            "format",
+            "encoding"
+          ],
           "present": [],
-          "missing": ["format", "encoding"]
+          "missing": [
+            "format",
+            "encoding"
+          ]
         },
         "schema_conformance": {
           "score": 0,
-          "field": ["conforms_to", "conforms_to_schema"],
+          "field": [
+            "conforms_to",
+            "conforms_to_schema"
+          ],
           "present": [],
-          "missing": ["conforms_to", "conforms_to_schema"]
+          "missing": [
+            "conforms_to",
+            "conforms_to_schema"
+          ]
         },
         "variable_metadata": {
           "score": 0,
-          "field": ["variables"],
+          "field": [
+            "variables"
+          ],
           "present": [],
-          "missing": ["variables"]
+          "missing": [
+            "variables"
+          ]
         },
         "use_guidance": {
           "score": 1,
-          "field": ["intended_uses", "prohibited_uses", "discouraged_uses"],
-          "present": ["discouraged_uses"],
-          "missing": ["intended_uses", "prohibited_uses"],
+          "field": [
+            "intended_uses",
+            "prohibited_uses",
+            "discouraged_uses"
+          ],
+          "present": [
+            "discouraged_uses"
+          ],
+          "missing": [
+            "intended_uses",
+            "prohibited_uses"
+          ],
           "values": {
             "discouraged_uses": "Users must adhere to license terms for public data and the Data Use Agreement for controlled-access data. Uses that would violate participant privacy protections or re-identification attempts are prohibited."
           }
         }
       }
     },
-
     "element_4_ethics": {
       "score": 5,
       "max_score": 5,
@@ -163,19 +283,37 @@
       "sub_elements": {
         "ethics_review": {
           "score": 1,
-          "field": ["ethical_reviews", "human_subject_research"],
-          "present": ["human_subject_research"],
-          "missing": ["ethical_reviews"],
+          "field": [
+            "ethical_reviews",
+            "human_subject_research"
+          ],
+          "present": [
+            "human_subject_research"
+          ],
+          "missing": [
+            "ethical_reviews"
+          ],
           "values": {
             "involves_human_subjects": true,
-            "irb_approval": ["Approved by University of Washington Institutional Review Board (approval number STUDY00016228)", "Reliance agreements with IRBs of University of Alabama at Birmingham and University of California San Diego"],
-            "ethics_review_board": ["University of Washington IRB (lead institution)", "University of Alabama at Birmingham IRB (reliance agreement)", "University of California San Diego IRB (reliance agreement)"]
+            "irb_approval": [
+              "Approved by University of Washington Institutional Review Board (approval number STUDY00016228)",
+              "Reliance agreements with IRBs of University of Alabama at Birmingham and University of California San Diego"
+            ],
+            "ethics_review_board": [
+              "University of Washington IRB (lead institution)",
+              "University of Alabama at Birmingham IRB (reliance agreement)",
+              "University of California San Diego IRB (reliance agreement)"
+            ]
           }
         },
         "deidentification": {
           "score": 1,
-          "field": ["is_deidentified"],
-          "present": ["is_deidentified"],
+          "field": [
+            "is_deidentified"
+          ],
+          "present": [
+            "is_deidentified"
+          ],
           "missing": [],
           "values": {
             "is_deidentified": "Public dataset is de-identified. Controlled-access dataset contains limited identifiers (5-digit zip code, demographic data) under data use agreement protections."
@@ -183,30 +321,58 @@
         },
         "privacy_protections": {
           "score": 1,
-          "field": ["participant_privacy"],
-          "present": ["participant_privacy"],
+          "field": [
+            "participant_privacy"
+          ],
+          "present": [
+            "participant_privacy"
+          ],
           "missing": [],
           "values": {
             "confidential_elements_present": true,
-            "confidentiality_details": ["5-digit zip code held under controlled access", "Genetic sequencing data (future) will be held under controlled access", "Past health records and medications held under controlled access", "Sex, race, ethnicity held under controlled access"],
+            "confidentiality_details": [
+              "5-digit zip code held under controlled access",
+              "Genetic sequencing data (future) will be held under controlled access",
+              "Past health records and medications held under controlled access",
+              "Sex, race, ethnicity held under controlled access"
+            ],
             "sensitive_elements_present": true,
-            "sensitivity_details": ["Sex, race, ethnicity held under controlled access", "Genetic sequencing data (future)", "Past health records and medications", "Traffic and accident reports (environmental data)"]
+            "sensitivity_details": [
+              "Sex, race, ethnicity held under controlled access",
+              "Genetic sequencing data (future)",
+              "Past health records and medications",
+              "Traffic and accident reports (environmental data)"
+            ]
           }
         },
         "informed_consent": {
           "score": 1,
-          "field": ["informed_consent"],
-          "present": ["informed_consent"],
+          "field": [
+            "informed_consent"
+          ],
+          "present": [
+            "informed_consent"
+          ],
           "missing": [],
           "values": {
             "consent_obtained": true,
-            "consent_type": ["Written informed consent provided by all participants", "Informed consent document available for download during recruitment", "Consent covers data collection and sharing of de-identified research data"]
+            "consent_type": [
+              "Written informed consent provided by all participants",
+              "Informed consent document available for download during recruitment",
+              "Consent covers data collection and sharing of de-identified research data"
+            ]
           }
         },
         "vulnerable_populations": {
           "score": 1,
-          "field": ["vulnerable_populations", "participant_compensation"],
-          "present": ["vulnerable_populations", "participant_compensation"],
+          "field": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
+          "present": [
+            "vulnerable_populations",
+            "participant_compensation"
+          ],
           "missing": [],
           "values": {
             "note": "Fields present in schema but not explicitly documented in this file beyond standard protections"
@@ -214,7 +380,6 @@
         }
       }
     },
-
     "element_5_composition": {
       "score": 4,
       "max_score": 5,
@@ -222,8 +387,12 @@
       "sub_elements": {
         "subpopulations": {
           "score": 1,
-          "field": ["subpopulations"],
-          "present": ["subpopulations"],
+          "field": [
+            "subpopulations"
+          ],
+          "present": [
+            "subpopulations"
+          ],
           "missing": [],
           "values": {
             "subpopulations": "Participants with and without Type 2 Diabetes Mellitus, stratified by diabetes severity. Four T2DM categories: no diabetes, pre-diabetes/lifestyle-controlled, diabetes treated with medications, insulin-controlled diabetes. Four race/ethnicity groups: Asian, Black, White, Hispanic. Equal distribution by biological sex."
@@ -231,8 +400,12 @@
         },
         "instances": {
           "score": 1,
-          "field": ["instances"],
-          "present": ["instances"],
+          "field": [
+            "instances"
+          ],
+          "present": [
+            "instances"
+          ],
           "missing": [],
           "values": {
             "instances": "Individual participants with and without Type 2 Diabetes Mellitus (T2DM) with multi-domain measurements. Each participant represents an instance with cross-sectional data including survey responses, physical and clinical measurements, blood and urine lab results, retinal imaging, ECG, wearable device time-series (10 days), continuous blood glucose monitoring (10 days), and environmental sensor data. Target enrollment 4,000 participants across three sites, with approximately 400 participants (10%) in longitudinal follow-up."
@@ -240,14 +413,24 @@
         },
         "variable_metadata": {
           "score": 0,
-          "field": ["variables", "is_tabular"],
+          "field": [
+            "variables",
+            "is_tabular"
+          ],
           "present": [],
-          "missing": ["variables", "is_tabular"]
+          "missing": [
+            "variables",
+            "is_tabular"
+          ]
         },
         "data_topics": {
           "score": 1,
-          "field": ["instances"],
-          "present": ["instances"],
+          "field": [
+            "instances"
+          ],
+          "present": [
+            "instances"
+          ],
           "missing": [],
           "values": {
             "note": "Topics represented in instances description: Type 2 Diabetes, survey data, clinical measurements, lab results, imaging, wearable devices, environmental sensors"
@@ -255,8 +438,14 @@
         },
         "quality_anomalies": {
           "score": 1,
-          "field": ["anomalies", "sampling_strategies"],
-          "present": ["anomalies", "sampling_strategies"],
+          "field": [
+            "anomalies",
+            "sampling_strategies"
+          ],
+          "present": [
+            "anomalies",
+            "sampling_strategies"
+          ],
           "missing": [],
           "values": {
             "anomalies": "As enrollment is ongoing (began July 18, 2023, continues through November 30, 2026), early data releases may not have achieved balanced distribution across all groups due to wave-based recruitment and ongoing enrollment.",
@@ -265,7 +454,6 @@
         }
       }
     },
-
     "element_6_provenance": {
       "score": 2,
       "max_score": 5,
@@ -273,34 +461,62 @@
       "sub_elements": {
         "version_number": {
           "score": 0,
-          "field": ["version"],
+          "field": [
+            "version"
+          ],
           "present": [],
-          "missing": ["version"]
+          "missing": [
+            "version"
+          ]
         },
         "version_access": {
           "score": 1,
-          "field": ["version_access"],
-          "present": ["version_access"],
+          "field": [
+            "version_access"
+          ],
+          "present": [
+            "version_access"
+          ],
           "missing": [],
           "values": {
             "version_access": "Separate documentation versions align to dataset versions. Users can navigate between versions via the documentation site. FAIRhub provides version control and DOI assignment for each release.",
-            "version_details": ["Version dropdown available in documentation", "Each dataset version has corresponding documentation version", "DOI assigned to each major release", "Version history tracked on FAIRhub"]
+            "version_details": [
+              "Version dropdown available in documentation",
+              "Each dataset version has corresponding documentation version",
+              "DOI assigned to each major release",
+              "Version history tracked on FAIRhub"
+            ]
           }
         },
         "errata_changes": {
           "score": 1,
-          "field": ["errata", "updates"],
-          "present": ["updates"],
-          "missing": ["errata"],
+          "field": [
+            "errata",
+            "updates"
+          ],
+          "present": [
+            "updates"
+          ],
+          "missing": [
+            "errata"
+          ],
           "values": {
             "updates": "Periodic updates to data releases are planned as enrollment proceeds (enrollment through November 30, 2026). Documentation versions align with dataset versions to ensure users can track changes across releases.",
-            "update_details": ["Periodic data releases as enrollment continues", "Documentation versioned with dataset (e.g., v1.0.0, v2.0.0)", "Target completion: November 2026"]
+            "update_details": [
+              "Periodic data releases as enrollment continues",
+              "Documentation versioned with dataset (e.g., v1.0.0, v2.0.0)",
+              "Target completion: November 2026"
+            ]
           }
         },
         "update_schedule": {
           "score": 1,
-          "field": ["updates"],
-          "present": ["updates"],
+          "field": [
+            "updates"
+          ],
+          "present": [
+            "updates"
+          ],
           "missing": [],
           "values": {
             "note": "Update schedule covered in updates field"
@@ -308,13 +524,18 @@
         },
         "provenance": {
           "score": 0,
-          "field": ["was_derived_from", "release_notes"],
+          "field": [
+            "was_derived_from",
+            "release_notes"
+          ],
           "present": [],
-          "missing": ["was_derived_from", "release_notes"]
+          "missing": [
+            "was_derived_from",
+            "release_notes"
+          ]
         }
       }
     },
-
     "element_7_motivation": {
       "score": 3,
       "max_score": 5,
@@ -322,8 +543,12 @@
       "sub_elements": {
         "purposes": {
           "score": 1,
-          "field": ["purposes"],
-          "present": ["purposes"],
+          "field": [
+            "purposes"
+          ],
+          "present": [
+            "purposes"
+          ],
           "missing": [],
           "values": {
             "purposes": "Create a flagship ethically-sourced dataset to enable future generations of artificial intelligence/machine learning (AI/ML) research to provide critical insights into type 2 diabetes mellitus (T2DM), including salutogenic pathways to return to health. Develop a foundational dataset in diabetes, agnostic to existing classification criteria, which can be used to reconstruct a temporal atlas of T2DM development and reversal towards health."
@@ -331,8 +556,12 @@
         },
         "tasks": {
           "score": 1,
-          "field": ["tasks"],
-          "present": ["tasks"],
+          "field": [
+            "tasks"
+          ],
+          "present": [
+            "tasks"
+          ],
           "missing": [],
           "values": {
             "tasks": "Enable downstream AI/ML analyses including pseudotime manifold analysis to predict disease trajectories across survey, clinical, imaging, wearable, and environmental domains related to T2DM that may not be feasible with existing data sources such as claims or electronic health records data."
@@ -340,31 +569,45 @@
         },
         "funders": {
           "score": 0,
-          "field": ["funders"],
+          "field": [
+            "funders"
+          ],
           "present": [],
-          "missing": ["funders"]
+          "missing": [
+            "funders"
+          ]
         },
         "grant_ids": {
           "score": 0,
-          "field": ["funders"],
+          "field": [
+            "funders"
+          ],
           "present": [],
-          "missing": ["funders"],
+          "missing": [
+            "funders"
+          ],
           "values": {
             "note": "No explicit grant IDs in funders field, but NIH project link available in external_resources"
           }
         },
         "creators": {
           "score": 1,
-          "field": ["creators", "funders"],
-          "present": ["creators"],
-          "missing": ["funders"],
+          "field": [
+            "creators",
+            "funders"
+          ],
+          "present": [
+            "creators"
+          ],
+          "missing": [
+            "funders"
+          ],
           "values": {
             "creators": "AI-READI Consortium - Multi-institutional team led by Contact PI Aaron Lee (University of Washington, Department of Ophthalmology), with teams across eight institutions working on six cross-disciplinary project modules."
           }
         }
       }
     },
-
     "element_8_technical": {
       "score": 4,
       "max_score": 5,
@@ -372,18 +615,35 @@
       "sub_elements": {
         "collection_mechanisms": {
           "score": 1,
-          "field": ["collection_mechanisms"],
-          "present": ["collection_mechanisms"],
+          "field": [
+            "collection_mechanisms"
+          ],
+          "present": [
+            "collection_mechanisms"
+          ],
           "missing": [],
           "values": {
             "collection_mechanisms": "Multi-modal data collection using hardware devices, clinical procedures, and software-driven capture. REDCap used for patient-reported questionnaires and clinical data entry.",
-            "mechanism_details": ["REDCap for survey data and clinical measurements entry", "Retinal imaging devices exporting to DICOM format", "ECG devices exporting raw format", "Garmin fitness tracker for 10-day activity and heart rate monitoring", "Dexcom Continuous Glucose Monitor for 10-day glucose tracking", "Environmental sensors for home air quality monitoring", "Laboratory equipment for blood and urine analysis", "Clinical procedures (monofilament testing, cognitive function testing, visual acuity, contrast sensitivity)"]
+            "mechanism_details": [
+              "REDCap for survey data and clinical measurements entry",
+              "Retinal imaging devices exporting to DICOM format",
+              "ECG devices exporting raw format",
+              "Garmin fitness tracker for 10-day activity and heart rate monitoring",
+              "Dexcom Continuous Glucose Monitor for 10-day glucose tracking",
+              "Environmental sensors for home air quality monitoring",
+              "Laboratory equipment for blood and urine analysis",
+              "Clinical procedures (monofilament testing, cognitive function testing, visual acuity, contrast sensitivity)"
+            ]
           }
         },
         "acquisition_methods": {
           "score": 1,
-          "field": ["acquisition_methods"],
-          "present": ["acquisition_methods"],
+          "field": [
+            "acquisition_methods"
+          ],
+          "present": [
+            "acquisition_methods"
+          ],
           "missing": [],
           "values": {
             "acquisition_methods": "Harmonized, multi-domain data acquisition across three collection sites (University of Washington, University of Alabama at Birmingham, University of California San Diego) using surveys, clinical exams, imaging devices, wearable sensors, and environmental monitors. In-person study visit for clinical assessments, followed by 10-day at-home monitoring with wearable devices.",
@@ -393,8 +653,16 @@
         },
         "preprocessing_cleaning": {
           "score": 1,
-          "field": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
-          "present": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
+          "field": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
+          "present": [
+            "preprocessing_strategies",
+            "cleaning_strategies",
+            "labeling_strategies"
+          ],
           "missing": [],
           "values": {
             "preprocessing_strategies": "Domain-specific processing and harmonization described in the Dataset Documentation for each data domain. Images exported from devices in raw format with some requiring conversion to DICOM standard format prior to upload. Data from wearable devices and sensors exported in their raw formats.",
@@ -404,25 +672,35 @@
         },
         "software_tools": {
           "score": 0,
-          "field": ["software_and_tools"],
+          "field": [
+            "software_and_tools"
+          ],
           "present": [],
-          "missing": ["software_and_tools"],
+          "missing": [
+            "software_and_tools"
+          ],
           "values": {
             "note": "REDCap mentioned in collection_mechanisms but not in dedicated software_and_tools field"
           }
         },
         "external_standards": {
           "score": 1,
-          "field": ["external_resources", "conforms_to"],
-          "present": ["external_resources"],
-          "missing": ["conforms_to"],
+          "field": [
+            "external_resources",
+            "conforms_to"
+          ],
+          "present": [
+            "external_resources"
+          ],
+          "missing": [
+            "conforms_to"
+          ],
           "values": {
             "external_resources": "AI-READI Dataset Documentation, Related Publications, Zenodo Archive, NIH RePORTER"
           }
         }
       }
     },
-
     "element_9_limitations": {
       "score": 3,
       "max_score": 5,
@@ -430,26 +708,38 @@
       "sub_elements": {
         "known_limitations": {
           "score": 0,
-          "field": ["known_limitations"],
+          "field": [
+            "known_limitations"
+          ],
           "present": [],
-          "missing": ["known_limitations"],
+          "missing": [
+            "known_limitations"
+          ],
           "values": {
             "note": "Limitations mentioned in anomalies and future_use_impacts but not in dedicated known_limitations field"
           }
         },
         "known_biases": {
           "score": 0,
-          "field": ["known_biases"],
+          "field": [
+            "known_biases"
+          ],
           "present": [],
-          "missing": ["known_biases"],
+          "missing": [
+            "known_biases"
+          ],
           "values": {
             "note": "Potential bias from unbalanced early releases mentioned in future_use_impacts but not in dedicated known_biases field"
           }
         },
         "anomalies": {
           "score": 1,
-          "field": ["anomalies"],
-          "present": ["anomalies"],
+          "field": [
+            "anomalies"
+          ],
+          "present": [
+            "anomalies"
+          ],
           "missing": [],
           "values": {
             "anomalies": "As enrollment is ongoing (began July 18, 2023, continues through November 30, 2026), early data releases may not have achieved balanced distribution across all groups due to wave-based recruitment and ongoing enrollment."
@@ -457,18 +747,34 @@
         },
         "sensitive_content": {
           "score": 1,
-          "field": ["sensitive_elements", "content_warnings"],
-          "present": ["sensitive_elements"],
-          "missing": ["content_warnings"],
+          "field": [
+            "sensitive_elements",
+            "content_warnings"
+          ],
+          "present": [
+            "sensitive_elements"
+          ],
+          "missing": [
+            "content_warnings"
+          ],
           "values": {
             "sensitive_elements_present": true,
-            "sensitivity_details": ["Sex, race, ethnicity held under controlled access", "Genetic sequencing data (future)", "Past health records and medications", "Traffic and accident reports (environmental data)"]
+            "sensitivity_details": [
+              "Sex, race, ethnicity held under controlled access",
+              "Genetic sequencing data (future)",
+              "Past health records and medications",
+              "Traffic and accident reports (environmental data)"
+            ]
           }
         },
         "ethical_review_conflicts": {
           "score": 1,
-          "field": ["ethical_reviews"],
-          "present": ["ethical_reviews"],
+          "field": [
+            "ethical_reviews"
+          ],
+          "present": [
+            "ethical_reviews"
+          ],
           "missing": [],
           "values": {
             "note": "IRB approval documented in human_subject_research field, though not in separate ethical_reviews field"
@@ -476,7 +782,6 @@
         }
       }
     },
-
     "element_10_integration": {
       "score": 3,
       "max_score": 5,
@@ -484,35 +789,55 @@
       "sub_elements": {
         "publisher": {
           "score": 0,
-          "field": ["publisher"],
+          "field": [
+            "publisher"
+          ],
           "present": [],
-          "missing": ["publisher"],
+          "missing": [
+            "publisher"
+          ],
           "values": {
             "note": "FAIRhub platform mentioned but not in dedicated publisher field"
           }
         },
         "citation_doi": {
           "score": 0,
-          "field": ["citation", "doi"],
+          "field": [
+            "citation",
+            "doi"
+          ],
           "present": [],
-          "missing": ["citation", "doi"],
+          "missing": [
+            "citation",
+            "doi"
+          ],
           "values": {
             "note": "DOIs present in external_resources but not in dedicated doi or citation fields"
           }
         },
         "conforms_to": {
           "score": 0,
-          "field": ["conforms_to"],
+          "field": [
+            "conforms_to"
+          ],
           "present": [],
-          "missing": ["conforms_to"],
+          "missing": [
+            "conforms_to"
+          ],
           "values": {
             "note": "FAIR principles and DICOM mentioned but not in conforms_to field"
           }
         },
         "outreach_documentation": {
           "score": 1,
-          "field": ["external_resources", "page"],
-          "present": ["external_resources", "page"],
+          "field": [
+            "external_resources",
+            "page"
+          ],
+          "present": [
+            "external_resources",
+            "page"
+          ],
           "missing": [],
           "values": {
             "external_resources_count": 4,
@@ -521,9 +846,13 @@
         },
         "related_datasets": {
           "score": 0,
-          "field": ["related_datasets"],
+          "field": [
+            "related_datasets"
+          ],
           "present": [],
-          "missing": ["related_datasets"],
+          "missing": [
+            "related_datasets"
+          ],
           "values": {
             "note": "Subsets defined but not typed relationships to other datasets"
           }
@@ -531,7 +860,6 @@
       }
     }
   },
-
   "summary": {
     "total_score": 35,
     "max_score": 50,
@@ -561,7 +889,6 @@
       "element_10_integration": 60.0
     }
   },
-
   "semantic_analysis": {
     "doi_validation": {
       "dois_found": [
@@ -570,7 +897,9 @@
         "https://doi.org/10.5281/zenodo.10642459"
       ],
       "doi_format_valid": true,
-      "doi_locations": ["external_resources"],
+      "doi_locations": [
+        "external_resources"
+      ],
       "doi_types": {
         "journal_articles": 2,
         "repositories": 1
@@ -581,13 +910,14 @@
         "Missing citation field with formal citation string"
       ]
     },
-
     "grant_validation": {
       "grants_found": [
         "https://reporter.nih.gov/project-details/10471118"
       ],
       "grant_format_valid": true,
-      "grant_locations": ["external_resources"],
+      "grant_locations": [
+        "external_resources"
+      ],
       "grant_structure": {
         "nih_reporter_links": 1,
         "explicit_grant_numbers": 0,
@@ -599,13 +929,14 @@
         "Missing structured funding information (funder names, grant IDs, award amounts)"
       ]
     },
-
     "irb_validation": {
       "irb_approvals_found": [
         "STUDY00016228"
       ],
       "irb_format_valid": true,
-      "irb_locations": ["human_subject_research.irb_approval"],
+      "irb_locations": [
+        "human_subject_research.irb_approval"
+      ],
       "institutions": [
         "University of Washington IRB (lead institution)",
         "University of Alabama at Birmingham IRB (reliance agreement)",
@@ -617,7 +948,6 @@
         "Missing details on IRB review frequency or continuing review status"
       ]
     },
-
     "identifier_validation": {
       "persistent_identifiers": {
         "id": "https://fairhub.io/datasets/2",
@@ -641,7 +971,6 @@
         "ID uses platform-specific URL rather than globally unique identifier"
       ]
     },
-
     "consistency_analysis": {
       "temporal_consistency": {
         "enrollment_start": "July 18, 2023",
@@ -650,7 +979,6 @@
         "consistent": true,
         "issues": []
       },
-
       "numerical_consistency": {
         "target_enrollment": 4000,
         "longitudinal_cohort": 400,
@@ -659,7 +987,6 @@
         "collection_sites": 3,
         "issues": []
       },
-
       "stratification_consistency": {
         "race_ethnicity_groups": 4,
         "diabetes_severity_categories": 4,
@@ -669,7 +996,6 @@
         "sampling_strategies_match": true,
         "issues": []
       },
-
       "access_tier_consistency": {
         "public_dataset_defined": true,
         "controlled_access_defined": true,
@@ -677,7 +1003,6 @@
         "sensitive_elements_match": true,
         "issues": []
       },
-
       "field_mapping_consistency": {
         "issues": [
           "Ethics information split between human_subject_research and implied ethical_reviews (not present)",
@@ -688,7 +1013,6 @@
         ]
       }
     },
-
     "semantic_completeness": {
       "well_documented_domains": [
         "Human subjects ethics and consent (IRB approval, informed consent, privacy protections)",
@@ -697,14 +1021,12 @@
         "Access policies (public vs controlled access, license terms)",
         "Preprocessing and cleaning strategies"
       ],
-
       "moderately_documented_domains": [
         "Dataset motivation and purpose",
         "Technical transparency (collection and processing)",
         "Quality issues and anomalies",
         "Version and update information"
       ],
-
       "poorly_documented_domains": [
         "Formal provenance (no was_derived_from or release_notes)",
         "Dataset versioning (no version number)",
@@ -713,7 +1035,6 @@
         "Cross-platform integration (no publisher, citation, or conforms_to fields)",
         "Known limitations and biases (information scattered, not in dedicated fields)"
       ],
-
       "structural_observations": [
         "Strong ethics and human subjects documentation",
         "Comprehensive description of data collection and sampling",
@@ -722,30 +1043,61 @@
         "Some information placed in descriptive fields rather than structured fields"
       ]
     },
-
     "fair_principles_assessment": {
       "findable": {
         "score": "Good",
-        "strengths": ["Unique ID", "Rich keywords", "Landing page", "Multiple external resources"],
-        "weaknesses": ["No dataset DOI", "No RRID"]
+        "strengths": [
+          "Unique ID",
+          "Rich keywords",
+          "Landing page",
+          "Multiple external resources"
+        ],
+        "weaknesses": [
+          "No dataset DOI",
+          "No RRID"
+        ]
       },
       "accessible": {
         "score": "Good",
-        "strengths": ["Clear access policies", "Two-tier access model", "License terms defined"],
-        "weaknesses": ["No download_url", "No explicit regulatory_restrictions field"]
+        "strengths": [
+          "Clear access policies",
+          "Two-tier access model",
+          "License terms defined"
+        ],
+        "weaknesses": [
+          "No download_url",
+          "No explicit regulatory_restrictions field"
+        ]
       },
       "interoperable": {
         "score": "Fair",
-        "strengths": ["FAIR principles mentioned", "DICOM format mentioned", "Multi-site harmonization"],
-        "weaknesses": ["No conforms_to field", "No conforms_to_schema field", "No variable metadata", "No explicit format/encoding"]
+        "strengths": [
+          "FAIR principles mentioned",
+          "DICOM format mentioned",
+          "Multi-site harmonization"
+        ],
+        "weaknesses": [
+          "No conforms_to field",
+          "No conforms_to_schema field",
+          "No variable metadata",
+          "No explicit format/encoding"
+        ]
       },
       "reusable": {
         "score": "Good",
-        "strengths": ["Clear license terms", "Use guidance provided", "Rich documentation", "Comprehensive metadata"],
-        "weaknesses": ["No formal provenance", "No version number", "Limited structured funding info"]
+        "strengths": [
+          "Clear license terms",
+          "Use guidance provided",
+          "Rich documentation",
+          "Comprehensive metadata"
+        ],
+        "weaknesses": [
+          "No formal provenance",
+          "No version number",
+          "Limited structured funding info"
+        ]
       }
     },
-
     "recommendations": {
       "high_priority": [
         "Add dataset-level DOI in doi field",
@@ -756,7 +1108,6 @@
         "Add version number in version field",
         "Move scattered limitation/bias information to known_limitations and known_biases fields"
       ],
-
       "medium_priority": [
         "Add conforms_to field with standards (DICOM, FAIR, etc.)",
         "Add conforms_to_schema field",
@@ -767,7 +1118,6 @@
         "Consider adding RRID for dataset",
         "Add separate ethical_reviews field with detailed review information"
       ],
-
       "low_priority": [
         "Add regulatory_restrictions field if applicable",
         "Add ip_restrictions field if applicable",
@@ -777,7 +1127,6 @@
       ]
     }
   },
-
   "overall_assessment": {
     "strengths": [
       "Exceptional ethics and human subjects documentation (100% on Element 4)",
@@ -789,7 +1138,6 @@
       "Well-documented sampling strategies and subpopulations",
       "Consistent temporal and numerical information"
     ],
-
     "weaknesses": [
       "Poor provenance and versioning (40% on Element 6)",
       "Missing formal cross-platform integration fields (60% on Element 10)",
@@ -801,14 +1149,12 @@
       "No version number",
       "Some information in narrative fields rather than structured fields"
     ],
-
     "comparison_to_schema": {
       "field_coverage": "Moderate - uses about 40-50% of available D4D schema fields",
       "field_placement": "Good - most information in appropriate fields, some exceptions",
       "field_depth": "Good - rich descriptions in most populated fields",
       "field_structure": "Fair - some structured lists present, missing others (funders, variables)"
     },
-
     "use_case_suitability": {
       "ai_ml_research": "Good - comprehensive composition and technical details",
       "regulatory_compliance": "Excellent - strong ethics and consent documentation",
@@ -817,5 +1163,21 @@
       "reproducibility": "Good - detailed methods and processing",
       "long_term_preservation": "Fair - good documentation but limited formal provenance"
     }
+  },
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "project": "AI",
+  "method": "READI_claudecode_assistant",
+  "d4d_file": "data/d4d_concatenated/READI_claudecode_assistant/AI_d4d.yaml",
+  "evaluation_timestamp": "2025-12-10T13:08:11.224296",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
+    "temperature": 0.0,
+    "evaluation_type": "semantic_llm_judge"
+  },
+  "summary_scores": {
+    "total_score": 0.0,
+    "total_max_score": 0.0,
+    "overall_percentage": 0
   }
 }
