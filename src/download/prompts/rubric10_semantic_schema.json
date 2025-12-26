@@ -1,0 +1,275 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bridge2ai.github.io/data-sheets-schema/evaluation/rubric10-semantic.schema.json",
+  "title": "Rubric10-Semantic Evaluation Schema",
+  "description": "Schema for D4D evaluation results using the Rubric10-Semantic framework with semantic validation (10 elements, 50 sub-elements)",
+  "type": "object",
+  "required": ["rubric", "version", "d4d_file", "project", "method", "evaluation_timestamp", "model", "summary_scores", "element_scores", "semantic_analysis"],
+  "properties": {
+    "rubric": {
+      "type": "string",
+      "const": "rubric10-semantic",
+      "description": "Rubric type identifier"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+$",
+      "description": "Rubric version (e.g., '1.0')"
+    },
+    "d4d_file": {
+      "type": "string",
+      "description": "Path to the D4D YAML file being evaluated"
+    },
+    "project": {
+      "type": "string",
+      "enum": ["AI_READI", "CHORUS", "CM4AI", "VOICE"],
+      "description": "Project name"
+    },
+    "method": {
+      "type": "string",
+      "enum": ["claudecode_agent", "claudecode_assistant", "claudecode", "gpt5", "curated"],
+      "description": "Generation method"
+    },
+    "evaluation_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of evaluation"
+    },
+    "model": {
+      "type": "object",
+      "required": ["name", "temperature", "evaluation_type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Model identifier (e.g., claude-sonnet-4-5-20250929)"
+        },
+        "temperature": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Model temperature setting"
+        },
+        "evaluation_type": {
+          "type": "string",
+          "enum": ["semantic_llm_judge", "llm_as_judge"],
+          "description": "Type of evaluation"
+        }
+      }
+    },
+    "summary_scores": {
+      "type": "object",
+      "required": ["total_score", "total_max_score", "overall_percentage"],
+      "properties": {
+        "total_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 50,
+          "description": "Total points earned (sum of all element scores)"
+        },
+        "total_max_score": {
+          "type": "number",
+          "const": 50,
+          "description": "Maximum possible points (10 elements × 5 sub-elements each)"
+        },
+        "overall_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage score (total_score / total_max_score × 100)"
+        },
+        "grade": {
+          "type": "string",
+          "description": "Optional letter grade (A+, A, B+, etc.)"
+        }
+      }
+    },
+    "element_scores": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10,
+      "description": "Ten evaluation elements (each with 5 sub-elements)",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "description", "sub_elements", "element_score", "element_max"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Element number (1-10)"
+          },
+          "name": {
+            "type": "string",
+            "description": "Element name/title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Element description/question"
+          },
+          "sub_elements": {
+            "type": "array",
+            "minItems": 5,
+            "maxItems": 5,
+            "description": "Five sub-elements per element (binary 0/1 scoring)",
+            "items": {
+              "type": "object",
+              "required": ["name", "score", "evidence", "quality_note"],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Sub-element name/criterion"
+                },
+                "score": {
+                  "type": "integer",
+                  "enum": [0, 1],
+                  "description": "Binary score: 1 = present/satisfied, 0 = absent/not satisfied"
+                },
+                "evidence": {
+                  "type": "string",
+                  "description": "Evidence from D4D file supporting the score"
+                },
+                "quality_note": {
+                  "type": "string",
+                  "description": "Qualitative assessment and justification"
+                },
+                "semantic_validation": {
+                  "type": "string",
+                  "description": "Optional semantic validation notes (format checks, consistency)"
+                }
+              }
+            }
+          },
+          "element_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Sum of sub-element scores (0-5)"
+          },
+          "element_max": {
+            "type": "integer",
+            "const": 5,
+            "description": "Maximum score for element (always 5)"
+          }
+        }
+      }
+    },
+    "semantic_analysis": {
+      "type": "object",
+      "description": "Semantic validation and quality assessment",
+      "properties": {
+        "issues_detected": {
+          "type": "array",
+          "description": "List of semantic or format issues found",
+          "items": {
+            "type": "object",
+            "required": ["type", "severity", "description"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Issue type (format_error, inconsistency, missing_data, etc.)"
+              },
+              "severity": {
+                "type": "string",
+                "enum": ["critical", "warning", "info"],
+                "description": "Issue severity level"
+              },
+              "description": {
+                "type": "string",
+                "description": "Detailed issue description"
+              },
+              "fields_involved": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "D4D fields related to this issue"
+              },
+              "recommendation": {
+                "type": "string",
+                "description": "Suggested fix or improvement"
+              }
+            }
+          }
+        },
+        "consistency_checks": {
+          "type": "object",
+          "description": "Internal consistency validation results",
+          "properties": {
+            "passed": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Consistency checks that passed"
+            },
+            "failed": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Consistency checks that failed"
+            },
+            "warnings": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Consistency warnings"
+            }
+          }
+        },
+        "correctness_validations": {
+          "type": "object",
+          "description": "Format and correctness validation results",
+          "properties": {
+            "doi_format": {
+              "type": "string",
+              "enum": ["valid", "invalid", "missing"],
+              "description": "DOI format validation"
+            },
+            "grant_format": {
+              "type": "string",
+              "enum": ["valid", "invalid", "missing"],
+              "description": "Grant number format validation"
+            },
+            "rrid_format": {
+              "type": "string",
+              "enum": ["valid", "invalid", "missing"],
+              "description": "RRID format validation"
+            },
+            "url_validity": {
+              "type": "string",
+              "enum": ["all_valid", "some_invalid", "not_checked"],
+              "description": "URL format and accessibility check"
+            }
+          }
+        },
+        "semantic_insights": {
+          "type": "string",
+          "description": "High-level semantic analysis insights and observations"
+        }
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "description": "Actionable recommendations for improving the D4D datasheet",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evaluation_metadata": {
+      "type": "object",
+      "description": "Additional evaluation metadata (optional)",
+      "properties": {
+        "evaluator_id": {
+          "type": "string",
+          "description": "Unique evaluator identifier (optional)"
+        },
+        "rubric_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of rubric file used (optional)"
+        },
+        "d4d_file_hash": {
+          "type": "string",
+          "description": "SHA-256 hash of D4D file evaluated (optional)"
+        },
+        "evaluation_duration_seconds": {
+          "type": "number",
+          "description": "Time taken to complete evaluation (optional)"
+        }
+      }
+    }
+  }
+}
