@@ -60,8 +60,8 @@ def main():
 
     # Load schemas
     schemas = {
+        "rubric10-semantic": load_schema(schema_dir / "rubric10_semantic_schema.json"),
         "rubric20-semantic": load_schema(schema_dir / "rubric20_semantic_schema.json"),
-        # TODO: Add rubric10-semantic schema when created
     }
 
     # Find all evaluation JSON files

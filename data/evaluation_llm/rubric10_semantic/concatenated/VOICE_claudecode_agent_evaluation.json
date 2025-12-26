@@ -1,491 +1,572 @@
 {
-  "metadata": {
-    "project": "VOICE",
-    "d4d_file": "VOICE_d4d.yaml",
-    "file_path": "data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml",
-    "generation_method": "Claude Code Agent Deterministic",
-    "evaluation_date": "2025-12-20",
-    "evaluator": "Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)",
+  "rubric": "rubric10-semantic",
+  "version": "1.0",
+  "d4d_file": "data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml",
+  "project": "VOICE",
+  "method": "claudecode_agent",
+  "evaluation_timestamp": "2025-12-25T18:55:50.628662",
+  "model": {
+    "name": "claude-sonnet-4-5-20250929",
     "temperature": 0.0,
-    "rubric_version": "2.0",
-    "evaluation_type": "rubric10_semantic",
-    "file_stats": {
-      "lines": 765,
-      "generated": "2025-12-20 00:11"
-    }
+    "evaluation_type": "semantic_llm_judge"
   },
-  "summary": {
-    "total_score": 46,
-    "max_score": 50,
-    "percentage": 92.0,
-    "elements_evaluated": 10,
-    "sub_elements_evaluated": 50
+  "summary_scores": {
+    "total_score": 44.0,
+    "total_max_score": 50.0,
+    "overall_percentage": 88.0,
+    "grade": "TBD"
   },
   "element_scores": [
     {
       "id": 1,
       "name": "Dataset Discovery and Identification",
-      "score": 5,
-      "max_score": 5,
-      "percentage": 100.0,
+      "description": "Can a user or system discover and uniquely identify this dataset?",
       "sub_elements": [
         {
           "name": "Persistent Identifier (DOI, RRID, or URI)",
-          "fields_checked": ["doi", "rrid", "id"],
           "score": 1,
-          "evidence": "id: https://doi.org/10.13026/37yb-1t42 (line 7)",
-          "rationale": "Dataset has persistent DOI identifier embedded in id field"
+          "evidence": "id: https://doi.org/10.13026/37yb-1t42",
+          "quality_note": "DOI present and properly formatted as persistent identifier",
+          "semantic_validation": "DOI format validated - resolves to PhysioNet dataset"
         },
         {
           "name": "Dataset Title and Description Completeness",
-          "fields_checked": ["title", "description"],
           "score": 1,
-          "evidence": "title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information (line 9); description: comprehensive 17-line description (lines 10-26)",
-          "rationale": "Both title and extensive description present with comprehensive project context"
+          "evidence": "title: Bridge2AI-Voice - An ethically-sourced, diverse voice dataset linked to health information; description: 500+ character comprehensive description",
+          "quality_note": "Clear, descriptive title with comprehensive multi-paragraph description covering scope, purpose, and contents",
+          "semantic_validation": "Title and description are comprehensive and informative"
         },
         {
           "name": "Keywords or Tags for Searchability",
-          "fields_checked": ["keywords"],
           "score": 1,
-          "evidence": "keywords: 45 keyword entries covering voice biomarker, disorders, methods, standards (lines 29-72)",
-          "rationale": "Extensive keyword list including technical terms, medical conditions, tools, and standards"
+          "evidence": "keywords: 45 entries including 'voice biomarker', 'Bridge2AI', 'acoustic biomarker', disease categories, methods, and platforms",
+          "quality_note": "Extensive keyword list covering domain, methods, conditions, tools, and principles",
+          "semantic_validation": "Keywords cover multiple dimensions - domain, technical, medical, ethical"
         },
         {
           "name": "Landing Page and Resources (page, hierarchical resources)",
-          "fields_checked": ["page", "resources"],
           "score": 1,
-          "evidence": "page: https://docs.b2ai-voice.org (line 27); external_resources: 11 resource entries (lines 708-765)",
-          "rationale": "Primary landing page and comprehensive external resources section with 11 documented links"
+          "evidence": "page: https://docs.b2ai-voice.org; PhysioNet URL in distribution_formats and external_resources",
+          "quality_note": "Landing page URL provided; no hierarchical resources field but external_resources lists 11 related resources",
+          "semantic_validation": "Landing page present; hierarchical resources structure not used"
         },
         {
           "name": "Hierarchical Structure (parent datasets, relationships)",
-          "fields_checked": ["parent_datasets", "related_datasets"],
-          "score": 1,
-          "evidence": "External resources section implicitly documents hierarchical relationships through platform linkages (PhysioNet, Health Data Nexus, Zenodo)",
-          "rationale": "While explicit parent_datasets and related_datasets fields are not present, hierarchical structure is documented through versioning (v1.0, v1.1, v2.0.0, v2.0.1) and multiple platform distribution points indicating dataset family relationships"
+          "score": 0,
+          "evidence": "No parent_datasets or related_datasets fields found",
+          "quality_note": "Missing hierarchical structure fields - dataset appears standalone without explicit parent/child relationships",
+          "semantic_validation": "Schema fields parent_datasets and related_datasets not populated"
         }
-      ]
+      ],
+      "element_score": 4,
+      "element_max": 5
     },
     {
       "id": 2,
       "name": "Dataset Access and Retrieval",
-      "score": 5,
-      "max_score": 5,
-      "percentage": 100.0,
+      "description": "Can the dataset and its associated resources be located, accessed, and downloaded?",
       "sub_elements": [
         {
           "name": "Access Policy and IP Restrictions Defined",
-          "fields_checked": ["license_and_use_terms", "ip_restrictions"],
           "score": 1,
-          "evidence": "license_and_use_terms: comprehensive section with license terms list (lines 508-531)",
-          "rationale": "Detailed license terms including registered access, data use agreement, authorized users, sharing restrictions, and compliance requirements"
+          "evidence": "license_and_use_terms: Bridge2AI Voice Registered Access License with detailed terms; ip_restrictions field not present",
+          "quality_note": "Comprehensive access policy defined in license_and_use_terms; IP restrictions not explicitly documented in separate field",
+          "semantic_validation": "License terms comprehensive but ip_restrictions field missing"
         },
         {
           "name": "Regulatory Restrictions and Confidentiality Level Specified",
-          "fields_checked": ["regulatory_restrictions", "confidentiality_level"],
           "score": 1,
-          "evidence": "Certificate of Confidentiality protections documented (lines 528, 696-705); HIPAA Safe Harbor de-identification (lines 418-430)",
-          "rationale": "Regulatory framework clearly specified through Certificate of Confidentiality, HIPAA compliance, and IRB approval"
+          "evidence": "Certificate of Confidentiality mentioned in license_and_use_terms and sensitive_elements; HIPAA Safe Harbor de-identification in cleaning_strategies",
+          "quality_note": "Regulatory frameworks (HIPAA, Certificate of Confidentiality) mentioned but regulatory_restrictions and confidentiality_level schema fields not populated",
+          "semantic_validation": "Regulatory info present in narrative but not in structured fields"
         },
         {
           "name": "Download URL or Platform Link Available",
-          "fields_checked": ["download_url"],
           "score": 1,
-          "evidence": "access_urls in distribution_formats: https://physionet.org/content/b2ai-voice/ (lines 541, 549, 557, 565)",
-          "rationale": "Direct access URLs provided within each distribution format specification"
+          "evidence": "distribution_formats.access_urls: https://physionet.org/content/b2ai-voice/; page: https://docs.b2ai-voice.org",
+          "quality_note": "PhysioNet access URLs provided in distribution_formats; download_url field not used",
+          "semantic_validation": "Access URLs present in distribution formats"
         },
         {
           "name": "Distribution Formats and File Types Specified",
-          "fields_checked": ["distribution_formats", "format", "media_type"],
           "score": 1,
-          "evidence": "distribution_formats: 5 format entries covering Parquet (spectrograms, MFCCs), TSV (phenotype, static features), and raw audio (lines 533-573)",
-          "rationale": "Comprehensive documentation of all distribution formats with technical specifications and access methods"
+          "evidence": "distribution_formats: 5 entries (Parquet for spectrograms, Parquet for MFCCs, TSV for phenotype, TSV for static features, raw audio controlled access)",
+          "quality_note": "Multiple distribution formats clearly specified with format names and descriptions",
+          "semantic_validation": "Distribution formats comprehensive and well-documented"
         },
         {
           "name": "Related Datasets and External Resources Linked",
-          "fields_checked": ["related_datasets", "external_resources"],
           "score": 1,
-          "evidence": "external_resources: 11 entries covering PhysioNet, GitHub, NIH RePORTER, Health Data Nexus, Zenodo, publications, DACO contact (lines 708-765)",
-          "rationale": "Extensive external resources documentation linking to platforms, documentation, code repositories, and related publications"
+          "evidence": "external_resources: 11 entries including PhysioNet, GitHub, Health Data Nexus, Zenodo, publications; related_datasets field not present",
+          "quality_note": "Extensive external resources but no typed relationships to related datasets",
+          "semantic_validation": "External resources present; related_datasets field not used"
         }
-      ]
+      ],
+      "element_score": 5,
+      "element_max": 5
     },
     {
       "id": 3,
       "name": "Data Reuse and Interoperability",
-      "score": 5,
-      "max_score": 5,
-      "percentage": 100.0,
+      "description": "Is sufficient information provided to reuse and integrate the dataset with others?",
       "sub_elements": [
         {
           "name": "License Terms Allow Reuse",
-          "fields_checked": ["license_and_use_terms"],
           "score": 1,
-          "evidence": "license_and_use_terms with explicit reuse provisions: public disclosure encouraged, recognition required, open-access publication preferred (lines 526-527)",
-          "rationale": "License explicitly encourages research reuse and publication with appropriate attribution"
+          "evidence": "license_and_use_terms with detailed terms including public disclosure of results encouraged in open-access journals",
+          "quality_note": "License explicitly supports research reuse with clear terms and conditions",
+          "semantic_validation": "License permits research use with appropriate safeguards"
         },
         {
           "name": "Data Formats Are Standardized (encoding, format)",
-          "fields_checked": ["format", "encoding"],
           "score": 1,
-          "evidence": "Standardized formats: Parquet for arrays (spectrograms, MFCCs), TSV for tabular data, JSON for dictionaries (lines 533-573)",
-          "rationale": "Industry-standard formats compatible with Python datasets library and common data science tools"
+          "evidence": "distribution_formats specify Parquet, TSV, JSON; preprocessing specifies 16kHz, monaural; format/encoding top-level fields not populated",
+          "quality_note": "Standard formats (Parquet, TSV, JSON) specified in distribution; audio standardized to 16kHz monaural",
+          "semantic_validation": "Formats standardized but not in top-level format/encoding fields"
         },
         {
           "name": "Schema or Ontology Conformance Stated",
-          "fields_checked": ["conforms_to", "conforms_to_schema"],
-          "score": 1,
-          "evidence": "Schema conformance documented in header: Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml (line 4); FAIR principles mentioned in keywords (line 70)",
-          "rationale": "D4D schema conformance explicitly documented; FAIR principles referenced as guiding framework"
+          "score": 0,
+          "evidence": "No conforms_to or conforms_to_schema fields found",
+          "quality_note": "Missing explicit schema/ontology conformance statements",
+          "semantic_validation": "Schema conformance fields not populated"
         },
         {
           "name": "Variable Metadata with Identifiers Defined",
-          "fields_checked": ["variables"],
           "score": 1,
-          "evidence": "Data dictionaries provided: phenotype.json for demographics/questionnaires, static_features.json for acoustic features (lines 555, 563)",
-          "rationale": "JSON data dictionaries provide variable-level metadata with column descriptions for all tabular data"
+          "evidence": "phenotype.json and static_features.json data dictionaries mentioned; variables field (as schema list) not populated",
+          "quality_note": "Variable metadata available via JSON data dictionaries but not in variables schema field",
+          "semantic_validation": "Variable documentation exists in external dictionaries"
         },
         {
           "name": "Use Guidance Provided (intended, prohibited uses)",
-          "fields_checked": ["intended_uses", "prohibited_uses", "discouraged_uses"],
           "score": 1,
-          "evidence": "intended_uses: 5 use cases (lines 454-480); discouraged_uses: 4 discouraged use cases (lines 482-504)",
-          "rationale": "Comprehensive use guidance covering both appropriate applications and discouraged/prohibited uses"
+          "evidence": "intended_uses: 5 entries; discouraged_uses: 4 entries; prohibited_uses field not present",
+          "quality_note": "Comprehensive use guidance with intended and discouraged uses; prohibited_uses field not used",
+          "semantic_validation": "Use guidance comprehensive covering both recommendations and warnings"
         }
-      ]
+      ],
+      "element_score": 4,
+      "element_max": 5
     },
     {
       "id": 4,
       "name": "Ethical Use and Privacy Safeguards",
-      "score": 5,
-      "max_score": 5,
-      "percentage": 100.0,
+      "description": "Does the dataset provide clear information about consent, privacy, and ethical oversight?",
       "sub_elements": [
         {
           "name": "IRB or Ethics Review Documented",
-          "fields_checked": ["ethical_reviews", "human_subject_research"],
           "score": 1,
-          "evidence": "human_subject_research: comprehensive section documenting USF IRB approval, informed consent, bioethics guidance (lines 641-658)",
-          "rationale": "IRB approval explicitly documented with ethics review board identification and bioethics integration details"
+          "evidence": "human_subject_research: IRB approval from University of South Florida, written informed consent; ethical_reviews as list field not populated",
+          "quality_note": "IRB approval documented in human_subject_research class but not in ethical_reviews list",
+          "semantic_validation": "Ethics review documented but in different field structure"
         },
         {
           "name": "Deidentification Method Described",
-          "fields_checked": ["is_deidentified"],
           "score": 1,
-          "evidence": "HIPAA Safe Harbor de-identification comprehensively documented with 18 identifier categories removed (lines 418-430)",
-          "rationale": "Detailed deidentification methodology following HIPAA Safe Harbor standard with specific identifier categories enumerated"
+          "evidence": "cleaning_strategies: HIPAA Safe Harbor de-identification with 18 identifier categories removed; is_deidentified field not populated",
+          "quality_note": "Comprehensive de-identification documented in cleaning_strategies; is_deidentified class field not used",
+          "semantic_validation": "De-identification thoroughly documented in cleaning strategies"
         },
         {
           "name": "Privacy Protections Beyond Deidentification",
-          "fields_checked": ["participant_privacy"],
           "score": 1,
-          "evidence": "Certificate of Confidentiality (lines 696-705); raw audio controlled access (lines 239-245, 664-671); free speech transcript removal (lines 399-405)",
-          "rationale": "Multiple privacy protection layers including Certificate of Confidentiality, controlled access for sensitive data, and transcript removal"
+          "evidence": "Certificate of Confidentiality, controlled access for raw audio, free speech transcripts removed; participant_privacy field not populated",
+          "quality_note": "Multiple privacy protections documented in various fields but not in participant_privacy schema field",
+          "semantic_validation": "Privacy protections extensive but not in structured participant_privacy field"
         },
         {
           "name": "Informed Consent Obtained from Participants",
-          "fields_checked": ["informed_consent"],
           "score": 1,
-          "evidence": "Written informed consent documented for data collection initiative, data sharing, EHR access, and research data sharing (lines 645-648)",
-          "rationale": "Comprehensive informed consent process documented covering multiple data collection and sharing aspects"
+          "evidence": "human_subject_research: 'Participants provided written informed consent for data collection initiative and data sharing'",
+          "quality_note": "Informed consent documented in human_subject_research but not in informed_consent list field",
+          "semantic_validation": "Consent documented in human_subject_research narrative"
         },
         {
           "name": "Vulnerable Populations and Compensation Documented",
-          "fields_checked": ["vulnerable_populations", "participant_compensation"],
           "score": 1,
-          "evidence": "Pediatric cohort with special ethical considerations documented (lines 296-301); additional privacy precautions for pediatric data noted (line 608)",
-          "rationale": "Vulnerable population (pediatric) explicitly identified with documented ethical challenges and additional protection measures"
+          "evidence": "subpopulations includes pediatric cohort with ethical considerations noted; vulnerable_populations and participant_compensation fields not populated",
+          "quality_note": "Pediatric vulnerable population acknowledged in subpopulations; schema fields not used",
+          "semantic_validation": "Vulnerable populations mentioned but not in dedicated schema fields"
         }
-      ]
+      ],
+      "element_score": 5,
+      "element_max": 5
     },
     {
       "id": 5,
       "name": "Data Composition and Structure",
-      "score": 5,
-      "max_score": 5,
-      "percentage": 100.0,
+      "description": "Can the dataset's structure, modality, and population be understood from metadata?",
       "sub_elements": [
         {
           "name": "Cohort or Subpopulations Characteristics Described",
-          "fields_checked": ["subpopulations"],
           "score": 1,
-          "evidence": "subpopulations: 5 cohorts detailed (Voice Disorders, Neurological, Mood/Psychiatric, Respiratory, Pediatric) with clinical characteristics (lines 270-301)",
-          "rationale": "Comprehensive subpopulation documentation with clinical manifestations and disease-specific characteristics"
+          "evidence": "subpopulations: 5 entries (Voice Disorders, Neurological, Mood/Psychiatric, Respiratory, Pediatric) with detailed descriptions",
+          "quality_note": "Comprehensive subpopulation characterization with clinical details for each cohort",
+          "semantic_validation": "Subpopulations well-defined with clinical context"
         },
         {
           "name": "Number of Instances or Samples Reported",
-          "fields_checked": ["instances"],
           "score": 1,
-          "evidence": "instances: 306 participants, 12,523 recordings documented (lines 214-225)",
-          "rationale": "Specific instance counts provided at both participant and recording levels"
+          "evidence": "instances: 306 participants, 12,523 recordings in v1.0",
+          "quality_note": "Clear instance counts for participants and recordings",
+          "semantic_validation": "Instance counts clearly stated"
         },
         {
           "name": "Variable-Level Metadata and Tabular Flag",
-          "fields_checked": ["variables", "is_tabular"],
           "score": 1,
-          "evidence": "JSON data dictionaries for phenotype and static features (lines 555, 563); tabular data explicitly documented as TSV format",
-          "rationale": "Variable-level metadata provided through data dictionaries; tabular structure implicit in TSV format specification"
+          "evidence": "phenotype.json and static_features.json data dictionaries; TSV format indicates tabular; variables and is_tabular fields not populated",
+          "quality_note": "Variable metadata via external JSON dictionaries; tabular nature implied by TSV format",
+          "semantic_validation": "Variable metadata available externally; schema fields not used"
         },
         {
           "name": "Data Topics or Conditions Represented",
-          "fields_checked": ["instances"],
           "score": 1,
-          "evidence": "Five disease cohort categories detailed in instances and subpopulations sections (lines 220-225, 270-301)",
-          "rationale": "Data topics comprehensively documented through disease cohort categorization and clinical condition descriptions"
+          "evidence": "instances and subpopulations describe five disease categories with specific conditions listed",
+          "quality_note": "Comprehensive description of clinical conditions and health topics covered",
+          "semantic_validation": "Data topics clearly enumerated across multiple fields"
         },
         {
           "name": "Data Quality Issues and Anomalies Documented",
-          "fields_checked": ["anomalies", "sampling_strategies"],
           "score": 1,
-          "evidence": "sampling_strategies: detailed sampling methodology with non-random, non-representative sampling explicitly stated (lines 247-268)",
-          "rationale": "Sampling strategy comprehensively documented including acknowledgment of non-representative sampling and potential limitations"
+          "evidence": "sampling_strategies present with is_sample, is_random, is_representative flags; anomalies field not populated",
+          "quality_note": "Sampling characteristics documented; quality issues mentioned in discourse but anomalies field not used",
+          "semantic_validation": "Sampling documented; anomalies field missing"
         }
-      ]
+      ],
+      "element_score": 5,
+      "element_max": 5
     },
     {
       "id": 6,
       "name": "Data Provenance and Version Tracking",
-      "score": 5,
-      "max_score": 5,
-      "percentage": 100.0,
+      "description": "Can a user determine dataset versions, update history, and provenance?",
       "sub_elements": [
         {
           "name": "Dataset Version Number Provided",
-          "fields_checked": ["version"],
           "score": 1,
-          "evidence": "Version progression documented: v1.0, v1.1, v2.0.0, v2.0.1 with dates (lines 603-615)",
-          "rationale": "Multiple version numbers provided with release timeline from January through August 2025"
+          "evidence": "updates: v1.0 (Jan 2025), v1.1 (Jan 2025), v2.0.0 (Apr 2025), v2.0.1 (Aug 2025); version field not populated",
+          "quality_note": "Version numbers documented in updates narrative but not in version schema field",
+          "semantic_validation": "Versions documented in updates but version field not used"
         },
         {
           "name": "Version Access Methods Documented",
-          "fields_checked": ["version_access"],
           "score": 1,
-          "evidence": "Version-specific documentation and DOI system mentioned (lines 606, 619); PhysioNet platform provides versioned access",
-          "rationale": "Version access methods documented through PhysioNet platform and version-specific DOIs"
+          "evidence": "updates: 'Latest version available at https://doi.org/10.13026/37yb-1t42'; version_access field not populated",
+          "quality_note": "Version access via DOI documented in updates; version_access class field not used",
+          "semantic_validation": "Version access mentioned but not in structured field"
         },
         {
           "name": "Change Descriptions and Errata Provided",
-          "fields_checked": ["errata", "updates"],
           "score": 1,
-          "evidence": "updates: detailed version history with specific changes (v1.1 added MFCCs, v2.0.0 expanded cohort, etc.) lines 599-619",
-          "rationale": "Comprehensive update history documenting specific changes in each version release"
+          "evidence": "updates.update_details: version-specific changes listed (v1.0 initial, v1.1 added MFCCs, v2.0.0 expanded cohort, etc.); errata field not populated",
+          "quality_note": "Version changes documented in updates; errata field not used",
+          "semantic_validation": "Change documentation in updates; errata field missing"
         },
         {
           "name": "Update Schedule or Frequency Indicated",
-          "fields_checked": ["updates"],
           "score": 1,
-          "evidence": "frequency: Periodic versioned releases during data collection period (2022-2026) (line 609); future releases planned (lines 616-617)",
-          "rationale": "Update schedule clearly specified with data collection timeline and planned future releases"
+          "evidence": "updates.frequency: 'Periodic versioned releases during data collection period (2022-2026)'",
+          "quality_note": "Update frequency and timeline clearly stated",
+          "semantic_validation": "Update schedule documented with project end date"
         },
         {
           "name": "Provenance and Source Derivation Documented",
-          "fields_checked": ["was_derived_from", "release_notes"],
           "score": 1,
-          "evidence": "Generation provenance in header: Source: data/preprocessed/concatenated/VOICE_preprocessed.txt (89K, 9 source files) (line 3); preprocessing strategies document feature derivation (lines 345-415)",
-          "rationale": "Source provenance documented in header; data derivation process comprehensively described in preprocessing section"
+          "evidence": "D4D header comments: 'Source: data/preprocessed/concatenated/VOICE_preprocessed.txt (89K, 9 source files)'; was_derived_from and release_notes fields not populated",
+          "quality_note": "Generation provenance in header; schema provenance fields not used",
+          "semantic_validation": "Provenance in metadata header but not in schema fields"
         }
-      ]
+      ],
+      "element_score": 5,
+      "element_max": 5
     },
     {
       "id": 7,
       "name": "Scientific Motivation and Funding Transparency",
-      "score": 5,
-      "max_score": 5,
-      "percentage": 100.0,
+      "description": "Does the metadata clearly state why the dataset exists and who funded it?",
       "sub_elements": [
         {
           "name": "Motivation or Purpose for Dataset Creation",
-          "fields_checked": ["purposes"],
           "score": 1,
-          "evidence": "purposes: 3 comprehensive purpose statements covering clinical integration, flagship dataset creation, and standards development (lines 76-93)",
-          "rationale": "Detailed motivation documented across multiple dimensions of project goals"
+          "evidence": "purposes: 3 detailed entries explaining integration of voice as health biomarker, creating flagship dataset, establishing standards",
+          "quality_note": "Comprehensive purpose statements covering research, standards, and AI development goals",
+          "semantic_validation": "Purpose clearly articulated across multiple perspectives"
         },
         {
           "name": "Primary Research Objectives or Tasks",
-          "fields_checked": ["tasks"],
           "score": 1,
-          "evidence": "tasks: 6 task entries covering AI/ML development for voice disorders, neurological, mood, respiratory, pediatric disorders, and workforce development (lines 95-128)",
-          "rationale": "Comprehensive task documentation covering all clinical domains and educational objectives"
+          "evidence": "tasks: 6 entries covering voice disorders, neurological disorders, mood disorders, respiratory disorders, pediatric disorders, and workforce development",
+          "quality_note": "Detailed task descriptions for each clinical domain and community building",
+          "semantic_validation": "Tasks comprehensive and aligned with purposes"
         },
         {
           "name": "Funding Sources and Mechanisms Listed",
-          "fields_checked": ["funders"],
           "score": 1,
-          "evidence": "funders: 2 entries - NIH Office of the Director and NIBIB with detailed grant information (lines 195-210)",
-          "rationale": "Primary and supporting funding sources documented with institutional details"
+          "evidence": "funders: NIH Office of the Director and NIBIB with detailed grant information",
+          "quality_note": "Two funding sources identified with agencies and programs",
+          "semantic_validation": "Funding sources clearly documented"
         },
         {
           "name": "Grant IDs or Award Numbers Present",
-          "fields_checked": ["funders"],
           "score": 1,
-          "evidence": "Grant numbers: 3OT2OD032720-01S3 (NIH OD), R01EB030362 (NIBIB) with opportunity number OTA-21-008 (lines 199, 208)",
-          "rationale": "Specific grant numbers and opportunity numbers provided for complete funding traceability"
+          "evidence": "funders: grant 3OT2OD032720-01S3 and R01EB030362 with opportunity number OTA-21-008",
+          "quality_note": "Specific grant numbers, opportunity number, and study section provided",
+          "semantic_validation": "Grant identifiers complete and traceable"
         },
         {
           "name": "Creators and Acknowledgements Documented",
-          "fields_checked": ["creators", "funders"],
           "score": 1,
-          "evidence": "creators: 13 entries including contact PI, co-PIs, co-investigators, and consortium (lines 154-193)",
-          "rationale": "Comprehensive creator documentation with roles and institutional affiliations"
+          "evidence": "creators: 13 entries including Contact PI, 10 Co-PIs, 1 Co-I, and consortium; funders provide acknowledgements",
+          "quality_note": "Comprehensive creator list with roles and affiliations",
+          "semantic_validation": "Creator attribution complete and detailed"
         }
-      ]
+      ],
+      "element_score": 5,
+      "element_max": 5
     },
     {
       "id": 8,
       "name": "Technical Transparency (Data Collection and Processing)",
-      "score": 5,
-      "max_score": 5,
-      "percentage": 100.0,
+      "description": "Can data collection and processing steps be replicated or understood?",
       "sub_elements": [
         {
           "name": "Collection Mechanisms and Settings Described",
-          "fields_checked": ["collection_mechanisms"],
           "score": 1,
-          "evidence": "collection_mechanisms: 3 detailed entries covering smartphone app protocol, multi-institutional collection, and comprehensive data collection protocol (lines 304-323)",
-          "rationale": "Collection mechanisms thoroughly documented with device specifications, protocols, and standardization methods"
+          "evidence": "collection_mechanisms: 3 entries describing smartphone app, multi-site protocols, standardized data collection procedures",
+          "quality_note": "Collection mechanisms comprehensively documented with technical and institutional details",
+          "semantic_validation": "Collection process replicable from documentation"
         },
         {
           "name": "Data Acquisition Methods Listed",
-          "fields_checked": ["acquisition_methods"],
           "score": 1,
-          "evidence": "acquisition_methods: 3 entries covering voice recordings, questionnaires, and EHR access (lines 325-342)",
-          "rationale": "Comprehensive acquisition methods documentation covering all data modalities"
+          "evidence": "acquisition_methods: 3 entries covering voice recordings, questionnaires, and EHR access",
+          "quality_note": "All acquisition modalities documented with details on tasks and instruments",
+          "semantic_validation": "Acquisition methods thorough and multimodal"
         },
         {
           "name": "Preprocessing, Cleaning, and Labeling Strategies",
-          "fields_checked": ["preprocessing_strategies", "cleaning_strategies", "labeling_strategies"],
           "score": 1,
-          "evidence": "preprocessing_strategies: 7 entries with detailed technical specifications (lines 345-415); cleaning_strategies: 3 entries (lines 417-451)",
-          "rationale": "Extensive documentation of preprocessing (audio conversion, feature extraction, transcription) and cleaning (de-identification, privacy protection) with technical parameters"
+          "evidence": "preprocessing_strategies: 7 entries; cleaning_strategies: 3 entries; labeling_strategies field not populated",
+          "quality_note": "Extensive preprocessing (audio, spectrograms, MFCCs, features, transcription) and cleaning (de-identification, privacy, standardization) documented; no labeling strategies",
+          "semantic_validation": "Preprocessing and cleaning comprehensive; labeling not applicable/documented"
         },
         {
           "name": "Software and Tools Documented",
-          "fields_checked": ["software_and_tools"],
           "score": 1,
-          "evidence": "Software tools documented throughout preprocessing: OpenSMILE, Praat, Parselmouth, Whisper, b2aiprep library, REDCap (lines 378-415)",
-          "rationale": "Key software tools identified in preprocessing and cleaning sections with specific applications"
+          "evidence": "Preprocessing mentions OpenSMILE, Praat, Parselmouth, OpenAI Whisper, REDCap, b2aiprep; software_and_tools field not populated",
+          "quality_note": "Major software tools documented in preprocessing narratives but not in software_and_tools schema field",
+          "semantic_validation": "Software documented in narratives; schema field not used"
         },
         {
           "name": "External Standards and Resources Referenced",
-          "fields_checked": ["external_resources", "conforms_to"],
           "score": 1,
-          "evidence": "external_resources: 11 entries including standards publications, platforms, repositories (lines 708-765); FAIR principles in keywords (line 70)",
-          "rationale": "External standards documented through resources section and FAIR/CARE principles references"
+          "evidence": "external_resources: 11 entries; HIPAA standards, PhysioNet platform, Bridge2AI program; conforms_to field not populated",
+          "quality_note": "External resources and standards referenced extensively; conforms_to field not used",
+          "semantic_validation": "Standards and resources documented; conforms_to field missing"
         }
-      ]
+      ],
+      "element_score": 5,
+      "element_max": 5
     },
     {
       "id": 9,
       "name": "Dataset Evaluation and Limitations Disclosure",
-      "score": 3,
-      "max_score": 5,
-      "percentage": 60.0,
+      "description": "Does the metadata communicate known risks, biases, or dataset limitations?",
       "sub_elements": [
         {
           "name": "Known Limitations Documented",
-          "fields_checked": ["known_limitations"],
-          "score": 1,
-          "evidence": "Limitations implicitly documented: non-representative sampling (line 263), pediatric data not yet released (line 301), multi-session requirements for subset of participants (lines 308-310)",
-          "rationale": "While not in a dedicated known_limitations field, substantive limitations are documented throughout the datasheet in sampling_strategies and instances sections"
+          "score": 0,
+          "evidence": "No known_limitations field; sampling_strategies notes is_representative: false but no detailed limitations discussion",
+          "quality_note": "Sampling limitations implied but no explicit limitations documentation",
+          "semantic_validation": "known_limitations field not populated"
         },
         {
           "name": "Systematic Biases Identified and Described",
-          "fields_checked": ["known_biases"],
           "score": 0,
-          "evidence": "No explicit known_biases field present",
-          "rationale": "Dataset acknowledges non-representative sampling but does not explicitly document systematic biases in a dedicated section"
+          "evidence": "No known_biases field; addressing_gaps mentions demographic diversity limitations in prior research",
+          "quality_note": "Historical bias issues mentioned in gaps but no systematic bias documentation for this dataset",
+          "semantic_validation": "known_biases field not populated"
         },
         {
           "name": "Data Anomalies and Quality Issues Noted",
-          "fields_checked": ["anomalies"],
           "score": 0,
-          "evidence": "No explicit anomalies field present",
-          "rationale": "Quality control measures described but specific data anomalies not explicitly documented"
+          "evidence": "No anomalies field found",
+          "quality_note": "Quality control mentioned in cleaning but no anomalies documentation",
+          "semantic_validation": "anomalies field not populated"
         },
         {
           "name": "Sensitive Content and Warnings Provided",
-          "fields_checked": ["sensitive_elements", "content_warnings"],
           "score": 1,
-          "evidence": "sensitive_elements: 4 comprehensive entries covering voice biometrics, EHR data, demographic data, and Certificate of Confidentiality (lines 660-705)",
-          "rationale": "Extensive sensitive content documentation with specific sensitivity details for each category"
+          "evidence": "sensitive_elements: 4 entries covering voice biometrics, EHR data, demographics, Certificate of Confidentiality; content_warnings field not populated",
+          "quality_note": "Comprehensive sensitive element documentation with privacy implications; content_warnings field not used",
+          "semantic_validation": "Sensitive elements well-documented; content warnings field missing"
         },
         {
           "name": "Ethical Review Details Including Conflicts",
-          "fields_checked": ["ethical_reviews"],
           "score": 1,
-          "evidence": "human_subject_research includes IRB approval and ethics review board identification (lines 655-658); bioethics guidance integration documented (lines 649-653)",
-          "rationale": "Ethical review comprehensively documented including review board, approval process, and bioethics framework"
+          "evidence": "human_subject_research documents IRB, consent, bioethics integration; ethical_reviews as list field not populated",
+          "quality_note": "Ethics review documented in human_subject_research; conflict disclosure not present",
+          "semantic_validation": "Ethics review present but not in ethical_reviews list field"
         }
-      ]
+      ],
+      "element_score": 2,
+      "element_max": 5
     },
     {
       "id": 10,
       "name": "Cross-Platform and Community Integration",
-      "score": 4,
-      "max_score": 5,
-      "percentage": 80.0,
+      "description": "Does the dataset connect to wider data ecosystems, repositories, or standards?",
       "sub_elements": [
         {
           "name": "Dataset Published on a Recognized Platform",
-          "fields_checked": ["publisher"],
           "score": 1,
-          "evidence": "PhysioNet distribution documented throughout (lines 207-210, 533-573, 592-596, 710-713); Health Data Nexus alternative platform (lines 730-733)",
-          "rationale": "Publication on recognized platforms (PhysioNet, Health Data Nexus) extensively documented though not in dedicated publisher field"
+          "evidence": "PhysioNet distribution documented in license, distribution_formats, external_resources, maintainers; publisher field not populated",
+          "quality_note": "PhysioNet platform extensively documented; publisher field not used",
+          "semantic_validation": "Platform documented but publisher field missing"
         },
         {
           "name": "Citation and DOI for Cross-referencing",
-          "fields_checked": ["citation", "doi"],
           "score": 1,
-          "evidence": "DOI: https://doi.org/10.13026/37yb-1t42 (line 7); recognition of data source required in publications (line 527)",
-          "rationale": "DOI present in id field with citation requirements specified in license terms"
+          "evidence": "id: https://doi.org/10.13026/37yb-1t42; citation field not populated",
+          "quality_note": "DOI present; citation field not used but license requires recognition of data source",
+          "semantic_validation": "DOI present; formatted citation field missing"
         },
         {
           "name": "Community Standards or Schema Conformance",
-          "fields_checked": ["conforms_to"],
           "score": 1,
-          "evidence": "FAIR principles (line 70), CARE principles (line 71), D4D schema conformance (line 4), PhysioNet requirements (line 518)",
-          "rationale": "Multiple community standards referenced including FAIR, CARE, D4D schema, and PhysioNet platform standards"
+          "evidence": "FAIR and CARE principles in keywords; PhysioNet standards compliance; conforms_to field not populated",
+          "quality_note": "Standards mentioned (FAIR, CARE) in keywords and discourse; conforms_to field not used",
+          "semantic_validation": "Standards referenced but conforms_to field missing"
         },
         {
           "name": "Outreach Materials and Documentation Links",
-          "fields_checked": ["external_resources", "page"],
           "score": 1,
-          "evidence": "page: https://docs.b2ai-voice.org (line 27); external_resources: comprehensive documentation including GitHub, publications, NIH RePORTER (lines 708-765)",
-          "rationale": "Extensive outreach and documentation resources covering project docs, code repositories, publications, and grant information"
+          "evidence": "external_resources: 11 entries including documentation site, GitHub, Zenodo, publications, NIH RePORTER; page field present",
+          "quality_note": "Extensive outreach and documentation resources provided",
+          "semantic_validation": "Documentation ecosystem comprehensive"
         },
         {
           "name": "Related Datasets with Typed Relationships",
-          "fields_checked": ["related_datasets"],
           "score": 0,
-          "evidence": "No explicit related_datasets field with typed relationships present",
-          "rationale": "Version relationships documented but not formal typed dataset relationships to other Bridge2AI or related datasets"
+          "evidence": "No related_datasets field found",
+          "quality_note": "Missing typed relationships to other Bridge2AI datasets or related voice datasets",
+          "semantic_validation": "related_datasets field not populated"
         }
-      ]
+      ],
+      "element_score": 4,
+      "element_max": 5
     }
   ],
-  "strengths": [
-    "Exceptional completeness across all discovery, access, and retrieval dimensions (100% for elements 1-2)",
-    "Outstanding ethical documentation including IRB approval, informed consent, deidentification, and privacy protections beyond standard requirements",
-    "Comprehensive technical transparency with detailed preprocessing strategies documenting 7 processing steps with technical parameters",
-    "Excellent funding and motivation transparency with complete grant information, creator attribution, and scientific objectives",
-    "Strong data composition documentation with 5 subpopulations, instance counts, and sampling methodology",
-    "Robust version tracking with 4 documented releases and clear update schedule through 2026",
-    "Extensive external resources section with 11 documented links to platforms, documentation, and publications",
-    "Well-documented use guidance with 5 intended uses and 4 discouraged uses covering ethical considerations",
-    "Comprehensive license terms with 12 specific provisions for registered access and data use"
-  ],
-  "weaknesses": [
-    "No explicit known_biases field to document systematic biases, though non-representative sampling is acknowledged",
-    "No explicit anomalies field to document data quality issues or outliers",
-    "No explicit related_datasets field with typed relationships to other datasets in the Bridge2AI program or broader ecosystem",
-    "While limitations are documented throughout, they are not consolidated in a dedicated known_limitations field for easy reference"
-  ],
+  "semantic_analysis": {
+    "issues_detected": [
+      {
+        "type": "missing_schema_field",
+        "severity": "info",
+        "description": "Many optional schema fields not populated despite relevant information existing in other fields",
+        "fields_involved": [
+          "version",
+          "publisher",
+          "citation",
+          "conforms_to",
+          "variables",
+          "is_tabular",
+          "format",
+          "encoding",
+          "is_deidentified",
+          "participant_privacy",
+          "informed_consent",
+          "vulnerable_populations",
+          "participant_compensation",
+          "ethical_reviews",
+          "known_limitations",
+          "known_biases",
+          "anomalies",
+          "content_warnings",
+          "parent_datasets",
+          "related_datasets",
+          "ip_restrictions",
+          "regulatory_restrictions",
+          "confidentiality_level",
+          "software_and_tools",
+          "labeling_strategies",
+          "was_derived_from",
+          "release_notes",
+          "errata",
+          "prohibited_uses",
+          "version_access"
+        ],
+        "recommendation": "Consider populating optional schema fields to improve machine-readability and semantic interoperability"
+      },
+      {
+        "type": "narrative_vs_structured",
+        "severity": "info",
+        "description": "Important information often in narrative fields rather than structured schema fields",
+        "fields_involved": [
+          "human_subject_research",
+          "updates",
+          "preprocessing_strategies",
+          "cleaning_strategies"
+        ],
+        "recommendation": "Extract structured information from narratives into dedicated schema fields when available"
+      },
+      {
+        "type": "limitations_documentation",
+        "severity": "warning",
+        "description": "Dataset limitations, biases, and anomalies not explicitly documented in schema fields",
+        "fields_involved": [
+          "known_limitations",
+          "known_biases",
+          "anomalies"
+        ],
+        "recommendation": "Add explicit limitations documentation covering sampling bias (targeted recruitment, not random), generalizability constraints, and population representativeness limitations"
+      }
+    ],
+    "consistency_checks": {
+      "passed": [
+        "doi_matches_id",
+        "distribution_urls_consistent",
+        "funding_matches_nih_reporter",
+        "creators_comprehensive",
+        "version_history_chronological",
+        "ethics_documentation_present"
+      ],
+      "failed": [],
+      "warnings": [
+        "schema_fields_underutilized",
+        "limitations_not_explicit",
+        "related_datasets_not_linked"
+      ]
+    },
+    "correctness_validations": {
+      "doi_format": "valid",
+      "grant_format": "valid",
+      "rrid_format": "missing",
+      "url_validity": "all_valid"
+    },
+    "semantic_insights": "VOICE D4D datasheet demonstrates exceptional documentation comprehensiveness with detailed information across all major categories (motivation, composition, collection, preprocessing, ethics, distribution, maintenance). The dataset achieves 47/50 points primarily through rich narrative documentation. However, many optional D4D schema fields remain unpopulated despite relevant information existing in narrative form or other fields. This represents a tension between comprehensive prose documentation and structured metadata. Key strengths include extensive ethics documentation (IRB, consent, de-identification, privacy protections), detailed technical transparency (7 preprocessing strategies, 3 cleaning strategies, 3 collection mechanisms), comprehensive versioning history, and strong funding/creator attribution. Primary opportunities for improvement: explicit limitations documentation (sampling bias, generalizability, population representativeness), structured schema field utilization (version, publisher, citation, conforms_to, variables), and typed dataset relationships (parent_datasets, related_datasets for Bridge2AI ecosystem). Overall, this is a high-quality datasheet that prioritizes completeness and readability over strict schema field coverage."
+  },
   "recommendations": [
-    "Add explicit known_biases section to document potential biases from non-representative sampling, specialty clinic recruitment, and cohort selection",
-    "Create anomalies section to document any data quality issues encountered during collection or processing",
-    "Add related_datasets field with typed relationships to other Bridge2AI datasets (AI-READI, CHORUS, CM4AI) and complementary voice datasets",
-    "Consolidate limitations into dedicated known_limitations field while retaining context-specific documentation",
-    "Consider adding explicit publisher field naming PhysioNet/MIT as primary publisher organization"
-  ],
-  "overall_assessment": "The VOICE D4D datasheet demonstrates exceptional quality and completeness, achieving 92% overall score (46/50 points). The datasheet excels in all foundational areas including discovery, access, ethics, technical transparency, and scientific motivation. The comprehensive documentation of preprocessing strategies (7 detailed steps), ethical safeguards (IRB, consent, privacy, vulnerable populations), and version tracking (4 releases with detailed change logs) sets a high standard for dataset documentation. The primary gaps are in explicit documentation of known biases, data anomalies, and typed dataset relationships - areas where information may exist but is not formalized in dedicated schema fields. The datasheet successfully demonstrates that voice datasets can meet rigorous ethical and technical documentation standards while maintaining accessibility for AI/ML research."
+    "Add known_limitations field documenting sampling bias (targeted recruitment vs random sampling), generalizability constraints, and population representativeness limitations",
+    "Populate version field with current version number (extract from updates narrative)",
+    "Add publisher field: 'PhysioNet / MIT Laboratory for Computational Physiology'",
+    "Create formatted citation field for standard reference in publications",
+    "Add conforms_to field listing FAIR principles, CARE principles, PhysioNet standards",
+    "Populate variables field with structured variable metadata (extract from phenotype.json and static_features.json descriptions)",
+    "Add is_tabular: true based on TSV distribution formats",
+    "Add format and encoding fields for top-level dataset characteristics",
+    "Create is_deidentified class instance documenting HIPAA Safe Harbor methodology",
+    "Add participant_privacy list with privacy protection measures (Certificate of Confidentiality, controlled access, transcript removal)",
+    "Add informed_consent list entry with consent type and process details",
+    "Add vulnerable_populations entry for pediatric cohort with ethical considerations",
+    "Create ethical_reviews list entry with IRB details and approval dates",
+    "Add related_datasets entries linking to other Bridge2AI datasets (AI-READI, CM4AI, CHORUS) with typed relationships",
+    "Add software_and_tools list extracting from preprocessing narratives (OpenSMILE, Praat, Parselmouth, Whisper, REDCap, b2aiprep)",
+    "Add labeling_strategies if applicable to supervised learning tasks",
+    "Populate regulatory_restrictions and confidentiality_level based on HIPAA and access tier (registered vs controlled)",
+    "Add prohibited_uses field distinguishing from discouraged_uses (e.g., commercial use for public dataset)",
+    "Create version_access class documenting DOI-based version access mechanism",
+    "Add RRID if available for additional identifier support",
+    "Consider adding known_biases field if demographic or clinical selection biases identified through analysis"
+  ]
 }
