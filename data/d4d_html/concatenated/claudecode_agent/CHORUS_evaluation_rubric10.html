@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubric10-Semantic Evaluation: Unknown</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .metadata {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+
+        .metadata-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .metadata-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metadata-label {
+            font-size: 0.85em;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .metadata-value {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .score-large {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .score-subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .element {
+            background: #fff;
+            border: 1px solid #e1e8ed;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .element-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .element-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .element-score {
+            font-size: 1.1em;
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: #ecf0f1;
+        }
+
+        .score-high { background: #2ecc71; color: white; }
+        .score-medium { background: #f39c12; color: white; }
+        .score-low { background: #e74c3c; color: white; }
+
+        .sub-element {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .sub-element:last-child {
+            border-bottom: none;
+        }
+
+        .sub-element-name {
+            font-weight: 500;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .sub-element-score {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .score-1 { background: #2ecc71; color: white; }
+        .score-0 { background: #e74c3c; color: white; }
+
+        .detail {
+            margin-top: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #7f8c8d;
+            margin-right: 5px;
+        }
+
+        .semantic-section {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .validation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .validation-item {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid #3498db;
+        }
+
+        .gap-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .gap-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .gap-item.medium {
+            border-left-color: #f39c12;
+        }
+
+        .gap-item.low {
+            border-left-color: #95a5a6;
+        }
+
+        .strength {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .weakness {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .recommendation-section {
+            margin-top: 20px;
+        }
+
+        .recommendation-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #e7f3ff;
+            border-radius: 4px;
+            border-left: 3px solid #2196f3;
+        }
+
+        .recommendation-item.critical {
+            background: #fee;
+            border-left-color: #e74c3c;
+        }
+
+        .recommendation-item.important {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e8ed;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rubric10-Semantic Evaluation Report</h1>
+        <div class="metadata">
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <div class="metadata-label">Dataset</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Generation Method</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Evaluator</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Rubric Type</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Temperature</div>
+                    <div class="metadata-value">N/A</div>
+                </div>
+                <div class="metadata-item">
+                    <div class="metadata-label">Evaluation Date</div>
+                    <div class="metadata-value">Unknown</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="score-card">
+            <div class="score-large">38.0/50.0</div>
+            <div class="score-subtitle">76.0% Overall Score</div>
+        </div>
+
+        <h2>Element Scores</h2>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Persistent Identifier (DOI, RRID, or URI)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> id: https://chorus4ai.org/
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Title and Description Completeness
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> title: Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI; description: 600+ character comprehensive description covering scope, data types, institutions, ethical approach, and scale
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Keywords or Tags for Searchability
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> keywords: 31 entries including 'CHoRUS', 'Bridge2AI', 'critical care', 'acute illness', 'OMOP Common Data Model', 'EHR', 'waveform telemetry', 'medical imaging', 'health equity', 'federated access', 'ethical AI', 'trustworthy AI', domain-specific terms
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Landing Page and Resources (page, hierarchical resources)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> page: https://chorus4ai.org/; external_resources includes multiple CHoRUS resources (website, GitHub org, documentation, developer resources)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Hierarchical Structure (parent datasets, relationships)
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No parent_datasets or related_datasets fields found
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Access Policy and IP Restrictions Defined
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> license_and_use_terms: CHoRUS Controlled Access License with detailed description of registration requirements (institutional email, signed licensing agreement, approval process), contact emails provided; ip_restrictions field not present
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Regulatory Restrictions and Confidentiality Level Specified
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> Ethical and legal frameworks mentioned in description and human_subject_research, but regulatory_restrictions and confidentiality_level schema fields not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Download URL or Platform Link Available
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> distribution_formats.access_urls: https://chorus4ai.org/ (appears in 5 format entries); page: https://chorus4ai.org/; contact emails for access requests
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Distribution Formats and File Types Specified
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> distribution_formats: 5 entries (OMOP Common Data Model, WFDB waveform format, DICOM imaging format, OHNLP tokenized text, EDF+/Persyst EEG formats) with descriptions and access information
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Related Datasets and External Resources Linked
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources: 10 entries including CHoRUS website, GitHub organization, documentation, OHDSI community, published research, contact emails, NIH RePORTER, Bridge2AI program, AIM-AHEAD partnership; related_datasets field not present
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    License Terms Allow Reuse
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> license_and_use_terms: CHoRUS Controlled Access License specifies data use agreement, permitted research uses, ethical/legal compliance requirements
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Formats Are Standardized (encoding, format)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> distribution_formats specify OMOP, WFDB, DICOM, OHNLP, EDF+, Persyst - all recognized international standards; format/encoding top-level fields not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Schema or Ontology Conformance Stated
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> preprocessing_strategies and distribution_formats reference OMOP Common Data Model, DICOM schema, WFDB/PhysioNet schema, OHNLP schema, EDF+ schema, Persyst schema; conforms_to field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Variable Metadata with Identifiers Defined
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> OMOP schema metadata mentioned as 'published' but variables field (as schema list) not populated; no explicit variable-level documentation in D4D file
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Use Guidance Provided (intended, prohibited uses)
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> intended_uses: 5 entries (AI/ML model development, external validation, health equity research, clinical care improvement, educational/training); discouraged_uses: 3 entries (uses during ongoing collection, clinical decision-making without validation, re-identification attempts); prohibited_uses field not present
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">3/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    IRB or Ethics Review Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> human_subject_research: IRB approval from institutional review boards at 14 data acquisition centers, community-facing ethics focus groups, legal and ethical advisory teams; ethical_reviews as list field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Deidentification Method Described
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> preprocessing_strategies (preproc-005): 'Data re-identification limitation' with privacy-preserving transformations, de-identification algorithms, risk assessment; cleaning_strategies reference de-identification; is_deidentified field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Privacy Protections Beyond Deidentification
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> preprocessing_strategies document privacy-preserving transformations, community ethics focus groups input, re-identification limitation approaches; controlled access model in license_and_use_terms; participant_privacy field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Informed Consent Obtained from Participants
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> human_subject_research describes ethics processes but does not explicitly mention informed consent procedures; informed_consent field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Vulnerable Populations and Compensation Documented
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No vulnerable_populations or participant_compensation fields; critically ill patients are vulnerable population but not explicitly documented as such
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Cohort or Subpopulations Characteristics Described
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> subpopulations: 2 entries (critically ill patients by hospital - 14 hospitals; patients with complete multi-modal data); instances describes critically ill patients across ICU settings
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Number of Instances or Samples Reported
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> instances: 'As of November 2024, dataset covers 14 different hospitals with 23,400 unique admissions. Target enrollment exceeds 100,000 critically ill patients.'
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Variable-Level Metadata and Tabular Flag
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> OMOP schema metadata referenced as 'published' and available but not included in D4D file; variables and is_tabular fields not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Topics or Conditions Represented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> instances: 'acute and critical care illness' and 'critically ill patients requiring acute or critical care admitted to intensive care units'; purposes address improving recovery from acute illness
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Quality Issues and Anomalies Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> sampling_strategies: federated multi-center sampling with is_sample: true, is_random: false, is_representative: true; cleaning_strategies document quality assurance; anomalies field not populated
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">3/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Version Number Provided
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> updates describes ongoing data collection through November 2026 but no explicit version numbers; version field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Version Access Methods Documented
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No version_access field; updates describe ongoing collection but not version access mechanisms
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Change Descriptions and Errata Provided
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> updates.update_details: current status (23,400 admissions Nov 2024), target (100,000+), site status tracking via GitHub/Google Forms, GitHub project tracking, documentation updates, semantic mapping expansion; errata field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Update Schedule or Frequency Indicated
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> updates.frequency: 'Continuous updates through November 2026'; project timeline extends through November 30, 2026 with no-cost extension approved
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Provenance and Source Derivation Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> D4D header comments: 'Source: data/preprocessed/concatenated/CHORUS_preprocessed.txt (79K, 7 source files)'; collection_mechanisms describe retrospective EHR extraction from 14 centers; was_derived_from and release_notes fields not populated
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">5/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Motivation or Purpose for Dataset Creation
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> purposes: 4 detailed entries (improve recovery from acute illness, create AI-ready critical care dataset, establish data standards and tools, promote diversity and health equity)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Primary Research Objectives or Tasks
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> tasks: 5 entries (characterize acute/critical care illness, predict complications, measure treatment response, external validation for marketplace adoption, label data for prediction targets)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Funding Sources and Mechanisms Listed
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> funders: NIH Common Fund Bridge2AI Program with detailed grant information (1OT2OD032701-01, NIH Office of the Director)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Grant IDs or Award Numbers Present
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> funders: grant 1OT2OD032701-01, opportunity number OTA-21-008, study section DCMM, fiscal year 2022, total funding $5,880,300 (2022)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Creators and Acknowledgements Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> creators: 19 entries including Contact PI (Eric S. Rosenthal, MGH), 11 Principal Investigators, Program Lead, lecturers/instructors, workshop leads with affiliations and roles
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">5/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Collection Mechanisms and Settings Described
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> collection_mechanisms: 5 entries (retrospective EHR extraction, waveform telemetry capture, medical imaging acquisition, EEG recording extraction, standardized data transformation) with detailed descriptions of systems and processes
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Acquisition Methods Listed
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> acquisition_methods: 8 entries covering structured EHR (OMOP), medication administration, provider documentation, nursing flowsheets, clinical notes (OHNLP), medical imaging (DICOM), waveform telemetry (WFDB), EEG waveforms (EDF+/Persyst)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Preprocessing, Cleaning, and Labeling Strategies
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> preprocessing_strategies: 5 entries (OMOP transformation, clinical note tokenization, waveform standardization, imaging de-identification, re-identification limitation); cleaning_strategies: 2 entries (multi-center harmonization, metadata schema validation); labeling_strategies: 1 entry (visualization and annotation environment)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Software and Tools Documented
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> preprocessing/acquisition reference OHDSI tool stack, OHNLP toolkit, OMOP CDM, PhysioNet schema, DICOM schema; GitHub organization (chorus-ai) with 28 repositories including chorus_waveform, privacy_scan_tool, chorus-container-apps; software_and_tools field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    External Standards and Resources Referenced
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources: 10 entries; preprocessing references OMOP CDM, DICOM, WFDB, OHNLP, EDF+, Persyst schemas; OHDSI community included in external_resources; conforms_to field not populated
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">2/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Known Limitations Documented
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> updates mentions ongoing collection and quality assurance processes; discouraged_uses mentions completeness limitations during ongoing collection; known_limitations field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Systematic Biases Identified and Described
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> addressing_gaps mentions bias management and Social Determinants of Health but no explicit bias documentation for the dataset itself; known_biases field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Data Anomalies and Quality Issues Noted
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> cleaning_strategies document quality checks but no anomalies field; quality assurance mentioned as ongoing
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Sensitive Content and Warnings Provided
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> sensitive_elements: 4 entries (clinical/medical data with protected health information subject to HIPAA; physiological monitoring data revealing health conditions; medical imaging with de-identification; Social Determinants of Health with privacy-preserving transformations)
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Ethical Review Details Including Conflicts
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> human_subject_research: IRB approvals at 14 sites, community ethics focus groups, legal/ethical advisory teams, multidisciplinary expertise (law, ethics, health services, biomedical science, engineering, publications); ethical_reviews field not populated
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="element">
+            <div class="element-header">
+                <div class="element-title">Element None: None</div>
+                <div class="element-score score-low">4/5 (0%)</div>
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Dataset Published on a Recognized Platform
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> CHoRUS secure enclave mentioned in license_and_use_terms, distribution_formats, and maintainers; external_resources includes NIH RePORTER, Bridge2AI program; publisher field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Citation and DOI for Cross-referencing
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources includes published research with DOI (http://doi:10.1007/s12028-024-02007); id field is URL not DOI; citation field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Community Standards or Schema Conformance
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> OMOP Common Data Model, DICOM, WFDB/PhysioNet, OHNLP, EDF+, Persyst schemas referenced extensively; OHDSI community in external_resources; FAIR principles implied by Bridge2AI program; conforms_to field not populated
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Outreach Materials and Documentation Links
+                    <span class="sub-element-score score-1">1/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> external_resources: 10 entries (CHoRUS website, GitHub org with 28 repos, Chorus_SOP documentation, developer docs, NIH RePORTER, Bridge2AI, AIM-AHEAD partnership, OHDSI community, published research, contact emails); page field present
+                </div>
+
+            </div>
+
+            <div class="sub-element">
+                <div class="sub-element-name">
+                    Related Datasets with Typed Relationships
+                    <span class="sub-element-score score-0">0/1</span>
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Fields:</span> 
+                </div>
+                <div class="detail">
+                    <span class="detail-label">Rationale:</span> No related_datasets field found; Bridge2AI program mentioned but no typed relationships to other Bridge2AI datasets
+                </div>
+
+            </div>
+
+        </div>
+
+        <h2>Semantic Analysis</h2>
+
+        <h2>Recommendations</h2>
+
+        <div class="recommendation-section">
+            <h3>Recommendations</h3>
+
+            <div class="recommendation-item">Obtain DOI for dataset via appropriate repository (Zenodo, institutional, or domain-specific) to enable persistent identification and formal citation</div>
+
+            <div class="recommendation-item">Add RRID if applicable for additional identifier support and life sciences repository integration</div>
+
+            <div class="recommendation-item">Populate version field with current version/snapshot number and implement formal versioning scheme for continuous updates</div>
+
+            <div class="recommendation-item">Add version_access class documenting how users access specific dataset versions or snapshots</div>
+
+            <div class="recommendation-item">Create known_limitations field documenting: (1) ongoing collection status and completeness, (2) multi-center harmonization challenges, (3) non-random federated sampling, (4) generalizability across different ICU types, (5) variable data availability by modality (imaging/EEG in process), (6) institutional EHR system variability</div>
+
+            <div class="recommendation-item">Add known_biases field identifying: (1) academic medical center bias (14 university-affiliated centers), (2) geographic bias (US-only), (3) temporal bias (specific collection period), (4) clinical bias (ICU patients not general population)</div>
+
+            <div class="recommendation-item">Document informed_consent procedures and model for retrospective EHR collection (waiver rationale, opt-out mechanisms, institutional policies)</div>
+
+            <div class="recommendation-item">Add vulnerable_populations entry for critically ill patients with ethical considerations for this inherently vulnerable population</div>
+
+            <div class="recommendation-item">Add publisher field: 'CHoRUS Consortium / National Institutes of Health Bridge2AI Program'</div>
+
+            <div class="recommendation-item">Create formatted citation field for standard reference in publications</div>
+
+            <div class="recommendation-item">Add conforms_to field listing: OMOP Common Data Model, DICOM, WFDB (extended PhysioNet schema), OHNLP, EDF+, Persyst, OHDSI standards, FAIR principles</div>
+
+            <div class="recommendation-item">Populate conforms_to_schema with structured references to schema versions used</div>
+
+            <div class="recommendation-item">Add variables field with structured variable metadata (can reference external OMOP documentation but provide summary)</div>
+
+            <div class="recommendation-item">Add is_tabular field based on OMOP structured format</div>
+
+            <div class="recommendation-item">Add format and encoding fields for top-level dataset characteristics</div>
+
+            <div class="recommendation-item">Create is_deidentified class instance documenting de-identification methodology and privacy transformations</div>
+
+            <div class="recommendation-item">Add participant_privacy list documenting: (1) de-identification approaches, (2) controlled access model, (3) re-identification prohibition, (4) community ethics input, (5) privacy-preserving transformations</div>
+
+            <div class="recommendation-item">Create ethical_reviews list with entries for each of 14 IRB approvals including institutions and approval scope</div>
+
+            <div class="recommendation-item">Add regulatory_restrictions and confidentiality_level based on HIPAA framework and controlled access requirements</div>
+
+            <div class="recommendation-item">Add prohibited_uses field distinguishing prohibited from discouraged uses (e.g., commercial use restrictions, re-identification prohibition)</div>
+
+            <div class="recommendation-item">Add related_datasets entries with typed relationships to other Bridge2AI datasets (AI-READI, VOICE, CM4AI) and parent Bridge2AI program</div>
+
+            <div class="recommendation-item">Create software_and_tools list extracting from narratives: OHDSI tool stack, OHNLP toolkit, chorus_waveform, privacy_scan_tool, chorus-container-apps, visualization/annotation environment</div>
+
+            <div class="recommendation-item">Add anomalies field if quality issues identified during multi-center harmonization and validation</div>
+
+            <div class="recommendation-item">Add content_warnings field if sensitive clinical content requires user warnings beyond general sensitive_elements</div>
+
+            <div class="recommendation-item">Document participant_compensation (likely not applicable for retrospective collection but clarify)</div>
+
+            <div class="recommendation-item">Add was_derived_from documenting retrospective EHR extraction provenance</div>
+
+            <div class="recommendation-item">Add errata field for tracking data quality issues or corrections discovered post-release</div>
+
+            <div class="recommendation-item">Consider adding parent_datasets or hierarchical resources structure if dataset has logical subdivisions (by site, by modality, by time period)</div>
+
+        </div>
+
+        <div class="timestamp">
+            Generated on 2026-01-13 16:57:40 using Bridge2AI Data Sheets Schema
+        </div>
+    </div>
+</body>
+</html>
