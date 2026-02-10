@@ -82,7 +82,112 @@ This workflow is triggered when a user requests creation of a new D4D datasheet,
 - Issue labeled with `d4d:create` or similar
 - Explicit request: "Create a D4D datasheet for [dataset]"
 
+## Deterministic Generation Settings
+
+**CRITICAL**: This assistant uses deterministic settings for reproducible D4D generation:
+
+- **Model**: `claude-sonnet-4-5-20250929` (date-pinned for consistency)
+- **Temperature**: `0.0` (maximum determinism - same input produces same output)
+- **Schema**: Local version-controlled file (`data_sheets_schema_all.yaml`)
+- **Prompts**: External version-controlled files (hashed for tracking)
+
+**Why deterministic**:
+- Enables scientific comparison with batch extraction methods
+- Ensures reproducibility (same sources → same D4D)
+- Comprehensive provenance tracking with SHA-256 hashes
+- Comparable to `process_concatenated_d4d_claude.py` outputs
+
+**Metadata tracking**:
+All generated datasheets include a `{dataset}_d4d_metadata.yaml` file with:
+- SHA-256 hashes of inputs, schema, and prompts
+- Git commit for provenance
+- Model settings (temperature, max_tokens)
+- Processing environment details
+- Extraction timestamp and ID
+
+## Input Modes
+
+The assistant supports two input modes:
+
+### File-Based Mode (Preferred)
+
+**When to use**: User provides documentation files directly.
+
+**Advantages**:
+- Reproducible (files are hashed)
+- No network dependencies
+- Faster processing
+- Full provenance tracking
+
+**Location**: `data/sheets_d4dassistant/inputs/{dataset}/`
+
+**User provides**: Local files or attachments in issue
+
+### URL-Based Mode (Fallback)
+
+**When to use**: User provides URLs to documentation.
+
+**Behavior**:
+- Assistant downloads content from URLs
+- Saves to `data/sheets_d4dassistant/fetched/{dataset}/`
+- URL hashes tracked in metadata
+- Files cached for potential re-processing
+
+**Location**: `data/sheets_d4dassistant/fetched/{dataset}/`
+
+**User provides**: List of URLs in issue
+
 ## Step-by-Step Process
+
+### 0. Validate Prerequisites (FAIL FAST)
+
+**CRITICAL**: Before attempting D4D generation, validate that all required resources are available.
+
+**Run prerequisites check**:
+```bash
+# Determine input mode from user request
+MODE="file"  # or "url"
+DATASET="<dataset-name>"  # Extract from user request
+
+# File mode
+./src/github/validate_prerequisites.sh --dataset ${DATASET} --mode file
+
+# URL mode with URLs
+URLS="url1 url2 url3"  # Extract from user request
+./src/github/validate_prerequisites.sh --dataset ${DATASET} --mode url --urls "${URLS}"
+```
+
+**What this checks**:
+- ✅ Schema file exists (`data_sheets_schema_all.yaml`)
+- ✅ Prompt files exist (system and user prompts)
+- ✅ Input files/URLs accessible
+- ✅ Python dependencies installed (pyyaml, anthropic)
+- ✅ API key set (`ANTHROPIC_API_KEY`)
+- ✅ Output directory exists/created
+
+**If validation fails**:
+- **DO NOT proceed** with D4D generation
+- Report what's missing to user in issue comment
+- Request user to provide missing resources
+- Exit workflow early to save time and API costs
+
+**Prerequisites failure template**:
+```bash
+gh issue comment ${ISSUE_NUMBER} --body "❌ **Prerequisites Validation Failed**
+
+I cannot proceed with D4D generation because:
+- ✗ Missing input files in \`data/sheets_d4dassistant/inputs/${DATASET}/\`
+- ✗ Schema file not found
+
+Please provide:
+1. Documentation files to process (attach to issue or provide local paths)
+2. Or valid URLs to documentation
+
+Once prerequisites are met, mention me again to retry.
+
+---
+🤖 D4D Assistant"
+```
 
 ### 1. Study Schema Structure and Reference Examples
 
@@ -236,7 +341,7 @@ collection_process:
 # ... additional sections ...
 ```
 
-### 5. Save and Validate
+### 5. Save D4D YAML
 
 **Save Location:**
 
@@ -253,18 +358,63 @@ OUTPUT_FILE="data/sheets_d4dassistant/${DATASET_NAME}_d4d.yaml"
 - Separates assistant-created datasheets from manually curated examples
 - All assistant outputs in one place for easy review and management
 - Distinct from project-specific extraction outputs in `data/extracted_by_column/`
+- Enables scientific comparison with batch extractions
 
-**Validate Against Schema:**
+### 6. Generate Comprehensive Metadata
+
+**CRITICAL**: After D4D generation, immediately generate metadata for provenance.
+
+**Run metadata generator**:
+```bash
+# Determine input mode and gather sources
+if [ "$INPUT_MODE" = "file" ]; then
+  # File-based mode
+  python3 src/github/generate_d4d_metadata.py \
+    --d4d-file ${OUTPUT_FILE} \
+    --dataset-name ${DATASET_NAME} \
+    --input-dir data/sheets_d4dassistant/inputs/${DATASET_NAME} \
+    --issue-number ${ISSUE_NUMBER}
+elif [ "$INPUT_MODE" = "url" ]; then
+  # URL-based mode
+  python3 src/github/generate_d4d_metadata.py \
+    --d4d-file ${OUTPUT_FILE} \
+    --dataset-name ${DATASET_NAME} \
+    --input-sources "${URL1}" "${URL2}" "${URL3}" \
+    --issue-number ${ISSUE_NUMBER}
+fi
+```
+
+**What this generates**:
+- `{dataset}_d4d_metadata.yaml` file alongside the D4D YAML
+- SHA-256 hashes of inputs, schema, prompts
+- Git commit for provenance
+- Model settings (temperature=0.0, model version)
+- Processing environment details
+- Extraction timestamp and ID
+- GitHub context (issue number)
+
+**Why metadata matters**:
+- Enables reproducibility verification
+- Provides scientific comparison with batch methods
+- Tracks all inputs for provenance
+- Ensures deterministic settings were used
+
+**Metadata structure matches**:
+The metadata structure is identical to batch extraction (`process_concatenated_d4d_claude.py`), ensuring outputs are scientifically comparable.
+
+### 7. Validate Against Schema and Completeness
 
 **Critical**: Validation MUST pass before creating a PR. Do not skip this step.
 
+#### 7a. Schema Validation (LinkML)
+
 ```bash
-# Validate the generated YAML
+# Validate against LinkML schema
 poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
   -C Dataset ${OUTPUT_FILE}
 ```
 
-**Understanding Validation Output:**
+**Understanding Schema Validation Output:**
 - **Success**: No output or "✓ Validation passed" message
 - **Failure**: Error messages describing schema violations
 
@@ -317,15 +467,15 @@ poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_a
    ```
    **Fix**: Check indentation, quotes, and YAML structure
 
-**If Validation Fails:**
+**If Schema Validation Fails:**
 1. Read the error message carefully to identify the issue
 2. Check the schema file to understand correct structure: `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
 3. Fix the YAML file
-4. Re-run validation
+4. Re-run schema validation
 5. Repeat until validation passes
-6. **DO NOT proceed to PR creation with invalid YAML**
+6. **DO NOT proceed to completeness validation with invalid YAML**
 
-**Alternative Validation Methods:**
+**Alternative Schema Validation Methods:**
 ```bash
 # Use the test suite (validates examples in src/data/examples/valid/)
 make test-examples
@@ -334,7 +484,100 @@ make test-examples
 poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml ${OUTPUT_FILE}
 ```
 
-### 6. Generate HTML Preview
+#### 7b. Completeness Validation (Quality Gate)
+
+**CRITICAL**: After schema validation passes, check completeness to prevent thin datasheets.
+
+**Run completeness validator**:
+```bash
+# Check if datasheet meets quality thresholds
+python3 src/github/validate_d4d_completeness.py ${OUTPUT_FILE}
+
+# Exit code 0 = pass (proceed with PR)
+# Exit code 1 = fail (block PR)
+```
+
+**What this checks**:
+- Number of populated D4D sections (motivation, composition, etc.)
+- Number of populated slots (non-null fields)
+- File size (non-empty, non-comment lines)
+- Required fields present (id, name)
+
+**Quality levels**:
+- **Comprehensive**: 10+ sections, 146+ slots, 200+ lines → ✅ Create PR
+- **Acceptable**: 7+ sections, 100+ slots, 150+ lines → ✅ Create PR
+- **Minimal**: 4+ sections, 50+ slots, 100+ lines → ⚠️ Warn but allow PR
+- **Insufficient**: Below minimal → ❌ **BLOCK PR**
+
+**If completeness validation fails**:
+```bash
+# Exit code 1 means quality is insufficient
+echo "❌ Completeness validation failed"
+
+# DO NOT create PR
+# Comment on issue explaining the problem
+
+gh issue comment ${ISSUE_NUMBER} --body "❌ **D4D Quality Check Failed**
+
+The generated datasheet does not meet minimum quality thresholds:
+- Sections populated: X/10 (need at least 4)
+- Slots populated: Y (need at least 50)
+- Lines: Z (need at least 100)
+
+**Why this matters**:
+Thin datasheets with minimal information provide little value to users and reviewers.
+
+**What to do**:
+1. Provide more comprehensive documentation sources
+2. Or add more detail to existing sources
+3. Then mention me again to regenerate
+
+---
+🤖 D4D Assistant"
+
+exit 1  # Exit workflow without creating PR
+```
+
+**If completeness validation passes**:
+```bash
+echo "✅ Completeness validation passed"
+# Proceed to HTML generation and PR creation
+```
+
+**Completeness report example**:
+```
+🌟 D4D Completeness Report
+============================================================
+
+File: data/sheets_d4dassistant/mydataset_d4d.yaml
+Quality Level: ACCEPTABLE
+
+📊 Metrics:
+   Sections: 8/10 populated
+   Slots: 112 populated
+   Lines: 165 non-empty
+
+🎯 Thresholds (Block threshold: minimal):
+   Comprehensive: 10 sections, 146 slots, 200 lines
+ → Acceptable: 7 sections, 100 slots, 150 lines
+   Minimal: 4 sections, 50 slots, 100 lines
+
+📋 Populated Sections:
+   ✓ motivation
+   ✓ composition
+   ✓ collection_process
+   ✓ uses
+   ✓ distribution
+   ✓ maintenance
+   ✓ ethics_and_data_protection
+   ✓ data_governance
+
+✅ QUALITY CHECK PASSED
+   Quality level 'acceptable' meets threshold 'minimal'
+   PR creation is allowed.
+```
+
+### 8. Generate HTML Preview
 
 ```bash
 # Generate human-readable HTML from the YAML
@@ -344,7 +587,9 @@ poetry run python src/html/human_readable_renderer.py ${OUTPUT_FILE}
 # Reviewers will use this to preview the datasheet in human-readable format
 ```
 
-### 7. Create Pull Request
+### 9. Create Pull Request
+
+**IMPORTANT**: Only create PR if both schema validation AND completeness validation passed.
 
 **Branch Creation:**
 ```bash
@@ -424,7 +669,28 @@ EOF
 )"
 ```
 
-### 8. Check Budget and Prepare Warning (If Needed)
+**Files to commit**:
+```bash
+# Add all three files to PR
+git add ${OUTPUT_FILE}                           # D4D YAML
+git add ${OUTPUT_FILE%.yaml}_metadata.yaml       # Metadata
+git add ${OUTPUT_FILE%.yaml}.html                # HTML preview
+```
+
+**Commit message template**:
+```bash
+git commit -m "Add D4D datasheet for ${DATASET_NAME}
+
+- Extracted metadata from provided documentation
+- Deterministic generation (temperature=0.0)
+- Schema validation passed
+- Completeness validation passed (${QUALITY_LEVEL})
+- Metadata includes SHA-256 hashes for reproducibility
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+```
+
+### 10. Check Budget and Prepare Warning (If Needed)
 
 Before posting your final comment to the GitHub issue, check the CBORG API budget:
 
@@ -441,7 +707,7 @@ BUDGET_WARNING=$(python3 scripts/check_budget.py)
 
 **Note**: The script handles missing API keys gracefully - if `ANTHROPIC_API_KEY` is not set, it will skip the check and exit cleanly.
 
-### 9. Notify User in GitHub Issue
+### 11. Notify User in GitHub Issue
 
 ```bash
 # Comment on the original issue with PR link and instructions
@@ -460,6 +726,7 @@ I've created a new D4D datasheet for **${DATASET_NAME}** and opened a pull reque
 
 ## What I Created
 - **YAML Datasheet**: \`${OUTPUT_FILE}\`
+- **Metadata File**: \`${OUTPUT_FILE%.yaml}_metadata.yaml\`
 - **HTML Preview**: \`${OUTPUT_FILE%.yaml}.html\`
 
 ## Metadata Summary
@@ -467,6 +734,13 @@ I've created a new D4D datasheet for **${DATASET_NAME}** and opened a pull reque
 - **Dataset Name**: <name>
 - **Source URLs**: <number> documentation source(s) processed
 - **Sections Populated**: <list major sections with content>
+
+## Generation Details
+- **Model**: claude-sonnet-4-5-20250929 (deterministic)
+- **Temperature**: 0.0
+- **Quality Level**: <quality_level> (comprehensive/acceptable/minimal)
+- **Input Mode**: <file/url>
+- **Reproducible**: ✅ All inputs hashed (SHA-256)
 
 ## Next Steps
 1. **Review the pull request** to verify extracted metadata accuracy

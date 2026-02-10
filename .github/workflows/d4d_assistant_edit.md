@@ -83,6 +83,22 @@ This workflow is triggered when a user requests edits to an existing D4D datashe
 - Explicit request: "Update the D4D datasheet for [dataset]"
 - Request to add/modify/remove specific fields
 
+## Deterministic Generation Settings
+
+**IMPORTANT**: All assistant edits maintain deterministic settings for reproducibility:
+
+- **Model**: `claude-sonnet-4-5-20250929` (date-pinned)
+- **Temperature**: `0.0` (deterministic)
+- **Schema**: Local version-controlled file
+- **Prompts**: External version-controlled files
+
+**Metadata regeneration**:
+After edits, metadata files (`{dataset}_d4d_metadata.yaml`) should be updated to reflect:
+- New timestamp
+- Updated file hashes if inputs changed
+- Preservation of original provenance
+- Git commit of edit
+
 ## Step-by-Step Process
 
 ### 1. Locate Existing Datasheet
@@ -238,12 +254,37 @@ distribution:
     has_header: true
 ```
 
-### 5. Validate Changes
+### 5. Regenerate Metadata (If Applicable)
+
+**When to regenerate metadata**:
+- If inputs changed (new sources added)
+- To update timestamp to reflect edit
+- To track git commit of edit
+
+**Skip metadata regeneration if**:
+- Only correcting typos/values
+- No new sources added
+- Original metadata should be preserved
+
+**Regenerate metadata**:
+```bash
+# If new sources were added
+python3 src/github/generate_d4d_metadata.py \
+  --d4d-file <edited-file>.yaml \
+  --dataset-name ${DATASET_NAME} \
+  --input-sources "${NEW_URL1}" "${NEW_URL2}" \
+  --issue-number ${ISSUE_NUMBER} \
+  --pr-number ${PR_NUMBER}
+```
+
+### 6. Validate Changes
 
 **Critical**: Validation MUST pass before creating a PR. Do not skip this step.
 
+#### 6a. Schema Validation
+
 ```bash
-# Validate the edited YAML file
+# Validate against LinkML schema
 poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml \
   -C Dataset <edited-file>.yaml
 ```
@@ -300,7 +341,7 @@ poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_a
 - **Modified nested object**: Check object structure matches schema class
 - **Deleted field**: Verify it wasn't a required field
 
-**Alternative Validation Methods:**
+**Alternative Schema Validation Methods:**
 ```bash
 # Use the test suite (if file is in src/data/examples/valid/)
 make test-examples
@@ -309,7 +350,23 @@ make test-examples
 poetry run linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml <edited-file>.yaml
 ```
 
-### 6. Regenerate HTML Preview
+#### 6b. Completeness Validation (Optional for Edits)
+
+**When to run**: If edits substantially changed content (added/removed sections).
+
+**Skip if**: Only minor corrections or single field updates.
+
+```bash
+# Check completeness after major edits
+python3 src/github/validate_d4d_completeness.py <edited-file>.yaml
+```
+
+**If completeness drops below threshold**:
+- Comment on PR warning about quality degradation
+- Don't block edit PRs (edits are typically improvements)
+- Suggest adding more information if quality is now minimal
+
+### 7. Regenerate HTML Preview
 
 ```bash
 # Update HTML view to reflect changes
@@ -318,7 +375,7 @@ poetry run python src/html/human_readable_renderer.py <edited-file>.yaml
 # This updates the .html file for reviewer convenience
 ```
 
-### 7. Create Pull Request
+### 8. Create Pull Request
 
 **Branch Creation:**
 ```bash
@@ -413,7 +470,17 @@ EOF
 )"
 ```
 
-### 8. Check Budget and Prepare Warning (If Needed)
+**Files to commit**:
+```bash
+# Add modified files
+git add <edited-file>.yaml
+git add <edited-file>.html  # Updated HTML preview
+
+# If metadata was regenerated, add it too
+git add <edited-file>_metadata.yaml  # Optional
+```
+
+### 9. Check Budget and Prepare Warning (If Needed)
 
 Before posting your final comment to the GitHub issue, check the CBORG API budget:
 
@@ -430,7 +497,7 @@ BUDGET_WARNING=$(python3 scripts/check_budget.py)
 
 **Note**: The script handles missing API keys gracefully - if `ANTHROPIC_API_KEY` is not set, it will skip the check and exit cleanly.
 
-### 9. Notify User in GitHub Issue
+### 10. Notify User in GitHub Issue
 
 ```bash
 # Comment on the original issue with PR link
