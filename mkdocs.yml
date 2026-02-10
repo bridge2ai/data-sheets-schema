@@ -11,8 +11,8 @@ plugins:
   - search
   - mermaid2
 nav:
-  # - Home: home.md
-  - Index: index.md
+  - Home: home.md
+  - Schema Documentation: index.md
   - D4D Examples: d4d_examples.md
   - About: about.md
 site_url: https://bridge2ai.github.io/data-sheets-schema
