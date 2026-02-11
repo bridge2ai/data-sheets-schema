@@ -207,6 +207,23 @@ class D4DMetadataGenerator:
             print(f"Warning: Schema file not found: {self.schema_path}")
             self.schema_hash = "unknown"
 
+    def _safe_relative_path(self, file_path: Path) -> str:
+        """
+        Safely calculate relative path, handling files outside project root.
+
+        Args:
+            file_path: Path to file
+
+        Returns:
+            Relative path string
+        """
+        try:
+            file_abs = file_path.resolve()
+            return str(file_abs.relative_to(self.project_root))
+        except ValueError:
+            # File is not under project root, return as-is
+            return str(file_path)
+
     def generate_metadata(
         self,
         d4d_file: Path,
@@ -244,11 +261,13 @@ class D4DMetadataGenerator:
         if input_dir and input_dir.exists():
             # File-based mode
             input_mode = "file"
-            for file_path in sorted(input_dir.glob('*')):
+            # Convert to absolute path to ensure proper relative path calculation
+            input_dir_abs = input_dir.resolve()
+            for file_path in sorted(input_dir_abs.glob('*')):
                 if file_path.is_file():
                     input_documents.append({
                         "filename": file_path.name,
-                        "relative_path": str(file_path.relative_to(self.project_root)),
+                        "relative_path": self._safe_relative_path(file_path),
                         "format": file_path.suffix.lstrip('.') or "txt",
                         "size_bytes": file_path.stat().st_size,
                         "sha256_hash": calculate_file_hash(file_path)
@@ -283,7 +302,7 @@ class D4DMetadataGenerator:
             }],
             "output_document": {
                 "filename": d4d_file.name,
-                "relative_path": str(d4d_file.relative_to(self.project_root)) if d4d_file.exists() else str(d4d_file),
+                "relative_path": self._safe_relative_path(d4d_file),
                 "format": "yaml",
                 "dataset_name": dataset_name
             },
