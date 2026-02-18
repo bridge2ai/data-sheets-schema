@@ -390,6 +390,6 @@ After running all tests, check:
 ## Support
 
 For issues or questions:
-- Check `IMPLEMENTATION_SUMMARY.md` for complete details
+- Check `notes/IMPLEMENTATION_SUMMARY.md` for complete details
 - Review instruction files in `.github/workflows/`
 - Check `data/sheets_d4dassistant/README.md` for usage guidance
