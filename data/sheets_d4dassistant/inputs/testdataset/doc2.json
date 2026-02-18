@@ -1,0 +1,7 @@
+{
+  "dataset_id": "test_001",
+  "name": "Test Dataset",
+  "description": "A test dataset for validation",
+  "instances": 1000,
+  "format": "JSON"
+}
