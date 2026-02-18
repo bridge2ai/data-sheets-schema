@@ -639,7 +639,7 @@ def main():
 
             # Generate output filename
             project_name = eval_file.stem.replace('_claudecode_agent_evaluation', '')
-            output_path = output_dir / f"{project_name}_evaluation.html"
+            output_path = output_dir / f"{project_name}_evaluation_rubric10.html"
 
             # Generate HTML
             generate_evaluation_html(eval_data, output_path)

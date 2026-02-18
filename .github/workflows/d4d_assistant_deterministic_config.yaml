@@ -1,0 +1,146 @@
+# D4D Assistant Deterministic Configuration
+# Ensures reproducible D4D generation matching Claude Code agent approach
+#
+# Purpose: Centralized configuration for deterministic D4D extraction
+# Version: 1.0.0
+# Last Updated: 2025-02-10
+
+# Model Configuration
+model:
+  provider: anthropic
+  name: claude-sonnet-4-5-20250929  # Date-pinned for reproducibility
+  temperature: 0.0                  # Maximum determinism
+  max_tokens: 16000                 # Sufficient for comprehensive D4D generation
+
+# Prompt Configuration
+prompts:
+  # External version-controlled prompt files
+  system_prompt_file: src/download/prompts/d4d_concatenated_system_prompt.txt
+  user_prompt_file: src/download/prompts/d4d_concatenated_user_prompt.txt
+
+  # Prompt templates can be overridden for specific modes
+  file_mode_prompt: null  # Future: src/download/prompts/d4d_assistant_file_mode_prompt.txt
+  url_mode_prompt: null   # Future: src/download/prompts/d4d_assistant_url_mode_prompt.txt
+
+# Schema Configuration
+schema:
+  source: local  # Use local version-controlled schema file
+  path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+
+  # Fallback to remote if local not available (not recommended)
+  remote_url: https://raw.githubusercontent.com/bridge2ai/data-sheets-schema/main/src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+
+# Metadata Generation
+metadata:
+  generate_metadata: true        # Always generate comprehensive metadata
+  track_input_hash: true         # SHA-256 hash of input files/URLs
+  track_schema_hash: true        # SHA-256 hash of schema file
+  track_prompt_hashes: true      # SHA-256 hashes of prompt files
+  track_git_commit: true         # Current git commit for provenance
+  include_environment: true      # Platform, Python version, etc.
+
+# Input Modes
+input:
+  # File-based mode (preferred for reproducibility)
+  file_mode:
+    enabled: true
+    input_dir: data/sheets_d4dassistant/inputs
+    supported_formats: [txt, md, json, yaml, pdf, html]
+
+  # URL-based mode (fallback when files not provided)
+  url_mode:
+    enabled: true
+    download_dir: data/sheets_d4dassistant/fetched
+    timeout_seconds: 30
+    max_retries: 3
+
+# Output Configuration
+output:
+  base_dir: data/sheets_d4dassistant
+  yaml_filename_pattern: "{dataset}_d4d.yaml"
+  metadata_filename_pattern: "{dataset}_d4d_metadata.yaml"
+  html_filename_pattern: "{dataset}_d4d.html"
+
+# Validation Gates
+validation:
+  # Quality thresholds (BLOCK PR if not met)
+  min_sections_comprehensive: 10  # All D4D sections populated
+  min_sections_acceptable: 7      # Most D4D sections populated
+  min_sections_minimal: 4         # Basic D4D sections
+
+  min_slots_comprehensive: 146    # Comprehensive datasheet
+  min_slots_acceptable: 100       # Acceptable quality
+  min_slots_minimal: 50           # Minimal viable
+
+  min_lines_comprehensive: 200    # File size indicator
+  min_lines_acceptable: 150
+  min_lines_minimal: 100
+
+  # Required fields (always enforced)
+  required_fields: [id, name]
+
+  # Block PR creation if below this threshold
+  block_threshold: minimal        # Options: comprehensive, acceptable, minimal, none
+
+  # Run LinkML schema validation before PR
+  schema_validation: true
+
+# Reproducibility Settings
+reproducibility:
+  # Settings that ensure determinism
+  deterministic: true
+  random_seed: null  # Not applicable for LLM calls at temp=0.0
+
+  # Verification settings
+  verify_reproducibility: false  # Future: Run twice and compare outputs
+  diff_tolerance: 0              # Exact match required
+
+# Provenance Tracking
+provenance:
+  extraction_type: github_assistant_claude_code
+  performed_by: d4dassistant
+  wrapper_script: src/github/generate_d4d_metadata.py
+  version: "1.0.0"
+
+# Prerequisites Validation
+prerequisites:
+  # Check these before D4D generation (FAIL FAST if missing)
+  check_schema_exists: true
+  check_prompts_exist: true
+  check_input_files: true  # File mode
+  check_urls_accessible: true  # URL mode
+
+  # Timeout for prerequisites checks
+  check_timeout_seconds: 10
+
+# Error Handling
+error_handling:
+  # What to do on various failures
+  on_validation_failure: fail     # Options: fail, warn, ignore
+  on_prerequisites_failure: fail  # Options: fail, warn
+  on_schema_load_failure: fail    # Options: fail, fallback_remote
+
+  # Retry settings
+  max_generation_attempts: 1      # No retries for deterministic generation
+  retry_on_validation_failure: false
+
+# Budget and Cost Tracking (optional)
+budget:
+  check_before_generation: false  # Future: check CBORG API budget
+  warn_threshold_percent: 75      # Warn if > 75% of budget used
+  api_url: null                   # Future: CBORG API endpoint
+
+# Documentation
+docs:
+  readme_path: data/sheets_d4dassistant/README.md
+  create_instructions_path: .github/workflows/d4d_assistant_create.md
+  edit_instructions_path: .github/workflows/d4d_assistant_edit.md
+
+# Feature Flags (for gradual rollout)
+features:
+  enable_metadata_generation: true
+  enable_completeness_validation: true
+  enable_prerequisites_check: true
+  enable_file_mode: true
+  enable_url_mode: true
+  enable_batch_mode: false  # Future: process multiple datasets
