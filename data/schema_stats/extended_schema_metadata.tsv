@@ -1,0 +1,14 @@
+Property	Value
+Schema Name	data-sheets-schema
+Schema ID	https://w3id.org/bridge2ai/data-sheets-schema
+Version	Not specified
+License	MIT
+Title	data-sheets-schema
+Description	A LinkML schema for Datasheets for Datasets.
+Total Imports	0
+Total Prefixes	31
+Total Classes	76
+Total Slots	272
+Total Enums	15
+Total Types	19
+Total Subsets	9

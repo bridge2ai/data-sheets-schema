@@ -1,0 +1,16 @@
+D4D Class	RAI Mapping	Purpose
+DatasetBias	rai:dataBiases	Documented biases in the dataset
+DatasetLimitation	rai:dataLimitations	Known limitations
+SensitiveElement	rai:personalSensitiveInformation	PII/sensitive data
+CollectionMechanism	rai:dataCollection	How data was collected
+CollectionTimeframe	rai:dataCollectionTimeframe	When data was collected
+MissingDataDocumentation	rai:dataCollectionMissingData	Missing data handling
+RawDataSource	rai:dataCollectionRawData	Original data sources
+PreprocessingStrategy	rai:dataPreprocessingProtocol	Preprocessing steps
+CleaningStrategy	rai:dataManipulationProtocol	Data cleaning
+ImputationProtocol	rai:dataImputationProtocol	Missing value imputation
+AnnotationAnalysis	rai:dataAnnotationAnalysis	Annotation quality
+MachineAnnotationTools	rai:machineAnnotationTools	Automated labeling
+FutureUseImpact	rai:dataSocialImpact	Social impact
+IntendedUse	rai:dataUseCases	Intended use cases
+UpdatePlan	rai:dataReleaseMaintenancePlan	Maintenance plan

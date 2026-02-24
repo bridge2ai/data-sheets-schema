@@ -1,0 +1,17 @@
+Enum Name	Value Count	Has Ontology Mappings	Description
+BiasTypeEnum	9	Yes	Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO) bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO
+Boolean	3	No	
+CRediTRoleEnum	14	No	Contributor roles based on the CRediT (Contributor Roles Taxonomy). See https://credit.niso.org/
+ComplianceStatusEnum	5	No	Compliance status for regulatory frameworks. Indicates the extent to which a dataset complies with specific regulations (e.g., HIPAA, 45 CFR 46). These are workflow status values that may evolve as regulations are assessed or as the dataset is modified.
+CompressionEnum	7	No	
+ConfidentialityLevelEnum	3	No	"Confidentiality classification levels for datasets indicating the degree of access restrictions and data sensitivity.
+NOTE: This enum classifies data sensitivity and access control (WHO can access), which is orthogonal to DataUsePermissionEnum that specifies use restrictions (WHAT authorized users can do with data). ConfidentialityLevelEnum determines access requirements, while DataUsePermissionEnum uses DUO terms to specify permitted uses once access is granted."
+CreatorOrMaintainerEnum	11	No	Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to schema.org organization types.
+DataUsePermissionEnum	22	Yes	Data use permissions and restrictions based on the Data Use Ontology (DUO). DUO is a standardized ontology for representing data use conditions developed by GA4GH. See https://github.com/EBISPOT/DUO
+DatasetRelationshipTypeEnum	14	No	Standardized types of relationships between datasets, based on DataCite Metadata Schema RelationType controlled vocabulary and Dublin Core relationship terms. See https://datacite-metadata-schema.readthedocs.io/ and http://purl.org/dc/terms/
+EncodingEnum	34	No	
+FormatEnum	18	No	
+LimitationTypeEnum	7	No	Types of limitations that may affect dataset use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).
+MediaTypeEnum	19	No	
+VariableTypeEnum	13	No	Common data types for variables. Values are mapped to schema.org DataType vocabulary. See https://schema.org/DataType
+VersionTypeEnum	12	No	Type of version change using semantic versioning principles. See https://semver.org/

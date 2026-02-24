@@ -1,0 +1,6 @@
+D4D Class	RAI Mapping	Category	Description	Key Focus
+FutureUseImpact	rai:dataSocialImpact	Social Impact	Impact of dataset composition or collection on future uses	Risks, harms, unfair treatment, legal/financial consequences
+DatasetBias	rai:dataBiases	Bias & Fairness	Known biases present in the dataset	Systematic errors affecting representativeness and fairness
+DatasetLimitation	rai:dataLimitations	Quality & Scope	Known limitations of the dataset	Technical, coverage, or methodological constraints
+IntendedUse	rai:dataUseCases	Use Cases	Explicit statement of intended uses	Positive intended applications and purposes
+DataProtectionImpact	(no RAI mapping)	Privacy & Ethics	Impact analysis on data subjects	Data protection, privacy impact assessment

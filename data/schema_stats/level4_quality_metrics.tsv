@@ -1,0 +1,5 @@
+Quality Check	Status	Count	Examples
+Classes without description	PASS	0	None
+Slots without range	ISSUE	89	title, language, page, dialect, path
+Orphaned classes	ISSUE	67	DatasetCollection, DataSubset, Software, FormatDialect, Purpose
+Single-use slots	WARNING	170	is_data_split, is_subpopulation, url, affiliation, email
