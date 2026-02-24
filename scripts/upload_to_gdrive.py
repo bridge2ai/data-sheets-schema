@@ -14,8 +14,11 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
 # Configuration
-SERVICE_ACCOUNT_FILE = '/Users/marcin/Documents/VIMSS/ontology/KG-Hub/KG-Microbe/CultureBotHT/CultureBotHT/credentials/service_account.json'
-PARENT_FOLDER_ID = '15QywFl6JKOXqk6gdDFCv1F_eHLYTOzO5'  # From Drive URL
+SERVICE_ACCOUNT_FILE = os.environ.get(
+    'GOOGLE_SERVICE_ACCOUNT_FILE',
+    str(Path(__file__).resolve().parent.parent / 'credentials' / 'service_account.json'),
+)
+PARENT_FOLDER_ID = os.getenv('GDRIVE_PARENT_FOLDER_ID', '15QywFl6JKOXqk6gdDFCv1F_eHLYTOzO5')  # From Drive URL or env var
 SUBFOLDER_NAME = 'D4D_stats'
 TSV_DIR = Path('data/schema_stats')
 

@@ -181,12 +181,12 @@ VariableTypeEnum	object	Complex structured objects or nested data structures.
 VersionTypeEnum	MAJOR	Incompatible changes, breaking backward compatibility	
 VersionTypeEnum	MINOR	Backward-compatible new functionality or enhancements	
 VersionTypeEnum	PATCH	Backward-compatible bug fixes or minor corrections	
-VersionTypeEnum	Windows-1250		
-VersionTypeEnum	Windows-1251		
-VersionTypeEnum	Windows-1252		
-VersionTypeEnum	Windows-1253		
-VersionTypeEnum	Windows-1254		
-VersionTypeEnum	Windows-1255		
-VersionTypeEnum	Windows-1256		
-VersionTypeEnum	Windows-1257		
-VersionTypeEnum	Windows-1258		
+EncodingEnum	Windows-1250		
+EncodingEnum	Windows-1251		
+EncodingEnum	Windows-1252		
+EncodingEnum	Windows-1253		
+EncodingEnum	Windows-1254		
+EncodingEnum	Windows-1255		
+EncodingEnum	Windows-1256		
+EncodingEnum	Windows-1257		
+EncodingEnum	Windows-1258		

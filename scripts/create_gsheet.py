@@ -16,7 +16,10 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
 # Configuration
-SERVICE_ACCOUNT_FILE = '/Users/marcin/Documents/VIMSS/ontology/KG-Hub/KG-Microbe/CultureBotHT/CultureBotHT/credentials/service_account.json'
+SERVICE_ACCOUNT_FILE = os.environ.get(
+    'GOOGLE_SERVICE_ACCOUNT_FILE',
+    str(Path(__file__).resolve().parent.parent / 'credentials' / 'service_account.json'),
+)
 SPREADSHEET_TITLE = 'D4D Schema Statistics'
 TSV_DIR = Path('data/schema_stats')
 
