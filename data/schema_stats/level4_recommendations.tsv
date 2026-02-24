@@ -1,0 +1,4 @@
+Issue	Impact	Recommendation
+89 slots without explicit range	Defaults to string, may reduce type safety	Add explicit range declarations for better validation
+67 orphaned classes	Unused schema elements increase complexity	Review and remove if truly unused, or add references if needed
+170 single-use slots	Potential over-specialization	Consider consolidating similar slots across classes

@@ -1,0 +1,49 @@
+SECTION	Metric	Value	Details
+Level 1	Total Classes	76
+Level 1	Total Slots	272
+Level 1	Total Enums	15
+Level 1	Total Subsets	9
+Level 1	Total Prefixes	31
+
+Level 2	Abstract Classes	0
+Level 2	Concrete Classes	76
+Level 2	Classes in Main Module	70
+Level 2	Classes in Unknown Module	6
+Level 2	Required Slots	4
+Level 2	Optional Slots	268
+Level 2	Multivalued Slots	97
+Level 2	Single-valued Slots	175
+Level 2	Identifier Slots	0
+
+Slots by Type	string	204
+Slots by Type	boolean	24
+Slots by Type	uriorcurie	6
+Slots by Type	uri	5
+Slots by Type	integer	4
+Slots by Type	datetime	3
+Slots by Type	Organization	3
+Slots by Type	float	3
+Slots by Type	Person	2
+Slots by Type	date	2
+
+Level 3	Max Inheritance Depth	3
+Level 3	Classes at Depth 0	3	base classes
+Level 3	Classes at Depth 1	69
+Level 3	Classes at Depth 2	3
+Level 3	Classes at Depth 3	1
+
+Top Reused Slots	id	75	classes
+Top Reused Slots	name	75	classes
+Top Reused Slots	description	75	classes
+Top Reused Slots	used_software	65	classes
+Top Reused Slots	license	5	classes
+Top Reused Slots	version	5	classes
+Top Reused Slots	compression	4	classes
+Top Reused Slots	conforms_to	4	classes
+Top Reused Slots	conforms_to_class	4	classes
+Top Reused Slots	conforms_to_schema	4	classes
+
+Level 4 Quality	Classes without description	0	PASS
+Level 4 Quality	Slots without range	89	ISSUE: title, language, page, dialect, path
+Level 4 Quality	Orphaned classes	67	ISSUE: DatasetCollection, DataSubset, Software, FormatDialect, Purpose
+Level 4 Quality	Single-use slots	170	WARNING: is_data_split, is_subpopulation, url, affiliation, email

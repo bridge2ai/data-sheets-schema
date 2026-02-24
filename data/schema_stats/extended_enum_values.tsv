@@ -1,0 +1,192 @@
+Enum Name	Value	Description	Meaning (Ontology Term)
+BiasTypeEnum	selection_bias	Bias arising from non-random selection of data or participants.	
+BiasTypeEnum	measurement_bias	Bias in how data is measured or recorded. Occurs when features and labels are proxies for desired quantities, potentially leading to differential performance.	AIO:MeasurementBias
+BiasTypeEnum	historical_bias	Bias reflecting historical inequities or societal biases. Long-standing biases encoded in society over time.	AIO:HistoricalBias
+BiasTypeEnum	representation_bias	Certain groups are over- or under-represented in the data. Results from non-random sampling of subgroups making trends non-generalizable to new populations.	AIO:RepresentationBias
+BiasTypeEnum	aggregation_bias	Bias from inappropriately combining distinct groups. Related to making inferences about individuals based on their group membership.	
+BiasTypeEnum	algorithmic_bias	Bias introduced or amplified by algorithmic processing. Computational bias from data analysis processes and methods.	
+BiasTypeEnum	sampling_bias	Bias from sampling methodology not representative of the population.	
+BiasTypeEnum	annotation_bias	Bias introduced during data labeling or annotation. Occurs when annotators rely on heuristics or exhibit systematic patterns in labeling.	
+BiasTypeEnum	confirmation_bias	Bias from seeking data that confirms pre-existing beliefs. Tendency to prefer information that confirms existing beliefs, influencing the search for, interpretation of, and recall of information.	AIO:ConfirmationBias
+Boolean	true		
+Boolean	false		
+Boolean	unknown		
+CRediTRoleEnum	conceptualization	Ideas; formulation or evolution of overarching research goals and aims	
+CRediTRoleEnum	methodology	Development or design of methodology; creation of models	
+CRediTRoleEnum	software	Programming, software development; designing computer programs	
+CRediTRoleEnum	validation	Verification of the overall replication/reproducibility of results	
+CRediTRoleEnum	formal_analysis	Application of statistical, mathematical, or other formal techniques	
+CRediTRoleEnum	investigation	Conducting the research and investigation process	
+CRediTRoleEnum	resources	Provision of study materials, reagents, patients, laboratory samples, etc.	
+CRediTRoleEnum	data_curation	Management activities to annotate, scrub data and maintain research data	
+CRediTRoleEnum	writing_original_draft	Preparation, creation and/or presentation of the published work	
+CRediTRoleEnum	writing_review_editing	Critical review, commentary or revision of the work	
+CRediTRoleEnum	visualization	Preparation, creation and/or presentation of visualizations/data presentation	
+CRediTRoleEnum	supervision	Oversight and leadership responsibility for the research activity	
+CRediTRoleEnum	project_administration	Management and coordination responsibility for the research activity	
+CRediTRoleEnum	funding_acquisition	Acquisition of the financial support for the project	
+ComplianceStatusEnum	compliant	Dataset is compliant with the regulation. All requirements are met and documented.	
+ComplianceStatusEnum	partially_compliant	Dataset is partially compliant, with known limitations or gaps in compliance. Some but not all requirements are met.	
+ComplianceStatusEnum	not_compliant	Dataset does not comply with the regulation. Significant requirements are not met.	
+ComplianceStatusEnum	not_applicable	Regulation does not apply to this dataset based on scope, jurisdiction, or subject matter.	
+ComplianceStatusEnum	under_review	Compliance status is currently under review or assessment. Final determination has not been made.	
+CompressionEnum	gzip		
+CompressionEnum	bzip2		
+CompressionEnum	zip		
+CompressionEnum	tar		
+CompressionEnum	xz		
+CompressionEnum	lzma		
+CompressionEnum	compress		
+ConfidentialityLevelEnum	unrestricted	No confidentiality restrictions. Data is publicly available with no access controls required. Equivalent to public or open access data.	
+ConfidentialityLevelEnum	restricted	Restricted access requiring approval or registration. Data contains sensitive information requiring controlled access. May require account creation, data use agreement, or institutional approval.	
+ConfidentialityLevelEnum	confidential	Highly confidential with strict access controls. Data contains highly sensitive information with significant privacy or security implications. Typically requires IRB approval, formal data use agreements, institutional authorization, or other formal vetting processes.	
+CreatorOrMaintainerEnum	data_subject	A person whose information is recorded in the dataset.	
+CreatorOrMaintainerEnum	third_party	A third party not involved in the direct creation or maintenance.	
+CreatorOrMaintainerEnum	researcher	A researcher involved in dataset creation or maintenance.	
+CreatorOrMaintainerEnum	industry	Industry professional involved in dataset creation or maintenance.	
+CreatorOrMaintainerEnum	academic_institution	Academic institution responsible for dataset.	
+CreatorOrMaintainerEnum	government_agency	Government agency responsible for dataset.	
+CreatorOrMaintainerEnum	commercial_entity	Commercial entity responsible for dataset.	
+CreatorOrMaintainerEnum	non_profit_organization	Non-profit organization responsible for dataset.	
+CreatorOrMaintainerEnum	crowdsourced	Dataset created through crowdsourcing efforts with multiple contributors.	
+CreatorOrMaintainerEnum	automated_system	Automated system or process responsible for dataset.	
+CreatorOrMaintainerEnum	other	Other type of creator or maintainer not listed.	
+DataUsePermissionEnum	no_restriction	No restriction on data use	DUO:0000004
+DataUsePermissionEnum	general_research_use	Data available for any research purpose (GRU)	DUO:0000042
+DataUsePermissionEnum	health_medical_biomedical_research	Data limited to health, medical, or biomedical research (HMB)	DUO:0000006
+DataUsePermissionEnum	disease_specific_research	Data limited to research on specified disease(s) (DS)	DUO:0000007
+DataUsePermissionEnum	population_origins_ancestry_research	Data limited to population origins or ancestry research (POA)	DUO:0000011
+DataUsePermissionEnum	clinical_care_use	Data available for clinical care and applications (CC)	DUO:0000043
+DataUsePermissionEnum	no_commercial_use	Data use limited to non-commercial purposes (NCU)	DUO:0000046
+DataUsePermissionEnum	non_profit_use_only	Data use limited to not-for-profit organizations (NPU)	DUO:0000045
+DataUsePermissionEnum	non_profit_use_and_non_commercial_use	Data limited to not-for-profit organizations and non-commercial use (NPUNCU)	DUO:0000018
+DataUsePermissionEnum	no_methods_development	Data cannot be used for methods or software development (NMDS)	DUO:0000015
+DataUsePermissionEnum	genetic_studies_only	Data limited to genetic studies only (GSO)	DUO:0000016
+DataUsePermissionEnum	ethics_approval_required	Ethics approval (e.g., IRB/ERB) required for data use (IRB)	DUO:0000021
+DataUsePermissionEnum	collaboration_required	Collaboration with primary investigator required (COL)	DUO:0000020
+DataUsePermissionEnum	publication_required	Results must be published/shared with research community (PUB)	DUO:0000019
+DataUsePermissionEnum	geographic_restriction	Data use limited to specific geographic region (GS)	DUO:0000022
+DataUsePermissionEnum	institution_specific	Data use limited to approved institutions (IS)	DUO:0000028
+DataUsePermissionEnum	project_specific	Data use limited to approved project(s) (PS)	DUO:0000027
+DataUsePermissionEnum	user_specific	Data use limited to approved users (US)	DUO:0000026
+DataUsePermissionEnum	time_limit	Data use approved for limited time period (TS)	DUO:0000025
+DataUsePermissionEnum	return_to_database	Derived data must be returned to database/resource (RTN)	DUO:0000029
+DataUsePermissionEnum	publication_moratorium	Publication restricted until specified date (MOR)	DUO:0000024
+DataUsePermissionEnum	no_population_ancestry_research	Population/ancestry research prohibited (NPOA)	DUO:0000044
+DatasetRelationshipTypeEnum	derives_from	This dataset is derived from the target dataset through processing, analysis, or transformation. Equivalent to DataCite IsDerivedFrom.	
+DatasetRelationshipTypeEnum	supplements	This dataset supplements or adds to the target dataset. Equivalent to DataCite IsSupplementTo.	
+DatasetRelationshipTypeEnum	is_supplemented_by	This dataset is supplemented by the target dataset. Equivalent to DataCite IsSupplementedBy.	
+DatasetRelationshipTypeEnum	is_version_of	This dataset is a version of the target dataset (e.g., updated, corrected, or revised version). Equivalent to DataCite IsVersionOf.	
+DatasetRelationshipTypeEnum	is_new_version_of	This dataset is a new version that replaces or updates the target dataset. Equivalent to DataCite IsNewVersionOf.	
+DatasetRelationshipTypeEnum	replaces	This dataset replaces or supersedes the target dataset. Equivalent to DataCite Obsoletes.	
+DatasetRelationshipTypeEnum	is_replaced_by	This dataset is replaced or superseded by the target dataset. Equivalent to DataCite IsObsoletedBy.	
+DatasetRelationshipTypeEnum	is_required_by	This dataset is required by the target dataset. Equivalent to DataCite IsRequiredBy.	
+DatasetRelationshipTypeEnum	requires	This dataset requires the target dataset. Equivalent to DataCite Requires.	
+DatasetRelationshipTypeEnum	is_part_of	This dataset is part of the target dataset (e.g., subset, component). Equivalent to DataCite IsPartOf.	
+DatasetRelationshipTypeEnum	has_part	This dataset has the target dataset as a part. Equivalent to DataCite HasPart.	
+DatasetRelationshipTypeEnum	is_referenced_by	This dataset is referenced or cited by the target dataset. Equivalent to DataCite IsReferencedBy.	
+DatasetRelationshipTypeEnum	references	This dataset references or cites the target dataset. Equivalent to DataCite References.	
+DatasetRelationshipTypeEnum	is_identical_to	This dataset is identical to the target dataset (e.g., mirror, copy). Equivalent to DataCite IsIdenticalTo.	
+EncodingEnum	ASCII		
+EncodingEnum	Big5		
+EncodingEnum	EUC-JP		
+EncodingEnum	EUC-KR		
+EncodingEnum	EUC-TW		
+EncodingEnum	GB2312		
+EncodingEnum	HZ-GB-2312		
+EncodingEnum	ISO-2022-CN-EXT		
+EncodingEnum	ISO-2022-CN		
+EncodingEnum	ISO-2022-JP-2		
+EncodingEnum	ISO-2022-JP		
+EncodingEnum	ISO-2022-KR		
+EncodingEnum	ISO-8859-10		
+EncodingEnum	ISO-8859-11		
+EncodingEnum	ISO-8859-13		
+EncodingEnum	ISO-8859-14		
+EncodingEnum	ISO-8859-15		
+EncodingEnum	ISO-8859-16		
+EncodingEnum	ISO-8859-1		
+EncodingEnum	ISO-8859-2		
+EncodingEnum	ISO-8859-3		
+EncodingEnum	ISO-8859-4		
+EncodingEnum	ISO-8859-5		
+EncodingEnum	ISO-8859-6		
+EncodingEnum	ISO-8859-7		
+EncodingEnum	ISO-8859-8		
+EncodingEnum	ISO-8859-9		
+EncodingEnum	KOI8-R		
+EncodingEnum	KOI8-U		
+EncodingEnum	Shift_JIS		
+EncodingEnum	UTF-16		
+EncodingEnum	UTF-32		
+EncodingEnum	UTF-7		
+EncodingEnum	UTF-8		
+FormatEnum	CSV		
+FormatEnum	TSV		
+FormatEnum	XML		
+FormatEnum	JSON		
+FormatEnum	JSONL		
+FormatEnum	YAML		
+FormatEnum	HTML		
+FormatEnum	PDF		
+FormatEnum	DOCX		
+FormatEnum	XLSX		
+FormatEnum	PPTX		
+FormatEnum	TXT		
+FormatEnum	MD		
+FormatEnum	ZIP		
+FormatEnum	TAR		
+FormatEnum	GZ		
+FormatEnum	BZ2		
+FormatEnum	XZ		
+LimitationTypeEnum	scope_limitation	Dataset does not cover all intended use cases or populations. The scope of the dataset is narrower than the intended application domain.	
+LimitationTypeEnum	temporal_limitation	Dataset is limited to specific time periods. Data may not reflect current conditions or may not be applicable to other time periods.	
+LimitationTypeEnum	coverage_limitation	Dataset has incomplete coverage of target domain. Missing data points, categories, or geographic regions within the intended scope.	
+LimitationTypeEnum	methodological_limitation	Data collection methodology introduces constraints. Limitations arising from how data was gathered, measured, or processed.	
+LimitationTypeEnum	representativeness_limitation	Dataset may not be representative of target population. Sample may not accurately reflect the broader population of interest.	
+LimitationTypeEnum	resolution_limitation	Data granularity or resolution is insufficient for some uses. Level of detail may not support fine-grained analysis or specific applications.	
+LimitationTypeEnum	integration_limitation	Challenges in combining with other data sources. Incompatibilities in formats, identifiers, or schemas that hinder data integration.	
+MediaTypeEnum	text/csv		
+MediaTypeEnum	text/tab-separated-values		
+MediaTypeEnum	application/json		
+MediaTypeEnum	application/xml		
+MediaTypeEnum	text/xml		
+MediaTypeEnum	application/yaml		
+MediaTypeEnum	text/yaml		
+MediaTypeEnum	text/html		
+MediaTypeEnum	application/pdf		
+MediaTypeEnum	application/vnd.openxmlformats-officedocument.wordprocessingml.document		
+MediaTypeEnum	application/vnd.openxmlformats-officedocument.spreadsheetml.sheet		
+MediaTypeEnum	application/vnd.openxmlformats-officedocument.presentationml.presentation		
+MediaTypeEnum	text/plain		
+MediaTypeEnum	text/markdown		
+MediaTypeEnum	application/zip		
+MediaTypeEnum	application/x-tar		
+MediaTypeEnum	application/gzip		
+MediaTypeEnum	application/x-bzip2		
+MediaTypeEnum	application/x-xz		
+VariableTypeEnum	integer	Whole numbers.	
+VariableTypeEnum	float	Floating-point numbers (single precision).	
+VariableTypeEnum	double	Double-precision floating-point numbers.	
+VariableTypeEnum	string	Text strings.	
+VariableTypeEnum	boolean	True/false values.	
+VariableTypeEnum	date	Date values (without time).	
+VariableTypeEnum	datetime	Date and time values.	
+VariableTypeEnum	categorical	Categorical/factor variables with finite set of discrete values. Often used for nominal data (unordered categories).	
+VariableTypeEnum	ordinal	Ordered categorical variables where values have a meaningful sequence (e.g., low/medium/high, strongly disagree/disagree/agree/strongly agree).	
+VariableTypeEnum	identifier	Unique identifiers or keys for records or entities.	
+VariableTypeEnum	json	JSON-encoded data structures.	
+VariableTypeEnum	array	Arrays or lists of values. May contain elements of the same or different types.	
+VariableTypeEnum	object	Complex structured objects or nested data structures.	
+VersionTypeEnum	MAJOR	Incompatible changes, breaking backward compatibility	
+VersionTypeEnum	MINOR	Backward-compatible new functionality or enhancements	
+VersionTypeEnum	PATCH	Backward-compatible bug fixes or minor corrections	
+EncodingEnum	Windows-1250		
+EncodingEnum	Windows-1251		
+EncodingEnum	Windows-1252		
+EncodingEnum	Windows-1253		
+EncodingEnum	Windows-1254		
+EncodingEnum	Windows-1255		
+EncodingEnum	Windows-1256		
+EncodingEnum	Windows-1257		
+EncodingEnum	Windows-1258		

@@ -1,0 +1,27 @@
+Range Type	Slot Count
+string	204
+boolean	24
+uriorcurie	6
+uri	5
+integer	4
+datetime	3
+Organization	3
+float	3
+Person	2
+date	2
+FormatEnum	1
+EncodingEnum	1
+CompressionEnum	1
+MediaTypeEnum	1
+Dataset	1
+CRediTRoleEnum	1
+Grantor	1
+Grant	1
+MissingInfo	1
+BiasTypeEnum	1
+LimitationTypeEnum	1
+DatasetRelationshipTypeEnum	1
+DataUsePermissionEnum	1
+ComplianceStatusEnum	1
+ConfidentialityLevelEnum	1
+VariableTypeEnum	1

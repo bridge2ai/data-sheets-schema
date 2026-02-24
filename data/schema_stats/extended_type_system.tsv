@@ -1,0 +1,20 @@
+Type Name	Base Type	URI	Description
+boolean	base type	xsd:boolean	A binary (true or false) value
+curie	base type	xsd:string	a compact URI
+date	base type	xsd:date	a date (year, month and day) in an idealized calendar
+date_or_datetime	base type	linkml:DateOrDatetime	Either a date or a datetime
+datetime	base type	xsd:dateTime	The combination of a date and time
+decimal	base type	xsd:decimal	A real number with arbitrary precision that conforms to the xsd:decimal specification
+double	base type	xsd:double	A real number that conforms to the xsd:double specification
+float	base type	xsd:float	A real number that conforms to the xsd:float specification
+integer	base type	xsd:integer	An integer
+jsonpath	base type	xsd:string	A string encoding a JSON Path. The value of the string MUST conform to JSON Point syntax and SHOULD dereference to zero or more valid objects within the current instance document when encoded in tree form.
+jsonpointer	base type	xsd:string	A string encoding a JSON Pointer. The value of the string MUST conform to JSON Point syntax and SHOULD dereference to a valid object within the current instance document when encoded in tree form.
+ncname	base type	xsd:string	Prefix part of CURIE
+nodeidentifier	base type	shex:nonLiteral	A URI, CURIE or BNODE that represents a node in a model.
+objectidentifier	base type	shex:iri	A URI or CURIE that represents an object in the model.
+sparqlpath	base type	xsd:string	A string encoding a SPARQL Property Path. The value of the string MUST conform to SPARQL syntax and SHOULD dereference to zero or more valid objects within the current instance document when encoded as RDF.
+string	base type	xsd:string	A character string
+time	base type	xsd:time	A time object represents a (local) time of day, independent of any particular day
+uri	base type	xsd:anyURI	a complete URI
+uriorcurie	base type	xsd:anyURI	a URI or a CURIE

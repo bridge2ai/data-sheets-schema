@@ -1,0 +1,5 @@
+D4D Slot	RAI Mapping	Purpose
+data_annotation_platform	rai:dataAnnotationPlatform	Annotation tool used
+data_annotation_protocol	rai:dataAnnotationProtocol	Annotation methodology
+annotations_per_item	rai:annotationsPerItem	Annotation redundancy
+annotator_demographics	rai:annotatorDemographics	Annotator information

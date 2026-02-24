@@ -1,0 +1,8 @@
+Metric	Value
+RAI Namespace Prefix	rai
+RAI Namespace URI	http://mlcommons.org/croissant/RAI/
+Total RAI Class Mappings	15
+Total RAI Slot Mappings	4
+Total RAI Mappings	19
+Source Framework	MLCommons Croissant RAI
+Interoperability	Compatible with Croissant dataset metadata standard

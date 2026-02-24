@@ -1,0 +1,20 @@
+Type	D4D Element	RAI Mapping	Purpose
+Class	DatasetBias	rai:dataBiases	Documented biases in the dataset
+Class	DatasetLimitation	rai:dataLimitations	Known limitations
+Class	SensitiveElement	rai:personalSensitiveInformation	PII/sensitive data
+Class	CollectionMechanism	rai:dataCollection	How data was collected
+Class	CollectionTimeframe	rai:dataCollectionTimeframe	When data was collected
+Class	MissingDataDocumentation	rai:dataCollectionMissingData	Missing data handling
+Class	RawDataSource	rai:dataCollectionRawData	Original data sources
+Class	PreprocessingStrategy	rai:dataPreprocessingProtocol	Preprocessing steps
+Class	CleaningStrategy	rai:dataManipulationProtocol	Data cleaning
+Class	ImputationProtocol	rai:dataImputationProtocol	Missing value imputation
+Class	AnnotationAnalysis	rai:dataAnnotationAnalysis	Annotation quality
+Class	MachineAnnotationTools	rai:machineAnnotationTools	Automated labeling
+Class	FutureUseImpact	rai:dataSocialImpact	Social impact
+Class	IntendedUse	rai:dataUseCases	Intended use cases
+Class	UpdatePlan	rai:dataReleaseMaintenancePlan	Maintenance plan
+Slot	data_annotation_platform	rai:dataAnnotationPlatform	Annotation tool used
+Slot	data_annotation_protocol	rai:dataAnnotationProtocol	Annotation methodology
+Slot	annotations_per_item	rai:annotationsPerItem	Annotation redundancy
+Slot	annotator_demographics	rai:annotatorDemographics	Annotator information
