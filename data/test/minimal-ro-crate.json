@@ -1,0 +1,48 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.1/context",
+    {
+      "rai": "https://w3id.org/rai#",
+      "evi": "https://w3id.org/evi#"
+    }
+  ],
+  "@graph": [
+    {
+      "@type": "CreativeWork",
+      "@id": "ro-crate-metadata.json",
+      "conformsTo": {"@id": "https://w3id.org/ro/crate/1.1"},
+      "about": {"@id": "./"}
+    },
+    {
+      "@type": "Dataset",
+      "@id": "./",
+      "name": "Minimal Test Dataset",
+      "description": "A minimal RO-Crate for testing D4D transformation",
+      "author": [
+        {
+          "@type": "Person",
+          "name": "John Doe",
+          "email": "john.doe@example.org"
+        }
+      ],
+      "dateCreated": "2024-01-15T10:30:00Z",
+      "dateModified": "2024-02-20T14:22:00Z",
+      "version": "1.0.0",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "keywords": ["test", "minimal", "ro-crate", "d4d"],
+      "identifier": "https://doi.org/10.1234/test.dataset",
+      "url": "https://example.org/datasets/test",
+      "contentSize": "1048576",
+      "md5": "5d41402abc4b2a76b9719d911017c592",
+      "sha256": "6ca13d52ca70c883e0f0bb101e425a89e8624de51db2d2392593af6a84118090",
+      "language": "en",
+      "rai:dataCollection": "Survey",
+      "rai:dataCollectionType": "Questionnaire",
+      "rai:dataUseCases": "Research in machine learning fairness",
+      "rai:personalSensitiveInformation": "Contains demographic data",
+      "rai:dataBiases": "May have geographic bias toward urban areas",
+      "rai:dataLimitations": "Limited to English speakers only",
+      "rai:ethicalReview": "Approved by IRB #2024-001"
+    }
+  ]
+}
