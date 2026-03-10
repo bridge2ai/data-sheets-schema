@@ -874,6 +874,92 @@ The D4D agents use the `aurelian` framework:
 git submodule update --init --recursive
 ```
 
+## D4D Slim Schema
+
+A streamlined version of the full D4D schema optimized for RO-Crate transformations and minimal documentation requirements.
+
+### Overview
+
+D4D Slim is a reduced-complexity schema that includes only classes and attributes with **≥50% coverage** in RO-Crate mappings:
+
+**Statistics:**
+```
+Full D4D:    74 classes, 680 attributes
+D4D Slim:     5 classes, 237 attributes
+
+Reduction:   93% fewer classes, 65% fewer attributes
+Coverage:    40% of full schema (via RO-Crate mapping)
+```
+
+**Included Classes:**
+1. **Dataset** (87.9% coverage - 91 attributes)
+2. **DataSubset** (86.0% coverage - 93 attributes)
+3. **DatasetCollection** (83.3% coverage - 24 attributes)
+4. **Information** (82.6% coverage - 23 attributes)
+5. **Software** (50.0% coverage - 6 attributes)
+
+**Excluded:** 69 detail classes from all modules (Motivation, Composition, Collection, Preprocessing, Uses, Distribution, Maintenance, Ethics, Human, Data Governance, Variables)
+
+### Design Principles
+
+1. **Complete-Class Approach**: Include ALL attributes from classes ≥50% covered (not cherry-picked fields)
+2. **Simplification**: Complex type references → simple strings/arrays
+3. **Documentation**: All classes marked with coverage % and unmapped attributes
+4. **Progressive Enhancement**: Start simple, add detail as needed
+
+### Usage
+
+```bash
+# Schema file
+src/data_sheets_schema/schema/D4D_Slim.yaml
+
+# Generated artifacts
+project/slim/
+├── D4D_Slim.py                 # Python datamodel
+├── jsonschema/                 # JSON Schema
+└── jsonld/                     # JSON-LD context
+
+# Use with RO-Crate transformation
+python .claude/agents/scripts/rocrate_to_d4d.py \
+  --input rocrate.json \
+  --output dataset.yaml \
+  --schema src/data_sheets_schema/schema/D4D_Slim.yaml \
+  --validate
+```
+
+### When to Use
+
+**Use D4D Slim:**
+- RO-Crate transformations
+- Quick dataset documentation
+- Prototyping catalog systems
+- Minimal documentation needs
+- Flat data structures preferred
+
+**Use Full D4D:**
+- Comprehensive documentation
+- Regulatory compliance (HIPAA, GDPR)
+- Scientific repository publishing
+- Complex provenance tracking
+- Detailed ethical review documentation
+
+### Critical Gaps in D4D Slim
+
+Missing detail classes for:
+- **Workflow/Process** (11 classes): Detailed collection, preprocessing, labeling procedures
+- **Quality/Validation** (5 classes): Structured bias, limitations, anomalies documentation
+- **Ethical/Compliance** (6 classes): IRB approval, consent procedures, at-risk protections
+- **Technical Metadata** (3 classes): Format dialects, distribution specifications
+- **Distribution/Access** (7 classes): Licensing details, version access, regulatory compliance
+
+**Workaround:** Use simplified string fields for basic documentation.
+
+### Documentation
+
+- **Complete analysis:** `notes/D4D_SLIM_ANALYSIS.md` (1,505 lines)
+- **Usage guide:** `project/slim/README.md`
+- **Schema:** `src/data_sheets_schema/schema/D4D_Slim.yaml`
+
 ## RO-Crate to D4D Transformation
 
 This repository includes a skill (`d4d-rocrate`) to transform RO-Crate JSON-LD metadata (from fairscape-cli) into D4D YAML datasheets.
