@@ -173,6 +173,81 @@ The schema is modularized by D4D sections. Key architectural patterns:
 - The full schema should have NO import statements (it's fully materialized)
 - Tests verify the full schema includes all expected prefixes and has no imports
 
+## Preprocessing Pipeline Ordering
+
+The D4D schema supports expressing typical order-of-operations for data preprocessing through optional fields.
+
+### The 7 Preprocessing Steps
+
+The schema includes 7 preprocessing classes with implied ordering:
+
+1. **RawData** (step 10) - Unprocessed original data
+2. **CleaningStrategy** (step 20) - Deduplication, error removal
+3. **ImputationProtocol** (step 25) - Missing value handling
+4. **PreprocessingStrategy** (step 30) - Feature extraction, normalization
+5. **LabelingStrategy** (step 40) - Human annotation
+6. **MachineAnnotationTools** (step 45) - Automated annotation
+7. **AnnotationAnalysis** (step 50) - Quality assessment
+
+### Using Pipeline Ordering
+
+Two optional fields enable ordering documentation:
+
+**`pipeline_step`** (integer, 1-100):
+- Machine-readable ordering for programmatic sorting
+- Added to `DatasetProperty` base class
+- Typical values: 10, 20, 25, 30, 40, 45, 50
+- Gaps allow insertions (e.g., 21, 35)
+
+**`step_type`** (enum):
+- Human-readable semantic label
+- Added to each of the 7 preprocessing classes
+- Values: `raw_data`, `data_cleaning`, `data_imputation`, `data_preprocessing`, `data_annotation`, `automated_annotation`, `quality_assessment`
+
+### Example with Ordering
+
+```yaml
+# Step 1: Cleaning
+cleaning_strategies:
+  - id: clean-001
+    pipeline_step: 20
+    step_type: data_cleaning
+    description: Remove duplicate sensor readings
+    cleaning_details:
+      - "Removed 145 duplicate timestamps"
+
+# Step 2: Preprocessing (after cleaning)
+preprocessing_strategies:
+  - id: preproc-001
+    pipeline_step: 30
+    step_type: data_preprocessing
+    description: Extract MFCC features from cleaned audio
+    preprocessing_details:
+      - "40 MFCC coefficients, 25ms window"
+```
+
+### Backward Compatibility
+
+All ordering fields are **optional**. Existing D4D files without these fields remain valid:
+
+```yaml
+# Valid without ordering
+cleaning_strategies:
+  - description: Deduplication
+    cleaning_details:
+      - "Removed duplicates"
+```
+
+### Complete Documentation
+
+See **`notes/PREPROCESSING_PIPELINE.md`** for:
+- Detailed descriptions of all 7 steps
+- Complete workflow examples
+- Mermaid diagrams showing typical sequences
+- Best practices for ordering
+- Validation and sorting code examples
+- FAQs
+
 ## Testing Strategy
 
 The project has three types of tests (all run with `make test`):
@@ -966,14 +1041,26 @@ This repository includes a skill (`d4d-rocrate`) to transform RO-Crate JSON-LD m
 
 ### Overview
 
-RO-Crate transformation provides a deterministic, mapping-based approach to generate D4D datasheets from structured RO-Crate metadata. It uses an authoritative TSV mapping file with 83 fields covering 95.2% of the D4D schema.
+RO-Crate transformation provides a deterministic, mapping-based approach to generate D4D datasheets from structured RO-Crate metadata. It uses an authoritative TSV mapping file with 124 fields aligned with the official RO-Crate specification.
 
 **Key features:**
-- **High coverage**: 83/87 D4D fields mapped (95.2%)
-- **Direct mappings**: 66 fields with 1:1 RO-Crate → D4D mappings
+- **Comprehensive coverage**: 124 D4D fields mapped (v2.1, +42 fields since v1)
+- **Official spec alignment**: Matches RO-Crate reference specification
+- **Direct mappings**: 106 fields with 1:1 or transformation-based mappings
+- **FAIRSCAPE additionalProperty support**: Extracts 10+ structured metadata fields
+- **FAIRSCAPE Evidence (EVI) metadata**: 9 fields for RO-Crate statistics
+- **IRB/Ethics fields**: 8 fields for human subjects research compliance
+- **D4D-embedded fields**: 5 fields for bidirectional D4D/RO-Crate integration
+- **Multi-file merge**: Intelligent merging of parent + sub-crate RO-Crates (doubles coverage)
 - **Automatic validation**: Validates output against D4D schema
 - **Transformation reports**: Documents unmapped fields and coverage
-- **Fast**: ~2-15 seconds per transformation
+- **Provenance tracking**: Documents which sources contributed each field
+- **Fast**: ~2-15 seconds per transformation, ~5-10 seconds for multi-file merge
+
+**Coverage statistics**:
+- Single-file: 15 fields (15%) from single RO-Crate
+- Multi-file merge: 34 fields (34.3%) from 3 RO-Crates (127% improvement)
+- **Reference spec**: **74 fields (60.2%)** from comprehensive RO-Crate (v2.1, 5x improvement)
 
 ### Quick Start
 
@@ -997,21 +1084,28 @@ The transformation uses four Python scripts in `.claude/agents/scripts/`:
 
 ### Mapping Reference
 
-The transformation uses `data/ro-crate_mapping/D4D - RO-Crate - RAI Mappings.xlsx - Class Alignment.tsv` with:
+The transformation uses `data/ro-crate_mapping/D4D - RO-Crate - RAI Mappings.xlsx - Class Alignment.tsv` with **124 field mappings** (v2.1, expanded from 82 in v1):
 
-**Coverage by category:**
+**Coverage by category**:
 - Basic Metadata: 12 fields (title, description, creators, keywords, etc.)
 - Dates & Identifiers: 8 fields (created_on, doi, md5, sha256, etc.)
-- Licensing & Distribution: 6 fields (license, download_url, etc.)
+- Licensing & Distribution: 12 fields (license, download_url, citation, copyright_notice, usage_info, contact_point, etc.)
 - Data Composition: 5 fields (bytes, compression, encoding, etc.)
 - Motivation: 8 fields (purposes, tasks, addressing_gaps, etc.)
 - Collection: 7 fields (collection_mechanisms, timeframes, etc.)
 - Preprocessing: 5 fields (strategies, cleaning, labeling, etc.)
-- Ethics & Compliance: 9 fields (ethical_reviews, human_subject_research, etc.)
-- Quality & Limitations: 6 fields (known_biases, limitations, etc.)
-- Use Cases: 5 fields (intended_uses, discouraged_uses, etc.)
-- Maintenance: 5 fields (updates, maintainers, errata, etc.)
-- Miscellaneous: 7 fields (funders, publisher, status, etc.)
+- **Ethics & Compliance: 27 fields** (+8 in v2.1: irb_information, irb_protocol_id, human_subject_exemption, fda_regulated, is_deidentified, human_subjects_details, data_governance_committee_details, etc.)
+- Quality & Limitations: 8 fields (known_biases, limitations_details, bias_sources, anomalies_notes, etc.)
+- Use Cases: 7 fields (intended_uses, intended_use_details, prohibited_use_details, etc.)
+- Maintenance: 6 fields (updates, maintenance_plan_details, etc.)
+- Governance & Access: 3 fields (confidentiality_level, governance_committee, principal_investigator)
+- **EVI Metadata: 9 fields** (NEW in v2.1: dataset_count, computation_count, software_count, schema_count, total_content_size_bytes, entities_with_summary_stats, entities_with_checksums, total_entities, file_formats)
+- **D4D-embedded: 5 fields** (NEW in v2.1: addressing_gaps_notes, anomalies_notes, content_warnings_notes, informed_consent_notes, at_risk_populations_notes)
+
+**Version history**:
+- **v2.1 (24 new fields)**: IRB/Ethics (8), EVI metadata (9), D4D-embedded (5), Summary (3)
+- **v2.0 (18 new fields)**: Direct RO-Crate (8), FAIRSCAPE additionalProperty (10)
+- **v1.0 (82 fields)**: Initial implementation
 
 ### Usage Examples
 
@@ -1160,12 +1254,237 @@ python .claude/agents/scripts/rocrate_to_d4d.py \
 | **Manual Creation** | 100% | High | Slow (hours) | High |
 | **Template Fill** | Low (30-50%) | High | Fast (seconds) | High |
 
+### LinkML-Map Transformer Specifications
+
+**Declarative transformation specs** (documentation and formal specification):
+
+The repository includes LinkML-Map transformer specifications that provide a formal, declarative definition of the RO-Crate ↔ D4D transformation logic:
+
+**Files**:
+- `src/data_sheets_schema/transform/schemas/rocrate_schema.yaml` - RO-Crate LinkML schema (436 lines)
+- `src/data_sheets_schema/transform/rocrate_to_d4d.yaml` - RO-Crate → D4D transformer spec (418 lines)
+- `src/data_sheets_schema/transform/d4d_to_rocrate.yaml` - D4D → RO-Crate transformer spec (395 lines)
+
+**Purpose**:
+- Formal specification of transformation logic
+- Version-controlled declarative rules
+- Documentation of field mappings and expressions
+- Reference for maintaining Python implementation
+
+**Status**: **Documentation only** (not production-ready due to linkml-map dependency issues). The Python approach (`.claude/agents/scripts/rocrate_to_d4d.py`) is recommended for production use.
+
+**Example transformation spec**:
+```yaml
+# RO-Crate → D4D preprocessing mapping
+cleaning_strategies:
+  name: cleaning_strategies
+  description: Data cleaning from RAI field
+  expr: |
+    [{
+      "description": dataManipulationProtocol,
+      "step_type": "data_cleaning",
+      "pipeline_step": 20
+    }] if dataManipulationProtocol else []
+```
+
 ### Documentation
 
 Complete documentation in:
 - **Skill file**: `.claude/agents/d4d-rocrate.md`
-- **Mapping file**: `data/ro-crate_mapping/D4D - RO-Crate - RAI Mappings.xlsx - Class Alignment.tsv`
+- **Mapping file**: `data/ro-crate_mapping/D4D - RO-Crate - RAI Mappings.xlsx - Class Alignment.tsv` (124 fields)
+- **Reference spec**: `data/ro-crate/reference/full-ro-crate-metadata.json` - Official RO-Crate specification
 - **Test example**: `data/test/minimal-ro-crate.json`
+- **Transformation comparison**: `notes/ROCRATE_TRANSFORMATION_COMPARISON.md` - Detailed analysis of LinkML-Map vs Python approaches, coverage gaps, and recommendations
+- **V2.0 implementation**: `notes/ROCRATE_TRANSFORMATION_V2_SUMMARY.md` - additionalProperty parsing, 100 field mappings, multi-file merge (127% improvement)
+- **V2.1 specification alignment**: `notes/ROCRATE_TRANSFORMATION_V2.1_SUMMARY.md` - Official spec alignment, 124 field mappings, EVI metadata, IRB/Ethics fields, D4D-embedded fields (60.2% coverage on reference file)
+
+## RO-Crate Profile for D4D
+
+The repository includes a complete **RO-Crate profile specification** for the D4D LinkML schema, enabling standardized packaging of D4D metadata within RO-Crate.
+
+### Overview
+
+**Profile URI**: `https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0`
+
+The D4D RO-Crate Profile defines how to use RO-Crate for comprehensive dataset documentation following the Datasheets for Datasets methodology. It provides:
+
+- **Three conformance levels** (Minimal, Basic, Complete)
+- **JSON-LD context** defining all D4D vocabulary terms
+- **Example RO-Crates** demonstrating each conformance level
+- **SHACL validation shapes** for automated testing
+- **Property catalog** with 124+ mapped D4D fields
+
+### Conformance Levels
+
+| Level | Properties | Description | Use Case |
+|-------|-----------|-------------|----------|
+| **Level 1 (Minimal)** | 8 required | Basic discoverability | Quick registration, lightweight catalogs |
+| **Level 2 (Basic)** | 25 (8+17) | Responsible AI & FAIR | Research datasets, ML/AI sharing |
+| **Level 3 (Complete)** | 100+ | Comprehensive documentation | Clinical data, regulatory compliance |
+
+**Level 1 required properties**:
+1. `@type` (Dataset), 2. `name`, 3. `description`, 4. `datePublished`, 5. `license`, 6. `keywords`, 7. `author`, 8. `identifier`
+
+**Level 2 adds**: Motivation (purposes, addressing_gaps), Composition (contentSize, formats), Collection (dataCollection, timeframe), Preprocessing (cleaning, preprocessing), Ethics (IRB, human subjects, deidentified, confidentiality), Quality (limitations, biases), Uses (use cases, prohibited uses), Maintenance (publisher, maintenance plan)
+
+**Level 3 covers**: All 10 D4D sections (Motivation, Composition, Collection, Preprocessing, Uses, Distribution, Maintenance, Ethics, Quality, Governance)
+
+### Profile Components
+
+**Location**: `data/ro-crate/profiles/`
+
+| File | Purpose |
+|------|---------|
+| `d4d-profile-spec.md` | Complete profile specification (467 lines) |
+| `d4d-context.jsonld` | JSON-LD context with d4d:, rai:, evi: vocabularies |
+| `examples/d4d-rocrate-minimal.json` | Level 1 example (8 properties) |
+| `examples/d4d-rocrate-basic.json` | Level 2 example (25 properties) |
+| `examples/d4d-rocrate-complete.json` | Level 3 example (100+ properties) |
+| `validation/d4d-minimal-shape.ttl` | SHACL shape for Level 1 (strict) |
+| `validation/d4d-basic-shape.ttl` | SHACL shape for Level 2 (warnings) |
+| `validation/d4d-complete-shape.ttl` | SHACL shape for Level 3 (info) |
+| `README.md` | Usage guide with testing examples |
+| `profile.json` | Machine-readable profile descriptor |
+
+### Usage
+
+**Creating a D4D RO-Crate**:
+```json
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.2/context",
+    "https://w3id.org/bridge2ai/d4d-context/1.0"
+  ],
+  "@graph": [
+    {
+      "@type": "Dataset",
+      "@id": "./",
+      "conformsTo": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "name": "My Dataset",
+      "description": "A comprehensive dataset...",
+      "datePublished": "2026-03-11",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "keywords": ["genomics", "ML", "protein"],
+      "author": "Jane Doe",
+      "identifier": "https://doi.org/10.1234/example"
+    }
+  ]
+}
+```
+
+**Validating conformance**:
+```bash
+# Using pyshacl (Python)
+poetry run pyshacl \
+  -s data/ro-crate/profiles/validation/d4d-basic-shape.ttl \
+  -df json-ld \
+  ro-crate-metadata.json
+
+# Using shacl-cli (Node.js)
+shacl validate \
+  -d ro-crate-metadata.json \
+  -s data/ro-crate/profiles/validation/d4d-minimal-shape.ttl \
+  -f json-ld
+```
+
+### Property Value Patterns
+
+**Arrays**: Use `@container: "@set"` for multivalued properties
+```json
+{
+  "keywords": ["keyword1", "keyword2"],
+  "d4d:purposes": ["Enable research", "Support development"]
+}
+```
+
+**Person/Organization**:
+```json
+{
+  "author": {
+    "@type": "Person",
+    "name": "Jane Doe",
+    "email": "jane@example.edu"
+  }
+}
+```
+
+**PropertyValue objects** for structured data:
+```json
+{
+  "d4d:subpopulations": [
+    {
+      "@type": "PropertyValue",
+      "name": "European Ancestry",
+      "value": "60% of samples"
+    }
+  ]
+}
+```
+
+**Dates**:
+```json
+{
+  "datePublished": "2026-03-11",
+  "rai:dataCollectionTimeframe": [
+    {"startDate": "2023-01-01", "endDate": "2024-12-31"}
+  ]
+}
+```
+
+**Booleans**:
+```json
+{
+  "d4d:deidentified": true,
+  "d4d:fdaRegulated": false
+}
+```
+
+### Namespaces
+
+| Prefix | Namespace | Description |
+|--------|-----------|-------------|
+| `schema:` | `https://schema.org/` | Core metadata (name, description, author, etc.) |
+| `d4d:` | `https://w3id.org/bridge2ai/data-sheets-schema/` | D4D-specific (purposes, tasks, splits, etc.) |
+| `rai:` | `http://mlcommons.org/croissant/RAI/` | Responsible AI (ML Commons Croissant) |
+| `evi:` | `https://w3id.org/EVI#` | FAIRSCAPE Evidence metadata |
+
+### Bidirectional Transformation
+
+The profile enables seamless bidirectional transformation between RO-Crate and D4D:
+
+**RO-Crate → D4D YAML**:
+```bash
+python .claude/agents/scripts/rocrate_to_d4d.py \
+  --input ro-crate-metadata.json \
+  --output dataset.yaml \
+  --validate
+```
+
+**D4D YAML → RO-Crate**:
+```bash
+python .claude/agents/scripts/d4d_to_rocrate.py \
+  --input dataset.yaml \
+  --output ro-crate-metadata.json \
+  --validate
+```
+
+### When to Use Each Level
+
+**Level 1 (Minimal)**: Dataset catalogs, quick registration, minimum viable documentation
+
+**Level 2 (Basic)**: Research data repositories, ML dataset sharing, FAIR compliance, responsible AI documentation
+
+**Level 3 (Complete)**: Clinical/biomedical datasets, regulatory compliance (HIPAA, GDPR), high-impact scientific publications, commercial dataset releases, comprehensive provenance tracking
+
+### Documentation
+
+- **Profile specification**: `data/ro-crate/profiles/d4d-profile-spec.md`
+- **Usage guide**: `data/ro-crate/profiles/README.md`
+- **JSON-LD context**: `data/ro-crate/profiles/d4d-context.jsonld`
+- **Examples**: `data/ro-crate/profiles/examples/`
+- **Validation**: `data/ro-crate/profiles/validation/`
 
 ## D4D Assistant Instructions (GitHub Actions)
 
@@ -1509,6 +1828,49 @@ Complete methodology, rubric details, and findings documented in:
 - `notes/D4D_EVALUATION.md` - Full evaluation methodology and results
 - `data/rubric/rubric10.txt` - 10-element hierarchical rubric specification
 - `data/rubric/rubric20.txt` - 20-question detailed rubric specification
+
+## ECO Evidence Type Classification
+
+The schema integrates the Evidence & Conclusion Ontology (ECO) to classify annotation evidence types.
+
+### Usage Examples
+
+**Human annotation:**
+```yaml
+labeling_strategies:
+  - description: "Expert manual annotation"
+    evidence_type: manual_curation
+    data_annotation_platform: "Label Studio"
+```
+
+**Machine annotation:**
+```yaml
+machine_annotation_tools:
+  - description: "NLP entity extraction"
+    evidence_type: automatic_annotation
+    tools: ["spaCy 3.5.0"]
+```
+
+**Custom ECO code:**
+```yaml
+machine_annotation_tools:
+  - description: "Phylogenetic inference"
+    eco_evidence_code: "ECO:0000080"
+```
+
+### Evidence Type Values
+
+| Value | ECO Term | Use Case |
+|-------|----------|----------|
+| `manual_curation` | ECO:0000317 | Crowdsourcing, expert labeling |
+| `automatic_annotation` | ECO:0000501 | NLP pipelines, rule-based systems |
+| `computational_prediction` | ECO:0000203 | ML models, statistical classifiers |
+| `semi_automated` | ECO:0000305 | Human-verified automation |
+| `sequence_similarity` | ECO:0000250 | Bioinformatics similarity transfer |
+
+### Resources
+- ECO BioPortal: https://bioportal.bioontology.org/ontologies/ECO
+- ECO Documentation: http://evidenceontology.org/
 
 ## D4D LLM-based Evaluation (Quality Assessment)
 

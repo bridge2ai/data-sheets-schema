@@ -1,0 +1,225 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix schema: <https://schema.org/> .
+@prefix d4d: <https://w3id.org/bridge2ai/data-sheets-schema/> .
+@prefix rai: <http://mlcommons.org/croissant/RAI/> .
+@prefix evi: <https://w3id.org/EVI#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# D4D RO-Crate Profile - Level 2 (Basic) Validation Shape
+# Validates conformance to basic requirements of the D4D profile
+# 8 required + 17 recommended properties (25 total)
+
+d4d:BasicDatasetShape
+  a sh:NodeShape ;
+  sh:targetClass schema:Dataset ;
+  sh:name "D4D Basic Dataset Shape" ;
+  sh:description "Validates that a Dataset conforms to D4D RO-Crate Profile Level 2 (Basic)" ;
+
+  # ============================================
+  # REQUIRED PROPERTIES (8) - from Minimal level
+  # ============================================
+
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue schema:Dataset ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have @type 'Dataset'" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:minLength 1 ;
+    sh:message "Dataset must have a 'name'" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:description ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:minLength 5 ;
+    sh:message "Dataset must have 'description' (minimum 5 characters)" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:datePublished ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have 'datePublished'" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:license ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have 'license'" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:keywords ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have 'keywords'" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:author ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have 'author'" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:identifier ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have 'identifier'" ;
+  ] ;
+
+  # ============================================
+  # RECOMMENDED PROPERTIES (17)
+  # ============================================
+
+  # Motivation & Purpose
+  sh:property [
+    sh:path d4d:purposes ;
+    sh:minCount 1 ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'd4d:purposes' (why dataset was created)" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:addressingGaps ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'd4d:addressingGaps' (gaps addressed by creation)" ;
+  ] ;
+
+  # Composition
+  sh:property [
+    sh:path schema:contentSize ;
+    sh:or (
+      [ sh:datatype xsd:string ]
+      [ sh:datatype xsd:integer ]
+    ) ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'contentSize' (dataset size)" ;
+  ] ;
+
+  sh:property [
+    sh:path evi:formats ;
+    sh:minCount 1 ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'evi:formats' (file formats included)" ;
+  ] ;
+
+  # Collection
+  sh:property [
+    sh:path rai:dataCollection ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'rai:dataCollection' (collection methodology)" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataCollectionTimeframe ;
+    sh:minCount 1 ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'rai:dataCollectionTimeframe' (collection time period)" ;
+  ] ;
+
+  # Preprocessing
+  sh:property [
+    sh:path rai:dataManipulationProtocol ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'rai:dataManipulationProtocol' (data cleaning)" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataPreprocessingProtocol ;
+    sh:minCount 1 ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'rai:dataPreprocessingProtocol' (preprocessing steps)" ;
+  ] ;
+
+  # Ethics & Compliance
+  sh:property [
+    sh:path d4d:ethicalReview ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'ethicalReview' (ethical review information)" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:humanSubjectResearch ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'humanSubjectResearch' (human subjects details)" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:deidentified ;
+    sh:datatype xsd:boolean ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'deidentified' (de-identification status)" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:confidentialityLevel ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'confidentialityLevel' (data classification)" ;
+  ] ;
+
+  # Quality & Limitations
+  sh:property [
+    sh:path rai:dataLimitations ;
+    sh:minCount 1 ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'rai:dataLimitations' (known limitations)" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataBiases ;
+    sh:minCount 1 ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'rai:dataBiases' (known biases)" ;
+  ] ;
+
+  # Uses
+  sh:property [
+    sh:path rai:dataUseCases ;
+    sh:minCount 1 ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'rai:dataUseCases' (intended use cases)" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:prohibitedUses ;
+    sh:minCount 1 ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'prohibitedUses' (prohibited uses)" ;
+  ] ;
+
+  # Distribution & Maintenance
+  sh:property [
+    sh:path schema:publisher ;
+    sh:or (
+      [ sh:datatype xsd:string ]
+      [ sh:class schema:Organization ]
+    ) ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'publisher' (publisher/host)" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataReleaseMaintenancePlan ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should have 'rai:dataReleaseMaintenancePlan' (maintenance plan)" ;
+  ] ;
+
+  # Conformance declaration
+  sh:property [
+    sh:path schema:conformsTo ;
+    sh:hasValue <https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0> ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should declare conformance to D4D RO-Crate Profile 1.0" ;
+  ] .

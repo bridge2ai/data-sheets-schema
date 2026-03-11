@@ -1,0 +1,42 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.2/context",
+    "https://w3id.org/bridge2ai/d4d-context/1.0"
+  ],
+  "@graph": [
+    {
+      "@type": "CreativeWork",
+      "@id": "ro-crate-metadata.json",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      },
+      "about": {
+        "@id": "./"
+      },
+      "description": "RO-Crate metadata descriptor for D4D profile conformance Level 1 (Minimal)"
+    },
+    {
+      "@type": [
+        "Dataset",
+        "https://w3id.org/EVI#ROCrate"
+      ],
+      "@id": "./",
+      "conformsTo": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "name": "Example Genomic Variant Dataset",
+      "description": "A curated dataset of genomic variants from whole-genome sequencing studies, annotated with clinical significance and population frequencies. This dataset contains variant calls from 1,000 participants in cardiovascular disease research.",
+      "datePublished": "2026-01-15",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "keywords": [
+        "genomics",
+        "variants",
+        "cardiovascular disease",
+        "whole-genome sequencing",
+        "clinical annotation"
+      ],
+      "author": "Jane Smith; John Doe; Maria Garcia",
+      "identifier": "https://doi.org/10.1234/example-genomic-variants-2026"
+    }
+  ]
+}

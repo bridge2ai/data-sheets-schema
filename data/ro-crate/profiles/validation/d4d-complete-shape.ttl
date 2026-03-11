@@ -1,0 +1,666 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix schema: <https://schema.org/> .
+@prefix d4d: <https://w3id.org/bridge2ai/data-sheets-schema/> .
+@prefix rai: <http://mlcommons.org/croissant/RAI/> .
+@prefix evi: <https://w3id.org/EVI#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# D4D RO-Crate Profile - Level 3 (Complete) Validation Shape
+# Validates conformance to complete D4D documentation requirements
+# All 100+ D4D properties across 10 sections
+# Uses sh:severity sh:Info for comprehensive coverage checks
+
+d4d:CompleteDatasetShape
+  a sh:NodeShape ;
+  sh:targetClass schema:Dataset ;
+  sh:name "D4D Complete Dataset Shape" ;
+  sh:description "Validates that a Dataset conforms to D4D RO-Crate Profile Level 3 (Complete)" ;
+
+  # ============================================
+  # SECTION 1: MOTIVATION (5 properties)
+  # ============================================
+
+  sh:property [
+    sh:path d4d:purposes ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:purposes' - why dataset was created" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:addressingGaps ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:addressingGaps' - gaps addressed" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:tasks ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:tasks' - specific tasks enabled" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:funder ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'funder' - funding sources" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:sponsors ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:sponsors' - sponsoring entities" ;
+  ] ;
+
+  # ============================================
+  # SECTION 2: COMPOSITION (12 properties)
+  # ============================================
+
+  sh:property [
+    sh:path d4d:instances ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:instances' - instance descriptions" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:instanceCount ;
+    sh:datatype xsd:integer ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:instanceCount' - number of instances" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:contentSize ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'contentSize' - dataset size" ;
+  ] ;
+
+  sh:property [
+    sh:path evi:totalContentSizeBytes ;
+    sh:datatype xsd:integer ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'evi:totalContentSizeBytes' - size in bytes" ;
+  ] ;
+
+  sh:property [
+    sh:path evi:formats ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'evi:formats' - file formats" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:encodingFormat ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'encodingFormat' - primary format" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:subpopulations ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:subpopulations' - subpopulations present" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:missingInfo ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:missingInfo' - missing information" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:relationshipsBetweenInstances ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:relationshipsBetweenInstances' - relationships" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:splits ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:splits' - train/test splits" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:errorSources ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:errorSources' - potential error sources" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:confidentialElements ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:confidentialElements' - confidential data" ;
+  ] ;
+
+  # ============================================
+  # SECTION 3: COLLECTION (7 properties)
+  # ============================================
+
+  sh:property [
+    sh:path rai:dataCollection ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataCollection' - collection methodology" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataCollectionType ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataCollectionType' - collection types" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataCollectionTimeframe ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataCollectionTimeframe' - collection dates" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:samplingStrategy ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:samplingStrategy' - sampling methodology" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:dataCollectors ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:dataCollectors' - who collected data" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataCollectionMissingData ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataCollectionMissingData' - missing data docs" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataCollectionRawData ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataCollectionRawData' - raw data sources" ;
+  ] ;
+
+  # ============================================
+  # SECTION 4: PREPROCESSING (10 properties)
+  # ============================================
+
+  sh:property [
+    sh:path rai:dataManipulationProtocol ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataManipulationProtocol' - data cleaning" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataImputationProtocol ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataImputationProtocol' - imputation" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataPreprocessingProtocol ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataPreprocessingProtocol' - preprocessing" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataAnnotationProtocol ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataAnnotationProtocol' - annotation method" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataAnnotationPlatform ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataAnnotationPlatform' - annotation platform" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:annotationsPerItem ;
+    sh:datatype xsd:integer ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:annotationsPerItem' - annotations count" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:machineAnnotationTools ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:machineAnnotationTools' - automated tools" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataAnnotationAnalysis ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataAnnotationAnalysis' - quality analysis" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:rawDataSaved ;
+    sh:datatype xsd:boolean ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:rawDataSaved' - raw data preserved" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:rawDataLocation ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:rawDataLocation' - raw data access URL" ;
+  ] ;
+
+  # ============================================
+  # SECTION 5: USES (7 properties)
+  # ============================================
+
+  sh:property [
+    sh:path rai:dataUseCases ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataUseCases' - intended use cases" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:existingUses ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:existingUses' - already used for" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:otherUses ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:otherUses' - other potential uses" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:discouragedUses ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:discouragedUses' - discouraged uses" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:prohibitedUses ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'prohibitedUses' - prohibited uses" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:useRepository ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:useRepository' - use case repository" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataSocialImpact ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataSocialImpact' - social impact" ;
+  ] ;
+
+  # ============================================
+  # SECTION 6: DISTRIBUTION (11 properties)
+  # ============================================
+
+  sh:property [
+    sh:path schema:publisher ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'publisher' - publisher/host" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:contentUrl ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'contentUrl' - download URL" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:conditionsOfAccess ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'conditionsOfAccess' - access conditions" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:usageInfo ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'usageInfo' - usage guidelines" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:copyrightNotice ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'copyrightNotice' - copyright info" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:citation ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'citation' - recommended citation" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:distributionFormat ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:distributionFormat' - distribution formats" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:distributionDates ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:distributionDates' - distribution date" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:ipRestrictions ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:ipRestrictions' - IP restrictions" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:exportControls ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:exportControls' - export controls" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:retentionLimit ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:retentionLimit' - retention limits" ;
+  ] ;
+
+  # ============================================
+  # SECTION 7: MAINTENANCE (6 properties)
+  # ============================================
+
+  sh:property [
+    sh:path schema:version ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'version' - dataset version" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataReleaseMaintenancePlan ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataReleaseMaintenancePlan' - maintenance plan" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:maintainer ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:maintainer' - maintainers" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:errataURL ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:errataURL' - errata location" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:dateModified ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'dateModified' - last modified date" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:versionAccess ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:versionAccess' - version access policy" ;
+  ] ;
+
+  # ============================================
+  # SECTION 8: ETHICAL CONSIDERATIONS (12 properties)
+  # ============================================
+
+  sh:property [
+    sh:path d4d:ethicalReview ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'ethicalReview' - ethical review details" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:irb ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'irb' - IRB information" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:irbProtocolId ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'irbProtocolId' - IRB protocol ID" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:humanSubjectResearch ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'humanSubjectResearch' - human subjects details" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:humanSubjectExemption ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'humanSubjectExemption' - exemption details" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:informedConsent ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:informedConsent' - consent procedures" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:atRiskPopulations ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:atRiskPopulations' - at-risk populations" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:personalSensitiveInformation ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:personalSensitiveInformation' - PII/sensitive data" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:deidentified ;
+    sh:datatype xsd:boolean ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'deidentified' - de-identification status" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:fdaRegulated ;
+    sh:datatype xsd:boolean ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'fdaRegulated' - FDA regulation status" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:confidentialityLevel ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'confidentialityLevel' - confidentiality level" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:dataProtectionImpactAssessment ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:dataProtectionImpactAssessment' - DPIA details" ;
+  ] ;
+
+  # ============================================
+  # SECTION 9: QUALITY & LIMITATIONS (6 properties)
+  # ============================================
+
+  sh:property [
+    sh:path rai:dataBiases ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataBiases' - known biases" ;
+  ] ;
+
+  sh:property [
+    sh:path rai:dataLimitations ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'rai:dataLimitations' - known limitations" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:dataAnomalies ;
+    sh:minCount 1 ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:dataAnomalies' - data anomalies" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:contentWarning ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:contentWarning' - content warnings" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:validationAnalysis ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'd4d:validationAnalysis' - validation procedures" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:hasSummaryStatistics ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'hasSummaryStatistics' - summary statistics" ;
+  ] ;
+
+  # ============================================
+  # SECTION 10: GOVERNANCE & PROVENANCE (10 properties)
+  # ============================================
+
+  sh:property [
+    sh:path d4d:dataGovernanceCommittee ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'dataGovernanceCommittee' - governance committee" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:principalInvestigator ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'principalInvestigator' - PI" ;
+  ] ;
+
+  sh:property [
+    sh:path d4d:contactEmail ;
+    sh:datatype xsd:string ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'contactEmail' - contact email" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:isPartOf ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'isPartOf' - parent datasets" ;
+  ] ;
+
+  sh:property [
+    sh:path schema:hasPart ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'hasPart' - sub-datasets" ;
+  ] ;
+
+  # FAIRSCAPE Evidence Metadata (optional)
+  sh:property [
+    sh:path evi:datasetCount ;
+    sh:datatype xsd:integer ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'evi:datasetCount' - number of datasets" ;
+  ] ;
+
+  sh:property [
+    sh:path evi:computationCount ;
+    sh:datatype xsd:integer ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'evi:computationCount' - number of computations" ;
+  ] ;
+
+  sh:property [
+    sh:path evi:softwareCount ;
+    sh:datatype xsd:integer ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'evi:softwareCount' - number of software entities" ;
+  ] ;
+
+  sh:property [
+    sh:path evi:totalEntities ;
+    sh:datatype xsd:integer ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'evi:totalEntities' - total entities" ;
+  ] ;
+
+  sh:property [
+    sh:path evi:entitiesWithSummaryStats ;
+    sh:datatype xsd:integer ;
+    sh:severity sh:Info ;
+    sh:message "Complete D4D: 'evi:entitiesWithSummaryStats' - entities with statistics" ;
+  ] .
