@@ -1,0 +1,109 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix schema: <https://schema.org/> .
+@prefix d4d: <https://w3id.org/bridge2ai/data-sheets-schema/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# D4D RO-Crate Profile - Level 1 (Minimal) Validation Shape
+# Validates conformance to the minimal requirements of the D4D profile
+# 8 required properties for basic dataset documentation
+
+d4d:MinimalDatasetShape
+  a sh:NodeShape ;
+  sh:targetClass schema:Dataset ;
+  sh:name "D4D Minimal Dataset Shape" ;
+  sh:description "Validates that a Dataset conforms to D4D RO-Crate Profile Level 1 (Minimal)" ;
+
+  # Required: Dataset must include Dataset type
+  sh:property [
+    sh:path rdf:type ;
+    sh:hasValue schema:Dataset ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have @type 'Dataset'" ;
+  ] ;
+
+  # Required: name (dataset title)
+  sh:property [
+    sh:path schema:name ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:minLength 1 ;
+    sh:message "Dataset must have a 'name' (dataset title)" ;
+  ] ;
+
+  # Required: description (minimum 5 characters)
+  sh:property [
+    sh:path schema:description ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:minLength 5 ;
+    sh:message "Dataset must have a 'description' of at least 5 characters" ;
+  ] ;
+
+  # Required: datePublished
+  sh:property [
+    sh:path schema:datePublished ;
+    sh:or (
+      [ sh:datatype xsd:date ]
+      [ sh:datatype xsd:dateTime ]
+      [ sh:datatype xsd:string ]
+    ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Dataset must have 'datePublished' (publication or release date)" ;
+  ] ;
+
+  # Required: license
+  sh:property [
+    sh:path schema:license ;
+    sh:or (
+      [ sh:nodeKind sh:IRI ]
+      [ sh:datatype xsd:string ]
+    ) ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have 'license' (URL or text)" ;
+  ] ;
+
+  # Required: keywords (minimum 3)
+  sh:property [
+    sh:path schema:keywords ;
+    sh:or (
+      [ sh:datatype xsd:string ]  # Single string with comma-separated keywords
+      [ sh:nodeKind sh:Literal ]  # Array of strings
+    ) ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have 'keywords' (minimum 3 keywords)" ;
+  ] ;
+
+  # Required: author (dataset creator)
+  sh:property [
+    sh:path schema:author ;
+    sh:or (
+      [ sh:datatype xsd:string ]
+      [ sh:class schema:Person ]
+      [ sh:class schema:Organization ]
+    ) ;
+    sh:minCount 1 ;
+    sh:message "Dataset must have 'author' (creator as text, Person, or Organization)" ;
+  ] ;
+
+  # Required: identifier (DOI, ARK, or other persistent ID)
+  sh:property [
+    sh:path schema:identifier ;
+    sh:or (
+      [ sh:nodeKind sh:IRI ]
+      [ sh:datatype xsd:string ]
+    ) ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Dataset must have 'identifier' (persistent identifier like DOI or ARK)" ;
+  ] ;
+
+  # Recommended: conformsTo should include D4D profile URI
+  sh:property [
+    sh:path schema:conformsTo ;
+    sh:hasValue <https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0> ;
+    sh:severity sh:Warning ;
+    sh:message "Dataset should declare conformance to D4D RO-Crate Profile 1.0" ;
+  ] .

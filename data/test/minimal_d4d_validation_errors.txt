@@ -1,0 +1,17 @@
+[ERROR] [data/test/minimal_d4d.yaml/0] 'Research in machine learning fairness' is not of type 'array', 'null' in /tasks
+[ERROR] [data/test/minimal_d4d.yaml/0] 'John Doe' is not of type 'object' in /creators/0
+[ERROR] [data/test/minimal_d4d.yaml/0] 'Contains demographic data' is not of type 'array', 'null' in /confidential_elements
+[ERROR] [data/test/minimal_d4d.yaml/0] 'Contains demographic data' is not of type 'array', 'null' in /sensitive_elements
+[ERROR] [data/test/minimal_d4d.yaml/0] 'Survey' is not of type 'array', 'null' in /acquisition_methods
+[ERROR] [data/test/minimal_d4d.yaml/0] 'Survey' is not of type 'array', 'null' in /collection_mechanisms
+[ERROR] [data/test/minimal_d4d.yaml/0] 'Research in machine learning fairness' is not of type 'array', 'null' in /existing_uses
+[ERROR] [data/test/minimal_d4d.yaml/0] 'Research in machine learning fairness' is not of type 'array', 'null' in /other_tasks
+[ERROR] [data/test/minimal_d4d.yaml/0] 'Research in machine learning fairness' is not of type 'array', 'null' in /intended_uses
+[ERROR] [data/test/minimal_d4d.yaml/0] '2024-01-15' is not of type 'array', 'null' in /distribution_dates
+[ERROR] [data/test/minimal_d4d.yaml/0] 'https://creativecommons.org/licenses/by/4.0/' is not valid under any of the given schemas in /license_and_use_terms
+[ERROR] [data/test/minimal_d4d.yaml/0] 'https://creativecommons.org/licenses/by/4.0/' is not valid under any of the given schemas in /ip_restrictions
+[ERROR] [data/test/minimal_d4d.yaml/0] '1.0.0' is not valid under any of the given schemas in /version_access
+[ERROR] [data/test/minimal_d4d.yaml/0] 'https://creativecommons.org/licenses/by/4.0/' is not valid under any of the given schemas in /extension_mechanism
+[ERROR] [data/test/minimal_d4d.yaml/0] '2024-01-15' is not a 'date-time' in /created_on
+[ERROR] [data/test/minimal_d4d.yaml/0] '2024-01-15' is not a 'date-time' in /issued
+[ERROR] [data/test/minimal_d4d.yaml/0] 'id' is a required property in /

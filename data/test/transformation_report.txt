@@ -1,0 +1,29 @@
+================================================================================
+RO-Crate to D4D Transformation Report
+Generated: 2026-02-24T15:56:00.560439
+================================================================================
+
+TRANSFORMATION SUMMARY
+--------------------------------------------------------------------------------
+Total D4D fields in mapping: 81
+Fields populated from RO-Crate: 28
+Coverage: 28/81 (34.6%)
+
+UNMAPPED RO-CRATE PROPERTIES
+--------------------------------------------------------------------------------
+Found 4 properties in RO-Crate with no D4D mapping:
+
+  • dateModified
+    Sample value: 2024-02-20T14:22:00Z
+
+  • rai:dataBiases
+    Sample value: May have geographic bias toward urban areas
+
+  • rai:dataLimitations
+    Sample value: Limited to English speakers only
+
+  • rai:ethicalReview
+    Sample value: Approved by IRB #2024-001
+
+
+These properties could be added to the mapping TSV for future iterations to improve D4D coverage.

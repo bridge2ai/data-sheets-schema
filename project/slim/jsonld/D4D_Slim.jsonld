@@ -1,0 +1,2188 @@
+{
+  "name": "data-sheets-schema-slim",
+  "description": "A slimmed-down version of the Datasheets for Datasets (D4D) schema optimized\nfor RO-Crate transformations. This schema includes only classes and attributes\nwith \u226550% coverage in RO-Crate mappings.\n\nCoverage: 40% of full D4D schema (272/680 attributes)\nIncluded classes: 5 (Dataset, DataSubset, DatasetCollection, Information, Software)\nExcluded classes: 69 (all module-specific detail classes)\n\nThis slim schema is suitable for:\n- RO-Crate JSON-LD to D4D YAML transformations\n- Minimal dataset documentation requirements\n- Progressive enhancement (add more fields as RO-Crate coverage grows)\n\nSee full D4D schema at: https://w3id.org/bridge2ai/data-sheets-schema",
+  "title": "D4D Slim Schema - RO-Crate Compatible Subset",
+  "see_also": [
+    "https://bridge2ai.github.io/data-sheets-schema",
+    "https://www.researchobject.org/ro-crate/"
+  ],
+  "id": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+  "imports": [
+    "linkml:types"
+  ],
+  "license": "MIT",
+  "prefixes": [
+    {
+      "prefix_prefix": "linkml",
+      "prefix_reference": "https://w3id.org/linkml/"
+    },
+    {
+      "prefix_prefix": "d4dslim",
+      "prefix_reference": "https://w3id.org/bridge2ai/data-sheets-schema/slim#"
+    },
+    {
+      "prefix_prefix": "dcat",
+      "prefix_reference": "http://www.w3.org/ns/dcat#"
+    },
+    {
+      "prefix_prefix": "dcterms",
+      "prefix_reference": "http://purl.org/dc/terms/"
+    },
+    {
+      "prefix_prefix": "schema",
+      "prefix_reference": "http://schema.org/"
+    },
+    {
+      "prefix_prefix": "prov",
+      "prefix_reference": "http://www.w3.org/ns/prov#"
+    }
+  ],
+  "default_prefix": "d4dslim",
+  "default_range": "string",
+  "types": [
+    {
+      "name": "string",
+      "definition_uri": "https://w3id.org/linkml/String",
+      "description": "A character string",
+      "notes": [
+        "In RDF serializations, a slot with range of string is treated as a literal or type xsd:string.   If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"string\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "exact_mappings": [
+        "schema:Text"
+      ],
+      "base": "str",
+      "uri": "http://www.w3.org/2001/XMLSchema#string",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "integer",
+      "definition_uri": "https://w3id.org/linkml/Integer",
+      "description": "An integer",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"integer\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "exact_mappings": [
+        "schema:Integer"
+      ],
+      "base": "int",
+      "uri": "http://www.w3.org/2001/XMLSchema#integer",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "boolean",
+      "definition_uri": "https://w3id.org/linkml/Boolean",
+      "description": "A binary (true or false) value",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"boolean\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "exact_mappings": [
+        "schema:Boolean"
+      ],
+      "base": "Bool",
+      "uri": "http://www.w3.org/2001/XMLSchema#boolean",
+      "repr": "bool",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "float",
+      "definition_uri": "https://w3id.org/linkml/Float",
+      "description": "A real number that conforms to the xsd:float specification",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"float\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "exact_mappings": [
+        "schema:Float"
+      ],
+      "base": "float",
+      "uri": "http://www.w3.org/2001/XMLSchema#float",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "double",
+      "definition_uri": "https://w3id.org/linkml/Double",
+      "description": "A real number that conforms to the xsd:double specification",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"double\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "close_mappings": [
+        "schema:Float"
+      ],
+      "base": "float",
+      "uri": "http://www.w3.org/2001/XMLSchema#double",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "decimal",
+      "definition_uri": "https://w3id.org/linkml/Decimal",
+      "description": "A real number with arbitrary precision that conforms to the xsd:decimal specification",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"decimal\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "broad_mappings": [
+        "schema:Number"
+      ],
+      "base": "Decimal",
+      "uri": "http://www.w3.org/2001/XMLSchema#decimal",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "time",
+      "definition_uri": "https://w3id.org/linkml/Time",
+      "description": "A time object represents a (local) time of day, independent of any particular day",
+      "notes": [
+        "URI is dateTime because OWL reasoners do not work with straight date or time",
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"time\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "exact_mappings": [
+        "schema:Time"
+      ],
+      "base": "XSDTime",
+      "uri": "http://www.w3.org/2001/XMLSchema#time",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "date",
+      "definition_uri": "https://w3id.org/linkml/Date",
+      "description": "a date (year, month and day) in an idealized calendar",
+      "notes": [
+        "URI is dateTime because OWL reasoners don't work with straight date or time",
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"date\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "exact_mappings": [
+        "schema:Date"
+      ],
+      "base": "XSDDate",
+      "uri": "http://www.w3.org/2001/XMLSchema#date",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "datetime",
+      "definition_uri": "https://w3id.org/linkml/Datetime",
+      "description": "The combination of a date and time",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"datetime\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "exact_mappings": [
+        "schema:DateTime"
+      ],
+      "base": "XSDDateTime",
+      "uri": "http://www.w3.org/2001/XMLSchema#dateTime",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "date_or_datetime",
+      "definition_uri": "https://w3id.org/linkml/DateOrDatetime",
+      "description": "Either a date or a datetime",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"date_or_datetime\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "str",
+      "uri": "https://w3id.org/linkml/DateOrDatetime",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "uriorcurie",
+      "definition_uri": "https://w3id.org/linkml/Uriorcurie",
+      "description": "a URI or a CURIE",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"uriorcurie\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "URIorCURIE",
+      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "curie",
+      "definition_uri": "https://w3id.org/linkml/Curie",
+      "conforms_to": "https://www.w3.org/TR/curie/",
+      "description": "a compact URI",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"curie\"."
+      ],
+      "comments": [
+        "in RDF serializations this MUST be expanded to a URI",
+        "in non-RDF serializations MAY be serialized as the compact representation"
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "Curie",
+      "uri": "http://www.w3.org/2001/XMLSchema#string",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "uri",
+      "definition_uri": "https://w3id.org/linkml/Uri",
+      "conforms_to": "https://www.ietf.org/rfc/rfc3987.txt",
+      "description": "a complete URI",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"uri\"."
+      ],
+      "comments": [
+        "in RDF serializations a slot with range of uri is treated as a literal or type xsd:anyURI unless it is an identifier or a reference to an identifier, in which case it is translated directly to a node"
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "close_mappings": [
+        "schema:URL"
+      ],
+      "base": "URI",
+      "uri": "http://www.w3.org/2001/XMLSchema#anyURI",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "ncname",
+      "definition_uri": "https://w3id.org/linkml/Ncname",
+      "description": "Prefix part of CURIE",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"ncname\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "NCName",
+      "uri": "http://www.w3.org/2001/XMLSchema#string",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "objectidentifier",
+      "definition_uri": "https://w3id.org/linkml/Objectidentifier",
+      "description": "A URI or CURIE that represents an object in the model.",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"objectidentifier\"."
+      ],
+      "comments": [
+        "Used for inheritance and type checking"
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "ElementIdentifier",
+      "uri": "http://www.w3.org/ns/shex#iri",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "nodeidentifier",
+      "definition_uri": "https://w3id.org/linkml/Nodeidentifier",
+      "description": "A URI, CURIE or BNODE that represents a node in a model.",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"nodeidentifier\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "NodeIdentifier",
+      "uri": "http://www.w3.org/ns/shex#nonLiteral",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "jsonpointer",
+      "definition_uri": "https://w3id.org/linkml/Jsonpointer",
+      "conforms_to": "https://datatracker.ietf.org/doc/html/rfc6901",
+      "description": "A string encoding a JSON Pointer. The value of the string MUST conform to JSON Point syntax and SHOULD dereference to a valid object within the current instance document when encoded in tree form.",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"jsonpointer\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "str",
+      "uri": "http://www.w3.org/2001/XMLSchema#string",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "jsonpath",
+      "definition_uri": "https://w3id.org/linkml/Jsonpath",
+      "conforms_to": "https://www.ietf.org/archive/id/draft-goessner-dispatch-jsonpath-00.html",
+      "description": "A string encoding a JSON Path. The value of the string MUST conform to JSON Point syntax and SHOULD dereference to zero or more valid objects within the current instance document when encoded in tree form.",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"jsonpath\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "str",
+      "uri": "http://www.w3.org/2001/XMLSchema#string",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    },
+    {
+      "name": "sparqlpath",
+      "definition_uri": "https://w3id.org/linkml/Sparqlpath",
+      "conforms_to": "https://www.w3.org/TR/sparql11-query/#propertypaths",
+      "description": "A string encoding a SPARQL Property Path. The value of the string MUST conform to SPARQL syntax and SHOULD dereference to zero or more valid objects within the current instance document when encoded as RDF.",
+      "notes": [
+        "If you are authoring schemas in LinkML YAML, the type is referenced with the lower case \"sparqlpath\"."
+      ],
+      "from_schema": "https://w3id.org/linkml/types",
+      "imported_from": "linkml:types",
+      "base": "str",
+      "uri": "http://www.w3.org/2001/XMLSchema#string",
+      "repr": "str",
+      "@type": "TypeDefinition"
+    }
+  ],
+  "enums": [
+    {
+      "name": "CompressionEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#CompressionEnum",
+      "description": "Compression format enumerations",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "permissible_values": [
+        {
+          "text": "GZIP",
+          "description": "gzip compression (.gz)"
+        },
+        {
+          "text": "TAR",
+          "description": "tar archive (.tar)"
+        },
+        {
+          "text": "ZIP",
+          "description": "zip compression (.zip)"
+        },
+        {
+          "text": "BZIP2",
+          "description": "bzip2 compression (.bz2)"
+        },
+        {
+          "text": "XZ",
+          "description": "xz compression (.xz)"
+        },
+        {
+          "text": "ZSTD",
+          "description": "Zstandard compression (.zst)"
+        }
+      ]
+    }
+  ],
+  "slots": [
+    {
+      "name": "id",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#id",
+      "description": "Unique identifier for the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#id",
+      "identifier": true,
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Software",
+        "Dataset"
+      ],
+      "range": "uriorcurie",
+      "required": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "name",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#name",
+      "description": "Short name or label for the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#name",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Software",
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "title",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#title",
+      "description": "Official title of the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://purl.org/dc/terms/title"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/title",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "description",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#description",
+      "description": "Detailed description of the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://purl.org/dc/terms/description"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/description",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Software",
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "keywords",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#keywords",
+      "description": "Keywords or tags describing the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/keywords"
+      ],
+      "slot_uri": "http://schema.org/keywords",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "language",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#language",
+      "description": "Language in which the information is expressed",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/inLanguage"
+      ],
+      "slot_uri": "http://schema.org/inLanguage",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "citation",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#citation",
+      "description": "Bibliographic citation for the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#citation",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "doi",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#doi",
+      "description": "Digital Object Identifier",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/identifier"
+      ],
+      "slot_uri": "http://schema.org/identifier",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "uriorcurie",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "page",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#page",
+      "description": "Landing page or documentation URL",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/url"
+      ],
+      "slot_uri": "http://schema.org/url",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "uri",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "download_url",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#download_url",
+      "description": "Direct download URL for the data",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#downloadURL"
+      ],
+      "slot_uri": "http://www.w3.org/ns/dcat#downloadURL",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "uri",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "url",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#url",
+      "description": "URL for the resource (used in Software)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/url"
+      ],
+      "slot_uri": "http://schema.org/url",
+      "owner": "Software",
+      "domain_of": [
+        "Software"
+      ],
+      "range": "uri",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "license",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#license",
+      "description": "License under which the resource is distributed",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://purl.org/dc/terms/license"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/license",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Software",
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "license_and_use_terms",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#license_and_use_terms",
+      "description": "Detailed licensing and terms of use information, including any fees. Simplified to string in D4D Slim.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#license_and_use_terms",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "version",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#version",
+      "description": "Version identifier for the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/version"
+      ],
+      "slot_uri": "http://schema.org/version",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Software",
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "status",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#status",
+      "description": "Status of the resource (e.g., draft, published, deprecated)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#status",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "uri",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "issued",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#issued",
+      "description": "Date of formal issuance or publication",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://purl.org/dc/terms/issued"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/issued",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "date",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "created_on",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#created_on",
+      "description": "Creation date",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/dateCreated"
+      ],
+      "slot_uri": "http://schema.org/dateCreated",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "date",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "last_updated_on",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#last_updated_on",
+      "description": "Last modification date",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/dateModified"
+      ],
+      "slot_uri": "http://schema.org/dateModified",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "date",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "created_by",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#created_by",
+      "description": "Creator or author (simplified to string in D4D Slim)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/creator"
+      ],
+      "slot_uri": "http://schema.org/creator",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "modified_by",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#modified_by",
+      "description": "Person or agent who modified the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#modified_by",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "publisher",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#publisher",
+      "description": "Publisher of the resource",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/publisher"
+      ],
+      "slot_uri": "http://schema.org/publisher",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "uri",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "creators",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#creators",
+      "description": "Who created the dataset (team, research group) and on behalf of which entity. Simplified to string in D4D Slim.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#creators",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "funders",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#funders",
+      "description": "Funding sources (simplified to string in D4D Slim)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#funders",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "was_derived_from",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#was_derived_from",
+      "description": "Resource from which this was derived",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://www.w3.org/ns/prov#wasDerivedFrom"
+      ],
+      "slot_uri": "http://www.w3.org/ns/prov#wasDerivedFrom",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "parent_datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#parent_datasets",
+      "description": "Parent or source datasets (simplified to strings in D4D Slim)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#parent_datasets",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "related_datasets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#related_datasets",
+      "description": "Related datasets (simplified to strings in D4D Slim)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#related_datasets",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "conforms_to",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#conforms_to",
+      "description": "Standards or specifications this resource conforms to",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://purl.org/dc/terms/conformsTo"
+      ],
+      "slot_uri": "http://purl.org/dc/terms/conformsTo",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "uri",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "conforms_to_schema",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#conforms_to_schema",
+      "description": "Schema this resource conforms to",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#conforms_to_schema",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "uri",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "conforms_to_class",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#conforms_to_class",
+      "description": "Class or type this resource conforms to",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#conforms_to_class",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "uriorcurie",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "bytes",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#bytes",
+      "description": "Size in bytes",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/contentSize"
+      ],
+      "slot_uri": "http://schema.org/contentSize",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "integer",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "compression",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#compression",
+      "description": "Compression format",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#compression",
+      "owner": "Dataset",
+      "domain_of": [
+        "Information",
+        "Dataset"
+      ],
+      "range": "CompressionEnum",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "encoding",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#encoding",
+      "description": "Character encoding",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/encoding"
+      ],
+      "slot_uri": "http://schema.org/encoding",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "format",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#format",
+      "description": "File format (simplified to string in D4D Slim)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#format",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "media_type",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#media_type",
+      "description": "MIME type of the data",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "mappings": [
+        "http://schema.org/encodingFormat"
+      ],
+      "slot_uri": "http://schema.org/encodingFormat",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "hash",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#hash",
+      "description": "Hash value of the data",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#hash",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "md5",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#md5",
+      "description": "MD5 hash",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#md5",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "sha256",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#sha256",
+      "description": "SHA-256 hash",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#sha256",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "is_tabular",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_tabular",
+      "description": "Indicates if data is in tabular format",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_tabular",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dialect",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#dialect",
+      "description": "Format dialect information (CSV headers, delimiter, etc.). Simplified to string in D4D Slim.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#dialect",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "path",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#path",
+      "description": "File path within the dataset",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#path",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#resources",
+      "description": "Sub-resources or component datasets (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#resources",
+      "owner": "DatasetCollection",
+      "domain_of": [
+        "DatasetCollection"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "purposes",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#purposes",
+      "description": "Purpose for which the dataset was created",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#purposes",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "tasks",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#tasks",
+      "description": "Specific task the dataset was intended for",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#tasks",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "addressing_gaps",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#addressing_gaps",
+      "description": "Specific gap the dataset was created to fill",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#addressing_gaps",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "instances",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#instances",
+      "description": "What the instances in the dataset represent (e.g., documents, photos, people). Simplified to string in D4D Slim.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#instances",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "variables",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#variables",
+      "description": "Variables or features in the dataset (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#variables",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "subsets",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#subsets",
+      "description": "Subsets within the dataset (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#subsets",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "subpopulations",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#subpopulations",
+      "description": "Subpopulations identified in the dataset (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#subpopulations",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "anomalies",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#anomalies",
+      "description": "Known anomalies in the data (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#anomalies",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "sensitive_elements",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#sensitive_elements",
+      "description": "Sensitive data elements present (e.g., race, religion, biometrics). Simplified to string in D4D Slim.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#sensitive_elements",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "confidential_elements",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#confidential_elements",
+      "description": "Confidential data elements (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#confidential_elements",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "known_biases",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#known_biases",
+      "description": "Known biases in the data (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#known_biases",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "known_limitations",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#known_limitations",
+      "description": "Known limitations of the dataset (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#known_limitations",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "content_warnings",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#content_warnings",
+      "description": "Warnings about potentially offensive, threatening, or anxiety-provoking content. Simplified to string in D4D Slim.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#content_warnings",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "external_resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#external_resources",
+      "description": "External resources the dataset depends on (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#external_resources",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "collection_mechanisms",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#collection_mechanisms",
+      "description": "Mechanisms used to collect the data (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#collection_mechanisms",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "acquisition_methods",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#acquisition_methods",
+      "description": "Acquisition methods used (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#acquisition_methods",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "collection_timeframes",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#collection_timeframes",
+      "description": "Timeframe over which data was collected (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#collection_timeframes",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "data_collectors",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#data_collectors",
+      "description": "Who was involved in data collection and how they were compensated. Simplified to string in D4D Slim.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#data_collectors",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "sampling_strategies",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#sampling_strategies",
+      "description": "Sampling strategies used (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#sampling_strategies",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "missing_data_documentation",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#missing_data_documentation",
+      "description": "Documentation of missing data patterns and causes (simplified to strings).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#missing_data_documentation",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "raw_sources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#raw_sources",
+      "description": "Raw data sources (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#raw_sources",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "raw_data_sources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#raw_data_sources",
+      "description": "Description of raw data sources before preprocessing (simplified to strings).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#raw_data_sources",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "preprocessing_strategies",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#preprocessing_strategies",
+      "description": "Preprocessing steps applied (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#preprocessing_strategies",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "cleaning_strategies",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#cleaning_strategies",
+      "description": "Data cleaning procedures (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#cleaning_strategies",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "labeling_strategies",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#labeling_strategies",
+      "description": "Labeling/annotation procedures (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#labeling_strategies",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "imputation_protocols",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#imputation_protocols",
+      "description": "Data imputation methodology (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#imputation_protocols",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "annotation_analyses",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#annotation_analyses",
+      "description": "Analysis of annotation quality and inter-annotator agreement (simplified).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#annotation_analyses",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "machine_annotation_tools",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#machine_annotation_tools",
+      "description": "Automated annotation tools used (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#machine_annotation_tools",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "intended_uses",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#intended_uses",
+      "description": "Intended uses for the dataset (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#intended_uses",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "other_tasks",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#other_tasks",
+      "description": "Other potential tasks for the dataset (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#other_tasks",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "existing_uses",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#existing_uses",
+      "description": "Tasks the dataset has already been used for (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#existing_uses",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "discouraged_uses",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#discouraged_uses",
+      "description": "Tasks the dataset should not be used for (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#discouraged_uses",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "prohibited_uses",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#prohibited_uses",
+      "description": "Explicitly forbidden uses (stronger than discouraged). Simplified to strings.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#prohibited_uses",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "future_use_impacts",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#future_use_impacts",
+      "description": "Potential impacts or risks from future uses (simplified to strings).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#future_use_impacts",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "distribution_formats",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#distribution_formats",
+      "description": "Distribution formats available (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#distribution_formats",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "distribution_dates",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#distribution_dates",
+      "description": "Dates when the dataset will be distributed (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#distribution_dates",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "extension_mechanism",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#extension_mechanism",
+      "description": "Mechanism for extending or contributing to the dataset (simplified to string).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#extension_mechanism",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "use_repository",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#use_repository",
+      "description": "Repository linking to papers/systems using the dataset (simplified to string).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#use_repository",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "version_access",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#version_access",
+      "description": "Information about access to older versions (simplified to string).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#version_access",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "maintainers",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#maintainers",
+      "description": "Who maintains/hosts the dataset (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#maintainers",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "updates",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#updates",
+      "description": "Update and maintenance plans (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#updates",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "errata",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#errata",
+      "description": "Known errors and corrections (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#errata",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "retention_limit",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#retention_limit",
+      "description": "Data retention policy (simplified to string)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#retention_limit",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "ethical_reviews",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#ethical_reviews",
+      "description": "Ethical or compliance reviews conducted (e.g., IRB). Simplified to strings.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#ethical_reviews",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "data_protection_impacts",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#data_protection_impacts",
+      "description": "Data protection impact analysis conducted (simplified to strings).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#data_protection_impacts",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "ip_restrictions",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#ip_restrictions",
+      "description": "Intellectual property restrictions (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#ip_restrictions",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "regulatory_restrictions",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#regulatory_restrictions",
+      "description": "Regulatory restrictions on data use (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#regulatory_restrictions",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "human_subject_research",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#human_subject_research",
+      "description": "Information about human subjects research involvement (simplified to string).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#human_subject_research",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "informed_consent",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#informed_consent",
+      "description": "Informed consent procedures (simplified to strings)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#informed_consent",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "vulnerable_populations",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#vulnerable_populations",
+      "description": "Protections for at-risk populations (simplified to strings).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#vulnerable_populations",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "is_deidentified",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_deidentified",
+      "description": "Indicates if data has been deidentified",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_deidentified",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "is_data_split",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_data_split",
+      "description": "Indicates if subset represents a data split (train/test/val)",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_data_split",
+      "owner": "DataSubset",
+      "domain_of": [
+        "DataSubset"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "is_subpopulation",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_subpopulation",
+      "description": "Indicates if subset represents a subpopulation",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_subpopulation",
+      "owner": "DataSubset",
+      "domain_of": [
+        "DataSubset"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "DatasetCollection_resources",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#resources",
+      "description": "Sub-resources or component datasets within this collection. In D4D Slim, this is simplified to a list of strings (dataset identifiers). In full D4D, this would reference Dataset objects.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "is_a": "resources",
+      "domain": "DatasetCollection",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#resources",
+      "alias": "resources",
+      "owner": "DatasetCollection",
+      "domain_of": [
+        "DatasetCollection"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "resources",
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "DataSubset_is_data_split",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_data_split",
+      "description": "Indicates if this subset represents a data split (e.g., train, test, validation).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "is_a": "is_data_split",
+      "domain": "DataSubset",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_data_split",
+      "alias": "is_data_split",
+      "owner": "DataSubset",
+      "domain_of": [
+        "DataSubset"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "is_data_split",
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "DataSubset_is_subpopulation",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_subpopulation",
+      "description": "Indicates if this subset represents a specific subpopulation (e.g., demographic group, condition).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "is_a": "is_subpopulation",
+      "domain": "DataSubset",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#is_subpopulation",
+      "alias": "is_subpopulation",
+      "owner": "DataSubset",
+      "domain_of": [
+        "DataSubset"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "is_subpopulation",
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    }
+  ],
+  "classes": [
+    {
+      "name": "Information",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#Information",
+      "description": "Abstract base class for information resources. Provides common metadata fields for datasets, collections, and other information artifacts.",
+      "comments": [
+        "RO-Crate mapping coverage: 82.6% (19/23 attributes)",
+        "Unmapped attributes: id, name, conforms_to_class, conforms_to_schema"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "abstract": true,
+      "slots": [
+        "id",
+        "name",
+        "title",
+        "description",
+        "keywords",
+        "language",
+        "license",
+        "doi",
+        "page",
+        "download_url",
+        "publisher",
+        "version",
+        "issued",
+        "created_on",
+        "created_by",
+        "last_updated_on",
+        "modified_by",
+        "was_derived_from",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "compression",
+        "status"
+      ],
+      "slot_usage": {},
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#Information",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Software",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#Software",
+      "description": "Information about software used in dataset creation, processing, or analysis.",
+      "comments": [
+        "RO-Crate mapping coverage: 50.0% (3/6 attributes)",
+        "Unmapped attributes: id, name, url"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "is_a": "Information",
+      "slots": [
+        "title",
+        "keywords",
+        "language",
+        "doi",
+        "page",
+        "download_url",
+        "publisher",
+        "issued",
+        "created_on",
+        "created_by",
+        "last_updated_on",
+        "modified_by",
+        "was_derived_from",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "compression",
+        "status",
+        "id",
+        "name",
+        "description",
+        "version",
+        "license",
+        "url"
+      ],
+      "slot_usage": {},
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#Software",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "DatasetCollection",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#DatasetCollection",
+      "description": "A collection of related datasets, likely containing multiple files of multiple potential purposes and properties. This is the top-level container for grouping related data resources.",
+      "comments": [
+        "RO-Crate mapping coverage: 83.3% (20/24 attributes)",
+        "Unmapped attributes: id, name, conforms_to_class, conforms_to_schema",
+        "Note: 'resources' simplified from Dataset objects to string list for D4D Slim"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "aliases": [
+        "file collection",
+        "dataset collection",
+        "data resource collection"
+      ],
+      "exact_mappings": [
+        "dcat:Dataset"
+      ],
+      "close_mappings": [
+        "dcat:Catalog"
+      ],
+      "is_a": "Information",
+      "slots": [
+        "id",
+        "name",
+        "title",
+        "description",
+        "keywords",
+        "language",
+        "license",
+        "doi",
+        "page",
+        "download_url",
+        "publisher",
+        "version",
+        "issued",
+        "created_on",
+        "created_by",
+        "last_updated_on",
+        "modified_by",
+        "was_derived_from",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "compression",
+        "status",
+        "DatasetCollection_resources"
+      ],
+      "slot_usage": {},
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#DatasetCollection",
+      "tree_root": true,
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "Dataset",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#Dataset",
+      "description": "A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted. Represents a single data file or coherent data resource.",
+      "comments": [
+        "RO-Crate mapping coverage: 87.9% (80/91 attributes)",
+        "Unmapped attributes: citation, conforms_to_class, conforms_to_schema, external_resources, format, id, machine_annotation_tools, name, parent_datasets, related_datasets, variables",
+        "Note: Complex type references simplified to strings for D4D Slim",
+        "Note: All attributes preserved from full schema for progressive enhancement"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "aliases": [
+        "data resource",
+        "data file",
+        "data package"
+      ],
+      "mappings": [
+        "dcat:Distribution"
+      ],
+      "exact_mappings": [
+        "schema:DataDownload"
+      ],
+      "is_a": "Information",
+      "slots": [
+        "bytes",
+        "encoding",
+        "format",
+        "compression",
+        "hash",
+        "md5",
+        "sha256",
+        "media_type",
+        "is_tabular",
+        "dialect",
+        "path",
+        "id",
+        "name",
+        "title",
+        "description",
+        "citation",
+        "doi",
+        "keywords",
+        "language",
+        "page",
+        "download_url",
+        "was_derived_from",
+        "parent_datasets",
+        "related_datasets",
+        "creators",
+        "created_on",
+        "created_by",
+        "issued",
+        "last_updated_on",
+        "modified_by",
+        "publisher",
+        "version",
+        "funders",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "status",
+        "purposes",
+        "tasks",
+        "addressing_gaps",
+        "instances",
+        "variables",
+        "subsets",
+        "subpopulations",
+        "anomalies",
+        "sensitive_elements",
+        "confidential_elements",
+        "known_biases",
+        "known_limitations",
+        "content_warnings",
+        "external_resources",
+        "collection_mechanisms",
+        "acquisition_methods",
+        "collection_timeframes",
+        "data_collectors",
+        "sampling_strategies",
+        "missing_data_documentation",
+        "raw_sources",
+        "raw_data_sources",
+        "preprocessing_strategies",
+        "cleaning_strategies",
+        "labeling_strategies",
+        "imputation_protocols",
+        "annotation_analyses",
+        "machine_annotation_tools",
+        "intended_uses",
+        "other_tasks",
+        "existing_uses",
+        "discouraged_uses",
+        "prohibited_uses",
+        "future_use_impacts",
+        "distribution_formats",
+        "distribution_dates",
+        "license",
+        "license_and_use_terms",
+        "extension_mechanism",
+        "use_repository",
+        "version_access",
+        "maintainers",
+        "updates",
+        "errata",
+        "retention_limit",
+        "ethical_reviews",
+        "data_protection_impacts",
+        "ip_restrictions",
+        "regulatory_restrictions",
+        "human_subject_research",
+        "informed_consent",
+        "vulnerable_populations",
+        "is_deidentified"
+      ],
+      "slot_usage": {},
+      "class_uri": "http://www.w3.org/ns/dcat#Distribution",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "DataSubset",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#DataSubset",
+      "description": "A subset of a dataset, potentially representing a split (train/test/validation), a subpopulation, or another logical partition of the data.",
+      "comments": [
+        "RO-Crate mapping coverage: 86.0% (80/93 attributes)",
+        "Unmapped attributes: (inherits Dataset unmapped) + is_data_split, is_subpopulation"
+      ],
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/slim",
+      "is_a": "Dataset",
+      "slots": [
+        "bytes",
+        "encoding",
+        "format",
+        "compression",
+        "hash",
+        "md5",
+        "sha256",
+        "media_type",
+        "is_tabular",
+        "dialect",
+        "path",
+        "id",
+        "name",
+        "title",
+        "description",
+        "citation",
+        "doi",
+        "keywords",
+        "language",
+        "page",
+        "download_url",
+        "was_derived_from",
+        "parent_datasets",
+        "related_datasets",
+        "creators",
+        "created_on",
+        "created_by",
+        "issued",
+        "last_updated_on",
+        "modified_by",
+        "publisher",
+        "version",
+        "funders",
+        "conforms_to",
+        "conforms_to_schema",
+        "conforms_to_class",
+        "status",
+        "purposes",
+        "tasks",
+        "addressing_gaps",
+        "instances",
+        "variables",
+        "subsets",
+        "subpopulations",
+        "anomalies",
+        "sensitive_elements",
+        "confidential_elements",
+        "known_biases",
+        "known_limitations",
+        "content_warnings",
+        "external_resources",
+        "collection_mechanisms",
+        "acquisition_methods",
+        "collection_timeframes",
+        "data_collectors",
+        "sampling_strategies",
+        "missing_data_documentation",
+        "raw_sources",
+        "raw_data_sources",
+        "preprocessing_strategies",
+        "cleaning_strategies",
+        "labeling_strategies",
+        "imputation_protocols",
+        "annotation_analyses",
+        "machine_annotation_tools",
+        "intended_uses",
+        "other_tasks",
+        "existing_uses",
+        "discouraged_uses",
+        "prohibited_uses",
+        "future_use_impacts",
+        "distribution_formats",
+        "distribution_dates",
+        "license",
+        "license_and_use_terms",
+        "extension_mechanism",
+        "use_repository",
+        "version_access",
+        "maintainers",
+        "updates",
+        "errata",
+        "retention_limit",
+        "ethical_reviews",
+        "data_protection_impacts",
+        "ip_restrictions",
+        "regulatory_restrictions",
+        "human_subject_research",
+        "informed_consent",
+        "vulnerable_populations",
+        "is_deidentified",
+        "DataSubset_is_data_split",
+        "DataSubset_is_subpopulation"
+      ],
+      "slot_usage": {},
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/slim#DataSubset",
+      "@type": "ClassDefinition"
+    }
+  ],
+  "metamodel_version": "1.7.0",
+  "source_file": "D4D_Slim.yaml",
+  "source_file_date": "2026-03-09T13:44:42",
+  "source_file_size": 25056,
+  "generation_date": "2026-03-09T18:45:39",
+  "@type": "SchemaDefinition",
+  "@context": [
+    "project/slim/jsonld/D4D_Slim.context.jsonld",
+    "https://w3id.org/linkml/types.context.jsonld",
+    {
+      "@base": "https://w3id.org/bridge2ai/data-sheets-schema/slim#"
+    }
+  ]
+}

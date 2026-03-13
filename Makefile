@@ -98,6 +98,19 @@ help: status
 	@echo "════════════════════════════════════════════════════════════════"
 	@echo "make extract-d4d-concat-gpt5       -- extract D4D from concatenated file (GPT-5)"
 	@echo "                                      (usage: PROJECT=AI_READI)"
+	@echo ""
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo "  D4D Pipeline: RO-Crate Transformation"
+	@echo "════════════════════════════════════════════════════════════════"
+	@echo "make rocrate-to-d4d           -- transform single RO-Crate to D4D YAML"
+	@echo "                                 (usage: INPUT=rocrate.json OUTPUT=d4d.yaml)"
+	@echo "make merge-rocrates           -- merge multiple RO-Crates into comprehensive D4D"
+	@echo "                                 (usage: INPUTS=\"file1.json file2.json\" OUTPUT=d4d.yaml)"
+	@echo "make auto-process-rocrates    -- auto-discover and process all RO-Crates in directory"
+	@echo "                                 (usage: DIR=data/ro-crate/PROJECT OUTPUT=d4d.yaml)"
+	@echo "make merge-cm4ai-rocrates     -- merge all CM4AI RO-Crates (release + 2 sub-crates)"
+	@echo "make test-rocrate-transform   -- test single-file transformation"
+	@echo "make test-rocrate-merge       -- test multi-file merge (CM4AI top 2)"
 	@echo "make extract-d4d-concat-all-gpt5   -- extract D4D from all concatenated (GPT-5)"
 	@echo "make extract-d4d-concat-claude     -- extract D4D from concatenated file (Claude API)"
 	@echo "                                      (usage: PROJECT=AI_READI)"
@@ -338,5 +351,113 @@ clean:
 	rm -rf tmp
 	rm -fr docs/*
 	rm -fr $(PYMODEL)/*
+
+# ════════════════════════════════════════════════════════════════
+# RO-Crate to D4D Transformation
+# ════════════════════════════════════════════════════════════════
+
+# Default paths for RO-Crate transformation
+ROCRATE_MAPPING = data/ro-crate_mapping/D4D - RO-Crate - RAI Mappings.xlsx - Class Alignment.tsv
+ROCRATE_SCHEMA = $(SOURCE_SCHEMA_ALL)
+
+# Transform RO-Crate JSON-LD to D4D YAML
+# Usage: make rocrate-to-d4d INPUT=rocrate.json OUTPUT=d4d.yaml
+rocrate-to-d4d:
+ifndef INPUT
+	$(error INPUT is required. Usage: make rocrate-to-d4d INPUT=rocrate.json OUTPUT=d4d.yaml)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make rocrate-to-d4d INPUT=rocrate.json OUTPUT=d4d.yaml)
+endif
+	@echo "Transforming RO-Crate to D4D..."
+	$(RUN) python .claude/agents/scripts/rocrate_to_d4d.py \
+		--input $(INPUT) \
+		--output $(OUTPUT) \
+		--mapping "$(ROCRATE_MAPPING)" \
+		--schema $(ROCRATE_SCHEMA) \
+		--validate
+
+# Test RO-Crate transformation with minimal example
+test-rocrate-transform:
+	@echo "Testing RO-Crate transformation with minimal example..."
+	@mkdir -p data/test
+	$(RUN) python .claude/agents/scripts/rocrate_to_d4d.py \
+		--input data/test/minimal-ro-crate.json \
+		--output data/test/minimal_d4d.yaml \
+		--mapping "$(ROCRATE_MAPPING)" \
+		--schema $(ROCRATE_SCHEMA) \
+		--validate
+	@echo ""
+	@echo "Generated files:"
+	@echo "  D4D YAML:            data/test/minimal_d4d.yaml"
+	@echo "  Transformation report: data/test/transformation_report.txt"
+	@echo "  Validation errors:    data/test/minimal_d4d_validation_errors.txt (if any)"
+
+# Multi-RO-Crate Merging
+# ════════════════════════════════════════════════════════════════
+
+# Merge multiple RO-Crate files into comprehensive D4D
+# Usage: make merge-rocrates INPUTS="file1.json file2.json file3.json" OUTPUT=merged.yaml
+merge-rocrates:
+ifndef INPUTS
+	$(error INPUTS is required. Usage: make merge-rocrates INPUTS="file1.json file2.json" OUTPUT=merged.yaml)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make merge-rocrates INPUTS="file1.json file2.json" OUTPUT=merged.yaml)
+endif
+	@echo "Merging multiple RO-Crates..."
+	$(RUN) python .claude/agents/scripts/rocrate_to_d4d.py \
+		--merge \
+		--auto-prioritize \
+		--inputs $(INPUTS) \
+		--output $(OUTPUT) \
+		--mapping "$(ROCRATE_MAPPING)" \
+		--schema $(ROCRATE_SCHEMA) \
+		--validate
+
+# Automated RO-Crate processing (auto-discover and process all files in directory)
+# Usage: make auto-process-rocrates DIR=data/ro-crate/CM4AI OUTPUT=output.yaml [STRATEGY=merge]
+auto-process-rocrates:
+ifndef DIR
+	$(error DIR is required. Usage: make auto-process-rocrates DIR=data/ro-crate/CM4AI OUTPUT=output.yaml)
+endif
+ifndef OUTPUT
+	$(error OUTPUT is required. Usage: make auto-process-rocrates DIR=data/ro-crate/CM4AI OUTPUT=output.yaml)
+endif
+	@echo "Auto-processing RO-Crates in $(DIR)..."
+	$(RUN) python .claude/agents/scripts/auto_process_rocrates.py \
+		--input-dir $(DIR) \
+		--output $(OUTPUT) \
+		--mapping "$(ROCRATE_MAPPING)" \
+		--strategy $(or $(STRATEGY),merge) \
+		$(if $(TOP_N),--top-n $(TOP_N)) \
+		--validate \
+		--schema $(ROCRATE_SCHEMA)
+
+# CM4AI-specific comprehensive merge (all 3 RO-Crates)
+merge-cm4ai-rocrates:
+	@echo "Merging all CM4AI RO-Crates into comprehensive D4D..."
+	@mkdir -p data/d4d_concatenated/rocrate
+	$(MAKE) auto-process-rocrates \
+		DIR=data/ro-crate/CM4AI \
+		OUTPUT=data/d4d_concatenated/rocrate/CM4AI_comprehensive_d4d.yaml \
+		STRATEGY=merge
+	@echo ""
+	@echo "✓ Generated: data/d4d_concatenated/rocrate/CM4AI_comprehensive_d4d.yaml"
+	@echo "✓ Report:    data/d4d_concatenated/rocrate/CM4AI_comprehensive_d4d_merge_report.txt"
+
+# Test multi-file merge with CM4AI RO-Crates (top 2 only)
+test-rocrate-merge:
+	@echo "Testing multi-RO-Crate merge with CM4AI (top 2 files)..."
+	@mkdir -p data/test
+	$(MAKE) auto-process-rocrates \
+		DIR=data/ro-crate/CM4AI \
+		OUTPUT=data/test/CM4AI_merge_test.yaml \
+		STRATEGY=merge \
+		TOP_N=2
+	@echo ""
+	@echo "Generated files:"
+	@echo "  D4D YAML:     data/test/CM4AI_merge_test.yaml"
+	@echo "  Merge report: data/test/CM4AI_merge_test_merge_report.txt"
 
 include project.Makefile

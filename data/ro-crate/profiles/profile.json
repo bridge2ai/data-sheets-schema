@@ -1,0 +1,285 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.2/context",
+    "https://w3id.org/bridge2ai/d4d-context/1.0"
+  ],
+  "@graph": [
+    {
+      "@type": "CreativeWork",
+      "@id": "ro-crate-metadata.json",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      },
+      "about": {
+        "@id": "./"
+      },
+      "description": "RO-Crate metadata descriptor for D4D Profile specification"
+    },
+    {
+      "@type": [
+        "CreativeWork",
+        "DefinedTerm"
+      ],
+      "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0",
+      "name": "Datasheets for Datasets (D4D) RO-Crate Profile",
+      "description": "An RO-Crate profile for comprehensive dataset documentation following the Datasheets for Datasets methodology. Defines how to package D4D metadata within RO-Crate for FAIR and Responsible AI compliance.",
+      "version": "1.0.0",
+      "datePublished": "2026-03-11",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "author": [
+        {
+          "@type": "Organization",
+          "name": "Bridge2AI Data Standards Core"
+        }
+      ],
+      "keywords": [
+        "dataset documentation",
+        "datasheets for datasets",
+        "FAIR",
+        "responsible AI",
+        "metadata",
+        "RO-Crate profile"
+      ],
+      "url": "https://github.com/bridge2ai/data-sheets-schema/tree/main/data/ro-crate/profiles",
+      "codeRepository": "https://github.com/bridge2ai/data-sheets-schema",
+      "hasPart": [
+        {
+          "@id": "d4d-profile-spec.md"
+        },
+        {
+          "@id": "d4d-context.jsonld"
+        },
+        {
+          "@id": "examples/d4d-rocrate-minimal.json"
+        },
+        {
+          "@id": "examples/d4d-rocrate-basic.json"
+        },
+        {
+          "@id": "examples/d4d-rocrate-complete.json"
+        },
+        {
+          "@id": "validation/d4d-minimal-shape.ttl"
+        },
+        {
+          "@id": "validation/d4d-basic-shape.ttl"
+        },
+        {
+          "@id": "validation/d4d-complete-shape.ttl"
+        },
+        {
+          "@id": "README.md"
+        }
+      ],
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      },
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Conformance Levels",
+          "value": "3"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Minimum Properties",
+          "value": "8"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Basic Properties",
+          "value": "25"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Complete Properties",
+          "value": "100+"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Target Schemas",
+          "value": "D4D LinkML Schema, FAIRSCAPE, ML Commons RAI"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Validation Method",
+          "value": "SHACL"
+        }
+      ]
+    },
+    {
+      "@type": "File",
+      "@id": "d4d-profile-spec.md",
+      "name": "D4D RO-Crate Profile Specification",
+      "description": "Complete specification document defining conformance requirements, property catalog, and usage guidelines for the D4D RO-Crate profile.",
+      "encodingFormat": "text/markdown",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2/profile-spec"
+      },
+      "about": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      }
+    },
+    {
+      "@type": "File",
+      "@id": "d4d-context.jsonld",
+      "name": "D4D JSON-LD Context",
+      "description": "JSON-LD context defining all D4D vocabulary terms including d4d:, rai:, and evi: namespaces with data types and container specifications.",
+      "encodingFormat": "application/ld+json",
+      "url": "https://w3id.org/bridge2ai/d4d-context/1.0",
+      "about": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      }
+    },
+    {
+      "@type": "File",
+      "@id": "examples/d4d-rocrate-minimal.json",
+      "name": "D4D RO-Crate Example - Level 1 (Minimal)",
+      "description": "Example RO-Crate demonstrating Level 1 conformance with 8 required properties for basic dataset discoverability.",
+      "encodingFormat": "application/ld+json",
+      "conformsTo": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Conformance Level",
+          "value": "1 (Minimal)"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Properties Count",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "@type": "File",
+      "@id": "examples/d4d-rocrate-basic.json",
+      "name": "D4D RO-Crate Example - Level 2 (Basic)",
+      "description": "Example RO-Crate demonstrating Level 2 conformance with 25 properties for Responsible AI and FAIR compliance.",
+      "encodingFormat": "application/ld+json",
+      "conformsTo": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Conformance Level",
+          "value": "2 (Basic)"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Properties Count",
+          "value": "25"
+        }
+      ]
+    },
+    {
+      "@type": "File",
+      "@id": "examples/d4d-rocrate-complete.json",
+      "name": "D4D RO-Crate Example - Level 3 (Complete)",
+      "description": "Example RO-Crate demonstrating Level 3 conformance with 100+ properties for comprehensive dataset documentation.",
+      "encodingFormat": "application/ld+json",
+      "conformsTo": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Conformance Level",
+          "value": "3 (Complete)"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Properties Count",
+          "value": "100+"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Dataset Name",
+          "value": "CardioGen-1K"
+        }
+      ]
+    },
+    {
+      "@type": "File",
+      "@id": "validation/d4d-minimal-shape.ttl",
+      "name": "D4D Minimal Validation Shape",
+      "description": "SHACL validation shape for Level 1 (Minimal) conformance testing. Validates 8 required properties with strict error reporting.",
+      "encodingFormat": "text/turtle",
+      "programmingLanguage": "SHACL",
+      "about": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Validation Severity",
+          "value": "sh:Violation"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Target Level",
+          "value": "1 (Minimal)"
+        }
+      ]
+    },
+    {
+      "@type": "File",
+      "@id": "validation/d4d-basic-shape.ttl",
+      "name": "D4D Basic Validation Shape",
+      "description": "SHACL validation shape for Level 2 (Basic) conformance testing. Validates 8 required + 17 recommended properties with warnings.",
+      "encodingFormat": "text/turtle",
+      "programmingLanguage": "SHACL",
+      "about": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Validation Severity",
+          "value": "sh:Violation (required), sh:Warning (recommended)"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Target Level",
+          "value": "2 (Basic)"
+        }
+      ]
+    },
+    {
+      "@type": "File",
+      "@id": "validation/d4d-complete-shape.ttl",
+      "name": "D4D Complete Validation Shape",
+      "description": "SHACL validation shape for Level 3 (Complete) conformance testing. Validates all 100+ D4D properties with info messages.",
+      "encodingFormat": "text/turtle",
+      "programmingLanguage": "SHACL",
+      "about": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Validation Severity",
+          "value": "sh:Info"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Target Level",
+          "value": "3 (Complete)"
+        }
+      ]
+    },
+    {
+      "@type": "File",
+      "@id": "README.md",
+      "name": "D4D RO-Crate Profile README",
+      "description": "Comprehensive usage guide including conformance testing, property patterns, examples, and validation instructions.",
+      "encodingFormat": "text/markdown",
+      "about": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      }
+    }
+  ]
+}
