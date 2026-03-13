@@ -741,6 +741,28 @@
 
 
 
+      Dataset : participant_compensation
+
+
+
+
+
+        Dataset --&gt; "0..1" HumanSubjectCompensation : participant_compensation
+        click HumanSubjectCompensation href "../HumanSubjectCompensation/"
+
+
+
+      Dataset : participant_privacy
+
+
+
+
+
+        Dataset --&gt; "*" ParticipantPrivacy : participant_privacy
+        click ParticipantPrivacy href "../ParticipantPrivacy/"
+
+
+
       Dataset : path
 
       Dataset : preprocessing_strategies
@@ -1207,9 +1229,21 @@
 <td>direct</td>
 </tr>
 <tr>
+<td><a href="../participant_privacy/">participant_privacy</a></td>
+<td>* <br/> <a href="../ParticipantPrivacy/">ParticipantPrivacy</a></td>
+<td>Privacy protections and anonymization procedures for human research participa...</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../participant_compensation/">participant_compensation</a></td>
+<td>0..1 <br/> <a href="../HumanSubjectCompensation/">HumanSubjectCompensation</a></td>
+<td>Compensation or incentives provided to human research participants</td>
+<td>direct</td>
+</tr>
+<tr>
 <td><a href="../vulnerable_populations/">vulnerable_populations</a></td>
 <td>0..1 <br/> <a href="../VulnerablePopulations/">VulnerablePopulations</a></td>
-<td>Information about protections for at-risk populations (e</td>
+<td>Information about protections for vulnerable populations (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -1916,9 +1950,30 @@ attributes:
     multivalued: true
     inlined: true
     inlined_as_list: true
+  participant_privacy:
+    name: participant_privacy
+    description: Privacy protections and anonymization procedures for human research
+      participants, including reidentification risk assessment.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: ParticipantPrivacy
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  participant_compensation:
+    name: participant_compensation
+    description: Compensation or incentives provided to human research participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    domain_of:
+    - Dataset
+    range: HumanSubjectCompensation
+    inlined: true
   vulnerable_populations:
     name: vulnerable_populations
-    description: Information about protections for at-risk populations (e.g., minors,
+    description: Information about protections for vulnerable populations (e.g., minors,
       pregnant women, prisoners) including special safeguards and assent procedures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
@@ -2581,9 +2636,34 @@ attributes:
     multivalued: true
     inlined: true
     inlined_as_list: true
+  participant_privacy:
+    name: participant_privacy
+    description: Privacy protections and anonymization procedures for human research
+      participants, including reidentification risk assessment.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: participant_privacy
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: ParticipantPrivacy
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  participant_compensation:
+    name: participant_compensation
+    description: Compensation or incentives provided to human research participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    alias: participant_compensation
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: HumanSubjectCompensation
+    inlined: true
   vulnerable_populations:
     name: vulnerable_populations
-    description: Information about protections for at-risk populations (e.g., minors,
+    description: Information about protections for vulnerable populations (e.g., minors,
       pregnant women, prisoners) including special safeguards and assent procedures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
