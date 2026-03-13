@@ -1,0 +1,89 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.2/context",
+    "https://w3id.org/bridge2ai/d4d-context/1.0"
+  ],
+  "@graph": [
+    {
+      "@type": "CreativeWork",
+      "@id": "ro-crate-metadata.json",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      },
+      "about": {
+        "@id": "./"
+      },
+      "description": "RO-Crate metadata descriptor for D4D profile conformance Level 2 (Basic)"
+    },
+    {
+      "@type": [
+        "Dataset",
+        "https://w3id.org/EVI#ROCrate"
+      ],
+      "@id": "./",
+      "conformsTo": {
+        "@id": "https://w3id.org/bridge2ai/ro-crate-profile/d4d/1.0"
+      },
+      "name": "Example Genomic Variant Dataset",
+      "description": "A curated dataset of genomic variants from whole-genome sequencing studies, annotated with clinical significance and population frequencies. This dataset contains variant calls from 1,000 participants in cardiovascular disease research.",
+      "datePublished": "2026-01-15",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "keywords": [
+        "genomics",
+        "variants",
+        "cardiovascular disease",
+        "whole-genome sequencing",
+        "clinical annotation"
+      ],
+      "author": "Jane Smith; John Doe; Maria Garcia",
+      "identifier": "https://doi.org/10.1234/example-genomic-variants-2026",
+      "d4d:purposes": [
+        "Enable research on genetic risk factors for cardiovascular disease",
+        "Support development of variant classification algorithms",
+        "Provide reference dataset for clinical interpretation training"
+      ],
+      "d4d:addressingGaps": "Previous genomic variant datasets lacked comprehensive clinical annotation and population diversity. This dataset addresses these gaps by including detailed phenotype data and samples from underrepresented populations.",
+      "contentSize": "124 GB",
+      "evi:formats": [
+        "application/x-vcf",
+        "application/json",
+        "text/tab-separated-values"
+      ],
+      "rai:dataCollection": "Whole-genome sequencing performed on blood samples from consented research participants. Variant calling performed using GATK pipeline with subsequent clinical annotation.",
+      "rai:dataCollectionTimeframe": [
+        "2023-03-01",
+        "2025-11-30"
+      ],
+      "rai:dataManipulationProtocol": "Quality control included removing samples with <30x coverage, filtering variants with QUAL<30, removing duplicate variants, and validating clinical annotations against ClinVar database.",
+      "rai:dataPreprocessingProtocol": [
+        "Normalization of variant representations using vt normalize",
+        "Annotation with VEP (Ensembl Variant Effect Predictor)",
+        "Population frequency annotation from gnomAD v3.1"
+      ],
+      "ethicalReview": "Approved by Example University IRB #2022-0456",
+      "humanSubjectResearch": "Yes - genomic data from human participants with informed consent for data sharing",
+      "deidentified": true,
+      "confidentialityLevel": "De-identified with controlled access",
+      "rai:dataLimitations": [
+        "Limited to cardiovascular disease cohort - may not generalize to other conditions",
+        "Underrepresentation of certain ancestry groups despite efforts to increase diversity"
+      ],
+      "rai:dataBiases": [
+        "Selection bias toward participants with family history of cardiovascular disease",
+        "Ascertainment bias due to clinical referral patterns"
+      ],
+      "rai:dataUseCases": [
+        "Training variant classification machine learning models",
+        "Clinical interpretation reference for cardiovascular genetics",
+        "Population genetics research on disease-associated variants"
+      ],
+      "prohibitedUses": [
+        "Re-identification of participants",
+        "Insurance or employment discrimination",
+        "Commercial diagnostic test development without data sharing agreement"
+      ],
+      "publisher": "Example University Genomics Research Center",
+      "rai:dataReleaseMaintenancePlan": "Dataset will be updated quarterly with new variants and annotations. ClinVar submissions reviewed monthly. Critical variant reclassifications will trigger immediate updates."
+    }
+  ]
+}
