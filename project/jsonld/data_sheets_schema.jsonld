@@ -2323,8 +2323,38 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "dataset__participant_privacy",
+      "description": "Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/participant_privacy",
+      "alias": "participant_privacy",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "ParticipantPrivacy",
+      "multivalued": true,
+      "inlined": true,
+      "inlined_as_list": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "dataset__participant_compensation",
+      "description": "Compensation or incentives provided to human research participants.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/participant_compensation",
+      "alias": "participant_compensation",
+      "owner": "Dataset",
+      "domain_of": [
+        "Dataset"
+      ],
+      "range": "HumanSubjectCompensation",
+      "inlined": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "dataset__vulnerable_populations",
-      "description": "Information about protections for at-risk populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.",
+      "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/vulnerable_populations",
       "alias": "vulnerable_populations",
@@ -5232,8 +5262,119 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "participantPrivacy__anonymization_method",
+      "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#anonymization_method",
+      "alias": "anonymization_method",
+      "owner": "ParticipantPrivacy",
+      "domain_of": [
+        "ParticipantPrivacy"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "participantPrivacy__reidentification_risk",
+      "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#reidentification_risk",
+      "alias": "reidentification_risk",
+      "owner": "ParticipantPrivacy",
+      "domain_of": [
+        "ParticipantPrivacy"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "participantPrivacy__privacy_techniques",
+      "description": "What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data masking)?\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#privacy_techniques",
+      "alias": "privacy_techniques",
+      "owner": "ParticipantPrivacy",
+      "domain_of": [
+        "ParticipantPrivacy"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "participantPrivacy__data_linkage",
+      "description": "Can this dataset be linked to other datasets in ways that might compromise participant privacy?\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#data_linkage",
+      "alias": "data_linkage",
+      "owner": "ParticipantPrivacy",
+      "domain_of": [
+        "ParticipantPrivacy"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "humanSubjectCompensation__compensation_provided",
+      "description": "Were participants compensated for their participation?",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_provided",
+      "alias": "compensation_provided",
+      "owner": "HumanSubjectCompensation",
+      "domain_of": [
+        "HumanSubjectCompensation"
+      ],
+      "range": "boolean",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "humanSubjectCompensation__compensation_type",
+      "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_type",
+      "alias": "compensation_type",
+      "owner": "HumanSubjectCompensation",
+      "domain_of": [
+        "HumanSubjectCompensation"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "humanSubjectCompensation__compensation_amount",
+      "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_amount",
+      "alias": "compensation_amount",
+      "owner": "HumanSubjectCompensation",
+      "domain_of": [
+        "HumanSubjectCompensation"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "humanSubjectCompensation__compensation_rationale",
+      "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#compensation_rationale",
+      "alias": "compensation_rationale",
+      "owner": "HumanSubjectCompensation",
+      "domain_of": [
+        "HumanSubjectCompensation"
+      ],
+      "range": "string",
+      "multivalued": true,
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "vulnerablePopulations__vulnerable_groups_included",
-      "description": "Are any at-risk populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
+      "description": "Are any vulnerable populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#vulnerable_groups_included",
       "alias": "vulnerable_groups_included",
@@ -5246,7 +5387,7 @@
     },
     {
       "name": "vulnerablePopulations__special_protections",
-      "description": "What additional protections were implemented for at-risk populations? Include safeguards, modified procedures, or additional oversight.\n",
+      "description": "What additional protections were implemented for vulnerable populations? Include safeguards, modified procedures, or additional oversight.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#special_protections",
       "alias": "special_protections",
@@ -5883,6 +6024,8 @@
         "dataset__data_protection_impacts",
         "dataset__human_subject_research",
         "dataset__informed_consent",
+        "dataset__participant_privacy",
+        "dataset__participant_compensation",
         "dataset__vulnerable_populations",
         "dataset__preprocessing_strategies",
         "dataset__cleaning_strategies",
@@ -6103,8 +6246,23 @@
           "@type": "SlotDefinition"
         },
         {
+          "name": "participant_privacy",
+          "description": "Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.",
+          "range": "ParticipantPrivacy",
+          "multivalued": true,
+          "inlined_as_list": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "participant_compensation",
+          "description": "Compensation or incentives provided to human research participants.",
+          "range": "HumanSubjectCompensation",
+          "inlined": true,
+          "@type": "SlotDefinition"
+        },
+        {
           "name": "vulnerable_populations",
-          "description": "Information about protections for at-risk populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.",
+          "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.",
           "range": "VulnerablePopulations",
           "inlined": true,
           "@type": "SlotDefinition"
@@ -6405,6 +6563,8 @@
         "dataset__data_protection_impacts",
         "dataset__human_subject_research",
         "dataset__informed_consent",
+        "dataset__participant_privacy",
+        "dataset__participant_compensation",
         "dataset__vulnerable_populations",
         "dataset__preprocessing_strategies",
         "dataset__cleaning_strategies",
@@ -8993,9 +9153,108 @@
       "@type": "ClassDefinition"
     },
     {
+      "name": "ParticipantPrivacy",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#ParticipantPrivacy",
+      "description": "Information about privacy protections and anonymization procedures for human research participants.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "datasetProperty__id",
+        "datasetProperty__name",
+        "datasetProperty__description",
+        "datasetProperty__used_software",
+        "participantPrivacy__anonymization_method",
+        "participantPrivacy__reidentification_risk",
+        "participantPrivacy__privacy_techniques",
+        "participantPrivacy__data_linkage"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "anonymization_method",
+          "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "reidentification_risk",
+          "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "privacy_techniques",
+          "description": "What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data masking)?\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "data_linkage",
+          "description": "Can this dataset be linked to other datasets in ways that might compromise participant privacy?\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#ParticipantPrivacy",
+      "@type": "ClassDefinition"
+    },
+    {
+      "name": "HumanSubjectCompensation",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#HumanSubjectCompensation",
+      "description": "Information about compensation or incentives provided to human research participants.\n",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
+      "is_a": "DatasetProperty",
+      "slots": [
+        "datasetProperty__id",
+        "datasetProperty__name",
+        "datasetProperty__description",
+        "datasetProperty__used_software",
+        "humanSubjectCompensation__compensation_provided",
+        "humanSubjectCompensation__compensation_type",
+        "humanSubjectCompensation__compensation_amount",
+        "humanSubjectCompensation__compensation_rationale"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "compensation_provided",
+          "description": "Were participants compensated for their participation?",
+          "range": "boolean",
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "compensation_type",
+          "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "compensation_amount",
+          "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        },
+        {
+          "name": "compensation_rationale",
+          "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
+          "range": "string",
+          "multivalued": true,
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#HumanSubjectCompensation",
+      "@type": "ClassDefinition"
+    },
+    {
       "name": "VulnerablePopulations",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/human#VulnerablePopulations",
-      "description": "Information about protections for at-risk populations in human subjects research.\n",
+      "description": "Information about protections for vulnerable populations in human subjects research.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/human",
       "is_a": "DatasetProperty",
       "slots": [
@@ -9012,13 +9271,13 @@
       "attributes": [
         {
           "name": "vulnerable_groups_included",
-          "description": "Are any at-risk populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
+          "description": "Are any vulnerable populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
           "range": "boolean",
           "@type": "SlotDefinition"
         },
         {
           "name": "special_protections",
-          "description": "What additional protections were implemented for at-risk populations? Include safeguards, modified procedures, or additional oversight.\n",
+          "description": "What additional protections were implemented for vulnerable populations? Include safeguards, modified procedures, or additional oversight.\n",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -9336,9 +9595,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-03-09T13:04:46",
-  "source_file_size": 14675,
-  "generation_date": "2026-03-09T13:05:09",
+  "source_file_date": "2025-12-18T23:38:21",
+  "source_file_size": 15161,
+  "generation_date": "2025-12-19T20:27:47",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

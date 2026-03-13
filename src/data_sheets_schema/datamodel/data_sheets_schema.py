@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-03-09T13:05:10
+# Generation date: 2025-12-19T20:27:48
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -478,6 +478,8 @@ class Dataset(Information):
     data_protection_impacts: Optional[Union[Union[dict, "DataProtectionImpact"], list[Union[dict, "DataProtectionImpact"]]]] = empty_list()
     human_subject_research: Optional[Union[dict, "HumanSubjectResearch"]] = None
     informed_consent: Optional[Union[Union[dict, "InformedConsent"], list[Union[dict, "InformedConsent"]]]] = empty_list()
+    participant_privacy: Optional[Union[Union[dict, "ParticipantPrivacy"], list[Union[dict, "ParticipantPrivacy"]]]] = empty_list()
+    participant_compensation: Optional[Union[dict, "HumanSubjectCompensation"]] = None
     vulnerable_populations: Optional[Union[dict, "VulnerablePopulations"]] = None
     preprocessing_strategies: Optional[Union[Union[dict, "PreprocessingStrategy"], list[Union[dict, "PreprocessingStrategy"]]]] = empty_list()
     cleaning_strategies: Optional[Union[Union[dict, "CleaningStrategy"], list[Union[dict, "CleaningStrategy"]]]] = empty_list()
@@ -646,6 +648,13 @@ class Dataset(Information):
         if not isinstance(self.informed_consent, list):
             self.informed_consent = [self.informed_consent] if self.informed_consent is not None else []
         self.informed_consent = [v if isinstance(v, InformedConsent) else InformedConsent(**as_dict(v)) for v in self.informed_consent]
+
+        if not isinstance(self.participant_privacy, list):
+            self.participant_privacy = [self.participant_privacy] if self.participant_privacy is not None else []
+        self.participant_privacy = [v if isinstance(v, ParticipantPrivacy) else ParticipantPrivacy(**as_dict(v)) for v in self.participant_privacy]
+
+        if self.participant_compensation is not None and not isinstance(self.participant_compensation, HumanSubjectCompensation):
+            self.participant_compensation = HumanSubjectCompensation(**as_dict(self.participant_compensation))
 
         if self.vulnerable_populations is not None and not isinstance(self.vulnerable_populations, VulnerablePopulations):
             self.vulnerable_populations = VulnerablePopulations(**as_dict(self.vulnerable_populations))
@@ -2545,9 +2554,82 @@ class InformedConsent(DatasetProperty):
 
 
 @dataclass(repr=False)
+class ParticipantPrivacy(DatasetProperty):
+    """
+    Information about privacy protections and anonymization procedures for human research participants.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["ParticipantPrivacy"]
+    class_class_curie: ClassVar[str] = "d4dhuman:ParticipantPrivacy"
+    class_name: ClassVar[str] = "ParticipantPrivacy"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.ParticipantPrivacy
+
+    anonymization_method: Optional[Union[str, list[str]]] = empty_list()
+    reidentification_risk: Optional[Union[str, list[str]]] = empty_list()
+    privacy_techniques: Optional[Union[str, list[str]]] = empty_list()
+    data_linkage: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if not isinstance(self.anonymization_method, list):
+            self.anonymization_method = [self.anonymization_method] if self.anonymization_method is not None else []
+        self.anonymization_method = [v if isinstance(v, str) else str(v) for v in self.anonymization_method]
+
+        if not isinstance(self.reidentification_risk, list):
+            self.reidentification_risk = [self.reidentification_risk] if self.reidentification_risk is not None else []
+        self.reidentification_risk = [v if isinstance(v, str) else str(v) for v in self.reidentification_risk]
+
+        if not isinstance(self.privacy_techniques, list):
+            self.privacy_techniques = [self.privacy_techniques] if self.privacy_techniques is not None else []
+        self.privacy_techniques = [v if isinstance(v, str) else str(v) for v in self.privacy_techniques]
+
+        if not isinstance(self.data_linkage, list):
+            self.data_linkage = [self.data_linkage] if self.data_linkage is not None else []
+        self.data_linkage = [v if isinstance(v, str) else str(v) for v in self.data_linkage]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
+class HumanSubjectCompensation(DatasetProperty):
+    """
+    Information about compensation or incentives provided to human research participants.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = D4DHUMAN["HumanSubjectCompensation"]
+    class_class_curie: ClassVar[str] = "d4dhuman:HumanSubjectCompensation"
+    class_name: ClassVar[str] = "HumanSubjectCompensation"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.HumanSubjectCompensation
+
+    compensation_provided: Optional[Union[bool, Bool]] = None
+    compensation_type: Optional[Union[str, list[str]]] = empty_list()
+    compensation_amount: Optional[Union[str, list[str]]] = empty_list()
+    compensation_rationale: Optional[Union[str, list[str]]] = empty_list()
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self.compensation_provided is not None and not isinstance(self.compensation_provided, Bool):
+            self.compensation_provided = Bool(self.compensation_provided)
+
+        if not isinstance(self.compensation_type, list):
+            self.compensation_type = [self.compensation_type] if self.compensation_type is not None else []
+        self.compensation_type = [v if isinstance(v, str) else str(v) for v in self.compensation_type]
+
+        if not isinstance(self.compensation_amount, list):
+            self.compensation_amount = [self.compensation_amount] if self.compensation_amount is not None else []
+        self.compensation_amount = [v if isinstance(v, str) else str(v) for v in self.compensation_amount]
+
+        if not isinstance(self.compensation_rationale, list):
+            self.compensation_rationale = [self.compensation_rationale] if self.compensation_rationale is not None else []
+        self.compensation_rationale = [v if isinstance(v, str) else str(v) for v in self.compensation_rationale]
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
 class VulnerablePopulations(DatasetProperty):
     """
-    Information about protections for at-risk populations in human subjects research.
+    Information about protections for vulnerable populations in human subjects research.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -3579,6 +3661,12 @@ slots.dataset__human_subject_research = Slot(uri=DATA_SHEETS_SCHEMA.human_subjec
 slots.dataset__informed_consent = Slot(uri=DATA_SHEETS_SCHEMA.informed_consent, name="dataset__informed_consent", curie=DATA_SHEETS_SCHEMA.curie('informed_consent'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__informed_consent, domain=None, range=Optional[Union[Union[dict, InformedConsent], list[Union[dict, InformedConsent]]]])
 
+slots.dataset__participant_privacy = Slot(uri=DATA_SHEETS_SCHEMA.participant_privacy, name="dataset__participant_privacy", curie=DATA_SHEETS_SCHEMA.curie('participant_privacy'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__participant_privacy, domain=None, range=Optional[Union[Union[dict, ParticipantPrivacy], list[Union[dict, ParticipantPrivacy]]]])
+
+slots.dataset__participant_compensation = Slot(uri=DATA_SHEETS_SCHEMA.participant_compensation, name="dataset__participant_compensation", curie=DATA_SHEETS_SCHEMA.curie('participant_compensation'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__participant_compensation, domain=None, range=Optional[Union[dict, HumanSubjectCompensation]])
+
 slots.dataset__vulnerable_populations = Slot(uri=DATA_SHEETS_SCHEMA.vulnerable_populations, name="dataset__vulnerable_populations", curie=DATA_SHEETS_SCHEMA.curie('vulnerable_populations'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__vulnerable_populations, domain=None, range=Optional[Union[dict, VulnerablePopulations]])
 
@@ -4158,6 +4246,30 @@ slots.informedConsent__withdrawal_mechanism = Slot(uri=D4DHUMAN.withdrawal_mecha
 
 slots.informedConsent__consent_scope = Slot(uri=D4DHUMAN.consent_scope, name="informedConsent__consent_scope", curie=D4DHUMAN.curie('consent_scope'),
                    model_uri=DATA_SHEETS_SCHEMA.informedConsent__consent_scope, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.participantPrivacy__anonymization_method = Slot(uri=D4DHUMAN.anonymization_method, name="participantPrivacy__anonymization_method", curie=D4DHUMAN.curie('anonymization_method'),
+                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__anonymization_method, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.participantPrivacy__reidentification_risk = Slot(uri=D4DHUMAN.reidentification_risk, name="participantPrivacy__reidentification_risk", curie=D4DHUMAN.curie('reidentification_risk'),
+                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__reidentification_risk, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.participantPrivacy__privacy_techniques = Slot(uri=D4DHUMAN.privacy_techniques, name="participantPrivacy__privacy_techniques", curie=D4DHUMAN.curie('privacy_techniques'),
+                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__privacy_techniques, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.participantPrivacy__data_linkage = Slot(uri=D4DHUMAN.data_linkage, name="participantPrivacy__data_linkage", curie=D4DHUMAN.curie('data_linkage'),
+                   model_uri=DATA_SHEETS_SCHEMA.participantPrivacy__data_linkage, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.humanSubjectCompensation__compensation_provided = Slot(uri=D4DHUMAN.compensation_provided, name="humanSubjectCompensation__compensation_provided", curie=D4DHUMAN.curie('compensation_provided'),
+                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_provided, domain=None, range=Optional[Union[bool, Bool]])
+
+slots.humanSubjectCompensation__compensation_type = Slot(uri=D4DHUMAN.compensation_type, name="humanSubjectCompensation__compensation_type", curie=D4DHUMAN.curie('compensation_type'),
+                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_type, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.humanSubjectCompensation__compensation_amount = Slot(uri=D4DHUMAN.compensation_amount, name="humanSubjectCompensation__compensation_amount", curie=D4DHUMAN.curie('compensation_amount'),
+                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_amount, domain=None, range=Optional[Union[str, list[str]]])
+
+slots.humanSubjectCompensation__compensation_rationale = Slot(uri=D4DHUMAN.compensation_rationale, name="humanSubjectCompensation__compensation_rationale", curie=D4DHUMAN.curie('compensation_rationale'),
+                   model_uri=DATA_SHEETS_SCHEMA.humanSubjectCompensation__compensation_rationale, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.vulnerablePopulations__vulnerable_groups_included = Slot(uri=D4DHUMAN.vulnerable_groups_included, name="vulnerablePopulations__vulnerable_groups_included", curie=D4DHUMAN.curie('vulnerable_groups_included'),
                    model_uri=DATA_SHEETS_SCHEMA.vulnerablePopulations__vulnerable_groups_included, domain=None, range=Optional[Union[bool, Bool]])

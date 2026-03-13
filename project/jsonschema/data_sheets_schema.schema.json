@@ -1412,6 +1412,27 @@
                         "null"
                     ]
                 },
+                "participant_compensation": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/HumanSubjectCompensation"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Compensation or incentives provided to human research participants."
+                },
+                "participant_privacy": {
+                    "description": "Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.",
+                    "items": {
+                        "$ref": "#/$defs/ParticipantPrivacy"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "path": {
                     "type": [
                         "string",
@@ -1630,7 +1651,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "Information about protections for at-risk populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
+                    "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
                 },
                 "was_derived_from": {
                     "type": [
@@ -2204,6 +2225,27 @@
                         "null"
                     ]
                 },
+                "participant_compensation": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/HumanSubjectCompensation"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Compensation or incentives provided to human research participants."
+                },
+                "participant_privacy": {
+                    "description": "Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.",
+                    "items": {
+                        "$ref": "#/$defs/ParticipantPrivacy"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "path": {
                     "type": [
                         "string",
@@ -2422,7 +2464,7 @@
                             "type": "null"
                         }
                     ],
-                    "description": "Information about protections for at-risk populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
+                    "description": "Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
                 },
                 "was_derived_from": {
                     "type": [
@@ -3774,6 +3816,82 @@
             "title": "Grantor",
             "type": "object"
         },
+        "HumanSubjectCompensation": {
+            "additionalProperties": false,
+            "description": "Information about compensation or incentives provided to human research participants.",
+            "properties": {
+                "compensation_amount": {
+                    "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "compensation_provided": {
+                    "description": "Were participants compensated for their participation?",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "compensation_rationale": {
+                    "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "compensation_type": {
+                    "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "HumanSubjectCompensation",
+            "type": "object"
+        },
         "HumanSubjectResearch": {
             "additionalProperties": false,
             "description": "Information about whether the dataset involves human subjects research and what regulatory or ethical review processes were followed.",
@@ -5026,6 +5144,85 @@
             "title": "OtherTask",
             "type": "object"
         },
+        "ParticipantPrivacy": {
+            "additionalProperties": false,
+            "description": "Information about privacy protections and anonymization procedures for human research participants.",
+            "properties": {
+                "anonymization_method": {
+                    "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "data_linkage": {
+                    "description": "Can this dataset be linked to other datasets in ways that might compromise participant privacy?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "privacy_techniques": {
+                    "description": "What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data masking)?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "reidentification_risk": {
+                    "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "ParticipantPrivacy",
+            "type": "object"
+        },
         "Person": {
             "additionalProperties": false,
             "description": "An individual human being. This class represents a person in the context of a specific dataset. Attributes like affiliation and email represent the person's current or most relevant contact information for this dataset. For stable cross-dataset identification, use the ORCID field. Note that contributor roles (CRediT) are specified in the usage context (e.g., Creator class) rather than on the Person directly, since roles vary by dataset.",
@@ -6240,7 +6437,7 @@
         },
         "VulnerablePopulations": {
             "additionalProperties": false,
-            "description": "Information about protections for at-risk populations in human subjects research.",
+            "description": "Information about protections for vulnerable populations in human subjects research.",
             "properties": {
                 "assent_procedures": {
                     "description": "For research involving minors, what assent procedures were used? How was developmentally appropriate assent obtained?\n",
@@ -6284,7 +6481,7 @@
                     ]
                 },
                 "special_protections": {
-                    "description": "What additional protections were implemented for at-risk populations? Include safeguards, modified procedures, or additional oversight.\n",
+                    "description": "What additional protections were implemented for vulnerable populations? Include safeguards, modified procedures, or additional oversight.\n",
                     "items": {
                         "type": "string"
                     },
@@ -6304,7 +6501,7 @@
                     ]
                 },
                 "vulnerable_groups_included": {
-                    "description": "Are any at-risk populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
+                    "description": "Are any vulnerable populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
                     "type": [
                         "boolean",
                         "null"

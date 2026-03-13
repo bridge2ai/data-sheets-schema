@@ -238,11 +238,23 @@ classes:
         description: >-
           Details about informed consent procedures, including consent type,
           documentation, and withdrawal mechanisms.
+      participant_privacy:
+        range: ParticipantPrivacy
+        multivalued: true
+        inlined_as_list: true
+        description: >-
+          Privacy protections and anonymization procedures for human research
+          participants, including reidentification risk assessment.
+      participant_compensation:
+        range: HumanSubjectCompensation
+        inlined: true
+        description: >-
+          Compensation or incentives provided to human research participants.
       vulnerable_populations:
         range: VulnerablePopulations
         inlined: true
         description: >-
-          Information about protections for at-risk populations (e.g., minors,
+          Information about protections for vulnerable populations (e.g., minors,
           pregnant women, prisoners) including special safeguards and assent procedures.
       # Preprocessing module classes
       preprocessing_strategies:

@@ -1,9 +1,0 @@
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] Additional properties are not allowed ('external_resource' was unexpected) in /
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] 'Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; Bélisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T' is not of type 'object' in /creators/0
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] 'Forget A, Obernier K, Krogan N' is not of type 'object' in /creators/1
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] 'Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe Belisle-Pipon jean-christophe_belisle-pipon@sfu.ca.' is not of type 'array', 'null' in /ethical_reviews
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] 'https://creativecommons.org/licenses/by-nc-sa/4.0/' is not valid under any of the given schemas in /license_and_use_terms
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] 'https://creativecommons.org/licenses/by-nc-sa/4.0/' is not valid under any of the given schemas in /ip_restrictions
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] '1.0' is not valid under any of the given schemas in /version_access
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] 'https://creativecommons.org/licenses/by-nc-sa/4.0/' is not valid under any of the given schemas in /extension_mechanism
-[ERROR] [data/test/CM4AI_merge_test.yaml/0] 'id' is a required property in /

@@ -2129,9 +2129,32 @@ classes:
         multivalued: true
         inlined: true
         inlined_as_list: true
+      participant_privacy:
+        name: participant_privacy
+        description: Privacy protections and anonymization procedures for human research
+          participants, including reidentification risk assessment.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: participant_privacy
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: ParticipantPrivacy
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      participant_compensation:
+        name: participant_compensation
+        description: Compensation or incentives provided to human research participants.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: participant_compensation
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: HumanSubjectCompensation
+        inlined: true
       vulnerable_populations:
         name: vulnerable_populations
-        description: Information about protections for at-risk populations (e.g.,
+        description: Information about protections for vulnerable populations (e.g.,
           minors, pregnant women, prisoners) including special safeguards and assent
           procedures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3350,9 +3373,31 @@ classes:
         range: InformedConsent
         multivalued: true
         inlined_as_list: true
+      participant_privacy:
+        name: participant_privacy
+        description: Privacy protections and anonymization procedures for human research
+          participants, including reidentification risk assessment.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: participant_privacy
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: ParticipantPrivacy
+        multivalued: true
+        inlined_as_list: true
+      participant_compensation:
+        name: participant_compensation
+        description: Compensation or incentives provided to human research participants.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        alias: participant_compensation
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: HumanSubjectCompensation
+        inlined: true
       vulnerable_populations:
         name: vulnerable_populations
-        description: Information about protections for at-risk populations (e.g.,
+        description: Information about protections for vulnerable populations (e.g.,
           minors, pregnant women, prisoners) including special safeguards and assent
           procedures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -4262,6 +4307,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -4343,6 +4390,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -4424,6 +4473,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -4494,6 +4545,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5248,6 +5301,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5329,6 +5384,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5410,6 +5467,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5480,6 +5539,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5582,6 +5643,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5663,6 +5726,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5744,6 +5809,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5814,6 +5881,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5918,6 +5987,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5999,6 +6070,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6080,6 +6153,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6150,6 +6225,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6283,6 +6360,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6364,6 +6443,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6445,6 +6526,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6515,6 +6598,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6632,6 +6717,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6713,6 +6800,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6794,6 +6883,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6864,6 +6955,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7237,6 +7330,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7318,6 +7413,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7399,6 +7496,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7469,6 +7568,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7646,6 +7747,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7727,6 +7830,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7808,6 +7913,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7878,6 +7985,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7997,6 +8106,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8078,6 +8189,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8159,6 +8272,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8229,6 +8344,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8336,6 +8453,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8417,6 +8536,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8498,6 +8619,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8568,6 +8691,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8674,6 +8799,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8755,6 +8882,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8836,6 +8965,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8906,6 +9037,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9011,6 +9144,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9092,6 +9227,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9173,6 +9310,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9243,6 +9382,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9388,6 +9529,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9469,6 +9612,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9550,6 +9695,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9620,6 +9767,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9762,6 +9911,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9843,6 +9994,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9924,6 +10077,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9994,6 +10149,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10150,6 +10307,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10231,6 +10390,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10312,6 +10473,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10382,6 +10545,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10497,6 +10662,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10578,6 +10745,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10659,6 +10828,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10729,6 +10900,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10841,6 +11014,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10922,6 +11097,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11003,6 +11180,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11073,6 +11252,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11195,6 +11376,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11276,6 +11459,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11357,6 +11542,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11427,6 +11614,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11561,6 +11750,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11642,6 +11833,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11723,6 +11916,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11793,6 +11988,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11910,6 +12107,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11991,6 +12190,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12072,6 +12273,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12142,6 +12345,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12298,6 +12503,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12379,6 +12586,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12449,6 +12658,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12591,6 +12802,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12672,6 +12885,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12753,6 +12968,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12823,6 +13040,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12932,6 +13151,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13013,6 +13234,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13094,6 +13317,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13164,6 +13389,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13280,6 +13507,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13361,6 +13590,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13442,6 +13673,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13512,6 +13745,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13639,6 +13874,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13720,6 +13957,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13801,6 +14040,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13871,6 +14112,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13986,6 +14229,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14067,6 +14312,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14148,6 +14395,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14218,6 +14467,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14351,6 +14602,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14432,6 +14685,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14513,6 +14768,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14583,6 +14840,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14728,6 +14987,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14809,6 +15070,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14890,6 +15153,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14960,6 +15225,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15068,6 +15335,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15149,6 +15418,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15230,6 +15501,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15300,6 +15573,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15408,6 +15683,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15489,6 +15766,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15570,6 +15849,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15640,6 +15921,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15810,6 +16093,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15891,6 +16176,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15972,6 +16259,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16042,6 +16331,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16157,6 +16448,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16238,6 +16531,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16319,6 +16614,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16389,6 +16686,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16533,6 +16832,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16614,6 +16915,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16695,6 +16998,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16765,6 +17070,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16920,6 +17227,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17001,6 +17310,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17082,6 +17393,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17152,6 +17465,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17291,6 +17606,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17372,6 +17689,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17453,6 +17772,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17523,6 +17844,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17627,6 +17950,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17708,6 +18033,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17789,6 +18116,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17859,6 +18188,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17974,6 +18305,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18055,6 +18388,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18136,6 +18471,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18206,6 +18543,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18311,6 +18650,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18392,6 +18733,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18473,6 +18816,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18543,6 +18888,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18654,6 +19001,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18735,6 +19084,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18816,6 +19167,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18886,6 +19239,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18991,6 +19346,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19072,6 +19429,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19153,6 +19512,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19223,6 +19584,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19351,6 +19714,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19432,6 +19797,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19513,6 +19880,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19583,6 +19952,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19688,6 +20059,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19769,6 +20142,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19850,6 +20225,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19920,6 +20297,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20027,6 +20406,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20108,6 +20489,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20189,6 +20572,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20259,6 +20644,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20363,6 +20750,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20444,6 +20833,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20525,6 +20916,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20595,6 +20988,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20701,6 +21096,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20782,6 +21179,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20863,6 +21262,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20933,6 +21334,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21051,6 +21454,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21132,6 +21537,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21213,6 +21620,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21283,6 +21692,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21398,6 +21809,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21479,6 +21892,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21560,6 +21975,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21630,6 +22047,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21749,6 +22168,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21830,6 +22251,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21911,6 +22334,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21981,6 +22406,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22098,6 +22525,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22179,6 +22608,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22260,6 +22691,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22330,6 +22763,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22455,6 +22890,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22536,6 +22973,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22617,6 +23056,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22687,6 +23128,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22804,6 +23247,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22885,6 +23330,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22966,6 +23413,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23036,6 +23485,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23173,6 +23624,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23254,6 +23707,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23335,6 +23790,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23405,6 +23862,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23514,6 +23973,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23595,6 +24056,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23676,6 +24139,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23746,6 +24211,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23853,6 +24320,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23934,6 +24403,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24015,6 +24486,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24085,6 +24558,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24192,6 +24667,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24273,6 +24750,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24354,6 +24833,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24424,6 +24905,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24531,6 +25014,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24612,6 +25097,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24693,6 +25180,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24763,6 +25252,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24917,6 +25408,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24998,6 +25491,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25079,6 +25574,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25149,6 +25646,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25303,6 +25802,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25384,6 +25885,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25465,6 +25968,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25535,6 +26040,774 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  ParticipantPrivacy:
+    name: ParticipantPrivacy
+    description: 'Information about privacy protections and anonymization procedures
+      for human research participants.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    is_a: DatasetProperty
+    attributes:
+      anonymization_method:
+        name: anonymization_method
+        description: 'What methods were used to anonymize or de-identify participant
+          data? Include technical details of privacy-preserving techniques.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        alias: anonymization_method
+        owner: ParticipantPrivacy
+        domain_of:
+        - ParticipantPrivacy
+        range: string
+        multivalued: true
+      reidentification_risk:
+        name: reidentification_risk
+        description: 'What is the assessed risk of re-identification? What measures
+          were taken to minimize this risk?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        alias: reidentification_risk
+        owner: ParticipantPrivacy
+        domain_of:
+        - ParticipantPrivacy
+        range: string
+        multivalued: true
+      privacy_techniques:
+        name: privacy_techniques
+        description: 'What privacy-preserving techniques were applied (e.g., differential
+          privacy, k-anonymity, data masking)?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        alias: privacy_techniques
+        owner: ParticipantPrivacy
+        domain_of:
+        - ParticipantPrivacy
+        range: string
+        multivalued: true
+      data_linkage:
+        name: data_linkage
+        description: 'Can this dataset be linked to other datasets in ways that might
+          compromise participant privacy?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        alias: data_linkage
+        owner: ParticipantPrivacy
+        domain_of:
+        - ParticipantPrivacy
+        range: string
+        multivalued: true
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: ParticipantPrivacy
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: ParticipantPrivacy
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: ParticipantPrivacy
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        alias: used_software
+        owner: ParticipantPrivacy
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  HumanSubjectCompensation:
+    name: HumanSubjectCompensation
+    description: 'Information about compensation or incentives provided to human research
+      participants.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    is_a: DatasetProperty
+    attributes:
+      compensation_provided:
+        name: compensation_provided
+        description: Were participants compensated for their participation?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        alias: compensation_provided
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: boolean
+      compensation_type:
+        name: compensation_type
+        description: 'What type of compensation was provided (e.g., monetary payment,
+          gift cards, course credit, other incentives)?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        alias: compensation_type
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: string
+        multivalued: true
+      compensation_amount:
+        name: compensation_amount
+        description: 'What was the amount or value of compensation provided? Include
+          currency or equivalent value.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        alias: compensation_amount
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: string
+        multivalued: true
+      compensation_rationale:
+        name: compensation_rationale
+        description: 'What was the rationale for the compensation structure? How was
+          the amount determined to be appropriate?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        alias: compensation_rationale
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: string
+        multivalued: true
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: HumanSubjectCompensation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: HumanSubjectCompensation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: HumanSubjectCompensation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        alias: used_software
+        owner: HumanSubjectCompensation
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25545,8 +26818,8 @@ classes:
         inlined_as_list: true
   VulnerablePopulations:
     name: VulnerablePopulations
-    description: 'Information about protections for at-risk populations in human subjects
-      research.
+    description: 'Information about protections for vulnerable populations in human
+      subjects research.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -25554,7 +26827,7 @@ classes:
     attributes:
       vulnerable_groups_included:
         name: vulnerable_groups_included
-        description: 'Are any at-risk populations included (e.g., children, pregnant
+        description: 'Are any vulnerable populations included (e.g., children, pregnant
           women, prisoners, cognitively impaired individuals)?
 
           '
@@ -25566,8 +26839,8 @@ classes:
         range: boolean
       special_protections:
         name: special_protections
-        description: 'What additional protections were implemented for at-risk populations?
-          Include safeguards, modified procedures, or additional oversight.
+        description: 'What additional protections were implemented for vulnerable
+          populations? Include safeguards, modified procedures, or additional oversight.
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
@@ -25679,6 +26952,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25760,6 +27035,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25841,6 +27118,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25911,6 +27190,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26051,6 +27332,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26132,6 +27415,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26213,6 +27498,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26283,6 +27570,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26393,6 +27682,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26474,6 +27765,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26555,6 +27848,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26625,6 +27920,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26784,6 +28081,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26865,6 +28164,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26946,6 +28247,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27016,6 +28319,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27272,6 +28577,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27353,6 +28660,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27434,6 +28743,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27504,6 +28815,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
