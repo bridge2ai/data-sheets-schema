@@ -1,0 +1,39 @@
+# D4D Datasheet Generated from RO-Crate
+# Source: minimal-ro-crate.json
+# Mapping: D4D - RO-Crate - RAI Mappings.xlsx - Class Alignment.tsv
+# Generated: 2026-02-24T15:56:00.559395
+# Generator: d4d-rocrate skill
+
+acquisition_methods: Survey
+bytes: 1048576
+collection_mechanisms: Survey
+confidential_elements: Contains demographic data
+created_on: '2024-01-15'
+creators:
+- John Doe
+description: A minimal RO-Crate for testing D4D transformation
+distribution_dates: '2024-01-15'
+doi: https://doi.org/10.1234/test.dataset
+existing_uses: Research in machine learning fairness
+extension_mechanism: https://creativecommons.org/licenses/by/4.0/
+hash: 5d41402abc4b2a76b9719d911017c592
+intended_uses: Research in machine learning fairness
+ip_restrictions: https://creativecommons.org/licenses/by/4.0/
+issued: '2024-01-15'
+keywords:
+- test
+- minimal
+- ro-crate
+- d4d
+language: en
+license: https://creativecommons.org/licenses/by/4.0/
+license_and_use_terms: https://creativecommons.org/licenses/by/4.0/
+md5: 5d41402abc4b2a76b9719d911017c592
+other_tasks: Research in machine learning fairness
+page: https://example.org/datasets/test
+sensitive_elements: Contains demographic data
+sha256: 6ca13d52ca70c883e0f0bb101e425a89e8624de51db2d2392593af6a84118090
+tasks: Research in machine learning fairness
+title: Minimal Test Dataset
+version: 1.0.0
+version_access: 1.0.0

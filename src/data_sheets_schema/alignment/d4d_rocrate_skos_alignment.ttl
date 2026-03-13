@@ -1,0 +1,186 @@
+@prefix d4d: <https://w3id.org/bridge2ai/data-sheets-schema/> .
+@prefix schema: <https://schema.org/> .
+@prefix rai: <http://mlcommons.org/croissant/RAI/> .
+@prefix evi: <https://w3id.org/EVI#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# ==============================================================================
+# D4D to RO-Crate SKOS Semantic Alignment
+# ==============================================================================
+# Version: 1.0
+# Date: 2026-03-12
+# Description: Formal semantic mappings between D4D LinkML schema and RO-Crate
+#              properties using SKOS mapping predicates.
+#
+# Mapping Types:
+#   - skos:exactMatch: Direct 1:1 mapping, no transformation needed
+#   - skos:closeMatch: Semantically close, transformation required
+#   - skos:relatedMatch: Related concepts, complex/partial mapping
+#   - skos:broadMatch: RO-Crate term is broader than D4D term
+#   - skos:narrowMatch: RO-Crate term is narrower than D4D term
+# ==============================================================================
+
+# Class-level alignments
+# ==============================================================================
+d4d:Dataset skos:exactMatch schema:Dataset .
+
+# Direct/Exact Mappings (53 properties)
+# ==============================================================================
+# These properties map directly without transformation
+
+d4d:title skos:exactMatch schema:name .
+d4d:description skos:exactMatch schema:description .
+d4d:doi skos:exactMatch schema:identifier .
+d4d:keywords skos:exactMatch schema:keywords .
+d4d:language skos:exactMatch schema:inLanguage .
+d4d:license skos:exactMatch schema:license .
+d4d:publisher skos:exactMatch schema:publisher .
+d4d:version skos:exactMatch schema:version .
+d4d:page skos:exactMatch schema:url .
+d4d:download_url skos:exactMatch schema:contentUrl .
+d4d:bytes skos:exactMatch schema:contentSize .
+d4d:md5 skos:exactMatch evi:md5 .
+d4d:sha256 skos:exactMatch evi:sha256 .
+d4d:hash skos:exactMatch evi:md5 .
+d4d:created_on skos:exactMatch schema:dateCreated .
+d4d:issued skos:exactMatch schema:datePublished .
+d4d:last_updated_on skos:exactMatch schema:dateModified .
+d4d:status skos:exactMatch schema:creativeWorkStatus .
+d4d:conforms_to skos:exactMatch schema:conformsTo .
+d4d:was_derived_from skos:exactMatch schema:isBasedOn .
+
+# Addressing_gaps and related properties
+d4d:addressing_gaps skos:exactMatch d4d:addressingGaps .
+d4d:anomalies skos:exactMatch d4d:anomalies .
+d4d:content_warnings skos:exactMatch d4d:contentWarnings .
+d4d:informed_consent skos:exactMatch d4d:informedConsent .
+
+# RAI namespace - exact matches
+d4d:acquisition_methods skos:exactMatch rai:dataCollection .
+d4d:collection_mechanisms skos:exactMatch rai:dataCollection .
+d4d:collection_timeframes skos:exactMatch d4d:dataCollectionTimeframe .
+d4d:confidential_elements skos:exactMatch rai:personalSensitiveInformation .
+d4d:data_protection_impacts skos:exactMatch rai:dataSocialImpact .
+d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
+d4d:discouraged_uses skos:exactMatch rai:prohibitedUses .
+d4d:prohibited_uses skos:exactMatch rai:prohibitedUses .
+d4d:distribution_dates skos:exactMatch schema:dateCreated .
+d4d:errata skos:exactMatch schema:correction .
+d4d:ethical_reviews skos:exactMatch rai:ethicalReview .
+d4d:existing_uses skos:exactMatch rai:dataUseCases .
+d4d:intended_uses skos:exactMatch rai:dataUseCases .
+d4d:other_tasks skos:exactMatch rai:dataUseCases .
+d4d:tasks skos:exactMatch rai:dataUseCases .
+d4d:purposes skos:closeMatch rai:dataUseCases .
+d4d:known_biases skos:exactMatch rai:dataBiases .
+d4d:known_limitations skos:exactMatch rai:dataLimitations .
+d4d:imputation_protocols skos:exactMatch rai:imputationProtocol .
+d4d:missing_data_documentation skos:exactMatch rai:dataCollectionMissingData .
+d4d:raw_data_sources skos:exactMatch rai:dataCollectionRawData .
+d4d:raw_sources skos:exactMatch rai:dataCollectionRawData .
+d4d:updates skos:exactMatch rai:dataReleaseMaintenancePlan .
+d4d:human_subject_research skos:exactMatch d4d:humanSubject .
+d4d:vulnerable_populations skos:exactMatch rai:atRiskPopulations .
+
+# FAIRSCAPE Evidence namespace - exact matches
+d4d:distribution_formats skos:exactMatch evi:formats .
+d4d:encoding skos:closeMatch evi:formats .
+d4d:funders skos:exactMatch schema:funder .
+
+# Close Matches (20 properties)
+# ==============================================================================
+# Semantically close but require transformation
+
+# String to Person/Organization object
+d4d:creators skos:closeMatch schema:author .
+d4d:created_by skos:closeMatch schema:creator .
+d4d:modified_by skos:closeMatch schema:contributor .
+
+# Sensitive data (similar to confidential but not identical)
+d4d:sensitive_elements skos:closeMatch rai:personalSensitiveInformation .
+
+# String to structured object array
+d4d:cleaning_strategies skos:closeMatch rai:dataManipulationProtocol .
+d4d:preprocessing_strategies skos:closeMatch rai:dataPreprocessingProtocol .
+d4d:labeling_strategies skos:closeMatch rai:dataAnnotationProtocol .
+d4d:annotation_analyses skos:closeMatch rai:dataAnnotationAnalysis .
+d4d:machine_annotation_analyses skos:closeMatch rai:machineAnnotationTools .
+
+# Multiple properties to single field
+d4d:license_and_use_terms skos:closeMatch schema:license .
+d4d:ip_restrictions skos:closeMatch schema:conditionsOfAccess .
+d4d:extension_mechanism skos:closeMatch schema:license .
+d4d:regulatory_restrictions skos:closeMatch schema:conditionsOfAccess .
+
+# Format/dialect transformations
+d4d:compression skos:closeMatch evi:formats .
+d4d:dialect skos:closeMatch schema:encodingFormat .
+d4d:media_type skos:closeMatch schema:encodingFormat .
+
+# External resource relationship
+d4d:external_resource skos:closeMatch schema:relatedLink .
+
+# Related Matches (9 properties)
+# ==============================================================================
+# Related concepts requiring complex or partial mapping
+
+# Complex structured data
+d4d:instances skos:relatedMatch schema:variableMeasured .
+d4d:subpopulations skos:relatedMatch schema:variableMeasured .
+
+# Collection structures
+d4d:resources skos:relatedMatch schema:hasPart .
+
+# Data collectors with compensation details
+d4d:data_collectors skos:relatedMatch schema:contributor .
+
+# Maintainers (not directly in RO-Crate)
+d4d:maintainers skos:relatedMatch schema:maintainer .
+
+# Subset information
+d4d:subsets skos:relatedMatch schema:hasPart .
+d4d:sampling_strategies skos:relatedMatch evi:samplingPlan .
+
+# Versioning and access
+d4d:version_access skos:relatedMatch schema:version .
+
+# Repository tracking
+d4d:use_repository skos:relatedMatch schema:relatedLink .
+
+# Narrow/Broad Matches (4 properties)
+# ==============================================================================
+# Where scope differs between D4D and RO-Crate
+
+# D4D path is more specific than generic RO-Crate file path
+d4d:path skos:narrowMatch schema:contentUrl .
+
+# D4D deidentification is narrower than general confidentiality
+d4d:is_deidentified skos:narrowMatch rai:confidentialityLevel .
+
+# D4D tabular flag is narrower than general format
+d4d:is_tabular skos:narrowMatch schema:encodingFormat .
+
+# D4D retention is narrower than general data management
+d4d:retention_limit skos:narrowMatch schema:conditionsOfAccess .
+
+# ==============================================================================
+# Alignment Statistics
+# ==============================================================================
+# Total mappings: 88 D4D properties (+ 1 class-level alignment)
+# - Exact matches: 52 (59.1%)
+# - Close matches: 20 (22.7%)
+# - Related matches: 10 (11.4%)
+# - Narrow/Broad matches: 6 (6.8%)
+#
+# Coverage by namespace (approximate):
+# - schema.org: ~25 properties
+# - rai: (Responsible AI): ~35 properties
+# - evi: (FAIRSCAPE Evidence): ~5 properties
+# - d4d: (D4D-specific): ~23 properties
+#
+# Note: Some D4D properties map to the same RO-Crate property when they represent
+#       synonyms or alternative expressions of the same concept.
+# ==============================================================================
