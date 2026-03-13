@@ -42,8 +42,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
 
-# Import transformation scripts
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / '.claude' / 'agents' / 'scripts'))
+# Import transformation scripts from .claude/agents/scripts/
+# Note: These are legacy recovered scripts not installed as a package
+scripts_dir = Path(__file__).resolve().parent.parent.parent / '.claude' / 'agents' / 'scripts'
+if scripts_dir.exists() and str(scripts_dir) not in sys.path:
+    sys.path.insert(0, str(scripts_dir))
 
 try:
     from mapping_loader import MappingLoader
@@ -55,7 +58,8 @@ try:
     from field_prioritizer import FieldPrioritizer
     SCRIPTS_AVAILABLE = True
 except ImportError as e:
-    print(f"Warning: Could not import transformation scripts: {e}")
+    print(f"Warning: Could not import transformation scripts from {scripts_dir}: {e}")
+    print("Ensure transformation scripts exist in .claude/agents/scripts/")
     SCRIPTS_AVAILABLE = False
 
 # Import validation framework
@@ -184,9 +188,15 @@ class SemanticTransformer:
         validate = validate if validate is not None else self.config.validate_output
 
         # Load RO-Crate data
+        cleanup_temp = False
         if isinstance(rocrate_input, dict):
-            rocrate_data = rocrate_input
+            # Save dict to temp file for ROCrateParser (expects file path)
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False, encoding='utf-8') as tmp:
+                json.dump(rocrate_input, tmp, indent=2)
+                rocrate_path = Path(tmp.name)
             source_path = "dict"
+            cleanup_temp = True
         elif isinstance(rocrate_input, (Path, str)):
             rocrate_path = Path(rocrate_input) if isinstance(rocrate_input, str) else rocrate_input
 
@@ -204,18 +214,28 @@ class SemanticTransformer:
                 if not syntax_ok:
                     raise ValueError(f"RO-Crate input validation failed: {rocrate_path}")
 
-            with open(rocrate_path, 'r', encoding='utf-8') as f:
-                rocrate_data = json.load(f)
             source_path = str(rocrate_path)
         else:
             raise TypeError(f"Unsupported input type: {type(rocrate_input)}")
 
-        # Parse RO-Crate
-        parser = ROCrateParser(rocrate_data)
+        try:
+            # Parse RO-Crate (expects file path string)
+            parser = ROCrateParser(str(rocrate_path))
 
-        # Build D4D structure
-        builder = D4DBuilder(parser, self.mapping_loader)
-        d4d_dict = builder.build_dataset()
+            # Build D4D structure
+            builder = D4DBuilder(self.mapping_loader)
+            d4d_dict = builder.build_dataset(parser)
+
+            # Track coverage statistics
+            covered_fields = self.mapping_loader.get_covered_fields()
+            mapped_count = len([f for f in covered_fields if d4d_dict.get(f) is not None])
+            coverage_percentage = (mapped_count / len(covered_fields) * 100) if covered_fields else 0.0
+            unmapped_fields = [f for f in covered_fields if d4d_dict.get(f) is None]
+
+        finally:
+            # Clean up temp file if created
+            if cleanup_temp and rocrate_path.exists():
+                rocrate_path.unlink()
 
         # Add transformation metadata
         if self.config.preserve_provenance:
@@ -225,8 +245,8 @@ class SemanticTransformer:
                 'transformation_date': datetime.now().isoformat(),
                 'mapping_version': 'v2_semantic',
                 'profile_level': self.config.profile_level,
-                'coverage_percentage': builder.get_coverage_percentage(),
-                'unmapped_fields': builder.get_unmapped_fields(),
+                'coverage_percentage': coverage_percentage,
+                'unmapped_fields': unmapped_fields,
                 'transformer_version': 'semantic_transformer_1.0'
             }
 
@@ -268,8 +288,8 @@ class SemanticTransformer:
             target="d4d",
             timestamp=datetime.now().isoformat(),
             mapping_version='v2_semantic',
-            coverage_percentage=builder.get_coverage_percentage(),
-            unmapped_fields=builder.get_unmapped_fields(),
+            coverage_percentage=coverage_percentage,
+            unmapped_fields=unmapped_fields,
             validation_passed=validation_passed,
             validation_errors=validation_errors,
             transformation_metadata=d4d_dict.get('transformation_metadata')
@@ -337,26 +357,28 @@ class SemanticTransformer:
 
         # Parse all RO-Crates
         parsers = []
+        source_names = []
         for rocrate_path in rocrate_inputs:
-            with open(rocrate_path, 'r', encoding='utf-8') as f:
-                rocrate_data = json.load(f)
-            parser = ROCrateParser(rocrate_data)
-            parsers.append((str(rocrate_path), parser))
+            parser = ROCrateParser(str(rocrate_path))
+            parsers.append(parser)
+            source_names.append(Path(rocrate_path).stem)
 
         # Rank by informativeness if requested
+        primary_index = 0
         if auto_prioritize:
-            scorer = InformativenessScorer([p for _, p in parsers])
-            ranked = scorer.rank_sources()
-            ranked_with_paths = list(zip([path for path, _ in parsers], ranked))
-        else:
-            ranked_with_paths = parsers
+            scorer = InformativenessScorer()
+            ranked = scorer.rank_rocrates(parsers, self.mapping_loader)
+            # ranked is List[(parser, scores, rank)] sorted by score
+            parsers = [parser for parser, scores, rank in ranked]
+            source_names = [Path(parser.rocrate_path).stem for parser in parsers]
+            primary_index = 0  # Highest ranked becomes primary
 
         # Merge using field prioritization
-        merger = ROCrateMerger(ranked_with_paths, self.mapping_loader, self.config.merge_strategy)
-        merged_d4d = merger.merge()
+        merger = ROCrateMerger(self.mapping_loader)
+        merged_d4d = merger.merge_rocrates(parsers, primary_index=primary_index, source_names=source_names)
 
         # Get merge report
-        merge_report = merger.get_report()
+        merge_report = merger.generate_merge_report(parsers, source_names=source_names)
 
         # Add transformation metadata
         if self.config.preserve_provenance:
@@ -437,13 +459,17 @@ class SemanticTransformer:
         if not self.mapping_loader:
             return {"error": "Mapping loader not initialized"}
 
+        covered_fields = self.mapping_loader.get_covered_fields()
+        all_rocrate_props = self.mapping_loader.get_all_mapped_rocrate_properties()
+        direct_mappings = [f for f in covered_fields if self.mapping_loader.is_direct_mapping(f)]
+
         return {
             "mapping_file": str(self.config.mapping_file),
-            "total_mappings": len(self.mapping_loader.get_all_mappings()),
-            "exact_matches": len(self.mapping_loader.get_exact_matches()),
-            "close_matches": len(self.mapping_loader.get_close_matches()),
-            "related_matches": len(self.mapping_loader.get_related_matches()),
-            "unmapped": len(self.mapping_loader.get_unmapped())
+            "total_mappings": len(self.mapping_loader.mappings),
+            "covered_d4d_fields": len(covered_fields),
+            "rocrate_properties": len(all_rocrate_props),
+            "direct_mappings": len(direct_mappings),
+            "transformation_required": len(covered_fields) - len(direct_mappings)
         }
 
 

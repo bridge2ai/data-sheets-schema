@@ -27,7 +27,7 @@
 # ==============================================================================
 d4d:Dataset skos:exactMatch schema:Dataset .
 
-# Direct/Exact Mappings (66 properties)
+# Direct/Exact Mappings (53 properties)
 # ==============================================================================
 # These properties map directly without transformation
 
@@ -63,7 +63,6 @@ d4d:acquisition_methods skos:exactMatch rai:dataCollection .
 d4d:collection_mechanisms skos:exactMatch rai:dataCollection .
 d4d:collection_timeframes skos:exactMatch d4d:dataCollectionTimeframe .
 d4d:confidential_elements skos:exactMatch rai:personalSensitiveInformation .
-d4d:sensitive_elements skos:exactMatch rai:personalSensitiveInformation .
 d4d:data_protection_impacts skos:exactMatch rai:dataSocialImpact .
 d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
 d4d:discouraged_uses skos:exactMatch rai:prohibitedUses .
@@ -91,7 +90,7 @@ d4d:distribution_formats skos:exactMatch evi:formats .
 d4d:encoding skos:closeMatch evi:formats .
 d4d:funders skos:exactMatch schema:funder .
 
-# Close Matches (16 properties)
+# Close Matches (20 properties)
 # ==============================================================================
 # Semantically close but require transformation
 
@@ -99,6 +98,9 @@ d4d:funders skos:exactMatch schema:funder .
 d4d:creators skos:closeMatch schema:author .
 d4d:created_by skos:closeMatch schema:creator .
 d4d:modified_by skos:closeMatch schema:contributor .
+
+# Sensitive data (similar to confidential but not identical)
+d4d:sensitive_elements skos:closeMatch rai:personalSensitiveInformation .
 
 # String to structured object array
 d4d:cleaning_strategies skos:closeMatch rai:dataManipulationProtocol .
@@ -167,15 +169,18 @@ d4d:retention_limit skos:narrowMatch schema:conditionsOfAccess .
 # ==============================================================================
 # Alignment Statistics
 # ==============================================================================
-# Total mappings: 82 D4D properties
-# - Exact matches: 66 (80.5%)
-# - Close matches: 16 (19.5%)
-# - Related matches: 9 (11.0%)
-# - Narrow/Broad matches: 4 (4.9%)
+# Total mappings: 88 D4D properties (+ 1 class-level alignment)
+# - Exact matches: 52 (59.1%)
+# - Close matches: 20 (22.7%)
+# - Related matches: 10 (11.4%)
+# - Narrow/Broad matches: 6 (6.8%)
 #
-# Coverage by namespace:
-# - schema.org: 28 properties
-# - rai: (Responsible AI): 32 properties
-# - evi: (FAIRSCAPE Evidence): 6 properties
-# - d4d: (D4D-specific): 16 properties
+# Coverage by namespace (approximate):
+# - schema.org: ~25 properties
+# - rai: (Responsible AI): ~35 properties
+# - evi: (FAIRSCAPE Evidence): ~5 properties
+# - d4d: (D4D-specific): ~23 properties
+#
+# Note: Some D4D properties map to the same RO-Crate property when they represent
+#       synonyms or alternative expressions of the same concept.
 # ==============================================================================
