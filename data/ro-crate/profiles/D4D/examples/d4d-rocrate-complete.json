@@ -1,7 +1,11 @@
 {
   "@context": [
     "https://w3id.org/ro/crate/1.2/context",
-    "https://w3id.org/bridge2ai/d4d-context/1.0"
+    "https://w3id.org/bridge2ai/d4d-context/1.0",
+    {
+      "@vocab": "https://schema.org/",
+      "EVI": "https://w3id.org/EVI#"
+    }
   ],
   "@graph": [
     {
@@ -78,6 +82,13 @@
         "text/tab-separated-values",
         "application/parquet"
       ],
+      "evi:datasetCount": 1,
+      "evi:computationCount": 4,
+      "evi:softwareCount": 12,
+      "evi:schemaCount": 2,
+      "evi:totalEntities": 19,
+      "evi:entitiesWithSummaryStats": 1,
+      "evi:entitiesWithChecksums": 15,
       "encodingFormat": "application/x-vcf+gzip",
       "d4d:subpopulations": [
         {
@@ -334,6 +345,23 @@
       ],
       "d4d:contentWarning": "This dataset contains genomic and health information related to cardiovascular disease. Users should be aware of potential for incidental findings of clinical significance.",
       "d4d:validationAnalysis": "Validation performed through: (1) Comparison with orthogonal genotyping array (99.8% concordance), (2) Mendelian inheritance checking in related samples (99.9% consistency), (3) Hardy-Weinberg equilibrium testing, (4) Comparison with gnomAD allele frequencies (r=0.98 for common variants)",
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Completeness",
+          "value": "Dataset is 100% complete for variant calls; clinical annotations are 92% complete due to pending ClinVar submissions"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Data Governance Committee",
+          "value": "Dr. John Doe (Chair), Dr. Jane Smith, bioethics representative"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Prohibited Uses",
+          "value": "These data are not to be used for re-identification attempts, insurance/employment discrimination, or clinical decision-making without appropriate regulatory oversight and validation"
+        }
+      ],
       "hasSummaryStatistics": "https://genomics.example.edu/cardiogen1k/summary-stats/",
       "dataGovernanceCommittee": "CardioGen-1K Data Access Committee (5 members including PI, bioethicist, patient advocate, statistician, clinical geneticist). Meets quarterly to review data access requests and address data use concerns.",
       "principalInvestigator": "Dr. Jane Smith, MD, PhD",

@@ -10,6 +10,27 @@
 
 Implemented comprehensive semantic exchange layer between D4D LinkML schema and RO-Crate metadata specification, following the plan outlined in the implementation document.
 
+### FAIRSCAPE Reference Implementation
+
+The **FAIRSCAPE** framework provides the canonical reference implementation of RO-Crate metadata for Bridge2AI's **Cell Maps for AI (CM4AI)** project. The D4D profile aligns with and extends FAIRSCAPE patterns:
+
+**Reference File**: `data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json`
+
+**FAIRSCAPE as CM4AI Example**:
+- Production-quality RO-Crate for 19.1 TB computational biology dataset
+- 647 entities (330 datasets, 312 computations, 5 software tools)
+- Demonstrates EVI namespace properties for computational provenance
+- Shows @context object pattern with `@vocab`
+- Uses PropertyValue pattern for custom metadata via additionalProperty
+
+**D4D Profile Alignment**:
+- Adopts FAIRSCAPE @context patterns (array + object with @vocab)
+- Includes EVI properties (datasetCount, computationCount, formats, etc.)
+- Uses semicolon-separated author strings (FAIRSCAPE convention)
+- Extends with comprehensive D4D documentation (ethics, biases, uses)
+
+See `data/ro-crate/profiles/D4D/README.md` for detailed comparison and usage guidance.
+
 ## What Was Implemented
 
 ### Phase 1: Core Infrastructure (COMPLETE ✅)

@@ -95,15 +95,15 @@ Governance	DatasetCollection.data_sharing_agreement	str	d4d:data_sharing_agreeme
 Maintenance	Dataset.version_access	str	d4d:version_access skos:relatedMatch schema:version	@graph[?@type='Dataset']['version']	relatedMatch	minimal	"""All versions available"""	"""All versions available"""	
 Maintenance	Maintenance.frequency	str	d4d:maintenance.frequency	rai:dataReleaseMaintenancePlan	closeMatch	moderate	"""Quarterly"""	Embedded in maintenance plan string	Structure lost
 Maintenance	Maintenance.versioning_strategy	str	d4d:maintenance.versioning_strategy	rai:dataReleaseMaintenancePlan	closeMatch	moderate	"""Semantic versioning"""	Embedded in maintenance plan string	Structure lost
-FAIRSCAPE EVI	EvidenceMetadata.dataset_count	int	evi:datasetCount	@graph[?@type='ROCrate']['evi:datasetCount']	exactMatch	none	5	5	FAIRSCAPE-specific
-FAIRSCAPE EVI	EvidenceMetadata.computation_count	int	evi:computationCount	@graph[?@type='ROCrate']['evi:computationCount']	exactMatch	none	10	10	FAIRSCAPE-specific
-FAIRSCAPE EVI	EvidenceMetadata.software_count	int	evi:softwareCount	@graph[?@type='ROCrate']['evi:softwareCount']	exactMatch	none	3	3	FAIRSCAPE-specific
-FAIRSCAPE EVI	EvidenceMetadata.schema_count	int	evi:schemaCount	@graph[?@type='ROCrate']['evi:schemaCount']	exactMatch	none	1	1	FAIRSCAPE-specific
-FAIRSCAPE EVI	EvidenceMetadata.total_entities	int	evi:totalEntities	@graph[?@type='ROCrate']['evi:totalEntities']	exactMatch	none	25	25	FAIRSCAPE-specific
-FAIRSCAPE EVI	EvidenceMetadata.entities_with_summary_stats	int	evi:entitiesWithSummaryStats	@graph[?@type='ROCrate']['evi:entitiesWithSummaryStats']	exactMatch	none	15	15	FAIRSCAPE-specific
-FAIRSCAPE EVI	EvidenceMetadata.entities_with_checksums	int	evi:entitiesWithChecksums	@graph[?@type='ROCrate']['evi:entitiesWithChecksums']	exactMatch	none	20	20	FAIRSCAPE-specific
-FAIRSCAPE EVI	EvidenceMetadata.total_content_size_bytes	int	evi:totalContentSizeBytes	@graph[?@type='ROCrate']['evi:totalContentSizeBytes']	exactMatch	none	10737418240	10737418240	FAIRSCAPE-specific
-FAIRSCAPE EVI	EvidenceMetadata.formats	List[str]	evi:formats	@graph[?@type='ROCrate']['evi:formats']	exactMatch	none	"[""CSV"", ""JSON""]"	"[""CSV"", ""JSON""]"	FAIRSCAPE-specific
+FAIRSCAPE EVI	EvidenceMetadata.dataset_count	int	evi:datasetCount	@graph[?@type='Dataset']['evi:datasetCount']	exactMatch	none	330	330	Used in FAIRSCAPE CM4AI - computational provenance
+FAIRSCAPE EVI	EvidenceMetadata.computation_count	int	evi:computationCount	@graph[?@type='Dataset']['evi:computationCount']	exactMatch	none	312	312	Used in FAIRSCAPE CM4AI - computational provenance
+FAIRSCAPE EVI	EvidenceMetadata.software_count	int	evi:softwareCount	@graph[?@type='Dataset']['evi:softwareCount']	exactMatch	none	5	5	Used in FAIRSCAPE CM4AI - computational provenance
+FAIRSCAPE EVI	EvidenceMetadata.schema_count	int	evi:schemaCount	@graph[?@type='Dataset']['evi:schemaCount']	exactMatch	none	20	20	Used in FAIRSCAPE CM4AI - computational provenance
+FAIRSCAPE EVI	EvidenceMetadata.total_entities	int	evi:totalEntities	@graph[?@type='Dataset']['evi:totalEntities']	exactMatch	none	647	647	Used in FAIRSCAPE CM4AI - total entity count
+FAIRSCAPE EVI	EvidenceMetadata.entities_with_summary_stats	int	evi:entitiesWithSummaryStats	@graph[?@type='Dataset']['evi:entitiesWithSummaryStats']	exactMatch	none	1	1	Used in FAIRSCAPE CM4AI - summary statistics flag
+FAIRSCAPE EVI	EvidenceMetadata.entities_with_checksums	int	evi:entitiesWithChecksums	@graph[?@type='Dataset']['evi:entitiesWithChecksums']	exactMatch	none	6	6	Used in FAIRSCAPE CM4AI - checksum availability
+FAIRSCAPE EVI	EvidenceMetadata.total_content_size_bytes	int	evi:totalContentSizeBytes	@graph[?@type='Dataset']['evi:totalContentSizeBytes']	exactMatch	none	19454700000000	19454700000000	Used in FAIRSCAPE CM4AI - 19.1 TB total size
+FAIRSCAPE EVI	EvidenceMetadata.formats	List[str]	evi:formats	@graph[?@type='Dataset']['evi:formats']	exactMatch	none	"["".d"", "".tsv"", ""h5ad""]"	"["".d"", "".tsv"", ""h5ad""]"	Used in FAIRSCAPE CM4AI - file format list
 D4D-Embedded	DatasetCollection.completeness	str	d4d:completeness	@graph[?@type='Dataset']['additionalProperty'][?name='Completeness']['value']	exactMatch	none	"""95% complete"""	"""95% complete"""	additionalProperty pattern
 D4D-Embedded	DatasetCollection.summary_statistics	str	d4d:summary_statistics	@graph[?@type='Dataset']['hasSummaryStatistics']	exactMatch	none	"""Mean age: 45.2 years"""	"""Mean age: 45.2 years"""	D4D-embedded
 D4D-Embedded	DatasetCollection.quality_control	str	d4d:quality_control	@graph[?@type='Dataset']['additionalProperty'][?name='Quality Control']['value']	exactMatch	none	"""Automated QC checks"""	"""Automated QC checks"""	additionalProperty pattern

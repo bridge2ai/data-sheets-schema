@@ -21,6 +21,125 @@ The profile enables:
 
 ---
 
+## FAIRSCAPE Reference Implementation
+
+The **FAIRSCAPE** (FAIR Structured Computational Archive for Provenance and Execution) framework provides a canonical reference implementation of RO-Crate metadata for the Bridge2AI **Cell Maps for AI (CM4AI)** project.
+
+### Reference File
+
+**Location**: `../fairscape/full-ro-crate-metadata.json`
+
+This file demonstrates production-quality RO-Crate metadata for a large-scale computational biology dataset (CM4AI January 2026 Data Release, 19.1 TB, 647 entities).
+
+### Key FAIRSCAPE Patterns
+
+The D4D profile aligns with and extends the following FAIRSCAPE patterns:
+
+#### 1. **@context Structure**
+FAIRSCAPE uses object notation with `@vocab`:
+```json
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "EVI": "https://w3id.org/EVI#"
+  }
+}
+```
+
+D4D extends this with URI references:
+```json
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.2/context",
+    "https://w3id.org/bridge2ai/d4d-context/1.0",
+    {
+      "@vocab": "https://schema.org/",
+      "EVI": "https://w3id.org/EVI#"
+    }
+  ]
+}
+```
+
+#### 2. **EVI Namespace Properties**
+FAIRSCAPE tracks computational provenance with EVI properties:
+- `evi:datasetCount` (330) - Number of datasets
+- `evi:computationCount` (312) - Number of computations
+- `evi:softwareCount` (5) - Software tools used
+- `evi:totalContentSizeBytes` (19.1 TB) - Total data size
+- `evi:formats` - File formats present (`.d`, `.tsv`, `h5ad`, etc.)
+
+D4D profiles include these properties for computational RO-Crates.
+
+#### 3. **Author Formatting**
+FAIRSCAPE uses semicolon-separated author strings:
+```json
+{
+  "author": "Clark T; Parker J; Al Manir S; Axelsson U; ..."
+}
+```
+
+D4D adopts this pattern for compatibility.
+
+#### 4. **additionalProperty Pattern**
+FAIRSCAPE uses PropertyValue objects for custom metadata:
+```json
+{
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "name": "Completeness",
+      "value": "These data are not yet in completed final form..."
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Human Subject",
+      "value": "None - data collected from commercially available cell lines"
+    }
+  ]
+}
+```
+
+D4D uses the same pattern for domain-specific metadata not in standard vocabularies.
+
+### Key Differences Between FAIRSCAPE and D4D Profile
+
+| Aspect | FAIRSCAPE | D4D Profile |
+|--------|-----------|-------------|
+| **Primary focus** | Computational provenance | Dataset documentation |
+| **@context** | Object with @vocab | Array with URI references + @vocab |
+| **Namespace scope** | schema.org + EVI | schema.org + d4d + rai + EVI |
+| **Property count** | ~50 (computational focus) | ~130 (comprehensive documentation) |
+| **Ethics/compliance** | Minimal (cell lines) | Extensive (human subjects, IRB, consent) |
+| **Use documentation** | Basic (usageInfo) | Extensive (intended, discouraged, prohibited) |
+| **Biases/limitations** | Basic (RAI properties) | Extensive (structured arrays, mitigation) |
+
+### Using FAIRSCAPE as Reference
+
+When creating D4D RO-Crates:
+
+1. **For computational datasets** (multiple datasets, workflows, software):
+   - Include EVI namespace properties
+   - Document provenance relationships (generatedBy, derivedFrom)
+   - Use FAIRSCAPE-style additionalProperty for custom metadata
+
+2. **For simple data-only datasets**:
+   - Focus on D4D documentation properties
+   - Minimal EVI properties (datasetCount, formats) if needed
+   - Emphasize ethics, biases, uses sections
+
+3. **For Bridge2AI projects**:
+   - Align with FAIRSCAPE patterns for CM4AI interoperability
+   - Extend with D4D properties for comprehensive documentation
+   - Use consistent author formatting (semicolon-separated)
+
+### References
+
+- **FAIRSCAPE**: https://fairscape.github.io/
+- **CM4AI Project**: https://cm4ai.org/
+- **FAIRSCAPE Paper**: Clark T, Parker J, et al. (2024) "Cell Maps for Artificial Intelligence" bioRxiv 2024.05.21.589311
+
+---
+
 ## Profile Components
 
 ### 1. Profile Specification
