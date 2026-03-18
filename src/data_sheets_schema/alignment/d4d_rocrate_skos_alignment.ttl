@@ -27,7 +27,7 @@
 # ==============================================================================
 d4d:Dataset skos:exactMatch schema:Dataset .
 
-# Direct/Exact Mappings (53 properties)
+# Direct/Exact Mappings (52 properties)
 # ==============================================================================
 # These properties map directly without transformation
 

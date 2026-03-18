@@ -126,7 +126,7 @@ def concatenate_rocrates(
     print(f"\nConcatenating {len(rocrate_paths)} RO-Crate files...")
 
     concatenated = {
-        "@context": "https://w3id.org/ro/crate/1.1/context",
+        "@context": "https://w3id.org/ro/crate/1.2/context",
         "@graph": []
     }
 

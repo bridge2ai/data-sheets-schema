@@ -63,7 +63,10 @@ except ImportError as e:
     SCRIPTS_AVAILABLE = False
 
 # Import validation framework
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Only add to sys.path if not already present to avoid pollution
+validation_dir = Path(__file__).parent.parent
+if validation_dir.exists() and str(validation_dir) not in sys.path:
+    sys.path.insert(0, str(validation_dir))
 try:
     from validation.unified_validator import UnifiedValidator, ValidationLevel
     VALIDATION_AVAILABLE = True
@@ -175,7 +178,7 @@ class SemanticTransformer:
         Transform RO-Crate JSON-LD to D4D YAML.
 
         Args:
-            rocrate_input: Path to RO-Crate file, URL string, or dict
+            rocrate_input: Path to RO-Crate file or dict (URLs not supported)
             output_path: Optional path to save D4D YAML
             validate: Override config.validate_output (default: use config)
 
@@ -222,6 +225,10 @@ class SemanticTransformer:
             # Parse RO-Crate (expects file path string)
             parser = ROCrateParser(str(rocrate_path))
 
+            # Check mapping loader is available
+            if self.mapping_loader is None:
+                raise RuntimeError("Mapping loader not initialized. Check mapping file path.")
+
             # Build D4D structure
             builder = D4DBuilder(self.mapping_loader)
             d4d_dict = builder.build_dataset(parser)
@@ -258,7 +265,7 @@ class SemanticTransformer:
             # Save to temp file for validation
             import tempfile
             with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False, encoding='utf-8') as tmp:
-                yaml.dump(d4d_dict, tmp, indent=self.config.output_indent, sort_keys=False)
+                yaml.safe_dump(d4d_dict, tmp, indent=self.config.output_indent, sort_keys=False)
                 tmp_path = Path(tmp.name)
 
             try:
@@ -279,7 +286,7 @@ class SemanticTransformer:
         # Save to output file if requested
         if output_path:
             with open(output_path, 'w', encoding=self.config.output_encoding) as f:
-                yaml.dump(d4d_dict, f, indent=self.config.output_indent, sort_keys=False)
+                yaml.safe_dump(d4d_dict, f, indent=self.config.output_indent, sort_keys=False)
 
         # Return result
         return TransformationResult(
@@ -353,6 +360,9 @@ class SemanticTransformer:
         if not SCRIPTS_AVAILABLE:
             raise RuntimeError("Transformation scripts not available. Check imports.")
 
+        if self.mapping_loader is None:
+            raise RuntimeError("Mapping loader not initialized. Check mapping file path.")
+
         validate = validate if validate is not None else self.config.validate_output
 
         # Parse all RO-Crates
@@ -397,7 +407,7 @@ class SemanticTransformer:
             # Save to temp file for validation
             import tempfile
             with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False, encoding='utf-8') as tmp:
-                yaml.dump(merged_d4d, tmp, indent=self.config.output_indent, sort_keys=False)
+                yaml.safe_dump(merged_d4d, tmp, indent=self.config.output_indent, sort_keys=False)
                 tmp_path = Path(tmp.name)
 
             try:
@@ -419,7 +429,7 @@ class SemanticTransformer:
         # Save to output file if requested
         if output_path:
             with open(output_path, 'w', encoding=self.config.output_encoding) as f:
-                yaml.dump(merged_d4d, f, indent=self.config.output_indent, sort_keys=False)
+                yaml.safe_dump(merged_d4d, f, indent=self.config.output_indent, sort_keys=False)
 
         return {
             'd4d': merged_d4d,
