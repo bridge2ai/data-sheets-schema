@@ -90,6 +90,20 @@ d4d:distribution_formats skos:exactMatch evi:formats .
 d4d:encoding skos:closeMatch evi:formats .
 d4d:funders skos:exactMatch schema:funder .
 
+# Metadata and structure
+d4d:citation skos:exactMatch schema:citation .
+d4d:format skos:exactMatch schema:encodingFormat .
+d4d:parent_datasets skos:exactMatch schema:isPartOf .
+d4d:related_datasets skos:exactMatch schema:isRelatedTo .
+d4d:same_as skos:exactMatch schema:sameAs .
+d4d:variables skos:exactMatch schema:variableMeasured .
+
+# JSON-LD identifier
+d4d:id skos:exactMatch rdf:ID .
+
+# D4D-specific properties
+d4d:participant_compensation skos:exactMatch d4d:participantCompensation .
+
 # Close Matches (20 properties)
 # ==============================================================================
 # Semantically close but require transformation
@@ -107,7 +121,7 @@ d4d:cleaning_strategies skos:closeMatch rai:dataManipulationProtocol .
 d4d:preprocessing_strategies skos:closeMatch rai:dataPreprocessingProtocol .
 d4d:labeling_strategies skos:closeMatch rai:dataAnnotationProtocol .
 d4d:annotation_analyses skos:closeMatch rai:dataAnnotationAnalysis .
-d4d:machine_annotation_analyses skos:closeMatch rai:machineAnnotationTools .
+d4d:machine_annotation_tools skos:closeMatch rai:machineAnnotationTools .
 
 # Multiple properties to single field
 d4d:license_and_use_terms skos:closeMatch schema:license .
@@ -120,8 +134,14 @@ d4d:compression skos:closeMatch evi:formats .
 d4d:dialect skos:closeMatch schema:encodingFormat .
 d4d:media_type skos:closeMatch schema:encodingFormat .
 
+# Privacy and ethical considerations
+d4d:participant_privacy skos:closeMatch rai:personalSensitiveInformation .
+
+# Subject categorization
+d4d:themes skos:closeMatch schema:about .
+
 # External resource relationship
-d4d:external_resource skos:closeMatch schema:relatedLink .
+d4d:external_resources skos:closeMatch schema:relatedLink .
 
 # Related Matches (9 properties)
 # ==============================================================================
@@ -166,20 +186,25 @@ d4d:is_tabular skos:narrowMatch schema:encodingFormat .
 # D4D retention is narrower than general data management
 d4d:retention_limit skos:narrowMatch schema:conditionsOfAccess .
 
+# D4D schema/class conformance is narrower than general conformsTo
+d4d:conforms_to_class skos:narrowMatch schema:conformsTo .
+d4d:conforms_to_schema skos:narrowMatch schema:conformsTo .
+
 # ==============================================================================
 # Alignment Statistics
 # ==============================================================================
-# Total mappings: 88 D4D properties (+ 1 class-level alignment)
-# - Exact matches: 52 (59.1%)
-# - Close matches: 20 (22.7%)
-# - Related matches: 10 (11.4%)
-# - Narrow/Broad matches: 6 (6.8%)
+# Total mappings: 100 D4D properties (+ 1 class-level alignment)
+# - Exact matches: 60 (60.0%)
+# - Close matches: 24 (24.0%)
+# - Related matches: 10 (10.0%)
+# - Narrow/Broad matches: 6 (6.0%)
 #
 # Coverage by namespace (approximate):
-# - schema.org: ~25 properties
-# - rai: (Responsible AI): ~35 properties
+# - schema.org: ~32 properties
+# - rai: (Responsible AI): ~36 properties
 # - evi: (FAIRSCAPE Evidence): ~5 properties
-# - d4d: (D4D-specific): ~23 properties
+# - d4d: (D4D-specific): ~25 properties
+# - rdf: ~1 property
 #
 # Note: Some D4D properties map to the same RO-Crate property when they represent
 #       synonyms or alternative expressions of the same concept.
