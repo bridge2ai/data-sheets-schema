@@ -71,6 +71,7 @@ classes:
         description: >-
           Code(s) used to represent missing values for this variable.
           Examples: "NA", "-999", "null", "". Multiple codes may be specified.
+        slot_uri: schema:variableMeasured
         range: string
         multivalued: true
 
@@ -112,11 +113,13 @@ classes:
         description: >-
           Indicates whether this variable contains sensitive information
           (e.g., personal data, protected health information).
+        slot_uri: d4d:is_sensitive
         range: boolean
 
       precision:
         description: >-
           The precision or number of decimal places for numeric variables.
+        slot_uri: schema:variableMeasured
         range: integer
 
       measurement_technique:

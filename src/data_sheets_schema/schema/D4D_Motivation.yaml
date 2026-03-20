@@ -93,6 +93,7 @@ classes:
           contributions made to this dataset (e.g., Conceptualization, Data Curation,
           Methodology). Note: roles are specified here rather than on Person directly,
           since the same person may have different roles across different datasets.
+        slot_uri: schema:creator
         range: CRediTRoleEnum
         multivalued: true
 

@@ -342,6 +342,7 @@ classes:
 
       frequency:
         description: How frequently this weakness appears
+        slot_uri: d4d:frequency
         range: FrequencyEnum
 
       affected_element_or_question:
