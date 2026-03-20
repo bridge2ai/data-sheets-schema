@@ -338,15 +338,20 @@ git-status:
 ## ------------------------------------------------------------------
 
 SSSOM_SCRIPT = src/alignment/generate_sssom_mapping.py
+SSSOM_URI_SCRIPT = src/alignment/generate_sssom_uri_mapping.py
 SKOS_ALIGNMENT = src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
 ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
 INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
+D4D_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_all.yaml
 SSSOM_FULL = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv
 SSSOM_SUBSET = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping_subset.tsv
+SSSOM_URI = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_mapping.tsv
 
-.PHONY: gen-sssom gen-sssom-full gen-sssom-subset clean-sssom
+.PHONY: gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-all clean-sssom
 
-gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM mappings (full and subset)
+gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM property-level mappings (full and subset)
+
+gen-sssom-all: gen-sssom gen-sssom-uri ## Generate all SSSOM mappings (property-level and URI-level)
 
 gen-sssom-full: $(SSSOM_FULL) ## Generate full SSSOM mapping from SKOS alignment
 
@@ -364,8 +369,18 @@ gen-sssom-subset: $(SSSOM_SUBSET) ## Generate subset SSSOM mapping (interface fi
 $(SSSOM_SUBSET): $(SSSOM_FULL)
 	@echo "Subset SSSOM generated alongside full mapping"
 
+gen-sssom-uri: $(SSSOM_URI) ## Generate URI-level SSSOM mapping (D4D slot URIs → RO-Crate property URIs)
+
+$(SSSOM_URI): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(SSSOM_URI_SCRIPT)
+	@echo "Generating URI-level SSSOM mapping..."
+	$(RUN) python $(SSSOM_URI_SCRIPT) \
+		--schema $(D4D_SCHEMA_ALL) \
+		--skos $(SKOS_ALIGNMENT) \
+		--rocrate $(ROCRATE_JSON) \
+		--output $(SSSOM_URI)
+
 clean-sssom: ## Remove generated SSSOM files
-	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET)
+	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET) $(SSSOM_URI)
 
 ## ------------------------------------------------------------------
 ## FAIRSCAPE ↔ D4D Bidirectional Conversion
