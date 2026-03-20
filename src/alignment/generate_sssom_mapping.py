@@ -52,6 +52,7 @@ class SSSOMGenerator:
         self.rocrate_properties = self._extract_rocrate_properties()
         self.pydantic_properties = self._extract_pydantic_properties()
         self.interface_fields = self._load_interface_mapping() if mapping_tsv else set()
+        self.interface_paths = self._load_interface_paths() if mapping_tsv else {}
 
     def _parse_skos(self) -> List[Dict]:
         """Parse SKOS alignment TTL file."""
@@ -132,6 +133,31 @@ class SSSOMGenerator:
 
         return fields
 
+    def _load_interface_paths(self) -> Dict[str, Dict[str, str]]:
+        """Load D4D and RO-Crate path information from interface mapping TSV."""
+        paths = {}
+
+        with open(self.mapping_tsv) as f:
+            reader = csv.DictReader(f, delimiter='\t')
+            for row in reader:
+                if 'D4D_Full_Path' not in row or 'RO_Crate_JSON_Path' not in row:
+                    continue
+
+                # Extract field name from D4D_Full_Path (e.g., "Dataset.title" -> "title")
+                full_path = row['D4D_Full_Path']
+                if '.' in full_path:
+                    field_name = full_path.split('.')[-1]
+
+                    # Prefer Dataset.{field} over other classes (e.g., Dataset.description
+                    # over AnnotationAnalysis.description)
+                    if field_name not in paths or full_path.startswith('Dataset.'):
+                        paths[field_name] = {
+                            'd4d_path': full_path,
+                            'rocrate_path': row['RO_Crate_JSON_Path']
+                        }
+
+        return paths
+
     def _validate_mapping(self, mapping: Dict) -> Dict:
         """Validate mapping against RO-Crate JSON and Pydantic classes."""
         subject = mapping['subject']
@@ -204,9 +230,11 @@ class SSSOMGenerator:
 
             # Build SSSOM row
             row = {
+                'd4d_schema_path': self._get_d4d_schema_path(subject),
                 'subject_id': f"d4d:{subject}",
                 'subject_label': subject.replace('_', ' ').title(),
                 'predicate_id': f"skos:{predicate}",
+                'rocrate_json_path': self._get_rocrate_json_path(object_uri),
                 'object_id': object_uri,
                 'object_label': object_uri.split(':')[1] if ':' in object_uri else object_uri,
                 'mapping_justification': self._get_mapping_justification(predicate),
@@ -226,6 +254,41 @@ class SSSOMGenerator:
             rows.append(row)
 
         return rows
+
+    def _get_d4d_schema_path(self, subject: str) -> str:
+        """Get full D4D schema path for a property."""
+        # Check if we have it in the interface mapping
+        if subject in self.interface_paths:
+            return self.interface_paths[subject]['d4d_path']
+
+        # Default to Dataset.{property}
+        return f"Dataset.{subject}"
+
+    def _get_rocrate_json_path(self, object_uri: str) -> str:
+        """Get full RO-Crate JSON path for a property."""
+        # Extract property name from URI
+        if ':' in object_uri:
+            namespace, prop = object_uri.split(':', 1)
+        else:
+            namespace = 'schema'
+            prop = object_uri
+
+        # Check if we have it in the interface mapping (look up by property name in values)
+        for field_name, path_info in self.interface_paths.items():
+            rocrate_path = path_info['rocrate_path']
+            # Check if this path contains the property we're looking for
+            if f"['{prop}']" in rocrate_path or f"[\"{prop}\"]" in rocrate_path:
+                return rocrate_path
+
+        # Default path based on namespace
+        if namespace == 'schema':
+            return f"@graph[?@type='Dataset']['{prop}']"
+        elif namespace in ['evi', 'rai', 'd4d']:
+            return f"@graph[?@type='Dataset']['{namespace}:{prop}']"
+        elif namespace == 'rdf':
+            return f"@graph[?@type='Dataset']['@{prop.lower()}']"
+        else:
+            return f"@graph[?@type='Dataset']['{object_uri}']"
 
     def _get_object_source(self, object_uri: str) -> str:
         """Get source vocabulary for object URI."""
@@ -250,9 +313,11 @@ class SSSOMGenerator:
 
         # SSSOM header
         fieldnames = [
+            'd4d_schema_path',
             'subject_id',
             'subject_label',
             'predicate_id',
+            'rocrate_json_path',
             'object_id',
             'object_label',
             'mapping_justification',
