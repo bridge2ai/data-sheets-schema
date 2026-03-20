@@ -9,10 +9,9 @@ Processes:
 """
 
 import csv
-import yaml
 import re
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Dict, List
 
 class SlotURIAdder:
     """Add slot_uri definitions to D4D schema files."""

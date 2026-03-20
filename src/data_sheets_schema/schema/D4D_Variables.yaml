@@ -71,7 +71,6 @@ classes:
         description: >-
           Code(s) used to represent missing values for this variable.
           Examples: "NA", "-999", "null", "". Multiple codes may be specified.
-        slot_uri: schema:variableMeasured
         range: string
         multivalued: true
 
@@ -119,7 +118,6 @@ classes:
       precision:
         description: >-
           The precision or number of decimal places for numeric variables.
-        slot_uri: schema:variableMeasured
         range: integer
 
       measurement_technique:

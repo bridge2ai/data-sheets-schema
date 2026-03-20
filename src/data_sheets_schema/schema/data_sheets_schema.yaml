@@ -353,7 +353,7 @@ classes:
         multivalued: true
         inlined_as_list: true
       distribution_dates:
-        slot_uri: schema:datePublished
+        slot_uri: d4d:distributionDates
         range: DistributionDate
         multivalued: true
         inlined_as_list: true

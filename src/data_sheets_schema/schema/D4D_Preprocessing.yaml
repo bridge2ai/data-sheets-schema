@@ -238,6 +238,5 @@ classes:
         description: >
           Known accuracy or performance metrics for the automated tools (if available).
           Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy: 92%").
-        slot_uri: schema:name
         range: string
         multivalued: true

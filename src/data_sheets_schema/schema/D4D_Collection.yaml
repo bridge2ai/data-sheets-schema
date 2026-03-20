@@ -43,11 +43,9 @@ classes:
         range: boolean
       was_inferred_derived:
         description: Whether the data was inferred or derived from other data
-        slot_uri: prov:wasDerivedFrom
         range: boolean
       was_validated_verified:
         description: Whether the data was validated or verified in any way
-        slot_uri: schema:date
         range: boolean
       acquisition_details:
         description: >

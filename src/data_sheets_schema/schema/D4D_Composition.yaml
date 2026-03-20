@@ -120,7 +120,7 @@ classes:
       representative_verification:
         description: >
           Explanation of how representativeness was validated or verified.
-        slot_uri: schema:date
+        slot_uri: schema:description
         range: string
         multivalued: true
       why_not_representative:
@@ -240,7 +240,7 @@ classes:
       limitation_type:
         description: >
           Category of limitation (e.g., scope, coverage, temporal, methodological).
-        slot_uri: schema:temporalCoverage
+        slot_uri: d4d:limitationType
         range: LimitationTypeEnum
       limitation_description:
         description: >

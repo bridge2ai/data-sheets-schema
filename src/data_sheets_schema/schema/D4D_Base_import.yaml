@@ -12,6 +12,7 @@ see_also:
 
 prefixes:
   biolink: https://w3id.org/biolink/vocab/
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
   datasets: https://w3id.org/linkml/report
   dcat: http://www.w3.org/ns/dcat#
