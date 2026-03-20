@@ -1,0 +1,28 @@
+attribute	description	range	used_in_classes
+missing_data_documentation	Documentation of missing data patterns and handling strategies.	MissingDataDocumentation	DataSubset, Dataset
+raw_data_sources	Description of raw data sources before preprocessing.	RawDataSource	DataSubset, Dataset
+informed_consent	Details about informed consent procedures, including consent type, documentation, and withdrawal mechanisms.	InformedConsent	DataSubset, Dataset
+comment_prefix		string	FormatDialect
+source_data	"Description of the larger set from which the sample was drawn, if any.
+"	string	SamplingStrategy
+strategies	"Description of the sampling strategy (deterministic, probabilistic, etc.).
+"	string	SamplingStrategy
+missing_data_patterns	"Description of patterns in missing data (e.g., missing completely at random, missing at random, missing not at random).
+"	string	MissingDataDocumentation
+source_description	"Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collection).
+"	string	RawDataSource
+access_details	"Information on how to access or retrieve the raw source data.
+"	string	RawDataSource
+annotation_quality_details	"Additional details on annotation quality assessment and findings.
+"	string	AnnotationAnalysis
+tool_descriptions	"Descriptions of what each tool does in the annotation process and what types of annotations it produces. Should correspond to the tools list.
+"	string	MachineAnnotationTools
+usage_notes	Notes or caveats about using the dataset for intended purposes.	string	IntendedUse
+ethics_review_board	"What ethics review board(s) reviewed this research? Include institution names and approval details.
+"	string	HumanSubjectResearch
+consent_documentation	"How is consent documented? Include references to consent forms or procedures used.
+"	string	InformedConsent
+anonymization_method	"What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.
+"	string	ParticipantPrivacy
+derivation	Description of how this variable was derived or calculated from other variables, if applicable.	string	VariableMetadata
+quality_notes	Notes about data quality, reliability, or known issues specific to this variable.	string	VariableMetadata

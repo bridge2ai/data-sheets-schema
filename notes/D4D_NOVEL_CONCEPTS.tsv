@@ -1,0 +1,61 @@
+attribute	description	range	used_in_classes
+addressing_gaps		AddressingGap	DataSubset, Dataset
+known_biases	Known biases present in the dataset that may affect fairness, representativeness, or model performance. Uses BiasTypeEnum for standardized bias categorization mapped to the AI Ontology (AIO).	DatasetBias	DataSubset, Dataset
+known_limitations	Known limitations of the dataset that may affect its use or interpretation. Distinct from biases (systematic errors) and anomalies (data quality issues).	DatasetLimitation	DataSubset, Dataset
+confidential_elements		Confidentiality	DataSubset, Dataset
+content_warnings		ContentWarning	DataSubset, Dataset
+sensitive_elements		SensitiveElement	DataSubset, Dataset
+sampling_strategies		SamplingStrategy	DataSubset, Dataset, Instance
+ethical_reviews		EthicalReview	DataSubset, Dataset
+data_protection_impacts		DataProtectionImpact	DataSubset, Dataset
+participant_compensation	Compensation or incentives provided to human research participants.	HumanSubjectCompensation	DataSubset, Dataset
+vulnerable_populations	Information about protections for vulnerable populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures.	VulnerablePopulations	DataSubset, Dataset
+preprocessing_strategies		PreprocessingStrategy	DataSubset, Dataset
+cleaning_strategies		CleaningStrategy	DataSubset, Dataset
+labeling_strategies		LabelingStrategy	DataSubset, Dataset
+imputation_protocols	Data imputation methodology and techniques.	ImputationProtocol	DataSubset, Dataset
+annotation_analyses	Analysis of annotation quality and inter-annotator agreement.	AnnotationAnalysis	DataSubset, Dataset
+future_use_impacts		FutureUseImpact	DataSubset, Dataset
+discouraged_uses		DiscouragedUse	DataSubset, Dataset
+intended_uses	Explicit intended and recommended uses for this dataset. Complements future_use_impacts by focusing on positive applications.	IntendedUse	DataSubset, Dataset
+prohibited_uses	Explicitly prohibited or forbidden uses for this dataset. Stronger than discouraged_uses - these are not permitted.	ProhibitedUse	DataSubset, Dataset
+errata		Erratum	DataSubset, Dataset
+updates		UpdatePlan	DataSubset, Dataset
+retention_limit		RetentionLimits	DataSubset, Dataset
+is_deidentified		Deidentification	DataSubset, Dataset
+mitigation_strategy	"Steps taken or recommended to mitigate this bias.
+"	string	DatasetBias
+confidential_elements_present	Indicates whether any confidential data elements are present.	boolean	Confidentiality
+content_warnings_present	Indicates whether any content warnings are needed.	boolean	ContentWarning
+sensitive_elements_present	Indicates whether sensitive data elements are present.	boolean	SensitiveElement
+handling_strategy	"Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).
+"	string	MissingDataDocumentation
+data_annotation_protocol	Annotation methodology, tasks, and protocols followed during labeling. Includes annotation guidelines, quality control procedures, and task definitions.	string	LabelingStrategy
+imputation_method	"Specific imputation technique used (mean, median, mode, forward fill, backward fill, interpolation, model-based imputation, etc.).
+"	string	ImputationProtocol
+imputed_fields	"Fields or columns where imputation was applied.
+"	string	ImputationProtocol
+imputation_rationale	"Justification for the imputation approach chosen, including assumptions made about missing data mechanisms.
+"	string	ImputationProtocol
+imputation_validation	"Methods used to validate imputation quality (if any).
+"	string	ImputationProtocol
+analysis_method	"Methodology used to assess annotation quality and resolve disagreements.
+"	string	AnnotationAnalysis
+prohibition_reason	Reason why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).	string	ProhibitedUse
+frequency	How often updates are planned (e.g., quarterly, annually).	string	UpdatePlan
+retention_period	Time period for data retention.	string	RetentionLimits
+consent_scope	"What specific uses did participants consent to? Are there limitations on data use based on consent?
+"	string	InformedConsent
+compensation_provided	Were participants compensated for their participation?	boolean	HumanSubjectCompensation
+compensation_type	"What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?
+"	string	HumanSubjectCompensation
+compensation_amount	"What was the amount or value of compensation provided? Include currency or equivalent value.
+"	string	HumanSubjectCompensation
+compensation_rationale	"What was the rationale for the compensation structure? How was the amount determined to be appropriate?
+"	string	HumanSubjectCompensation
+vulnerable_groups_included	"Are any vulnerable populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?
+"	boolean	VulnerablePopulations
+special_protections	"What additional protections were implemented for vulnerable populations? Include safeguards, modified procedures, or additional oversight.
+"	string	VulnerablePopulations
+confidentiality_level	Confidentiality classification of the dataset indicating level of access restrictions and sensitivity.	ConfidentialityLevelEnum	ExportControlRegulatoryRestrictions
+is_sensitive	Indicates whether this variable contains sensitive information (e.g., personal data, protected health information).	boolean	VariableMetadata
