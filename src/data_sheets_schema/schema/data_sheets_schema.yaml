@@ -159,7 +159,6 @@ classes:
         multivalued: true
         inlined_as_list: true
       known_biases:
-        slot_uri: d4d:knownBiases
         description: >-
           Known biases present in the dataset that may affect fairness,
           representativeness, or model performance. Uses BiasTypeEnum for
@@ -168,7 +167,6 @@ classes:
         multivalued: true
         inlined_as_list: true
       known_limitations:
-        slot_uri: d4d:knownLimitations
         description: >-
           Known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
@@ -222,14 +220,12 @@ classes:
         multivalued: true
         inlined_as_list: true
       missing_data_documentation:
-        slot_uri: d4d:missingDataDocumentation
         description: >-
           Documentation of missing data patterns and handling strategies.
         range: MissingDataDocumentation
         multivalued: true
         inlined_as_list: true
       raw_data_sources:
-        slot_uri: d4d:rawDataSources
         description: >-
           Description of raw data sources before preprocessing.
         range: RawDataSource
@@ -262,26 +258,12 @@ classes:
         description: >-
           Details about informed consent procedures, including consent type,
           documentation, and withdrawal mechanisms.
-      participant_privacy:
-        slot_uri: d4d:participantPrivacy
-        range: ParticipantPrivacy
-        multivalued: true
-        inlined_as_list: true
-        description: >-
-          Privacy protections and anonymization procedures for human research
-          participants, including reidentification risk assessment.
-      participant_compensation:
-        slot_uri: d4d:participantCompensation
-        range: HumanSubjectCompensation
-        inlined: true
-        description: >-
-          Compensation or incentives provided to human research participants.
       vulnerable_populations:
         slot_uri: d4d:vulnerablePopulations
         range: VulnerablePopulations
         inlined: true
         description: >-
-          Information about protections for vulnerable populations (e.g., minors,
+          Information about protections for at-risk populations (e.g., minors,
           pregnant women, prisoners) including special safeguards and assent procedures.
       # Preprocessing module classes
       preprocessing_strategies:
@@ -305,21 +287,18 @@ classes:
         multivalued: true
         inlined_as_list: true
       imputation_protocols:
-        slot_uri: d4d:imputationProtocols
         description: >-
           Data imputation methodology and techniques.
         range: ImputationProtocol
         multivalued: true
         inlined_as_list: true
       annotation_analyses:
-        slot_uri: d4d:annotationAnalyses
         description: >-
           Analysis of annotation quality and inter-annotator agreement.
         range: AnnotationAnalysis
         multivalued: true
         inlined_as_list: true
       machine_annotation_tools:
-        slot_uri: d4d:machineAnnotationTools
         description: >-
           Automated annotation tools used in dataset creation.
         range: MachineAnnotationTools
@@ -455,7 +434,6 @@ classes:
         exact_mappings:
           - schema:isPartOf
       related_datasets:
-        slot_uri: schema:relatedLink
         description: >-
           Related datasets with typed relationships (e.g., supplements, derives from,
           is version of). Use DatasetRelationship class to specify relationship types.
