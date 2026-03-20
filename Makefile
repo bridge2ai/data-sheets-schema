@@ -339,19 +339,22 @@ git-status:
 
 SSSOM_SCRIPT = src/alignment/generate_sssom_mapping.py
 SSSOM_URI_SCRIPT = src/alignment/generate_sssom_uri_mapping.py
+SSSOM_COMPREHENSIVE_SCRIPT = src/alignment/generate_comprehensive_sssom.py
 SKOS_ALIGNMENT = src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
 ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
 INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
 D4D_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+URI_RECOMMENDATIONS = notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv
 SSSOM_FULL = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv
 SSSOM_SUBSET = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping_subset.tsv
 SSSOM_URI = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_mapping.tsv
+SSSOM_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_comprehensive.tsv
 
-.PHONY: gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-all clean-sssom
+.PHONY: gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-comprehensive gen-sssom-all clean-sssom
 
 gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM property-level mappings (full and subset)
 
-gen-sssom-all: gen-sssom gen-sssom-uri ## Generate all SSSOM mappings (property-level and URI-level)
+gen-sssom-all: gen-sssom gen-sssom-uri gen-sssom-comprehensive ## Generate all SSSOM mappings (property, URI, and comprehensive)
 
 gen-sssom-full: $(SSSOM_FULL) ## Generate full SSSOM mapping from SKOS alignment
 
@@ -379,8 +382,18 @@ $(SSSOM_URI): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(SSSOM_URI_SC
 		--rocrate $(ROCRATE_JSON) \
 		--output $(SSSOM_URI)
 
+gen-sssom-comprehensive: $(SSSOM_COMPREHENSIVE) ## Generate comprehensive SSSOM for ALL 270 D4D attributes
+
+$(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_COMPREHENSIVE_SCRIPT)
+	@echo "Generating comprehensive SSSOM mapping (all D4D attributes)..."
+	$(RUN) python $(SSSOM_COMPREHENSIVE_SCRIPT) \
+		--schema $(D4D_SCHEMA_ALL) \
+		--skos $(SKOS_ALIGNMENT) \
+		--recommendations $(URI_RECOMMENDATIONS) \
+		--output $(SSSOM_COMPREHENSIVE)
+
 clean-sssom: ## Remove generated SSSOM files
-	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET) $(SSSOM_URI)
+	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET) $(SSSOM_URI) $(SSSOM_COMPREHENSIVE)
 
 ## ------------------------------------------------------------------
 ## FAIRSCAPE ↔ D4D Bidirectional Conversion
