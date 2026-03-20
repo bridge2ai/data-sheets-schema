@@ -1200,7 +1200,10 @@ slots:
     - DataSubset
   dialect:
     name: dialect
+    description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
+      profile).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    slot_uri: schema:encodingFormat
     domain_of:
     - Dataset
   bytes:
@@ -1434,6 +1437,7 @@ slots:
     description: Sub-resources or component datasets. Used in DatasetCollection to
       contain Dataset objects, and in Dataset to allow nested resource structures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    slot_uri: schema:hasPart
     domain_of:
     - DatasetCollection
     - Dataset
@@ -1466,6 +1470,7 @@ classes:
         description: Sub-resources or component datasets. Used in DatasetCollection
           to contain Dataset objects, and in Dataset to allow nested resource structures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:hasPart
         alias: resources
         owner: DatasetCollection
         domain_of:
@@ -2521,7 +2526,10 @@ classes:
         range: integer
       dialect:
         name: dialect
+        description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
+          profile).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:encodingFormat
         alias: dialect
         owner: Dataset
         domain_of:
@@ -2621,6 +2629,7 @@ classes:
         description: Sub-resources or component datasets that are part of this dataset.
           Allows datasets to contain nested resource structures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:hasPart
         alias: resources
         owner: Dataset
         domain_of:
@@ -3002,7 +3011,10 @@ classes:
         range: integer
       dialect:
         name: dialect
+        description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
+          profile).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:encodingFormat
         alias: dialect
         owner: DataSubset
         domain_of:
@@ -3101,6 +3113,7 @@ classes:
         description: Sub-resources or component datasets that are part of this dataset.
           Allows datasets to contain nested resource structures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:hasPart
         alias: resources
         owner: DataSubset
         domain_of:

@@ -333,6 +333,42 @@ git-status:
 	echo "creating a stub for .cruft.json. IMPORTANT: setup via cruft not cookiecutter recommended!" ; \
 	touch $@
 
+## ------------------------------------------------------------------
+## SSSOM Alignment Generation
+## ------------------------------------------------------------------
+
+SSSOM_SCRIPT = src/alignment/generate_sssom_mapping.py
+SKOS_ALIGNMENT = src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
+ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
+INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
+SSSOM_FULL = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv
+SSSOM_SUBSET = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping_subset.tsv
+
+.PHONY: gen-sssom gen-sssom-full gen-sssom-subset clean-sssom
+
+gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM mappings (full and subset)
+
+gen-sssom-full: $(SSSOM_FULL) ## Generate full SSSOM mapping from SKOS alignment
+
+$(SSSOM_FULL): $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(INTERFACE_MAPPING) $(SSSOM_SCRIPT)
+	@echo "Generating full SSSOM mapping..."
+	$(RUN) python $(SSSOM_SCRIPT) \
+		--skos $(SKOS_ALIGNMENT) \
+		--rocrate $(ROCRATE_JSON) \
+		--mapping $(INTERFACE_MAPPING) \
+		--output $(SSSOM_FULL) \
+		--output-subset $(SSSOM_SUBSET)
+
+gen-sssom-subset: $(SSSOM_SUBSET) ## Generate subset SSSOM mapping (interface fields only)
+
+$(SSSOM_SUBSET): $(SSSOM_FULL)
+	@echo "Subset SSSOM generated alongside full mapping"
+
+clean-sssom: ## Remove generated SSSOM files
+	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET)
+
+## ------------------------------------------------------------------
+
 clean:
 	rm -rf $(DEST)
 	rm -rf tmp

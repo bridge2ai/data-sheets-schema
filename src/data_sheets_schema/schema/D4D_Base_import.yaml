@@ -252,6 +252,8 @@ slots:
     slot_uri: dcat:landingPage
 
   dialect:
+    description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).
+    slot_uri: schema:encodingFormat
 
   bytes:
     description: Size of the data in bytes.
@@ -369,6 +371,7 @@ slots:
       Dataset objects, and in Dataset to allow nested resource structures.
     range: Dataset
     multivalued: true
+    slot_uri: schema:hasPart
 
 ## SHARED ENUMS ##
 enums:
