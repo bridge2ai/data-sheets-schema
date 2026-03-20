@@ -368,6 +368,45 @@ clean-sssom: ## Remove generated SSSOM files
 	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET)
 
 ## ------------------------------------------------------------------
+## FAIRSCAPE ↔ D4D Bidirectional Conversion
+## ------------------------------------------------------------------
+
+D4D_TO_FAIRSCAPE = src/fairscape_integration/d4d_to_fairscape.py
+FAIRSCAPE_TO_D4D = src/fairscape_integration/fairscape_to_d4d.py
+
+.PHONY: test-fairscape-conversion test-d4d-to-fairscape test-fairscape-to-d4d
+
+test-fairscape-conversion: test-d4d-to-fairscape test-fairscape-to-d4d ## Test bidirectional FAIRSCAPE ↔ D4D conversion
+
+test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
+	@echo "Testing D4D → FAIRSCAPE conversion..."
+	$(RUN) python -c "import sys; sys.path.insert(0, 'src'); \
+		from fairscape_integration.d4d_to_fairscape import convert_d4d_to_fairscape; \
+		import yaml, json; \
+		d4d = yaml.safe_load(open('data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml')); \
+		rocrate, (valid, errors) = convert_d4d_to_fairscape(d4d); \
+		print('✓ D4D → FAIRSCAPE: PASSED' if valid else '✗ D4D → FAIRSCAPE: FAILED'); \
+		json.dump(rocrate.model_dump(exclude_none=True, by_alias=True), \
+		          open('data/ro-crate/examples/voice_d4d_to_fairscape.json', 'w'), indent=2)"
+
+test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (CM4AI example)
+	@echo "Testing FAIRSCAPE → D4D conversion..."
+	$(RUN) python $(FAIRSCAPE_TO_D4D) \
+		--input $(ROCRATE_JSON) \
+		--output data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml \
+		--sssom $(SSSOM_FULL)
+
+fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
+	@if [ -z "$(INPUT)" ] || [ -z "$(OUTPUT)" ]; then \
+		echo "Usage: make fairscape-to-d4d INPUT=<rocrate.json> OUTPUT=<d4d.yaml>"; \
+		exit 1; \
+	fi
+	$(RUN) python $(FAIRSCAPE_TO_D4D) \
+		--input $(INPUT) \
+		--output $(OUTPUT) \
+		--sssom $(SSSOM_FULL)
+
+## ------------------------------------------------------------------
 
 clean:
 	rm -rf $(DEST)
