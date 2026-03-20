@@ -41,6 +41,14 @@ class ComprehensiveURISSSOMGenerator:
 
         self.base_slots = schema.get('slots', {})
 
+        # Also collect slot_uri from Dataset class attributes
+        self.class_attributes = {}
+        for class_name, class_def in schema.get('classes', {}).items():
+            attrs = class_def.get('attributes', {})
+            for attr_name, attr_def in attrs.items():
+                if 'slot_uri' in attr_def:
+                    self.class_attributes[attr_name] = attr_def
+
         # Use comprehensive generator for categorization
         self.comp_gen = ComprehensiveSSSOMGenerator(
             d4d_schema, skos_file, recommendations_file
@@ -51,10 +59,12 @@ class ComprehensiveURISSSOMGenerator:
         rows = []
 
         for attr_name, attr_info in sorted(self.comp_gen.d4d_attributes.items()):
-            # Get current slot_uri if exists
+            # Get current slot_uri if exists (check both base_slots and class_attributes)
             current_slot_uri = ''
             if attr_name in self.base_slots:
                 current_slot_uri = self.base_slots[attr_name].get('slot_uri', '')
+            elif attr_name in self.class_attributes:
+                current_slot_uri = self.class_attributes[attr_name].get('slot_uri', '')
 
             # Get category and recommended mapping
             category = self.comp_gen._categorize_attribute(attr_name, attr_info)
