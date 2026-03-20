@@ -109,12 +109,73 @@ class D4DToFairscapeConverter:
             "hasPart": []  # Required field, start with empty list
         }
 
-        # Add optional fields
+        # Add optional Schema.org fields
         if "issued" in d4d_dict or "datePublished" in d4d_dict:
             dataset_params["datePublished"] = d4d_dict.get("issued") or d4d_dict.get("datePublished")
 
         if "publisher" in d4d_dict:
             dataset_params["publisher"] = d4d_dict["publisher"]
+
+        if "doi" in d4d_dict:
+            dataset_params["identifier"] = d4d_dict["doi"]
+
+        if "bytes" in d4d_dict:
+            dataset_params["contentSize"] = str(d4d_dict["bytes"])
+
+        # Add EVI namespace properties (computational provenance)
+        evi_mapping = {
+            'dataset_count': 'evi:datasetCount',
+            'computation_count': 'evi:computationCount',
+            'software_count': 'evi:softwareCount',
+            'schema_count': 'evi:schemaCount',
+            'total_entities': 'evi:totalEntities',
+            'distribution_formats': 'evi:formats',
+            'md5': 'evi:md5',
+            'sha256': 'evi:sha256',
+        }
+
+        for d4d_field, evi_prop in evi_mapping.items():
+            if d4d_field in d4d_dict:
+                dataset_params[evi_prop] = d4d_dict[d4d_field]
+
+        # Add RAI namespace properties (responsible AI)
+        rai_mapping = {
+            'intended_uses': 'rai:dataUseCases',
+            'known_biases': 'rai:dataBiases',
+            'known_limitations': 'rai:dataLimitations',
+            'acquisition_methods': 'rai:dataCollection',
+            'missing_data_documentation': 'rai:dataCollectionMissingData',
+            'raw_data_sources': 'rai:dataCollectionRawData',
+            'collection_timeframes': 'rai:dataCollectionTimeframe',
+            'prohibited_uses': 'rai:prohibitedUses',
+            'ethical_reviews': 'rai:ethicalReview',
+            'confidential_elements': 'rai:personalSensitiveInformation',
+            'data_protection_impacts': 'rai:dataSocialImpact',
+            'updates': 'rai:dataReleaseMaintenancePlan',
+            'preprocessing_strategies': 'rai:dataPreprocessingProtocol',
+            'labeling_strategies': 'rai:dataAnnotationProtocol',
+            'annotation_analyses': 'rai:dataAnnotationAnalysis',
+            'machine_annotation_analyses': 'rai:machineAnnotationTools',
+            'imputation_protocols': 'rai:imputationProtocol',
+        }
+
+        for d4d_field, rai_prop in rai_mapping.items():
+            if d4d_field in d4d_dict:
+                dataset_params[rai_prop] = d4d_dict[d4d_field]
+
+        # Add D4D namespace properties
+        d4d_mapping = {
+            'addressing_gaps': 'd4d:addressingGaps',
+            'anomalies': 'd4d:dataAnomalies',
+            'content_warnings': 'd4d:contentWarning',
+            'informed_consent': 'd4d:informedConsent',
+            'human_subject_research': 'd4d:humanSubject',
+            'vulnerable_populations': 'd4d:atRiskPopulations',
+        }
+
+        for d4d_field, d4d_prop in d4d_mapping.items():
+            if d4d_field in d4d_dict:
+                dataset_params[d4d_prop] = d4d_dict[d4d_field]
 
         # Create Dataset element
         dataset = ROCrateMetadataElem(**dataset_params)
