@@ -82,6 +82,7 @@ classes:
       sampling_strategies:
         description: >
           References to one or more SamplingStrategy objects.
+        slot_uri: d4d:sampling_strategies
         range: SamplingStrategy
         multivalued: true
       missing_information:
@@ -119,6 +120,7 @@ classes:
       representative_verification:
         description: >
           Explanation of how representativeness was validated or verified.
+        slot_uri: schema:date
         range: string
         multivalued: true
       why_not_representative:
@@ -217,6 +219,7 @@ classes:
       mitigation_strategy:
         description: >
           Steps taken or recommended to mitigate this bias.
+        slot_uri: d4d:mitigation_strategy
         range: string
       affected_subsets:
         description: >
@@ -237,6 +240,7 @@ classes:
       limitation_type:
         description: >
           Category of limitation (e.g., scope, coverage, temporal, methodological).
+        slot_uri: schema:temporalCoverage
         range: LimitationTypeEnum
       limitation_description:
         description: >
@@ -296,6 +300,7 @@ classes:
       confidential_elements_present:
         range: boolean
         description: "Indicates whether any confidential data elements are present."
+        slot_uri: d4d:confidential_elements_present
       confidentiality_details:
         description: >
           Details on confidential data elements and handling procedures.
@@ -313,6 +318,7 @@ classes:
       content_warnings_present:
         range: boolean
         description: "Indicates whether any content warnings are needed."
+        slot_uri: d4d:content_warnings_present
       warnings:
         range: string
         multivalued: true
@@ -354,6 +360,7 @@ classes:
         range: string
         multivalued: true
         description: "List of identifier types removed during de-identification."
+        slot_uri: schema:identifier
       deidentification_details:
         description: >
           Details on de-identification procedures and residual risks.
@@ -373,6 +380,7 @@ classes:
       sensitive_elements_present:
         range: boolean
         description: "Indicates whether sensitive data elements are present."
+        slot_uri: d4d:sensitive_elements_present
       sensitivity_details:
         description: >
           Details on sensitive data elements present and handling procedures.
@@ -392,6 +400,7 @@ classes:
         description: >-
           The dataset that this relationship points to. Can be specified by
           identifier, URL, or Dataset object.
+        slot_uri: schema:identifier
         range: string
         required: true
       relationship_type:

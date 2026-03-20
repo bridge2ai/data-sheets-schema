@@ -126,6 +126,7 @@ classes:
         description: >-
           Confidentiality classification of the dataset indicating level of
           access restrictions and sensitivity.
+        slot_uri: d4d:confidentiality_level
         range: ConfidentialityLevelEnum
       governance_committee_contact:
         description: >-

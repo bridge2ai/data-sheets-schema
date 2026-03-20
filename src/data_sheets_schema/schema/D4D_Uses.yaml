@@ -147,5 +147,6 @@ classes:
         description: >-
           Reason why this use is prohibited (e.g., license restriction,
           ethical concern, privacy risk, legal constraint).
+        slot_uri: d4d:prohibition_reason
         range: string
         multivalued: true
