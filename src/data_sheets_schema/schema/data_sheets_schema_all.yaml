@@ -1937,6 +1937,7 @@ classes:
           representativeness, or model performance. Uses BiasTypeEnum for standardized
           bias categorization mapped to the AI Ontology (AIO).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:known_biases
         alias: known_biases
         owner: Dataset
         domain_of:
@@ -1950,6 +1951,7 @@ classes:
         description: Known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:known_limitations
         alias: known_limitations
         owner: Dataset
         domain_of:
@@ -2062,6 +2064,7 @@ classes:
         name: missing_data_documentation
         description: Documentation of missing data patterns and handling strategies.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:missingDataDocumentation
         alias: missing_data_documentation
         owner: Dataset
         domain_of:
@@ -2074,6 +2077,7 @@ classes:
         name: raw_data_sources
         description: Description of raw data sources before preprocessing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:rawDataSources
         alias: raw_data_sources
         owner: Dataset
         domain_of:
@@ -2188,6 +2192,7 @@ classes:
         name: imputation_protocols
         description: Data imputation methodology and techniques.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:imputation_protocols
         alias: imputation_protocols
         owner: Dataset
         domain_of:
@@ -2200,6 +2205,7 @@ classes:
         name: annotation_analyses
         description: Analysis of annotation quality and inter-annotator agreement.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:annotation_analyses
         alias: annotation_analyses
         owner: Dataset
         domain_of:
@@ -3176,6 +3182,7 @@ classes:
           representativeness, or model performance. Uses BiasTypeEnum for standardized
           bias categorization mapped to the AI Ontology (AIO).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:known_biases
         alias: known_biases
         owner: DataSubset
         domain_of:
@@ -3188,6 +3195,7 @@ classes:
         description: Known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:known_limitations
         alias: known_limitations
         owner: DataSubset
         domain_of:
@@ -3290,6 +3298,7 @@ classes:
         name: missing_data_documentation
         description: Documentation of missing data patterns and handling strategies.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:missingDataDocumentation
         alias: missing_data_documentation
         owner: DataSubset
         domain_of:
@@ -3301,6 +3310,7 @@ classes:
         name: raw_data_sources
         description: Description of raw data sources before preprocessing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:rawDataSources
         alias: raw_data_sources
         owner: DataSubset
         domain_of:
@@ -3407,6 +3417,7 @@ classes:
         name: imputation_protocols
         description: Data imputation methodology and techniques.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:imputation_protocols
         alias: imputation_protocols
         owner: DataSubset
         domain_of:
@@ -3418,6 +3429,7 @@ classes:
         name: annotation_analyses
         description: Analysis of annotation quality and inter-annotator agreement.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:annotation_analyses
         alias: annotation_analyses
         owner: DataSubset
         domain_of:

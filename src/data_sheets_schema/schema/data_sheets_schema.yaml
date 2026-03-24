@@ -164,6 +164,7 @@ classes:
           Known biases present in the dataset that may affect fairness,
           representativeness, or model performance. Uses BiasTypeEnum for
           standardized bias categorization mapped to the AI Ontology (AIO).
+        slot_uri: d4d:known_biases
         range: DatasetBias
         multivalued: true
         inlined_as_list: true
@@ -171,6 +172,7 @@ classes:
         description: >-
           Known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
+        slot_uri: d4d:known_limitations
         range: DatasetLimitation
         multivalued: true
         inlined_as_list: true
@@ -223,12 +225,14 @@ classes:
       missing_data_documentation:
         description: >-
           Documentation of missing data patterns and handling strategies.
+        slot_uri: d4d:missingDataDocumentation
         range: MissingDataDocumentation
         multivalued: true
         inlined_as_list: true
       raw_data_sources:
         description: >-
           Description of raw data sources before preprocessing.
+        slot_uri: d4d:rawDataSources
         range: RawDataSource
         multivalued: true
         inlined_as_list: true
@@ -290,12 +294,14 @@ classes:
       imputation_protocols:
         description: >-
           Data imputation methodology and techniques.
+        slot_uri: d4d:imputation_protocols
         range: ImputationProtocol
         multivalued: true
         inlined_as_list: true
       annotation_analyses:
         description: >-
           Analysis of annotation quality and inter-annotator agreement.
+        slot_uri: d4d:annotation_analyses
         range: AnnotationAnalysis
         multivalued: true
         inlined_as_list: true
