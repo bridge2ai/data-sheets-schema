@@ -54,14 +54,14 @@ d4d:was_derived_from skos:exactMatch schema:isBasedOn .
 
 # Addressing_gaps and related properties
 d4d:addressing_gaps skos:exactMatch d4d:addressingGaps .
-d4d:anomalies skos:exactMatch d4d:anomalies .
-d4d:content_warnings skos:exactMatch d4d:contentWarnings .
+d4d:anomalies skos:exactMatch d4d:dataAnomalies .
+d4d:content_warnings skos:exactMatch d4d:contentWarning .
 d4d:informed_consent skos:exactMatch d4d:informedConsent .
 
 # RAI namespace - exact matches
 d4d:acquisition_methods skos:exactMatch rai:dataCollection .
 d4d:collection_mechanisms skos:exactMatch rai:dataCollection .
-d4d:collection_timeframes skos:exactMatch d4d:dataCollectionTimeframe .
+d4d:collection_timeframes skos:exactMatch rai:dataCollectionTimeframe .
 d4d:confidential_elements skos:exactMatch rai:personalSensitiveInformation .
 d4d:data_protection_impacts skos:exactMatch rai:dataSocialImpact .
 d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
@@ -83,7 +83,7 @@ d4d:raw_data_sources skos:exactMatch rai:dataCollectionRawData .
 d4d:raw_sources skos:exactMatch rai:dataCollectionRawData .
 d4d:updates skos:exactMatch rai:dataReleaseMaintenancePlan .
 d4d:human_subject_research skos:exactMatch d4d:humanSubject .
-d4d:vulnerable_populations skos:exactMatch rai:atRiskPopulations .
+d4d:vulnerable_populations skos:exactMatch d4d:atRiskPopulations .
 
 # FAIRSCAPE Evidence namespace - exact matches
 d4d:distribution_formats skos:exactMatch evi:formats .
