@@ -35,7 +35,7 @@ class SlotURIAdder:
         """Load recommendations by confidence level."""
         recommendations = []
 
-        with open(self.recommendations_file) as f:
+        with open(self.recommendations_file, encoding='utf-8', newline='') as f:
             reader = csv.DictReader(f, delimiter='\t')
             for row in reader:
                 if row['confidence'] == confidence:
@@ -51,7 +51,7 @@ class SlotURIAdder:
         """Load novel D4D concepts."""
         concepts = []
 
-        with open(self.novel_concepts_file) as f:
+        with open(self.novel_concepts_file, encoding='utf-8', newline='') as f:
             reader = csv.DictReader(f, delimiter='\t')
             for row in reader:
                 concepts.append({
@@ -67,7 +67,7 @@ class SlotURIAdder:
         found_in = []
 
         for schema_file in self.schema_dir.glob('D4D_*.yaml'):
-            with open(schema_file) as f:
+            with open(schema_file, encoding='utf-8') as f:
                 content = f.read()
                 # Look for attribute definition
                 if re.search(rf'^\s+{attr_name}:\s*$', content, re.MULTILINE):
@@ -78,7 +78,7 @@ class SlotURIAdder:
     def add_slot_uri_to_file(self, schema_file: Path, attr_name: str, slot_uri: str) -> bool:
         """Add slot_uri to an attribute in a schema file."""
 
-        with open(schema_file) as f:
+        with open(schema_file, encoding='utf-8') as f:
             lines = f.readlines()
 
         # Find the attribute
@@ -130,7 +130,7 @@ class SlotURIAdder:
         lines.insert(insert_idx, slot_uri_line)
 
         # Write back
-        with open(schema_file, 'w') as f:
+        with open(schema_file, 'w', encoding='utf-8') as f:
             f.writelines(lines)
 
         return True

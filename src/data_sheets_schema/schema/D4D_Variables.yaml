@@ -11,6 +11,7 @@ see_also:
   - https://bridge2ai.github.io/data-sheets-schema
 
 prefixes:
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
   d4dvariables: https://w3id.org/bridge2ai/data-sheets-schema/variables#
   dcat: http://www.w3.org/ns/dcat#
   dcterms: http://purl.org/dc/terms/
@@ -112,7 +113,7 @@ classes:
         description: >-
           Indicates whether this variable contains sensitive information
           (e.g., personal data, protected health information).
-        slot_uri: d4d:is_sensitive
+        slot_uri: d4d:isSensitive
         range: boolean
 
       precision:

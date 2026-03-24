@@ -20,6 +20,7 @@ imports:
 
 
 prefixes:
+  d4d: "https://w3id.org/bridge2ai/data-sheets-schema/"
   linkml: "https://w3id.org/linkml/"
   d4duses: "https://w3id.org/bridge2ai/data-sheets-schema/uses#"
   schema: "http://schema.org/"
@@ -147,6 +148,6 @@ classes:
         description: >-
           Reason why this use is prohibited (e.g., license restriction,
           ethical concern, privacy risk, legal constraint).
-        slot_uri: d4d:prohibition_reason
+        slot_uri: d4d:prohibitionReason
         range: string
         multivalued: true

@@ -6,6 +6,7 @@ description: |
   across rubrics, projects, and input types.
 
 prefixes:
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
   d4deval: https://w3id.org/bridge2ai/d4d-evaluation-summary/
   linkml: https://w3id.org/linkml/
 

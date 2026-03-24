@@ -10,9 +10,11 @@ license: MIT
 
 
 prefixes:
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
   linkml: https://w3id.org/linkml/
   schema: http://schema.org/
   dcterms: http://purl.org/dc/terms/
+  prov: http://www.w3.org/ns/prov#
 
 
 imports:
@@ -98,11 +100,11 @@ classes:
     attributes:
       start_date:
         description: Start date of data collection
-        slot_uri: schema:date
+        slot_uri: schema:startDate
         range: date
       end_date:
         description: End date of data collection
-        slot_uri: schema:date
+        slot_uri: schema:endDate
         range: date
       timeframe_details:
         description: >
@@ -153,7 +155,7 @@ classes:
         description: >
           Strategy used to handle missing data (e.g., deletion, imputation,
           flagging, multiple imputation).
-        slot_uri: d4d:handling_strategy
+        slot_uri: d4d:handlingStrategy
         range: string
 
 

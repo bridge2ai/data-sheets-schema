@@ -22,6 +22,7 @@ imports:
 
 
 prefixes:
+  d4d: "https://w3id.org/bridge2ai/data-sheets-schema/"
   linkml: "https://w3id.org/linkml/"
   d4dcomposition: "https://w3id.org/bridge2ai/data-sheets-schema/composition#"
   schema: "http://schema.org/"
@@ -82,7 +83,7 @@ classes:
       sampling_strategies:
         description: >
           References to one or more SamplingStrategy objects.
-        slot_uri: d4d:sampling_strategies
+        slot_uri: d4d:samplingStrategies
         range: SamplingStrategy
         multivalued: true
       missing_information:

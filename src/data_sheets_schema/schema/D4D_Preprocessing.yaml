@@ -22,10 +22,12 @@ imports:
 
 
 prefixes:
+  d4d: "https://w3id.org/bridge2ai/data-sheets-schema/"
   linkml: "https://w3id.org/linkml/"
   d4dpreprocessing: "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#"
   schema: "http://schema.org/"
   dcterms: "http://purl.org/dc/terms/"
+  dcat: "http://www.w3.org/ns/dcat#"
 
 
 default_prefix: "d4dpreprocessing"
@@ -89,7 +91,7 @@ classes:
         description: >-
           Annotation methodology, tasks, and protocols followed during labeling.
           Includes annotation guidelines, quality control procedures, and task definitions.
-        slot_uri: d4d:data_annotation_protocol
+        slot_uri: d4d:dataAnnotationProtocol
         range: string
         multivalued: true
         exact_mappings:
