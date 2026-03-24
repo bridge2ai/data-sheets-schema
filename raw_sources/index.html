@@ -354,7 +354,7 @@
 
 
 <h1 id="slot-raw_sources">Slot: raw_sources</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/raw_sources">data_sheets_schema:raw_sources</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/rawSources">d4d:rawSources</a>
 Alias: raw_sources</p>
 <!-- no inheritance hierarchy -->
 
@@ -369,13 +369,13 @@ Alias: raw_sources</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -405,7 +405,7 @@ Alias: raw_sources</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:raw_sources</td>
+<td>d4d:rawSources</td>
 </tr>
 <tr>
 <td>native</td>
@@ -419,6 +419,7 @@ Alias: raw_sources</p>
 <pre><code class="language-yaml">name: raw_sources
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:rawSources
 alias: raw_sources
 owner: Dataset
 domain_of:

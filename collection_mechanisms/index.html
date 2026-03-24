@@ -354,7 +354,7 @@
 
 
 <h1 id="slot-collection_mechanisms">Slot: collection_mechanisms</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/collection_mechanisms">data_sheets_schema:collection_mechanisms</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/collectionMechanisms">d4d:collectionMechanisms</a>
 Alias: collection_mechanisms</p>
 <!-- no inheritance hierarchy -->
 
@@ -369,13 +369,13 @@ Alias: collection_mechanisms</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -405,7 +405,7 @@ Alias: collection_mechanisms</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:collection_mechanisms</td>
+<td>d4d:collectionMechanisms</td>
 </tr>
 <tr>
 <td>native</td>
@@ -419,6 +419,7 @@ Alias: collection_mechanisms</p>
 <pre><code class="language-yaml">name: collection_mechanisms
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:collectionMechanisms
 alias: collection_mechanisms
 owner: Dataset
 domain_of:

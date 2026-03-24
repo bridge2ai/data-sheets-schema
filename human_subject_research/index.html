@@ -355,7 +355,7 @@
 
 <h1 id="slot-human_subject_research">Slot: human_subject_research</h1>
 <p><em>Information about whether dataset involves human subjects research, including IRB approval, ethics review, and regulatory compliance.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/human_subject_research">data_sheets_schema:human_subject_research</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/humanSubjectResearch">d4d:humanSubjectResearch</a>
 Alias: human_subject_research</p>
 <!-- no inheritance hierarchy -->
 
@@ -370,13 +370,13 @@ Alias: human_subject_research</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -401,7 +401,7 @@ Alias: human_subject_research</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:human_subject_research</td>
+<td>d4d:humanSubjectResearch</td>
 </tr>
 <tr>
 <td>native</td>
@@ -417,6 +417,7 @@ description: Information about whether dataset involves human subjects research,
   IRB approval, ethics review, and regulatory compliance.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:humanSubjectResearch
 alias: human_subject_research
 owner: Dataset
 domain_of:

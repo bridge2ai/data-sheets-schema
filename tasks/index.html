@@ -354,7 +354,7 @@
 
 
 <h1 id="slot-tasks">Slot: tasks</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/tasks">data_sheets_schema:tasks</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/tasks">d4d:tasks</a>
 Alias: tasks</p>
 <!-- no inheritance hierarchy -->
 
@@ -369,13 +369,13 @@ Alias: tasks</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -405,7 +405,7 @@ Alias: tasks</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:tasks</td>
+<td>d4d:tasks</td>
 </tr>
 <tr>
 <td>native</td>
@@ -419,6 +419,7 @@ Alias: tasks</p>
 <pre><code class="language-yaml">name: tasks
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:tasks
 alias: tasks
 owner: Dataset
 domain_of:

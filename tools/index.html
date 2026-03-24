@@ -356,7 +356,7 @@
 <h1 id="slot-tools">Slot: tools</h1>
 <p><em>List of automated annotation tools with their versions. Format each entry as "ToolName version" (e.g., "spaCy 3.5.0", "NLTK 3.8", "GPT-4 turbo"). Use "unknown" for version if not available (e.g., "Custom NER Model unknown").</em></p>
 <p>__</p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/tools">data_sheets_schema:tools</a>
+<p>URI: <a href="http://schema.org/name">schema:name</a>
 Alias: tools</p>
 <!-- no inheritance hierarchy -->
 
@@ -402,7 +402,7 @@ Alias: tools</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:tools</td>
+<td>schema:name</td>
 </tr>
 <tr>
 <td>native</td>
@@ -421,6 +421,7 @@ description: 'List of automated annotation tools with their versions. Format eac
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:name
 alias: tools
 owner: MachineAnnotationTools
 domain_of:
