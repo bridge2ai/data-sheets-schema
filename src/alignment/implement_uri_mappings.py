@@ -179,7 +179,6 @@ class URIMappingImplementer:
         'resources': 'D4D_Minimal',
 
         # Distribution Module
-        'repository_url': 'D4D_Distribution',
 
         # Relationships (in main schema)
         'has_part': 'data_sheets_schema',

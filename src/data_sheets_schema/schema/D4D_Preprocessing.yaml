@@ -203,7 +203,7 @@ classes:
       analysis_method:
         description: >
           Methodology used to assess annotation quality and resolve disagreements.
-        slot_uri: d4d:analysis_method
+        slot_uri: d4d:analysisMethod
         range: string
       disagreement_patterns:
         description: >

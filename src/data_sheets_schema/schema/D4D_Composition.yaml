@@ -74,7 +74,7 @@ classes:
       label:
         description: >
           Is there a label or target associated with each instance?
-        slot_uri: schema:name
+        slot_uri: d4d:hasLabel
         range: boolean
       label_description:
         description: >

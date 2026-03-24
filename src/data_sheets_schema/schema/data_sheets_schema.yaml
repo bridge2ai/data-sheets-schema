@@ -270,6 +270,21 @@ classes:
         description: >-
           Information about protections for at-risk populations (e.g., minors,
           pregnant women, prisoners) including special safeguards and assent procedures.
+      participant_privacy:
+        slot_uri: d4d:participantPrivacy
+        range: ParticipantPrivacy
+        multivalued: true
+        inlined_as_list: true
+        description: >-
+          Information about privacy protections and anonymization procedures
+          for human research participants.
+      participant_compensation:
+        slot_uri: d4d:participantCompensation
+        range: HumanSubjectCompensation
+        multivalued: true
+        inlined_as_list: true
+        description: >-
+          Information about compensation or incentives provided to human research participants.
       # Preprocessing module classes
       preprocessing_strategies:
         slot_uri: d4d:preprocessingStrategies

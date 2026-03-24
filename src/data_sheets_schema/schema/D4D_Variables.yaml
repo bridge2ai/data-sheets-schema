@@ -72,7 +72,7 @@ classes:
         description: >-
           Code(s) used to represent missing values for this variable.
           Examples: "NA", "-999", "null", "". Multiple codes may be specified.
-        slot_uri: schema:valueRequired
+        slot_uri: d4d:missingValueCode
         range: string
         multivalued: true
 
