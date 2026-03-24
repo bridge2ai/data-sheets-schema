@@ -1,4 +1,3 @@
----
 name: data-sheets-schema
 description: A LinkML schema for Datasheets for Datasets.
 title: data-sheets-schema
@@ -13,6 +12,9 @@ prefixes:
   biolink:
     prefix_prefix: biolink
     prefix_reference: https://w3id.org/biolink/vocab/
+  d4d:
+    prefix_prefix: d4d
+    prefix_reference: https://w3id.org/bridge2ai/data-sheets-schema/
   data_sheets_schema:
     prefix_prefix: data_sheets_schema
     prefix_reference: https://w3id.org/bridge2ai/data-sheets-schema/
@@ -1849,6 +1851,7 @@ classes:
       purposes:
         name: purposes
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:purposes
         alias: purposes
         owner: Dataset
         domain_of:
@@ -1860,6 +1863,7 @@ classes:
       tasks:
         name: tasks
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:tasks
         alias: tasks
         owner: Dataset
         domain_of:
@@ -1871,6 +1875,7 @@ classes:
       addressing_gaps:
         name: addressing_gaps
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:addressingGaps
         alias: addressing_gaps
         owner: Dataset
         domain_of:
@@ -1882,6 +1887,7 @@ classes:
       creators:
         name: creators
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:creator
         alias: creators
         owner: Dataset
         domain_of:
@@ -1893,6 +1899,7 @@ classes:
       funders:
         name: funders
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:funder
         alias: funders
         owner: Dataset
         domain_of:
@@ -1918,6 +1925,7 @@ classes:
       instances:
         name: instances
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:instances
         alias: instances
         owner: Dataset
         domain_of:
@@ -1929,6 +1937,7 @@ classes:
       anomalies:
         name: anomalies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:anomalies
         alias: anomalies
         owner: Dataset
         domain_of:
@@ -1943,6 +1952,7 @@ classes:
           representativeness, or model performance. Uses BiasTypeEnum for standardized
           bias categorization mapped to the AI Ontology (AIO).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:known_biases
         alias: known_biases
         owner: Dataset
         domain_of:
@@ -1956,6 +1966,7 @@ classes:
         description: Known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:known_limitations
         alias: known_limitations
         owner: Dataset
         domain_of:
@@ -1967,6 +1978,7 @@ classes:
       confidential_elements:
         name: confidential_elements
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:confidentialElements
         alias: confidential_elements
         owner: Dataset
         domain_of:
@@ -1978,6 +1990,7 @@ classes:
       content_warnings:
         name: content_warnings
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:contentWarnings
         alias: content_warnings
         owner: Dataset
         domain_of:
@@ -1989,6 +2002,7 @@ classes:
       subpopulations:
         name: subpopulations
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:subpopulations
         alias: subpopulations
         owner: Dataset
         domain_of:
@@ -2000,6 +2014,7 @@ classes:
       sensitive_elements:
         name: sensitive_elements
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:sensitiveElements
         alias: sensitive_elements
         owner: Dataset
         domain_of:
@@ -2011,6 +2026,7 @@ classes:
       acquisition_methods:
         name: acquisition_methods
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:acquisitionMethods
         alias: acquisition_methods
         owner: Dataset
         domain_of:
@@ -2022,6 +2038,7 @@ classes:
       collection_mechanisms:
         name: collection_mechanisms
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:collectionMechanisms
         alias: collection_mechanisms
         owner: Dataset
         domain_of:
@@ -2033,6 +2050,7 @@ classes:
       sampling_strategies:
         name: sampling_strategies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:samplingStrategies
         alias: sampling_strategies
         owner: Dataset
         domain_of:
@@ -2045,6 +2063,7 @@ classes:
       data_collectors:
         name: data_collectors
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:dataCollectors
         alias: data_collectors
         owner: Dataset
         domain_of:
@@ -2056,6 +2075,7 @@ classes:
       collection_timeframes:
         name: collection_timeframes
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:collectionTimeframes
         alias: collection_timeframes
         owner: Dataset
         domain_of:
@@ -2068,6 +2088,7 @@ classes:
         name: missing_data_documentation
         description: Documentation of missing data patterns and handling strategies.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:missingDataDocumentation
         alias: missing_data_documentation
         owner: Dataset
         domain_of:
@@ -2080,6 +2101,7 @@ classes:
         name: raw_data_sources
         description: Description of raw data sources before preprocessing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:rawDataSources
         alias: raw_data_sources
         owner: Dataset
         domain_of:
@@ -2091,6 +2113,7 @@ classes:
       ethical_reviews:
         name: ethical_reviews
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:ethicalReviews
         alias: ethical_reviews
         owner: Dataset
         domain_of:
@@ -2102,6 +2125,7 @@ classes:
       data_protection_impacts:
         name: data_protection_impacts
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:dataProtectionImpacts
         alias: data_protection_impacts
         owner: Dataset
         domain_of:
@@ -2115,6 +2139,7 @@ classes:
         description: Information about whether dataset involves human subjects research,
           including IRB approval, ethics review, and regulatory compliance.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:humanSubjectResearch
         alias: human_subject_research
         owner: Dataset
         domain_of:
@@ -2126,6 +2151,7 @@ classes:
         description: Details about informed consent procedures, including consent
           type, documentation, and withdrawal mechanisms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:informedConsent
         alias: informed_consent
         owner: Dataset
         domain_of:
@@ -2140,15 +2166,45 @@ classes:
           minors, pregnant women, prisoners) including special safeguards and assent
           procedures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:vulnerablePopulations
         alias: vulnerable_populations
         owner: Dataset
         domain_of:
         - Dataset
         range: VulnerablePopulations
         inlined: true
+      participant_privacy:
+        name: participant_privacy
+        description: Information about privacy protections and anonymization procedures
+          for human research participants.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:participantPrivacy
+        alias: participant_privacy
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: ParticipantPrivacy
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      participant_compensation:
+        name: participant_compensation
+        description: Information about compensation or incentives provided to human
+          research participants.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:participantCompensation
+        alias: participant_compensation
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: HumanSubjectCompensation
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
       preprocessing_strategies:
         name: preprocessing_strategies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:preprocessingStrategies
         alias: preprocessing_strategies
         owner: Dataset
         domain_of:
@@ -2160,6 +2216,7 @@ classes:
       cleaning_strategies:
         name: cleaning_strategies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:cleaningStrategies
         alias: cleaning_strategies
         owner: Dataset
         domain_of:
@@ -2171,6 +2228,7 @@ classes:
       labeling_strategies:
         name: labeling_strategies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:labelingStrategies
         alias: labeling_strategies
         owner: Dataset
         domain_of:
@@ -2182,6 +2240,7 @@ classes:
       raw_sources:
         name: raw_sources
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:rawSources
         alias: raw_sources
         owner: Dataset
         domain_of:
@@ -2194,6 +2253,7 @@ classes:
         name: imputation_protocols
         description: Data imputation methodology and techniques.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:imputation_protocols
         alias: imputation_protocols
         owner: Dataset
         domain_of:
@@ -2206,6 +2266,7 @@ classes:
         name: annotation_analyses
         description: Analysis of annotation quality and inter-annotator agreement.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:annotation_analyses
         alias: annotation_analyses
         owner: Dataset
         domain_of:
@@ -2229,6 +2290,7 @@ classes:
       existing_uses:
         name: existing_uses
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:existingUses
         alias: existing_uses
         owner: Dataset
         domain_of:
@@ -2240,6 +2302,7 @@ classes:
       use_repository:
         name: use_repository
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:useRepository
         alias: use_repository
         owner: Dataset
         domain_of:
@@ -2251,6 +2314,7 @@ classes:
       other_tasks:
         name: other_tasks
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:otherTasks
         alias: other_tasks
         owner: Dataset
         domain_of:
@@ -2262,6 +2326,7 @@ classes:
       future_use_impacts:
         name: future_use_impacts
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:futureUseImpacts
         alias: future_use_impacts
         owner: Dataset
         domain_of:
@@ -2273,6 +2338,7 @@ classes:
       discouraged_uses:
         name: discouraged_uses
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:discouragedUses
         alias: discouraged_uses
         owner: Dataset
         domain_of:
@@ -2286,6 +2352,7 @@ classes:
         description: Explicit intended and recommended uses for this dataset. Complements
           future_use_impacts by focusing on positive applications.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:intendedUses
         alias: intended_uses
         owner: Dataset
         domain_of:
@@ -2299,6 +2366,7 @@ classes:
         description: Explicitly prohibited or forbidden uses for this dataset. Stronger
           than discouraged_uses - these are not permitted.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:prohibitedUses
         alias: prohibited_uses
         owner: Dataset
         domain_of:
@@ -2310,6 +2378,7 @@ classes:
       distribution_formats:
         name: distribution_formats
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:distributionFormats
         alias: distribution_formats
         owner: Dataset
         domain_of:
@@ -2321,6 +2390,7 @@ classes:
       distribution_dates:
         name: distribution_dates
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:distributionDates
         alias: distribution_dates
         owner: Dataset
         domain_of:
@@ -2332,6 +2402,7 @@ classes:
       license_and_use_terms:
         name: license_and_use_terms
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:license
         alias: license_and_use_terms
         owner: Dataset
         domain_of:
@@ -2341,6 +2412,7 @@ classes:
       ip_restrictions:
         name: ip_restrictions
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:ipRestrictions
         alias: ip_restrictions
         owner: Dataset
         domain_of:
@@ -2350,6 +2422,7 @@ classes:
       regulatory_restrictions:
         name: regulatory_restrictions
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:regulatoryRestrictions
         alias: regulatory_restrictions
         owner: Dataset
         domain_of:
@@ -2360,6 +2433,7 @@ classes:
       maintainers:
         name: maintainers
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:maintainers
         alias: maintainers
         owner: Dataset
         domain_of:
@@ -2371,6 +2445,7 @@ classes:
       errata:
         name: errata
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:errata
         alias: errata
         owner: Dataset
         domain_of:
@@ -2382,6 +2457,7 @@ classes:
       updates:
         name: updates
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:updates
         alias: updates
         owner: Dataset
         domain_of:
@@ -2391,6 +2467,7 @@ classes:
       retention_limit:
         name: retention_limit
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:retentionLimit
         alias: retention_limit
         owner: Dataset
         domain_of:
@@ -2400,6 +2477,7 @@ classes:
       version_access:
         name: version_access
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:accessURL
         alias: version_access
         owner: Dataset
         domain_of:
@@ -2409,6 +2487,7 @@ classes:
       extension_mechanism:
         name: extension_mechanism
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:extensionMechanism
         alias: extension_mechanism
         owner: Dataset
         domain_of:
@@ -2434,6 +2513,7 @@ classes:
       is_deidentified:
         name: is_deidentified
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:isDeidentified
         alias: is_deidentified
         owner: Dataset
         domain_of:
@@ -2443,6 +2523,7 @@ classes:
       is_tabular:
         name: is_tabular
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:encodingFormat
         alias: is_tabular
         owner: Dataset
         domain_of:
@@ -2483,6 +2564,7 @@ classes:
           derives from, is version of). Use DatasetRelationship class to specify relationship
           types.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:isRelatedTo
         alias: related_datasets
         owner: Dataset
         domain_of:
@@ -3102,6 +3184,7 @@ classes:
       purposes:
         name: purposes
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:purposes
         alias: purposes
         owner: DataSubset
         domain_of:
@@ -3112,6 +3195,7 @@ classes:
       tasks:
         name: tasks
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:tasks
         alias: tasks
         owner: DataSubset
         domain_of:
@@ -3122,6 +3206,7 @@ classes:
       addressing_gaps:
         name: addressing_gaps
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:addressingGaps
         alias: addressing_gaps
         owner: DataSubset
         domain_of:
@@ -3132,6 +3217,7 @@ classes:
       creators:
         name: creators
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:creator
         alias: creators
         owner: DataSubset
         domain_of:
@@ -3142,6 +3228,7 @@ classes:
       funders:
         name: funders
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:funder
         alias: funders
         owner: DataSubset
         domain_of:
@@ -3165,6 +3252,7 @@ classes:
       instances:
         name: instances
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:instances
         alias: instances
         owner: DataSubset
         domain_of:
@@ -3175,6 +3263,7 @@ classes:
       anomalies:
         name: anomalies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:anomalies
         alias: anomalies
         owner: DataSubset
         domain_of:
@@ -3188,6 +3277,7 @@ classes:
           representativeness, or model performance. Uses BiasTypeEnum for standardized
           bias categorization mapped to the AI Ontology (AIO).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:known_biases
         alias: known_biases
         owner: DataSubset
         domain_of:
@@ -3200,6 +3290,7 @@ classes:
         description: Known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:known_limitations
         alias: known_limitations
         owner: DataSubset
         domain_of:
@@ -3210,6 +3301,7 @@ classes:
       confidential_elements:
         name: confidential_elements
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:confidentialElements
         alias: confidential_elements
         owner: DataSubset
         domain_of:
@@ -3220,6 +3312,7 @@ classes:
       content_warnings:
         name: content_warnings
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:contentWarnings
         alias: content_warnings
         owner: DataSubset
         domain_of:
@@ -3230,6 +3323,7 @@ classes:
       subpopulations:
         name: subpopulations
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:subpopulations
         alias: subpopulations
         owner: DataSubset
         domain_of:
@@ -3240,6 +3334,7 @@ classes:
       sensitive_elements:
         name: sensitive_elements
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:sensitiveElements
         alias: sensitive_elements
         owner: DataSubset
         domain_of:
@@ -3250,6 +3345,7 @@ classes:
       acquisition_methods:
         name: acquisition_methods
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:acquisitionMethods
         alias: acquisition_methods
         owner: DataSubset
         domain_of:
@@ -3260,6 +3356,7 @@ classes:
       collection_mechanisms:
         name: collection_mechanisms
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:collectionMechanisms
         alias: collection_mechanisms
         owner: DataSubset
         domain_of:
@@ -3270,6 +3367,7 @@ classes:
       sampling_strategies:
         name: sampling_strategies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:samplingStrategies
         alias: sampling_strategies
         owner: DataSubset
         domain_of:
@@ -3281,6 +3379,7 @@ classes:
       data_collectors:
         name: data_collectors
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:dataCollectors
         alias: data_collectors
         owner: DataSubset
         domain_of:
@@ -3291,6 +3390,7 @@ classes:
       collection_timeframes:
         name: collection_timeframes
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:collectionTimeframes
         alias: collection_timeframes
         owner: DataSubset
         domain_of:
@@ -3302,6 +3402,7 @@ classes:
         name: missing_data_documentation
         description: Documentation of missing data patterns and handling strategies.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:missingDataDocumentation
         alias: missing_data_documentation
         owner: DataSubset
         domain_of:
@@ -3313,6 +3414,7 @@ classes:
         name: raw_data_sources
         description: Description of raw data sources before preprocessing.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:rawDataSources
         alias: raw_data_sources
         owner: DataSubset
         domain_of:
@@ -3323,6 +3425,7 @@ classes:
       ethical_reviews:
         name: ethical_reviews
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:ethicalReviews
         alias: ethical_reviews
         owner: DataSubset
         domain_of:
@@ -3333,6 +3436,7 @@ classes:
       data_protection_impacts:
         name: data_protection_impacts
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:dataProtectionImpacts
         alias: data_protection_impacts
         owner: DataSubset
         domain_of:
@@ -3345,6 +3449,7 @@ classes:
         description: Information about whether dataset involves human subjects research,
           including IRB approval, ethics review, and regulatory compliance.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:humanSubjectResearch
         alias: human_subject_research
         owner: DataSubset
         domain_of:
@@ -3356,6 +3461,7 @@ classes:
         description: Details about informed consent procedures, including consent
           type, documentation, and withdrawal mechanisms.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:informedConsent
         alias: informed_consent
         owner: DataSubset
         domain_of:
@@ -3369,15 +3475,43 @@ classes:
           minors, pregnant women, prisoners) including special safeguards and assent
           procedures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:vulnerablePopulations
         alias: vulnerable_populations
         owner: DataSubset
         domain_of:
         - Dataset
         range: VulnerablePopulations
         inlined: true
+      participant_privacy:
+        name: participant_privacy
+        description: Information about privacy protections and anonymization procedures
+          for human research participants.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:participantPrivacy
+        alias: participant_privacy
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: ParticipantPrivacy
+        multivalued: true
+        inlined_as_list: true
+      participant_compensation:
+        name: participant_compensation
+        description: Information about compensation or incentives provided to human
+          research participants.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:participantCompensation
+        alias: participant_compensation
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: HumanSubjectCompensation
+        multivalued: true
+        inlined_as_list: true
       preprocessing_strategies:
         name: preprocessing_strategies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:preprocessingStrategies
         alias: preprocessing_strategies
         owner: DataSubset
         domain_of:
@@ -3388,6 +3522,7 @@ classes:
       cleaning_strategies:
         name: cleaning_strategies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:cleaningStrategies
         alias: cleaning_strategies
         owner: DataSubset
         domain_of:
@@ -3398,6 +3533,7 @@ classes:
       labeling_strategies:
         name: labeling_strategies
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:labelingStrategies
         alias: labeling_strategies
         owner: DataSubset
         domain_of:
@@ -3408,6 +3544,7 @@ classes:
       raw_sources:
         name: raw_sources
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:rawSources
         alias: raw_sources
         owner: DataSubset
         domain_of:
@@ -3419,6 +3556,7 @@ classes:
         name: imputation_protocols
         description: Data imputation methodology and techniques.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:imputation_protocols
         alias: imputation_protocols
         owner: DataSubset
         domain_of:
@@ -3430,6 +3568,7 @@ classes:
         name: annotation_analyses
         description: Analysis of annotation quality and inter-annotator agreement.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:annotation_analyses
         alias: annotation_analyses
         owner: DataSubset
         domain_of:
@@ -3451,6 +3590,7 @@ classes:
       existing_uses:
         name: existing_uses
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:existingUses
         alias: existing_uses
         owner: DataSubset
         domain_of:
@@ -3461,6 +3601,7 @@ classes:
       use_repository:
         name: use_repository
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:useRepository
         alias: use_repository
         owner: DataSubset
         domain_of:
@@ -3471,6 +3612,7 @@ classes:
       other_tasks:
         name: other_tasks
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:otherTasks
         alias: other_tasks
         owner: DataSubset
         domain_of:
@@ -3481,6 +3623,7 @@ classes:
       future_use_impacts:
         name: future_use_impacts
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:futureUseImpacts
         alias: future_use_impacts
         owner: DataSubset
         domain_of:
@@ -3491,6 +3634,7 @@ classes:
       discouraged_uses:
         name: discouraged_uses
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:discouragedUses
         alias: discouraged_uses
         owner: DataSubset
         domain_of:
@@ -3503,6 +3647,7 @@ classes:
         description: Explicit intended and recommended uses for this dataset. Complements
           future_use_impacts by focusing on positive applications.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:intendedUses
         alias: intended_uses
         owner: DataSubset
         domain_of:
@@ -3515,6 +3660,7 @@ classes:
         description: Explicitly prohibited or forbidden uses for this dataset. Stronger
           than discouraged_uses - these are not permitted.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:prohibitedUses
         alias: prohibited_uses
         owner: DataSubset
         domain_of:
@@ -3525,6 +3671,7 @@ classes:
       distribution_formats:
         name: distribution_formats
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:distributionFormats
         alias: distribution_formats
         owner: DataSubset
         domain_of:
@@ -3535,6 +3682,7 @@ classes:
       distribution_dates:
         name: distribution_dates
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:distributionDates
         alias: distribution_dates
         owner: DataSubset
         domain_of:
@@ -3545,6 +3693,7 @@ classes:
       license_and_use_terms:
         name: license_and_use_terms
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:license
         alias: license_and_use_terms
         owner: DataSubset
         domain_of:
@@ -3554,6 +3703,7 @@ classes:
       ip_restrictions:
         name: ip_restrictions
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:ipRestrictions
         alias: ip_restrictions
         owner: DataSubset
         domain_of:
@@ -3563,6 +3713,7 @@ classes:
       regulatory_restrictions:
         name: regulatory_restrictions
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:regulatoryRestrictions
         alias: regulatory_restrictions
         owner: DataSubset
         domain_of:
@@ -3573,6 +3724,7 @@ classes:
       maintainers:
         name: maintainers
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:maintainers
         alias: maintainers
         owner: DataSubset
         domain_of:
@@ -3583,6 +3735,7 @@ classes:
       errata:
         name: errata
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:errata
         alias: errata
         owner: DataSubset
         domain_of:
@@ -3593,6 +3746,7 @@ classes:
       updates:
         name: updates
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:updates
         alias: updates
         owner: DataSubset
         domain_of:
@@ -3602,6 +3756,7 @@ classes:
       retention_limit:
         name: retention_limit
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:retentionLimit
         alias: retention_limit
         owner: DataSubset
         domain_of:
@@ -3611,6 +3766,7 @@ classes:
       version_access:
         name: version_access
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:accessURL
         alias: version_access
         owner: DataSubset
         domain_of:
@@ -3620,6 +3776,7 @@ classes:
       extension_mechanism:
         name: extension_mechanism
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:extensionMechanism
         alias: extension_mechanism
         owner: DataSubset
         domain_of:
@@ -3644,6 +3801,7 @@ classes:
       is_deidentified:
         name: is_deidentified
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:isDeidentified
         alias: is_deidentified
         owner: DataSubset
         domain_of:
@@ -3653,6 +3811,7 @@ classes:
       is_tabular:
         name: is_tabular
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:encodingFormat
         alias: is_tabular
         owner: DataSubset
         domain_of:
@@ -3692,6 +3851,7 @@ classes:
           derives from, is version of). Use DatasetRelationship class to specify relationship
           types.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:isRelatedTo
         alias: related_datasets
         owner: DataSubset
         domain_of:
@@ -4275,6 +4435,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -4356,6 +4518,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -4437,6 +4601,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -4446,6 +4612,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DatasetProperty
         domain_of:
@@ -4507,6 +4674,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5261,6 +5430,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5342,6 +5513,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5423,6 +5596,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5432,6 +5607,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Purpose
         domain_of:
@@ -5493,6 +5669,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5595,6 +5773,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5676,6 +5856,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5757,6 +5939,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5766,6 +5950,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Task
         domain_of:
@@ -5827,6 +6012,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -5931,6 +6118,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6012,6 +6201,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6093,6 +6284,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6102,6 +6295,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: AddressingGap
         domain_of:
@@ -6163,6 +6357,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6214,6 +6410,7 @@ classes:
           Note: roles are specified here rather than on Person directly, since the
           same person may have different roles across different datasets.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+        slot_uri: d4d:creditRoles
         alias: credit_roles
         owner: Creator
         domain_of:
@@ -6296,6 +6493,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6377,6 +6576,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6458,6 +6659,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6467,6 +6670,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Creator
         domain_of:
@@ -6528,6 +6732,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6645,6 +6851,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6726,6 +6934,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6807,6 +7017,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -6816,6 +7028,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: FundingMechanism
         domain_of:
@@ -6877,6 +7090,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7130,6 +7345,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:hasLabel
         alias: label
         owner: Instance
         domain_of:
@@ -7153,6 +7369,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:samplingStrategies
         alias: sampling_strategies
         owner: Instance
         domain_of:
@@ -7168,6 +7385,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:missingInformation
         alias: missing_information
         owner: Instance
         domain_of:
@@ -7250,6 +7468,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7331,6 +7551,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7412,6 +7634,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7421,6 +7645,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Instance
         domain_of:
@@ -7482,6 +7707,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7504,6 +7731,7 @@ classes:
         name: is_sample
         description: Indicates whether it is a sample of a larger set.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:isSample
         alias: is_sample
         owner: SamplingStrategy
         domain_of:
@@ -7514,6 +7742,7 @@ classes:
         name: is_random
         description: Indicates whether the sample is random.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:isRandom
         alias: is_random
         owner: SamplingStrategy
         domain_of:
@@ -7527,6 +7756,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:sourceData
         alias: source_data
         owner: SamplingStrategy
         domain_of:
@@ -7540,6 +7770,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:isRepresentative
         alias: is_representative
         owner: SamplingStrategy
         domain_of:
@@ -7552,6 +7783,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: schema:description
         alias: representative_verification
         owner: SamplingStrategy
         domain_of:
@@ -7564,6 +7796,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:whyNotRepresentative
         alias: why_not_representative
         owner: SamplingStrategy
         domain_of:
@@ -7577,6 +7810,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:strategies
         alias: strategies
         owner: SamplingStrategy
         domain_of:
@@ -7659,6 +7893,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7740,6 +7976,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7821,6 +8059,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -7830,6 +8070,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: SamplingStrategy
         domain_of:
@@ -7891,6 +8132,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8010,6 +8253,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8091,6 +8336,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8172,6 +8419,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8181,6 +8430,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: MissingInfo
         domain_of:
@@ -8242,6 +8492,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8349,6 +8601,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8430,6 +8684,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8511,6 +8767,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8520,6 +8778,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Relationships
         domain_of:
@@ -8581,6 +8840,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8687,6 +8948,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8768,6 +9031,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8849,6 +9114,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -8858,6 +9125,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Splits
         domain_of:
@@ -8919,6 +9187,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9024,6 +9294,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9105,6 +9377,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9186,6 +9460,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9195,6 +9471,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DataAnomaly
         domain_of:
@@ -9256,6 +9533,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9283,6 +9562,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:biasType
         alias: bias_type
         owner: DatasetBias
         domain_of:
@@ -9307,6 +9587,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:mitigation_strategy
         alias: mitigation_strategy
         owner: DatasetBias
         domain_of:
@@ -9319,6 +9600,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:affectedSubsets
         alias: affected_subsets
         owner: DatasetBias
         domain_of:
@@ -9401,6 +9683,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9482,6 +9766,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9563,6 +9849,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9572,6 +9860,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DatasetBias
         domain_of:
@@ -9633,6 +9922,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9659,6 +9950,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:limitationType
         alias: limitation_type
         owner: DatasetLimitation
         domain_of:
@@ -9683,6 +9975,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:scopeImpact
         alias: scope_impact
         owner: DatasetLimitation
         domain_of:
@@ -9694,6 +9987,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:recommendedMitigation
         alias: recommended_mitigation
         owner: DatasetLimitation
         domain_of:
@@ -9775,6 +10069,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9856,6 +10152,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9937,6 +10235,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -9946,6 +10246,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DatasetLimitation
         domain_of:
@@ -10007,6 +10308,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10053,6 +10356,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: schema:archivedAt
         alias: archival
         owner: ExternalResource
         domain_of:
@@ -10163,6 +10467,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10244,6 +10550,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10325,6 +10633,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10334,6 +10644,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ExternalResource
         domain_of:
@@ -10395,6 +10706,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10416,6 +10729,7 @@ classes:
         name: confidential_elements_present
         description: Indicates whether any confidential data elements are present.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:confidential_elements_present
         alias: confidential_elements_present
         owner: Confidentiality
         domain_of:
@@ -10510,6 +10824,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10591,6 +10907,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10672,6 +10990,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10681,6 +11001,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Confidentiality
         domain_of:
@@ -10742,6 +11063,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10763,6 +11086,7 @@ classes:
         name: content_warnings_present
         description: Indicates whether any content warnings are needed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:content_warnings_present
         alias: content_warnings_present
         owner: ContentWarning
         domain_of:
@@ -10854,6 +11178,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -10935,6 +11261,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11016,6 +11344,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11025,6 +11355,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ContentWarning
         domain_of:
@@ -11086,6 +11417,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11107,6 +11440,7 @@ classes:
         name: subpopulation_elements_present
         description: Indicates whether any subpopulations are explicitly identified.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:subpopulationElementsPresent
         alias: subpopulation_elements_present
         owner: Subpopulation
         domain_of:
@@ -11208,6 +11542,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11289,6 +11625,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11370,6 +11708,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11379,6 +11719,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Subpopulation
         domain_of:
@@ -11440,6 +11781,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11461,6 +11804,7 @@ classes:
         name: identifiable_elements_present
         description: Indicates whether data subjects can be identified.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:identifiableElementsPresent
         alias: identifiable_elements_present
         owner: Deidentification
         domain_of:
@@ -11470,6 +11814,7 @@ classes:
         name: method
         description: Method used for de-identification (e.g., HIPAA Safe Harbor).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: schema:method
         alias: method
         owner: Deidentification
         domain_of:
@@ -11479,6 +11824,7 @@ classes:
         name: identifiers_removed
         description: List of identifier types removed during de-identification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: schema:identifier
         alias: identifiers_removed
         owner: Deidentification
         domain_of:
@@ -11574,6 +11920,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11655,6 +12003,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11736,6 +12086,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11745,6 +12097,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Deidentification
         domain_of:
@@ -11806,6 +12159,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -11829,6 +12184,7 @@ classes:
         name: sensitive_elements_present
         description: Indicates whether sensitive data elements are present.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: d4d:sensitive_elements_present
         alias: sensitive_elements_present
         owner: SensitiveElement
         domain_of:
@@ -11923,6 +12279,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12004,6 +12362,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12085,6 +12445,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12094,6 +12456,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: SensitiveElement
         domain_of:
@@ -12155,6 +12518,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12178,6 +12543,7 @@ classes:
         description: The dataset that this relationship points to. Can be specified
           by identifier, URL, or Dataset object.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: schema:identifier
         alias: target_dataset
         owner: DatasetRelationship
         domain_of:
@@ -12189,6 +12555,7 @@ classes:
         description: The type of relationship (e.g., derives_from, supplements, is_version_of).
           Uses DatasetRelationshipTypeEnum for standardized relationship types.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: schema:additionalType
         alias: relationship_type
         owner: DatasetRelationship
         domain_of:
@@ -12200,6 +12567,7 @@ classes:
         description: Free-text description providing additional context about the
           relationship.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+        slot_uri: schema:description
         alias: description
         owner: DatasetRelationship
         domain_of:
@@ -12311,6 +12679,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12392,6 +12762,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12401,6 +12773,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DatasetRelationship
         domain_of:
@@ -12462,6 +12835,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12483,6 +12858,7 @@ classes:
         name: was_directly_observed
         description: Whether the data was directly observed
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:wasDirectlyObserved
         alias: was_directly_observed
         owner: InstanceAcquisition
         domain_of:
@@ -12492,6 +12868,7 @@ classes:
         name: was_reported_by_subjects
         description: Whether the data was reported directly by the subjects themselves
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:wasReportedBySubjects
         alias: was_reported_by_subjects
         owner: InstanceAcquisition
         domain_of:
@@ -12501,6 +12878,7 @@ classes:
         name: was_inferred_derived
         description: Whether the data was inferred or derived from other data
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:wasInferred
         alias: was_inferred_derived
         owner: InstanceAcquisition
         domain_of:
@@ -12510,6 +12888,7 @@ classes:
         name: was_validated_verified
         description: Whether the data was validated or verified in any way
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:wasValidated
         alias: was_validated_verified
         owner: InstanceAcquisition
         domain_of:
@@ -12604,6 +12983,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12685,6 +13066,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12766,6 +13149,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12775,6 +13160,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: InstanceAcquisition
         domain_of:
@@ -12836,6 +13222,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -12945,6 +13333,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13026,6 +13416,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13107,6 +13499,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13116,6 +13510,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: CollectionMechanism
         domain_of:
@@ -13177,6 +13572,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13198,6 +13595,7 @@ classes:
         name: role
         description: Role of the data collector (e.g., researcher, crowdworker)
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: schema:roleName
         alias: role
         owner: DataCollector
         domain_of:
@@ -13293,6 +13691,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13374,6 +13774,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13455,6 +13857,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13464,6 +13868,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DataCollector
         domain_of:
@@ -13525,6 +13930,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13548,6 +13955,7 @@ classes:
         name: start_date
         description: Start date of data collection
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: schema:startDate
         alias: start_date
         owner: CollectionTimeframe
         domain_of:
@@ -13557,6 +13965,7 @@ classes:
         name: end_date
         description: End date of data collection
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: schema:endDate
         alias: end_date
         owner: CollectionTimeframe
         domain_of:
@@ -13652,6 +14061,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13733,6 +14144,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13814,6 +14227,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13823,6 +14238,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: CollectionTimeframe
         domain_of:
@@ -13884,6 +14300,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -13905,6 +14323,7 @@ classes:
         name: is_direct
         description: Whether collection was direct from individuals
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:isDirect
         alias: is_direct
         owner: DirectCollection
         domain_of:
@@ -13999,6 +14418,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14080,6 +14501,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14161,6 +14584,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14170,6 +14595,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DirectCollection
         domain_of:
@@ -14231,6 +14657,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14257,6 +14685,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:missingDataPatterns
         alias: missing_data_patterns
         owner: MissingDataDocumentation
         domain_of:
@@ -14270,6 +14699,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:missingDataCauses
         alias: missing_data_causes
         owner: MissingDataDocumentation
         domain_of:
@@ -14283,6 +14713,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:handlingStrategy
         alias: handling_strategy
         owner: MissingDataDocumentation
         domain_of:
@@ -14364,6 +14795,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14445,6 +14878,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14526,6 +14961,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14535,6 +14972,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: MissingDataDocumentation
         domain_of:
@@ -14596,6 +15034,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14623,6 +15063,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: dcterms:description
         alias: source_description
         owner: RawDataSource
         domain_of:
@@ -14636,6 +15077,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: dcterms:type
         alias: source_type
         owner: RawDataSource
         domain_of:
@@ -14648,6 +15090,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:accessDetails
         alias: access_details
         owner: RawDataSource
         domain_of:
@@ -14659,6 +15102,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+        slot_uri: d4d:rawDataFormat
         alias: raw_data_format
         owner: RawDataSource
         domain_of:
@@ -14741,6 +15185,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14822,6 +15268,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14903,6 +15351,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -14912,6 +15362,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: RawDataSource
         domain_of:
@@ -14973,6 +15424,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15081,6 +15534,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15162,6 +15617,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15243,6 +15700,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15252,6 +15711,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: PreprocessingStrategy
         domain_of:
@@ -15313,6 +15773,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15421,6 +15883,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15502,6 +15966,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15583,6 +16049,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15592,6 +16060,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: CleaningStrategy
         domain_of:
@@ -15653,6 +16122,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15691,6 +16162,7 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
         exact_mappings:
         - rai:dataAnnotationProtocol
+        slot_uri: d4d:dataAnnotationProtocol
         alias: data_annotation_protocol
         owner: LabelingStrategy
         domain_of:
@@ -15704,6 +16176,7 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
         exact_mappings:
         - rai:annotationsPerItem
+        slot_uri: d4d:annotationsPerItem
         alias: annotations_per_item
         owner: LabelingStrategy
         domain_of:
@@ -15728,6 +16201,7 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
         exact_mappings:
         - rai:annotatorDemographics
+        slot_uri: d4d:annotatorDemographics
         alias: annotator_demographics
         owner: LabelingStrategy
         domain_of:
@@ -15823,6 +16297,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15904,6 +16380,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15985,6 +16463,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -15994,6 +16474,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: LabelingStrategy
         domain_of:
@@ -16055,6 +16536,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16076,6 +16559,7 @@ classes:
         name: access_url
         description: URL or access point for the raw data.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: dcat:accessURL
         alias: access_url
         owner: RawData
         domain_of:
@@ -16170,6 +16654,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16251,6 +16737,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16332,6 +16820,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16341,6 +16831,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: RawData
         domain_of:
@@ -16402,6 +16893,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16428,6 +16921,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:imputation_method
         alias: imputation_method
         owner: ImputationProtocol
         domain_of:
@@ -16440,6 +16934,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:imputed_fields
         alias: imputed_fields
         owner: ImputationProtocol
         domain_of:
@@ -16453,6 +16948,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:imputation_rationale
         alias: imputation_rationale
         owner: ImputationProtocol
         domain_of:
@@ -16464,6 +16960,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:imputation_validation
         alias: imputation_validation
         owner: ImputationProtocol
         domain_of:
@@ -16546,6 +17043,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16627,6 +17126,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16708,6 +17209,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16717,6 +17220,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ImputationProtocol
         domain_of:
@@ -16778,6 +17282,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -16804,6 +17310,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:interAnnotatorAgreementScore
         alias: inter_annotator_agreement_score
         owner: AnnotationAnalysis
         domain_of:
@@ -16816,6 +17323,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:agreementMetric
         alias: agreement_metric
         owner: AnnotationAnalysis
         domain_of:
@@ -16827,6 +17335,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:analysisMethod
         alias: analysis_method
         owner: AnnotationAnalysis
         domain_of:
@@ -16839,6 +17348,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:disagreementPatterns
         alias: disagreement_patterns
         owner: AnnotationAnalysis
         domain_of:
@@ -16851,6 +17361,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:annotationQualityDetails
         alias: annotation_quality_details
         owner: AnnotationAnalysis
         domain_of:
@@ -16933,6 +17444,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17014,6 +17527,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17095,6 +17610,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17104,6 +17621,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: AnnotationAnalysis
         domain_of:
@@ -17165,6 +17683,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17194,6 +17714,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: schema:name
         alias: tools
         owner: MachineAnnotationTools
         domain_of:
@@ -17208,6 +17729,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:toolDescriptions
         alias: tool_descriptions
         owner: MachineAnnotationTools
         domain_of:
@@ -17222,6 +17744,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+        slot_uri: d4d:toolAccuracy
         alias: tool_accuracy
         owner: MachineAnnotationTools
         domain_of:
@@ -17304,6 +17827,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17385,6 +17910,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17466,6 +17993,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17475,6 +18004,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: MachineAnnotationTools
         domain_of:
@@ -17536,6 +18066,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17556,6 +18088,7 @@ classes:
         name: examples
         description: List of examples of known/previous uses of the dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
+        slot_uri: schema:example
         alias: examples
         owner: ExistingUse
         domain_of:
@@ -17640,6 +18173,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17721,6 +18256,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17802,6 +18339,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17811,6 +18350,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ExistingUse
         domain_of:
@@ -17872,6 +18412,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -17893,6 +18435,7 @@ classes:
         name: repository_url
         description: URL to a repository of known dataset uses.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
+        slot_uri: dcat:accessURL
         alias: repository_url
         owner: UseRepository
         domain_of:
@@ -17987,6 +18530,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18068,6 +18613,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18149,6 +18696,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18158,6 +18707,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: UseRepository
         domain_of:
@@ -18219,6 +18769,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18324,6 +18876,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18405,6 +18959,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18486,6 +19042,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18495,6 +19053,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: OtherTask
         domain_of:
@@ -18556,6 +19115,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18667,6 +19228,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18748,6 +19311,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18829,6 +19394,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -18838,6 +19405,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: FutureUseImpact
         domain_of:
@@ -18899,6 +19467,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19004,6 +19574,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19085,6 +19657,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19166,6 +19740,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19175,6 +19751,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DiscouragedUse
         domain_of:
@@ -19236,6 +19813,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19260,6 +19839,7 @@ classes:
         name: examples
         description: List of example intended uses for this dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
+        slot_uri: schema:example
         alias: examples
         owner: IntendedUse
         domain_of:
@@ -19272,6 +19852,7 @@ classes:
         name: usage_notes
         description: Notes or caveats about using the dataset for intended purposes.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
+        slot_uri: dcterms:description
         alias: usage_notes
         owner: IntendedUse
         domain_of:
@@ -19282,6 +19863,7 @@ classes:
         description: Category of intended use (e.g., research, clinical, educational,
           commercial, policy).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
+        slot_uri: d4d:useCategory
         alias: use_category
         owner: IntendedUse
         domain_of:
@@ -19364,6 +19946,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19445,6 +20029,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19526,6 +20112,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19535,6 +20123,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: IntendedUse
         domain_of:
@@ -19596,6 +20185,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19619,6 +20210,7 @@ classes:
         description: Reason why this use is prohibited (e.g., license restriction,
           ethical concern, privacy risk, legal constraint).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
+        slot_uri: d4d:prohibitionReason
         alias: prohibition_reason
         owner: ProhibitedUse
         domain_of:
@@ -19701,6 +20293,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19782,6 +20376,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19863,6 +20459,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -19872,6 +20470,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ProhibitedUse
         domain_of:
@@ -19933,6 +20532,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20040,6 +20641,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20121,6 +20724,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20202,6 +20807,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20211,6 +20818,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ThirdPartySharing
         domain_of:
@@ -20272,6 +20880,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20376,6 +20986,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20457,6 +21069,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20538,6 +21152,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20547,6 +21163,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DistributionFormat
         domain_of:
@@ -20608,6 +21225,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20714,6 +21333,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20795,6 +21416,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20876,6 +21499,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -20885,6 +21510,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DistributionDate
         domain_of:
@@ -20946,6 +21572,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21064,6 +21692,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21145,6 +21775,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21226,6 +21858,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21235,6 +21869,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Maintainer
         domain_of:
@@ -21296,6 +21931,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21317,6 +21954,7 @@ classes:
         name: erratum_url
         description: URL or access point for the erratum.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+        slot_uri: dcat:accessURL
         alias: erratum_url
         owner: Erratum
         domain_of:
@@ -21411,6 +22049,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21492,6 +22132,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21573,6 +22215,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21582,6 +22226,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: Erratum
         domain_of:
@@ -21643,6 +22288,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21667,6 +22314,7 @@ classes:
         name: frequency
         description: How often updates are planned (e.g., quarterly, annually).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+        slot_uri: d4d:frequency
         alias: frequency
         owner: UpdatePlan
         domain_of:
@@ -21762,6 +22410,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21843,6 +22493,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21924,6 +22576,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -21933,6 +22587,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: UpdatePlan
         domain_of:
@@ -21994,6 +22649,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22017,6 +22674,7 @@ classes:
         name: retention_period
         description: Time period for data retention.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+        slot_uri: d4d:retentionPeriod
         alias: retention_period
         owner: RetentionLimits
         domain_of:
@@ -22111,6 +22769,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22192,6 +22852,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22273,6 +22935,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22282,6 +22946,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: RetentionLimits
         domain_of:
@@ -22343,6 +23008,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22364,6 +23031,7 @@ classes:
         name: latest_version_doi
         description: DOI or URL of the latest dataset version.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+        slot_uri: schema:identifier
         alias: latest_version_doi
         owner: VersionAccess
         domain_of:
@@ -22373,6 +23041,7 @@ classes:
         name: versions_available
         description: List of available versions with metadata.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+        slot_uri: d4d:versionsAvailable
         alias: versions_available
         owner: VersionAccess
         domain_of:
@@ -22468,6 +23137,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22549,6 +23220,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22630,6 +23303,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22639,6 +23314,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: VersionAccess
         domain_of:
@@ -22700,6 +23376,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22722,6 +23400,7 @@ classes:
         name: contribution_url
         description: URL for contribution guidelines or process.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
+        slot_uri: dcat:landingPage
         alias: contribution_url
         owner: ExtensionMechanism
         domain_of:
@@ -22817,6 +23496,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22898,6 +23579,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22979,6 +23662,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -22988,6 +23673,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ExtensionMechanism
         domain_of:
@@ -23049,6 +23735,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23186,6 +23874,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23267,6 +23957,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23348,6 +24040,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23357,6 +24051,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: EthicalReview
         domain_of:
@@ -23418,6 +24113,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23527,6 +24224,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23608,6 +24307,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23689,6 +24390,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23698,6 +24401,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: DataProtectionImpact
         domain_of:
@@ -23759,6 +24463,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23866,6 +24572,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -23947,6 +24655,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24028,6 +24738,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24037,6 +24749,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: CollectionNotification
         domain_of:
@@ -24098,6 +24811,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24205,6 +24920,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24286,6 +25003,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24367,6 +25086,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24376,6 +25097,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: CollectionConsent
         domain_of:
@@ -24437,6 +25159,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24544,6 +25268,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24625,6 +25351,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24706,6 +25434,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24715,6 +25445,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ConsentRevocation
         domain_of:
@@ -24776,6 +25507,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -24797,6 +25530,7 @@ classes:
         name: involves_human_subjects
         description: Does this dataset involve human subjects research?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:involvesHumanSubjects
         alias: involves_human_subjects
         owner: HumanSubjectResearch
         domain_of:
@@ -24809,6 +25543,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:irbApproval
         alias: irb_approval
         owner: HumanSubjectResearch
         domain_of:
@@ -24822,6 +25557,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:ethicsReviewBoard
         alias: ethics_review_board
         owner: HumanSubjectResearch
         domain_of:
@@ -24835,6 +25571,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:specialPopulations
         alias: special_populations
         owner: HumanSubjectResearch
         domain_of:
@@ -24848,6 +25585,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:regulatoryCompliance
         alias: regulatory_compliance
         owner: HumanSubjectResearch
         domain_of:
@@ -24930,6 +25668,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25011,6 +25751,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25092,6 +25834,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25101,6 +25845,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: HumanSubjectResearch
         domain_of:
@@ -25162,6 +25907,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25183,6 +25930,7 @@ classes:
         name: consent_obtained
         description: Was informed consent obtained from all participants?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:consentObtained
         alias: consent_obtained
         owner: InformedConsent
         domain_of:
@@ -25195,6 +25943,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:consentType
         alias: consent_type
         owner: InformedConsent
         domain_of:
@@ -25208,6 +25957,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:consentDocumentation
         alias: consent_documentation
         owner: InformedConsent
         domain_of:
@@ -25221,6 +25971,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:withdrawalMechanism
         alias: withdrawal_mechanism
         owner: InformedConsent
         domain_of:
@@ -25234,6 +25985,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:consentScope
         alias: consent_scope
         owner: InformedConsent
         domain_of:
@@ -25316,6 +26068,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25397,6 +26151,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25478,6 +26234,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25487,6 +26245,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: InformedConsent
         domain_of:
@@ -25548,6 +26307,784 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  ParticipantPrivacy:
+    name: ParticipantPrivacy
+    description: 'Information about privacy protections and anonymization procedures
+      for human research participants.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    is_a: DatasetProperty
+    attributes:
+      anonymization_method:
+        name: anonymization_method
+        description: 'What methods were used to anonymize or de-identify participant
+          data? Include technical details of privacy-preserving techniques.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:anonymizationMethod
+        alias: anonymization_method
+        owner: ParticipantPrivacy
+        domain_of:
+        - ParticipantPrivacy
+        range: string
+        multivalued: true
+      reidentification_risk:
+        name: reidentification_risk
+        description: 'What is the assessed risk of re-identification? What measures
+          were taken to minimize this risk?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:reidentificationRisk
+        alias: reidentification_risk
+        owner: ParticipantPrivacy
+        domain_of:
+        - ParticipantPrivacy
+        range: string
+        multivalued: true
+      privacy_techniques:
+        name: privacy_techniques
+        description: 'What privacy-preserving techniques were applied (e.g., differential
+          privacy, k-anonymity, data masking)?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:privacyTechniques
+        alias: privacy_techniques
+        owner: ParticipantPrivacy
+        domain_of:
+        - ParticipantPrivacy
+        range: string
+        multivalued: true
+      data_linkage:
+        name: data_linkage
+        description: 'Can this dataset be linked to other datasets in ways that might
+          compromise participant privacy?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:dataLinkage
+        alias: data_linkage
+        owner: ParticipantPrivacy
+        domain_of:
+        - ParticipantPrivacy
+        range: string
+        multivalued: true
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: ParticipantPrivacy
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: ParticipantPrivacy
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: ParticipantPrivacy
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
+        alias: used_software
+        owner: ParticipantPrivacy
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: Software
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+  HumanSubjectCompensation:
+    name: HumanSubjectCompensation
+    description: 'Information about compensation or incentives provided to human research
+      participants.
+
+      '
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    is_a: DatasetProperty
+    attributes:
+      compensation_provided:
+        name: compensation_provided
+        description: Were participants compensated for their participation?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:compensationProvided
+        alias: compensation_provided
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: boolean
+      compensation_type:
+        name: compensation_type
+        description: 'What type of compensation was provided (e.g., monetary payment,
+          gift cards, course credit, other incentives)?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:compensationType
+        alias: compensation_type
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: string
+        multivalued: true
+      compensation_amount:
+        name: compensation_amount
+        description: 'What was the amount or value of compensation provided? Include
+          currency or equivalent value.
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:compensationAmount
+        alias: compensation_amount
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: string
+        multivalued: true
+      compensation_rationale:
+        name: compensation_rationale
+        description: 'What was the rationale for the compensation structure? How was
+          the amount determined to be appropriate?
+
+          '
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:compensationRationale
+        alias: compensation_rationale
+        owner: HumanSubjectCompensation
+        domain_of:
+        - HumanSubjectCompensation
+        range: string
+        multivalued: true
+      id:
+        name: id
+        description: An optional identifier for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        alias: id
+        owner: HumanSubjectCompensation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: uriorcurie
+      name:
+        name: name
+        description: A human-readable name for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: HumanSubjectCompensation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      description:
+        name: description
+        description: A human-readable description for this property.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: HumanSubjectCompensation
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - NamedThing
+        - Organization
+        - DatasetProperty
+        - DatasetRelationship
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - VulnerablePopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        range: string
+      used_software:
+        name: used_software
+        description: What software was used as part of this dataset property?
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
+        alias: used_software
+        owner: HumanSubjectCompensation
+        domain_of:
+        - DatasetProperty
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25558,8 +27095,8 @@ classes:
         inlined_as_list: true
   VulnerablePopulations:
     name: VulnerablePopulations
-    description: 'Information about protections for at-risk populations in human subjects
-      research.
+    description: 'Information about protections for vulnerable populations in human
+      subjects research.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -25567,11 +27104,12 @@ classes:
     attributes:
       vulnerable_groups_included:
         name: vulnerable_groups_included
-        description: 'Are any at-risk populations included (e.g., children, pregnant
+        description: 'Are any vulnerable populations included (e.g., children, pregnant
           women, prisoners, cognitively impaired individuals)?
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:vulnerableGroupsIncluded
         alias: vulnerable_groups_included
         owner: VulnerablePopulations
         domain_of:
@@ -25579,11 +27117,12 @@ classes:
         range: boolean
       special_protections:
         name: special_protections
-        description: 'What additional protections were implemented for at-risk populations?
-          Include safeguards, modified procedures, or additional oversight.
+        description: 'What additional protections were implemented for vulnerable
+          populations? Include safeguards, modified procedures, or additional oversight.
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:specialProtections
         alias: special_protections
         owner: VulnerablePopulations
         domain_of:
@@ -25597,6 +27136,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:assentProcedures
         alias: assent_procedures
         owner: VulnerablePopulations
         domain_of:
@@ -25610,6 +27150,7 @@ classes:
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
+        slot_uri: d4d:guardianConsent
         alias: guardian_consent
         owner: VulnerablePopulations
         domain_of:
@@ -25692,6 +27233,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25773,6 +27316,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25854,6 +27399,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -25863,6 +27410,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: VulnerablePopulations
         domain_of:
@@ -25924,6 +27472,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26064,6 +27614,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26145,6 +27697,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26226,6 +27780,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26235,6 +27791,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: LicenseAndUseTerms
         domain_of:
@@ -26296,6 +27853,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26406,6 +27965,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26487,6 +28048,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26568,6 +28131,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26577,6 +28142,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: IPRestrictions
         domain_of:
@@ -26638,6 +28204,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26681,6 +28249,7 @@ classes:
           Accountability Act (HIPAA). HIPAA applies to protected health information
           in the United States.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+        slot_uri: d4d:hipaaCompliant
         alias: hipaa_compliant
         owner: ExportControlRegulatoryRestrictions
         domain_of:
@@ -26691,6 +28260,7 @@ classes:
         description: Other regulatory compliance frameworks applicable to this dataset
           (e.g., CCPA, PIPEDA, industry-specific regulations).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+        slot_uri: d4d:otherCompliance
         alias: other_compliance
         owner: ExportControlRegulatoryRestrictions
         domain_of:
@@ -26702,6 +28272,7 @@ classes:
         description: Confidentiality classification of the dataset indicating level
           of access restrictions and sensitivity.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
+        slot_uri: d4d:confidentialityLevel
         alias: confidentiality_level
         owner: ExportControlRegulatoryRestrictions
         domain_of:
@@ -26797,6 +28368,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26878,6 +28451,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26959,6 +28534,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -26968,6 +28545,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: ExportControlRegulatoryRestrictions
         domain_of:
@@ -27029,6 +28607,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27094,6 +28674,7 @@ classes:
         description: 'Code(s) used to represent missing values for this variable.
           Examples: "NA", "-999", "null", "". Multiple codes may be specified.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
+        slot_uri: d4d:missingValueCode
         alias: missing_value_code
         owner: VariableMetadata
         domain_of:
@@ -27163,6 +28744,7 @@ classes:
         description: Indicates whether this variable contains sensitive information
           (e.g., personal data, protected health information).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
+        slot_uri: d4d:isSensitive
         alias: is_sensitive
         owner: VariableMetadata
         domain_of:
@@ -27172,6 +28754,7 @@ classes:
         name: precision
         description: The precision or number of decimal places for numeric variables.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
+        slot_uri: schema:valuePrecision
         alias: precision
         owner: VariableMetadata
         domain_of:
@@ -27193,6 +28776,7 @@ classes:
         description: Description of how this variable was derived or calculated from
           other variables, if applicable.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
+        slot_uri: dcterms:provenance
         alias: derivation
         owner: VariableMetadata
         domain_of:
@@ -27203,6 +28787,7 @@ classes:
         description: Notes about data quality, reliability, or known issues specific
           to this variable.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
+        slot_uri: dcterms:description
         alias: quality_notes
         owner: VariableMetadata
         domain_of:
@@ -27285,6 +28870,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27366,6 +28953,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27447,6 +29036,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27456,6 +29047,7 @@ classes:
         name: used_software
         description: What software was used as part of this dataset property?
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: d4d:usedSoftware
         alias: used_software
         owner: VariableMetadata
         domain_of:
@@ -27517,6 +29109,8 @@ classes:
         - ConsentRevocation
         - HumanSubjectResearch
         - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
         - VulnerablePopulations
         - LicenseAndUseTerms
         - IPRestrictions
@@ -27527,3 +29121,4 @@ classes:
         inlined_as_list: true
     class_uri: schema:PropertyValue
 source_file: src/data_sheets_schema/schema/data_sheets_schema.yaml
+

@@ -45,6 +45,7 @@ classes:
     attributes:
       examples:
         description: "List of examples of known/previous uses of the dataset."
+        slot_uri: schema:example
         range: string
         multivalued: true
 
@@ -132,6 +133,7 @@ classes:
         description: >-
           Category of intended use (e.g., research, clinical, educational,
           commercial, policy).
+        slot_uri: d4d:useCategory
         range: string
         multivalued: true
 

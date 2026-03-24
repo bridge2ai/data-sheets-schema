@@ -131,6 +131,7 @@ classes:
         range: string
       used_software:
         description: "What software was used as part of this dataset property?"
+        slot_uri: d4d:usedSoftware
         range: Software
         multivalued: true
         inlined_as_list: true

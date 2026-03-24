@@ -39,15 +39,19 @@ classes:
     attributes:
       was_directly_observed:
         description: Whether the data was directly observed
+        slot_uri: d4d:wasDirectlyObserved
         range: boolean
       was_reported_by_subjects:
         description: Whether the data was reported directly by the subjects themselves
+        slot_uri: d4d:wasReportedBySubjects
         range: boolean
       was_inferred_derived:
         description: Whether the data was inferred or derived from other data
+        slot_uri: d4d:wasInferred
         range: boolean
       was_validated_verified:
         description: Whether the data was validated or verified in any way
+        slot_uri: d4d:wasValidated
         range: boolean
       acquisition_details:
         description: >
@@ -81,6 +85,7 @@ classes:
     attributes:
       role:
         description: Role of the data collector (e.g., researcher, crowdworker)
+        slot_uri: schema:roleName
         range: string
       collector_details:
         description: >
@@ -122,6 +127,7 @@ classes:
     attributes:
       is_direct:
         description: Whether collection was direct from individuals
+        slot_uri: d4d:isDirect
         range: boolean
       collection_details:
         description: >
@@ -143,12 +149,14 @@ classes:
         description: >
           Description of patterns in missing data (e.g., missing completely at random,
           missing at random, missing not at random).
+        slot_uri: d4d:missingDataPatterns
         range: string
         multivalued: true
       missing_data_causes:
         description: >
           Known or suspected causes of missing data (e.g., sensor failures,
           participant dropout, privacy constraints).
+        slot_uri: d4d:missingDataCauses
         range: string
         multivalued: true
       handling_strategy:
@@ -171,20 +179,24 @@ classes:
         description: >
           Detailed description of where raw data comes from (e.g., sensors,
           databases, web APIs, manual collection).
+        slot_uri: dcterms:description
         range: string
         required: true
       source_type:
         description: >
           Type of raw source (sensor, database, user input, web scraping, etc.).
+        slot_uri: dcterms:type
         range: string
         multivalued: true
       access_details:
         description: >
           Information on how to access or retrieve the raw source data.
+        slot_uri: d4d:accessDetails
         range: string
       raw_data_format:
         description: >
           Format of the raw data before any preprocessing.
+        slot_uri: d4d:rawDataFormat
         range: string
         multivalued: true
 

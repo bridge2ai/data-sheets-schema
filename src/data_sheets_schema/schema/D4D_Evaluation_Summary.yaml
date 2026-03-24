@@ -366,6 +366,7 @@ classes:
 
       frequency:
         description: How frequently this strength appears
+        slot_uri: d4d:frequency
         range: FrequencyEnum
 
       affected_element_or_question:

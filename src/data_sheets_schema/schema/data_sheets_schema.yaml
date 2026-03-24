@@ -164,6 +164,7 @@ classes:
           Known biases present in the dataset that may affect fairness,
           representativeness, or model performance. Uses BiasTypeEnum for
           standardized bias categorization mapped to the AI Ontology (AIO).
+        slot_uri: d4d:known_biases
         range: DatasetBias
         multivalued: true
         inlined_as_list: true
@@ -171,6 +172,7 @@ classes:
         description: >-
           Known limitations of the dataset that may affect its use or interpretation.
           Distinct from biases (systematic errors) and anomalies (data quality issues).
+        slot_uri: d4d:known_limitations
         range: DatasetLimitation
         multivalued: true
         inlined_as_list: true
@@ -223,12 +225,14 @@ classes:
       missing_data_documentation:
         description: >-
           Documentation of missing data patterns and handling strategies.
+        slot_uri: d4d:missingDataDocumentation
         range: MissingDataDocumentation
         multivalued: true
         inlined_as_list: true
       raw_data_sources:
         description: >-
           Description of raw data sources before preprocessing.
+        slot_uri: d4d:rawDataSources
         range: RawDataSource
         multivalued: true
         inlined_as_list: true
@@ -266,6 +270,21 @@ classes:
         description: >-
           Information about protections for at-risk populations (e.g., minors,
           pregnant women, prisoners) including special safeguards and assent procedures.
+      participant_privacy:
+        slot_uri: d4d:participantPrivacy
+        range: ParticipantPrivacy
+        multivalued: true
+        inlined_as_list: true
+        description: >-
+          Information about privacy protections and anonymization procedures
+          for human research participants.
+      participant_compensation:
+        slot_uri: d4d:participantCompensation
+        range: HumanSubjectCompensation
+        multivalued: true
+        inlined_as_list: true
+        description: >-
+          Information about compensation or incentives provided to human research participants.
       # Preprocessing module classes
       preprocessing_strategies:
         slot_uri: d4d:preprocessingStrategies
@@ -290,12 +309,14 @@ classes:
       imputation_protocols:
         description: >-
           Data imputation methodology and techniques.
+        slot_uri: d4d:imputation_protocols
         range: ImputationProtocol
         multivalued: true
         inlined_as_list: true
       annotation_analyses:
         description: >-
           Analysis of annotation quality and inter-annotator agreement.
+        slot_uri: d4d:annotation_analyses
         range: AnnotationAnalysis
         multivalued: true
         inlined_as_list: true
@@ -414,6 +435,7 @@ classes:
         range: Deidentification
         inlined: true
       is_tabular:
+        slot_uri: schema:encodingFormat
         range: boolean
       # Dataset citation and relationships
       citation:
@@ -438,6 +460,7 @@ classes:
         description: >-
           Related datasets with typed relationships (e.g., supplements, derives from,
           is version of). Use DatasetRelationship class to specify relationship types.
+        slot_uri: schema:isRelatedTo
         range: DatasetRelationship
         multivalued: true
         inlined_as_list: true

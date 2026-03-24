@@ -72,6 +72,7 @@ classes:
         description: >-
           Code(s) used to represent missing values for this variable.
           Examples: "NA", "-999", "null", "". Multiple codes may be specified.
+        slot_uri: d4d:missingValueCode
         range: string
         multivalued: true
 
@@ -119,6 +120,7 @@ classes:
       precision:
         description: >-
           The precision or number of decimal places for numeric variables.
+        slot_uri: schema:valuePrecision
         range: integer
 
       measurement_technique:
@@ -132,12 +134,14 @@ classes:
         description: >-
           Description of how this variable was derived or calculated from
           other variables, if applicable.
+        slot_uri: dcterms:provenance
         range: string
 
       quality_notes:
         description: >-
           Notes about data quality, reliability, or known issues specific
           to this variable.
+        slot_uri: dcterms:description
         range: string
         multivalued: true
 
