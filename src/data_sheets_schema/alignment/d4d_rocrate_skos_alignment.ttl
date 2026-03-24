@@ -83,7 +83,7 @@ d4d:raw_data_sources skos:exactMatch rai:dataCollectionRawData .
 d4d:raw_sources skos:exactMatch rai:dataCollectionRawData .
 d4d:updates skos:exactMatch rai:dataReleaseMaintenancePlan .
 d4d:human_subject_research skos:exactMatch d4d:humanSubject .
-d4d:vulnerable_populations skos:exactMatch d4d:atRiskPopulations .
+d4d:at_risk_populations skos:exactMatch d4d:atRiskPopulations .
 
 # FAIRSCAPE Evidence namespace - exact matches
 d4d:distribution_formats skos:exactMatch evi:formats .

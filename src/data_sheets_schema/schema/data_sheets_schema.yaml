@@ -263,9 +263,9 @@ classes:
         description: >-
           Details about informed consent procedures, including consent type,
           documentation, and withdrawal mechanisms.
-      vulnerable_populations:
-        slot_uri: d4d:vulnerablePopulations
-        range: VulnerablePopulations
+      at_risk_populations:
+        slot_uri: d4d:atRiskPopulations
+        range: AtRiskPopulations
         inlined: true
         description: >-
           Information about protections for at-risk populations (e.g., minors,
