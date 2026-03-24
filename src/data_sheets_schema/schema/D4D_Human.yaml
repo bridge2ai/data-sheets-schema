@@ -21,6 +21,7 @@ imports:
 
 
 prefixes:
+  d4d: "https://w3id.org/bridge2ai/data-sheets-schema/"
   linkml: "https://w3id.org/linkml/"
   d4dhuman: "https://w3id.org/bridge2ai/data-sheets-schema/human#"
 
@@ -101,24 +102,91 @@ classes:
         description: >
           What specific uses did participants consent to? Are there
           limitations on data use based on consent?
+        slot_uri: d4d:consentScope
+        range: string
+        multivalued: true
+
+
+  ParticipantPrivacy:
+    description: >
+      Information about privacy protections and anonymization procedures
+      for human research participants.
+    is_a: DatasetProperty
+    attributes:
+      anonymization_method:
+        description: >
+          What methods were used to anonymize or de-identify participant data?
+          Include technical details of privacy-preserving techniques.
+        range: string
+        multivalued: true
+      reidentification_risk:
+        description: >
+          What is the assessed risk of re-identification? What measures
+          were taken to minimize this risk?
+        range: string
+        multivalued: true
+      privacy_techniques:
+        description: >
+          What privacy-preserving techniques were applied (e.g., differential
+          privacy, k-anonymity, data masking)?
+        range: string
+        multivalued: true
+      data_linkage:
+        description: >
+          Can this dataset be linked to other datasets in ways that might
+          compromise participant privacy?
+        range: string
+        multivalued: true
+
+
+  HumanSubjectCompensation:
+    description: >
+      Information about compensation or incentives provided to human research participants.
+    is_a: DatasetProperty
+    attributes:
+      compensation_provided:
+        description: "Were participants compensated for their participation?"
+        slot_uri: d4d:compensationProvided
+        range: boolean
+      compensation_type:
+        description: >
+          What type of compensation was provided (e.g., monetary payment,
+          gift cards, course credit, other incentives)?
+        slot_uri: d4d:compensationType
+        range: string
+        multivalued: true
+      compensation_amount:
+        description: >
+          What was the amount or value of compensation provided?
+          Include currency or equivalent value.
+        slot_uri: d4d:compensationAmount
+        range: string
+        multivalued: true
+      compensation_rationale:
+        description: >
+          What was the rationale for the compensation structure?
+          How was the amount determined to be appropriate?
+        slot_uri: d4d:compensationRationale
         range: string
         multivalued: true
 
 
   VulnerablePopulations:
     description: >
-      Information about protections for at-risk populations in human subjects research.
+      Information about protections for vulnerable populations in human subjects research.
     is_a: DatasetProperty
     attributes:
       vulnerable_groups_included:
         description: >
-          Are any at-risk populations included (e.g., children, pregnant women,
+          Are any vulnerable populations included (e.g., children, pregnant women,
           prisoners, cognitively impaired individuals)?
+        slot_uri: d4d:vulnerableGroupsIncluded
         range: boolean
       special_protections:
         description: >
-          What additional protections were implemented for at-risk populations?
+          What additional protections were implemented for vulnerable populations?
           Include safeguards, modified procedures, or additional oversight.
+        slot_uri: d4d:specialProtections
         range: string
         multivalued: true
       assent_procedures:

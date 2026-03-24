@@ -21,6 +21,7 @@ imports:
 
 prefixes:
   # Common LinkML prefixes and any that your environment requires
+  d4d: "https://w3id.org/bridge2ai/data-sheets-schema/"
   linkml: "https://w3id.org/linkml/"
   d4dmotivation: "https://w3id.org/bridge2ai/data-sheets-schema/motivation#"
   schema: "http://schema.org/"
@@ -93,6 +94,7 @@ classes:
           contributions made to this dataset (e.g., Conceptualization, Data Curation,
           Methodology). Note: roles are specified here rather than on Person directly,
           since the same person may have different roles across different datasets.
+        slot_uri: d4d:creditRoles
         range: CRediTRoleEnum
         multivalued: true
 

@@ -20,6 +20,7 @@ imports:
 
 
 prefixes:
+  d4d: "https://w3id.org/bridge2ai/data-sheets-schema/"
   linkml: "https://w3id.org/linkml/"
   d4dmaintenance: "https://w3id.org/bridge2ai/data-sheets-schema/maintenance#"
   schema: "http://schema.org/"
@@ -62,6 +63,7 @@ classes:
     attributes:
       erratum_url:
         description: "URL or access point for the erratum."
+        slot_uri: dcat:accessURL
         range: uri
       erratum_details:
         description: >
@@ -82,6 +84,7 @@ classes:
     attributes:
       frequency:
         description: "How often updates are planned (e.g., quarterly, annually)."
+        slot_uri: d4d:frequency
         range: string
       update_details:
         description: >
@@ -101,6 +104,7 @@ classes:
     attributes:
       retention_period:
         description: "Time period for data retention."
+        slot_uri: d4d:retentionPeriod
         range: string
       retention_details:
         description: >
