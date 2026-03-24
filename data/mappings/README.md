@@ -1,11 +1,36 @@
-# D4D URI Mapping Analysis
+# D4D Mapping Files
 
-This directory contains analysis and recommendations for slot_uri mappings in the D4D schema.
+This directory contains all D4D mapping files including SSSOM mappings, structural mappings, and URI mapping analysis.
 
-## Files
+## SSSOM Mapping Files
+
+SSSOM (Simple Standard for Sharing Ontological Mappings) files documenting D4D ↔ RO-Crate mappings:
+
+### Comprehensive Mappings
+- `d4d_rocrate_sssom_comprehensive.tsv` (105K) - Complete D4D to RO-Crate SSSOM mappings
+- `d4d_rocrate_sssom_mapping.tsv` (35K) - Core D4D property mappings
+- `d4d_rocrate_sssom_mapping_subset.tsv` (31K) - Focused subset of mappings
+
+### URI-Level Mappings
+- `d4d_rocrate_sssom_uri_comprehensive_v1.tsv` (70K) - URI-level comprehensive mapping (version 1)
+- `d4d_rocrate_sssom_uri_comprehensive_v2.tsv` (81K) - URI-level comprehensive mapping (version 2)
+- `d4d_rocrate_sssom_uri_mapping.tsv` (11K) - Core URI mappings
+- `d4d_rocrate_sssom_uri_interface.tsv` (29K) - Interface-level URI mappings
+
+### Structural Mappings
+- `d4d_rocrate_structural_mapping.sssom.tsv` (34K) - Structural mapping between D4D and RO-Crate schemas
+
+**Note**: Two versions of `d4d_rocrate_sssom_uri_comprehensive.tsv` exist (v1 and v2) with different contents. Both preserved for comparison.
+
+## Analysis and Documentation
 
 - `uri_mapping_recommendations.md` - Comprehensive mapping recommendations for all unmapped slots
-- Analysis based on:
+- `STRUCTURAL_MAPPING_ANALYSIS.md` - Analysis of structural schema mappings
+- `d4d_rocrate_structural_mapping_summary.md` - Summary of structural mapping coverage
+
+## Vocabulary Sources
+
+Analysis based on:
   - EBI OLS (Ontology Lookup Service) API searches
   - Schema.org vocabulary
   - DCTerms (Dublin Core)
@@ -13,6 +38,8 @@ This directory contains analysis and recommendations for slot_uri mappings in th
   - PROV (Provenance)
   - DUO (Data Use Ontology)
   - QUDT (Quantities, Units, Dimensions and Types)
+  - FAIRSCAPE Evidence (EVI) namespace
+  - RAI (Responsible AI) namespace
 
 ## Summary
 
