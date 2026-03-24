@@ -45,29 +45,34 @@ classes:
     attributes:
       involves_human_subjects:
         description: "Does this dataset involve human subjects research?"
+        slot_uri: d4d:involvesHumanSubjects
         range: boolean
       irb_approval:
         description: >
           Was Institutional Review Board (IRB) approval obtained?
           Include approval number and institution if applicable.
+        slot_uri: d4d:irbApproval
         range: string
         multivalued: true
       ethics_review_board:
         description: >
           What ethics review board(s) reviewed this research?
           Include institution names and approval details.
+        slot_uri: d4d:ethicsReviewBoard
         range: string
         multivalued: true
       special_populations:
         description: >
           Does the research involve any special populations that require
           additional protections (e.g., minors, pregnant women, prisoners)?
+        slot_uri: d4d:specialPopulations
         range: string
         multivalued: true
       regulatory_compliance:
         description: >
           What regulatory frameworks govern this human subjects research
           (e.g., 45 CFR 46, HIPAA)?
+        slot_uri: d4d:regulatoryCompliance
         range: string
         multivalued: true
 
@@ -79,23 +84,27 @@ classes:
     attributes:
       consent_obtained:
         description: "Was informed consent obtained from all participants?"
+        slot_uri: d4d:consentObtained
         range: boolean
       consent_type:
         description: >
           What type of consent was obtained (e.g., written, verbal, electronic,
           implied through participation)?
+        slot_uri: d4d:consentType
         range: string
         multivalued: true
       consent_documentation:
         description: >
           How is consent documented? Include references to consent forms
           or procedures used.
+        slot_uri: d4d:consentDocumentation
         range: string
         multivalued: true
       withdrawal_mechanism:
         description: >
           How can participants withdraw their consent? What procedures
           are in place for data deletion upon withdrawal?
+        slot_uri: d4d:withdrawalMechanism
         range: string
         multivalued: true
       consent_scope:
@@ -117,24 +126,28 @@ classes:
         description: >
           What methods were used to anonymize or de-identify participant data?
           Include technical details of privacy-preserving techniques.
+        slot_uri: d4d:anonymizationMethod
         range: string
         multivalued: true
       reidentification_risk:
         description: >
           What is the assessed risk of re-identification? What measures
           were taken to minimize this risk?
+        slot_uri: d4d:reidentificationRisk
         range: string
         multivalued: true
       privacy_techniques:
         description: >
           What privacy-preserving techniques were applied (e.g., differential
           privacy, k-anonymity, data masking)?
+        slot_uri: d4d:privacyTechniques
         range: string
         multivalued: true
       data_linkage:
         description: >
           Can this dataset be linked to other datasets in ways that might
           compromise participant privacy?
+        slot_uri: d4d:dataLinkage
         range: string
         multivalued: true
 
@@ -193,11 +206,13 @@ classes:
         description: >
           For research involving minors, what assent procedures were used?
           How was developmentally appropriate assent obtained?
+        slot_uri: d4d:assentProcedures
         range: string
         multivalued: true
       guardian_consent:
         description: >
           For participants unable to provide their own consent, how was
           guardian or surrogate consent obtained?
+        slot_uri: d4d:guardianConsent
         range: string
         multivalued: true

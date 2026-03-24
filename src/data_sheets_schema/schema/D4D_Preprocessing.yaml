@@ -100,6 +100,7 @@ classes:
         description: >-
           Number of annotations collected per data item. Multiple annotations
           per item enable calculation of inter-annotator agreement.
+        slot_uri: d4d:annotationsPerItem
         range: integer
         exact_mappings:
           - rai:annotationsPerItem
@@ -113,6 +114,7 @@ classes:
         description: >-
           Demographic information about annotators, if available and relevant
           (e.g., geographic location, language background, expertise level).
+        slot_uri: d4d:annotatorDemographics
         range: string
         multivalued: true
         exact_mappings:
@@ -190,11 +192,13 @@ classes:
         description: >
           Measured agreement between annotators (e.g., Cohen's kappa value,
           Fleiss' kappa, Krippendorff's alpha).
+        slot_uri: d4d:interAnnotatorAgreementScore
         range: float
       agreement_metric:
         description: >
           Type of agreement metric used (Cohen's kappa, Fleiss' kappa,
           Krippendorff's alpha, percentage agreement, etc.).
+        slot_uri: d4d:agreementMetric
         range: string
       analysis_method:
         description: >
@@ -205,11 +209,13 @@ classes:
         description: >
           Systematic patterns in annotator disagreements (e.g., by demographic
           group, annotation difficulty, task type).
+        slot_uri: d4d:disagreementPatterns
         range: string
         multivalued: true
       annotation_quality_details:
         description: >
           Additional details on annotation quality assessment and findings.
+        slot_uri: d4d:annotationQualityDetails
         range: string
         multivalued: true
 
@@ -234,11 +240,13 @@ classes:
         description: >
           Descriptions of what each tool does in the annotation process and
           what types of annotations it produces. Should correspond to the tools list.
+        slot_uri: d4d:toolDescriptions
         range: string
         multivalued: true
       tool_accuracy:
         description: >
           Known accuracy or performance metrics for the automated tools (if available).
           Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy: 92%").
+        slot_uri: d4d:toolAccuracy
         range: string
         multivalued: true
