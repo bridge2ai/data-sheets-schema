@@ -414,6 +414,7 @@ classes:
         range: Deidentification
         inlined: true
       is_tabular:
+        slot_uri: schema:encodingFormat
         range: boolean
       # Dataset citation and relationships
       citation:
@@ -438,6 +439,7 @@ classes:
         description: >-
           Related datasets with typed relationships (e.g., supplements, derives from,
           is version of). Use DatasetRelationship class to specify relationship types.
+        slot_uri: schema:isRelatedTo
         range: DatasetRelationship
         multivalued: true
         inlined_as_list: true

@@ -1,4 +1,3 @@
----
 name: data-sheets-schema
 description: A LinkML schema for Datasheets for Datasets.
 title: data-sheets-schema
@@ -2438,6 +2437,7 @@ classes:
       is_tabular:
         name: is_tabular
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:encodingFormat
         alias: is_tabular
         owner: Dataset
         domain_of:
@@ -2478,6 +2478,7 @@ classes:
           derives from, is version of). Use DatasetRelationship class to specify relationship
           types.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:isRelatedTo
         alias: related_datasets
         owner: Dataset
         domain_of:
@@ -3640,6 +3641,7 @@ classes:
       is_tabular:
         name: is_tabular
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:encodingFormat
         alias: is_tabular
         owner: DataSubset
         domain_of:
@@ -3679,6 +3681,7 @@ classes:
           derives from, is version of). Use DatasetRelationship class to specify relationship
           types.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:isRelatedTo
         alias: related_datasets
         owner: DataSubset
         domain_of:
@@ -27514,3 +27517,4 @@ classes:
         inlined_as_list: true
     class_uri: schema:PropertyValue
 source_file: src/data_sheets_schema/schema/data_sheets_schema.yaml
+
