@@ -73,7 +73,7 @@ MAPPING_RULES = {
     'raw_sources': ('exactMatch', 'none', 'raw_sources', '"Epic EHR, lab LIMS"', '"Epic EHR, lab LIMS"'),
     'updates': ('exactMatch', 'none', 'updates', '"Quarterly updates planned"', '"Quarterly updates planned"'),
     'human_subject_research': ('exactMatch', 'none', 'human_subject_research', '"Yes, IRB approved"', '"Yes, IRB approved"'),
-    'vulnerable_populations': ('exactMatch', 'none', 'vulnerable_populations', '"Children excluded"', '"Children excluded"'),
+    'at_risk_populations': ('exactMatch', 'none', 'at_risk_populations', '"Children excluded"', '"Children excluded"'),
 
     # FAIRSCAPE Evidence namespace
     'distribution_formats': ('exactMatch', 'none', 'distribution_formats', '"CSV, Parquet"', '"CSV, Parquet"'),

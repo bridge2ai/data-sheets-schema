@@ -28,7 +28,7 @@ class FieldPrioritizer:
         'ethical_reviews', 'regulatory_restrictions', 'human_subject_research',
         'is_deidentified', 'data_governance', 'known_biases', 'intended_uses',
         'discouraged_uses', 'data_protection_impacts', 'informed_consent',
-        'vulnerable_populations', 'confidential_elements', 'sensitive_elements',
+        'at_risk_populations', 'confidential_elements', 'sensitive_elements',
         'updates', 'maintenance_plan', 'version_access', 'retention_limit'
     }
 
