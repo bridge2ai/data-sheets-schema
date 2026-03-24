@@ -80,5 +80,5 @@ RO-Crate: Fairscape Release RO-Crate	acquisition_methods			(slot exists but no d
 	use_repository			Is there a repository that links to any or all papers or systems that use the dataset? If so, provide a link or other access point.	We store them in software can grab urls maybe?			1	0	0	
 	version	str		(slot exists but no description)	version			1	1	0	
 	version_access			Will older versions of the dataset continue to be supported/hosted/maintained? If so, how? If not, how will obsolescence be communicated to dataset consumers?	version			1	0	0	
-	vulnerable_populations			Information about protections for vulnerable populations in human subjects research.	atRiskPopulations			1	1	0	
+	at_risk_populations	AtRiskPopulations		Information about protections for at-risk populations in human subjects research.	atRiskPopulations			1	1	0
 	was_derived_from	str		(slot exists but no description)	generatedBy			1	1	0	
