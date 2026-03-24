@@ -18,17 +18,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
 
-# Add fairscape_models to path
-fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
-if fairscape_path.exists() and str(fairscape_path) not in sys.path:
-    sys.path.insert(0, str(fairscape_path))
-
-try:
-    from fairscape_models.rocrate import ROCrateMetadataElem
-    FAIRSCAPE_AVAILABLE = True
-except ImportError:
-    FAIRSCAPE_AVAILABLE = False
-    print("Warning: FAIRSCAPE models not available")
+# Note: FAIRSCAPE models not required for URI-level SSSOM generation
 
 
 class SSSOMURIGenerator:
@@ -47,7 +37,6 @@ class SSSOMURIGenerator:
         # Load data
         self.d4d_slots = self._load_d4d_slots()
         self.skos_mappings = self._parse_skos()
-        self.rocrate_properties = self._extract_rocrate_properties()
 
     def _load_d4d_slots(self) -> Dict[str, str]:
         """Load D4D slot_uri mappings from schema."""
@@ -80,26 +69,6 @@ class SSSOMURIGenerator:
             }
 
         return mappings
-
-    def _extract_rocrate_properties(self) -> Dict[str, str]:
-        """Extract property URIs from RO-Crate JSON."""
-        with open(self.rocrate_json) as f:
-            rocrate = json.load(f)
-
-        # Get @context to understand namespace mappings
-        context = rocrate.get('@context', {})
-
-        # Extract properties used in Dataset entities
-        properties = {}
-        for entity in rocrate.get('@graph', []):
-            if 'Dataset' in str(entity.get('@type', [])):
-                for key, value in entity.items():
-                    if key.startswith('@'):
-                        continue
-                    # Store property with its namespace if present
-                    properties[key] = key
-
-        return properties
 
     def _get_mapping_confidence(self, predicate: str) -> float:
         """Get confidence score based on SKOS predicate."""
