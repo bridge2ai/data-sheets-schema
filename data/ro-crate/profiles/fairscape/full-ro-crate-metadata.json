@@ -13,11 +13,11 @@
         "@id": "https://w3id.org/ro/crate/1.2"
       },
       "about": {
-        "@id": "ark:59853/rocrate-cell-maps-for-artificial-intelligence-January-2026-data-release,"
+        "@id": "ark:59853/rocrate-cell-maps-for-artificial-intelligence-January-2026-data-release"
       }
     },
     {
-      "@id": "ark:59853/rocrate-cell-maps-for-artificial-intelligence-January-2026-data-release,",
+      "@id": "ark:59853/rocrate-cell-maps-for-artificial-intelligence-January-2026-data-release",
       "@type": ["Dataset", "https://w3id.org/EVI#ROCrate"],
       "name": "Cell Maps for Artificial Intelligence - January 2026 Data Release (Beta)",
       "description": "This dataset is the January 2026 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center.",
