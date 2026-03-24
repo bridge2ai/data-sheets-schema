@@ -116,11 +116,13 @@ classes:
         description: >-
           Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA).
           HIPAA applies to protected health information in the United States.
+        slot_uri: d4d:hipaaCompliant
         range: ComplianceStatusEnum
       other_compliance:
         description: >-
           Other regulatory compliance frameworks applicable to this dataset
           (e.g., CCPA, PIPEDA, industry-specific regulations).
+        slot_uri: d4d:otherCompliance
         range: string
         multivalued: true
       confidentiality_level:

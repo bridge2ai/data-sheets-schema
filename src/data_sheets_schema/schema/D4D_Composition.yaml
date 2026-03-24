@@ -74,6 +74,7 @@ classes:
       label:
         description: >
           Is there a label or target associated with each instance?
+        slot_uri: d4d:hasLabel
         range: boolean
       label_description:
         description: >
@@ -89,6 +90,7 @@ classes:
       missing_information:
         description: >
           References to one or more MissingInfo objects describing missing data.
+        slot_uri: d4d:missingInformation
         range: MissingInfo
         multivalued: true
 
@@ -102,20 +104,24 @@ classes:
     attributes:
       is_sample:
         description: "Indicates whether it is a sample of a larger set."
+        slot_uri: d4d:isSample
         range: boolean
         multivalued: true
       is_random:
         description: "Indicates whether the sample is random."
+        slot_uri: d4d:isRandom
         range: boolean
         multivalued: true
       source_data:
         description: >
           Description of the larger set from which the sample was drawn, if any.
+        slot_uri: d4d:sourceData
         range: string
         multivalued: true
       is_representative:
         description: >
           Indicates whether the sample is representative of the larger set.
+        slot_uri: d4d:isRepresentative
         range: boolean
         multivalued: true
       representative_verification:
@@ -127,11 +133,13 @@ classes:
       why_not_representative:
         description: >
           Explanation of why the sample is not representative, if applicable.
+        slot_uri: d4d:whyNotRepresentative
         range: string
         multivalued: true
       strategies:
         description: >
           Description of the sampling strategy (deterministic, probabilistic, etc.).
+        slot_uri: d4d:strategies
         range: string
         multivalued: true
 
@@ -210,6 +218,7 @@ classes:
         description: >
           The type of bias identified, using standardized categories from
           the Artificial Intelligence Ontology (AIO).
+        slot_uri: d4d:biasType
         range: BiasTypeEnum
       bias_description:
         description: >
@@ -225,6 +234,7 @@ classes:
       affected_subsets:
         description: >
           Specific subsets or features of the dataset affected by this bias.
+        slot_uri: d4d:affectedSubsets
         range: string
         multivalued: true
 
@@ -251,10 +261,12 @@ classes:
       scope_impact:
         description: >
           How this limitation affects the scope or applicability of the dataset.
+        slot_uri: d4d:scopeImpact
         range: string
       recommended_mitigation:
         description: >
           Recommended approaches for users to address this limitation.
+        slot_uri: d4d:recommendedMitigation
         range: string
 
 
@@ -282,6 +294,7 @@ classes:
         description: >
           Indication whether official archival versions of external resources
           are included.
+        slot_uri: schema:archivedAt
         range: boolean
         multivalued: true
       restrictions:
@@ -333,6 +346,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       subpopulation_elements_present:
+        slot_uri: d4d:subpopulationElementsPresent
         range: boolean
         description: "Indicates whether any subpopulations are explicitly identified."
       identification:
@@ -352,6 +366,7 @@ classes:
     is_a: DatasetProperty
     attributes:
       identifiable_elements_present:
+        slot_uri: d4d:identifiableElementsPresent
         range: boolean
         description: "Indicates whether data subjects can be identified."
       method:
@@ -408,6 +423,7 @@ classes:
         description: >-
           The type of relationship (e.g., derives_from, supplements, is_version_of).
           Uses DatasetRelationshipTypeEnum for standardized relationship types.
+        slot_uri: schema:additionalType
         range: DatasetRelationshipTypeEnum
         required: true
       description:
