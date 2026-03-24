@@ -22,10 +22,12 @@ imports:
 
 
 prefixes:
+  d4d: "https://w3id.org/bridge2ai/data-sheets-schema/"
   linkml: "https://w3id.org/linkml/"
   d4dpreprocessing: "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling#"
   schema: "http://schema.org/"
   dcterms: "http://purl.org/dc/terms/"
+  dcat: "http://www.w3.org/ns/dcat#"
 
 
 default_prefix: "d4dpreprocessing"
@@ -89,6 +91,7 @@ classes:
         description: >-
           Annotation methodology, tasks, and protocols followed during labeling.
           Includes annotation guidelines, quality control procedures, and task definitions.
+        slot_uri: d4d:dataAnnotationProtocol
         range: string
         multivalued: true
         exact_mappings:
@@ -130,6 +133,7 @@ classes:
     attributes:
       access_url:
         description: "URL or access point for the raw data."
+        slot_uri: dcat:accessURL
         range: uri
       raw_data_details:
         description: >
@@ -151,21 +155,25 @@ classes:
         description: >
           Specific imputation technique used (mean, median, mode, forward fill,
           backward fill, interpolation, model-based imputation, etc.).
+        slot_uri: d4d:imputation_method
         range: string
         multivalued: true
       imputed_fields:
         description: >
           Fields or columns where imputation was applied.
+        slot_uri: d4d:imputed_fields
         range: string
         multivalued: true
       imputation_rationale:
         description: >
           Justification for the imputation approach chosen, including
           assumptions made about missing data mechanisms.
+        slot_uri: d4d:imputation_rationale
         range: string
       imputation_validation:
         description: >
           Methods used to validate imputation quality (if any).
+        slot_uri: d4d:imputation_validation
         range: string
         multivalued: true
 
@@ -191,6 +199,7 @@ classes:
       analysis_method:
         description: >
           Methodology used to assess annotation quality and resolve disagreements.
+        slot_uri: d4d:analysis_method
         range: string
       disagreement_patterns:
         description: >
@@ -218,6 +227,7 @@ classes:
           List of automated annotation tools with their versions. Format each entry as
           "ToolName version" (e.g., "spaCy 3.5.0", "NLTK 3.8", "GPT-4 turbo").
           Use "unknown" for version if not available (e.g., "Custom NER Model unknown").
+        slot_uri: schema:name
         range: string
         multivalued: true
       tool_descriptions:

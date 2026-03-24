@@ -11,6 +11,7 @@ see_also:
 prefixes:
   AIO: https://w3id.org/aio/
   biolink: https://w3id.org/biolink/vocab/
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
   data_sheets_schema: https://w3id.org/bridge2ai/data-sheets-schema/
   datasets: https://w3id.org/linkml/report
   dcat: http://www.w3.org/ns/dcat#
@@ -116,22 +117,27 @@ classes:
     attributes:
       # Motivation module classes
       purposes:
+        slot_uri: d4d:purposes
         range: Purpose
         multivalued: true
         inlined_as_list: true
       tasks:
+        slot_uri: d4d:tasks
         range: Task
         multivalued: true
         inlined_as_list: true
       addressing_gaps:
+        slot_uri: d4d:addressingGaps
         range: AddressingGap
         multivalued: true
         inlined_as_list: true
       creators:
+        slot_uri: schema:creator
         range: Creator
         multivalued: true
         inlined_as_list: true
       funders:
+        slot_uri: schema:funder
         range: FundingMechanism
         multivalued: true
         inlined_as_list: true
@@ -144,10 +150,12 @@ classes:
         exact_mappings:
           - schema:distribution
       instances:
+        slot_uri: d4d:instances
         range: Instance
         multivalued: true
         inlined_as_list: true
       anomalies:
+        slot_uri: d4d:anomalies
         range: DataAnomaly
         multivalued: true
         inlined_as_list: true
@@ -167,39 +175,48 @@ classes:
         multivalued: true
         inlined_as_list: true
       confidential_elements:
+        slot_uri: d4d:confidentialElements
         range: Confidentiality
         multivalued: true
         inlined_as_list: true
       content_warnings:
+        slot_uri: d4d:contentWarnings
         range: ContentWarning
         multivalued: true
         inlined_as_list: true
       subpopulations:
+        slot_uri: d4d:subpopulations
         range: Subpopulation
         multivalued: true
         inlined_as_list: true
       sensitive_elements:
+        slot_uri: d4d:sensitiveElements
         range: SensitiveElement
         multivalued: true
         inlined_as_list: true
       # Collection module classes
       acquisition_methods:
+        slot_uri: d4d:acquisitionMethods
         range: InstanceAcquisition
         multivalued: true
         inlined_as_list: true
       collection_mechanisms:
+        slot_uri: d4d:collectionMechanisms
         range: CollectionMechanism
         multivalued: true
         inlined_as_list: true
       sampling_strategies:
+        slot_uri: d4d:samplingStrategies
         range: SamplingStrategy
         multivalued: true
         inlined_as_list: true
       data_collectors:
+        slot_uri: d4d:dataCollectors
         range: DataCollector
         multivalued: true
         inlined_as_list: true
       collection_timeframes:
+        slot_uri: d4d:collectionTimeframes
         range: CollectionTimeframe
         multivalued: true
         inlined_as_list: true
@@ -217,59 +234,56 @@ classes:
         inlined_as_list: true
       # Ethics module classes
       ethical_reviews:
+        slot_uri: d4d:ethicalReviews
         range: EthicalReview
         multivalued: true
         inlined_as_list: true
       data_protection_impacts:
+        slot_uri: d4d:dataProtectionImpacts
         range: DataProtectionImpact
         multivalued: true
         inlined_as_list: true
       # Human subjects module classes
       human_subject_research:
+        slot_uri: d4d:humanSubjectResearch
         range: HumanSubjectResearch
         inlined: true
         description: >-
           Information about whether dataset involves human subjects research,
           including IRB approval, ethics review, and regulatory compliance.
       informed_consent:
+        slot_uri: d4d:informedConsent
         range: InformedConsent
         multivalued: true
         inlined_as_list: true
         description: >-
           Details about informed consent procedures, including consent type,
           documentation, and withdrawal mechanisms.
-      participant_privacy:
-        range: ParticipantPrivacy
-        multivalued: true
-        inlined_as_list: true
-        description: >-
-          Privacy protections and anonymization procedures for human research
-          participants, including reidentification risk assessment.
-      participant_compensation:
-        range: HumanSubjectCompensation
-        inlined: true
-        description: >-
-          Compensation or incentives provided to human research participants.
       vulnerable_populations:
+        slot_uri: d4d:vulnerablePopulations
         range: VulnerablePopulations
         inlined: true
         description: >-
-          Information about protections for vulnerable populations (e.g., minors,
+          Information about protections for at-risk populations (e.g., minors,
           pregnant women, prisoners) including special safeguards and assent procedures.
       # Preprocessing module classes
       preprocessing_strategies:
+        slot_uri: d4d:preprocessingStrategies
         range: PreprocessingStrategy
         multivalued: true
         inlined_as_list: true
       cleaning_strategies:
+        slot_uri: d4d:cleaningStrategies
         range: CleaningStrategy
         multivalued: true
         inlined_as_list: true
       labeling_strategies:
+        slot_uri: d4d:labelingStrategies
         range: LabelingStrategy
         multivalued: true
         inlined_as_list: true
       raw_sources:
+        slot_uri: d4d:rawSources
         range: RawData
         multivalued: true
         inlined_as_list: true
@@ -293,26 +307,32 @@ classes:
         inlined_as_list: true
       # Uses module classes
       existing_uses:
+        slot_uri: d4d:existingUses
         range: ExistingUse
         multivalued: true
         inlined_as_list: true
       use_repository:
+        slot_uri: d4d:useRepository
         range: UseRepository
         multivalued: true
         inlined_as_list: true
       other_tasks:
+        slot_uri: d4d:otherTasks
         range: OtherTask
         multivalued: true
         inlined_as_list: true
       future_use_impacts:
+        slot_uri: d4d:futureUseImpacts
         range: FutureUseImpact
         multivalued: true
         inlined_as_list: true
       discouraged_uses:
+        slot_uri: d4d:discouragedUses
         range: DiscouragedUse
         multivalued: true
         inlined_as_list: true
       intended_uses:
+        slot_uri: d4d:intendedUses
         range: IntendedUse
         multivalued: true
         inlined_as_list: true
@@ -320,6 +340,7 @@ classes:
           Explicit intended and recommended uses for this dataset.
           Complements future_use_impacts by focusing on positive applications.
       prohibited_uses:
+        slot_uri: d4d:prohibitedUses
         range: ProhibitedUse
         multivalued: true
         inlined_as_list: true
@@ -328,42 +349,53 @@ classes:
           Stronger than discouraged_uses - these are not permitted.
       # Distribution module classes
       distribution_formats:
+        slot_uri: d4d:distributionFormats
         range: DistributionFormat
         multivalued: true
         inlined_as_list: true
       distribution_dates:
+        slot_uri: d4d:distributionDates
         range: DistributionDate
         multivalued: true
         inlined_as_list: true
       # Data Governance module classes
       license_and_use_terms:
+        slot_uri: schema:license
         range: LicenseAndUseTerms
         inlined: true
       ip_restrictions:
+        slot_uri: d4d:ipRestrictions
         range: IPRestrictions
         inlined: true
       regulatory_restrictions:
+        slot_uri: d4d:regulatoryRestrictions
         range: ExportControlRegulatoryRestrictions
         inlined: true
       # Maintenance module classes
       maintainers:
+        slot_uri: d4d:maintainers
         range: Maintainer
         multivalued: true
         inlined_as_list: true
       errata:
+        slot_uri: d4d:errata
         range: Erratum
         multivalued: true
         inlined_as_list: true
       updates:
+        slot_uri: d4d:updates
         range: UpdatePlan
         inlined: true
       retention_limit:
+        slot_uri: d4d:retentionLimit
         range: RetentionLimits
         inlined: true
       version_access:
+        slot_uri: dcat:accessURL
         range: VersionAccess
         inlined: true
       extension_mechanism:
+        slot_uri: d4d:extensionMechanism
         range: ExtensionMechanism
         inlined: true
       # Variable/field metadata
@@ -378,6 +410,7 @@ classes:
           - schema:variableMeasured
       # Other attributes
       is_deidentified:
+        slot_uri: d4d:isDeidentified
         range: Deidentification
         inlined: true
       is_tabular:

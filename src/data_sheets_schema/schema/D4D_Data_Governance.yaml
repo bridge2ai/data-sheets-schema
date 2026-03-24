@@ -20,6 +20,7 @@ imports:
 
 
 prefixes:
+  d4d: "https://w3id.org/bridge2ai/data-sheets-schema/"
   linkml: "https://w3id.org/linkml/"
   d4ddatagovernance: "https://w3id.org/bridge2ai/data-sheets-schema/data-governance#"
   schema: "http://schema.org/"
@@ -126,6 +127,7 @@ classes:
         description: >-
           Confidentiality classification of the dataset indicating level of
           access restrictions and sensitivity.
+        slot_uri: d4d:confidentialityLevel
         range: ConfidentialityLevelEnum
       governance_committee_contact:
         description: >-
