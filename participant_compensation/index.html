@@ -354,8 +354,8 @@
 
 
 <h1 id="slot-participant_compensation">Slot: participant_compensation</h1>
-<p><em>Compensation or incentives provided to human research participants.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/participant_compensation">data_sheets_schema:participant_compensation</a>
+<p><em>Information about compensation or incentives provided to human research participants.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/participantCompensation">d4d:participantCompensation</a>
 Alias: participant_compensation</p>
 <!-- no inheritance hierarchy -->
 
@@ -383,7 +383,12 @@ Alias: participant_compensation</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../HumanSubjectCompensation/">HumanSubjectCompensation</a></li>
+<li>
+<p>Range: <a href="../HumanSubjectCompensation/">HumanSubjectCompensation</a></p>
+</li>
+<li>
+<p>Multivalued: True</p>
+</li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
@@ -401,7 +406,7 @@ Alias: participant_compensation</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:participant_compensation</td>
+<td>d4d:participantCompensation</td>
 </tr>
 <tr>
 <td>native</td>
@@ -413,15 +418,19 @@ Alias: participant_compensation</p>
 <details>
 
 <pre><code class="language-yaml">name: participant_compensation
-description: Compensation or incentives provided to human research participants.
+description: Information about compensation or incentives provided to human research
+  participants.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: d4d:participantCompensation
 alias: participant_compensation
 owner: Dataset
 domain_of:
 - Dataset
 range: HumanSubjectCompensation
+multivalued: true
 inlined: true
+inlined_as_list: true
 
 </code></pre>
 

@@ -741,6 +741,28 @@
 
 
 
+      Dataset : participant_compensation
+
+
+
+
+
+        Dataset --&gt; "*" HumanSubjectCompensation : participant_compensation
+        click HumanSubjectCompensation href "../HumanSubjectCompensation/"
+
+
+
+      Dataset : participant_privacy
+
+
+
+
+
+        Dataset --&gt; "*" ParticipantPrivacy : participant_privacy
+        click ParticipantPrivacy href "../ParticipantPrivacy/"
+
+
+
       Dataset : path
 
       Dataset : preprocessing_strategies
@@ -1210,6 +1232,18 @@
 <td><a href="../vulnerable_populations/">vulnerable_populations</a></td>
 <td>0..1 <br/> <a href="../VulnerablePopulations/">VulnerablePopulations</a></td>
 <td>Information about protections for at-risk populations (e</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../participant_privacy/">participant_privacy</a></td>
+<td>* <br/> <a href="../ParticipantPrivacy/">ParticipantPrivacy</a></td>
+<td>Information about privacy protections and anonymization procedures for human ...</td>
+<td>direct</td>
+</tr>
+<tr>
+<td><a href="../participant_compensation/">participant_compensation</a></td>
+<td>* <br/> <a href="../HumanSubjectCompensation/">HumanSubjectCompensation</a></td>
+<td>Information about compensation or incentives provided to human research parti...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -1750,6 +1784,7 @@ attributes:
       mapped to the AI Ontology (AIO).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:known_biases
     domain_of:
     - Dataset
     range: DatasetBias
@@ -1762,6 +1797,7 @@ attributes:
       Distinct from biases (systematic errors) and anomalies (data quality issues).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:known_limitations
     domain_of:
     - Dataset
     range: DatasetLimitation
@@ -1873,6 +1909,7 @@ attributes:
     description: Documentation of missing data patterns and handling strategies.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:missingDataDocumentation
     domain_of:
     - Dataset
     range: MissingDataDocumentation
@@ -1884,6 +1921,7 @@ attributes:
     description: Description of raw data sources before preprocessing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:rawDataSources
     domain_of:
     - Dataset
     range: RawDataSource
@@ -1947,6 +1985,32 @@ attributes:
     - Dataset
     range: VulnerablePopulations
     inlined: true
+  participant_privacy:
+    name: participant_privacy
+    description: Information about privacy protections and anonymization procedures
+      for human research participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:participantPrivacy
+    domain_of:
+    - Dataset
+    range: ParticipantPrivacy
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  participant_compensation:
+    name: participant_compensation
+    description: Information about compensation or incentives provided to human research
+      participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:participantCompensation
+    domain_of:
+    - Dataset
+    range: HumanSubjectCompensation
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   preprocessing_strategies:
     name: preprocessing_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1996,6 +2060,7 @@ attributes:
     description: Data imputation methodology and techniques.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:imputation_protocols
     domain_of:
     - Dataset
     range: ImputationProtocol
@@ -2007,6 +2072,7 @@ attributes:
     description: Analysis of annotation quality and inter-annotator agreement.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:annotation_analyses
     domain_of:
     - Dataset
     range: AnnotationAnalysis
@@ -2241,6 +2307,7 @@ attributes:
     name: is_tabular
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: schema:encodingFormat
     domain_of:
     - Dataset
     range: boolean
@@ -2278,6 +2345,7 @@ attributes:
       types.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: schema:isRelatedTo
     domain_of:
     - Dataset
     range: DatasetRelationship
@@ -2425,6 +2493,7 @@ attributes:
       mapped to the AI Ontology (AIO).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:known_biases
     alias: known_biases
     owner: Dataset
     domain_of:
@@ -2439,6 +2508,7 @@ attributes:
       Distinct from biases (systematic errors) and anomalies (data quality issues).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:known_limitations
     alias: known_limitations
     owner: Dataset
     domain_of:
@@ -2570,6 +2640,7 @@ attributes:
     description: Documentation of missing data patterns and handling strategies.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:missingDataDocumentation
     alias: missing_data_documentation
     owner: Dataset
     domain_of:
@@ -2583,6 +2654,7 @@ attributes:
     description: Description of raw data sources before preprocessing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:rawDataSources
     alias: raw_data_sources
     owner: Dataset
     domain_of:
@@ -2658,6 +2730,36 @@ attributes:
     - Dataset
     range: VulnerablePopulations
     inlined: true
+  participant_privacy:
+    name: participant_privacy
+    description: Information about privacy protections and anonymization procedures
+      for human research participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:participantPrivacy
+    alias: participant_privacy
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: ParticipantPrivacy
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  participant_compensation:
+    name: participant_compensation
+    description: Information about compensation or incentives provided to human research
+      participants.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:participantCompensation
+    alias: participant_compensation
+    owner: Dataset
+    domain_of:
+    - Dataset
+    range: HumanSubjectCompensation
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   preprocessing_strategies:
     name: preprocessing_strategies
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2715,6 +2817,7 @@ attributes:
     description: Data imputation methodology and techniques.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:imputation_protocols
     alias: imputation_protocols
     owner: Dataset
     domain_of:
@@ -2728,6 +2831,7 @@ attributes:
     description: Analysis of annotation quality and inter-annotator agreement.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: d4d:annotation_analyses
     alias: annotation_analyses
     owner: Dataset
     domain_of:
@@ -3006,6 +3110,7 @@ attributes:
     name: is_tabular
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: schema:encodingFormat
     alias: is_tabular
     owner: Dataset
     domain_of:
@@ -3049,6 +3154,7 @@ attributes:
       types.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: schema:isRelatedTo
     alias: related_datasets
     owner: Dataset
     domain_of:

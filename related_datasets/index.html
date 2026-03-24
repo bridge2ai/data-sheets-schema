@@ -355,7 +355,7 @@
 
 <h1 id="slot-related_datasets">Slot: related_datasets</h1>
 <p><em>Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/related_datasets">data_sheets_schema:related_datasets</a>
+<p>URI: <a href="http://schema.org/isRelatedTo">schema:isRelatedTo</a>
 Alias: related_datasets</p>
 <!-- no inheritance hierarchy -->
 
@@ -370,13 +370,13 @@ Alias: related_datasets</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -406,7 +406,7 @@ Alias: related_datasets</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:related_datasets</td>
+<td>schema:isRelatedTo</td>
 </tr>
 <tr>
 <td>native</td>
@@ -422,6 +422,7 @@ description: Related datasets with typed relationships (e.g., supplements, deriv
   from, is version of). Use DatasetRelationship class to specify relationship types.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:isRelatedTo
 alias: related_datasets
 owner: Dataset
 domain_of:

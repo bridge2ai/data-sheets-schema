@@ -377,6 +377,7 @@ attributes:
     description: DOI or URL of the latest dataset version.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: schema:identifier
     domain_of:
     - VersionAccess
     range: string
@@ -385,6 +386,7 @@ attributes:
     description: List of available versions with metadata.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: d4d:versionsAvailable
     domain_of:
     - VersionAccess
     range: string
@@ -419,6 +421,7 @@ attributes:
     description: DOI or URL of the latest dataset version.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: schema:identifier
     alias: latest_version_doi
     owner: VersionAccess
     domain_of:
@@ -429,6 +432,7 @@ attributes:
     description: List of available versions with metadata.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
+    slot_uri: d4d:versionsAvailable
     alias: versions_available
     owner: VersionAccess
     domain_of:
@@ -488,6 +492,7 @@ attributes:
     description: What software was used as part of this dataset property?
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
+    slot_uri: d4d:usedSoftware
     alias: used_software
     owner: VersionAccess
     domain_of:
