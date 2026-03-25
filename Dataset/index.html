@@ -277,6 +277,17 @@
 
 
 
+      Dataset : at_risk_populations
+
+
+
+
+
+        Dataset --&gt; "0..1" AtRiskPopulations : at_risk_populations
+        click AtRiskPopulations href "../AtRiskPopulations/"
+
+
+
       Dataset : bytes
 
       Dataset : citation
@@ -973,17 +984,6 @@
 
 
 
-      Dataset : vulnerable_populations
-
-
-
-
-
-        Dataset --&gt; "0..1" VulnerablePopulations : vulnerable_populations
-        click VulnerablePopulations href "../VulnerablePopulations/"
-
-
-
       Dataset : was_derived_from
 
 
@@ -1021,7 +1021,7 @@
 <tr>
 <td><a href="../dialect/">dialect</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>Specific format dialect or variation (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -1229,8 +1229,8 @@
 <td>direct</td>
 </tr>
 <tr>
-<td><a href="../vulnerable_populations/">vulnerable_populations</a></td>
-<td>0..1 <br/> <a href="../VulnerablePopulations/">VulnerablePopulations</a></td>
+<td><a href="../at_risk_populations/">at_risk_populations</a></td>
+<td>0..1 <br/> <a href="../AtRiskPopulations/">AtRiskPopulations</a></td>
 <td>Information about protections for at-risk populations (e</td>
 <td>direct</td>
 </tr>
@@ -1974,16 +1974,16 @@ attributes:
     multivalued: true
     inlined: true
     inlined_as_list: true
-  vulnerable_populations:
-    name: vulnerable_populations
+  at_risk_populations:
+    name: at_risk_populations
     description: Information about protections for at-risk populations (e.g., minors,
       pregnant women, prisoners) including special safeguards and assent procedures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: d4d:vulnerablePopulations
+    slot_uri: d4d:atRiskPopulations
     domain_of:
     - Dataset
-    range: VulnerablePopulations
+    range: AtRiskPopulations
     inlined: true
   participant_privacy:
     name: participant_privacy
@@ -2717,18 +2717,18 @@ attributes:
     multivalued: true
     inlined: true
     inlined_as_list: true
-  vulnerable_populations:
-    name: vulnerable_populations
+  at_risk_populations:
+    name: at_risk_populations
     description: Information about protections for at-risk populations (e.g., minors,
       pregnant women, prisoners) including special safeguards and assent procedures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: d4d:vulnerablePopulations
-    alias: vulnerable_populations
+    slot_uri: d4d:atRiskPopulations
+    alias: at_risk_populations
     owner: Dataset
     domain_of:
     - Dataset
-    range: VulnerablePopulations
+    range: AtRiskPopulations
     inlined: true
   participant_privacy:
     name: participant_privacy
@@ -3176,8 +3176,11 @@ attributes:
     range: integer
   dialect:
     name: dialect
+    description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
+      profile).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: schema:encodingFormat
     alias: dialect
     owner: Dataset
     domain_of:
@@ -3284,6 +3287,7 @@ attributes:
       Allows datasets to contain nested resource structures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
+    slot_uri: schema:hasPart
     alias: resources
     owner: Dataset
     domain_of:

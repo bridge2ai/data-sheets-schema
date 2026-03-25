@@ -354,7 +354,8 @@
 
 
 <h1 id="slot-dialect">Slot: dialect</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/dialect">data_sheets_schema:dialect</a>
+<p><em>Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).</em></p>
+<p>URI: <a href="http://schema.org/encodingFormat">schema:encodingFormat</a>
 Alias: dialect</p>
 <!-- no inheritance hierarchy -->
 
@@ -400,7 +401,7 @@ Alias: dialect</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>data_sheets_schema:dialect</td>
+<td>schema:encodingFormat</td>
 </tr>
 <tr>
 <td>native</td>
@@ -412,8 +413,10 @@ Alias: dialect</p>
 <details>
 
 <pre><code class="language-yaml">name: dialect
+description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
+slot_uri: schema:encodingFormat
 alias: dialect
 domain_of:
 - Dataset
