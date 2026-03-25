@@ -333,6 +333,121 @@ git-status:
 	echo "creating a stub for .cruft.json. IMPORTANT: setup via cruft not cookiecutter recommended!" ; \
 	touch $@
 
+## ------------------------------------------------------------------
+## SSSOM Alignment Generation
+## ------------------------------------------------------------------
+
+SSSOM_SCRIPT = src/alignment/generate_sssom_mapping.py
+SSSOM_URI_SCRIPT = src/alignment/generate_sssom_uri_mapping.py
+SSSOM_URI_COMPREHENSIVE_SCRIPT = src/alignment/generate_comprehensive_sssom_uri.py
+SSSOM_COMPREHENSIVE_SCRIPT = src/alignment/generate_comprehensive_sssom.py
+SKOS_ALIGNMENT = src/data_sheets_schema/alignment/d4d_rocrate_skos_alignment.ttl
+ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
+INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
+D4D_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+URI_RECOMMENDATIONS = notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv
+SSSOM_FULL = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping.tsv
+SSSOM_SUBSET = src/data_sheets_schema/alignment/d4d_rocrate_sssom_mapping_subset.tsv
+SSSOM_URI = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_mapping.tsv
+SSSOM_URI_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_uri_comprehensive.tsv
+SSSOM_COMPREHENSIVE = src/data_sheets_schema/alignment/d4d_rocrate_sssom_comprehensive.tsv
+
+.PHONY: gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-all clean-sssom
+
+gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM property-level mappings (full and subset)
+
+gen-sssom-all: gen-sssom gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive ## Generate all SSSOM mappings (property + URI + comprehensive)
+
+gen-sssom-full: $(SSSOM_FULL) ## Generate full SSSOM mapping from SKOS alignment
+
+$(SSSOM_FULL): $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(INTERFACE_MAPPING) $(SSSOM_SCRIPT)
+	@echo "Generating full SSSOM mapping..."
+	$(RUN) python $(SSSOM_SCRIPT) \
+		--skos $(SKOS_ALIGNMENT) \
+		--rocrate $(ROCRATE_JSON) \
+		--mapping $(INTERFACE_MAPPING) \
+		--output $(SSSOM_FULL) \
+		--output-subset $(SSSOM_SUBSET)
+
+gen-sssom-subset: $(SSSOM_SUBSET) ## Generate subset SSSOM mapping (interface fields only)
+
+$(SSSOM_SUBSET): $(SSSOM_FULL)
+	@echo "Subset SSSOM generated alongside full mapping"
+
+gen-sssom-uri: $(SSSOM_URI) ## Generate URI-level SSSOM mapping (33 slots with slot_uri)
+
+$(SSSOM_URI): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(SSSOM_URI_SCRIPT)
+	@echo "Generating URI-level SSSOM mapping (slots with slot_uri only)..."
+	$(RUN) python $(SSSOM_URI_SCRIPT) \
+		--schema $(D4D_SCHEMA_ALL) \
+		--skos $(SKOS_ALIGNMENT) \
+		--rocrate $(ROCRATE_JSON) \
+		--output $(SSSOM_URI)
+
+gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for ALL 270 attributes
+
+$(SSSOM_URI_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_URI_COMPREHENSIVE_SCRIPT)
+	@echo "Generating comprehensive URI-level SSSOM (all attributes)..."
+	$(RUN) python $(SSSOM_URI_COMPREHENSIVE_SCRIPT) \
+		--schema $(D4D_SCHEMA_ALL) \
+		--skos $(SKOS_ALIGNMENT) \
+		--recommendations $(URI_RECOMMENDATIONS) \
+		--output $(SSSOM_URI_COMPREHENSIVE)
+
+gen-sssom-comprehensive: $(SSSOM_COMPREHENSIVE) ## Generate comprehensive SSSOM for ALL 270 D4D attributes
+
+$(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATIONS) $(SSSOM_COMPREHENSIVE_SCRIPT)
+	@echo "Generating comprehensive SSSOM mapping (all D4D attributes)..."
+	$(RUN) python $(SSSOM_COMPREHENSIVE_SCRIPT) \
+		--schema $(D4D_SCHEMA_ALL) \
+		--skos $(SKOS_ALIGNMENT) \
+		--recommendations $(URI_RECOMMENDATIONS) \
+		--output $(SSSOM_COMPREHENSIVE)
+
+clean-sssom: ## Remove generated SSSOM files
+	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET) $(SSSOM_URI) $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE)
+
+## ------------------------------------------------------------------
+## FAIRSCAPE ↔ D4D Bidirectional Conversion
+## ------------------------------------------------------------------
+
+D4D_TO_FAIRSCAPE = src/fairscape_integration/d4d_to_fairscape.py
+FAIRSCAPE_TO_D4D = src/fairscape_integration/fairscape_to_d4d.py
+
+.PHONY: test-fairscape-conversion test-d4d-to-fairscape test-fairscape-to-d4d
+
+test-fairscape-conversion: test-d4d-to-fairscape test-fairscape-to-d4d ## Test bidirectional FAIRSCAPE ↔ D4D conversion
+
+test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
+	@echo "Testing D4D → FAIRSCAPE conversion..."
+	$(RUN) python -c "import sys; sys.path.insert(0, 'src'); \
+		from fairscape_integration.d4d_to_fairscape import convert_d4d_to_fairscape; \
+		import yaml, json; \
+		d4d = yaml.safe_load(open('data/d4d_concatenated/claudecode_agent/VOICE_d4d.yaml')); \
+		rocrate, (valid, errors) = convert_d4d_to_fairscape(d4d); \
+		print('✓ D4D → FAIRSCAPE: PASSED' if valid else '✗ D4D → FAIRSCAPE: FAILED'); \
+		json.dump(rocrate.model_dump(exclude_none=True, by_alias=True), \
+		          open('data/ro-crate/examples/voice_d4d_to_fairscape.json', 'w'), indent=2)"
+
+test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (CM4AI example)
+	@echo "Testing FAIRSCAPE → D4D conversion..."
+	$(RUN) python $(FAIRSCAPE_TO_D4D) \
+		--input $(ROCRATE_JSON) \
+		--output data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml \
+		--sssom $(SSSOM_FULL)
+
+fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
+	@if [ -z "$(INPUT)" ] || [ -z "$(OUTPUT)" ]; then \
+		echo "Usage: make fairscape-to-d4d INPUT=<rocrate.json> OUTPUT=<d4d.yaml>"; \
+		exit 1; \
+	fi
+	$(RUN) python $(FAIRSCAPE_TO_D4D) \
+		--input $(INPUT) \
+		--output $(OUTPUT) \
+		--sssom $(SSSOM_FULL)
+
+## ------------------------------------------------------------------
+
 clean:
 	rm -rf $(DEST)
 	rm -rf tmp

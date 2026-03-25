@@ -1,3 +1,6 @@
 [submodule "aurelian"]
 	path = aurelian
 	url = https://github.com/monarch-initiative/aurelian.git
+[submodule "fairscape_models"]
+	path = fairscape_models
+	url = https://github.com/fairscape/fairscape_models

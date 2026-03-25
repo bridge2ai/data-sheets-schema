@@ -1,0 +1,204 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "evi": "https://w3id.org/EVI#",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "d4d": "https://w3id.org/bridge2ai/data-sheets-schema/"
+  },
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      },
+      "about": {
+        "@id": "ark:59853/rocrate-cell-maps-for-artificial-intelligence-January-2026-data-release"
+      }
+    },
+    {
+      "@id": "ark:59853/rocrate-cell-maps-for-artificial-intelligence-January-2026-data-release",
+      "@type": ["Dataset", "https://w3id.org/EVI#ROCrate"],
+      "name": "Cell Maps for Artificial Intelligence - January 2026 Data Release (Beta)",
+      "description": "This dataset is the January 2026 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center.",
+      "keywords": [
+        "AI",
+        "affinity purification",
+        "AP-MS",
+        "artificial intelligence",
+        "breast cancer",
+        "Bridge2AI",
+        "cardiomyocyte",
+        "CM4AI",
+        "CRISPR/Cas9",
+        "induced pluripotent stem cell",
+        "iPSC",
+        "KOLF2.1J",
+        "machine learning",
+        "mass spectroscopy",
+        "MDA-MB-468",
+        "neural progenitor cell",
+        "NPC",
+        "neuron",
+        "paclitaxel",
+        "perturb-seq",
+        "perturbation sequencing",
+        "protein-protein interaction",
+        "protein localization",
+        "single-cell RNA sequencing",
+        "scRNAseq",
+        "SEC-MS",
+        "size exclusion chromatography",
+        "subcellular imaging",
+        "vorinostat",
+        "Artificial intelligence",
+        "Breast cancer",
+        "CRISPR perturbation",
+        "Cell maps",
+        "IPSC",
+        "Machine learning",
+        "Mass spectroscopy",
+        "Perturb-seq",
+        "Protein-protein interaction",
+        "cell maps"
+      ],
+      "isPartOf": [
+        {
+          "@id": "ark:59852/organization-university-of-california-san-diego-AeH9g5fsz6Q"
+        },
+        {
+          "@id": "ark:59852/project-cell-maps-for-artificial-intelligence-xDzJNvOoeHL"
+        }
+      ],
+      "version": "1.0",
+      "datePublished": "2026-01-31",
+      "hasPart": [
+        {
+          "@id": "ark:59853/rocrate-data-from-undifferentiated-human-ipsc-generated-by-sec-ms-jan-26"
+        },
+        {
+          "@id": "ark:59853/rocrate-data-from-treated-human-cancer-cells-jan-26"
+        },
+        {
+          "@id": "ark:59853/rocrate-sra-data-for-perturbation-cell-atlas"
+        },
+        {
+          "@id": "ark:59853/rocrate-a-perturbation-cell-atlas-of-human-induced-pluripotent-stem-cells"
+        }
+      ],
+      "author": "Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; B\u00e9lisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T",
+      "publisher": "https://dataverse.lib.virginia.edu/",
+      "principalInvestigator": "Trey Ideker",
+      "funder": "National Institutes of Health: 1OT2OD032742-01, R01HG012351, R01NS131560, U54CA274502, #S10 OD026929. Department of Defense: W81XWH-22-1-0401. CIRM training: EDUC4-12804. Dutch Research Council: NWO, 019.231EN.013. National Cancer Institute: P30CA023100",
+      "contactEmail": "tideker@health.ucsd.edu",
+      "citation": "Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Park, S; Polacco B; Pratt D; Qian G; Schaffer, LV; Sigaeva A; Thaker S; Zhang Y; Zhao, X; B\u00e9lisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T, 2025, \"Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)\", https://doi.org/10.18130/V3/K7TGEM , https://dataverse.lib.virginia.edu/, V1",
+      "associatedPublication": [
+        "Clark T, Parker J, Al Manir S, et al. (2024) Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines. bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311",
+        "Nourreddine S, et al. (2024) A Perturbation Cell Atlas of Human Induced Pluripotent Stem Cells. bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.11.03.621734",
+        "Qin, Y., Huttlin, E.L., Winsnes, C.F. et al. A multi-scale map of cell structure fusing protein images and interactions. Nature 600, 536\u2013542 (2021). https://doi.org/10.1038/s41586-021-04115-9",
+        "Schaffer LV, Hu M, Qian G, et al. Multimodal cell maps as a foundation for structural and functional genomics. Nature [Internet]. 2025 Apr 9; Available from: https://www.nature.com/articles/s41586-025-08878-3"
+      ],
+      "identifier": "https://doi.org/10.18130/V3/K7TGEM",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "conditionsOfAccess": "Attribution is required to the copyright holders and the authors. Any publications referencing this data or derived data products should cite the Related Publications below, as well as directly citing this data collection.",
+      "copyrightNotice": "Copyright (c) 2026 The Regents of the University of California except where otherwise noted. Spatial proteomics raw image data is copyright (c) 2026 The Board of Trustees of the Leland Stanford Junior University.",
+      "contentSize": "19.1 TB",
+      "usageInfo": "These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval.",
+      "hasSummaryStatistics": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.",
+      "additionalProperty": [
+        {
+          "@type": "PropertyValue",
+          "name": "Completeness",
+          "value": "These data are not yet in completed final form, and some datasets are under temporary pre-publication embargo. Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap. Computed cell maps not included in this release."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Human Subject",
+          "value": "None - data collected from commercially available cell lines"
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Prohibited Uses",
+          "value": "These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval."
+        },
+        {
+          "@type": "PropertyValue",
+          "name": "Data Governance Committee",
+          "value": "Jilian Parker"
+        }
+      ],
+      "ethicalReview": "Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe Belisle-Pipon jean-christophe_belisle-pipon@sfu.ca.",
+      "confidentialityLevel": "Unrestricted",
+      "irb": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.",
+      "irbProtocolId": "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+      "humanSubjectExemption": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.",
+      "fdaRegulated": false,
+      "deidentified": true,
+      "humanSubjects": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.",
+      "humanSubjectResearch": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.",
+      "dataGovernanceCommittee": "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+      "rai:dataLimitations": "This is an interim release. It does not contain predicted cell maps, which will be added in future releases. The current release is most suitable for bioinformatics analysis of the individual datasets. Requires domain expertise for meaningful analysis.",
+      "rai:dataBiases": "Data in this release was derived from commercially available de-identified human cell lines, and does not represent all biological variants which may be seen in the population at large.",
+      "rai:dataUseCases": "AI-ready datasets to support research in functional genomics, AI/machine learning model training, cellular process analysis, cell architectural changes, and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations. A major goal is to enable biologically-driven, interpretable ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and Kuenzi et al. 2020 (PMID: 33096023).",
+      "rai:dataReleaseMaintenancePlan": "Dataset will be regularly updated and augmented on a quarterly basis through the end of the project (November, 2026). Long term preservation in the https://dataverse.lib.virginia.edu/, supported by committed institutional funds.",
+      "rai:dataCollection": "Data collection processes are generally described in Clark T et al. (2024) \"Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines\" bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311. Additional data collection details will be subsequently published once finalized. ",
+      "rai:dataCollectionType": ["Perturb-seq; IF imaging; SEC-MS"],
+      "rai:dataCollectionMissingData": "Some datasets are under temporary pre-publication embargo. Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap. Computed cell maps not included in this release.",
+      "rai:dataCollectionRawData": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "rai:dataCollectionTimeframe": ["9/1/2022", "1/31/2026"],
+      "rai:dataImputationProtocol": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "rai:dataManipulationProtocol": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "rai:dataPreprocessingProtocol": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "rai:dataAnnotationProtocol": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "rai:dataAnnotationPlatform": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "rai:dataAnnotationAnalysis": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "rai:personalSensitiveInformation": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "rai:dataSocialImpact": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "rai:annotationsPerItem": "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+      "rai:machineAnnotationTools": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "completeness": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "prohibitedUses": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "evi:datasetCount": 330,
+      "evi:computationCount": 312,
+      "evi:softwareCount": 5,
+      "evi:schemaCount": 20,
+      "evi:totalContentSizeBytes": 19454700000000,
+      "evi:entitiesWithSummaryStats": 1,
+      "evi:entitiesWithChecksums": 6,
+      "evi:totalEntities": 647,
+      "evi:formats": [
+        ".d",
+        ".d directory group",
+        ".tsv",
+        ".xml",
+        "TSV",
+        "executable",
+        "fastq.gz",
+        "h5",
+        "h5ad",
+        "pdf",
+        "unknown"
+      ],
+      "d4d:addressingGaps": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "d4d:dataAnomalies": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "d4d:contentWarning": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.",
+      "d4d:informedConsent": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "d4d:atRiskPopulations": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+    }
+  ]
+}

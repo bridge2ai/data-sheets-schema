@@ -1,0 +1,250 @@
+schema_version: '1.0'
+generated_date: '2026-03-19T21:11:31.163605'
+source: FAIRSCAPE RO-Crate
+title: Cell Maps for Artificial Intelligence - January 2026 Data Release (Beta)
+description: This dataset is the January 2026 Data Release of Cell Maps for Artificial
+  Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the
+  NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated
+  KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived
+  NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells
+  in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output
+  data are packaged with provenance graphs and rich metadata as AI-ready datasets
+  in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented
+  regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF,
+  Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center.
+keywords:
+- AI
+- affinity purification
+- AP-MS
+- artificial intelligence
+- breast cancer
+- Bridge2AI
+- cardiomyocyte
+- CM4AI
+- CRISPR/Cas9
+- induced pluripotent stem cell
+- iPSC
+- KOLF2.1J
+- machine learning
+- mass spectroscopy
+- MDA-MB-468
+- neural progenitor cell
+- NPC
+- neuron
+- paclitaxel
+- perturb-seq
+- perturbation sequencing
+- protein-protein interaction
+- protein localization
+- single-cell RNA sequencing
+- scRNAseq
+- SEC-MS
+- size exclusion chromatography
+- subcellular imaging
+- vorinostat
+- Artificial intelligence
+- Breast cancer
+- CRISPR perturbation
+- Cell maps
+- IPSC
+- Machine learning
+- Mass spectroscopy
+- Perturb-seq
+- Protein-protein interaction
+- cell maps
+version: '1.0'
+license: https://creativecommons.org/licenses/by-nc-sa/4.0/
+publisher: https://dataverse.lib.virginia.edu/
+doi: https://doi.org/10.18130/V3/K7TGEM
+issued: '2026-01-31'
+creators:
+- name: Clark T
+  type: Person
+- name: Parker J
+  type: Person
+- name: Al Manir S
+  type: Person
+- name: Axelsson U
+  type: Person
+- name: Ballllosero Navarro F
+  type: Person
+- name: Chinn B
+  type: Person
+- name: Churas CP
+  type: Person
+- name: Dailamy A
+  type: Person
+- name: Doctor Y
+  type: Person
+- name: Fall J
+  type: Person
+- name: Forget A
+  type: Person
+- name: Gao J
+  type: Person
+- name: Hansen JN
+  type: Person
+- name: Hu M
+  type: Person
+- name: Johannesson A
+  type: Person
+- name: Khaliq H
+  type: Person
+- name: Lee YH
+  type: Person
+- name: Lenkiewicz J
+  type: Person
+- name: Levinson MA
+  type: Person
+- name: Marquez C
+  type: Person
+- name: Metallo C
+  type: Person
+- name: Muralidharan M
+  type: Person
+- name: Nourreddine S
+  type: Person
+- name: Niestroy J
+  type: Person
+- name: Obernier K
+  type: Person
+- name: Pan E
+  type: Person
+- name: Polacco B
+  type: Person
+- name: Pratt D
+  type: Person
+- name: Qian G
+  type: Person
+- name: Schaffer L
+  type: Person
+- name: Sigaeva A
+  type: Person
+- name: Thaker S
+  type: Person
+- name: Zhang Y
+  type: Person
+- name: "B\xE9lisle-Pipon JC"
+  type: Person
+- name: Brandt C
+  type: Person
+- name: Chen JY
+  type: Person
+- name: Ding Y
+  type: Person
+- name: Fodeh S
+  type: Person
+- name: Krogan N
+  type: Person
+- name: Lundberg E
+  type: Person
+- name: Mali P
+  type: Person
+- name: Payne-Foster P
+  type: Person
+- name: Ratcliffe S
+  type: Person
+- name: Ravitsky V
+  type: Person
+- name: Sali A
+  type: Person
+- name: Schulz W
+  type: Person
+- name: Ideker T
+  type: Person
+bytes: 21000672090521
+resources:
+- ark:59853/rocrate-data-from-undifferentiated-human-ipsc-generated-by-sec-ms-jan-26
+- ark:59853/rocrate-data-from-treated-human-cancer-cells-jan-26
+- ark:59853/rocrate-sra-data-for-perturbation-cell-atlas
+- ark:59853/rocrate-a-perturbation-cell-atlas-of-human-induced-pluripotent-stem-cells
+is_part_of:
+- ark:59852/organization-university-of-california-san-diego-AeH9g5fsz6Q
+- ark:59852/project-cell-maps-for-artificial-intelligence-xDzJNvOoeHL
+completeness: These data are not yet in completed final form, and some datasets are
+  under temporary pre-publication embargo. Protein-protein interaction (SEC-MS), protein
+  localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins
+  which incompletely overlap. Computed cell maps not included in this release.
+human_subject_research: None - data collected from commercially available cell lines
+prohibited_uses: These laboratory data are not to be used in clinical decision-making
+  or in any context involving patient care without appropriate regulatory oversight
+  and approval.
+data_governance_committee: Jilian Parker
+dataset_count: 330
+computation_count: 312
+software_count: 5
+schema_count: 20
+total_entities: 647
+distribution_formats:
+- .d
+- .d directory group
+- .tsv
+- .xml
+- TSV
+- executable
+- fastq.gz
+- h5
+- h5ad
+- pdf
+- unknown
+intended_uses: 'AI-ready datasets to support research in functional genomics, AI/machine
+  learning model training, cellular process analysis, cell architectural changes,
+  and interactions in presence of specific disease processes, treatment conditions,
+  or genetic perturbations. A major goal is to enable biologically-driven, interpretable
+  ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and
+  Kuenzi et al. 2020 (PMID: 33096023).'
+known_biases: Data in this release was derived from commercially available de-identified
+  human cell lines, and does not represent all biological variants which may be seen
+  in the population at large.
+known_limitations: This is an interim release. It does not contain predicted cell
+  maps, which will be added in future releases. The current release is most suitable
+  for bioinformatics analysis of the individual datasets. Requires domain expertise
+  for meaningful analysis.
+acquisition_methods: 'Data collection processes are generally described in Clark T
+  et al. (2024) "Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell
+  Architecture from Disease-Relevant Cell Lines" bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311.
+  Additional data collection details will be subsequently published once finalized. '
+missing_data_documentation: Some datasets are under temporary pre-publication embargo.
+  Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi
+  perturbSeq data interrogate sets of proteins which incompletely overlap. Computed
+  cell maps not included in this release.
+raw_data_sources: Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo
+  cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis
+  ornare vel eu leo.
+collection_timeframes:
+- 9/1/2022
+- 1/31/2026
+confidential_elements:
+- Lorem ipsum odor amet, consectetuer adipiscing elit.
+- Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+data_protection_impacts: Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent
+  commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget
+  urna mollis ornare vel eu leo.
+updates: Dataset will be regularly updated and augmented on a quarterly basis through
+  the end of the project (November, 2026). Long term preservation in the https://dataverse.lib.virginia.edu/,
+  supported by committed institutional funds.
+preprocessing_strategies:
+- Lorem ipsum odor amet, consectetuer adipiscing elit.
+- Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+labeling_strategies: Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent
+  commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget
+  urna mollis ornare vel eu leo.
+annotation_analyses:
+- Lorem ipsum odor amet, consectetuer adipiscing elit.
+- Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+machine_annotation_analyses:
+- Lorem ipsum odor amet, consectetuer adipiscing elit.
+- Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+addressing_gaps: Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo
+  cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis
+  ornare vel eu leo.
+anomalies: Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus
+  magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare
+  vel eu leo.
+content_warnings: Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo
+  cursus magna, vel scelerisque nisl consectetur et.
+informed_consent: Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo
+  cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis
+  ornare vel eu leo.
+vulnerable_populations: Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent
+  commodo cursus magna, vel scelerisque nisl consectetur et.

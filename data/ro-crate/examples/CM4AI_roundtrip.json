@@ -1,0 +1,134 @@
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "evi": "https://w3id.org/EVI#",
+    "rai": "http://mlcommons.org/croissant/RAI/",
+    "d4d": "https://w3id.org/bridge2ai/data-sheets-schema/"
+  },
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      },
+      "about": {
+        "@id": "./"
+      },
+      "fairscapeVersion": "1.0.24"
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "https://w3id.org/EVI#ROCrate"
+      ],
+      "name": "Cell Maps for Artificial Intelligence - January 2026 Data Release (Beta)",
+      "description": "This dataset is the January 2026 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. This Beta release includes perturb-seq data in undifferentiated KOLF2.1J iPSCs; SEC-MS data in undifferentiated KOLF2.1J iPSCs and iPSC-derived NPCs, neurons, and cardiomyocytes; and IF images in MDA-MB-468 breast cancer cells in the presence and absence of chemotherapy (vorinostat and paclitaxel). CM4AI output data are packaged with provenance graphs and rich metadata as AI-ready datasets in RO-Crate format using the FAIRSCAPE framework. Data presented here will be augmented regularly through the end of the project. CM4AI is a collaboration of UCSD, UCSF, Stanford, UVA, Yale, UA Birmingham, Simon Fraser University, and the Hastings Center.",
+      "keywords": [
+        "AI",
+        "affinity purification",
+        "AP-MS",
+        "artificial intelligence",
+        "breast cancer",
+        "Bridge2AI",
+        "cardiomyocyte",
+        "CM4AI",
+        "CRISPR/Cas9",
+        "induced pluripotent stem cell",
+        "iPSC",
+        "KOLF2.1J",
+        "machine learning",
+        "mass spectroscopy",
+        "MDA-MB-468",
+        "neural progenitor cell",
+        "NPC",
+        "neuron",
+        "paclitaxel",
+        "perturb-seq",
+        "perturbation sequencing",
+        "protein-protein interaction",
+        "protein localization",
+        "single-cell RNA sequencing",
+        "scRNAseq",
+        "SEC-MS",
+        "size exclusion chromatography",
+        "subcellular imaging",
+        "vorinostat",
+        "Artificial intelligence",
+        "Breast cancer",
+        "CRISPR perturbation",
+        "Cell maps",
+        "IPSC",
+        "Machine learning",
+        "Mass spectroscopy",
+        "Perturb-seq",
+        "Protein-protein interaction",
+        "cell maps"
+      ],
+      "version": "1.0",
+      "datePublished": "2026-01-31",
+      "isPartOf": [],
+      "hasPart": [],
+      "author": "Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; B\u00e9lisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Payne-Foster P; Ratcliffe S; Ravitsky V; Sali A; Schulz W; Ideker T",
+      "publisher": "https://dataverse.lib.virginia.edu/",
+      "identifier": "https://doi.org/10.18130/V3/K7TGEM",
+      "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "contentSize": "21000672090521",
+      "rai:dataLimitations": "This is an interim release. It does not contain predicted cell maps, which will be added in future releases. The current release is most suitable for bioinformatics analysis of the individual datasets. Requires domain expertise for meaningful analysis.",
+      "rai:dataBiases": "Data in this release was derived from commercially available de-identified human cell lines, and does not represent all biological variants which may be seen in the population at large.",
+      "rai:dataUseCases": "AI-ready datasets to support research in functional genomics, AI/machine learning model training, cellular process analysis, cell architectural changes, and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations. A major goal is to enable biologically-driven, interpretable ML applications, for example as proposed in Ma et al. 2018 (PMID: 29505029) and Kuenzi et al. 2020 (PMID: 33096023).",
+      "rai:dataReleaseMaintenancePlan": "Dataset will be regularly updated and augmented on a quarterly basis through the end of the project (November, 2026). Long term preservation in the https://dataverse.lib.virginia.edu/, supported by committed institutional funds.",
+      "rai:dataCollection": "Data collection processes are generally described in Clark T et al. (2024) \"Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines\" bioRxiv 2024.05.21.589311; doi: https://doi.org/10.1101/2024.05.21.589311. Additional data collection details will be subsequently published once finalized. ",
+      "rai:dataCollectionMissingData": "Some datasets are under temporary pre-publication embargo. Protein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap. Computed cell maps not included in this release.",
+      "rai:dataCollectionRawData": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "rai:dataCollectionTimeframe": [
+        "9/1/2022",
+        "1/31/2026"
+      ],
+      "rai:dataPreprocessingProtocol": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "rai:dataAnnotationProtocol": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "rai:dataAnnotationAnalysis": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "rai:personalSensitiveInformation": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "rai:dataSocialImpact": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "rai:machineAnnotationTools": [
+        "Lorem ipsum odor amet, consectetuer adipiscing elit.",
+        "Praesent commodo cursus magna, vel scelerisque nisl consectetur et."
+      ],
+      "evi:datasetCount": 330,
+      "evi:computationCount": 312,
+      "evi:softwareCount": 5,
+      "evi:schemaCount": 20,
+      "evi:totalEntities": 647,
+      "evi:formats": [
+        ".d",
+        ".d directory group",
+        ".tsv",
+        ".xml",
+        "TSV",
+        "executable",
+        "fastq.gz",
+        "h5",
+        "h5ad",
+        "pdf",
+        "unknown"
+      ],
+      "d4d:addressingGaps": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "d4d:dataAnomalies": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "d4d:contentWarning": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.",
+      "d4d:informedConsent": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Nullam quis risus eget urna mollis ornare vel eu leo.",
+      "d4d:atRiskPopulations": "Lorem ipsum odor amet, consectetuer adipiscing elit. Praesent commodo cursus magna, vel scelerisque nisl consectetur et.",
+      "rai:prohibitedUses": "These laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval.",
+      "d4d:humanSubject": "None - data collected from commercially available cell lines"
+    }
+  ]
+}

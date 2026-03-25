@@ -1,3 +1,4 @@
+---
 name: data-sheets-schema
 description: A LinkML schema for Datasheets for Datasets.
 title: data-sheets-schema
@@ -2160,18 +2161,18 @@ classes:
         multivalued: true
         inlined: true
         inlined_as_list: true
-      vulnerable_populations:
-        name: vulnerable_populations
+      at_risk_populations:
+        name: at_risk_populations
         description: Information about protections for at-risk populations (e.g.,
           minors, pregnant women, prisoners) including special safeguards and assent
           procedures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: d4d:vulnerablePopulations
-        alias: vulnerable_populations
+        slot_uri: d4d:atRiskPopulations
+        alias: at_risk_populations
         owner: Dataset
         domain_of:
         - Dataset
-        range: VulnerablePopulations
+        range: AtRiskPopulations
         inlined: true
       participant_privacy:
         name: participant_privacy
@@ -3469,18 +3470,18 @@ classes:
         range: InformedConsent
         multivalued: true
         inlined_as_list: true
-      vulnerable_populations:
-        name: vulnerable_populations
+      at_risk_populations:
+        name: at_risk_populations
         description: Information about protections for at-risk populations (e.g.,
           minors, pregnant women, prisoners) including special safeguards and assent
           procedures.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: d4d:vulnerablePopulations
-        alias: vulnerable_populations
+        slot_uri: d4d:atRiskPopulations
+        alias: at_risk_populations
         owner: DataSubset
         domain_of:
         - Dataset
-        range: VulnerablePopulations
+        range: AtRiskPopulations
         inlined: true
       participant_privacy:
         name: participant_privacy
@@ -4437,7 +4438,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -4520,7 +4521,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -4603,7 +4604,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -4676,7 +4677,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -5432,7 +5433,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -5515,7 +5516,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -5598,7 +5599,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -5671,7 +5672,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -5775,7 +5776,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -5858,7 +5859,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -5941,7 +5942,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6014,7 +6015,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6120,7 +6121,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6203,7 +6204,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6286,7 +6287,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6359,7 +6360,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6495,7 +6496,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6578,7 +6579,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6661,7 +6662,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6734,7 +6735,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6853,7 +6854,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -6936,7 +6937,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -7019,7 +7020,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -7092,7 +7093,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -7470,7 +7471,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -7553,7 +7554,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -7636,7 +7637,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -7709,7 +7710,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -7895,7 +7896,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -7978,7 +7979,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8061,7 +8062,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8134,7 +8135,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8255,7 +8256,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8338,7 +8339,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8421,7 +8422,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8494,7 +8495,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8603,7 +8604,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8686,7 +8687,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8769,7 +8770,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8842,7 +8843,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -8950,7 +8951,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9033,7 +9034,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9116,7 +9117,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9189,7 +9190,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9296,7 +9297,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9379,7 +9380,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9462,7 +9463,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9535,7 +9536,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9685,7 +9686,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9768,7 +9769,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9851,7 +9852,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -9924,7 +9925,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10071,7 +10072,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10154,7 +10155,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10237,7 +10238,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10310,7 +10311,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10469,7 +10470,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10552,7 +10553,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10635,7 +10636,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10708,7 +10709,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10826,7 +10827,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10909,7 +10910,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -10992,7 +10993,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11065,7 +11066,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11180,7 +11181,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11263,7 +11264,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11346,7 +11347,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11419,7 +11420,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11544,7 +11545,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11627,7 +11628,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11710,7 +11711,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11783,7 +11784,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -11814,7 +11815,6 @@ classes:
         name: method
         description: Method used for de-identification (e.g., HIPAA Safe Harbor).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-        slot_uri: schema:method
         alias: method
         owner: Deidentification
         domain_of:
@@ -11922,7 +11922,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12005,7 +12005,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12088,7 +12088,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12161,7 +12161,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12281,7 +12281,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12364,7 +12364,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12447,7 +12447,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12520,7 +12520,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12567,7 +12567,6 @@ classes:
         description: Free-text description providing additional context about the
           relationship.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
-        slot_uri: schema:description
         alias: description
         owner: DatasetRelationship
         domain_of:
@@ -12681,7 +12680,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12764,7 +12763,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12837,7 +12836,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -12985,7 +12984,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13068,7 +13067,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13151,7 +13150,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13224,7 +13223,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13335,7 +13334,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13418,7 +13417,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13501,7 +13500,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13574,7 +13573,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13693,7 +13692,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13776,7 +13775,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13859,7 +13858,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -13932,7 +13931,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14063,7 +14062,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14146,7 +14145,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14229,7 +14228,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14302,7 +14301,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14420,7 +14419,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14503,7 +14502,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14586,7 +14585,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14659,7 +14658,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14797,7 +14796,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14880,7 +14879,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -14963,7 +14962,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15036,7 +15035,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15187,7 +15186,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15270,7 +15269,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15353,7 +15352,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15426,7 +15425,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15536,7 +15535,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15619,7 +15618,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15702,7 +15701,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15775,7 +15774,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15885,7 +15884,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -15968,7 +15967,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16051,7 +16050,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16124,7 +16123,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16299,7 +16298,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16382,7 +16381,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16465,7 +16464,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16538,7 +16537,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16656,7 +16655,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16739,7 +16738,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16822,7 +16821,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -16895,7 +16894,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17045,7 +17044,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17128,7 +17127,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17211,7 +17210,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17284,7 +17283,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17446,7 +17445,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17529,7 +17528,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17612,7 +17611,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17685,7 +17684,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17829,7 +17828,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17912,7 +17911,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -17995,7 +17994,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18068,7 +18067,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18175,7 +18174,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18258,7 +18257,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18341,7 +18340,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18414,7 +18413,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18435,7 +18434,6 @@ classes:
         name: repository_url
         description: URL to a repository of known dataset uses.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
-        slot_uri: dcat:accessURL
         alias: repository_url
         owner: UseRepository
         domain_of:
@@ -18532,7 +18530,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18615,7 +18613,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18698,7 +18696,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18771,7 +18769,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18878,7 +18876,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -18961,7 +18959,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19044,7 +19042,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19117,7 +19115,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19230,7 +19228,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19313,7 +19311,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19396,7 +19394,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19469,7 +19467,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19576,7 +19574,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19659,7 +19657,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19742,7 +19740,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19815,7 +19813,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -19839,7 +19837,6 @@ classes:
         name: examples
         description: List of example intended uses for this dataset.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
-        slot_uri: schema:example
         alias: examples
         owner: IntendedUse
         domain_of:
@@ -19852,7 +19849,6 @@ classes:
         name: usage_notes
         description: Notes or caveats about using the dataset for intended purposes.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
-        slot_uri: dcterms:description
         alias: usage_notes
         owner: IntendedUse
         domain_of:
@@ -19948,7 +19944,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20031,7 +20027,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20114,7 +20110,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20187,7 +20183,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20295,7 +20291,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20378,7 +20374,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20461,7 +20457,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20534,7 +20530,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20643,7 +20639,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20726,7 +20722,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20809,7 +20805,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20882,7 +20878,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -20988,7 +20984,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21071,7 +21067,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21154,7 +21150,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21227,7 +21223,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21335,7 +21331,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21418,7 +21414,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21501,7 +21497,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21574,7 +21570,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21694,7 +21690,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21777,7 +21773,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21860,7 +21856,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -21933,7 +21929,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22051,7 +22047,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22134,7 +22130,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22217,7 +22213,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22290,7 +22286,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22412,7 +22408,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22495,7 +22491,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22578,7 +22574,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22651,7 +22647,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22771,7 +22767,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22854,7 +22850,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -22937,7 +22933,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23010,7 +23006,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23139,7 +23135,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23222,7 +23218,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23305,7 +23301,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23378,7 +23374,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23498,7 +23494,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23581,7 +23577,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23664,7 +23660,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23737,7 +23733,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23876,7 +23872,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -23959,7 +23955,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24042,7 +24038,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24115,7 +24111,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24226,7 +24222,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24309,7 +24305,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24392,7 +24388,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24465,7 +24461,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24574,7 +24570,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24657,7 +24653,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24740,7 +24736,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24813,7 +24809,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -24922,7 +24918,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25005,7 +25001,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25088,7 +25084,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25161,7 +25157,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25270,7 +25266,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25353,7 +25349,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25436,7 +25432,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25509,7 +25505,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25670,7 +25666,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25753,7 +25749,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25836,7 +25832,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -25909,7 +25905,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26070,7 +26066,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26153,7 +26149,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26236,7 +26232,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26309,7 +26305,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26460,7 +26456,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26543,7 +26539,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26626,7 +26622,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26699,7 +26695,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26846,7 +26842,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -26929,7 +26925,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27012,7 +27008,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27085,7 +27081,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27093,40 +27089,40 @@ classes:
         multivalued: true
         inlined: true
         inlined_as_list: true
-  VulnerablePopulations:
-    name: VulnerablePopulations
-    description: 'Information about protections for vulnerable populations in human
-      subjects research.
+  AtRiskPopulations:
+    name: AtRiskPopulations
+    description: 'Information about protections for at-risk populations in human subjects
+      research.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     is_a: DatasetProperty
     attributes:
-      vulnerable_groups_included:
-        name: vulnerable_groups_included
-        description: 'Are any vulnerable populations included (e.g., children, pregnant
+      at_risk_groups_included:
+        name: at_risk_groups_included
+        description: 'Are any at-risk populations included (e.g., children, pregnant
           women, prisoners, cognitively impaired individuals)?
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
-        slot_uri: d4d:vulnerableGroupsIncluded
-        alias: vulnerable_groups_included
-        owner: VulnerablePopulations
+        slot_uri: d4d:atRiskGroupsIncluded
+        alias: at_risk_groups_included
+        owner: AtRiskPopulations
         domain_of:
-        - VulnerablePopulations
+        - AtRiskPopulations
         range: boolean
       special_protections:
         name: special_protections
-        description: 'What additional protections were implemented for vulnerable
-          populations? Include safeguards, modified procedures, or additional oversight.
+        description: 'What additional protections were implemented for at-risk populations?
+          Include safeguards, modified procedures, or additional oversight.
 
           '
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
         slot_uri: d4d:specialProtections
         alias: special_protections
-        owner: VulnerablePopulations
+        owner: AtRiskPopulations
         domain_of:
-        - VulnerablePopulations
+        - AtRiskPopulations
         range: string
         multivalued: true
       assent_procedures:
@@ -27138,9 +27134,9 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
         slot_uri: d4d:assentProcedures
         alias: assent_procedures
-        owner: VulnerablePopulations
+        owner: AtRiskPopulations
         domain_of:
-        - VulnerablePopulations
+        - AtRiskPopulations
         range: string
         multivalued: true
       guardian_consent:
@@ -27152,9 +27148,9 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/human
         slot_uri: d4d:guardianConsent
         alias: guardian_consent
-        owner: VulnerablePopulations
+        owner: AtRiskPopulations
         domain_of:
-        - VulnerablePopulations
+        - AtRiskPopulations
         range: string
         multivalued: true
       id:
@@ -27163,7 +27159,7 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:identifier
         alias: id
-        owner: VulnerablePopulations
+        owner: AtRiskPopulations
         domain_of:
         - DatasetCollection
         - Dataset
@@ -27235,7 +27231,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27246,7 +27242,7 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:name
         alias: name
-        owner: VulnerablePopulations
+        owner: AtRiskPopulations
         domain_of:
         - DatasetCollection
         - Dataset
@@ -27318,7 +27314,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27329,7 +27325,7 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: schema:description
         alias: description
-        owner: VulnerablePopulations
+        owner: AtRiskPopulations
         domain_of:
         - DatasetCollection
         - Dataset
@@ -27401,7 +27397,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27412,7 +27408,7 @@ classes:
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         slot_uri: d4d:usedSoftware
         alias: used_software
-        owner: VulnerablePopulations
+        owner: AtRiskPopulations
         domain_of:
         - DatasetProperty
         - Purpose
@@ -27474,7 +27470,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27616,7 +27612,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27699,7 +27695,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27782,7 +27778,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27855,7 +27851,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -27967,7 +27963,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28050,7 +28046,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28133,7 +28129,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28206,7 +28202,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28370,7 +28366,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28453,7 +28449,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28536,7 +28532,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28609,7 +28605,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28872,7 +28868,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -28955,7 +28951,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -29038,7 +29034,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -29111,7 +29107,7 @@ classes:
         - InformedConsent
         - ParticipantPrivacy
         - HumanSubjectCompensation
-        - VulnerablePopulations
+        - AtRiskPopulations
         - LicenseAndUseTerms
         - IPRestrictions
         - ExportControlRegulatoryRestrictions
@@ -29121,4 +29117,3 @@ classes:
         inlined_as_list: true
     class_uri: schema:PropertyValue
 source_file: src/data_sheets_schema/schema/data_sheets_schema.yaml
-

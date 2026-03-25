@@ -1,0 +1,127 @@
+attribute	description	range	used_in_classes	suggested_uri	confidence
+access_url	URL or access point for the raw data.	uri	RawData	dcat:accessURL	medium
+creators		Creator	DataSubset, Dataset	schema:creator	high
+credit_roles	Contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.	CRediTRoleEnum	Creator	schema:creator	high
+distribution_dates		DistributionDate	DataSubset, Dataset	schema:date	high
+distribution_formats		DistributionFormat	DataSubset, Dataset	dcat:distribution	medium
+end_date	End date of data collection	date	CollectionTimeframe	schema:date	high
+erratum_url	URL or access point for the erratum.	uri	Erratum	dcat:accessURL	medium
+funders		FundingMechanism	DataSubset, Dataset	schema:funder	high
+identifiers_removed	List of identifier types removed during de-identification.	string	Deidentification	schema:identifier	high
+license_and_use_terms		LicenseAndUseTerms	DataSubset, Dataset	schema:license	high
+limitation_type	"Category of limitation (e.g., scope, coverage, temporal, methodological).
+"	LimitationTypeEnum	DatasetLimitation	schema:temporalCoverage	high
+missing_value_code	"Code(s) used to represent missing values for this variable. Examples: ""NA"", ""-999"", ""null"", """". Multiple codes may be specified."	string	VariableMetadata	schema:variableMeasured	high
+precision	The precision or number of decimal places for numeric variables.	integer	VariableMetadata	schema:variableMeasured	high
+representative_verification	"Explanation of how representativeness was validated or verified.
+"	string	SamplingStrategy	schema:date	high
+start_date	Start date of data collection	date	CollectionTimeframe	schema:date	high
+target_dataset	The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.	string	DatasetRelationship	schema:identifier	high
+tool_accuracy	"Known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., ""spaCy F1: 0.95"", ""GPT-4 Accuracy: 92%"").
+"	string	MachineAnnotationTools	schema:name	high
+tools	"List of automated annotation tools with their versions. Format each entry as ""ToolName version"" (e.g., ""spaCy 3.5.0"", ""NLTK 3.8"", ""GPT-4 turbo""). Use ""unknown"" for version if not available (e.g., ""Custom NER Model unknown"").
+"	string	MachineAnnotationTools	schema:name	high
+version_access		VersionAccess	DataSubset, Dataset	dcat:accessURL	medium
+was_inferred_derived	Whether the data was inferred or derived from other data	boolean	InstanceAcquisition	prov:wasDerivedFrom	medium
+was_validated_verified	Whether the data was validated or verified in any way	boolean	InstanceAcquisition	schema:date	high
+acquisition_methods		InstanceAcquisition	DataSubset, Dataset		low
+affected_subsets	"Specific subsets or features of the dataset affected by this bias.
+"	string	DatasetBias		low
+agreement_metric	"Type of agreement metric used (Cohen's kappa, Fleiss' kappa, Krippendorff's alpha, percentage agreement, etc.).
+"	string	AnnotationAnalysis		low
+annotations_per_item	Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.	integer	LabelingStrategy		low
+annotator_demographics	Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).	string	LabelingStrategy		low
+anomalies		DataAnomaly	DataSubset, Dataset		low
+archival	"Indication whether official archival versions of external resources are included.
+"	boolean	ExternalResource		low
+assent_procedures	"For research involving minors, what assent procedures were used? How was developmentally appropriate assent obtained?
+"	string	VulnerablePopulations		low
+bias_type	"The type of bias identified, using standardized categories from the Artificial Intelligence Ontology (AIO).
+"	BiasTypeEnum	DatasetBias		low
+collection_mechanisms		CollectionMechanism	DataSubset, Dataset		low
+collection_timeframes		CollectionTimeframe	DataSubset, Dataset		low
+consent_obtained	Was informed consent obtained from all participants?	boolean	InformedConsent		low
+consent_type	"What type of consent was obtained (e.g., written, verbal, electronic, implied through participation)?
+"	string	InformedConsent		low
+contribution_url	URL for contribution guidelines or process.	uri	ExtensionMechanism		low
+data_collectors		DataCollector	DataSubset, Dataset		low
+data_linkage	"Can this dataset be linked to other datasets in ways that might compromise participant privacy?
+"	string	ParticipantPrivacy		low
+delimiter		string	FormatDialect		low
+disagreement_patterns	"Systematic patterns in annotator disagreements (e.g., by demographic group, annotation difficulty, task type).
+"	string	AnnotationAnalysis		low
+double_quote		string	FormatDialect		low
+examples	List of examples of known/previous uses of the dataset.	string	ExistingUse, IntendedUse, VariableMetadata		low
+existing_uses		ExistingUse	DataSubset, Dataset		low
+extension_mechanism		ExtensionMechanism	DataSubset, Dataset		low
+guardian_consent	"For participants unable to provide their own consent, how was guardian or surrogate consent obtained?
+"	string	VulnerablePopulations		low
+header		string	FormatDialect		low
+hipaa_compliant	Indicates compliance with the Health Insurance Portability and Accountability Act (HIPAA). HIPAA applies to protected health information in the United States.	ComplianceStatusEnum	ExportControlRegulatoryRestrictions		low
+human_subject_research	Information about whether dataset involves human subjects research, including IRB approval, ethics review, and regulatory compliance.	HumanSubjectResearch	DataSubset, Dataset		low
+identifiable_elements_present	Indicates whether data subjects can be identified.	boolean	Deidentification		low
+instances		Instance	DataSubset, Dataset		low
+inter_annotator_agreement_score	"Measured agreement between annotators (e.g., Cohen's kappa value, Fleiss' kappa, Krippendorff's alpha).
+"	float	AnnotationAnalysis		low
+involves_human_subjects	Does this dataset involve human subjects research?	boolean	HumanSubjectResearch		low
+ip_restrictions		IPRestrictions	DataSubset, Dataset		low
+irb_approval	"Was Institutional Review Board (IRB) approval obtained? Include approval number and institution if applicable.
+"	string	HumanSubjectResearch		low
+is_data_split	Is this subset a split of the larger dataset, e.g., is it a set for model training, testing, or validation?	boolean	DataSubset		low
+is_direct	Whether collection was direct from individuals	boolean	DirectCollection		low
+is_random	Indicates whether the sample is random.	boolean	SamplingStrategy		low
+is_representative	"Indicates whether the sample is representative of the larger set.
+"	boolean	SamplingStrategy		low
+is_sample	Indicates whether it is a sample of a larger set.	boolean	SamplingStrategy		low
+is_subpopulation	Is this subset a subpopulation of the larger dataset, e.g., is it a set of data for a specific demographic?	boolean	DataSubset		low
+is_tabular		boolean	DataSubset, Dataset		low
+label	"Is there a label or target associated with each instance?
+"	boolean	Instance		low
+latest_version_doi	DOI or URL of the latest dataset version.	string	VersionAccess		low
+machine_annotation_tools	Automated annotation tools used in dataset creation.	MachineAnnotationTools	DataSubset, Dataset		low
+maintainers		Maintainer	DataSubset, Dataset		low
+method	Method used for de-identification (e.g., HIPAA Safe Harbor).	string	Deidentification		low
+missing_data_causes	"Known or suspected causes of missing data (e.g., sensor failures, participant dropout, privacy constraints).
+"	string	MissingDataDocumentation		low
+missing_information	"References to one or more MissingInfo objects describing missing data.
+"	MissingInfo	Instance		low
+other_compliance	Other regulatory compliance frameworks applicable to this dataset (e.g., CCPA, PIPEDA, industry-specific regulations).	string	ExportControlRegulatoryRestrictions		low
+other_tasks		OtherTask	DataSubset, Dataset		low
+participant_privacy	Privacy protections and anonymization procedures for human research participants, including reidentification risk assessment.	ParticipantPrivacy	DataSubset, Dataset		low
+privacy_techniques	"What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data masking)?
+"	string	ParticipantPrivacy		low
+purposes		Purpose	DataSubset, Dataset		low
+quote_char		string	FormatDialect		low
+raw_data_format	"Format of the raw data before any preprocessing.
+"	string	RawDataSource		low
+raw_sources		RawData	DataSubset, Dataset		low
+recommended_mitigation	"Recommended approaches for users to address this limitation.
+"	string	DatasetLimitation		low
+regulatory_compliance	"What regulatory frameworks govern this human subjects research (e.g., 45 CFR 46, HIPAA)?
+"	string	HumanSubjectResearch		low
+regulatory_restrictions		ExportControlRegulatoryRestrictions	DataSubset, Dataset, ExportControlRegulatoryRestrictions		low
+reidentification_risk	"What is the assessed risk of re-identification? What measures were taken to minimize this risk?
+"	string	ParticipantPrivacy		low
+related_datasets	Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.	DatasetRelationship	DataSubset, Dataset		low
+relationship_type	The type of relationship (e.g., derives_from, supplements, is_version_of). Uses DatasetRelationshipTypeEnum for standardized relationship types.	DatasetRelationshipTypeEnum	DatasetRelationship		low
+repository_url	URL to a repository of known dataset uses.	uri	UseRepository		low
+role	Role of the data collector (e.g., researcher, crowdworker)	string	DataCollector, Maintainer		low
+scope_impact	"How this limitation affects the scope or applicability of the dataset.
+"	string	DatasetLimitation		low
+source_type	"Type of raw source (sensor, database, user input, web scraping, etc.).
+"	string	RawDataSource		low
+special_populations	"Does the research involve any special populations that require additional protections (e.g., minors, pregnant women, prisoners)?
+"	string	HumanSubjectResearch		low
+subpopulation_elements_present	Indicates whether any subpopulations are explicitly identified.	boolean	Subpopulation		low
+subpopulations		Subpopulation	DataSubset, Dataset		low
+tasks		Task	DataSubset, Dataset		low
+use_category	Category of intended use (e.g., research, clinical, educational, commercial, policy).	string	IntendedUse		low
+use_repository		UseRepository	DataSubset, Dataset		low
+used_software	What software was used as part of this dataset property?	Software	AddressingGap, AnnotationAnalysis, CleaningStrategy, CollectionConsent, CollectionMechanism, CollectionNotification, CollectionTimeframe, Confidentiality, ConsentRevocation, ContentWarning, Creator, DataAnomaly, DataCollector, DataProtectionImpact, DatasetBias, DatasetLimitation, DatasetProperty, DatasetRelationship, Deidentification, DirectCollection, DiscouragedUse, DistributionDate, DistributionFormat, Erratum, EthicalReview, ExistingUse, ExportControlRegulatoryRestrictions, ExtensionMechanism, ExternalResource, FundingMechanism, FutureUseImpact, HumanSubjectCompensation, HumanSubjectResearch, IPRestrictions, ImputationProtocol, InformedConsent, Instance, InstanceAcquisition, IntendedUse, LabelingStrategy, LicenseAndUseTerms, MachineAnnotationTools, Maintainer, MissingDataDocumentation, MissingInfo, OtherTask, ParticipantPrivacy, PreprocessingStrategy, ProhibitedUse, Purpose, RawData, RawDataSource, Relationships, RetentionLimits, SamplingStrategy, SensitiveElement, Splits, Subpopulation, Task, ThirdPartySharing, UpdatePlan, UseRepository, VariableMetadata, VersionAccess, VulnerablePopulations		low
+versions_available	List of available versions with metadata.	string	VersionAccess		low
+was_directly_observed	Whether the data was directly observed	boolean	InstanceAcquisition		low
+was_reported_by_subjects	Whether the data was reported directly by the subjects themselves	boolean	InstanceAcquisition		low
+why_not_representative	"Explanation of why the sample is not representative, if applicable.
+"	string	SamplingStrategy		low
+withdrawal_mechanism	"How can participants withdraw their consent? What procedures are in place for data deletion upon withdrawal?
+"	string	InformedConsent		low

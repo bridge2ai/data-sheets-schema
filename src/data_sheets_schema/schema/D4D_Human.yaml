@@ -184,20 +184,20 @@ classes:
         multivalued: true
 
 
-  VulnerablePopulations:
+  AtRiskPopulations:
     description: >
-      Information about protections for vulnerable populations in human subjects research.
+      Information about protections for at-risk populations in human subjects research.
     is_a: DatasetProperty
     attributes:
-      vulnerable_groups_included:
+      at_risk_groups_included:
         description: >
-          Are any vulnerable populations included (e.g., children, pregnant women,
+          Are any at-risk populations included (e.g., children, pregnant women,
           prisoners, cognitively impaired individuals)?
-        slot_uri: d4d:vulnerableGroupsIncluded
+        slot_uri: d4d:atRiskGroupsIncluded
         range: boolean
       special_protections:
         description: >
-          What additional protections were implemented for vulnerable populations?
+          What additional protections were implemented for at-risk populations?
           Include safeguards, modified procedures, or additional oversight.
         slot_uri: d4d:specialProtections
         range: string
