@@ -24,6 +24,8 @@ from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 
+from data_sheets_schema.constants import PROJECTS, METHODS, RUBRIC10_PATH, RUBRIC20_PATH
+
 
 @dataclass
 class SubElementScore:
@@ -612,13 +614,13 @@ def main():
         description='Evaluate D4D YAML files using rubrics')
     parser.add_argument('--base-dir', type=str, default='data',
                         help='Base directory containing d4d_concatenated/ or d4d_individual/')
-    parser.add_argument('--rubric10', type=str, default='data/rubric/rubric10.txt',
+    parser.add_argument('--rubric10', type=str, default=str(RUBRIC10_PATH),
                         help='Path to rubric10.txt')
-    parser.add_argument('--rubric20', type=str, default='data/rubric/rubric20.txt',
+    parser.add_argument('--rubric20', type=str, default=str(RUBRIC20_PATH),
                         help='Path to rubric20.txt')
-    parser.add_argument('--projects', nargs='+', default=['AI_READI', 'CM4AI', 'VOICE', 'CHORUS'],
+    parser.add_argument('--projects', nargs='+', default=PROJECTS,
                         help='Projects to evaluate (concatenated mode only)')
-    parser.add_argument('--methods', nargs='+', default=['curated', 'gpt5', 'claudecode'],
+    parser.add_argument('--methods', nargs='+', default=METHODS,
                         help='Methods to evaluate')
     parser.add_argument('--output-dir', type=str, default='data/evaluation',
                         help='Output directory for reports')
