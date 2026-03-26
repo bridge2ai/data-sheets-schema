@@ -105,7 +105,7 @@ poetry run d4d utils status --quick
 - `d4d render html --template human-readable` renders a single datasheet YAML file to the exact `--output` path you provide and copies `datasheet-common.css` into the same directory so the HTML remains styled when opened directly.
 - `d4d render html --template linkml` renders the same structured input into the more technical LinkML-style HTML view.
 - `d4d render evaluation` renders evaluation JSON directly and auto-detects `rubric10` vs `rubric20` unless you specify `--rubric`.
-- Evaluation naming is now consistent: rubric10 outputs use `*_evaluation.html`, while rubric20 outputs use `*_evaluation_rubric20.html`.
+- Evaluation naming is now consistent: if you omit `-o`, rubric10 outputs default to `*_evaluation.html`, while rubric20 outputs default to `*_evaluation_rubric20.html`.
 - `d4d render generate-all` is a convenience command that points users to the bulk HTML generation workflow (`make gen-d4d-html`).
 - `d4d schema` and `d4d rocrate` rely on helper scripts in `.claude/agents/scripts/`, so running from a repository checkout is important.
 

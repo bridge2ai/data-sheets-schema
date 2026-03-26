@@ -134,7 +134,7 @@ Options:
 | Option | Description |
 | --- | --- |
 | `INPUT_FILE` | Required positional argument. Structured input file |
-| `-o, --output PATH` | Output HTML path. Default: `<input_file>.html` |
+| `-o, --output PATH` | Output HTML path. Default: a canonical name derived from the input filename and rubric |
 | `--template` | `human-readable`, `evaluation`, or `linkml`. Default: `human-readable` |
 
 Current behavior notes:
@@ -164,8 +164,8 @@ Options:
 
 Naming convention notes:
 
-- Rubric10 evaluation outputs use the canonical `*_evaluation.html` name.
-- Rubric20 evaluation outputs use `*_evaluation_rubric20.html` so they do not collide with rubric10 outputs.
+- If you omit `-o`, rubric10 outputs default to the canonical `*_evaluation.html` name.
+- If you omit `-o`, rubric20 outputs default to `*_evaluation_rubric20.html` so they do not collide with rubric10 outputs.
 
 ### `d4d render generate-all`
 

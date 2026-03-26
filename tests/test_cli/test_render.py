@@ -44,6 +44,10 @@ class TestRenderCLI(unittest.TestCase):
         self.linkml_output_file = self.test_path / "rendered" / "sample_linkml.html"
         self.evaluation_json = self.test_path / "evaluation.json"
         self.evaluation20_json = self.test_path / "evaluation20.json"
+        self.named_evaluation_json = self.test_path / "AI_READI_claudecode_agent_evaluation.json"
+        self.named_evaluation20_dir = self.test_path / "rubric20"
+        self.named_evaluation20_dir.mkdir()
+        self.named_evaluation20_json = self.named_evaluation20_dir / "CM4AI_claudecode_agent_evaluation.json"
         self.evaluation_output = self.test_path / "rendered" / "evaluation.html"
         self.evaluation20_output = self.test_path / "rendered" / "evaluation20.html"
 
@@ -69,6 +73,7 @@ class TestRenderCLI(unittest.TestCase):
             "recommendations": {}
         }
         self.evaluation_json.write_text(json.dumps(rubric10_eval), encoding="utf-8")
+        self.named_evaluation_json.write_text(json.dumps(rubric10_eval), encoding="utf-8")
 
         rubric20_eval = {
             "rubric": "rubric20",
@@ -97,6 +102,7 @@ class TestRenderCLI(unittest.TestCase):
             "semantic_analysis": {},
         }
         self.evaluation20_json.write_text(json.dumps(rubric20_eval), encoding="utf-8")
+        self.named_evaluation20_json.write_text(json.dumps(rubric20_eval), encoding="utf-8")
 
     def tearDown(self):
         shutil.rmtree(self.test_dir)
@@ -169,6 +175,21 @@ class TestRenderCLI(unittest.TestCase):
         self.assertTrue(output_file.exists(), msg=result.output)
         self.assertIn("(rubric10)", result.output)
 
+    def test_render_html_template_evaluation_defaults_to_canonical_output_name(self):
+        result = self.runner.invoke(
+            cli,
+            [
+                "render", "html", str(self.named_evaluation_json),
+                "--template", "evaluation",
+            ],
+        )
+
+        expected_output = self.test_path / "AI_READI_evaluation.html"
+        self.assertEqual(result.exit_code, 0, msg=result.output)
+        self.assertTrue(expected_output.exists(), msg=result.output)
+        self.assertIn(str(expected_output), result.output)
+        self.assertIn("(rubric10)", result.output)
+
     def test_render_evaluation_command_renders_rubric20_category_dict(self):
         result = self.runner.invoke(
             cli,
@@ -184,6 +205,32 @@ class TestRenderCLI(unittest.TestCase):
         html = self.evaluation20_output.read_text(encoding="utf-8")
         self.assertIn("Rubric20-Semantic Evaluation", html)
         self.assertIn("Structural Completeness", html)
+        self.assertIn("(rubric20)", result.output)
+
+    def test_render_evaluation_command_defaults_to_canonical_rubric10_output_name(self):
+        result = self.runner.invoke(
+            cli,
+            ["render", "evaluation", str(self.named_evaluation_json)],
+        )
+
+        expected_output = self.test_path / "AI_READI_evaluation.html"
+        self.assertEqual(result.exit_code, 0, msg=result.output)
+        self.assertTrue(expected_output.exists(), msg=result.output)
+        self.assertIn(str(expected_output), result.output)
+        self.assertFalse((self.test_path / "AI_READI_claudecode_agent_evaluation.html").exists())
+        self.assertIn("(rubric10)", result.output)
+
+    def test_render_evaluation_command_defaults_to_canonical_rubric20_output_name(self):
+        result = self.runner.invoke(
+            cli,
+            ["render", "evaluation", str(self.named_evaluation20_json)],
+        )
+
+        expected_output = self.named_evaluation20_dir / "CM4AI_evaluation_rubric20.html"
+        self.assertEqual(result.exit_code, 0, msg=result.output)
+        self.assertTrue(expected_output.exists(), msg=result.output)
+        self.assertIn(str(expected_output), result.output)
+        self.assertFalse((self.named_evaluation20_dir / "CM4AI_claudecode_agent_evaluation.html").exists())
         self.assertIn("(rubric20)", result.output)
 
 
