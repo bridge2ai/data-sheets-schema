@@ -54,7 +54,7 @@ The CLI is organized into six top-level groups:
 
 - `d4d download`: fetch, preprocess, and concatenate source materials
 - `d4d evaluate`: run presence-based and LLM-based evaluations
-- `d4d render`: render D4D YAML to HTML or trigger bulk-render guidance
+- `d4d render`: render datasheets and evaluation outputs to HTML
 - `d4d rocrate`: parse, merge, and transform RO-Crate metadata
 - `d4d schema`: inspect schema metrics and validate D4D YAML
 - `d4d utils`: inspect pipeline status and validate preprocessing output
@@ -88,6 +88,13 @@ Render and validate outputs:
 poetry run d4d render html \
   docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml \
   -o /tmp/AI_READI_d4d.html
+poetry run d4d render html \
+  docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml \
+  --template linkml \
+  -o /tmp/AI_READI_d4d_linkml.html
+poetry run d4d render evaluation \
+  data/evaluation_llm/rubric10/concatenated/AI_READI_claudecode_agent_evaluation.json \
+  -o /tmp/AI_READI_evaluation.html
 poetry run d4d schema validate docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml
 poetry run d4d utils status --quick
 ```
@@ -95,7 +102,10 @@ poetry run d4d utils status --quick
 ### Current CLI Notes
 
 - `d4d evaluate llm` requires `ANTHROPIC_API_KEY`.
-- `d4d render html` now renders a single YAML file to the exact `--output` path you provide and copies `datasheet-common.css` into the same directory so the HTML remains styled when opened directly.
+- `d4d render html --template human-readable` renders a single datasheet YAML file to the exact `--output` path you provide and copies `datasheet-common.css` into the same directory so the HTML remains styled when opened directly.
+- `d4d render html --template linkml` renders the same structured input into the more technical LinkML-style HTML view.
+- `d4d render evaluation` renders evaluation JSON directly and auto-detects `rubric10` vs `rubric20` unless you specify `--rubric`.
+- Evaluation naming is now consistent: rubric10 outputs use `*_evaluation.html`, while rubric20 outputs use `*_evaluation_rubric20.html`.
 - `d4d render generate-all` is a convenience command that points users to the bulk HTML generation workflow (`make gen-d4d-html`).
 - `d4d schema` and `d4d rocrate` rely on helper scripts in `.claude/agents/scripts/`, so running from a repository checkout is important.
 

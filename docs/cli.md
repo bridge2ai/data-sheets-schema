@@ -21,7 +21,7 @@ Most subcommands assume they can import repo-local modules from `src/` and `.cla
 | --- | --- |
 | `d4d download` | Download, preprocess, and concatenate source documents |
 | `d4d evaluate` | Run datasheet evaluation workflows |
-| `d4d render` | Render D4D YAML to HTML or point to bulk rendering workflows |
+| `d4d render` | Render datasheets and evaluation outputs to HTML |
 | `d4d rocrate` | Parse, merge, and transform RO-Crate metadata |
 | `d4d schema` | Generate schema metrics and validate YAML against the schema |
 | `d4d utils` | Inspect pipeline status and validate preprocessing results |
@@ -121,7 +121,7 @@ Options:
 
 ### `d4d render html`
 
-Render a D4D YAML file to HTML.
+Render a structured input file to HTML.
 
 ```bash
 poetry run d4d render html \
@@ -133,7 +133,7 @@ Options:
 
 | Option | Description |
 | --- | --- |
-| `INPUT_FILE` | Required positional argument. Input YAML file |
+| `INPUT_FILE` | Required positional argument. Structured input file |
 | `-o, --output PATH` | Output HTML path. Default: `<input_file>.html` |
 | `--template` | `human-readable`, `evaluation`, or `linkml`. Default: `human-readable` |
 
@@ -141,7 +141,31 @@ Current behavior notes:
 
 - `human-readable` writes to the exact output path you provide.
 - The CLI also copies `datasheet-common.css` into the output directory so the generated HTML can be opened directly with styling intact.
-- `evaluation` and `linkml` currently print guidance to the existing rendering workflows and exit.
+- `linkml` renders a more technical LinkML-style HTML view from YAML or JSON input.
+- `evaluation` renders an evaluation JSON file and auto-detects `rubric10` vs `rubric20`.
+
+### `d4d render evaluation`
+
+Render evaluation JSON directly to HTML.
+
+```bash
+poetry run d4d render evaluation \
+  data/evaluation_llm/rubric10/concatenated/AI_READI_claudecode_agent_evaluation.json \
+  -o /tmp/AI_READI_evaluation.html
+```
+
+Options:
+
+| Option | Description |
+| --- | --- |
+| `INPUT_FILE` | Required positional argument. Evaluation JSON file |
+| `-o, --output PATH` | Output HTML path. Default: `<input_file>.html` |
+| `--rubric` | `auto`, `rubric10`, or `rubric20`. Default: `auto` |
+
+Naming convention notes:
+
+- Rubric10 evaluation outputs use the canonical `*_evaluation.html` name.
+- Rubric20 evaluation outputs use `*_evaluation_rubric20.html` so they do not collide with rubric10 outputs.
 
 ### `d4d render generate-all`
 

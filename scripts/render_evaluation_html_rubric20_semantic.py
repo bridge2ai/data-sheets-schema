@@ -53,6 +53,8 @@ def generate_evaluation_html(eval_data, output_path):
 
     # Extract categories (with nested questions)
     categories = eval_data.get("categories", [])
+    if isinstance(categories, dict):
+        categories = list(categories.values())
 
     # Extract semantic analysis
     semantic = eval_data.get("semantic_analysis", {})
@@ -684,10 +686,24 @@ def generate_evaluation_html(eval_data, output_path):
     return output_path
 
 
+def render_evaluation_file(input_file, output_path):
+    """Render a single rubric20 evaluation JSON file to HTML."""
+    input_path = Path(input_file)
+    html_output_path = Path(output_path)
+    html_output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(input_path, 'r', encoding='utf-8') as f:
+        eval_data = json.load(f)
+
+    return generate_evaluation_html(eval_data, html_output_path)
+
+
 def main():
     """Process rubric20-semantic claudecode_agent evaluation JSON files and generate HTML"""
 
-    input_dir = Path("data/evaluation_llm/rubric20_semantic/concatenated")
+    input_dir = Path("data/evaluation_llm/rubric20/concatenated")
+    if not input_dir.exists():
+        input_dir = Path("data/evaluation_llm/rubric20_semantic/concatenated")
     output_dir = Path("data/d4d_html/concatenated/claudecode_agent")
 
     # Ensure output directory exists
