@@ -28,6 +28,47 @@ make site               # Build complete site
 make deploy             # Deploy to GitHub Pages
 ```
 
+## Unified CLI (d4d command)
+
+The project provides a unified CLI via the `d4d` command for common operations:
+
+### Installation
+```bash
+poetry install          # Installs d4d command
+d4d --help              # Show all commands
+```
+
+### Utility Commands
+```bash
+d4d utils status        # Show detailed pipeline status
+d4d utils status --quick                      # Compact overview
+d4d utils validate-preprocessing              # Check preprocessing quality
+```
+
+### Download & Preprocessing
+```bash
+d4d download sources --project AI_READI       # Download from Google Sheet
+d4d download preprocess --project AI_READI    # Preprocess to text
+d4d download preprocess                       # Preprocess all projects
+d4d download concatenate --project AI_READI   # Concatenate files
+```
+
+### Evaluation
+```bash
+d4d evaluate presence --project AI_READI --method gpt5  # Presence-based
+d4d evaluate presence --method claudecode_agent         # All projects
+d4d evaluate llm --file path/to/file.yaml --project X --method Y  # LLM quality
+```
+
+### Benefits
+- **Auto-validation**: Project/method names validated via click.Choice
+- **Consistent interface**: All commands use same patterns
+- **Help everywhere**: `--help` on any command/group
+- **Constants**: Uses centralized constants from `data_sheets_schema.constants`
+
+### Backward Compatibility
+All existing Makefile targets and standalone scripts continue to work. The CLI is an additive enhancement.
+
 ## Architecture
 
 ### Core Schema Files
@@ -39,6 +80,15 @@ make deploy             # Deploy to GitHub Pages
 - `src/data_sheets_schema/datamodel/` - Python classes
 - `project/` - JSON Schema, OWL, SHACL, JSON-LD, GraphQL
 - `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` - Merged schema
+
+### Centralized Constants
+- `src/data_sheets_schema/constants/` - Project names, methods, paths, modules
+  - `projects.py` - PROJECTS list, path helpers
+  - `methods.py` - METHODS list (generation methods)
+  - `schemas.py` - MODULE_MAP, schema paths
+  - `evaluation.py` - Rubric paths, scoring constants
+
+Usage: `from data_sheets_schema.constants import PROJECTS, METHODS`
 
 ### Key Configuration
 - `about.yaml`, `pyproject.toml`, `Makefile`, `config.env`
