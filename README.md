@@ -2,7 +2,7 @@ Executive Order 14168: This repository is under review for potential modificatio
 
 # data-sheets-schema
 
-**📚 [View Documentation & Examples](https://bridge2ai.github.io/data-sheets-schema/)**
+**📚 [View Documentation & Examples](https://bridge2ai.github.io/data-sheets-schema/) · [CLI Reference](https://bridge2ai.github.io/data-sheets-schema/cli/)**
 
 A LinkML schema for Datasheets for Datasets model as published in [Datasheets for Datasets](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext). Inspired by datasheets as used in the electronics and other industries, Gebru et al. proposed that every dataset "be accompanied with a datasheet that documents its motivation, composition, collection process, recommended uses, and so on". To this end the authors create a series of topics and over 50 questions addressing different aspects of datasets, also useful in an AI/ML context. An example of completed datasheet for datasets can be found here:
 [Structured dataset documentation: a datasheet for CheXpert](https://arxiv.org/abs/2105.03020)
@@ -28,208 +28,74 @@ Curated comprehensive datasheets for each Bridge2AI data generating project:
 
 Browse the source code repository:
 
-* **[examples/](https://github.com/bridge2ai/data-sheets-schema/tree/main/examples)** - example data
+* **[src/data/examples/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)** - example YAML data
 * **[project/](https://github.com/bridge2ai/data-sheets-schema/tree/main/project)** - project files (do not edit these)
 * **[src/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src)** - source files (edit these)
   * **[src/data_sheets_schema/schema/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/schema)** - LinkML schema (edit this)
   * **[src/data_sheets_schema/datamodel/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/datamodel)** - generated Python datamodel
 * **[tests/](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests)** - Python tests
 
-## D4D Metadata Generation
+## D4D CLI
 
-This repository supports two distinct approaches for generating D4D (Datasheets for Datasets) metadata from dataset documentation:
-
-### Approach 1: Automated LLM API Agents 🤖
-
-**Use when**: You need to batch-process many files automatically with minimal human intervention.
-
-Automated scripts that use LLM APIs (OpenAI/Anthropic) to extract D4D metadata from dataset documentation. These agents run autonomously and can process hundreds of files in batch mode.
-
-#### 1.1 Validated D4D Wrapper (Recommended)
+This branch introduces a unified `d4d` CLI for the Datasheets for Datasets workflow. The command is exposed through Poetry:
 
 ```bash
-python src/download/validated_d4d_wrapper.py -i downloads_by_column -o data/extracted_by_column
+poetry install
+poetry run d4d --help
 ```
 
-**Features**:
-- Validates downloads succeeded
-- Checks content relevance to projects
-- Generates D4D YAML metadata via GPT-5
-- Creates detailed validation reports
-- Processes HTML, JSON, PDF, and text files
-- Adds generation metadata to YAML headers
+After installation you can also invoke it as `d4d`, but `poetry run d4d` is the safest form while developing in the repo.
 
-**Generated Metadata Includes**:
-```yaml
-# D4D Metadata extracted from: dataset_page.html
-# Column: AI_READI
-# Validation: Download ✅ success
-# Relevance: ✅ relevant
-# Generated: 2025-10-31 14:23:15
-# Generator: validated_d4d_wrapper (GPT-5)
-# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/...
-```
+Most subcommands currently expect a repository checkout because they import repo-local code from `src/` and `.claude/agents/scripts/`.
 
-#### 1.2 Aurelian D4D Agent (Library Usage)
+### Command Groups
 
-For integration into Python applications:
+The CLI is organized into six top-level groups:
 
-```python
-from aurelian.agents.d4d.d4d_agent import d4d_agent
-from aurelian.agents.d4d.d4d_config import D4DConfig
+- `d4d download`: fetch, preprocess, and concatenate source materials
+- `d4d evaluate`: run presence-based and LLM-based evaluations
+- `d4d render`: render D4D YAML to HTML or trigger bulk-render guidance
+- `d4d rocrate`: parse, merge, and transform RO-Crate metadata
+- `d4d schema`: inspect schema metrics and validate D4D YAML
+- `d4d utils`: inspect pipeline status and validate preprocessing output
 
-# Process multiple sources (URLs and local files)
-sources = [
-    "https://example.com/dataset",
-    "/path/to/metadata.json",
-    "/path/to/documentation.html"
-]
+Full option-by-option documentation is available in the docs site: [CLI Reference](https://bridge2ai.github.io/data-sheets-schema/cli/).
 
-config = D4DConfig()
-result = await d4d_agent.run(
-    f"Extract metadata from: {', '.join(sources)}",
-    deps=config
-)
+### Common Workflows
 
-print(result.data)  # D4D YAML output
-```
-
-**Supported File Types**: PDF, HTML, JSON, text/markdown (URLs and local files)
-
-#### 1.3 Basic D4D Wrapper (Simpler Version)
+Download, preprocess, and concatenate source documents for one project:
 
 ```bash
-python src/download/d4d_agent_wrapper.py -i downloads_by_column -o data/extracted_by_column
+poetry run d4d download sources --project AI_READI
+poetry run d4d download preprocess --project AI_READI
+poetry run d4d download concatenate --project AI_READI
 ```
 
-Simpler version without validation steps, suitable for clean input data.
-
-**Requirements for API Agents**:
-- Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable
-- Wrappers use GPT-5 by default (configurable)
-- Files organized in column directories
-
----
-
-### Approach 2: Interactive Coding Agents 👨‍💻
-
-**Use when**: You need human oversight, domain expertise, or customized metadata extraction.
-
-Use coding assistants like **Claude Code**, **GitHub Copilot**, or **Cursor** to generate D4D metadata interactively. This approach provides human-in-the-loop quality control and domain-specific reasoning.
-
-#### 2.1 Using Claude Code (Recommended)
-
-**Step 1**: Provide the schema and dataset documentation to Claude Code
-
-```
-Please generate D4D (Datasheets for Datasets) metadata for the dataset at:
-https://example.com/dataset
-
-Use the D4D schema at:
-https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/src/ontogpt/templates/data_sheets_schema.yaml
-
-Generate a complete YAML file following the schema structure.
-```
-
-**Step 2**: Claude Code will:
-- Fetch the dataset documentation
-- Analyze the content
-- Generate structured D4D YAML
-- Include reasoning about field mappings
-- Iterate based on your feedback
-
-**Generated Metadata Includes**:
-```yaml
-# D4D Metadata for: Example Dataset
-# Generated: 2025-10-31
-# Generator: Claude Code (claude-sonnet-4-5)
-# Method: Interactive extraction with human oversight
-# Schema: https://raw.githubusercontent.com/monarch-initiative/ontogpt/main/...
-# Reviewed by: [Your Name]
-```
-
-#### 2.2 Workflow Example
+Evaluate generated datasheets:
 
 ```bash
-# 1. Start interactive session with Claude Code
-claude-code
-
-# 2. Provide instructions
-"Generate D4D metadata for datasets in downloads_by_column/AI_READI/
-following the schema at [schema URL]"
-
-# 3. Review and refine
-# Claude Code will generate metadata and you can provide feedback:
-# - "Add more detail to the preprocessing section"
-# - "Include information from the supplementary materials"
-# - "Ensure all required fields are populated"
-
-# 4. Save validated output
-# Output is saved with generation metadata in YAML header
+poetry run d4d evaluate presence --project AI_READI --method gpt5
+poetry run d4d evaluate llm \
+  --file data/d4d_concatenated/gpt5/AI_READI_d4d.yaml \
+  --project AI_READI \
+  --method gpt5 \
+  --rubric both
 ```
 
-**Benefits of Interactive Approach**:
-- ✅ Human oversight and quality control
-- ✅ Domain expertise applied to field mapping
-- ✅ Iterative refinement based on feedback
-- ✅ Reasoning captured in generation process
-- ✅ Can handle complex, ambiguous documentation
-- ✅ Better handling of edge cases
+Render and validate outputs:
 
----
-
-### Comparison: When to Use Each Approach
-
-| Aspect | API Agents 🤖 | Interactive Coding Agents 👨‍💻 |
-|--------|---------------|-------------------------------|
-| **Speed** | Fast (batch processing) | Slower (interactive) |
-| **Scale** | Hundreds of files | Few files at a time |
-| **Quality** | Consistent, good | Variable, can be excellent |
-| **Human oversight** | Minimal | Full |
-| **Cost** | API costs × files | Time + API costs |
-| **Best for** | Standardized docs | Complex/ambiguous docs |
-| **Customization** | Limited | High |
-| **Domain expertise** | Model knowledge only | Human + model knowledge |
-
-### Recommended Workflow
-
-**For large-scale extraction**:
-1. Use API agents for initial batch processing
-2. Use coding agents to review and refine difficult cases
-3. Document any manual corrections
-
-**For high-value datasets**:
-1. Use coding agents with human oversight
-2. Validate against domain expertise
-3. Iterate until metadata is complete
-
----
-
-### Generation Metadata Standards
-
-Both approaches should include standardized generation metadata in YAML headers:
-
-```yaml
-# D4D Metadata for: [Dataset Name]
-# Source: [URL or file path]
-# Generated: [ISO 8601 timestamp]
-# Generator: [Tool name and version/model]
-# Method: [automated | interactive | hybrid]
-# Schema: [D4D schema URL]
-# Validator: [Name/email if human reviewed]
-# Notes: [Any relevant generation notes]
+```bash
+poetry run d4d render html docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml
+poetry run d4d schema validate docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml
+poetry run d4d utils status --quick
 ```
 
-### Script Locations
+### Current CLI Notes
 
-- **This repo**: https://github.com/bridge2ai/data-sheets-schema
-- **API Agent Scripts**: [src/download/](src/download/)
-  - Validated wrapper: `src/download/validated_d4d_wrapper.py`
-  - Basic wrapper: `src/download/d4d_agent_wrapper.py`
-- **Aurelian D4D Agent**: [aurelian/src/aurelian/agents/d4d/](aurelian/src/aurelian/agents/d4d/)
-  - Agent: `d4d_agent.py`
-  - Tools: `d4d_tools.py`
-  - Config: `d4d_config.py`
+- `d4d evaluate llm` requires `ANTHROPIC_API_KEY`.
+- `d4d render html` currently delegates to the legacy human-readable renderer. In the current implementation, the advertised `INPUT_FILE` and `--output` arguments are not fully honored by that renderer, which still writes to `src/html/output/`. The `evaluation` and `linkml` template flags print guidance to the existing workflows rather than completing those render paths inline.
+- `d4d render generate-all` is a convenience command that points users to the bulk HTML generation workflow (`make gen-d4d-html`).
+- `d4d schema` and `d4d rocrate` rely on helper scripts in `.claude/agents/scripts/`, so running from a repository checkout is important.
 
 ## Developer Documentation
 
