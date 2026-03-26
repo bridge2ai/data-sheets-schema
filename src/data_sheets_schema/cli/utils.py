@@ -4,8 +4,10 @@ Commands for utility operations like status checks.
 """
 
 import click
+import sys
 from pathlib import Path
 from data_sheets_schema.constants import PROJECTS, METHODS
+from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 @click.group()
 def utils():
@@ -24,21 +26,21 @@ def status(quick):
         _show_detailed_status()
 
 @utils.command('validate-preprocessing')
-@click.option('--raw-dir', type=click.Path(exists=True), default='data/raw',
+@click.option('--raw-dir', type=click.Path(), default='data/raw',
               help='Raw data directory')
-@click.option('--preprocessed-dir', type=click.Path(exists=True),
+@click.option('--preprocessed-dir', type=click.Path(),
               default='data/preprocessed/individual',
               help='Preprocessed data directory')
 @click.option('--project', type=click.Choice(PROJECTS),
               help='Validate specific project only')
 def validate_preprocessing(raw_dir, preprocessed_dir, project):
     """Validate preprocessing quality (check for empty/stub files)."""
-    import sys
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+    require_repo_context("d4d utils validate-preprocessing")
+
+    setup_repo_imports()
     from src.download.validate_preprocessing_quality import main as validate_main
 
     # Set up args for the validation script
-    import sys
     old_argv = sys.argv
     sys.argv = ['validate_preprocessing_quality.py',
                 '--raw-dir', raw_dir,

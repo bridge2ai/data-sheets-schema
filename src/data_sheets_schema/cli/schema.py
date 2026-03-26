@@ -7,6 +7,7 @@ import click
 import sys
 from pathlib import Path
 from data_sheets_schema.constants import SCHEMA_FULL_PATH
+from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 @click.group()
 def schema():
@@ -25,10 +26,12 @@ def schema():
               help=f'Schema file path (default: {SCHEMA_FULL_PATH})')
 def stats(level, format, output, schema_file):
     """Generate schema statistics and metrics."""
+    require_repo_context("d4d schema stats")
+
     click.echo(f"📊 Generating schema statistics (level {level}, {format} format)...")
 
     # Import and call the schema_stats script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "scripts"))
+    setup_repo_imports()
 
     try:
         from schema_stats import main as stats_main
@@ -62,10 +65,12 @@ def stats(level, format, output, schema_file):
               help=f'Schema file path (default: {SCHEMA_FULL_PATH})')
 def validate(d4d_file, schema_file):
     """Validate D4D YAML file against schema."""
+    require_repo_context("d4d schema validate")
+
     click.echo(f"✓ Validating {d4d_file}...")
 
     # Import and call the validator script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "scripts"))
+    setup_repo_imports()
 
     try:
         from validator import D4DValidator

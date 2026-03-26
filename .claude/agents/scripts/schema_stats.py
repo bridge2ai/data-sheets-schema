@@ -28,7 +28,6 @@ except ImportError:
     sys.exit(1)
 
 # Import centralized constants
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from data_sheets_schema.constants import MODULE_MAP
 

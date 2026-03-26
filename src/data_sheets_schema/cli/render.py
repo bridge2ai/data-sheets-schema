@@ -6,6 +6,7 @@ Commands for rendering D4D YAML to other formats.
 import click
 import sys
 from pathlib import Path
+from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 @click.group()
 def render():
@@ -21,13 +22,15 @@ def render():
               help='HTML template style')
 def html(input_file, output, template):
     """Render D4D YAML to HTML."""
+    require_repo_context("d4d render html")
+
     if not output:
         output = Path(input_file).with_suffix('.html')
 
     click.echo(f"🎨 Rendering {input_file} to HTML ({template} style)...")
 
     # Import and call the rendering script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+    setup_repo_imports()
 
     try:
         if template == 'human-readable':

@@ -7,6 +7,7 @@ import click
 import sys
 from pathlib import Path
 
+from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 @click.group()
 def rocrate():
     """RO-Crate integration commands."""
@@ -17,10 +18,12 @@ def rocrate():
 @click.option('--output', type=click.Path(), help='Output file for parsed data')
 def parse(input_file, output):
     """Parse RO-Crate JSON-LD file."""
+    require_repo_context("d4d rocrate parse")
+
     click.echo(f"📦 Parsing RO-Crate: {input_file}")
 
     # Import and call the parser script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "scripts"))
+    setup_repo_imports()
 
     try:
         from rocrate_parser import ROCrateParser
@@ -56,6 +59,8 @@ def parse(input_file, output):
               help='Primary RO-Crate file (for merging)')
 def transform(input_file, output, merge, inputs, primary):
     """Transform RO-Crate to D4D YAML format."""
+    require_repo_context("d4d rocrate transform")
+
     if merge:
         if not inputs:
             click.echo("❌ Error: --merge requires --inputs", err=True)
@@ -65,7 +70,7 @@ def transform(input_file, output, merge, inputs, primary):
         click.echo(f"🔄 Transforming RO-Crate to D4D: {input_file}")
 
     # Import and call the transform script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "scripts"))
+    setup_repo_imports()
 
     try:
         from rocrate_to_d4d import main as transform_main
@@ -103,10 +108,12 @@ def transform(input_file, output, merge, inputs, primary):
               help='Primary RO-Crate file (takes precedence in conflicts)')
 def merge(input_files, output, primary):
     """Merge multiple RO-Crate files into one."""
+    require_repo_context("d4d rocrate merge")
+
     click.echo(f"🔀 Merging {len(input_files)} RO-Crate files...")
 
     # Import and call the merger script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent / ".claude" / "agents" / "scripts"))
+    setup_repo_imports()
 
     try:
         from rocrate_merger import ROCrateMerger

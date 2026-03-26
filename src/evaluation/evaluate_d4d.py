@@ -620,8 +620,8 @@ def main():
                         help='Path to rubric20.txt')
     parser.add_argument('--projects', nargs='+', default=PROJECTS,
                         help='Projects to evaluate (concatenated mode only)')
-    parser.add_argument('--methods', nargs='+', default=METHODS,
-                        help='Methods to evaluate')
+    parser.add_argument('--methods', nargs='+', default=['curated', 'gpt5', 'claudecode'],
+                        help='Methods to evaluate (supported: curated, gpt5, claudecode)')
     parser.add_argument('--output-dir', type=str, default='data/evaluation',
                         help='Output directory for reports')
     parser.add_argument('--project', type=str,

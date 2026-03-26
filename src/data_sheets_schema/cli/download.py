@@ -7,6 +7,7 @@ import click
 import sys
 from pathlib import Path
 from data_sheets_schema.constants import PROJECTS
+from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 @click.group()
 def download():
@@ -44,19 +45,21 @@ def sources(project, output_dir):
 @download.command()
 @click.option('--project', type=click.Choice(PROJECTS),
               help='Preprocess specific project only (default: all)')
-@click.option('--input-dir', type=click.Path(exists=True), default='data/raw',
+@click.option('--input-dir', type=click.Path(), default='data/raw',
               help='Input directory with raw downloads')
 @click.option('--output-dir', type=click.Path(), default='data/preprocessed/individual',
               help='Output directory for preprocessed files')
 def preprocess(project, input_dir, output_dir):
     """Preprocess raw sources to standard text format."""
+    require_repo_context("d4d download preprocess")
+
     if project:
         click.echo(f"🔄 Preprocessing {project}...")
     else:
         click.echo(f"🔄 Preprocessing all projects...")
 
     # Import and call the preprocess script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+    setup_repo_imports()
     from src.download.preprocess_sources import main as preprocess_main
 
     # Set up args for the preprocess script
