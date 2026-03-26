@@ -60,11 +60,37 @@ d4d evaluate presence --method claudecode_agent         # All projects
 d4d evaluate llm --file path/to/file.yaml --project X --method Y  # LLM quality
 ```
 
+### RO-Crate Integration
+```bash
+d4d rocrate parse input.json                          # Parse RO-Crate
+d4d rocrate transform input.json -o output.yaml       # Convert to D4D
+d4d rocrate merge file1.json file2.json -o merged.json  # Merge RO-Crates
+```
+
+### Schema Operations
+```bash
+d4d schema stats --level 2 --format json              # Schema statistics
+d4d schema validate file.yaml                         # Validate D4D YAML
+```
+
+### Rendering
+```bash
+d4d render html input.yaml -o output.html             # Render to HTML
+```
+
 ### Benefits
 - **Auto-validation**: Project/method names validated via click.Choice
 - **Consistent interface**: All commands use same patterns
 - **Help everywhere**: `--help` on any command/group
 - **Constants**: Uses centralized constants from `data_sheets_schema.constants`
+
+### Complete Command Reference
+- **d4d utils**: status, validate-preprocessing
+- **d4d download**: sources, preprocess, concatenate
+- **d4d evaluate**: presence, llm
+- **d4d rocrate**: parse, transform, merge
+- **d4d schema**: stats, validate
+- **d4d render**: html, generate-all
 
 ### Backward Compatibility
 All existing Makefile targets and standalone scripts continue to work. The CLI is an additive enhancement.
@@ -100,6 +126,28 @@ Usage: `from data_sheets_schema.constants import PROJECTS, METHODS`
 3. `make test-schema` (full validation)
 4. `make gen-project` (regenerate artifacts)
 5. `make test` (complete validation)
+
+## Testing
+
+### Test Structure
+```
+tests/
+├── test_d4d_full_schema.py     # Schema generation tests
+├── test_data.py                # Data validation tests
+├── test_renderer.py            # Rendering tests
+├── test_schema/                # Schema utility tests
+│   └── test_schema_stats.py    # Schema statistics tests (8 tests)
+├── test_download/              # Download pipeline tests
+├── test_rocrate/               # RO-Crate integration tests
+└── test_evaluation/            # Evaluation framework tests
+```
+
+### Running Tests
+```bash
+make test                       # All tests
+make test-python                # Python unit tests only
+python -m unittest tests.test_schema.test_schema_stats  # Specific test
+```
 
 ## Keeping Schema Files in Sync
 
