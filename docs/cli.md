@@ -124,7 +124,9 @@ Options:
 Render a D4D YAML file to HTML.
 
 ```bash
-poetry run d4d render html docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml
+poetry run d4d render html \
+  docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml \
+  -o /tmp/AI_READI_d4d.html
 ```
 
 Options:
@@ -137,7 +139,8 @@ Options:
 
 Current behavior notes:
 
-- The command surface accepts `INPUT_FILE` and `--output`, but the current `human-readable` implementation delegates to the legacy batch renderer in `src/html/human_readable_renderer.py`, which still writes into `src/html/output/`.
+- `human-readable` writes to the exact output path you provide.
+- The CLI also copies `datasheet-common.css` into the output directory so the generated HTML can be opened directly with styling intact.
 - `evaluation` and `linkml` currently print guidance to the existing rendering workflows and exit.
 
 ### `d4d render generate-all`

@@ -34,19 +34,13 @@ def html(input_file, output, template):
 
     try:
         if template == 'human-readable':
-            from src.html.human_readable_renderer import main as render_main
+            from src.html.human_readable_renderer import render_yaml_file
 
-            # Set up args for the renderer
-            old_argv = sys.argv
-            sys.argv = ['human_readable_renderer.py',
-                        input_file,
-                        '-o', str(output)]
-
-            try:
-                render_main()
-                click.echo(f"✓ HTML saved to {output}")
-            finally:
-                sys.argv = old_argv
+            rendered_path = render_yaml_file(input_file, output)
+            css_path = Path(rendered_path).parent / 'datasheet-common.css'
+            click.echo(f"✓ HTML saved to {rendered_path}")
+            if css_path.exists():
+                click.echo(f"✓ Stylesheet saved to {css_path}")
 
         elif template == 'evaluation':
             click.echo("ℹ️  Evaluation template requires evaluation data")

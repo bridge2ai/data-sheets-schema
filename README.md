@@ -85,7 +85,9 @@ poetry run d4d evaluate llm \
 Render and validate outputs:
 
 ```bash
-poetry run d4d render html docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml
+poetry run d4d render html \
+  docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml \
+  -o /tmp/AI_READI_d4d.html
 poetry run d4d schema validate docs/yaml_output/concatenated/gpt5/AI_READI_d4d.yaml
 poetry run d4d utils status --quick
 ```
@@ -93,7 +95,7 @@ poetry run d4d utils status --quick
 ### Current CLI Notes
 
 - `d4d evaluate llm` requires `ANTHROPIC_API_KEY`.
-- `d4d render html` currently delegates to the legacy human-readable renderer. In the current implementation, the advertised `INPUT_FILE` and `--output` arguments are not fully honored by that renderer, which still writes to `src/html/output/`. The `evaluation` and `linkml` template flags print guidance to the existing workflows rather than completing those render paths inline.
+- `d4d render html` now renders a single YAML file to the exact `--output` path you provide and copies `datasheet-common.css` into the same directory so the HTML remains styled when opened directly.
 - `d4d render generate-all` is a convenience command that points users to the bulk HTML generation workflow (`make gen-d4d-html`).
 - `d4d schema` and `d4d rocrate` rely on helper scripts in `.claude/agents/scripts/`, so running from a repository checkout is important.
 
