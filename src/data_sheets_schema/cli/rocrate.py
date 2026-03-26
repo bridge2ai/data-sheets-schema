@@ -48,7 +48,7 @@ def parse(input_file, output):
         sys.exit(1)
 
 @rocrate.command()
-@click.argument('input_file', type=click.Path(exists=True))
+@click.argument('input_file', required=False, type=click.Path(exists=True))
 @click.option('--output', '-o', type=click.Path(), required=True,
               help='Output D4D YAML file')
 @click.option('--merge', is_flag=True,
@@ -63,10 +63,17 @@ def transform(input_file, output, merge, inputs, primary):
 
     if merge:
         if not inputs:
-            click.echo("❌ Error: --merge requires --inputs", err=True)
-            sys.exit(1)
+            raise click.UsageError(
+                "--merge requires at least one --inputs PATH.",
+                ctx=click.get_current_context(),
+            )
         click.echo(f"🔄 Transforming {len(inputs)} RO-Crates to D4D (merge mode)...")
     else:
+        if not input_file:
+            raise click.UsageError(
+                "Missing argument 'INPUT_FILE'.",
+                ctx=click.get_current_context(),
+            )
         click.echo(f"🔄 Transforming RO-Crate to D4D: {input_file}")
 
     # Import and call the transform script
