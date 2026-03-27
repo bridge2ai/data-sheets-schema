@@ -18,7 +18,12 @@ if str(repo_root) not in sys.path:
 try:
     from src.fairscape_integration.d4d_to_fairscape import D4DToFairscapeConverter
     from src.fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
-    FAIRSCAPE_AVAILABLE = True
+    # Try to instantiate to check if FAIRSCAPE models are actually available
+    try:
+        _test_converter = D4DToFairscapeConverter()
+        FAIRSCAPE_AVAILABLE = True
+    except RuntimeError:
+        FAIRSCAPE_AVAILABLE = False
 except ImportError:
     FAIRSCAPE_AVAILABLE = False
 
