@@ -13,6 +13,8 @@ from pathlib import Path
 from pdfminer.high_level import extract_text
 from bs4 import BeautifulSoup
 
+from data_sheets_schema.constants import PROJECTS
+
 
 def extract_pdf_text(pdf_path: Path) -> str:
     """Extract text from PDF using pdfminer."""
@@ -153,7 +155,7 @@ def main():
     parser.add_argument(
         "-p", "--projects",
         nargs="+",
-        default=["AI_READI", "CHORUS", "CM4AI", "VOICE"],
+        default=PROJECTS,
         help="Projects to process (default: all)"
     )
 

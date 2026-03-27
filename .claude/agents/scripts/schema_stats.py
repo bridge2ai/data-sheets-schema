@@ -27,6 +27,10 @@ except ImportError:
     print("ERROR: linkml-runtime not installed. Run: poetry install", file=sys.stderr)
     sys.exit(1)
 
+# Import centralized constants
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+from data_sheets_schema.constants import MODULE_MAP
+
 
 def find_full_schema() -> Path:
     """Auto-detect the full merged schema file."""
@@ -58,24 +62,7 @@ def load_schema(schema_path: str = None) -> SchemaView:
 
 def get_module_from_prefix(prefix: str) -> str:
     """Map namespace prefix to module name."""
-    module_map = {
-        'd4dmotivation': 'D4D_Motivation',
-        'd4dcomposition': 'D4D_Composition',
-        'd4dcollection': 'D4D_Collection',
-        'd4dpreprocessing': 'D4D_Preprocessing',
-        'd4duses': 'D4D_Uses',
-        'd4ddistribution': 'D4D_Distribution',
-        'd4dmaintenance': 'D4D_Maintenance',
-        'd4dethics': 'D4D_Ethics',
-        'd4dhuman': 'D4D_Human',
-        'd4ddatagovernance': 'D4D_Data_Governance',
-        'd4dvariables': 'D4D_Variables',
-        'd4dmetadata': 'D4D_Metadata',
-        'd4dminimal': 'D4D_Minimal',
-        'd4dbase': 'D4D_Base_import',
-        'linkml': 'LinkML_Core',
-    }
-    return module_map.get(prefix.lower(), 'Unknown')
+    return MODULE_MAP.get(prefix.lower(), 'Unknown')
 
 
 def get_class_module(sv: SchemaView, class_name: str) -> str:

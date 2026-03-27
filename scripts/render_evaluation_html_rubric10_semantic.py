@@ -10,11 +10,25 @@ from datetime import datetime
 def generate_evaluation_html(eval_data, output_path):
     """Generate HTML from evaluation JSON data"""
 
-    metadata = eval_data.get("evaluation_metadata", {})
-    element_scores = eval_data.get("element_scores", [])
-    summary = eval_data.get("summary_scores", {})
+    metadata = eval_data.get("evaluation_metadata") or {
+        "dataset_id": eval_data.get("project", "Unknown"),
+        "method": eval_data.get("method", "Unknown"),
+        "evaluator": eval_data.get("model", {}).get("name", "Unknown"),
+        "rubric_type": eval_data.get("rubric", "rubric10"),
+        "temperature": eval_data.get("model", {}).get("temperature", "N/A"),
+        "evaluation_timestamp": eval_data.get("evaluation_timestamp", "Unknown"),
+    }
+    element_scores = eval_data.get("element_scores", eval_data.get("elements", []))
+    summary = eval_data.get("summary_scores") or {
+        "total_score": eval_data.get("overall_score", {}).get("total_points", 0),
+        "total_max_score": eval_data.get("overall_score", {}).get("max_points", 50),
+        "overall_percentage": eval_data.get("overall_score", {}).get("percentage", 0),
+    }
     semantic = eval_data.get("semantic_analysis", {})
-    recommendations = eval_data.get("recommendations", {})
+    assessment = eval_data.get("assessment", {})
+    semantic.setdefault("strengths", assessment.get("strengths", []))
+    semantic.setdefault("weaknesses", assessment.get("weaknesses", []))
+    recommendations = eval_data.get("recommendations", assessment.get("recommendations", {}))
 
     # Calculate overall stats
     total_score = summary.get("total_score", 0)
@@ -608,10 +622,24 @@ def generate_evaluation_html(eval_data, output_path):
     return output_path
 
 
+def render_evaluation_file(input_file, output_path):
+    """Render a single rubric10 evaluation JSON file to HTML."""
+    input_path = Path(input_file)
+    html_output_path = Path(output_path)
+    html_output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(input_path, 'r', encoding='utf-8') as f:
+        eval_data = json.load(f)
+
+    return generate_evaluation_html(eval_data, html_output_path)
+
+
 def main():
     """Process claudecode_agent evaluation JSON files and generate HTML"""
 
-    input_dir = Path("data/evaluation_llm/rubric10_semantic/concatenated")
+    input_dir = Path("data/evaluation_llm/rubric10/concatenated")
+    if not input_dir.exists():
+        input_dir = Path("data/evaluation_llm/rubric10_semantic/concatenated")
     output_dir = Path("data/d4d_html/concatenated/claudecode_agent")
 
     # Ensure output directory exists
@@ -639,7 +667,7 @@ def main():
 
             # Generate output filename
             project_name = eval_file.stem.replace('_claudecode_agent_evaluation', '')
-            output_path = output_dir / f"{project_name}_evaluation_rubric10.html"
+            output_path = output_dir / f"{project_name}_evaluation.html"
 
             # Generate HTML
             generate_evaluation_html(eval_data, output_path)

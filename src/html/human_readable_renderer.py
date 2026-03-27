@@ -5,6 +5,7 @@ Creates natural, document-like HTML without raw JSON structures
 """
 
 import os
+import shutil
 import yaml
 import json
 from datetime import datetime
@@ -756,34 +757,59 @@ class HumanReadableRenderer:
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
 
-def process_yaml_file(file_path, output_dir):
-    """Process a YAML file and generate human-readable HTML"""
-    
+
+def get_default_css_source():
+    """Return the canonical stylesheet path for human-readable HTML output."""
+    return Path(__file__).parent / "output" / "datasheet-common.css"
+
+
+def render_yaml_file(input_file, output_file):
+    """Render a single YAML file to a single HTML file and copy the stylesheet."""
+    input_path = Path(input_file)
+    output_path = Path(output_file)
+
     renderer = HumanReadableRenderer()
-    
-    # Read and parse YAML
-    with open(file_path, 'r', encoding='utf-8-sig') as f:
+
+    with open(input_path, 'r', encoding='utf-8-sig') as f:
         data = yaml.safe_load(f)
-    
+
     if not data:
-        print(f"No data found in {file_path}")
-        return False
-    
-    # Generate output filename - remove _data from the stem if present
-    base_name = Path(file_path).stem
+        raise ValueError(f"No data found in {input_path}")
+
+    base_name = input_path.stem
     if base_name.endswith('_data'):
-        base_name = base_name[:-5]  # Remove '_data' suffix
-    
-    output_path = os.path.join(output_dir, f"{base_name}_human_readable.html")
-    
-    # Generate HTML with external CSS
-    html_content = renderer.render_to_html(data, base_name)
-    
-    # Write output
+        base_name = base_name[:-5]
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    css_name = "datasheet-common.css"
+    html_content = renderer.render_to_html(data, base_name, css_file=css_name)
+
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
-    
-    print(f"Generated human-readable HTML: {output_path}")
+
+    css_source = get_default_css_source()
+    css_destination = output_path.parent / css_name
+    if css_source.exists() and css_source.resolve() != css_destination.resolve():
+        shutil.copy2(css_source, css_destination)
+
+    return output_path
+
+def process_yaml_file(file_path, output_dir):
+    """Process a YAML file and generate human-readable HTML"""
+    base_name = Path(file_path).stem
+    if base_name.endswith('_data'):
+        base_name = base_name[:-5]
+
+    output_path = Path(output_dir) / f"{base_name}_human_readable.html"
+
+    try:
+        rendered_path = render_yaml_file(file_path, output_path)
+    except ValueError as e:
+        print(e)
+        return False
+
+    print(f"Generated human-readable HTML: {rendered_path}")
     return True
 
 def main():
