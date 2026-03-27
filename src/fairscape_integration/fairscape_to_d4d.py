@@ -189,10 +189,37 @@ class FairscapeToD4DConverter:
         }
 
         # Map basic properties
-        d4d.update(self._map_basic_properties(dataset))
+        basic_props = self._map_basic_properties(dataset)
 
-        # Map complex properties
-        d4d.update(self._map_complex_properties(dataset))
+        # Convert nested Datasets to FileCollections
+        has_file_collections = False
+        if nested_datasets:
+            file_collections = self._build_file_collections(nested_datasets)
+            if file_collections:
+                d4d['file_collections'] = file_collections
+                has_file_collections = True
+
+                # For schema 1.1 with file_collections: map contentSize to total_size_bytes
+                if 'bytes' in basic_props:
+                    basic_props['total_size_bytes'] = basic_props.pop('bytes')
+
+        d4d.update(basic_props)
+
+        # Map complex properties (skip hasPart mapping if we have file_collections)
+        complex_props = self._map_complex_properties(dataset)
+        if has_file_collections and 'resources' in complex_props:
+            # Filter out resources that are already in file_collections
+            fc_ids = {fc.get('id') for fc in d4d.get('file_collections', [])}
+            if isinstance(complex_props['resources'], list):
+                complex_props['resources'] = [
+                    r for r in complex_props['resources']
+                    if r not in fc_ids
+                ]
+                # Remove resources if empty
+                if not complex_props['resources']:
+                    del complex_props['resources']
+
+        d4d.update(complex_props)
 
         # Map EVI properties (computational provenance)
         d4d.update(self._map_evi_properties(dataset))
@@ -202,12 +229,6 @@ class FairscapeToD4DConverter:
 
         # Map custom D4D properties
         d4d.update(self._map_d4d_properties(dataset))
-
-        # Convert nested Datasets to FileCollections
-        if nested_datasets:
-            file_collections = self._build_file_collections(nested_datasets)
-            if file_collections:
-                d4d['file_collections'] = file_collections
 
         return d4d
 

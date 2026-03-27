@@ -7,8 +7,6 @@ RO-Crate nested Dataset entities.
 """
 
 import unittest
-import json
-import yaml
 from pathlib import Path
 import sys
 

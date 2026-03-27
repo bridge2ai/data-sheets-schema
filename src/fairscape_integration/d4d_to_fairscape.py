@@ -263,7 +263,8 @@ class D4DToFairscapeConverter:
             if "path" in fc:
                 collection_params["contentUrl"] = fc["path"]
 
-            if "media_type" in fc:
+            # Use media_type as fallback for encodingFormat when format is absent
+            if "media_type" in fc and "encodingFormat" not in collection_params:
                 collection_params["encodingFormat"] = fc["media_type"]
 
             if "compression" in fc:

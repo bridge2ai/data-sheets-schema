@@ -7,7 +7,6 @@ migrated to use FileCollection.
 """
 
 import unittest
-from pathlib import Path
 from src.validation.unified_validator import UnifiedValidator
 
 

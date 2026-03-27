@@ -2006,7 +2006,7 @@
         "Dataset",
         "FileCollection"
       ],
-      "range": "string",
+      "range": "Dataset",
       "multivalued": true,
       "@type": "SlotDefinition"
     },
@@ -6457,8 +6457,9 @@
       ],
       "is_usage_slot": true,
       "usage_slot_name": "resources",
-      "range": "string",
+      "range": "Dataset",
       "multivalued": true,
+      "inlined": true,
       "inlined_as_list": true,
       "@type": "SlotDefinition"
     },
@@ -10532,7 +10533,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-03-26T22:44:02",
   "source_file_size": 18530,
-  "generation_date": "2026-03-26T22:44:31",
+  "generation_date": "2026-03-27T00:15:11",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
