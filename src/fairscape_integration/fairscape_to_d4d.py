@@ -108,21 +108,31 @@ class FairscapeToD4DConverter:
             except Exception as e:
                 print(f"⚠ Warning: RO-Crate validation failed: {e}")
 
-        # Extract Dataset entity from @graph
-        dataset = self._extract_dataset(rocrate_data)
+        # Extract Dataset entity and nested Datasets from @graph
+        dataset, nested_datasets = self._extract_datasets(rocrate_data)
 
         if not dataset:
             raise ValueError("No Dataset entity found in RO-Crate @graph")
 
         # Convert to D4D
-        d4d_dict = self._build_d4d(dataset, rocrate_data)
+        d4d_dict = self._build_d4d(dataset, nested_datasets, rocrate_data)
 
         return d4d_dict
 
-    def _extract_dataset(self, rocrate_data: Dict) -> Optional[Dict]:
-        """Extract Dataset entity from RO-Crate @graph."""
+    def _extract_datasets(self, rocrate_data: Dict) -> Tuple[Optional[Dict], List[Dict]]:
+        """
+        Extract main Dataset and nested Datasets from RO-Crate @graph.
+
+        Returns:
+            Tuple of (main_dataset, nested_datasets_list)
+        """
         graph = rocrate_data.get('@graph', [])
 
+        main_dataset = None
+        nested_datasets = []
+        hasPart_ids = set()
+
+        # First pass: find main dataset and collect hasPart references
         for entity in graph:
             entity_type = entity.get('@type', [])
             if isinstance(entity_type, str):
@@ -132,16 +142,48 @@ class FairscapeToD4DConverter:
                 # Skip metadata descriptor
                 if entity.get('@id') == 'ro-crate-metadata.json':
                     continue
-                return entity
 
-        return None
+                # Main dataset is the root with @id "./" or has ROCrate type
+                entity_id = entity.get('@id', '')
+                if entity_id == './' or 'https://w3id.org/EVI#ROCrate' in entity_type:
+                    main_dataset = entity
+                    # Collect hasPart references
+                    has_part = entity.get('hasPart', [])
+                    for part in has_part:
+                        if isinstance(part, dict) and '@id' in part:
+                            hasPart_ids.add(part['@id'])
+                        elif isinstance(part, str):
+                            hasPart_ids.add(part)
 
-    def _build_d4d(self, dataset: Dict, full_rocrate: Dict) -> Dict[str, Any]:
-        """Build D4D dictionary from RO-Crate Dataset entity."""
+        # Second pass: collect nested datasets (those referenced by hasPart)
+        for entity in graph:
+            entity_type = entity.get('@type', [])
+            if isinstance(entity_type, str):
+                entity_type = [entity_type]
+
+            if 'Dataset' in entity_type:
+                entity_id = entity.get('@id', '')
+                if entity_id in hasPart_ids:
+                    nested_datasets.append(entity)
+
+        return main_dataset, nested_datasets
+
+    def _build_d4d(self, dataset: Dict, nested_datasets: List[Dict], full_rocrate: Dict) -> Dict[str, Any]:
+        """
+        Build D4D dictionary from RO-Crate Dataset entity.
+
+        Args:
+            dataset: Main Dataset entity
+            nested_datasets: Nested Dataset entities (FileCollections)
+            full_rocrate: Full RO-Crate data
+
+        Returns:
+            D4D dictionary
+        """
 
         d4d = {
             # Required D4D metadata
-            'schema_version': '1.0',
+            'schema_version': '1.1',  # Updated to 1.1 for FileCollection support
             'generated_date': datetime.now().isoformat(),
             'source': 'FAIRSCAPE RO-Crate',
         }
@@ -161,7 +203,78 @@ class FairscapeToD4DConverter:
         # Map custom D4D properties
         d4d.update(self._map_d4d_properties(dataset))
 
+        # Convert nested Datasets to FileCollections
+        if nested_datasets:
+            file_collections = self._build_file_collections(nested_datasets)
+            if file_collections:
+                d4d['file_collections'] = file_collections
+
         return d4d
+
+    def _build_file_collections(self, nested_datasets: List[Dict]) -> List[Dict[str, Any]]:
+        """
+        Convert nested RO-Crate Datasets to D4D FileCollections.
+
+        Args:
+            nested_datasets: List of nested Dataset entities from RO-Crate
+
+        Returns:
+            List of FileCollection dictionaries
+        """
+        file_collections = []
+
+        for dataset in nested_datasets:
+            collection = {}
+
+            # Map basic properties
+            if '@id' in dataset:
+                collection['id'] = dataset['@id']
+
+            if 'name' in dataset:
+                collection['name'] = dataset['name']
+
+            if 'description' in dataset:
+                collection['description'] = dataset['description']
+
+            # Map file-specific properties
+            if 'encodingFormat' in dataset:
+                collection['format'] = dataset['encodingFormat']
+
+            if 'contentSize' in dataset:
+                # Parse size string to bytes
+                size_str = dataset['contentSize']
+                if isinstance(size_str, str):
+                    collection['bytes'] = self._parse_size(size_str)
+                else:
+                    collection['bytes'] = size_str
+
+            if 'sha256' in dataset:
+                collection['sha256'] = dataset['sha256']
+
+            if 'md5' in dataset:
+                collection['md5'] = dataset['md5']
+
+            if 'contentUrl' in dataset:
+                collection['path'] = dataset['contentUrl']
+
+            if 'encoding' in dataset:
+                collection['encoding'] = dataset['encoding']
+
+            if 'fileFormat' in dataset:
+                collection['compression'] = dataset['fileFormat']
+
+            # Map D4D-specific properties
+            if 'd4d:collectionType' in dataset:
+                collection['collection_type'] = dataset['d4d:collectionType']
+
+            if 'd4d:fileCount' in dataset:
+                collection['file_count'] = dataset['d4d:fileCount']
+
+            # Only add non-empty collections
+            if collection:
+                file_collections.append(collection)
+
+        return file_collections
 
     def _map_basic_properties(self, dataset: Dict) -> Dict[str, Any]:
         """Map basic Schema.org properties to D4D."""
