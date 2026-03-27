@@ -206,7 +206,8 @@ class D4DToFairscapeConverter:
             'content_warnings': 'd4d:contentWarning',
             'informed_consent': 'd4d:informedConsent',
             'human_subject_research': 'd4d:humanSubject',
-            'vulnerable_populations': 'd4d:atRiskPopulations',
+            'at_risk_populations': 'd4d:atRiskPopulations',
+            'vulnerable_populations': 'd4d:atRiskPopulations',  # Backward compatibility
         }
 
         for d4d_field, d4d_prop in d4d_mapping.items():
