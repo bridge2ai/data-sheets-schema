@@ -126,6 +126,82 @@
             "title": "AnnotationAnalysis",
             "type": "object"
         },
+        "AtRiskPopulations": {
+            "additionalProperties": false,
+            "description": "Information about protections for at-risk populations in human subjects research.",
+            "properties": {
+                "assent_procedures": {
+                    "description": "For research involving minors, what assent procedures were used? How was developmentally appropriate assent obtained?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "at_risk_groups_included": {
+                    "description": "Are any at-risk populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "guardian_consent": {
+                    "description": "For participants unable to provide their own consent, how was guardian or surrogate consent obtained?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "special_protections": {
+                    "description": "What additional protections were implemented for at-risk populations? Include safeguards, modified procedures, or additional oversight.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "AtRiskPopulations",
+            "type": "object"
+        },
         "BiasTypeEnum": {
             "description": "Types of bias that may be present in datasets. Values are mapped to the Artificial Intelligence Ontology (AIO) bias taxonomy from BioPortal. See https://bioportal.bioontology.org/ontologies/AIO",
             "enum": [
@@ -909,12 +985,16 @@
                         "null"
                     ]
                 },
-                "bytes": {
-                    "description": "Size of the data in bytes.",
-                    "type": [
-                        "integer",
-                        "null"
-                    ]
+                "at_risk_populations": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/AtRiskPopulations"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Information about protections for at-risk populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
                 },
                 "citation": {
                     "description": "Recommended citation for this dataset in DataCite or BibTeX format. Provides a standard way to cite the dataset in publications.",
@@ -1037,12 +1117,6 @@
                         "null"
                     ]
                 },
-                "dialect": {
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "discouraged_uses": {
                     "items": {
                         "$ref": "#/$defs/DiscouragedUse"
@@ -1085,10 +1159,6 @@
                         "null"
                     ]
                 },
-                "encoding": {
-                    "$ref": "#/$defs/EncodingEnum",
-                    "description": "the character encoding of the data"
-                },
                 "errata": {
                     "items": {
                         "$ref": "#/$defs/Erratum"
@@ -1127,7 +1197,7 @@
                     ]
                 },
                 "external_resources": {
-                    "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
+                    "description": "External resources referenced at the dataset level (e.g., related publications, repositories, documentation). For file-level external resources, use FileCollection.external_resources.",
                     "items": {
                         "$ref": "#/$defs/ExternalResource"
                     },
@@ -1136,9 +1206,15 @@
                         "null"
                     ]
                 },
-                "format": {
-                    "$ref": "#/$defs/FormatEnum",
-                    "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
+                "file_collections": {
+                    "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart.",
+                    "items": {
+                        "$ref": "#/$defs/FileCollection"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 },
                 "funders": {
                     "items": {
@@ -1155,13 +1231,6 @@
                     },
                     "type": [
                         "array",
-                        "null"
-                    ]
-                },
-                "hash": {
-                    "description": "hash of the data",
-                    "type": [
-                        "string",
                         "null"
                     ]
                 },
@@ -1353,17 +1422,6 @@
                         "null"
                     ]
                 },
-                "md5": {
-                    "description": "md5 hash of the data",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "media_type": {
-                    "$ref": "#/$defs/MediaTypeEnum",
-                    "description": "The media type of the data. This should be a MIME type."
-                },
                 "missing_data_documentation": {
                     "description": "Documentation of missing data patterns and handling strategies.",
                     "items": {
@@ -1412,9 +1470,23 @@
                         "null"
                     ]
                 },
-                "path": {
+                "participant_compensation": {
+                    "description": "Information about compensation or incentives provided to human research participants.",
+                    "items": {
+                        "$ref": "#/$defs/HumanSubjectCompensation"
+                    },
                     "type": [
-                        "string",
+                        "array",
+                        "null"
+                    ]
+                },
+                "participant_privacy": {
+                    "description": "Information about privacy protections and anonymization procedures for human research participants.",
+                    "items": {
+                        "$ref": "#/$defs/ParticipantPrivacy"
+                    },
+                    "type": [
+                        "array",
                         "null"
                     ]
                 },
@@ -1492,7 +1564,7 @@
                     ]
                 },
                 "resources": {
-                    "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+                    "description": "Sub-resources or component datasets that are part of this dataset. Note: For file collections, use the file_collections attribute instead.",
                     "items": {
                         "$ref": "#/$defs/Dataset"
                     },
@@ -1526,13 +1598,6 @@
                     },
                     "type": [
                         "array",
-                        "null"
-                    ]
-                },
-                "sha256": {
-                    "description": "sha256 hash of the data",
-                    "type": [
-                        "string",
                         "null"
                     ]
                 },
@@ -1573,6 +1638,20 @@
                     "description": "the official title of the element",
                     "type": [
                         "string",
+                        "null"
+                    ]
+                },
+                "total_file_count": {
+                    "description": "Total number of files across all file collections in this dataset. Can be aggregated from file_collections[].file_count.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "total_size_bytes": {
+                    "description": "Total size of all files in bytes across all file collections. Can be aggregated from file_collections[].total_bytes.",
+                    "type": [
+                        "integer",
                         "null"
                     ]
                 },
@@ -1620,17 +1699,6 @@
                             "type": "null"
                         }
                     ]
-                },
-                "vulnerable_populations": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/$defs/VulnerablePopulations"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "description": "Information about protections for at-risk populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
                 },
                 "was_derived_from": {
                     "type": [
@@ -1715,12 +1783,16 @@
                         "null"
                     ]
                 },
-                "bytes": {
-                    "description": "Size of the data in bytes.",
-                    "type": [
-                        "integer",
-                        "null"
-                    ]
+                "at_risk_populations": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/AtRiskPopulations"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Information about protections for at-risk populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
                 },
                 "citation": {
                     "description": "Recommended citation for this dataset in DataCite or BibTeX format. Provides a standard way to cite the dataset in publications.",
@@ -1843,12 +1915,6 @@
                         "null"
                     ]
                 },
-                "dialect": {
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "discouraged_uses": {
                     "items": {
                         "$ref": "#/$defs/DiscouragedUse"
@@ -1891,10 +1957,6 @@
                         "null"
                     ]
                 },
-                "encoding": {
-                    "$ref": "#/$defs/EncodingEnum",
-                    "description": "the character encoding of the data"
-                },
                 "errata": {
                     "items": {
                         "$ref": "#/$defs/Erratum"
@@ -1933,7 +1995,7 @@
                     ]
                 },
                 "external_resources": {
-                    "description": "Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).",
+                    "description": "External resources referenced at the dataset level (e.g., related publications, repositories, documentation). For file-level external resources, use FileCollection.external_resources.",
                     "items": {
                         "$ref": "#/$defs/ExternalResource"
                     },
@@ -1942,9 +2004,15 @@
                         "null"
                     ]
                 },
-                "format": {
-                    "$ref": "#/$defs/FormatEnum",
-                    "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
+                "file_collections": {
+                    "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart.",
+                    "items": {
+                        "$ref": "#/$defs/FileCollection"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 },
                 "funders": {
                     "items": {
@@ -1961,13 +2029,6 @@
                     },
                     "type": [
                         "array",
-                        "null"
-                    ]
-                },
-                "hash": {
-                    "description": "hash of the data",
-                    "type": [
-                        "string",
                         "null"
                     ]
                 },
@@ -2145,17 +2206,6 @@
                         "null"
                     ]
                 },
-                "md5": {
-                    "description": "md5 hash of the data",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "media_type": {
-                    "$ref": "#/$defs/MediaTypeEnum",
-                    "description": "The media type of the data. This should be a MIME type."
-                },
                 "missing_data_documentation": {
                     "description": "Documentation of missing data patterns and handling strategies.",
                     "items": {
@@ -2204,9 +2254,23 @@
                         "null"
                     ]
                 },
-                "path": {
+                "participant_compensation": {
+                    "description": "Information about compensation or incentives provided to human research participants.",
+                    "items": {
+                        "$ref": "#/$defs/HumanSubjectCompensation"
+                    },
                     "type": [
-                        "string",
+                        "array",
+                        "null"
+                    ]
+                },
+                "participant_privacy": {
+                    "description": "Information about privacy protections and anonymization procedures for human research participants.",
+                    "items": {
+                        "$ref": "#/$defs/ParticipantPrivacy"
+                    },
+                    "type": [
+                        "array",
                         "null"
                     ]
                 },
@@ -2284,7 +2348,7 @@
                     ]
                 },
                 "resources": {
-                    "description": "Sub-resources or component datasets that are part of this dataset. Allows datasets to contain nested resource structures.",
+                    "description": "Sub-resources or component datasets that are part of this dataset. Note: For file collections, use the file_collections attribute instead.",
                     "items": {
                         "$ref": "#/$defs/Dataset"
                     },
@@ -2318,13 +2382,6 @@
                     },
                     "type": [
                         "array",
-                        "null"
-                    ]
-                },
-                "sha256": {
-                    "description": "sha256 hash of the data",
-                    "type": [
-                        "string",
                         "null"
                     ]
                 },
@@ -2365,6 +2422,20 @@
                     "description": "the official title of the element",
                     "type": [
                         "string",
+                        "null"
+                    ]
+                },
+                "total_file_count": {
+                    "description": "Total number of files across all file collections in this dataset. Can be aggregated from file_collections[].file_count.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "total_size_bytes": {
+                    "description": "Total size of all files in bytes across all file collections. Can be aggregated from file_collections[].total_bytes.",
+                    "type": [
+                        "integer",
                         "null"
                     ]
                 },
@@ -2412,17 +2483,6 @@
                             "type": "null"
                         }
                     ]
-                },
-                "vulnerable_populations": {
-                    "anyOf": [
-                        {
-                            "$ref": "#/$defs/VulnerablePopulations"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "description": "Information about protections for at-risk populations (e.g., minors, pregnant women, prisoners) including special safeguards and assent procedures."
                 },
                 "was_derived_from": {
                     "type": [
@@ -2631,9 +2691,9 @@
                     ]
                 },
                 "resources": {
-                    "description": "Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.",
+                    "description": "Sub-resources or component items. In DatasetCollection, contains Dataset objects. In Dataset, contains nested Dataset objects. In FileCollection, contains nested FileCollection objects. The specific range is defined via slot_usage in each class.",
                     "items": {
-                        "$ref": "#/$defs/Dataset"
+                        "type": "string"
                     },
                     "type": [
                         "array",
@@ -3541,6 +3601,272 @@
             "title": "ExternalResource",
             "type": "object"
         },
+        "FileCollection": {
+            "additionalProperties": false,
+            "description": "A collection of files with shared characteristics (format, purpose, structure). Represents a logical grouping of related files within a dataset, such as all training data files, all image files, or all raw data files. Maps to RO-Crate Dataset entities via schema:hasPart relationships.",
+            "properties": {
+                "bytes": {
+                    "description": "Size of the data in bytes.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "collection_type": {
+                    "$ref": "#/$defs/FileCollectionTypeEnum",
+                    "description": "Type of file collection (e.g., raw_data, processed_data, training_split, test_split, documentation, metadata)."
+                },
+                "compression": {
+                    "$ref": "#/$defs/CompressionEnum",
+                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+                },
+                "conforms_to": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "conforms_to_class": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "conforms_to_schema": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "created_by": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "created_on": {
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "dialect": {
+                    "description": "Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "doi": {
+                    "description": "digital object identifier",
+                    "pattern": "10\\.\\d{4,}\\/.+",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "download_url": {
+                    "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "encoding": {
+                    "$ref": "#/$defs/EncodingEnum",
+                    "description": "the character encoding of the data"
+                },
+                "external_resources": {
+                    "description": "External files or URLs referenced by this file collection.",
+                    "items": {
+                        "$ref": "#/$defs/ExternalResource"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "file_count": {
+                    "description": "Number of files in this collection.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "format": {
+                    "$ref": "#/$defs/FormatEnum",
+                    "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
+                },
+                "hash": {
+                    "description": "hash of the data",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "A unique identifier for a thing.",
+                    "type": "string"
+                },
+                "issued": {
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "keywords": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "language": {
+                    "description": "language in which the information is expressed",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "last_updated_on": {
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "license": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "md5": {
+                    "description": "md5 hash of the data",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "media_type": {
+                    "$ref": "#/$defs/MediaTypeEnum",
+                    "description": "The media type of the data. This should be a MIME type."
+                },
+                "modified_by": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "page": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "path": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "publisher": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "resources": {
+                    "description": "Individual files or nested file collections within this collection. Allows hierarchical file organization.",
+                    "items": {
+                        "$ref": "#/$defs/FileCollection"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "sha256": {
+                    "description": "sha256 hash of the data",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "status": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "title": {
+                    "description": "the official title of the element",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "total_bytes": {
+                    "description": "Total size of all files in bytes.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "version": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "was_derived_from": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "FileCollection",
+            "type": "object"
+        },
+        "FileCollectionTypeEnum": {
+            "description": "Types of file collections within datasets.",
+            "enum": [
+                "raw_data",
+                "processed_data",
+                "training_split",
+                "test_split",
+                "validation_split",
+                "documentation",
+                "metadata",
+                "code",
+                "supplementary",
+                "other"
+            ],
+            "title": "FileCollectionTypeEnum",
+            "type": "string"
+        },
         "FormatDialect": {
             "additionalProperties": false,
             "description": "Additional format information for a file",
@@ -3772,6 +4098,82 @@
                 "id"
             ],
             "title": "Grantor",
+            "type": "object"
+        },
+        "HumanSubjectCompensation": {
+            "additionalProperties": false,
+            "description": "Information about compensation or incentives provided to human research participants.",
+            "properties": {
+                "compensation_amount": {
+                    "description": "What was the amount or value of compensation provided? Include currency or equivalent value.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "compensation_provided": {
+                    "description": "Were participants compensated for their participation?",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "compensation_rationale": {
+                    "description": "What was the rationale for the compensation structure? How was the amount determined to be appropriate?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "compensation_type": {
+                    "description": "What type of compensation was provided (e.g., monetary payment, gift cards, course credit, other incentives)?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "HumanSubjectCompensation",
             "type": "object"
         },
         "HumanSubjectResearch": {
@@ -5026,6 +5428,85 @@
             "title": "OtherTask",
             "type": "object"
         },
+        "ParticipantPrivacy": {
+            "additionalProperties": false,
+            "description": "Information about privacy protections and anonymization procedures for human research participants.",
+            "properties": {
+                "anonymization_method": {
+                    "description": "What methods were used to anonymize or de-identify participant data? Include technical details of privacy-preserving techniques.\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "data_linkage": {
+                    "description": "Can this dataset be linked to other datasets in ways that might compromise participant privacy?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "An optional identifier for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for this property.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "privacy_techniques": {
+                    "description": "What privacy-preserving techniques were applied (e.g., differential privacy, k-anonymity, data masking)?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "reidentification_risk": {
+                    "description": "What is the assessed risk of re-identification? What measures were taken to minimize this risk?\n",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "used_software": {
+                    "description": "What software was used as part of this dataset property?",
+                    "items": {
+                        "$ref": "#/$defs/Software"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "title": "ParticipantPrivacy",
+            "type": "object"
+        },
         "Person": {
             "additionalProperties": false,
             "description": "An individual human being. This class represents a person in the context of a specific dataset. Attributes like affiliation and email represent the person's current or most relevant contact information for this dataset. For stable cross-dataset identification, use the ORCID field. Note that contributor roles (CRediT) are specified in the usage context (e.g., Creator class) rather than on the Person directly, since roles vary by dataset.",
@@ -6237,82 +6718,6 @@
             ],
             "title": "VersionTypeEnum",
             "type": "string"
-        },
-        "VulnerablePopulations": {
-            "additionalProperties": false,
-            "description": "Information about protections for at-risk populations in human subjects research.",
-            "properties": {
-                "assent_procedures": {
-                    "description": "For research involving minors, what assent procedures were used? How was developmentally appropriate assent obtained?\n",
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": [
-                        "array",
-                        "null"
-                    ]
-                },
-                "description": {
-                    "description": "A human-readable description for this property.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "guardian_consent": {
-                    "description": "For participants unable to provide their own consent, how was guardian or surrogate consent obtained?\n",
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": [
-                        "array",
-                        "null"
-                    ]
-                },
-                "id": {
-                    "description": "An optional identifier for this property.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "name": {
-                    "description": "A human-readable name for this property.",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "special_protections": {
-                    "description": "What additional protections were implemented for at-risk populations? Include safeguards, modified procedures, or additional oversight.\n",
-                    "items": {
-                        "type": "string"
-                    },
-                    "type": [
-                        "array",
-                        "null"
-                    ]
-                },
-                "used_software": {
-                    "description": "What software was used as part of this dataset property?",
-                    "items": {
-                        "$ref": "#/$defs/Software"
-                    },
-                    "type": [
-                        "array",
-                        "null"
-                    ]
-                },
-                "vulnerable_groups_included": {
-                    "description": "Are any at-risk populations included (e.g., children, pregnant women, prisoners, cognitively impaired individuals)?\n",
-                    "type": [
-                        "boolean",
-                        "null"
-                    ]
-                }
-            },
-            "title": "VulnerablePopulations",
-            "type": "object"
         }
     },
     "$id": "https://w3id.org/bridge2ai/data-sheets-schema",
@@ -6444,9 +6849,9 @@
             ]
         },
         "resources": {
-            "description": "Sub-resources or component datasets. Used in DatasetCollection to contain Dataset objects, and in Dataset to allow nested resource structures.",
+            "description": "Sub-resources or component items. In DatasetCollection, contains Dataset objects. In Dataset, contains nested Dataset objects. In FileCollection, contains nested FileCollection objects. The specific range is defined via slot_usage in each class.",
             "items": {
-                "$ref": "#/$defs/Dataset"
+                "type": "string"
             },
             "type": [
                 "array",

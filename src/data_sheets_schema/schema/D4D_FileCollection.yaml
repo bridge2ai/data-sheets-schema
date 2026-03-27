@@ -1,0 +1,119 @@
+---
+id: "https://w3id.org/bridge2ai/data-sheets-schema/file-collection"
+name: "data-sheets-schema-file-collection"
+title: "Datasheets for Datasets – File Collection Module"
+description: >
+  Module defining FileCollection class for representing collections of
+  files with shared characteristics within datasets.
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+prefixes:
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
+  dcat: http://www.w3.org/ns/dcat#
+  schema: http://schema.org/
+  dcterms: http://purl.org/dc/terms/
+
+default_prefix: data_sheets_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - D4D_Base_import
+
+classes:
+
+  FileCollection:
+    aliases:
+      - file collection
+      - data files
+      - file group
+    description: >-
+      A collection of files with shared characteristics (format, purpose, structure).
+      Represents a logical grouping of related files within a dataset, such as
+      all training data files, all image files, or all raw data files.
+      Maps to RO-Crate Dataset entities via schema:hasPart relationships.
+    is_a: Information
+    class_uri: dcat:Dataset
+    exact_mappings:
+      - schema:Dataset
+    close_mappings:
+      - dcat:Distribution
+    slots:
+      - bytes
+      - path
+      - format
+      - encoding
+      - compression
+      - media_type
+      - hash
+      - md5
+      - sha256
+      - dialect
+      - external_resources
+      - resources
+    slot_usage:
+      external_resources:
+        description: >-
+          External files or URLs referenced by this file collection.
+        range: ExternalResource
+        multivalued: true
+        inlined_as_list: true
+      resources:
+        description: >-
+          Individual files or nested file collections within this collection.
+          Allows hierarchical file organization.
+        range: FileCollection
+        multivalued: true
+        inlined_as_list: true
+    attributes:
+      collection_type:
+        description: >-
+          Type of file collection (e.g., raw_data, processed_data,
+          training_split, test_split, documentation, metadata).
+        range: FileCollectionTypeEnum
+        slot_uri: d4d:collectionType
+      file_count:
+        description: Number of files in this collection.
+        range: integer
+        slot_uri: d4d:fileCount
+      total_bytes:
+        description: Total size of all files in bytes.
+        range: integer
+        slot_uri: dcat:byteSize
+
+enums:
+  FileCollectionTypeEnum:
+    description: Types of file collections within datasets.
+    permissible_values:
+      raw_data:
+        description: Raw, unprocessed data files
+        meaning: d4d:RawData
+      processed_data:
+        description: Cleaned, processed, or transformed data files
+        meaning: d4d:ProcessedData
+      training_split:
+        description: Files designated for model training
+        meaning: d4d:TrainingSplit
+      test_split:
+        description: Files designated for model testing
+        meaning: d4d:TestSplit
+      validation_split:
+        description: Files designated for model validation
+        meaning: d4d:ValidationSplit
+      documentation:
+        description: Documentation files (README, codebook, etc.)
+        meaning: schema:Documentation
+      metadata:
+        description: Metadata or annotation files
+        meaning: dcat:CatalogRecord
+      code:
+        description: Code or script files
+        meaning: schema:SoftwareSourceCode
+      supplementary:
+        description: Supplementary materials
+        meaning: schema:SupplementalMaterial
+      other:
+        description: Other file collection type
+        meaning: d4d:OtherFileCollection

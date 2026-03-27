@@ -47,6 +47,7 @@ imports:
   - D4D_Human
   - D4D_Data_Governance
   - D4D_Variables
+  - D4D_FileCollection
 
 ## TYPES ##
 
@@ -94,27 +95,50 @@ classes:
       read, manipulated, transformed, and otherwise interpreted.
     is_a: Information
     slots:
-      - bytes
-      - dialect
-      - encoding
-      - format
-      - hash
-      - md5
-      - media_type
-      - path
-      - sha256
       - external_resources
       - resources
     slot_usage:
       external_resources:
+        description: >-
+          External resources referenced at the dataset level (e.g., related publications,
+          repositories, documentation). For file-level external resources, use
+          FileCollection.external_resources.
         range: ExternalResource
+        multivalued: true
         inlined_as_list: true
       resources:
         description: >-
           Sub-resources or component datasets that are part of this dataset.
-          Allows datasets to contain nested resource structures.
+          Note: For file collections, use the file_collections attribute instead.
+        range: Dataset
+        multivalued: true
         inlined_as_list: true
     attributes:
+      # FileCollection module
+      file_collections:
+        description: >-
+          Collections of files within this dataset. Each collection represents
+          a logical grouping of files with shared characteristics (e.g., all
+          training data, all image files, all raw data files). Maps to nested
+          RO-Crate Dataset entities via schema:hasPart.
+        slot_uri: schema:hasPart
+        range: FileCollection
+        multivalued: true
+        inlined_as_list: true
+        exact_mappings:
+          - dcat:distribution
+      total_file_count:
+        description: >-
+          Total number of files across all file collections in this dataset.
+          Can be aggregated from file_collections[].file_count.
+        range: integer
+        slot_uri: d4d:totalFileCount
+      total_size_bytes:
+        description: >-
+          Total size of all files in bytes across all file collections.
+          Can be aggregated from file_collections[].total_bytes.
+        range: integer
+        slot_uri: dcat:byteSize
       # Motivation module classes
       purposes:
         slot_uri: d4d:purposes
