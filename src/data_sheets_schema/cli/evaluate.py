@@ -54,9 +54,9 @@ def presence(project, method, output_dir):
 @evaluate.command()
 @click.option('--file', type=click.Path(exists=True), required=True,
               help='D4D YAML file to evaluate')
-@click.option('--project', type=str, required=True,
+@click.option('--project', type=click.Choice(PROJECTS), required=True,
               help='Project name')
-@click.option('--method', type=str, required=True,
+@click.option('--method', type=click.Choice(METHODS), required=True,
               help='Generation method')
 @click.option('--rubric', type=click.Choice(RUBRIC_TYPES + ['both']),
               default='both',

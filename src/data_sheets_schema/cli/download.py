@@ -21,10 +21,12 @@ def download():
               help='Output directory for downloads')
 def sources(project, output_dir):
     """Download source documents from Google Sheet."""
+    require_repo_context("d4d download sources")
+
     click.echo(f"📥 Downloading sources for {project}...")
 
     # Import and call the download script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+    setup_repo_imports()
     from src.download.organized_dataset_extractor import main as download_main
 
     # Set up args for the download script
@@ -89,13 +91,15 @@ def preprocess(project, input_dir, output_dir):
               help='Output file path (default: data/preprocessed/concatenated/{PROJECT}_preprocessed.txt)')
 def concatenate(project, input_dir, output_file):
     """Concatenate preprocessed files by project."""
+    require_repo_context("d4d download concatenate")
+
     if not output_file:
         output_file = f"data/preprocessed/concatenated/{project}_preprocessed.txt"
 
     click.echo(f"📑 Concatenating {project} files...")
 
     # Import and call the concatenate script
-    sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+    setup_repo_imports()
     from src.download.concatenate_documents import main as concat_main
 
     input_path = Path(input_dir) / project
