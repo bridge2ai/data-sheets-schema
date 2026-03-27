@@ -6,13 +6,20 @@ Converts D4D YAML/dict to FAIRSCAPE RO-Crate using Pydantic models.
 
 import sys
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, TYPE_CHECKING
 from datetime import datetime
 
 # Add fairscape_models to path
 fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
 if fairscape_path.exists() and str(fairscape_path) not in sys.path:
     sys.path.insert(0, str(fairscape_path))
+
+if TYPE_CHECKING:
+    from fairscape_models.rocrate import (
+        ROCrateV1_2,
+        ROCrateMetadataFileElem,
+        ROCrateMetadataElem
+    )
 
 try:
     from fairscape_models.rocrate import (
@@ -27,6 +34,10 @@ try:
 except ImportError as e:
     print(f"Error: Cannot import FAIRSCAPE models: {e}")
     FAIRSCAPE_AVAILABLE = False
+    # Provide stub types when not available
+    ROCrateV1_2 = Any  # type: ignore
+    ROCrateMetadataFileElem = Any  # type: ignore
+    ROCrateMetadataElem = Any  # type: ignore
 
 
 class D4DToFairscapeConverter:
