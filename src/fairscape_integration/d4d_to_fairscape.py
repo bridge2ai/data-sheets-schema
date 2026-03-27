@@ -234,9 +234,15 @@ class D4DToFairscapeConverter:
             # Build nested Dataset parameters
             collection_params = {
                 "@id": collection_id,
-                "@type": "Dataset",
+                "@type": ["Dataset"],  # Must be a list
                 "name": fc.get("name") or fc.get("title") or f"File Collection {idx + 1}",
                 "description": fc.get("description") or "File collection",
+                # Required fields for ROCrateMetadataElem
+                "keywords": fc.get("keywords", []),
+                "version": fc.get("version", "1.0"),
+                "author": fc.get("author", "Unknown"),
+                "license": fc.get("license", "Unspecified"),
+                "hasPart": []
             }
 
             # Map FileCollection properties to RO-Crate Dataset properties
