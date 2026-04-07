@@ -1419,6 +1419,59 @@
       ]
     },
     {
+      "name": "FileTypeEnum",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection/FileTypeEnum",
+      "description": "Types of individual files within datasets.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
+      "permissible_values": [
+        {
+          "text": "data_file",
+          "description": "A data file containing dataset content",
+          "meaning": "schema:DataDownload"
+        },
+        {
+          "text": "code_file",
+          "description": "A source code or script file",
+          "meaning": "schema:SoftwareSourceCode"
+        },
+        {
+          "text": "documentation_file",
+          "description": "A documentation file (README, guide, etc.)",
+          "meaning": "schema:Documentation"
+        },
+        {
+          "text": "metadata_file",
+          "description": "A metadata or annotation file",
+          "meaning": "dcat:CatalogRecord"
+        },
+        {
+          "text": "configuration_file",
+          "description": "A configuration or settings file",
+          "meaning": "d4d:ConfigurationFile"
+        },
+        {
+          "text": "notebook_file",
+          "description": "A computational notebook file (Jupyter, R Markdown, etc.)",
+          "meaning": "d4d:NotebookFile"
+        },
+        {
+          "text": "image_file",
+          "description": "An image or visualization file",
+          "meaning": "schema:ImageObject"
+        },
+        {
+          "text": "archive_file",
+          "description": "An archive or compressed file",
+          "meaning": "d4d:ArchiveFile"
+        },
+        {
+          "text": "other",
+          "description": "Other file type",
+          "meaning": "d4d:OtherFile"
+        }
+      ]
+    },
+    {
       "name": "FileCollectionTypeEnum",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection/FileCollectionTypeEnum",
       "description": "Types of file collections within datasets.",
@@ -1600,6 +1653,7 @@
       "slot_uri": "http://schema.org/encodingFormat",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "string",
@@ -1616,6 +1670,7 @@
       "slot_uri": "http://www.w3.org/ns/dcat#byteSize",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "integer",
@@ -1631,6 +1686,7 @@
       "slot_uri": "http://schema.org/contentUrl",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "string",
@@ -1666,6 +1722,7 @@
       "slot_uri": "http://purl.org/dc/terms/format",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "FormatEnum",
@@ -1682,6 +1739,7 @@
       "slot_uri": "http://www.w3.org/ns/dcat#mediaType",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "EncodingEnum",
@@ -1699,6 +1757,7 @@
       "owner": "FileCollection",
       "domain_of": [
         "Information",
+        "File",
         "FileCollection"
       ],
       "range": "CompressionEnum",
@@ -1718,6 +1777,7 @@
       "slot_uri": "http://www.w3.org/ns/dcat#mediaType",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "MediaTypeEnum",
@@ -1734,6 +1794,7 @@
       "slot_uri": "http://purl.org/dc/terms/identifier",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "string",
@@ -1750,6 +1811,7 @@
       "slot_uri": "http://purl.org/dc/terms/identifier",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "string",
@@ -1766,6 +1828,7 @@
       "slot_uri": "http://purl.org/dc/terms/identifier",
       "owner": "FileCollection",
       "domain_of": [
+        "File",
         "FileCollection"
       ],
       "range": "string",
@@ -6392,6 +6455,22 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "file__file_type",
+      "description": "Semantic type or purpose of this file (e.g., data_file, code_file, documentation_file, metadata_file).",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
+      "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/fileType"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/fileType",
+      "alias": "file_type",
+      "owner": "File",
+      "domain_of": [
+        "File"
+      ],
+      "range": "FileTypeEnum",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "fileCollection__collection_type",
       "description": "Type of file collection (e.g., raw_data, processed_data, training_split, test_split, documentation, metadata).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
@@ -6560,7 +6639,7 @@
     {
       "name": "FileCollection_resources",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/resources",
-      "description": "Individual files or nested file collections within this collection. Allows hierarchical file organization.",
+      "description": "Individual files or nested file collections within this collection. Allows hierarchical file organization with both File objects and nested FileCollection objects.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://schema.org/hasPart"
@@ -6575,10 +6654,20 @@
       ],
       "is_usage_slot": true,
       "usage_slot_name": "resources",
-      "range": "FileCollection",
+      "range": "Dataset",
       "multivalued": true,
       "inlined": true,
       "inlined_as_list": true,
+      "any_of": [
+        {
+          "range": "File",
+          "@type": "AnonymousSlotExpression"
+        },
+        {
+          "range": "FileCollection",
+          "@type": "AnonymousSlotExpression"
+        }
+      ],
       "@type": "SlotDefinition"
     }
   ],
@@ -10443,6 +10532,71 @@
       "@type": "ClassDefinition"
     },
     {
+      "name": "File",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection/File",
+      "description": "A single file within a dataset or file collection. Represents an individual data file, code file, documentation file, etc. Maps to RO-Crate File entities.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
+      "aliases": [
+        "data file",
+        "file",
+        "file object"
+      ],
+      "mappings": [
+        "schema:MediaObject"
+      ],
+      "exact_mappings": [
+        "schema:DigitalDocument"
+      ],
+      "is_a": "Information",
+      "slots": [
+        "namedThing__id",
+        "namedThing__name",
+        "namedThing__description",
+        "conforms_to",
+        "conforms_to_class",
+        "conforms_to_schema",
+        "created_by",
+        "created_on",
+        "doi",
+        "download_url",
+        "issued",
+        "keywords",
+        "language",
+        "last_updated_on",
+        "license",
+        "modified_by",
+        "page",
+        "publisher",
+        "status",
+        "title",
+        "version",
+        "was_derived_from",
+        "bytes",
+        "path",
+        "format",
+        "encoding",
+        "compression",
+        "media_type",
+        "hash",
+        "md5",
+        "sha256",
+        "dialect",
+        "file__file_type"
+      ],
+      "slot_usage": {},
+      "attributes": [
+        {
+          "name": "file_type",
+          "description": "Semantic type or purpose of this file (e.g., data_file, code_file, documentation_file, metadata_file).",
+          "slot_uri": "d4d:fileType",
+          "range": "FileTypeEnum",
+          "@type": "SlotDefinition"
+        }
+      ],
+      "class_uri": "http://schema.org/MediaObject",
+      "@type": "ClassDefinition"
+    },
+    {
       "name": "FileCollection",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection/FileCollection",
       "description": "A collection of files with shared characteristics (format, purpose, structure). Represents a logical grouping of related files within a dataset, such as all training data files, all image files, or all raw data files. Maps to RO-Crate Dataset entities via schema:hasPart relationships.",
@@ -10533,7 +10687,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-03-26T22:44:02",
   "source_file_size": 18530,
-  "generation_date": "2026-03-27T00:15:11",
+  "generation_date": "2026-04-06T19:09:15",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

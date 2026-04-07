@@ -3601,6 +3601,221 @@
             "title": "ExternalResource",
             "type": "object"
         },
+        "File": {
+            "additionalProperties": false,
+            "description": "A single file within a dataset or file collection. Represents an individual data file, code file, documentation file, etc. Maps to RO-Crate File entities.",
+            "properties": {
+                "bytes": {
+                    "description": "Size of the data in bytes.",
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "compression": {
+                    "$ref": "#/$defs/CompressionEnum",
+                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+                },
+                "conforms_to": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "conforms_to_class": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "conforms_to_schema": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "created_by": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "created_on": {
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "description": {
+                    "description": "A human-readable description for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "dialect": {
+                    "description": "Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "doi": {
+                    "description": "digital object identifier",
+                    "pattern": "10\\.\\d{4,}\\/.+",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "download_url": {
+                    "description": "URL from which the data can be downloaded. This is not the same as the landing page, which is a page that describes the dataset. Rather, this URL points directly to the data itself.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "encoding": {
+                    "$ref": "#/$defs/EncodingEnum",
+                    "description": "the character encoding of the data"
+                },
+                "file_type": {
+                    "$ref": "#/$defs/FileTypeEnum",
+                    "description": "Semantic type or purpose of this file (e.g., data_file, code_file, documentation_file, metadata_file)."
+                },
+                "format": {
+                    "$ref": "#/$defs/FormatEnum",
+                    "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
+                },
+                "hash": {
+                    "description": "hash of the data",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "description": "A unique identifier for a thing.",
+                    "type": "string"
+                },
+                "issued": {
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "keywords": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "language": {
+                    "description": "language in which the information is expressed",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "last_updated_on": {
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "license": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "md5": {
+                    "description": "md5 hash of the data",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "media_type": {
+                    "$ref": "#/$defs/MediaTypeEnum",
+                    "description": "The media type of the data. This should be a MIME type."
+                },
+                "modified_by": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "name": {
+                    "description": "A human-readable name for a thing.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "page": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "path": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "publisher": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "sha256": {
+                    "description": "sha256 hash of the data",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "status": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "title": {
+                    "description": "the official title of the element",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "version": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "was_derived_from": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "File",
+            "type": "object"
+        },
         "FileCollection": {
             "additionalProperties": false,
             "description": "A collection of files with shared characteristics (format, purpose, structure). Represents a logical grouping of related files within a dataset, such as all training data files, all image files, or all raw data files. Maps to RO-Crate Dataset entities via schema:hasPart relationships.",
@@ -3795,9 +4010,17 @@
                     ]
                 },
                 "resources": {
-                    "description": "Individual files or nested file collections within this collection. Allows hierarchical file organization.",
+                    "description": "Individual files or nested file collections within this collection. Allows hierarchical file organization with both File objects and nested FileCollection objects.",
                     "items": {
-                        "$ref": "#/$defs/FileCollection"
+                        "$ref": "#/$defs/Dataset",
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
                     },
                     "type": [
                         "array",
@@ -3865,6 +4088,22 @@
                 "other"
             ],
             "title": "FileCollectionTypeEnum",
+            "type": "string"
+        },
+        "FileTypeEnum": {
+            "description": "Types of individual files within datasets.",
+            "enum": [
+                "data_file",
+                "code_file",
+                "documentation_file",
+                "metadata_file",
+                "configuration_file",
+                "notebook_file",
+                "image_file",
+                "archive_file",
+                "other"
+            ],
+            "title": "FileTypeEnum",
             "type": "string"
         },
         "FormatDialect": {

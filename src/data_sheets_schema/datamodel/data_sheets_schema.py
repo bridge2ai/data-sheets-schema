@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-03-27T00:15:12
+# Generation date: 2026-04-06T19:09:16
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -135,6 +135,10 @@ class GrantorId(OrganizationId):
 
 
 class GrantId(NamedThingId):
+    pass
+
+
+class FileId(InformationId):
     pass
 
 
@@ -2821,6 +2825,74 @@ class VariableMetadata(DatasetProperty):
 
 
 @dataclass(repr=False)
+class File(Information):
+    """
+    A single file within a dataset or file collection. Represents an individual data file, code file, documentation
+    file, etc. Maps to RO-Crate File entities.
+    """
+    _inherited_slots: ClassVar[list[str]] = []
+
+    class_class_uri: ClassVar[URIRef] = SCHEMA["MediaObject"]
+    class_class_curie: ClassVar[str] = "schema:MediaObject"
+    class_name: ClassVar[str] = "File"
+    class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.File
+
+    id: Union[str, FileId] = None
+    bytes: Optional[int] = None
+    path: Optional[str] = None
+    format: Optional[Union[str, "FormatEnum"]] = None
+    encoding: Optional[Union[str, "EncodingEnum"]] = None
+    compression: Optional[Union[str, "CompressionEnum"]] = None
+    media_type: Optional[Union[str, "MediaTypeEnum"]] = None
+    hash: Optional[str] = None
+    md5: Optional[str] = None
+    sha256: Optional[str] = None
+    dialect: Optional[str] = None
+    file_type: Optional[Union[str, "FileTypeEnum"]] = None
+
+    def __post_init__(self, *_: str, **kwargs: Any):
+        if self._is_empty(self.id):
+            self.MissingRequiredField("id")
+        if not isinstance(self.id, FileId):
+            self.id = FileId(self.id)
+
+        if self.bytes is not None and not isinstance(self.bytes, int):
+            self.bytes = int(self.bytes)
+
+        if self.path is not None and not isinstance(self.path, str):
+            self.path = str(self.path)
+
+        if self.format is not None and not isinstance(self.format, FormatEnum):
+            self.format = FormatEnum(self.format)
+
+        if self.encoding is not None and not isinstance(self.encoding, EncodingEnum):
+            self.encoding = EncodingEnum(self.encoding)
+
+        if self.compression is not None and not isinstance(self.compression, CompressionEnum):
+            self.compression = CompressionEnum(self.compression)
+
+        if self.media_type is not None and not isinstance(self.media_type, MediaTypeEnum):
+            self.media_type = MediaTypeEnum(self.media_type)
+
+        if self.hash is not None and not isinstance(self.hash, str):
+            self.hash = str(self.hash)
+
+        if self.md5 is not None and not isinstance(self.md5, str):
+            self.md5 = str(self.md5)
+
+        if self.sha256 is not None and not isinstance(self.sha256, str):
+            self.sha256 = str(self.sha256)
+
+        if self.dialect is not None and not isinstance(self.dialect, str):
+            self.dialect = str(self.dialect)
+
+        if self.file_type is not None and not isinstance(self.file_type, FileTypeEnum):
+            self.file_type = FileTypeEnum(self.file_type)
+
+        super().__post_init__(**kwargs)
+
+
+@dataclass(repr=False)
 class FileCollection(Information):
     """
     A collection of files with shared characteristics (format, purpose, structure). Represents a logical grouping of
@@ -2846,7 +2918,7 @@ class FileCollection(Information):
     sha256: Optional[str] = None
     dialect: Optional[str] = None
     external_resources: Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]] = empty_list()
-    resources: Optional[Union[dict[Union[str, FileCollectionId], Union[dict, "FileCollection"]], list[Union[dict, "FileCollection"]]]] = empty_dict()
+    resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]] = empty_dict()
     collection_type: Optional[Union[str, "FileCollectionTypeEnum"]] = None
     file_count: Optional[int] = None
     total_bytes: Optional[int] = None
@@ -2891,7 +2963,7 @@ class FileCollection(Information):
             self.external_resources = [self.external_resources] if self.external_resources is not None else []
         self.external_resources = [v if isinstance(v, ExternalResource) else ExternalResource(**as_dict(v)) for v in self.external_resources]
 
-        self._normalize_inlined_as_list(slot_name="resources", slot_type=FileCollection, key_name="id", keyed=True)
+        self._normalize_inlined_as_list(slot_name="resources", slot_type=Dataset, key_name="id", keyed=True)
 
         if self.collection_type is not None and not isinstance(self.collection_type, FileCollectionTypeEnum):
             self.collection_type = FileCollectionTypeEnum(self.collection_type)
@@ -3545,6 +3617,52 @@ class VariableTypeEnum(EnumDefinitionImpl):
     _defn = EnumDefinition(
         name="VariableTypeEnum",
         description="""Common data types for variables. Values are mapped to schema.org DataType vocabulary. See https://schema.org/DataType""",
+    )
+
+class FileTypeEnum(EnumDefinitionImpl):
+    """
+    Types of individual files within datasets.
+    """
+    data_file = PermissibleValue(
+        text="data_file",
+        description="A data file containing dataset content",
+        meaning=SCHEMA["DataDownload"])
+    code_file = PermissibleValue(
+        text="code_file",
+        description="A source code or script file",
+        meaning=SCHEMA["SoftwareSourceCode"])
+    documentation_file = PermissibleValue(
+        text="documentation_file",
+        description="A documentation file (README, guide, etc.)",
+        meaning=SCHEMA["Documentation"])
+    metadata_file = PermissibleValue(
+        text="metadata_file",
+        description="A metadata or annotation file",
+        meaning=DCAT["CatalogRecord"])
+    configuration_file = PermissibleValue(
+        text="configuration_file",
+        description="A configuration or settings file",
+        meaning=D4D["ConfigurationFile"])
+    notebook_file = PermissibleValue(
+        text="notebook_file",
+        description="A computational notebook file (Jupyter, R Markdown, etc.)",
+        meaning=D4D["NotebookFile"])
+    image_file = PermissibleValue(
+        text="image_file",
+        description="An image or visualization file",
+        meaning=SCHEMA["ImageObject"])
+    archive_file = PermissibleValue(
+        text="archive_file",
+        description="An archive or compressed file",
+        meaning=D4D["ArchiveFile"])
+    other = PermissibleValue(
+        text="other",
+        description="Other file type",
+        meaning=D4D["OtherFile"])
+
+    _defn = EnumDefinition(
+        name="FileTypeEnum",
+        description="Types of individual files within datasets.",
     )
 
 class FileCollectionTypeEnum(EnumDefinitionImpl):
@@ -4476,6 +4594,9 @@ slots.variableMetadata__derivation = Slot(uri=DCTERMS.provenance, name="variable
 slots.variableMetadata__quality_notes = Slot(uri=DCTERMS.description, name="variableMetadata__quality_notes", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__quality_notes, domain=None, range=Optional[Union[str, list[str]]])
 
+slots.file__file_type = Slot(uri=D4D.fileType, name="file__file_type", curie=D4D.curie('fileType'),
+                   model_uri=DATA_SHEETS_SCHEMA.file__file_type, domain=None, range=Optional[Union[str, "FileTypeEnum"]])
+
 slots.fileCollection__collection_type = Slot(uri=D4D.collectionType, name="fileCollection__collection_type", curie=D4D.curie('collectionType'),
                    model_uri=DATA_SHEETS_SCHEMA.fileCollection__collection_type, domain=None, range=Optional[Union[str, "FileCollectionTypeEnum"]])
 
@@ -4501,4 +4622,4 @@ slots.FileCollection_external_resources = Slot(uri=DCTERMS.references, name="Fil
                    model_uri=DATA_SHEETS_SCHEMA.FileCollection_external_resources, domain=FileCollection, range=Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]])
 
 slots.FileCollection_resources = Slot(uri=SCHEMA.hasPart, name="FileCollection_resources", curie=SCHEMA.curie('hasPart'),
-                   model_uri=DATA_SHEETS_SCHEMA.FileCollection_resources, domain=FileCollection, range=Optional[Union[dict[Union[str, FileCollectionId], Union[dict, "FileCollection"]], list[Union[dict, "FileCollection"]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.FileCollection_resources, domain=FileCollection, range=Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]])
