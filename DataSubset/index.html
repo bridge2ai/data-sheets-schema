@@ -278,8 +278,6 @@
 
 
 
-      DataSubset : bytes
-
       DataSubset : citation
 
       DataSubset : cleaning_strategies
@@ -393,8 +391,6 @@
 
       DataSubset : description
 
-      DataSubset : dialect
-
       DataSubset : discouraged_uses
 
 
@@ -431,17 +427,6 @@
       DataSubset : doi
 
       DataSubset : download_url
-
-      DataSubset : encoding
-
-
-
-
-
-        DataSubset --&gt; "0..1" EncodingEnum : encoding
-        click EncodingEnum href "../EncodingEnum/"
-
-
 
       DataSubset : errata
 
@@ -498,14 +483,14 @@
 
 
 
-      DataSubset : format
+      DataSubset : file_collections
 
 
 
 
 
-        DataSubset --&gt; "0..1" FormatEnum : format
-        click FormatEnum href "../FormatEnum/"
+        DataSubset --&gt; "*" FileCollection : file_collections
+        click FileCollection href "../FileCollection/"
 
 
 
@@ -530,8 +515,6 @@
         click FutureUseImpact href "../FutureUseImpact/"
 
 
-
-      DataSubset : hash
 
       DataSubset : human_subject_research
 
@@ -694,19 +677,6 @@
 
 
 
-      DataSubset : md5
-
-      DataSubset : media_type
-
-
-
-
-
-        DataSubset --&gt; "0..1" MediaTypeEnum : media_type
-        click MediaTypeEnum href "../MediaTypeEnum/"
-
-
-
       DataSubset : missing_data_documentation
 
 
@@ -767,8 +737,6 @@
         click ParticipantPrivacy href "../ParticipantPrivacy/"
 
 
-
-      DataSubset : path
 
       DataSubset : preprocessing_strategies
 
@@ -893,8 +861,6 @@
 
 
 
-      DataSubset : sha256
-
       DataSubset : status
 
       DataSubset : subpopulations
@@ -931,6 +897,10 @@
 
 
       DataSubset : title
+
+      DataSubset : total_file_count
+
+      DataSubset : total_size_bytes
 
       DataSubset : updates
 
@@ -1019,69 +989,33 @@
 <td>direct</td>
 </tr>
 <tr>
-<td><a href="../bytes/">bytes</a></td>
-<td>0..1 <br/> <a href="../Integer/">Integer</a></td>
-<td>Size of the data in bytes</td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
-<td><a href="../dialect/">dialect</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Specific format dialect or variation (e</td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
-<td><a href="../encoding/">encoding</a></td>
-<td>0..1 <br/> <a href="../EncodingEnum/">EncodingEnum</a></td>
-<td>the character encoding of the data</td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
-<td><a href="../format/">format</a></td>
-<td>0..1 <br/> <a href="../FormatEnum/">FormatEnum</a></td>
-<td>The file format, physical medium, or dimensions of a resource</td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
-<td><a href="../hash/">hash</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>hash of the data</td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
-<td><a href="../md5/">md5</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>md5 hash of the data</td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
-<td><a href="../media_type/">media_type</a></td>
-<td>0..1 <br/> <a href="../MediaTypeEnum/">MediaTypeEnum</a></td>
-<td>The media type of the data</td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
-<td><a href="../path/">path</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
-<td><a href="../sha256/">sha256</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>sha256 hash of the data</td>
-<td><a href="../Dataset/">Dataset</a></td>
-</tr>
-<tr>
 <td><a href="../external_resources/">external_resources</a></td>
 <td>* <br/> <a href="../ExternalResource/">ExternalResource</a></td>
-<td>Links or identifiers for external resources</td>
+<td>External resources referenced at the dataset level (e</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../resources/">resources</a></td>
 <td>* <br/> <a href="../Dataset/">Dataset</a></td>
 <td>Sub-resources or component datasets that are part of this dataset</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../file_collections/">file_collections</a></td>
+<td>* <br/> <a href="../FileCollection/">FileCollection</a></td>
+<td>Collections of files within this dataset</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../total_file_count/">total_file_count</a></td>
+<td>0..1 <br/> <a href="../Integer/">Integer</a></td>
+<td>Total number of files across all file collections in this dataset</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../total_size_bytes/">total_size_bytes</a></td>
+<td>0..1 <br/> <a href="../Integer/">Integer</a></td>
+<td>Total size of all files in bytes across all file collections</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1688,113 +1622,11 @@ attributes:
     domain_of:
     - DataSubset
     range: boolean
-  bytes:
-    name: bytes
-    description: Size of the data in bytes.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: dcat:byteSize
-    alias: bytes
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: integer
-  dialect:
-    name: dialect
-    description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
-      profile).
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: schema:encodingFormat
-    alias: dialect
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: string
-  encoding:
-    name: encoding
-    description: the character encoding of the data
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: dcat:mediaType
-    alias: encoding
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: EncodingEnum
-  format:
-    name: format
-    description: The file format, physical medium, or dimensions of a resource. This
-      should be a file extension or MIME type.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: dcterms:format
-    alias: format
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: FormatEnum
-  hash:
-    name: hash
-    description: hash of the data
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: dcterms:identifier
-    alias: hash
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: string
-  md5:
-    name: md5
-    description: md5 hash of the data
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: dcterms:identifier
-    alias: md5
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: string
-  media_type:
-    name: media_type
-    description: The media type of the data. This should be a MIME type.
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - schema:encodingFormat
-    rank: 1000
-    slot_uri: dcat:mediaType
-    alias: media_type
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: MediaTypeEnum
-  path:
-    name: path
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: schema:contentUrl
-    alias: path
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: string
-  sha256:
-    name: sha256
-    description: sha256 hash of the data
-    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    rank: 1000
-    slot_uri: dcterms:identifier
-    alias: sha256
-    owner: DataSubset
-    domain_of:
-    - Dataset
-    range: string
   external_resources:
     name: external_resources
-    description: Links or identifiers for external resources. Can be used either as
-      a list of ExternalResource objects (in Dataset) or as a list of URL strings
-      (within ExternalResource class).
+    description: External resources referenced at the dataset level (e.g., related
+      publications, repositories, documentation). For file-level external resources,
+      use FileCollection.external_resources.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:references
@@ -1803,13 +1635,14 @@ attributes:
     domain_of:
     - Dataset
     - ExternalResource
+    - FileCollection
     range: ExternalResource
     multivalued: true
     inlined_as_list: true
   resources:
     name: resources
-    description: Sub-resources or component datasets that are part of this dataset.
-      Allows datasets to contain nested resource structures.
+    description: 'Sub-resources or component datasets that are part of this dataset.
+      Note: For file collections, use the file_collections attribute instead.'
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: schema:hasPart
@@ -1818,9 +1651,53 @@ attributes:
     domain_of:
     - DatasetCollection
     - Dataset
+    - FileCollection
     range: Dataset
     multivalued: true
     inlined_as_list: true
+  file_collections:
+    name: file_collections
+    description: Collections of files within this dataset. Each collection represents
+      a logical grouping of files with shared characteristics (e.g., all training
+      data, all image files, all raw data files). Maps to nested RO-Crate Dataset
+      entities via schema:hasPart.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - dcat:distribution
+    rank: 1000
+    slot_uri: schema:hasPart
+    alias: file_collections
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: FileCollection
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  total_file_count:
+    name: total_file_count
+    description: Total number of files across all file collections in this dataset.
+      Can be aggregated from file_collections[].file_count.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:totalFileCount
+    alias: total_file_count
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: integer
+  total_size_bytes:
+    name: total_size_bytes
+    description: Total size of all files in bytes across all file collections. Can
+      be aggregated from file_collections[].total_bytes.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: dcat:byteSize
+    alias: total_size_bytes
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: integer
   purposes:
     name: purposes
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2614,6 +2491,8 @@ attributes:
     owner: DataSubset
     domain_of:
     - Information
+    - File
+    - FileCollection
     range: CompressionEnum
   conforms_to:
     name: conforms_to

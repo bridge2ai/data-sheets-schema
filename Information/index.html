@@ -223,6 +223,10 @@
         click DatasetCollection href "../DatasetCollection/"
       Information &lt;|-- Dataset
         click Dataset href "../Dataset/"
+      Information &lt;|-- File
+        click File href "../File/"
+      Information &lt;|-- FileCollection
+        click FileCollection href "../FileCollection/"
 
 
       Information : compression
@@ -288,6 +292,8 @@
 <li><strong>Information</strong><ul>
 <li><a href="../DatasetCollection/">DatasetCollection</a></li>
 <li><a href="../Dataset/">Dataset</a></li>
+<li><a href="../File/">File</a></li>
+<li><a href="../FileCollection/">FileCollection</a></li>
 </ul>
 </li>
 </ul>
@@ -525,6 +531,8 @@ attributes:
     owner: Information
     domain_of:
     - Information
+    - File
+    - FileCollection
     range: CompressionEnum
   conforms_to:
     name: conforms_to

@@ -315,7 +315,7 @@
 <tr>
 <td><a href="../resources/">resources</a></td>
 <td>* <br/> <a href="../Dataset/">Dataset</a></td>
-<td>Sub-resources or component datasets</td>
+<td>Sub-resources or component items</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -545,8 +545,10 @@ slot_usage:
 attributes:
   resources:
     name: resources
-    description: Sub-resources or component datasets. Used in DatasetCollection to
-      contain Dataset objects, and in Dataset to allow nested resource structures.
+    description: Sub-resources or component items. In DatasetCollection, contains
+      Dataset objects. In Dataset, contains nested Dataset objects. In FileCollection,
+      contains nested FileCollection objects. The specific range is defined via slot_usage
+      in each class.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: schema:hasPart
@@ -555,6 +557,7 @@ attributes:
     domain_of:
     - DatasetCollection
     - Dataset
+    - FileCollection
     range: Dataset
     multivalued: true
     inlined_as_list: true
@@ -568,6 +571,8 @@ attributes:
     owner: DatasetCollection
     domain_of:
     - Information
+    - File
+    - FileCollection
     range: CompressionEnum
   conforms_to:
     name: conforms_to
