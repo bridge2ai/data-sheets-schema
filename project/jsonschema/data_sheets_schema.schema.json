@@ -3828,8 +3828,14 @@
                     ]
                 },
                 "collection_type": {
-                    "$ref": "#/$defs/FileCollectionTypeEnum",
-                    "description": "Type of file collection (e.g., raw_data, processed_data, training_split, test_split, documentation, metadata)."
+                    "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
+                    "items": {
+                        "$ref": "#/$defs/FileCollectionTypeEnum"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",

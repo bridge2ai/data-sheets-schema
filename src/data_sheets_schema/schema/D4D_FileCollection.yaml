@@ -105,10 +105,12 @@ classes:
     attributes:
       collection_type:
         description: >-
-          Type of file collection (e.g., raw_data, processed_data,
-          training_split, test_split, documentation, metadata).
+          Type(s) of content in this file collection. A collection may have
+          multiple types, for example a collection containing both raw_data
+          and documentation files would have both types listed.
         range: FileCollectionTypeEnum
         slot_uri: d4d:collectionType
+        multivalued: true
       file_count:
         description: Number of files in this collection.
         range: integer

@@ -6472,7 +6472,7 @@
     },
     {
       "name": "fileCollection__collection_type",
-      "description": "Type of file collection (e.g., raw_data, processed_data, training_split, test_split, documentation, metadata).",
+      "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/collectionType"
@@ -6484,6 +6484,7 @@
         "FileCollection"
       ],
       "range": "FileCollectionTypeEnum",
+      "multivalued": true,
       "@type": "SlotDefinition"
     },
     {
@@ -10659,9 +10660,10 @@
       "attributes": [
         {
           "name": "collection_type",
-          "description": "Type of file collection (e.g., raw_data, processed_data, training_split, test_split, documentation, metadata).",
+          "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
           "slot_uri": "d4d:collectionType",
           "range": "FileCollectionTypeEnum",
+          "multivalued": true,
           "@type": "SlotDefinition"
         },
         {
@@ -10687,7 +10689,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-03-26T22:44:02",
   "source_file_size": 18530,
-  "generation_date": "2026-04-06T19:09:15",
+  "generation_date": "2026-04-06T19:12:58",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

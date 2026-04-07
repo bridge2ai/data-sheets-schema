@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-06T19:09:16
+# Generation date: 2026-04-06T19:13:00
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2919,7 +2919,7 @@ class FileCollection(Information):
     dialect: Optional[str] = None
     external_resources: Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]] = empty_list()
     resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]] = empty_dict()
-    collection_type: Optional[Union[str, "FileCollectionTypeEnum"]] = None
+    collection_type: Optional[Union[Union[str, "FileCollectionTypeEnum"], list[Union[str, "FileCollectionTypeEnum"]]]] = empty_list()
     file_count: Optional[int] = None
     total_bytes: Optional[int] = None
 
@@ -2965,8 +2965,9 @@ class FileCollection(Information):
 
         self._normalize_inlined_as_list(slot_name="resources", slot_type=Dataset, key_name="id", keyed=True)
 
-        if self.collection_type is not None and not isinstance(self.collection_type, FileCollectionTypeEnum):
-            self.collection_type = FileCollectionTypeEnum(self.collection_type)
+        if not isinstance(self.collection_type, list):
+            self.collection_type = [self.collection_type] if self.collection_type is not None else []
+        self.collection_type = [v if isinstance(v, FileCollectionTypeEnum) else FileCollectionTypeEnum(v) for v in self.collection_type]
 
         if self.file_count is not None and not isinstance(self.file_count, int):
             self.file_count = int(self.file_count)
@@ -4598,7 +4599,7 @@ slots.file__file_type = Slot(uri=D4D.fileType, name="file__file_type", curie=D4D
                    model_uri=DATA_SHEETS_SCHEMA.file__file_type, domain=None, range=Optional[Union[str, "FileTypeEnum"]])
 
 slots.fileCollection__collection_type = Slot(uri=D4D.collectionType, name="fileCollection__collection_type", curie=D4D.curie('collectionType'),
-                   model_uri=DATA_SHEETS_SCHEMA.fileCollection__collection_type, domain=None, range=Optional[Union[str, "FileCollectionTypeEnum"]])
+                   model_uri=DATA_SHEETS_SCHEMA.fileCollection__collection_type, domain=None, range=Optional[Union[Union[str, "FileCollectionTypeEnum"], list[Union[str, "FileCollectionTypeEnum"]]]])
 
 slots.fileCollection__file_count = Slot(uri=D4D.fileCount, name="fileCollection__file_count", curie=D4D.curie('fileCount'),
                    model_uri=DATA_SHEETS_SCHEMA.fileCollection__file_count, domain=None, range=Optional[int])
