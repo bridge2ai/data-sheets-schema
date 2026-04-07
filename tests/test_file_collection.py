@@ -21,7 +21,7 @@ class TestFileCollection(unittest.TestCase):
             'id': 'test-collection-1',
             'name': 'Training Data',
             'description': 'Training dataset files',
-            'collection_type': 'training_split',
+            'collection_type': ['training_split'],
             'total_bytes': 1048576,
             'file_count': 100
         }
@@ -29,7 +29,7 @@ class TestFileCollection(unittest.TestCase):
         # This should validate without errors when using linkml-validate
         # For now, just test the data structure is correct
         self.assertIn('id', filecollection_data)
-        self.assertEqual(filecollection_data['collection_type'], 'training_split')
+        self.assertEqual(filecollection_data['collection_type'], ['training_split'])
 
     def test_dataset_with_file_collections(self):
         """Test Dataset containing FileCollections."""
@@ -41,13 +41,13 @@ class TestFileCollection(unittest.TestCase):
                 {
                     'id': 'collection-1',
                     'name': 'Training Files',
-                    'collection_type': 'training_split',
+                    'collection_type': ['training_split'],
                     'total_bytes': 1048576
                 },
                 {
                     'id': 'collection-2',
                     'name': 'Test Files',
-                    'collection_type': 'test_split',
+                    'collection_type': ['test_split'],
                     'total_bytes': 524288
                 }
             ],
@@ -77,9 +77,9 @@ class TestFileCollection(unittest.TestCase):
             collection = {
                 'id': f'collection-{collection_type}',
                 'name': f'{collection_type} files',
-                'collection_type': collection_type
+                'collection_type': [collection_type]
             }
-            self.assertEqual(collection['collection_type'], collection_type)
+            self.assertEqual(collection['collection_type'], [collection_type])
 
     def test_filecollection_properties_complete(self):
         """Test FileCollection with all collection-level properties."""
@@ -87,7 +87,7 @@ class TestFileCollection(unittest.TestCase):
             'id': 'complete-collection',
             'name': 'Complete File Collection',
             'description': 'A collection with all properties',
-            'collection_type': 'processed_data',
+            'collection_type': ['processed_data'],
             'total_bytes': 2097152,
             'file_count': 50,
             'path': '/data/processed/',
@@ -231,9 +231,17 @@ class TestFileCollectionYAMLGeneration(unittest.TestCase):
                 {
                     'id': 'test-collection',
                     'name': 'Test Files',
-                    'collection_type': 'test_split',
-                    'format': 'CSV',
-                    'bytes': 1024
+                    'collection_type': ['test_split'],
+                    'total_bytes': 1024,
+                    'file_count': 1,
+                    'resources': [
+                        {
+                            'id': 'test001.csv',
+                            'file_type': 'data_file',
+                            'format': 'CSV',
+                            'bytes': 1024
+                        }
+                    ]
                 }
             ]
         }
@@ -250,6 +258,7 @@ class TestFileCollectionYAMLGeneration(unittest.TestCase):
 
             self.assertEqual(loaded_data['id'], 'test-dataset')
             self.assertEqual(loaded_data['file_collections'][0]['name'], 'Test Files')
+            self.assertEqual(loaded_data['file_collections'][0]['resources'][0]['format'], 'CSV')
         finally:
             Path(temp_path).unlink()
 

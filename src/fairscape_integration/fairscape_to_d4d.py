@@ -286,6 +286,11 @@ class FairscapeToD4DConverter:
             if 'd4d:fileCount' in dataset:
                 collection['file_count'] = dataset['d4d:fileCount']
 
+            # TODO: Parse nested Dataset's hasPart to build FileCollection.resources
+            # Currently, file-level information in RO-Crate File entities is not converted
+            # to FileCollection.resources (File objects). Future work: parse dataset['hasPart'],
+            # fetch referenced File entities, and convert to D4D File objects in resources.
+
             # Only add non-empty collections
             if collection:
                 file_collections.append(collection)

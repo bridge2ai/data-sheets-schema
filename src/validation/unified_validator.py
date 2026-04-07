@@ -187,7 +187,7 @@ class UnifiedValidator:
         # Check if migration needed
         all_legacy_props = file_level_props + collection_props + ['bytes']
         has_file_props = any(k in data for k in all_legacy_props)
-        has_collections = 'file_collections' in data and data['file_collections']
+        has_collections = 'file_collections' in data
 
         if has_file_props and not has_collections:
             # Create default file collection

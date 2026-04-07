@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-07T12:55:59
+# Generation date: 2026-04-07T13:03:28
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3788,7 +3788,7 @@ slots.external_resources = Slot(uri=DCTERMS.references, name="external_resources
 slots.resources = Slot(uri=SCHEMA.hasPart, name="resources", curie=SCHEMA.curie('hasPart'),
                    model_uri=DATA_SHEETS_SCHEMA.resources, domain=None, range=Optional[Union[Union[str, DatasetId], list[Union[str, DatasetId]]]])
 
-slots.dataset__file_collections = Slot(uri=SCHEMA.hasPart, name="dataset__file_collections", curie=SCHEMA.curie('hasPart'),
+slots.dataset__file_collections = Slot(uri=D4D.fileCollections, name="dataset__file_collections", curie=D4D.curie('fileCollections'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__file_collections, domain=None, range=Optional[Union[dict[Union[str, FileCollectionId], Union[dict, FileCollection]], list[Union[dict, FileCollection]]]])
 
 slots.dataset__total_file_count = Slot(uri=D4D.totalFileCount, name="dataset__total_file_count", curie=D4D.curie('totalFileCount'),
