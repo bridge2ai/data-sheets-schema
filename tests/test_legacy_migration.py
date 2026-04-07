@@ -45,13 +45,24 @@ class TestLegacyMigration(unittest.TestCase):
         self.assertEqual(len(migrated_data['file_collections']), 1)
 
         file_collection = migrated_data['file_collections'][0]
-        self.assertEqual(file_collection['bytes'], 1048576)
+
+        # Collection-level properties
+        self.assertEqual(file_collection['total_bytes'], 1048576)  # bytes → total_bytes
         self.assertEqual(file_collection['path'], '/data/test.csv')
-        self.assertEqual(file_collection['format'], 'CSV')
-        self.assertEqual(file_collection['encoding'], 'UTF-8')
         self.assertEqual(file_collection['compression'], 'gzip')
-        self.assertEqual(file_collection['md5'], 'abc123')
-        self.assertEqual(file_collection['sha256'], 'def456')
+        self.assertEqual(file_collection['file_count'], 1)
+
+        # File-level properties should be in resources
+        self.assertIn('resources', file_collection)
+        self.assertEqual(len(file_collection['resources']), 1)
+
+        file_obj = file_collection['resources'][0]
+        self.assertEqual(file_obj['bytes'], 1048576)
+        self.assertEqual(file_obj['format'], 'CSV')
+        self.assertEqual(file_obj['encoding'], 'UTF-8')
+        self.assertEqual(file_obj['md5'], 'abc123')
+        self.assertEqual(file_obj['sha256'], 'def456')
+        self.assertEqual(file_obj['file_type'], 'data_file')
 
         # Check file properties removed from dataset level
         self.assertNotIn('bytes', migrated_data)
@@ -131,11 +142,20 @@ class TestLegacyMigration(unittest.TestCase):
         # Migration should still happen
         self.assertEqual(len(warnings), 1)
         file_collection = migrated_data['file_collections'][0]
-        self.assertEqual(file_collection['bytes'], 4096)
-        self.assertEqual(file_collection['format'], 'JSON')
-        # Properties not present should not be in collection
-        self.assertNotIn('md5', file_collection)
-        self.assertNotIn('sha256', file_collection)
+
+        # Collection should have total_bytes
+        self.assertEqual(file_collection['total_bytes'], 4096)
+        self.assertEqual(file_collection['file_count'], 1)
+
+        # File-level properties should be in resources
+        self.assertIn('resources', file_collection)
+        file_obj = file_collection['resources'][0]
+        self.assertEqual(file_obj['bytes'], 4096)
+        self.assertEqual(file_obj['format'], 'JSON')
+
+        # Properties not present should not be in File object
+        self.assertNotIn('md5', file_obj)
+        self.assertNotIn('sha256', file_obj)
 
 
 if __name__ == '__main__':

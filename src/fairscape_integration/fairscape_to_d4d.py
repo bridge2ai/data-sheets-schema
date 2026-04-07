@@ -269,21 +269,19 @@ class FairscapeToD4DConverter:
                 else:
                     collection['total_bytes'] = size_str
 
-            if 'md5' in dataset:
-                collection['md5'] = dataset['md5']
-
             if 'contentUrl' in dataset:
                 collection['path'] = dataset['contentUrl']
-
-            if 'encoding' in dataset:
-                collection['encoding'] = dataset['encoding']
 
             if 'fileFormat' in dataset:
                 collection['compression'] = dataset['fileFormat']
 
             # Map D4D-specific properties
             if 'd4d:collectionType' in dataset:
-                collection['collection_type'] = dataset['d4d:collectionType']
+                # collection_type is multivalued, wrap scalar as array
+                collection_type = dataset['d4d:collectionType']
+                collection['collection_type'] = (
+                    collection_type if isinstance(collection_type, list) else [collection_type]
+                )
 
             if 'd4d:fileCount' in dataset:
                 collection['file_count'] = dataset['d4d:fileCount']

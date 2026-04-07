@@ -178,12 +178,15 @@ class UnifiedValidator:
         """
         warnings = []
 
-        # File properties that were moved to FileCollection
-        file_props = ['bytes', 'path', 'format', 'encoding', 'compression',
-                      'media_type', 'hash', 'md5', 'sha256', 'dialect']
+        # File properties that should be on File objects (not FileCollection)
+        file_level_props = ['format', 'encoding', 'media_type', 'hash', 'md5', 'sha256', 'dialect']
+        # Collection properties that stay on FileCollection
+        collection_props = ['path', 'compression']
+        # Size property needs special handling (bytes → total_bytes)
 
         # Check if migration needed
-        has_file_props = any(k in data for k in file_props)
+        all_legacy_props = file_level_props + collection_props + ['bytes']
+        has_file_props = any(k in data for k in all_legacy_props)
         has_collections = 'file_collections' in data and data['file_collections']
 
         if has_file_props and not has_collections:
@@ -194,12 +197,39 @@ class UnifiedValidator:
                 'description': "Migrated from legacy dataset file properties"
             }
 
-            # Move file properties
+            # Create a File object for file-level properties
+            file_obj = {
+                'id': f"{data.get('id', 'dataset')}-file",
+                'file_type': 'data_file'
+            }
+
+            # Track migrated properties for warning
             migrated_props = []
-            for prop in file_props:
+
+            # Move file-level properties to File object
+            for prop in file_level_props:
+                if prop in data:
+                    file_obj[prop] = data.pop(prop)
+                    migrated_props.append(prop)
+
+            # Move collection-level properties to FileCollection
+            for prop in collection_props:
                 if prop in data:
                     file_collection[prop] = data.pop(prop)
                     migrated_props.append(prop)
+
+            # Handle bytes → total_bytes conversion
+            if 'bytes' in data:
+                # Put bytes on File object
+                file_obj['bytes'] = data.pop('bytes')
+                # Set total_bytes on FileCollection (same value for single file)
+                file_collection['total_bytes'] = file_obj['bytes']
+                migrated_props.append('bytes')
+
+            # Add File to collection resources if it has any properties
+            if any(k in file_obj for k in file_level_props + ['bytes']):
+                file_collection['resources'] = [file_obj]
+                file_collection['file_count'] = 1
 
             # Add collection
             data['file_collections'] = [file_collection]
@@ -207,7 +237,7 @@ class UnifiedValidator:
             # Create warning message
             warning_msg = (
                 f"DEPRECATION: File properties ({', '.join(migrated_props)}) at Dataset level are deprecated. "
-                f"Use file_collections instead. Automatically migrated to FileCollection. "
+                f"Use file_collections with File objects instead. Automatically migrated to FileCollection with File resources. "
                 f"This automatic migration will be removed in schema version 2.0."
             )
             warnings.append(warning_msg)

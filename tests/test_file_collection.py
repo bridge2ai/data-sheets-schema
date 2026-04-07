@@ -128,18 +128,19 @@ class TestFileCollection(unittest.TestCase):
                 {
                     'id': 'child-collection-1',
                     'name': 'Child Collection 1',
-                    'format': 'CSV'
+                    'collection_type': ['raw_data']
                 },
                 {
                     'id': 'child-collection-2',
                     'name': 'Child Collection 2',
-                    'format': 'JSON'
+                    'collection_type': ['processed_data']
                 }
             ]
         }
 
         self.assertEqual(len(parent_collection['resources']), 2)
-        self.assertEqual(parent_collection['resources'][0]['format'], 'CSV')
+        self.assertEqual(parent_collection['resources'][0]['collection_type'], ['raw_data'])
+        self.assertEqual(parent_collection['resources'][1]['collection_type'], ['processed_data'])
 
     def test_dataset_without_file_collections_still_valid(self):
         """Test that Dataset without file_collections is still valid."""
@@ -170,24 +171,40 @@ class TestFileCollectionYAMLGeneration(unittest.TestCase):
                     'id': 'collection-raw',
                     'name': 'Raw Data Files',
                     'description': 'Unprocessed sensor data',
-                    'collection_type': 'raw_data',
-                    'format': 'CSV',
-                    'bytes': 5242880,
+                    'collection_type': ['raw_data'],
+                    'total_bytes': 5242880,
                     'file_count': 150,
-                    'encoding': 'UTF-8',
-                    'sha256': 'a1b2c3d4e5f6'
+                    'path': '/data/raw/',
+                    'resources': [
+                        {
+                            'id': 'raw001.csv',
+                            'file_type': 'data_file',
+                            'format': 'CSV',
+                            'bytes': 34952,
+                            'encoding': 'UTF-8',
+                            'sha256': 'a1b2c3d4e5f6'
+                        }
+                    ]
                 },
                 {
                     'id': 'collection-processed',
                     'name': 'Processed Data Files',
                     'description': 'Cleaned and normalized data',
-                    'collection_type': 'processed_data',
-                    'format': 'JSON',
-                    'bytes': 3145728,
+                    'collection_type': ['processed_data'],
+                    'total_bytes': 3145728,
                     'file_count': 100,
-                    'encoding': 'UTF-8',
+                    'path': '/data/processed/',
                     'compression': 'gzip',
-                    'sha256': 'g7h8i9j0k1l2'
+                    'resources': [
+                        {
+                            'id': 'processed001.json',
+                            'file_type': 'data_file',
+                            'format': 'JSON',
+                            'bytes': 31457,
+                            'encoding': 'UTF-8',
+                            'sha256': 'g7h8i9j0k1l2'
+                        }
+                    ]
                 }
             ],
             'total_file_count': 250,
@@ -202,7 +219,7 @@ class TestFileCollectionYAMLGeneration(unittest.TestCase):
 
         self.assertEqual(parsed['id'], d4d_data['id'])
         self.assertEqual(len(parsed['file_collections']), 2)
-        self.assertEqual(parsed['file_collections'][0]['collection_type'], 'raw_data')
+        self.assertEqual(parsed['file_collections'][0]['collection_type'], ['raw_data'])
         self.assertEqual(parsed['total_file_count'], 250)
 
     def test_write_and_read_filecollection_yaml(self):
