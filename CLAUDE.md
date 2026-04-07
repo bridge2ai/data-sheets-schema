@@ -1,1439 +1,443 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with code in this repository.
 
 ## Project Overview
 
-This is a LinkML schema project for representing "Datasheets for Datasets" (D4D) - a standardized way to document datasets inspired by electronic component datasheets. The project creates structured schemas for the 50+ questions and topics outlined in the original Datasheets for Datasets paper by Gebru et al.
+LinkML schema project for "Datasheets for Datasets" (D4D) - standardized dataset documentation inspired by the Gebru et al. paper. Creates structured schemas for 50+ D4D questions.
 
-**Related work**:
-- Original paper: [Datasheets for Datasets](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext)
-- Example: [Structured dataset documentation: a datasheet for CheXpert](https://arxiv.org/abs/2105.03020)
-- Google's alternative: [Data Cards](https://arxiv.org/abs/2204.01075)
-- Augmented model: [Augmented Datasheets for Speech Datasets and Ethical Decision-Making](https://dl.acm.org/doi/10.1145/3593013.3594049)
+**Related work**: [Original paper](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext), [CheXpert example](https://arxiv.org/abs/2105.03020), [Data Cards](https://arxiv.org/abs/2204.01075)
 
 ## Development Commands
 
-This project uses Poetry for dependency management and Make for build automation:
-
-### Setup and Installation
+### Setup and Testing
 ```bash
-make setup          # Initial setup (run this first)
-make install        # Install dependencies only
-poetry install      # Alternative direct poetry install
+make setup              # Initial setup
+make install            # Install dependencies
+make test               # All tests
+make test-schema        # Validate full merged schema
+make test-modules       # Validate individual modules
+make lint-modules       # Lint D4D modules
 ```
 
-### Testing and Validation
+### Building
 ```bash
-make test           # Run all tests (schema validation, Python tests, examples)
-make test-schema    # Test schema validation only (full merged schema)
-make test-modules   # Validate all individual D4D module schemas
-make test-python    # Run Python unit tests only
-make test-examples  # Test example data validation
-make lint           # Run LinkML schema linting (main schema only)
-make lint-modules   # Lint all individual D4D module schemas
+make gen-project        # Generate Python/JSON/OWL artifacts
+make gendoc             # Generate documentation
+make site               # Build complete site
+make deploy             # Deploy to GitHub Pages
 ```
 
-### Building and Generation
+## Unified CLI (d4d command)
+
+The project provides a unified CLI via the `d4d` command for common operations:
+
+### Installation
 ```bash
-make all            # Generate all project artifacts
-make gen-project    # Generate Python datamodel, JSON schema, OWL, etc.
-make gen-examples   # Copy example data to examples/ directory
-make gendoc         # Generate documentation
+poetry install          # Installs d4d command
+d4d --help              # Show all commands
 ```
 
-### Documentation and Site
+### Utility Commands
 ```bash
-make site           # Build complete site (gen-project + gendoc)
-make serve          # Serve documentation locally
-make testdoc        # Build docs and serve locally
-make deploy         # Deploy site to GitHub Pages
+d4d utils status        # Show detailed pipeline status
+d4d utils status --quick                      # Compact overview
+d4d utils validate-preprocessing              # Check preprocessing quality
 ```
 
-## Architecture and Structure
+### Download & Preprocessing
+```bash
+d4d download sources --project AI_READI       # Download from Google Sheet
+d4d download preprocess --project AI_READI    # Preprocess to text
+d4d download preprocess                       # Preprocess all projects
+d4d download concatenate --project AI_READI   # Concatenate files
+```
+
+### Evaluation
+```bash
+d4d evaluate presence --project AI_READI --method gpt5  # Presence-based
+d4d evaluate presence --method claudecode_agent         # All projects
+d4d evaluate llm --file path/to/file.yaml --project X --method Y  # LLM quality
+```
+
+### RO-Crate Integration
+```bash
+d4d rocrate parse input.json                          # Parse RO-Crate
+d4d rocrate transform input.json -o output.yaml       # Convert to D4D
+d4d rocrate merge file1.json file2.json -o merged.json  # Merge RO-Crates
+```
+
+### Schema Operations
+```bash
+d4d schema stats --level 2 --format json              # Schema statistics
+d4d schema validate file.yaml                         # Validate D4D YAML
+```
+
+### Rendering
+```bash
+d4d render html input.yaml -o output.html             # Render to HTML
+```
+
+### Benefits
+- **Auto-validation**: Project/method names validated via click.Choice
+- **Consistent interface**: All commands use same patterns
+- **Help everywhere**: `--help` on any command/group
+- **Constants**: Uses centralized constants from `data_sheets_schema.constants`
+
+### Complete Command Reference
+- **d4d utils**: status, validate-preprocessing
+- **d4d download**: sources, preprocess, concatenate
+- **d4d evaluate**: presence, llm
+- **d4d rocrate**: parse, transform, merge
+- **d4d schema**: stats, validate
+- **d4d render**: html, generate-all
+
+### Backward Compatibility
+All existing Makefile targets and standalone scripts continue to work. The CLI is an additive enhancement.
+
+## Architecture
 
 ### Core Schema Files
-- `src/data_sheets_schema/schema/data_sheets_schema.yaml` - Main LinkML schema that imports all modules
-- `src/data_sheets_schema/schema/D4D_Base_import.yaml` - Base schema with shared classes (NamedThing, Organization, DatasetProperty, Person, Software, Information, FormatDialect), slots, and enums used across all modules
-- D4D Module files (directly in schema/ directory, NOT in modules/):
-  - `D4D_Motivation.yaml` - Dataset motivation questions
-  - `D4D_Composition.yaml` - Dataset composition questions
-  - `D4D_Collection.yaml` - Data collection process questions
-  - `D4D_Preprocessing.yaml` - Data preprocessing questions
-  - `D4D_Uses.yaml` - Recommended uses questions
-  - `D4D_Distribution.yaml` - Distribution questions
-  - `D4D_Maintenance.yaml` - Maintenance questions
-  - `D4D_Human.yaml` - Human subjects questions
-  - `D4D_Ethics.yaml` - Ethics and data protection questions
-  - `D4D_Data_Governance.yaml` - Data governance and licensing questions
-  - `D4D_Metadata.yaml` - Metadata-specific definitions
-  - `D4D_Minimal.yaml` - Minimal schema subset
+- `src/data_sheets_schema/schema/data_sheets_schema.yaml` - Main schema (imports all modules)
+- `src/data_sheets_schema/schema/D4D_Base_import.yaml` - Base classes/slots/enums
+- D4D modules (in schema/ directory): `D4D_Motivation.yaml`, `D4D_Composition.yaml`, `D4D_Collection.yaml`, `D4D_Preprocessing.yaml`, `D4D_Uses.yaml`, `D4D_Distribution.yaml`, `D4D_Maintenance.yaml`, `D4D_Human.yaml`, `D4D_Ethics.yaml`, `D4D_Data_Governance.yaml`, `D4D_Metadata.yaml`, `D4D_Minimal.yaml`
 
 ### Generated Artifacts (DO NOT EDIT)
-- `src/data_sheets_schema/datamodel/` - Auto-generated Python datamodel classes
-- `project/` - Generated schemas in multiple formats:
-  - `project/jsonschema/` - JSON Schema representations
-  - `project/owl/` - OWL ontology representations
-  - `project/shacl/` - SHACL validation shapes
-  - `project/jsonld/` - JSON-LD context files
-  - `project/graphql/` - GraphQL schema
-  - `project/excel/` - Excel templates
-  - `project/docs/` - Generated markdown documentation
-- `docs/` - Generated documentation site
-- `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` - Fully merged schema with all imports resolved (generated by `make full-schema`)
+- `src/data_sheets_schema/datamodel/` - Python classes
+- `project/` - JSON Schema, OWL, SHACL, JSON-LD, GraphQL
+- `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` - Merged schema
+
+### Centralized Constants
+- `src/data_sheets_schema/constants/` - Project names, methods, paths, modules
+  - `projects.py` - PROJECTS list, path helpers
+  - `methods.py` - METHODS list (generation methods)
+  - `schemas.py` - MODULE_MAP, schema paths
+  - `evaluation.py` - Rubric paths, scoring constants
+
+Usage: `from data_sheets_schema.constants import PROJECTS, METHODS`
 
 ### Key Configuration
-- `about.yaml` - Project metadata and configuration (used by Makefile)
-- `pyproject.toml` - Poetry dependencies and build configuration
-- `Makefile` - Build automation and commands
-- `config.env` - Environment variables for the build process
+- `about.yaml`, `pyproject.toml`, `Makefile`, `config.env`
 
 ## Schema Development Workflow
 
-1. Edit schema files in `src/data_sheets_schema/schema/`
-2. Run `make lint-modules` to lint individual module changes (faster for module-only edits)
-3. Run `make test-modules` to validate individual modules
-4. Run `make test-schema` to validate the full merged schema
-5. Run `make gen-project` to regenerate Python datamodel and other artifacts
-6. Run `make test` to validate everything works
-7. Run `make gendoc` to update documentation
+1. Edit schemas in `src/data_sheets_schema/schema/`
+2. `make lint-modules && make test-modules` (fast module validation)
+3. `make test-schema` (full validation)
+4. `make gen-project` (regenerate artifacts)
+5. `make test` (complete validation)
 
-**Quick validation during module development:**
-- `make lint-modules && make test-modules` - Fast validation of D4D modules only
-- `make test-schema` - Full schema validation (includes all modules merged)
+## Testing
+
+### Test Structure
+```
+tests/
+├── test_d4d_full_schema.py     # Schema generation tests
+├── test_data.py                # Data validation tests
+├── test_renderer.py            # Rendering tests
+├── test_schema/                # Schema utility tests
+│   └── test_schema_stats.py    # Schema statistics tests (8 tests)
+├── test_download/              # Download pipeline tests
+├── test_rocrate/               # RO-Crate integration tests
+└── test_evaluation/            # Evaluation framework tests
+```
+
+### Running Tests
+```bash
+make test                       # All tests
+make test-python                # Python unit tests only
+python -m unittest tests.test_schema.test_schema_stats  # Specific test
+```
 
 ## Keeping Schema Files in Sync
 
-The project maintains **three representations** of the schema that must stay synchronized:
-
-1. **`data_sheets_schema.yaml`** (12KB) - Source schema with module imports
-2. **`data_sheets_schema_all.yaml`** (671KB) - Fully merged schema (all imports resolved)
-3. **`data_sheets_schema.py`** (224KB) - Auto-generated Python datamodel
-
-### Automated Sync Checking
+Three representations must stay synchronized:
+1. `data_sheets_schema.yaml` (source)
+2. `data_sheets_schema_all.yaml` (merged)
+3. `data_sheets_schema.py` (Python model)
 
 ```bash
-# Check if all three files are in sync
-make check-sync
-
-# Force regenerate everything if out of sync
-make regen-all
+make check-sync    # Check synchronization
+make regen-all     # Force regenerate everything
 ```
-
-The `check-sync` target:
-- Compares modification times of source schema, module files, merged schema, and Python model
-- Reports which files are out of date
-- Provides commands to fix sync issues
-- Exit code 0 = in sync, 1 = out of sync
-
-### When Files Get Out of Sync
-
-Files become out of sync when:
-- You edit source schema or module files but don't regenerate artifacts
-- You pull changes that only update source files
-- Make's timestamp-based dependencies fail to trigger regeneration
-
-**Best practice after editing schemas:**
-```bash
-# 1. Edit source schema or modules
-vim src/data_sheets_schema/schema/D4D_*.yaml
-
-# 2. Regenerate everything
-make regen-all
-
-# 3. Verify sync
-make check-sync
-
-# 4. Test
-make test
-```
-
-### What Each Command Does
-
-| Command | What It Regenerates |
-|---------|---------------------|
-| `make full-schema` | Only `data_sheets_schema_all.yaml` (merged schema) |
-| `make gen-project` | Python model + JSON Schema + OWL + JSON-LD + etc. |
-| `make regen-all` | **Everything** (merged schema + all generated artifacts) |
-| `make check-sync` | Nothing - just checks if files are in sync |
 
 ## Working with Modules
 
-The schema is modularized by D4D sections. Key architectural patterns:
-
-### Module Structure
-- Each module is a standalone LinkML schema file that imports `D4D_Base_import.yaml`
-- Modules define classes that inherit from base classes (especially `DatasetProperty`)
-- The main `data_sheets_schema.yaml` imports all modules to create the complete schema
-- Each module uses its own namespace prefix (e.g., `d4dmotivation:`, `d4dcomposition:`)
-
-### Full Schema Generation
-- Run `make full-schema` to generate `data_sheets_schema_all.yaml` - a fully merged version with all imports resolved
-- This full schema is used for testing and validation
-- The full schema should have NO import statements (it's fully materialized)
-- Tests verify the full schema includes all expected prefixes and has no imports
+- Each module imports `D4D_Base_import.yaml`
+- Classes inherit from base classes (especially `DatasetProperty`)
+- Main schema imports all modules
+- `make full-schema` generates merged `data_sheets_schema_all.yaml`
 
 ## Testing Strategy
 
-The project has three types of tests (all run with `make test`):
-
-### Schema Validation (`make test-schema`)
-- Validates LinkML schema syntax and structure
-- Tests the fully merged schema (`data_sheets_schema_all.yaml`)
-- Run with: `poetry run gen-project -d tmp <schema_file>`
-
-### Python Unit Tests (`make test-python`)
-- Located in `tests/` directory
-- Tests generated datamodel classes
-- `tests/test_d4d_full_schema.py` - Tests full schema generation and validation
-- `tests/test_data.py` - Basic data tests
-- `tests/test_renderer.py` - Tests for rendering functionality
-- `tests/extract_docx.py` - Document extraction tests
-- Run with: `poetry run python -m unittest discover`
-
-### Example Validation (`make test-examples`)
-- Validates example data against the schema
-- Valid examples in `src/data/examples/valid/`
-- Invalid examples (should fail) in `src/data/examples/invalid/`
-- Output goes to `examples/output/`
-
-## LinkML-Specific Commands
-
-Beyond the Makefile commands, these LinkML CLI tools are useful:
-
-```bash
-# Validate a schema
-poetry run linkml-lint src/data_sheets_schema/schema/data_sheets_schema.yaml
-
-# Convert data between formats
-poetry run linkml-convert -s <schema.yaml> -C <ClassName> <input.yaml> -o <output.json>
-
-# Run examples and validate
-poetry run linkml-run-examples --schema <schema.yaml> --input-directory <dir> --output-directory <out>
-
-# Generate merged schema
-poetry run gen-linkml -o <output.yaml> -f yaml <input.yaml>
-
-# Render documentation
-poetry run gen-doc -d docs <schema.yaml>
-```
-
-## Common Workflows
-
-### Adding a New Module
-1. Create new module file in `src/data_sheets_schema/schema/` (e.g., `D4D_NewModule.yaml`)
-2. Define imports: `imports: [D4D_Base_import]`
-3. Set up prefixes and default_prefix
-4. Create classes inheriting from `DatasetProperty` or other base classes
-5. Add import to main `data_sheets_schema.yaml`
-6. Add attributes to `Dataset` class in main schema to reference new module classes
-7. Run `make gen-project` and `make test`
-
-### Modifying Existing Schema
-1. Edit the relevant module file or main schema
-2. Run `make lint-modules` to validate module syntax (if editing D4D modules)
-3. Run `make test-modules` to validate module schemas (if editing D4D modules)
-4. Run `make test-schema` to validate the full merged schema
-5. Run `make gen-project` to regenerate artifacts
-6. Run `make test` to ensure all tests pass
-7. Check generated Python in `src/data_sheets_schema/datamodel/` to verify changes
-
-### Working with Example Data
-1. Add valid examples to `src/data/examples/valid/`
-2. Add invalid examples (for negative testing) to `src/data/examples/invalid/`
-3. Run `make test-examples` to validate
-4. Check output in `examples/output/` for validation results
+1. **Schema Validation** (`make test-schema`): LinkML syntax/structure
+2. **Python Tests** (`make test-python`): Datamodel classes (`tests/`)
+3. **Example Validation** (`make test-examples`): Validate example data
 
 ## D4D Pipeline and Data Organization
 
-This repository includes AI-powered scripts and make targets to extract D4D metadata from dataset documentation.
+AI-powered extraction of D4D metadata from dataset documentation.
 
-### Data Organization Structure
-
-All data is organized under the `data/` directory with **standardized naming conventions**:
+### Data Structure
 
 ```
 data/
-  raw/                            # Raw downloads from Google Sheet
-    AI_READI/, CHORUS/, CM4AI/, VOICE/
-      {source}_row{N}.pdf         # PDFs (e.g., e097449.full_row2.pdf)
-      {source}_row{N}.html        # HTML files
-      {source}_row{N}.txt         # Text files
-      {source}_row{N}.json        # JSON metadata
-
+  raw/{PROJECT}/                     # Raw downloads: {source}_row{N}.{pdf,html,txt,json}
   preprocessed/
-    individual/                   # Transformed source files (standardized to TXT/JSON)
-      AI_READI/, CHORUS/, CM4AI/, VOICE/
-        {source}_row{N}.txt       # PDF→TXT, HTML→TXT (via pdfminer, BeautifulSoup)
-        {source}_row{N}.json      # JSON preserved as-is
-    concatenated/                 # Concatenated files per project (alphabetically sorted)
-      {PROJECT}_preprocessed.txt  # All preprocessed source docs concatenated
-      {PROJECT}_concatenated.txt  # All individual D4D YAMLs concatenated
-      {PROJECT}_raw.txt          # All raw downloads concatenated (optional)
-
-  d4d_individual/                 # D4D YAMLs from individual docs
-    claudecode_agent/AI_READI/, CHORUS/, CM4AI/, VOICE/    # ✅ Current (v5+)
-      {source}_row{N}_d4d.yaml    # D4D YAML for each source
-      {source}_row{N}_d4d_metadata.yaml  # Extraction metadata
-    claudecode_assistant/AI_READI/, CHORUS/, CM4AI/, VOICE/
-      {source}_row{N}_d4d.yaml
-    claudecode/AI_READI/, CHORUS/, CM4AI/, VOICE/          # Legacy
-      {source}_row{N}_d4d.yaml
-    gpt5/AI_READI/, CHORUS/, CM4AI/, VOICE/                # Comparison
-      {source}_row{N}_d4d.yaml
-      {source}_row{N}_d4d_metadata.yaml
-
-  d4d_concatenated/               # D4D YAMLs from concatenated docs (synthesized)
-    claudecode_agent/
-      AI_READI_d4d.yaml           # ✅ Current (v5+)
-      CHORUS_d4d.yaml
-      CM4AI_d4d.yaml
-      VOICE_d4d.yaml
-    claudecode_assistant/
-      {PROJECT}_d4d.yaml
-    claudecode/                   # Legacy
-      {PROJECT}_d4d.yaml
-    gpt5/                         # Comparison
-      {PROJECT}_d4d.yaml
-    curated/                      # Reference
-      AI_READI_curated.yaml
-      CHORUS_curated.yaml
-      CM4AI_curated.yaml
-      VOICE_curated.yaml
-
-  d4d_html/                       # HTML renderings
-    individual/
-      claudecode_agent/AI_READI/, CHORUS/, CM4AI/, VOICE/
-        {source}_row{N}.html      # Individual HTML for each source
-      claudecode_assistant/, claudecode/, gpt5/
-        {PROJECT}/{source}_row{N}.html
-    concatenated/
-      claudecode_agent/
-        AI_READI_d4d_human_readable.html    # ✅ Current (v5+)
-        AI_READI_evaluation.html
-        CHORUS_d4d_human_readable.html
-        CHORUS_evaluation.html
-        CM4AI_d4d_human_readable.html
-        CM4AI_evaluation.html
-        VOICE_d4d_human_readable.html
-        VOICE_evaluation.html
-      curated/
-        {PROJECT}_human_readable.html
-        {PROJECT}_linkml.html
-      claudecode_assistant/, claudecode/, gpt5/
-        {PROJECT}_{type}.html
-
-  ATTIC/                          # Archived legacy data (see ATTIC/README.md)
-    root_downloads/               # Old download structures from repository root
-      downloads_by_column_enhanced/
-      downloads_by_column_combined/
-      test_downloads/
-      old/
-    sheets_concatenated/          # Old concatenation structure
-    validated_extracted/          # Legacy extraction outputs
-    [19+ other legacy dirs]       # Early extraction experiments
+    individual/{PROJECT}/            # Standardized: {source}_row{N}.{txt,json}
+    concatenated/                    # {PROJECT}_{preprocessed|concatenated|raw}.txt
+  d4d_individual/{METHOD}/{PROJECT}/ # {source}_row{N}_d4d.yaml
+  d4d_concatenated/{METHOD}/         # {PROJECT}_d4d.yaml
+  d4d_html/{individual|concatenated}/{METHOD}/  # HTML renderings
+  ATTIC/                            # Archived legacy data
 ```
 
-### File Naming Conventions
+**Projects**: AI_READI, CHORUS, CM4AI, VOICE
 
-#### Raw Source Files
+### File Naming
+- Raw/preprocessed: `{source}_row{N}.{ext}` (e.g., `e097449.full_row2.pdf`)
+- D4D individual: `{source}_row{N}_d4d.yaml`
+- D4D concatenated: `{PROJECT}_d4d.yaml`
+- HTML: `{PROJECT}_d4d_human_readable.html`, `{PROJECT}_evaluation.html`
 
-**Pattern**: `{source}_row{N}.{ext}`
+### Pipeline Workflow
 
-**Components**:
-- `{source}`: Domain or source identifier (e.g., `docs_aireadi_org_docs-2`, `fairhub`, `doi`)
-- `row{N}`: Row number from Google Sheet (e.g., `row2`, `row10`)
-- `{ext}`: File extension (`.pdf`, `.html`, `.txt`, `.json`)
-
-**Examples**:
-```
-e097449.full_row2.pdf
-docs_aireadi_org_docs-2_row10.html
-fairhub_row12.json
-RePORT ⟩ RePORTER - AI-READI.pdf
-```
-
-**Location**: `data/raw/{PROJECT}/`
-
-#### Preprocessed Individual Files
-
-**Pattern**: `{source}_row{N}.{ext}`
-
-**Transformations**:
-- `.pdf` → `.txt` (using pdfminer)
-- `.html` → `.txt` (using BeautifulSoup)
-- `.json` → `.json` (preserved)
-- `.txt` → `.txt` (preserved)
-- `.md` → `.md` (preserved)
-
-**Examples**:
-```
-e097449.full_row2.txt              # PDF→TXT
-docs_aireadi_org_docs-2_row10.txt  # HTML→TXT
-fairhub_row12.json                 # Preserved
-```
-
-**Location**: `data/preprocessed/individual/{PROJECT}/`
-
-**Script**: `src/download/preprocess_sources.py`
-**Make target**: `make preprocess-sources`
-
-#### Concatenated Files
-
-**Three types per project**:
-
-1. **`{PROJECT}_preprocessed.txt`** - All preprocessed source documents concatenated
-   - **Purpose**: Input for D4D synthesis from original sources
-   - **Contents**: All `.txt` and `.json` files from `data/preprocessed/individual/{PROJECT}/`
-   - **Sorting**: Alphabetical by filename (reproducible)
-   - **Make target**: `make concat-preprocessed`
-
-2. **`{PROJECT}_concatenated.txt`** - All individual D4D YAMLs concatenated
-   - **Purpose**: Synthesis of multiple D4D extractions
-   - **Contents**: All `*_d4d.yaml` files from `data/d4d_individual/{method}/{PROJECT}/`
-   - **Sorting**: Alphabetical by filename (reproducible)
-   - **Make target**: `make concat-extracted`
-
-3. **`{PROJECT}_raw.txt`** - All raw downloads concatenated (optional)
-   - **Purpose**: Complete raw source archive
-   - **Contents**: All files from `data/raw/{PROJECT}/`
-   - **Make target**: `make concat-raw`
-
-**Features**:
-- File headers with metadata (filename, path, size)
-- Table of contents at beginning
-- Separator markers between files
-- Reproducible alphabetical ordering
-
-**Location**: `data/preprocessed/concatenated/`
-
-**Script**: `src/download/concatenate_documents.py`
-
-#### Individual D4D YAMLs
-
-**Pattern**: `{source}_row{N}_d4d.yaml`
-
-**Metadata**: `{source}_row{N}_d4d_metadata.yaml` (extraction provenance)
-
-**Location**: `data/d4d_individual/{METHOD}/{PROJECT}/`
-
-**Methods**: `claudecode_agent`, `claudecode_assistant`, `claudecode`, `gpt5`
-
-#### Concatenated D4D YAMLs
-
-**Pattern**: `{PROJECT}_d4d.yaml`
-
-**Special case**: Curated uses `{PROJECT}_curated.yaml` suffix
-
-**Location**: `data/d4d_concatenated/{METHOD}/`
-
-**Methods**: `claudecode_agent` (current), `claudecode_assistant`, `claudecode`, `gpt5`, `curated`
-
-#### HTML Files
-
-**Individual HTML**:
-- Pattern: `{source}_row{N}.html`
-- Location: `data/d4d_html/individual/{METHOD}/{PROJECT}/`
-
-**Concatenated HTML**:
-- Human-readable: `{PROJECT}_d4d_human_readable.html`
-- Evaluation: `{PROJECT}_evaluation.html`
-- LinkML (curated only): `{PROJECT}_linkml.html`
-- Location: `data/d4d_html/concatenated/{METHOD}/`
-
-**Versioned HTML** (for deployment):
-- Human-readable: `D4D_-_{PROJECT}_v{N}_human_readable.html`
-- Evaluation: `D4D_-_{PROJECT}_v{N}_evaluation.html`
-- Location: `src/html/output/` → `docs/html_output/` (GitHub Pages)
-
-### Input Document Pipeline
-
-Complete transformation path from raw sources to preprocessed files:
-
-```
-STEP 1: Download Raw Sources
-├─ Script: src/download/organized_dataset_extractor.py
-├─ Make: make download-sources
-├─ Input: Google Sheet URLs
-└─ Output: data/raw/{PROJECT}/{source}_row{N}.{pdf,html,json,txt}
-
-STEP 2: Preprocess to Standard Formats
-├─ Script: src/download/preprocess_sources.py
-├─ Make: make preprocess-sources
-├─ Input: data/raw/{PROJECT}/
-├─ Transformations:
-│  ├─ PDF → TXT (pdfminer.six)
-│  ├─ HTML → TXT (BeautifulSoup)
-│  └─ JSON/TXT/MD → Preserved
-└─ Output: data/preprocessed/individual/{PROJECT}/{source}_row{N}.{txt,json,md}
-
-STEP 2.5: Validate Preprocessing Quality ⚠️ CRITICAL
-├─ Script: src/download/validate_preprocessing_quality.py
-├─ Make: make validate-preprocessing
-├─ Input: data/raw/ and data/preprocessed/individual/
-├─ Checks:
-│  ├─ Empty or near-empty extractions
-│  ├─ Stub files (only headers/navigation)
-│  ├─ Significant text volume loss (>99% data loss)
-│  ├─ Missing expected outputs
-│  └─ Extraction quality ratios
-├─ Output: Quality report with issues flagged
-└─ **IMPORTANT**: Address all quality issues before proceeding to concatenation
-
-Common Quality Issues:
-• Google Docs URLs: Extract only headers (need direct download links or export URLs)
-• Scanned PDFs: Low text extraction (may need OCR preprocessing)
-• JavaScript-rendered HTML: Missing content (need alternative source)
-• Drive/SharePoint URLs: Access restricted (need direct download links)
-
-STEP 3: Concatenate by Project
-├─ Script: src/download/concatenate_documents.py
-├─ Make targets:
-│  ├─ make concat-preprocessed  # Preprocessed sources
-│  ├─ make concat-extracted     # Individual D4D YAMLs
-│  └─ make concat-raw           # Raw downloads (optional)
-├─ Input: data/preprocessed/individual/{PROJECT}/ or data/d4d_individual/{METHOD}/{PROJECT}/
-├─ Features:
-│  ├─ Alphabetical sorting (reproducible)
-│  ├─ File headers with metadata
-│  ├─ Table of contents
-│  └─ Separator markers
-└─ Output: data/preprocessed/concatenated/
-   ├─ {PROJECT}_preprocessed.txt    # For D4D synthesis
-   ├─ {PROJECT}_concatenated.txt    # D4D YAML synthesis
-   └─ {PROJECT}_raw.txt             # Raw archive
-```
-
-**Example for AI_READI**:
 ```bash
-# Step 1: Download (16 files)
-make download-sources
-# → data/raw/AI_READI/*.{pdf,html,json,txt}
+# 1. Download from Google Sheet
+make download-sources  # → data/raw/{PROJECT}/
 
-# Step 2: Preprocess (PDF→TXT, HTML→TXT)
-make preprocess-sources
-# → data/preprocessed/individual/AI_READI/*.{txt,json}
+# 2. Preprocess (PDF→TXT, HTML→TXT)
+make preprocess-sources  # → data/preprocessed/individual/{PROJECT}/
 
-# Step 2.5: Validate preprocessing quality ⚠️ IMPORTANT
-make validate-preprocessing
-# → Quality report showing any issues
-# If issues found: fix sources and re-run preprocessing
+# 2.5. Validate quality ⚠️ CRITICAL
+make validate-preprocessing  # Check for empty/stub files
 
-# Step 3: Concatenate all preprocessed files
-make concat-preprocessed
-# → data/preprocessed/concatenated/AI_READI_preprocessed.txt
+# 3. Concatenate by project
+make concat-preprocessed  # → {PROJECT}_preprocessed.txt
 
-# Step 4: Extract D4D from concatenated sources
-make d4d-agent PROJECT=AI_READI
-# → data/d4d_concatenated/claudecode_agent/AI_READI_d4d.yaml
+# 4. Extract D4D (recommended method)
+make d4d-agent PROJECT=AI_READI  # → data/d4d_concatenated/claudecode_agent/
+
+# 5. Generate HTML
+make gen-d4d-html
 ```
-
-### Standardization Guarantees
-
-1. **Reproducible Ordering**: All concatenation uses alphabetical sorting
-2. **Consistent Naming**: All files follow `{source}_row{N}` pattern from Google Sheet
-3. **Format Standardization**: All text content converted to UTF-8 `.txt` files
-4. **Metadata Preservation**: File headers track original paths and sizes
-5. **Version Control**: All transformations are deterministic and repeatable
-6. **Quality Validation**: Preprocessing quality checked for empty files, stubs, and data loss
 
 ### D4D Generation Methods
 
-Multiple methods exist for generating D4D metadata from source documents. Each has specific use cases:
+| Method | Status | Best For | Quality | Speed |
+|--------|--------|----------|---------|-------|
+| **claudecode_agent** | ✅ Current (v5+) | Production datasheets | ⭐⭐⭐⭐⭐ | Fast (parallel) |
+| claudecode_assistant | Alternative | Interactive refinement | ⭐⭐⭐⭐⭐ | Medium |
+| claudecode | Legacy | API automation | ⭐⭐⭐ | Medium |
+| gpt5 | Comparison | Benchmarking | ⭐⭐ | Slow |
+| curated | Reference | Gold standard | ⭐⭐⭐⭐⭐ | Manual |
 
-#### Current Canonical Method: `claudecode_agent` ✅
+**Key finding**: claudecode_agent outperforms GPT-5 by 3.26× on multi-document synthesis.
 
-**Status**: Active for v5+ versioned datasheets (December 2024+)
-
-**Location**: `data/d4d_concatenated/claudecode_agent/`, `data/d4d_individual/claudecode_agent/`
-
-**Use for**:
-- Creating new versioned datasheets for GitHub Pages deployment
-- Production-quality D4D generation with comprehensive synthesis
-- Multi-document synthesis requiring intelligent information merging
-
-**Advantages**:
-- Superior synthesis quality (3.26× better than GPT-5 on concatenated files)
-- Parallel processing via Claude Code Task tool (faster for multiple files)
-- Interactive validation and refinement
-- Best performance on complex multi-source documents
-
-**How to use**:
+**Use claudecode_agent for new datasheets**:
 ```bash
-# For versioned datasheets (recommended)
 make d4d-agent PROJECT=AI_READI
 make gen-d4d-html
 make version-html VERSION=6
-make gendoc
 ```
 
-#### Alternative Methods
+### Pipeline Commands Reference
 
-**`claudecode_assistant`** - Interactive Claude Code synthesis
-
-**Status**: Alternative approach, similar quality to claudecode_agent
-
-**Use for**:
-- Interactive refinement workflows
-- Custom synthesis with user guidance
-- Experimentation with different prompts
-
-**Advantages**:
-- Full user control over synthesis process
-- Can ask clarifying questions during generation
-- Good for prototyping new extraction patterns
-
----
-
-**`claudecode`** - Deterministic API-based Claude Code (Older)
-
-**Status**: Superseded by claudecode_agent for most use cases
-
-**Location**: `data/d4d_concatenated/claudecode/`, `data/d4d_individual/claudecode/`
-
-**Use for**:
-- Reproducible API-based generation (temperature=0.0)
-- Automated batch processing without interaction
-- Single-source document extraction
-
-**Advantages**:
-- Fully deterministic with temperature=0.0
-- No interactive session required
-- Good provenance tracking with SHA-256 hashes
-
-**Limitations**:
-- Weaker on multi-document synthesis vs claudecode_agent
-- Requires ANTHROPIC_API_KEY and incurs API costs
-
-**How to use**:
+**Extraction:**
 ```bash
-make extract-d4d-concat-all-claude
+make extract-d4d-individual-all-gpt5      # Extract all individual files
+make extract-d4d-concat-all-gpt5          # Extract from concatenated
+make d4d-pipeline-full-gpt5               # Complete pipeline
 ```
 
----
-
-**`gpt5`** - GPT-5 validated wrapper
-
-**Status**: For comparison and benchmarking only
-
-**Location**: `data/d4d_concatenated/gpt5/`, `data/d4d_individual/gpt5/`
-
-**Use for**:
-- Performance comparison with Claude methods
-- Cross-validation of extraction quality
-- Research and evaluation benchmarks
-
-**Advantages**:
-- Independent validation of extraction approach
-- Useful for identifying method-specific biases
-
-**Limitations**:
-- Significantly weaker synthesis (3.26× worse than claudecode_agent)
-- Identical performance to Claude on single-source files
-- Requires OPENAI_API_KEY and incurs API costs
-
-**How to use**:
+**Concatenation:**
 ```bash
-make extract-d4d-individual-all-gpt5
-make extract-d4d-concat-all-gpt5
+make concat-extracted        # Individual D4D YAMLs
+make concat-preprocessed     # Preprocessed source files
+make concat-raw             # Raw downloads
 ```
 
----
-
-**`curated`** - Hand-curated reference datasheets
-
-**Status**: Reference implementation, not for generation
-
-**Location**: `data/d4d_concatenated/curated/`
-
-**Use for**:
-- Gold standard reference
-- Evaluation baseline
-- Understanding ideal D4D structure
-
-**Note**: These are manually created, not generated by automated methods.
-
-#### Method Comparison Summary
-
-| Method | Status | Best For | Synthesis Quality | Speed | Cost |
-|--------|--------|----------|-------------------|-------|------|
-| **claudecode_agent** | ✅ **Current** | Versioned datasheets | ⭐⭐⭐⭐⭐ | Fast (parallel) | Interactive |
-| claudecode_assistant | Alternative | Interactive refinement | ⭐⭐⭐⭐⭐ | Medium | Interactive |
-| claudecode | Legacy | Deterministic API | ⭐⭐⭐ | Medium | API costs |
-| gpt5 | Comparison | Benchmarking | ⭐⭐ | Slow | API costs |
-| curated | Reference | Gold standard | ⭐⭐⭐⭐⭐ | N/A (manual) | Manual labor |
-
-#### When to Use Each Method
-
-**For versioned production datasheets** → Use `claudecode_agent`
-
-**For interactive experimentation** → Use `claudecode_assistant`
-
-**For reproducible automation** → Use `claudecode` (legacy)
-
-**For method comparison** → Use `gpt5` + `claudecode_agent`
-
-**For reference examples** → Use `curated`
-
-#### Migration Path
-
-If using older methods, migrate to `claudecode_agent`:
-
+**Validation:**
 ```bash
-# Old approach (deprecated)
-make extract-d4d-concat-all-gpt5
-
-# New approach (recommended)
-make d4d-agent PROJECT=AI_READI  # Repeat for all projects
-make gen-d4d-html
-make version-html VERSION=6
-```
-
-See `docs/VERSIONING.md` for complete versioning workflow.
-
-### Complete D4D Pipeline (Recommended)
-
-Run the complete end-to-end pipeline for all projects using GPT-5:
-
-```bash
-# Full pipeline: extract → validate → concatenate → synthesize → HTML
-make d4d-pipeline-full-gpt5
-
-# Or run individual pipeline stages:
-make d4d-pipeline-individual-gpt5     # Extract + validate individual files
-make d4d-pipeline-concatenated-gpt5   # Concatenate + synthesize + HTML
-```
-
-### Step-by-Step Pipeline Targets
-
-#### Step 1: Extract D4D from Individual Files
-
-```bash
-# Extract D4D metadata for all projects using GPT-5 (with validation)
-make extract-d4d-individual-all-gpt5
-
-# Or extract for a single project
-make extract-d4d-individual-gpt5 PROJECT=AI_READI
-
-# Direct script usage (advanced)
-cd aurelian
-uv run python ../src/download/validated_d4d_wrapper.py -i ../data/raw/AI_READI -o ../data/d4d_individual/gpt5/AI_READI
-```
-
-**Features:**
-- Validates download success
-- Checks content relevance to project categories
-- Generates D4D YAML metadata
-- Creates detailed validation reports
-- Output: `data/d4d_individual/gpt5/{PROJECT}/`
-
-#### Step 2: Validate D4D YAMLs
-
-```bash
-# Validate all D4D YAMLs across all projects
-make validate-d4d-all GENERATOR=gpt5
-
-# Validate all YAMLs for a specific project
+make validate-d4d FILE=path/to/file.yaml
 make validate-d4d-project PROJECT=AI_READI GENERATOR=gpt5
-
-# Validate a single D4D YAML file
-make validate-d4d FILE=data/d4d_individual/gpt5/AI_READI/file_d4d.yaml
+make validate-d4d-all GENERATOR=gpt5
 ```
 
-**Features:**
-- Validates against LinkML D4D schema
-- Reports validation errors with details
-- Provides summary statistics
-
-#### Step 3: Concatenate Individual D4D YAMLs
-
+**Monitoring:**
 ```bash
-# Concatenate individual D4D YAMLs by project (for synthesis)
-make concat-extracted
-
-# Concatenate preprocessed individual files
-make concat-preprocessed
-
-# Concatenate raw downloads
-make concat-raw
-
-# Custom concatenation from any directory
-make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=output.txt
-```
-
-**Features:**
-- Reproducible alphabetical ordering
-- Includes file metadata headers
-- Generates table of contents
-- Output: `data/preprocessed/concatenated/{PROJECT}_concatenated.txt`
-
-#### Step 4: Extract D4D from Concatenated Files
-
-```bash
-# Extract D4D from all concatenated files using GPT-5
-make extract-d4d-concat-all-gpt5
-
-# Or extract from a single project's concatenated file
-make extract-d4d-concat-gpt5 PROJECT=AI_READI
-
-# Process with custom parameters
-make process-concat INPUT_FILE=data/preprocessed/concatenated/AI_READI_concatenated.txt
-
-# Direct script usage (advanced)
-cd aurelian
-uv run python ../src/download/process_concatenated_d4d.py \
-  -i ../data/preprocessed/concatenated/AI_READI_concatenated.txt \
-  -o ../data/d4d_concatenated/gpt5/AI_READI_d4d.yaml
-```
-
-**Features:**
-- Synthesizes multiple D4D YAML files into comprehensive document
-- Merges complementary information from all sources
-- Prefers more detailed/specific information over generic
-- Uses aurelian's D4D agent for intelligent synthesis
-- Output: `data/d4d_concatenated/gpt5/{PROJECT}_d4d.yaml`
-
-#### Step 5: Generate HTML from D4D YAMLs
-
-```bash
-# Generate human-readable HTML from all D4D YAMLs
-make gen-d4d-html
-```
-
-**Features:**
-- Generates HTML for individual and concatenated D4D YAMLs
-- Creates both GPT-5 and Claude Code versions
-- Preserves curated HTML files
-- Output: `data/d4d_html/`
-
-### Data Status and Monitoring
-
-Check the current state of your data pipeline:
-
-```bash
-# Full detailed status report
-make data-status
-
-# Quick compact overview
-make data-status-quick
-
-# Detailed D4D YAML size report
-make data-d4d-sizes
-```
-
-**Features:**
-- Shows file counts for all directories in the pipeline
-- Flags empty directories with ⚠️ warnings
-- Identifies missing directories with ❌ markers
-- Displays file sizes and line counts for key files
-- Provides summary statistics across all projects
-- Reports D4D YAML sizes with individual and concatenated breakdowns
-
-### Quick Reference: Common Workflows
-
-```bash
-# Check current pipeline status
-make data-status-quick
-
-# Extract D4D from new raw downloads
-make extract-d4d-individual-all-gpt5
-
-# Validate all extracted YAMLs
-make validate-d4d-all
-
-# Create comprehensive D4D from all individual YAMLs
-make concat-extracted
-make extract-d4d-concat-all-gpt5
-
-# Generate HTML renderings
-make gen-d4d-html
-
-# Run complete pipeline
-make d4d-pipeline-full-gpt5
-```
-
-### D4D Agent Requirements
-- Set `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` environment variable
-- Validated wrapper uses GPT-5 by default
-- Concatenated processor uses GPT-5 by default
-- Run from `aurelian/` directory using `uv run` for dependency management
-- Expects column-organized input directories (by project category)
-- Outputs YAML files conforming to the D4D schema
-
-### D4D Agent Architecture
-The D4D agents use the `aurelian` framework:
-- Located in `aurelian/src/aurelian/agents/d4d/`
-- Uses pydantic-ai for agent orchestration
-- Loads full schema from GitHub or local file
-- Processes HTML, PDF, JSON, and text documents
-- Can synthesize multiple documents into comprehensive metadata
-- Can be run via CLI: `aurelian datasheets <URL>` or `aurelian datasheets --ui`
-
-**Note**: The `aurelian/` directory is a git submodule. Initialize it with:
-```bash
-git submodule update --init --recursive
+make data-status            # Full status report
+make data-status-quick      # Compact overview
+make data-d4d-sizes        # D4D YAML sizes
 ```
 
 ## D4D Assistant Instructions (GitHub Actions)
 
-**IMPORTANT**: This section is for the D4D Assistant running in GitHub Actions.
+**For GitHub Actions D4D Assistant only**: Read instruction files FIRST:
+- `.github/workflows/d4d_assistant_create.md` - Creating new datasheets
+- `.github/workflows/d4d_assistant_edit.md` - Editing existing datasheets
+- Both include "Modifying an Existing PR" sections
 
-### When You Are the D4D Assistant
+Critical requirements:
+- Scope: D4D tasks only (redirect others)
+- Tools: GitHub MCP, ARTL, WebSearch, WebFetch
+- Validation: MUST validate YAML before PRs
+- Comments: Update both PR and issue
 
-If you are invoked as the D4D Assistant (via GitHub Actions, issue mentions, or labeled requests), you MUST:
-
-1. **Read the appropriate instruction file FIRST** before doing anything:
-   - **For creating new datasheets**: Read `.github/workflows/d4d_assistant_create.md`
-   - **For editing existing datasheets**: Read `.github/workflows/d4d_assistant_edit.md`
-   - **For modifying an existing PR**: Both files contain "Modifying an Existing PR" sections
-
-2. **Follow the instructions exactly** as specified in the file
-
-3. **Do not proceed** without reading the instruction file - it contains critical information about:
-   - Scope limitations (D4D tasks only - redirect non-D4D questions)
-   - Available MCP tools (GitHub, ARTL, WebSearch, WebFetch) and how to use them
-   - Step-by-step workflows for metadata extraction and datasheet generation
-   - Pull request creation and modification procedures
-   - Validation requirements (MUST validate before creating/updating PRs)
-   - User communication templates
-   - Error handling guidance
-
-### Instruction File Locations
-
-- **`.github/workflows/d4d_assistant_create.md`** - Creating new D4D datasheets from URLs
-  - Includes: How to modify existing PRs with updates
-- **`.github/workflows/d4d_assistant_edit.md`** - Editing existing D4D YAML files
-  - Includes: How to apply additional edits to existing PRs
-- **`.github/workflows/README.md`** - MCP server setup and troubleshooting guide
-
-### Quick Reference: D4D Assistant Workflow
-
-When a user requests D4D assistance:
-
-```
-1. Identify task type: create new, edit existing, or modify PR
-2. READ appropriate instruction file from .github/workflows/
-3. Follow step-by-step instructions exactly
-4. Use MCP tools (GitHub, ARTL, WebSearch, WebFetch)
-5. Validate YAML against schema (REQUIRED before PR creation)
-6. Create PR with changes OR update existing PR
-7. Comment on PR with what changed
-8. Notify user in GitHub issue with PR link
-```
-
-**Critical Notes:**
-- Always validate YAML before creating or updating PRs
-- Use `gh pr checkout <number>` to modify existing PRs
-- Comment on both the PR and the issue to keep users informed
-- Only handle D4D-related tasks; politely redirect others
-
-**Note**: These workflows are specific to the GitHub Actions environment and differ from interactive Claude Code usage.
 ## Document Concatenation
 
-This project includes tools to concatenate multiple documents from a directory into a single document in reproducible order.
-
-### Concatenation Commands
+Concatenates multiple documents into single file with reproducible ordering.
 
 ```bash
-# Concatenate documents from a specific directory
-make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=path/to/output.txt
-
-# Optional parameters:
-make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=output.txt EXTENSIONS=".txt .md" RECURSIVE=true
-
-# Concatenate individual D4D YAMLs by project (from data/d4d_individual/gpt5/)
-make concat-extracted
-
-# Concatenate preprocessed files by project (from data/preprocessed/individual/)
-make concat-preprocessed
-
-# Concatenate raw downloads by project (from data/raw/)
-make concat-raw
-
-# Direct script usage with more options:
-poetry run python src/download/concatenate_documents.py -i input_dir -o output.txt [OPTIONS]
-
-# Script options:
-#   -e, --extensions .txt .md    # Filter by file extensions
-#   -r, --recursive             # Search subdirectories
-#   --no-headers                # Exclude file headers
-#   --no-summary                # Exclude table of contents
-#   -s "separator"              # Custom separator between files
+make concat-docs INPUT_DIR=path/to/dir OUTPUT_FILE=output.txt
+python src/download/concatenate_documents.py -i input -o output.txt [--extensions .txt .md] [--recursive]
 ```
 
-**Output location:** All concatenated files are saved to `data/preprocessed/concatenated/`
-
-### Features
-
-- **Reproducible ordering**: Files are sorted alphabetically for consistent results
-- **Multiple formats**: Handles text, HTML, YAML, JSON, and other text-based formats
-- **File metadata**: Includes headers with filename, path, and size
-- **Table of contents**: Summary section lists all concatenated files
-- **Error handling**: Gracefully handles encoding issues and read errors
-- **Project organization**: Automatically processes all projects (AI_READI, CHORUS, CM4AI, VOICE)
-
-### Use Cases
-
-- Combine all D4D YAMLs for synthesis into comprehensive metadata
-- Concatenate preprocessed files for batch D4D extraction
-- Combine raw downloads for comprehensive processing
-- Create single input documents for LLM processing
-- Merge documentation fragments into complete documents
+Features: Alphabetical sorting, file headers, table of contents, multiple format support.
 
 ## Custom Makefile Targets
 
-Beyond standard LinkML targets, this project adds comprehensive D4D pipeline targets:
-
-### Status and Monitoring Targets
+**Status/Monitoring:**
 ```bash
-make data-status                         # Full data status report with counts
-make data-status-quick                   # Compact status overview
-make data-d4d-sizes                      # Detailed D4D YAML size report
+make data-status[-quick]    # Data pipeline status
+make data-d4d-sizes         # D4D YAML sizes
 ```
 
-### Concatenation Targets
+**Concatenation:**
 ```bash
-make concat-extracted      # Concatenate individual D4D YAMLs by project
-make concat-preprocessed   # Concatenate preprocessed files by project
-make concat-raw            # Concatenate raw downloads by project
-make concat-docs           # Concatenate documents from directory (INPUT_DIR=, OUTPUT_FILE=)
+make concat-{extracted|preprocessed|raw}
 ```
 
-### D4D Extraction Targets
-
-#### GPT-5 Extraction
+**D4D Extraction:**
 ```bash
-# Individual file extraction
-make extract-d4d-individual-gpt5         # Extract for one project (PROJECT=AI_READI)
-make extract-d4d-individual-all-gpt5     # Extract for all projects
-
-# Concatenated file extraction
-make extract-d4d-concat-gpt5             # Extract from one concatenated (PROJECT=AI_READI)
-make extract-d4d-concat-all-gpt5         # Extract from all concatenated files
-make process-concat                      # Process single file (INPUT_FILE=)
-make process-all-concat                  # Process all files in directory
+make extract-d4d-{individual|concat}-{all-}gpt5
+make extract-d4d-{individual|concat}-{all-}claude
 ```
 
-#### Claude Code Deterministic Extraction
+**Validation:**
 ```bash
-# Concatenated file extraction (API-based, deterministic)
-make extract-d4d-concat-claude           # Extract for one project (PROJECT=AI_READI)
-make extract-d4d-concat-all-claude       # Extract for all projects
-
-# Direct script usage
-python3 src/download/process_d4d_deterministic.py --all
-python3 src/download/process_d4d_deterministic.py -i INPUT -o OUTPUT -p PROJECT
+make validate-d4d[-project|-all]
 ```
 
-**Requirements:**
-- `ANTHROPIC_API_KEY` environment variable must be set
-- Python packages: `anthropic`, `pyyaml` (install with `pip install anthropic pyyaml`)
-
-**Limitations:**
-- Requires ANTHROPIC_API_KEY and incurs API costs
-- Requires network connectivity
-- Rate limits may apply for batch processing
-
-**Alternative Approach:**
-For scenarios where API access is not available, use Claude Code assistant direct synthesis:
-1. Read concatenated input files from `data/preprocessed/concatenated/`
-2. Follow prompts from `src/download/prompts/d4d_concatenated_*.txt`
-3. Reference schema from `src/data_sheets_schema/schema/data_sheets_schema_all.yaml`
-4. Generate D4D YAML following the same deterministic principles
-5. See `notes/DETERMINISM.md` for complete details on the direct synthesis approach
-
-**Deterministic Settings:**
-- Temperature: 0.0 (maximum determinism)
-- Model: claude-sonnet-4-5-20250929 (date-pinned)
-- Schema: Local version-controlled file
-- Prompts: External version-controlled files
-- Metadata: Comprehensive provenance tracking with SHA-256 hashes
-
-### Validation Targets
+**HTML:**
 ```bash
-make validate-d4d                        # Validate single file (FILE=path/to/file.yaml)
-make validate-d4d-project                # Validate project (PROJECT=, GENERATOR=gpt5)
-make validate-d4d-all                    # Validate all D4D YAMLs (GENERATOR=gpt5)
+make gen-d4d-html
 ```
 
-### HTML Generation Targets
+**Pipelines:**
 ```bash
-make gen-d4d-html                        # Generate HTML from D4D YAMLs
-make gen-html                            # Alias for gen-d4d-html
-```
-
-### Complete Pipeline Workflows
-```bash
-make d4d-pipeline-individual-gpt5        # Extract + validate individual files
-make d4d-pipeline-concatenated-gpt5      # Concatenate + synthesize + HTML
-make d4d-pipeline-full-gpt5              # Complete end-to-end pipeline
-```
-
-### Schema and Example Targets
-```bash
-make gen-minimal-examples  # Generate minimal example files for all classes
-make full-schema          # Generate data_sheets_schema_all.yaml (merged schema)
-make test-modules         # Validate all individual D4D module schemas
-make lint-modules         # Lint all individual D4D module schemas
+make d4d-pipeline-{individual|concatenated|full}-gpt5
 ```
 
 ## Null/Empty Value Handling
 
-The codebase follows a consistent pattern for handling empty/missing values:
-
-### Schema and Python Code
-- **Default for empty values**: `null`/`None`
-- Python datamodel uses `Optional[type] = None` for all optional fields
-- Schema uses `default_range: string` but does NOT use `ifabsent` rules that would force empty strings
-- YAML data files should use `null` or omit fields entirely for missing values
-
-### HTML Rendering
-- **HTML output**: All `None`/`null` values are converted to empty strings `""`
-- This applies to:
-  - `src/html/human_readable_renderer.py` - Human-readable HTML output
-  - `src/renderer/yaml_renderer.py` - YAML to HTML/PDF rendering
-- Empty strings in HTML provide cleaner display without "Not specified" or placeholder text
-- Tables display empty cells rather than "-" or "N/A" for null values
-
-**Example:**
-```yaml
-# In YAML data file
-field1: "value"     # Has value
-field2: null        # No value (or omit entirely)
-```
-
-```html
-<!-- In HTML rendering -->
-<td>value</td>      <!-- field1 displays value -->
-<td></td>           <!-- field2 displays as empty -->
-```
+- **Schema/Python**: Use `null`/`None` for missing values (default for optional fields)
+- **HTML rendering**: Converts `None`/`null` → empty strings `""` for cleaner display
+- Files: `src/html/human_readable_renderer.py`, `src/renderer/yaml_renderer.py`
 
 ## D4D Evaluation Framework
 
-This repository includes a comprehensive evaluation system to compare D4D generation methods using two rubric systems.
+Evaluates D4D generation quality using two rubrics:
 
-### Evaluation Commands
-
-```bash
-# Evaluate concatenated D4D files (GPT-5, Claude Code, Curated)
-make evaluate-d4d                            # Evaluate all projects
-make evaluate-d4d-project PROJECT=VOICE      # Evaluate single project
-
-# Evaluate individual D4D files (GPT-5, Claude Code)
-make evaluate-d4d-individual                 # Evaluate all individual files
-
-# View results
-make eval-summary                            # View concatenated summary
-make eval-summary-individual                 # View individual summary
-make eval-details PROJECT=VOICE METHOD=claudecode  # View detailed report
-
-# Clean results
-make clean-eval                              # Remove concatenated results
-make clean-eval-individual                   # Remove individual results
-```
-
-### Evaluation Architecture
-
-The evaluation framework (`src/evaluation/evaluate_d4d.py`) compares three D4D generation methods:
-
-1. **Curated Comprehensive** - Manually curated datasheets (DatasetCollection format)
-2. **GPT-5** - Generated using GPT-5 API (flat D4D schema)
-3. **Claude Code Deterministic** - Direct synthesis at temperature=0.0 (flat D4D schema)
-
-### Two Rubric Systems
-
-**Rubric10** (`data/rubric/rubric10.txt`):
-- 10 hierarchical elements with 5 sub-elements each
-- Binary scoring (0/1) per sub-element
-- Maximum: 50 points total
-- Elements: Discovery, Access, Reuse, Ethics, Composition, Provenance, Motivation, Technical Transparency, Limitations, Integration
-
-**Rubric20** (`data/rubric/rubric20.txt`):
-- 20 questions in 4 categories
-- Quality-based scoring (0-5 scale) or pass/fail
-- Maximum: 84 points total
-- Categories: Structural Completeness, Metadata Quality, Technical Documentation, FAIRness & Accessibility
-
-### Evaluation Modes
-
-**Concatenated Mode** (default):
-- Evaluates comprehensive D4D files synthesized from multiple sources
-- Located in `data/d4d_concatenated/{curated,gpt5,claudecode}/`
-- Results in `data/evaluation/`
-
-**Individual Mode** (`--individual` flag):
-- Evaluates D4D files extracted from single source documents
-- Located in `data/d4d_individual/{gpt5,claudecode}/`
-- Results in `data/evaluation_individual/`
-
-### Key Evaluation Findings
-
-**Concatenated files** (synthesis required):
-- Claude Code: 37.5% (Rubric10), 52.4% (Rubric20) - **Best**
-- Curated: 21.3% (Rubric10), 41.7% (Rubric20)
-- GPT-5: 11.5% (Rubric10), 17.3% (Rubric20)
-- Claude Code outperforms GPT-5 by **3.26×**
-
-**Individual files** (single-source extraction):
-- Claude Code: 18.8% (Rubric10), 26.3% (Rubric20)
-- GPT-5: 18.8% (Rubric10), 26.3% (Rubric20)
-- **Identical performance** - synthesis is Claude Code's advantage
-
-### Evaluation Output
-
-All evaluation runs generate:
-- `summary_report.md` - Executive summary with comparison tables
-- `detailed_analysis/{PROJECT}_{METHOD}_evaluation.md` - Per-file breakdowns
-- `scores.csv` - Raw scoring data in CSV format
-- `scores.json` - Detailed scores with full metadata in JSON
-
-### Direct Script Usage
+**Rubric10** (50 points): 10 hierarchical elements × 5 sub-elements, binary scoring
+**Rubric20** (84 points): 20 questions across 4 categories, 0-5 scale
 
 ```bash
 # Evaluate concatenated files
-poetry run python src/evaluation/evaluate_d4d.py \
-  --base-dir data \
-  --projects AI_READI CM4AI VOICE CHORUS \
-  --methods curated gpt5 claudecode \
-  --output-dir data/evaluation
+make evaluate-d4d [PROJECT=VOICE]
 
 # Evaluate individual files
-poetry run python src/evaluation/evaluate_d4d.py \
-  --base-dir data \
-  --methods gpt5 claudecode \
-  --output-dir data/evaluation_individual \
-  --individual
+make evaluate-d4d-individual
 
-# Evaluate single project
-poetry run python src/evaluation/evaluate_d4d.py \
-  --project VOICE \
-  --output-dir data/evaluation
+# View results
+make eval-summary[-individual]
+make eval-details PROJECT=VOICE METHOD=claudecode
 ```
 
-### Evaluation Documentation
+**Output**: `data/evaluation/` - summary reports, detailed analyses, scores (CSV/JSON)
 
-Complete methodology, rubric details, and findings documented in:
-- `notes/D4D_EVALUATION.md` - Full evaluation methodology and results
-- `data/rubric/rubric10.txt` - 10-element hierarchical rubric specification
-- `data/rubric/rubric20.txt` - 20-question detailed rubric specification
+**Key findings** (concatenated synthesis):
+- Claude Code: 37.5% (R10), 52.4% (R20) - Best
+- Curated: 21.3% (R10), 41.7% (R20)
+- GPT-5: 11.5% (R10), 17.3% (R20)
+
+Individual files (single-source): Claude Code and GPT-5 identical at 18.8% (R10), 26.3% (R20).
 
 ## D4D LLM-based Evaluation (Quality Assessment)
 
-The repository includes LLM-as-judge evaluation agents that provide quality-based assessment of D4D datasheets, complementing the existing field-presence detection.
+LLM-as-judge agents provide quality assessment complementing field-presence detection.
 
-### LLM Evaluation Agents
+### Conversational Evaluation Agents
 
-**Conversational quality evaluation - No API key required**
+**d4d-rubric10** (`.claude/agents/d4d-rubric10.md`): 10-element hierarchical rubric
+**d4d-rubric20** (`.claude/agents/d4d-rubric20.md`): 20-question detailed rubric
 
-Two specialized agents for quality assessment that work directly within Claude Code conversations:
-
-**d4d-rubric10** (`.claude/agents/d4d-rubric10.md`):
-- Evaluates using the 10-element hierarchical rubric
-- Binary scoring (0/1) with quality notes and evidence
-- Maximum: 50 points (10 elements × 5 sub-elements)
-- Focus: Discovery, access, reuse, ethics, composition, provenance, motivation, transparency, limitations, integration
-
-**d4d-rubric20** (`.claude/agents/d4d-rubric20.md`):
-- Evaluates using the 20-question detailed rubric
-- Mixed scoring: 0-5 numeric or pass/fail
-- Maximum: 84 points across 4 categories
-- Focus: Structural completeness, metadata quality, technical documentation, FAIR compliance
-
-### Usage Examples
-
-**PRIMARY MODE: Conversational Evaluation (No API Key Required)**
+**Usage** (no API key required in Claude Code):
 ```
 User: Evaluate data/d4d_concatenated/claudecode/VOICE_d4d.yaml with d4d-rubric10
-
-Agent returns:
-✅ Rubric10 Evaluation Complete
-Overall Score: 38.5/50 (77%)
-
-Strengths:
-- Comprehensive ethical documentation with IRB approval
-- Clear access mechanisms and licensing
-- Detailed preprocessing pipeline
-
-Weaknesses:
-- Missing funding agency and award details
-- Limited version history documentation
-
-Recommendations:
-- Add funding_and_acknowledgements section
-- Include GitHub links for preprocessing code
 ```
 
-**More Usage Examples:** See `notes/RUBRIC_AGENT_USAGE.md` for comprehensive examples including:
-- Comparing multiple methods
-- Pre-publication quality checks
-- Tracking improvements over time
-- Understanding quality vs presence gaps
-- Actionable improvement recommendations
+Agent provides: Overall score, strengths, weaknesses, recommendations with evidence quotes.
 
-**Batch Conversational Evaluation:**
-```
-User: Evaluate all four projects (AI_READI, CHORUS, CM4AI, VOICE) across
-all methods (curated, gpt5, claudecode_agent, claudecode_assistant) using
-both rubric10 and rubric20 and save results to data/evaluation_llm/
-```
-
-The agent will iterate through all files, evaluate each one, and save structured results.
-
-**OPTIONAL: External Automation (via Makefile - Requires ANTHROPIC_API_KEY):**
-```bash
-# For CI/CD or external scripting only
-# Requires: export ANTHROPIC_API_KEY=sk-ant-...
-
-# Batch evaluation of all concatenated files
-make evaluate-d4d-llm-batch-concatenated
-# Evaluates: AI_READI, CHORUS, CM4AI, VOICE
-# Methods: curated, gpt5, claudecode_agent, claudecode_assistant
-# Time: ~25 minutes, Cost: ~$6
-
-# Dry run (preview files without evaluating)
-make evaluate-d4d-llm-batch-dry-run
-
-# Evaluate all individual D4D files (~85 files)
-make evaluate-d4d-llm-batch-individual
-# Time: ~2 hours, Cost: ~$34
-
-# Evaluate individual files for specific project/method
-make evaluate-d4d-llm-batch-individual-filtered PROJECT=VOICE
-make evaluate-d4d-llm-batch-individual-filtered METHOD=claudecode_agent
-
-# Complete evaluation (concatenated + individual)
-make evaluate-d4d-llm-batch-all
-# Time: ~2.5 hours, Cost: ~$40
-
-# ─────────────────────────────────────────────────
-# Legacy single-file evaluation targets:
-# ─────────────────────────────────────────────────
-
-# Evaluate with rubric10
-make evaluate-d4d-llm-rubric10
-
-# Evaluate with rubric20
-make evaluate-d4d-llm-rubric20
-
-# Evaluate with both rubrics
-make evaluate-d4d-llm-both
-
-# Evaluate single file
-make evaluate-d4d-llm FILE=data/d4d_concatenated/claudecode/VOICE_d4d.yaml \\
-  PROJECT=VOICE METHOD=claudecode RUBRIC=both
-
-# Compare LLM vs presence-based evaluation
-make compare-evaluations
-
-# View summaries
-make eval-llm-summary
-
-# Clean results
-make clean-eval-llm
-```
-
-**Reproducibility:**
-- Temperature: 0.0 (fully deterministic)
-- Model: claude-sonnet-4-5-20250929 (date-pinned)
-- Same D4D file → Same quality score every time
-- Rubrics: Version-controlled in `data/rubric/`
-- **No API key needed for conversational use** (you're already using Claude Code)
-- External scripts (optional): `src/evaluation/batch_evaluate_*.sh`
-
-### LLM Evaluation Features
-
-**Quality over Presence:**
-- Assesses content quality, not just field existence
-- Evaluates completeness, actionability, and usefulness
-- Provides evidence quotes from D4D files
-- Identifies strengths, weaknesses, and recommendations
-
-**Scoring Approach:**
-- Temperature: 0.0 (fully deterministic evaluation)
-- Model: claude-sonnet-4-5-20250929 (date-pinned)
-- Returns: JSON with scores, evidence, and assessment
-- Exports: Compatible CSV, JSON, and Markdown reports
-
-**Comparison with Presence Detection:**
-
-| Metric | Presence Detection | LLM Quality Assessment |
-|--------|-------------------|----------------------|
-| Speed | ~1 second | ~30-60 seconds |
-| Cost | Free | ~$0.10-0.30 per file |
-| Insight | "Field missing" | "Field present but generic/incomplete/excellent" |
-| Evidence | None | Quotes, reasoning, context |
-| Use Case | CI/CD, quick checks | Deep analysis, comparison |
-
-### LLM Evaluation Commands
+### External Automation (Optional - Requires ANTHROPIC_API_KEY)
 
 ```bash
-# Direct script usage
-poetry run python src/evaluation/evaluate_d4d_llm.py \\
-  --file data/d4d_concatenated/claudecode/VOICE_d4d.yaml \\
-  --project VOICE --method claudecode --rubric both
-
 # Batch evaluation
-poetry run python src/evaluation/evaluate_d4d_llm.py \\
-  --all --rubric both --output-dir data/evaluation_llm
+make evaluate-d4d-llm-batch-concatenated  # ~25min, ~$6
+make evaluate-d4d-llm-batch-individual    # ~2hrs, ~$34
+make evaluate-d4d-llm-batch-all           # Complete
 
-# Compare methods
-poetry run python src/evaluation/compare_evaluation_methods.py \\
-  --llm-dir data/evaluation_llm \\
-  --presence-dir data/evaluation
+# Single file (legacy)
+make evaluate-d4d-llm-{rubric10|rubric20|both}
+make evaluate-d4d-llm FILE=path PROJECT=X METHOD=Y RUBRIC=both
+
+# Compare with presence detection
+make compare-evaluations
 ```
 
-### LLM Evaluation Output
+**Settings**: Temperature 0.0, model claude-sonnet-4-5-20250929 (fully deterministic)
 
-All LLM evaluation runs generate:
-- `data/evaluation_llm/rubric10/summary_report.md` - Rubric10 summary
-- `data/evaluation_llm/rubric20/summary_report.md` - Rubric20 summary
-- `data/evaluation_llm/scores.csv` - Compatible scoring data
-- `data/evaluation_llm/scores.json` - Full results with metadata
-- `data/evaluation_comparison/comparison_report.md` - LLM vs presence comparison
+**Output**: `data/evaluation_llm/` - rubric10/rubric20 summaries, scores.csv, scores.json
 
-### Dependencies
+**Comparison**:
+| Metric | Presence | LLM Quality |
+|--------|----------|-------------|
+| Speed | ~1s | ~30-60s |
+| Cost | Free | ~$0.10-0.30 |
+| Insight | Field exists? | Quality/completeness |
+| Evidence | None | Quotes, reasoning |
 
-**Environment variables:**
-```bash
-export ANTHROPIC_API_KEY=sk-ant-...  # Required for LLM evaluation
-```
-
-**Python packages:**
-```bash
-poetry add anthropic  # Claude API client
-```
-
-### LLM Evaluation Documentation
-
-Complete LLM evaluation methodology documented in:
-- `notes/LLM_EVALUATION.md` - Full LLM evaluation methodology
-- `src/download/prompts/rubric10_system_prompt.md` - Rubric10 evaluation prompt
-- `src/download/prompts/rubric20_system_prompt.md` - Rubric20 evaluation prompt
+See `notes/LLM_EVALUATION.md` and `notes/RUBRIC_AGENT_USAGE.md` for details.
 
 ## Running Single Tests
 
-To run a specific test file:
 ```bash
-poetry run python -m unittest tests.test_d4d_full_schema
-poetry run python -m unittest tests.test_data
-poetry run python -m unittest tests.test_renderer
-```
-
-To run a specific test class or method:
-```bash
-poetry run python -m unittest tests.test_d4d_full_schema.TestD4DFullSchema
-poetry run python -m unittest tests.test_d4d_full_schema.TestD4DFullSchema.test_full_schema_generation
+poetry run python -m unittest tests.test_d4d_full_schema[.TestClass[.test_method]]
 ```
 
 ## Important Notes
 
-- **DO NOT EDIT** files in `project/` or `src/data_sheets_schema/datamodel/` - these are auto-generated
-- **DO NOT EDIT** `data_sheets_schema_all.yaml` - it's generated by `make full-schema`
-- The main schema imports all module schemas for reusable components
-- Poetry manages all dependencies - use `poetry add` rather than pip
-- LinkML generates multiple output formats (JSON Schema, OWL, SHACL, etc.) from single YAML schema source
-- Always run `make gen-project` after schema changes to regenerate artifacts
-- Module files are in `src/data_sheets_schema/schema/` (NOT in a `modules/` subdirectory)
-- When adding new classes, prefer inheriting from existing base classes in `D4D_Base_import.yaml`
-- The `aurelian/` directory is a git submodule - initialize with `git submodule update --init --recursive`
-- **Legacy data** is archived in `data/ATTIC/` - see `data/ATTIC/README.md` for details on archived directories and migration timeline
+- **DO NOT EDIT** `project/`, `src/data_sheets_schema/datamodel/`, `data_sheets_schema_all.yaml` (auto-generated)
+- Run `make gen-project` after schema changes
+- Module files in `src/data_sheets_schema/schema/` (NOT in modules/ subdirectory)
+- Prefer inheriting from base classes in `D4D_Base_import.yaml`
+- `aurelian/` is git submodule: `git submodule update --init --recursive`
+- Legacy data in `data/ATTIC/` (see ATTIC/README.md)
+- Always run `make regen-all` after editing schemas to stay in sync
+
+## LinkML-Specific Commands
+
+```bash
+linkml-lint <schema.yaml>
+linkml-convert -s <schema> -C <Class> <input> -o <output>
+gen-linkml -o <output> -f yaml <input>
+gen-doc -d docs <schema>
+```
+
+## Common Workflows
+
+**Add Module**: Create `D4D_NewModule.yaml`, import `D4D_Base_import`, add to main schema, add to `Dataset` class, run `make gen-project && make test`
+
+**Modify Schema**: Edit file → `make lint-modules` → `make test-modules` → `make test-schema` → `make gen-project` → `make test`
+
+**Example Data**: Add to `src/data/examples/valid/` or `invalid/` → `make test-examples` → check `examples/output/`

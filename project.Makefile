@@ -1098,8 +1098,19 @@ endif
 			cp data/d4d_html/concatenated/claudecode_agent/$${project}_evaluation.html \
 			   src/html/output/D4D_-_$${project}_v$(VERSION)_evaluation.html; \
 			echo "    ✓ Created D4D_-_$${project}_v$(VERSION)_evaluation.html"; \
+		elif [ -f data/d4d_html/concatenated/claudecode_agent/$${project}_evaluation_rubric10.html ]; then \
+			cp data/d4d_html/concatenated/claudecode_agent/$${project}_evaluation_rubric10.html \
+			   src/html/output/D4D_-_$${project}_v$(VERSION)_evaluation.html; \
+			echo "    ✓ Created D4D_-_$${project}_v$(VERSION)_evaluation.html (from rubric10 source)"; \
 		else \
 			echo "    ⚠️  Missing: $${project}_evaluation.html"; \
+		fi; \
+		if [ -f data/d4d_html/concatenated/claudecode_agent/$${project}_evaluation_rubric20.html ]; then \
+			cp data/d4d_html/concatenated/claudecode_agent/$${project}_evaluation_rubric20.html \
+			   src/html/output/D4D_-_$${project}_v$(VERSION)_evaluation_rubric20.html; \
+			echo "    ✓ Created D4D_-_$${project}_v$(VERSION)_evaluation_rubric20.html"; \
+		else \
+			echo "    ⚠️  Missing: $${project}_evaluation_rubric20.html"; \
 		fi; \
 	done
 	@echo ""

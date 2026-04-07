@@ -29,6 +29,8 @@ import yaml
 from pydantic_ai import Agent
 from dataclasses import dataclass
 
+from data_sheets_schema.constants import PROJECTS
+
 
 @dataclass
 class SimpleD4DConfig:
@@ -279,7 +281,7 @@ additional text before or after the YAML.
 
 async def process_all_projects(base_input_dir: Path, base_output_dir: Path):
     """Process all projects."""
-    projects = ['AI_READI', 'CHORUS', 'CM4AI', 'VOICE']
+    projects = PROJECTS
 
     print("🚀 Processing all projects with GPT-5...")
 

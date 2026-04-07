@@ -10,6 +10,27 @@ from datetime import datetime
 from jinja2 import Template, Environment
 from pathlib import Path
 
+
+def load_structured_data(file_path):
+    """Load a YAML or JSON file and return parsed data with its detected format."""
+    with open(file_path, 'r', encoding='utf-8-sig') as f:
+        content = f.read()
+
+    try:
+        data = yaml.safe_load(content)
+        data_format = "yaml"
+    except yaml.YAMLError:
+        try:
+            data = json.loads(content)
+            data_format = "json"
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Could not parse {file_path} as YAML or JSON") from e
+
+    if not data:
+        raise ValueError(f"No data found in {file_path}")
+
+    return data, data_format
+
 def organize_data_by_d4d_sections(data):
     """Organize data by D4D sections based on content analysis"""
     sections = {
@@ -214,54 +235,54 @@ def render_data_to_linkml_html(data, title):
     
     return html_content
 
+
+def render_structured_file_to_linkml_html(file_path, output_path, export_data_file=False):
+    """Render a single YAML/JSON file to LinkML-style HTML."""
+    input_path = Path(file_path)
+    html_output_path = Path(output_path)
+
+    data, data_format = load_structured_data(input_path)
+
+    html_output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if export_data_file:
+        data_output_path = html_output_path.parent / f"{input_path.stem}_data.{data_format}"
+        with open(data_output_path, 'w', encoding='utf-8') as f:
+            if data_format == "yaml":
+                yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+            else:
+                json.dump(data, f, indent=2)
+
+    html_content = render_data_to_linkml_html(data, input_path.stem)
+
+    with open(html_output_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
+    return html_output_path
+
 def process_text_file(file_path, output_dir):
     """Process a single text file and generate HTML output"""
-    
-    # Read the text file and handle BOM
-    with open(file_path, 'r', encoding='utf-8-sig') as f:
-        content = f.read()
-    
-    # Try to parse as YAML
-    try:
-        data = yaml.safe_load(content)
-        data_format = "yaml"
-    except yaml.YAMLError:
-        try:
-            # If YAML fails, try JSON
-            data = json.loads(content)
-            data_format = "json"
-        except json.JSONDecodeError:
-            print(f"Could not parse {file_path} as YAML or JSON")
-            return False
-    
-    if not data:
-        print(f"No data found in {file_path}")
-        return False
-    
-    # Generate output filename
     base_name = Path(file_path).stem
-    output_path = os.path.join(output_dir, f"{base_name}_linkml.html")
-    
-    # Save extracted data
-    data_output_path = os.path.join(output_dir, f"{base_name}_data.{data_format}")
-    with open(data_output_path, 'w', encoding='utf-8') as f:
-        if data_format == "yaml":
-            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
-        else:
-            json.dump(data, f, indent=2)
-    
-    # Generate HTML
-    html_content = render_data_to_linkml_html(data, base_name)
-    
-    # Write HTML output
-    with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(html_content)
-    
+    output_path = Path(output_dir) / f"{base_name}_linkml.html"
+
+    try:
+        _, data_format = load_structured_data(file_path)
+        rendered_path = render_structured_file_to_linkml_html(
+            file_path,
+            output_path,
+            export_data_file=True,
+        )
+    except ValueError as e:
+        print(e)
+        return False
+
+    data_output_path = Path(output_dir) / f"{base_name}_data.{data_format}"
+
     print(f"Processed: {file_path}")
     print(f"  - Data format: {data_format}")
     print(f"  - Data file: {data_output_path}")
-    print(f"  - LinkML HTML: {output_path}")
-    
+    print(f"  - LinkML HTML: {rendered_path}")
+
     return True
 
 def main():

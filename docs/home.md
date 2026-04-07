@@ -1,6 +1,6 @@
 # Datasheets for Datasets Schema
 
-**📚 View:** [Schema Documentation](index.md) | [D4D Examples](d4d_examples.md) | [About](about.md)
+**📚 View:** [Schema Documentation](index.md) | [CLI Reference](cli.md) | [D4D Examples](d4d_examples.md) | [About](about.md)
 
 A LinkML schema for Datasheets for Datasets model as published in [Datasheets for Datasets](https://m-cacm.acm.org/magazines/2021/12/256932-datasheets-for-datasets/fulltext). Inspired by datasheets as used in the electronics and other industries, Gebru et al. proposed that every dataset "be accompanied with a datasheet that documents its motivation, composition, collection process, recommended uses, and so on".
 
@@ -19,7 +19,7 @@ Curated comprehensive datasheets for each Bridge2AI data generating project:
 
 Browse the source code repository on GitHub:
 
-* **[examples/](https://github.com/bridge2ai/data-sheets-schema/tree/main/examples)** - Example data files
+* **[src/data/examples/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data/examples)** - Example data files
 * **[project/](https://github.com/bridge2ai/data-sheets-schema/tree/main/project)** - Generated project files (JSON Schema, OWL, SHACL, etc.)
 * **[src/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src)** - Source files
   * **[src/data_sheets_schema/schema/](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/data_sheets_schema/schema)** - LinkML schema source (edit here)
@@ -30,6 +30,7 @@ Browse the source code repository on GitHub:
 ## Quick Links
 
 - **[Schema Documentation](index.md)** - Complete schema reference (classes, slots, enumerations)
+- **[CLI Reference](cli.md)** - Command groups, flags, and workflow examples for `d4d`
 - **[D4D Examples](d4d_examples.md)** - View rendered datasheets for Bridge2AI projects
 - **[GitHub Repository](https://github.com/bridge2ai/data-sheets-schema)** - Source code and development
 - **[Issues](https://github.com/bridge2ai/data-sheets-schema/issues)** - Report bugs or request features
