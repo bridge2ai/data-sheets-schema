@@ -73,19 +73,20 @@ classes:
     close_mappings:
       - dcat:Distribution
     slots:
-      - bytes
       - path
-      - format
-      - encoding
       - compression
-      - media_type
-      - hash
-      - md5
-      - sha256
-      - dialect
       - external_resources
       - resources
     slot_usage:
+      path:
+        description: >-
+          Path or URL to the FileCollection. May be a directory path, archive file path,
+          or download URL depending on how the collection is distributed.
+      compression:
+        description: >-
+          Compression format if the collection is packaged as a compressed archive
+          (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections or
+          purely logical groupings.
       external_resources:
         description: >-
           External files or URLs referenced by this file collection.

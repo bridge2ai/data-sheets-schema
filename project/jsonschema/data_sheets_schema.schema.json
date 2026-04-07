@@ -3820,13 +3820,6 @@
             "additionalProperties": false,
             "description": "A collection of files with shared characteristics (format, purpose, structure). Represents a logical grouping of related files within a dataset, such as all training data files, all image files, or all raw data files. Maps to RO-Crate Dataset entities via schema:hasPart relationships.",
             "properties": {
-                "bytes": {
-                    "description": "Size of the data in bytes.",
-                    "type": [
-                        "integer",
-                        "null"
-                    ]
-                },
                 "collection_type": {
                     "description": "Type(s) of content in this file collection. A collection may have multiple types, for example a collection containing both raw_data and documentation files would have both types listed.",
                     "items": {
@@ -3839,7 +3832,7 @@
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+                    "description": "Compression format if the collection is packaged as a compressed archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections or purely logical groupings."
                 },
                 "conforms_to": {
                     "type": [
@@ -3879,13 +3872,6 @@
                         "null"
                     ]
                 },
-                "dialect": {
-                    "description": "Specific format dialect or variation (e.g., CSV dialect, JSON-LD profile).",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
                 "doi": {
                     "description": "digital object identifier",
                     "pattern": "10\\.\\d{4,}\\/.+",
@@ -3901,10 +3887,6 @@
                         "null"
                     ]
                 },
-                "encoding": {
-                    "$ref": "#/$defs/EncodingEnum",
-                    "description": "the character encoding of the data"
-                },
                 "external_resources": {
                     "description": "External files or URLs referenced by this file collection.",
                     "items": {
@@ -3919,17 +3901,6 @@
                     "description": "Number of files in this collection.",
                     "type": [
                         "integer",
-                        "null"
-                    ]
-                },
-                "format": {
-                    "$ref": "#/$defs/FormatEnum",
-                    "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
-                },
-                "hash": {
-                    "description": "hash of the data",
-                    "type": [
-                        "string",
                         "null"
                     ]
                 },
@@ -3973,17 +3944,6 @@
                         "null"
                     ]
                 },
-                "md5": {
-                    "description": "md5 hash of the data",
-                    "type": [
-                        "string",
-                        "null"
-                    ]
-                },
-                "media_type": {
-                    "$ref": "#/$defs/MediaTypeEnum",
-                    "description": "The media type of the data. This should be a MIME type."
-                },
                 "modified_by": {
                     "type": [
                         "string",
@@ -4004,6 +3964,7 @@
                     ]
                 },
                 "path": {
+                    "description": "Path or URL to the FileCollection. May be a directory path, archive file path, or download URL depending on how the collection is distributed.",
                     "type": [
                         "string",
                         "null"
@@ -4030,13 +3991,6 @@
                     },
                     "type": [
                         "array",
-                        "null"
-                    ]
-                },
-                "sha256": {
-                    "description": "sha256 hash of the data",
-                    "type": [
-                        "string",
                         "null"
                     ]
                 },

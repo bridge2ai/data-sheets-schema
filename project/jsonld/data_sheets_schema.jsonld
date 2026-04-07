@@ -1651,10 +1651,9 @@
         "http://schema.org/encodingFormat"
       ],
       "slot_uri": "http://schema.org/encodingFormat",
-      "owner": "FileCollection",
+      "owner": "File",
       "domain_of": [
-        "File",
-        "FileCollection"
+        "File"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -1668,10 +1667,9 @@
         "http://www.w3.org/ns/dcat#byteSize"
       ],
       "slot_uri": "http://www.w3.org/ns/dcat#byteSize",
-      "owner": "FileCollection",
+      "owner": "File",
       "domain_of": [
-        "File",
-        "FileCollection"
+        "File"
       ],
       "range": "integer",
       "@type": "SlotDefinition"
@@ -1720,10 +1718,9 @@
         "http://purl.org/dc/terms/format"
       ],
       "slot_uri": "http://purl.org/dc/terms/format",
-      "owner": "FileCollection",
+      "owner": "File",
       "domain_of": [
-        "File",
-        "FileCollection"
+        "File"
       ],
       "range": "FormatEnum",
       "@type": "SlotDefinition"
@@ -1737,10 +1734,9 @@
         "http://www.w3.org/ns/dcat#mediaType"
       ],
       "slot_uri": "http://www.w3.org/ns/dcat#mediaType",
-      "owner": "FileCollection",
+      "owner": "File",
       "domain_of": [
-        "File",
-        "FileCollection"
+        "File"
       ],
       "range": "EncodingEnum",
       "@type": "SlotDefinition"
@@ -1775,10 +1771,9 @@
         "http://schema.org/encodingFormat"
       ],
       "slot_uri": "http://www.w3.org/ns/dcat#mediaType",
-      "owner": "FileCollection",
+      "owner": "File",
       "domain_of": [
-        "File",
-        "FileCollection"
+        "File"
       ],
       "range": "MediaTypeEnum",
       "@type": "SlotDefinition"
@@ -1792,10 +1787,9 @@
         "http://purl.org/dc/terms/identifier"
       ],
       "slot_uri": "http://purl.org/dc/terms/identifier",
-      "owner": "FileCollection",
+      "owner": "File",
       "domain_of": [
-        "File",
-        "FileCollection"
+        "File"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -1809,10 +1803,9 @@
         "http://purl.org/dc/terms/identifier"
       ],
       "slot_uri": "http://purl.org/dc/terms/identifier",
-      "owner": "FileCollection",
+      "owner": "File",
       "domain_of": [
-        "File",
-        "FileCollection"
+        "File"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -1826,10 +1819,9 @@
         "http://purl.org/dc/terms/identifier"
       ],
       "slot_uri": "http://purl.org/dc/terms/identifier",
-      "owner": "FileCollection",
+      "owner": "File",
       "domain_of": [
-        "File",
-        "FileCollection"
+        "File"
       ],
       "range": "string",
       "@type": "SlotDefinition"
@@ -6614,6 +6606,48 @@
       "@type": "SlotDefinition"
     },
     {
+      "name": "FileCollection_path",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/path",
+      "description": "Path or URL to the FileCollection. May be a directory path, archive file path, or download URL depending on how the collection is distributed.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://schema.org/contentUrl"
+      ],
+      "is_a": "path",
+      "domain": "FileCollection",
+      "slot_uri": "http://schema.org/contentUrl",
+      "alias": "path",
+      "owner": "FileCollection",
+      "domain_of": [
+        "FileCollection"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "path",
+      "range": "string",
+      "@type": "SlotDefinition"
+    },
+    {
+      "name": "FileCollection_compression",
+      "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
+      "description": "Compression format if the collection is packaged as a compressed archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections or purely logical groupings.",
+      "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
+      "mappings": [
+        "http://www.w3.org/ns/dcat#compressFormat"
+      ],
+      "is_a": "compression",
+      "domain": "FileCollection",
+      "slot_uri": "http://www.w3.org/ns/dcat#compressFormat",
+      "alias": "compression",
+      "owner": "FileCollection",
+      "domain_of": [
+        "FileCollection"
+      ],
+      "is_usage_slot": true,
+      "usage_slot_name": "compression",
+      "range": "CompressionEnum",
+      "@type": "SlotDefinition"
+    },
+    {
       "name": "FileCollection_external_resources",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/external_resources",
       "description": "External files or URLs referenced by this file collection.",
@@ -10640,16 +10674,8 @@
         "title",
         "version",
         "was_derived_from",
-        "bytes",
-        "path",
-        "format",
-        "encoding",
-        "compression",
-        "media_type",
-        "hash",
-        "md5",
-        "sha256",
-        "dialect",
+        "FileCollection_path",
+        "FileCollection_compression",
         "FileCollection_external_resources",
         "FileCollection_resources",
         "fileCollection__collection_type",
@@ -10689,7 +10715,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-03-26T22:44:02",
   "source_file_size": 18530,
-  "generation_date": "2026-04-06T19:12:58",
+  "generation_date": "2026-04-06T21:13:16",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

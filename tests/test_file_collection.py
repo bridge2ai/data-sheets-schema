@@ -22,8 +22,7 @@ class TestFileCollection(unittest.TestCase):
             'name': 'Training Data',
             'description': 'Training dataset files',
             'collection_type': 'training_split',
-            'format': 'CSV',
-            'bytes': 1048576,
+            'total_bytes': 1048576,
             'file_count': 100
         }
 
@@ -43,15 +42,13 @@ class TestFileCollection(unittest.TestCase):
                     'id': 'collection-1',
                     'name': 'Training Files',
                     'collection_type': 'training_split',
-                    'format': 'CSV',
-                    'bytes': 1048576
+                    'total_bytes': 1048576
                 },
                 {
                     'id': 'collection-2',
                     'name': 'Test Files',
                     'collection_type': 'test_split',
-                    'format': 'CSV',
-                    'bytes': 524288
+                    'total_bytes': 524288
                 }
             ],
             'total_file_count': 200,
@@ -85,32 +82,42 @@ class TestFileCollection(unittest.TestCase):
             self.assertEqual(collection['collection_type'], collection_type)
 
     def test_filecollection_properties_complete(self):
-        """Test FileCollection with all properties."""
+        """Test FileCollection with all collection-level properties."""
         complete_collection = {
             'id': 'complete-collection',
             'name': 'Complete File Collection',
             'description': 'A collection with all properties',
             'collection_type': 'processed_data',
-            'format': 'JSON',
-            'bytes': 2097152,
             'total_bytes': 2097152,
             'file_count': 50,
             'path': '/data/processed/',
-            'encoding': 'UTF-8',
             'compression': 'gzip',
-            'media_type': 'application/json',
-            'hash': 'abc123def456',
-            'md5': 'abc123',
-            'sha256': 'def456789'
+            'resources': [
+                {
+                    'id': 'file001.json',
+                    'file_type': 'data_file',
+                    'format': 'JSON',
+                    'bytes': 41943,
+                    'encoding': 'UTF-8',
+                    'media_type': 'application/json',
+                    'md5': 'abc123',
+                    'sha256': 'def456789'
+                }
+            ]
         }
 
-        # Verify all expected properties present
+        # Verify collection-level properties present
         expected_props = ['id', 'name', 'description', 'collection_type',
-                          'format', 'bytes', 'file_count', 'path', 'encoding',
-                          'compression', 'md5', 'sha256']
+                          'total_bytes', 'file_count', 'path', 'compression', 'resources']
 
         for prop in expected_props:
             self.assertIn(prop, complete_collection)
+
+        # Verify file-level properties are in resources
+        self.assertEqual(len(complete_collection['resources']), 1)
+        file_obj = complete_collection['resources'][0]
+        self.assertEqual(file_obj['format'], 'JSON')
+        self.assertEqual(file_obj['bytes'], 41943)
 
     def test_nested_file_collections(self):
         """Test FileCollection can contain nested FileCollections via resources."""

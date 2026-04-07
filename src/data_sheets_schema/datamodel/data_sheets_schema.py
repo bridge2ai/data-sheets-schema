@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-06T19:13:00
+# Generation date: 2026-04-06T21:13:18
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2907,16 +2907,8 @@ class FileCollection(Information):
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.FileCollection
 
     id: Union[str, FileCollectionId] = None
-    bytes: Optional[int] = None
     path: Optional[str] = None
-    format: Optional[Union[str, "FormatEnum"]] = None
-    encoding: Optional[Union[str, "EncodingEnum"]] = None
     compression: Optional[Union[str, "CompressionEnum"]] = None
-    media_type: Optional[Union[str, "MediaTypeEnum"]] = None
-    hash: Optional[str] = None
-    md5: Optional[str] = None
-    sha256: Optional[str] = None
-    dialect: Optional[str] = None
     external_resources: Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]] = empty_list()
     resources: Optional[Union[dict[Union[str, DatasetId], Union[dict, Dataset]], list[Union[dict, Dataset]]]] = empty_dict()
     collection_type: Optional[Union[Union[str, "FileCollectionTypeEnum"], list[Union[str, "FileCollectionTypeEnum"]]]] = empty_list()
@@ -2929,35 +2921,11 @@ class FileCollection(Information):
         if not isinstance(self.id, FileCollectionId):
             self.id = FileCollectionId(self.id)
 
-        if self.bytes is not None and not isinstance(self.bytes, int):
-            self.bytes = int(self.bytes)
-
         if self.path is not None and not isinstance(self.path, str):
             self.path = str(self.path)
 
-        if self.format is not None and not isinstance(self.format, FormatEnum):
-            self.format = FormatEnum(self.format)
-
-        if self.encoding is not None and not isinstance(self.encoding, EncodingEnum):
-            self.encoding = EncodingEnum(self.encoding)
-
         if self.compression is not None and not isinstance(self.compression, CompressionEnum):
             self.compression = CompressionEnum(self.compression)
-
-        if self.media_type is not None and not isinstance(self.media_type, MediaTypeEnum):
-            self.media_type = MediaTypeEnum(self.media_type)
-
-        if self.hash is not None and not isinstance(self.hash, str):
-            self.hash = str(self.hash)
-
-        if self.md5 is not None and not isinstance(self.md5, str):
-            self.md5 = str(self.md5)
-
-        if self.sha256 is not None and not isinstance(self.sha256, str):
-            self.sha256 = str(self.sha256)
-
-        if self.dialect is not None and not isinstance(self.dialect, str):
-            self.dialect = str(self.dialect)
 
         if not isinstance(self.external_resources, list):
             self.external_resources = [self.external_resources] if self.external_resources is not None else []
@@ -4618,6 +4586,12 @@ slots.Dataset_resources = Slot(uri=SCHEMA.hasPart, name="Dataset_resources", cur
 
 slots.ExternalResource_external_resources = Slot(uri=DCTERMS.references, name="ExternalResource_external_resources", curie=DCTERMS.curie('references'),
                    model_uri=DATA_SHEETS_SCHEMA.ExternalResource_external_resources, domain=ExternalResource, range=Optional[Union[str, list[str]]])
+
+slots.FileCollection_path = Slot(uri=SCHEMA.contentUrl, name="FileCollection_path", curie=SCHEMA.curie('contentUrl'),
+                   model_uri=DATA_SHEETS_SCHEMA.FileCollection_path, domain=FileCollection, range=Optional[str])
+
+slots.FileCollection_compression = Slot(uri=DCAT.compressFormat, name="FileCollection_compression", curie=DCAT.curie('compressFormat'),
+                   model_uri=DATA_SHEETS_SCHEMA.FileCollection_compression, domain=FileCollection, range=Optional[Union[str, "CompressionEnum"]])
 
 slots.FileCollection_external_resources = Slot(uri=DCTERMS.references, name="FileCollection_external_resources", curie=DCTERMS.curie('references'),
                    model_uri=DATA_SHEETS_SCHEMA.FileCollection_external_resources, domain=FileCollection, range=Optional[Union[Union[dict, ExternalResource], list[Union[dict, ExternalResource]]]])

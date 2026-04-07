@@ -1300,7 +1300,6 @@ slots:
     slot_uri: schema:encodingFormat
     domain_of:
     - File
-    - FileCollection
   bytes:
     name: bytes
     description: Size of the data in bytes.
@@ -1308,7 +1307,6 @@ slots:
     slot_uri: dcat:byteSize
     domain_of:
     - File
-    - FileCollection
     range: integer
   path:
     name: path
@@ -1341,7 +1339,6 @@ slots:
     slot_uri: dcterms:format
     domain_of:
     - File
-    - FileCollection
     range: FormatEnum
   encoding:
     name: encoding
@@ -1350,7 +1347,6 @@ slots:
     slot_uri: dcat:mediaType
     domain_of:
     - File
-    - FileCollection
     range: EncodingEnum
   compression:
     name: compression
@@ -1374,7 +1370,6 @@ slots:
     slot_uri: dcat:mediaType
     domain_of:
     - File
-    - FileCollection
     range: MediaTypeEnum
   hash:
     name: hash
@@ -1383,7 +1378,6 @@ slots:
     slot_uri: dcterms:identifier
     domain_of:
     - File
-    - FileCollection
   md5:
     name: md5
     description: md5 hash of the data
@@ -1391,7 +1385,6 @@ slots:
     slot_uri: dcterms:identifier
     domain_of:
     - File
-    - FileCollection
   sha256:
     name: sha256
     description: sha256 hash of the data
@@ -1399,7 +1392,6 @@ slots:
     slot_uri: dcterms:identifier
     domain_of:
     - File
-    - FileCollection
   conforms_to:
     name: conforms_to
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -31087,7 +31079,6 @@ classes:
         owner: File
         domain_of:
         - File
-        - FileCollection
         range: integer
       path:
         name: path
@@ -31109,7 +31100,6 @@ classes:
         owner: File
         domain_of:
         - File
-        - FileCollection
         range: FormatEnum
       encoding:
         name: encoding
@@ -31120,7 +31110,6 @@ classes:
         owner: File
         domain_of:
         - File
-        - FileCollection
         range: EncodingEnum
       compression:
         name: compression
@@ -31148,7 +31137,6 @@ classes:
         owner: File
         domain_of:
         - File
-        - FileCollection
         range: MediaTypeEnum
       hash:
         name: hash
@@ -31159,7 +31147,6 @@ classes:
         owner: File
         domain_of:
         - File
-        - FileCollection
         range: string
       md5:
         name: md5
@@ -31170,7 +31157,6 @@ classes:
         owner: File
         domain_of:
         - File
-        - FileCollection
         range: string
       sha256:
         name: sha256
@@ -31181,7 +31167,6 @@ classes:
         owner: File
         domain_of:
         - File
-        - FileCollection
         range: string
       dialect:
         name: dialect
@@ -31193,7 +31178,6 @@ classes:
         owner: File
         domain_of:
         - File
-        - FileCollection
         range: string
       conforms_to:
         name: conforms_to
@@ -31733,19 +31717,20 @@ classes:
     - dcat:Distribution
     is_a: Information
     slots:
-    - bytes
     - path
-    - format
-    - encoding
     - compression
-    - media_type
-    - hash
-    - md5
-    - sha256
-    - dialect
     - external_resources
     - resources
     slot_usage:
+      path:
+        name: path
+        description: Path or URL to the FileCollection. May be a directory path, archive
+          file path, or download URL depending on how the collection is distributed.
+      compression:
+        name: compression
+        description: Compression format if the collection is packaged as a compressed
+          archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections
+          or purely logical groupings.
       external_resources:
         name: external_resources
         description: External files or URLs referenced by this file collection.
@@ -31796,19 +31781,10 @@ classes:
         domain_of:
         - FileCollection
         range: integer
-      bytes:
-        name: bytes
-        description: Size of the data in bytes.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcat:byteSize
-        alias: bytes
-        owner: FileCollection
-        domain_of:
-        - File
-        - FileCollection
-        range: integer
       path:
         name: path
+        description: Path or URL to the FileCollection. May be a directory path, archive
+          file path, or download URL depending on how the collection is distributed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:contentUrl
         alias: path
@@ -31817,32 +31793,11 @@ classes:
         - File
         - FileCollection
         range: string
-      format:
-        name: format
-        description: The file format, physical medium, or dimensions of a resource.
-          This should be a file extension or MIME type.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:format
-        alias: format
-        owner: FileCollection
-        domain_of:
-        - File
-        - FileCollection
-        range: FormatEnum
-      encoding:
-        name: encoding
-        description: the character encoding of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcat:mediaType
-        alias: encoding
-        owner: FileCollection
-        domain_of:
-        - File
-        - FileCollection
-        range: EncodingEnum
       compression:
         name: compression
-        description: compression format used, if any. e.g., gzip, bzip2, zip
+        description: Compression format if the collection is packaged as a compressed
+          archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections
+          or purely logical groupings.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
         alias: compression
@@ -31855,64 +31810,6 @@ classes:
         - Dataset
         - DataSubset
         range: CompressionEnum
-      media_type:
-        name: media_type
-        description: The media type of the data. This should be a MIME type.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        exact_mappings:
-        - schema:encodingFormat
-        slot_uri: dcat:mediaType
-        alias: media_type
-        owner: FileCollection
-        domain_of:
-        - File
-        - FileCollection
-        range: MediaTypeEnum
-      hash:
-        name: hash
-        description: hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: hash
-        owner: FileCollection
-        domain_of:
-        - File
-        - FileCollection
-        range: string
-      md5:
-        name: md5
-        description: md5 hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: md5
-        owner: FileCollection
-        domain_of:
-        - File
-        - FileCollection
-        range: string
-      sha256:
-        name: sha256
-        description: sha256 hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: sha256
-        owner: FileCollection
-        domain_of:
-        - File
-        - FileCollection
-        range: string
-      dialect:
-        name: dialect
-        description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
-          profile).
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: schema:encodingFormat
-        alias: dialect
-        owner: FileCollection
-        domain_of:
-        - File
-        - FileCollection
-        range: string
       external_resources:
         name: external_resources
         description: External files or URLs referenced by this file collection.

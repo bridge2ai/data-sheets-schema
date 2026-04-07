@@ -51,20 +51,34 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
                     'name': 'Training Files',
                     'description': 'Training data files',
                     'collection_type': 'training_split',
-                    'format': 'CSV',
-                    'bytes': 1048576,
+                    'total_bytes': 1048576,
                     'file_count': 100,
-                    'sha256': 'abc123'
+                    'resources': [
+                        {
+                            'id': 'train001.csv',
+                            'file_type': 'data_file',
+                            'format': 'CSV',
+                            'bytes': 10485,
+                            'sha256': 'abc123'
+                        }
+                    ]
                 },
                 {
                     'id': 'collection-2',
                     'name': 'Test Files',
                     'description': 'Test data files',
                     'collection_type': 'test_split',
-                    'format': 'JSON',
-                    'bytes': 524288,
+                    'total_bytes': 524288,
                     'file_count': 50,
-                    'md5': 'def456'
+                    'resources': [
+                        {
+                            'id': 'test001.json',
+                            'file_type': 'data_file',
+                            'format': 'JSON',
+                            'bytes': 10485,
+                            'md5': 'def456'
+                        }
+                    ]
                 }
             ],
             'total_file_count': 150,
@@ -111,9 +125,9 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         )
         self.assertIsNotNone(training_collection)
         self.assertEqual(training_collection['name'], 'Training Files')
-        self.assertEqual(training_collection['encodingFormat'], 'CSV')
-        self.assertEqual(training_collection['contentSize'], '1048576')
-        self.assertEqual(training_collection['sha256'], 'abc123')
+        # Note: encodingFormat and sha256 are now on individual File objects, not FileCollection
+        # FileCollection has aggregate total_bytes which maps to contentSize
+        self.assertEqual(training_collection.get('contentSize'), '1048576')
         self.assertEqual(training_collection['d4d:fileCount'], 100)
 
     def test_rocrate_to_d4d_with_nested_datasets(self):
@@ -183,9 +197,9 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         )
         self.assertIsNotNone(raw_collection)
         self.assertEqual(raw_collection['name'], 'Raw Data Files')
-        self.assertEqual(raw_collection['format'], 'CSV')
-        self.assertEqual(raw_collection['bytes'], 2097152)
-        self.assertEqual(raw_collection['sha256'], 'raw123')
+        # Note: format, bytes, sha256 are now file-level properties, not collection-level
+        # Collection has aggregate total_bytes from RO-Crate contentSize
+        self.assertEqual(raw_collection.get('total_bytes'), 2097152)
         self.assertEqual(raw_collection['collection_type'], 'raw_data')
         self.assertEqual(raw_collection['file_count'], 200)
 
@@ -203,11 +217,19 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
                     'name': 'Test Files',
                     'description': 'Test data',
                     'collection_type': 'test_split',
-                    'format': 'CSV',
-                    'bytes': 1024,
+                    'total_bytes': 1024,
                     'file_count': 10,
-                    'encoding': 'UTF-8',
-                    'sha256': 'test123'
+                    'path': '/data/test/',
+                    'resources': [
+                        {
+                            'id': 'test001.csv',
+                            'file_type': 'data_file',
+                            'format': 'CSV',
+                            'bytes': 102,
+                            'encoding': 'UTF-8',
+                            'sha256': 'test123'
+                        }
+                    ]
                 }
             ],
             'total_file_count': 10,
@@ -229,13 +251,12 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         recovered_collection = recovered_d4d['file_collections'][0]
         original_collection = original_d4d['file_collections'][0]
 
-        # Check key properties preserved
+        # Check collection-level properties preserved
         self.assertEqual(recovered_collection['name'], original_collection['name'])
-        self.assertEqual(recovered_collection['format'], original_collection['format'])
-        self.assertEqual(recovered_collection['bytes'], original_collection['bytes'])
+        self.assertEqual(recovered_collection.get('total_bytes'), original_collection['total_bytes'])
         self.assertEqual(recovered_collection['file_count'], original_collection['file_count'])
-        self.assertEqual(recovered_collection['sha256'], original_collection['sha256'])
         self.assertEqual(recovered_collection['collection_type'], original_collection['collection_type'])
+        # Note: File-level properties (format, encoding, sha256) are in resources, not on collection
 
     def test_backward_compatibility_no_filecollections(self):
         """Test that D4D without FileCollections still works."""

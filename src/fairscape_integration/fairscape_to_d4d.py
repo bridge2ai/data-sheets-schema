@@ -257,20 +257,17 @@ class FairscapeToD4DConverter:
             if 'description' in dataset:
                 collection['description'] = dataset['description']
 
-            # Map file-specific properties
-            if 'encodingFormat' in dataset:
-                collection['format'] = dataset['encodingFormat']
+            # Map collection-level properties
+            # Note: encodingFormat, sha256, md5, format, bytes, encoding are now
+            # file-level properties (on File objects), not FileCollection properties
 
             if 'contentSize' in dataset:
-                # Parse size string to bytes
+                # Parse size string to total_bytes (aggregate size)
                 size_str = dataset['contentSize']
                 if isinstance(size_str, str):
-                    collection['bytes'] = self._parse_size(size_str)
+                    collection['total_bytes'] = self._parse_size(size_str)
                 else:
-                    collection['bytes'] = size_str
-
-            if 'sha256' in dataset:
-                collection['sha256'] = dataset['sha256']
+                    collection['total_bytes'] = size_str
 
             if 'md5' in dataset:
                 collection['md5'] = dataset['md5']

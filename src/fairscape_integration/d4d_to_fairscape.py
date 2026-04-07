@@ -258,33 +258,22 @@ class D4DToFairscapeConverter:
             }
 
             # Map FileCollection properties to RO-Crate Dataset properties
-            if "format" in fc:
-                collection_params["encodingFormat"] = fc["format"]
+            # Note: format, bytes, encoding, media_type, sha256, md5, dialect, hash
+            # are now file-level properties (on File objects), not FileCollection properties
 
-            if "bytes" in fc:
-                collection_params["contentSize"] = str(fc["bytes"])
-            elif "total_bytes" in fc:
+            # Collection-level aggregate size
+            if "total_bytes" in fc:
                 collection_params["contentSize"] = str(fc["total_bytes"])
 
-            if "sha256" in fc:
-                collection_params["sha256"] = fc["sha256"]
-
-            if "md5" in fc:
-                collection_params["md5"] = fc["md5"]
-
+            # Collection location/URL
             if "path" in fc:
                 collection_params["contentUrl"] = fc["path"]
 
-            # Use media_type as fallback for encodingFormat when format is absent
-            if "media_type" in fc and "encodingFormat" not in collection_params:
-                collection_params["encodingFormat"] = fc["media_type"]
-
+            # Collection compression (if packaged as archive)
             if "compression" in fc:
                 collection_params["fileFormat"] = fc["compression"]
 
-            if "encoding" in fc:
-                collection_params["encoding"] = fc["encoding"]
-
+            # D4D-specific collection properties
             if "collection_type" in fc:
                 collection_params["d4d:collectionType"] = fc["collection_type"]
 
