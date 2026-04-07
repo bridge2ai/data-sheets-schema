@@ -1,0 +1,188 @@
+---
+id: "https://w3id.org/bridge2ai/data-sheets-schema/file-collection"
+name: "data-sheets-schema-file-collection"
+title: "Datasheets for Datasets – File Collection Module"
+description: >
+  Module defining FileCollection class for representing collections of
+  files with shared characteristics within datasets.
+license: MIT
+see_also:
+  - "https://bridge2ai.github.io/data-sheets-schema"
+
+prefixes:
+  d4d: https://w3id.org/bridge2ai/data-sheets-schema/
+  dcat: http://www.w3.org/ns/dcat#
+  schema: http://schema.org/
+  dcterms: http://purl.org/dc/terms/
+
+default_prefix: data_sheets_schema
+default_range: string
+
+imports:
+  - linkml:types
+  - D4D_Base_import
+
+classes:
+
+  File:
+    aliases:
+      - data file
+      - file
+      - file object
+    description: >-
+      A single file within a dataset or file collection.
+      Represents an individual data file, code file, documentation file, etc.
+      Maps to RO-Crate File entities.
+    is_a: Information
+    class_uri: schema:MediaObject
+    exact_mappings:
+      - schema:DigitalDocument
+    slots:
+      - bytes
+      - path
+      - format
+      - encoding
+      - compression
+      - media_type
+      - hash
+      - md5
+      - sha256
+      - dialect
+    attributes:
+      file_type:
+        description: >-
+          Semantic type or purpose of this file (e.g., data_file, code_file,
+          documentation_file, metadata_file).
+        range: FileTypeEnum
+        slot_uri: d4d:fileType
+
+  FileCollection:
+    aliases:
+      - file collection
+      - data files
+      - file group
+    description: >-
+      A collection of files with shared characteristics (format, purpose, structure).
+      Represents a logical grouping of related files within a dataset, such as
+      all training data files, all image files, or all raw data files.
+      Maps to RO-Crate Dataset entities via schema:hasPart relationships.
+    is_a: Information
+    class_uri: dcat:Dataset
+    exact_mappings:
+      - schema:Dataset
+    close_mappings:
+      - dcat:Distribution
+    slots:
+      - path
+      - compression
+      - external_resources
+      - resources
+    slot_usage:
+      path:
+        description: >-
+          Path or URL to the FileCollection. May be a directory path, archive file path,
+          or download URL depending on how the collection is distributed.
+      compression:
+        description: >-
+          Compression format if the collection is packaged as a compressed archive
+          (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections or
+          purely logical groupings.
+      external_resources:
+        description: >-
+          External files or URLs referenced by this file collection.
+        range: ExternalResource
+        multivalued: true
+        inlined_as_list: true
+      resources:
+        description: >-
+          Individual files or nested file collections within this collection.
+          Allows hierarchical file organization with both File objects and
+          nested FileCollection objects.
+        any_of:
+          - range: File
+          - range: FileCollection
+        multivalued: true
+        inlined_as_list: true
+    attributes:
+      collection_type:
+        description: >-
+          Type(s) of content in this file collection. A collection may have
+          multiple types, for example a collection containing both raw_data
+          and documentation files would have both types listed.
+        range: FileCollectionTypeEnum
+        slot_uri: d4d:collectionType
+        multivalued: true
+      file_count:
+        description: Number of files in this collection.
+        range: integer
+        slot_uri: d4d:fileCount
+      total_bytes:
+        description: Total size of all files in bytes.
+        range: integer
+        slot_uri: dcat:byteSize
+
+enums:
+  FileTypeEnum:
+    description: Types of individual files within datasets.
+    permissible_values:
+      data_file:
+        description: A data file containing dataset content
+        meaning: schema:DataDownload
+      code_file:
+        description: A source code or script file
+        meaning: schema:SoftwareSourceCode
+      documentation_file:
+        description: A documentation file (README, guide, etc.)
+        meaning: schema:Documentation
+      metadata_file:
+        description: A metadata or annotation file
+        meaning: dcat:CatalogRecord
+      configuration_file:
+        description: A configuration or settings file
+        meaning: d4d:ConfigurationFile
+      notebook_file:
+        description: A computational notebook file (Jupyter, R Markdown, etc.)
+        meaning: d4d:NotebookFile
+      image_file:
+        description: An image or visualization file
+        meaning: schema:ImageObject
+      archive_file:
+        description: An archive or compressed file
+        meaning: d4d:ArchiveFile
+      other:
+        description: Other file type
+        meaning: d4d:OtherFile
+
+  FileCollectionTypeEnum:
+    description: Types of file collections within datasets.
+    permissible_values:
+      raw_data:
+        description: Raw, unprocessed data files
+        meaning: d4d:RawData
+      processed_data:
+        description: Cleaned, processed, or transformed data files
+        meaning: d4d:ProcessedData
+      training_split:
+        description: Files designated for model training
+        meaning: d4d:TrainingSplit
+      test_split:
+        description: Files designated for model testing
+        meaning: d4d:TestSplit
+      validation_split:
+        description: Files designated for model validation
+        meaning: d4d:ValidationSplit
+      documentation:
+        description: Documentation files (README, codebook, etc.)
+        meaning: schema:Documentation
+      metadata:
+        description: Metadata or annotation files
+        meaning: dcat:CatalogRecord
+      code:
+        description: Code or script files
+        meaning: schema:SoftwareSourceCode
+      supplementary:
+        description: Supplementary materials
+        meaning: schema:SupplementalMaterial
+      other:
+        description: Other file collection type
+        meaning: d4d:OtherFileCollection

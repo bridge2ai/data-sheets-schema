@@ -369,8 +369,9 @@ slots:
 
   resources:
     description: >-
-      Sub-resources or component datasets. Used in DatasetCollection to contain
-      Dataset objects, and in Dataset to allow nested resource structures.
+      Sub-resources or component items. In DatasetCollection, contains Dataset objects.
+      In Dataset, contains nested Dataset objects. In FileCollection, contains nested
+      FileCollection objects. The specific range is defined via slot_usage in each class.
     range: Dataset
     multivalued: true
     slot_uri: schema:hasPart

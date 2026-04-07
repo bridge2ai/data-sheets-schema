@@ -6,13 +6,20 @@ Converts D4D YAML/dict to FAIRSCAPE RO-Crate using Pydantic models.
 
 import sys
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, TYPE_CHECKING
 from datetime import datetime
 
 # Add fairscape_models to path
 fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
 if fairscape_path.exists() and str(fairscape_path) not in sys.path:
     sys.path.insert(0, str(fairscape_path))
+
+if TYPE_CHECKING:
+    from fairscape_models.rocrate import (
+        ROCrateV1_2,
+        ROCrateMetadataFileElem,
+        ROCrateMetadataElem
+    )
 
 try:
     from fairscape_models.rocrate import (
@@ -27,6 +34,10 @@ try:
 except ImportError as e:
     print(f"Error: Cannot import FAIRSCAPE models: {e}")
     FAIRSCAPE_AVAILABLE = False
+    # Provide stub types when not available
+    ROCrateV1_2 = Any  # type: ignore
+    ROCrateMetadataFileElem = Any  # type: ignore
+    ROCrateMetadataElem = Any  # type: ignore
 
 
 class D4DToFairscapeConverter:
@@ -39,16 +50,16 @@ class D4DToFairscapeConverter:
     def convert(self, d4d_dict: Dict[str, Any]) -> ROCrateV1_2:
         """
         Convert D4D dictionary to FAIRSCAPE RO-Crate.
-        
+
         Args:
             d4d_dict: D4D metadata dictionary
-            
+
         Returns:
             FAIRSCAPE ROCrateV1_2 Pydantic model
         """
         # Build graph elements
         graph = []
-        
+
         # 1. Add metadata descriptor
         metadata_descriptor = ROCrateMetadataFileElem(**{
             "@id": "ro-crate-metadata.json",
@@ -57,12 +68,16 @@ class D4DToFairscapeConverter:
             "about": {"@id": "./"}
         })
         graph.append(metadata_descriptor)
-        
-        # 2. Add root dataset
-        dataset = self._build_dataset(d4d_dict)
+
+        # 2. Build file collections (nested Datasets)
+        file_collections, hasPart_ids = self._build_file_collections(d4d_dict)
+        graph.extend(file_collections)
+
+        # 3. Add root dataset (with hasPart references to file collections)
+        dataset = self._build_dataset(d4d_dict, hasPart_ids)
         graph.append(dataset)
-        
-        # 3. Create RO-Crate
+
+        # 4. Create RO-Crate
         rocrate = ROCrateV1_2(**{
             "@context": {
                 "@vocab": "https://schema.org/",
@@ -72,11 +87,20 @@ class D4DToFairscapeConverter:
             },
             "@graph": graph
         })
-        
+
         return rocrate
     
-    def _build_dataset(self, d4d_dict: Dict[str, Any]) -> ROCrateMetadataElem:
-        """Build Dataset from D4D metadata."""
+    def _build_dataset(self, d4d_dict: Dict[str, Any], hasPart_ids: List[str] = None) -> ROCrateMetadataElem:
+        """
+        Build Dataset from D4D metadata.
+
+        Args:
+            d4d_dict: D4D metadata dictionary
+            hasPart_ids: List of @id references to FileCollection entities
+
+        Returns:
+            ROCrateMetadataElem representing the root Dataset
+        """
 
         # Extract author names from D4D creators (which may be complex Person objects)
         authors = d4d_dict.get("creators") or d4d_dict.get("author")
@@ -106,7 +130,7 @@ class D4DToFairscapeConverter:
             "version": d4d_dict.get("version", "1.0"),
             "author": author_str,
             "license": d4d_dict.get("license", "No license specified"),  # Required field
-            "hasPart": []  # Required field, start with empty list
+            "hasPart": [{"@id": id} for id in (hasPart_ids or [])]  # Add file collection references
         }
 
         # Add optional Schema.org fields
@@ -119,8 +143,17 @@ class D4DToFairscapeConverter:
         if "doi" in d4d_dict:
             dataset_params["identifier"] = d4d_dict["doi"]
 
-        if "bytes" in d4d_dict:
-            dataset_params["contentSize"] = str(d4d_dict["bytes"])
+        # File properties: only add at dataset level if no file_collections exist
+        # (for backward compatibility with legacy files)
+        has_file_collections = bool(d4d_dict.get("file_collections"))
+
+        if not has_file_collections:
+            if "bytes" in d4d_dict:
+                dataset_params["contentSize"] = str(d4d_dict["bytes"])
+        else:
+            # Use aggregated total_size_bytes if available
+            if "total_size_bytes" in d4d_dict:
+                dataset_params["contentSize"] = str(d4d_dict["total_size_bytes"])
 
         # Add EVI namespace properties (computational provenance)
         evi_mapping = {
@@ -130,9 +163,12 @@ class D4DToFairscapeConverter:
             'schema_count': 'evi:schemaCount',
             'total_entities': 'evi:totalEntities',
             'distribution_formats': 'evi:formats',
-            'md5': 'evi:md5',
-            'sha256': 'evi:sha256',
         }
+
+        # Only add file-level properties if no file_collections
+        if not has_file_collections:
+            evi_mapping['md5'] = 'evi:md5'
+            evi_mapping['sha256'] = 'evi:sha256'
 
         for d4d_field, evi_prop in evi_mapping.items():
             if d4d_field in d4d_dict:
@@ -170,7 +206,8 @@ class D4DToFairscapeConverter:
             'content_warnings': 'd4d:contentWarning',
             'informed_consent': 'd4d:informedConsent',
             'human_subject_research': 'd4d:humanSubject',
-            'vulnerable_populations': 'd4d:atRiskPopulations',
+            'at_risk_populations': 'd4d:atRiskPopulations',
+            'vulnerable_populations': 'd4d:atRiskPopulations',  # Backward compatibility
         }
 
         for d4d_field, d4d_prop in d4d_mapping.items():
@@ -181,7 +218,74 @@ class D4DToFairscapeConverter:
         dataset = ROCrateMetadataElem(**dataset_params)
 
         return dataset
-    
+
+    def _build_file_collections(self, d4d_dict: Dict[str, Any]) -> tuple[List[ROCrateMetadataElem], List[str]]:
+        """
+        Build nested Dataset entities for FileCollections.
+
+        Args:
+            d4d_dict: D4D metadata dictionary
+
+        Returns:
+            Tuple of (file_collection_elements, hasPart_ids)
+        """
+        file_collections = []
+        hasPart_ids = []
+
+        # Get file_collections from D4D
+        collections_list = d4d_dict.get("file_collections", [])
+
+        for idx, fc in enumerate(collections_list):
+            if not isinstance(fc, dict):
+                continue
+
+            # Build @id for this collection
+            collection_id = fc.get("id") or f"#collection-{idx + 1}"
+            hasPart_ids.append(collection_id)
+
+            # Build nested Dataset parameters
+            collection_params = {
+                "@id": collection_id,
+                "@type": ["Dataset"],  # Must be a list
+                "name": fc.get("name") or fc.get("title") or f"File Collection {idx + 1}",
+                "description": fc.get("description") or "File collection",
+                # Required fields for ROCrateMetadataElem
+                "keywords": fc.get("keywords", []),
+                "version": fc.get("version", "1.0"),
+                "author": fc.get("author", "Unknown"),
+                "license": fc.get("license", "Unspecified"),
+                "hasPart": []
+            }
+
+            # Map FileCollection properties to RO-Crate Dataset properties
+            # Note: format, bytes, encoding, media_type, sha256, md5, dialect, hash
+            # are now file-level properties (on File objects), not FileCollection properties
+
+            # Collection-level aggregate size
+            if "total_bytes" in fc:
+                collection_params["contentSize"] = str(fc["total_bytes"])
+
+            # Collection location/URL
+            if "path" in fc:
+                collection_params["contentUrl"] = fc["path"]
+
+            # Collection compression (if packaged as archive)
+            if "compression" in fc:
+                collection_params["fileFormat"] = fc["compression"]
+
+            # D4D-specific collection properties
+            if "collection_type" in fc:
+                collection_params["d4d:collectionType"] = fc["collection_type"]
+
+            if "file_count" in fc:
+                collection_params["d4d:fileCount"] = fc["file_count"]
+
+            # Create nested Dataset element
+            collection_elem = ROCrateMetadataElem(**collection_params)
+            file_collections.append(collection_elem)
+
+        return file_collections, hasPart_ids
+
     def validate(self, rocrate: ROCrateV1_2) -> tuple[bool, Optional[List[str]]]:
         """
         Validate FAIRSCAPE RO-Crate.

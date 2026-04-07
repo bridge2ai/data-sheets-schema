@@ -158,6 +158,97 @@ class UnifiedValidator:
         return Path("data/ro-crate/profiles/shapes")
 
     # =========================================================================
+    # Migration Support
+    # =========================================================================
+
+    @staticmethod
+    def migrate_legacy_file_properties(data: Dict[str, Any]) -> tuple[Dict[str, Any], List[str]]:
+        """
+        Migrate legacy D4D files with file properties at Dataset level.
+
+        Detects if Dataset has file properties (bytes, path, format, etc.)
+        and no file_collections. If so, creates a single FileCollection
+        with those properties.
+
+        Args:
+            data: Parsed D4D data dictionary
+
+        Returns:
+            Tuple of (migrated_data, warnings)
+        """
+        warnings = []
+
+        # File properties that should be on File objects (not FileCollection)
+        file_level_props = ['format', 'encoding', 'media_type', 'hash', 'md5', 'sha256', 'dialect']
+        # Collection properties that stay on FileCollection
+        collection_props = ['path', 'compression']
+        # Size property needs special handling (bytes → total_bytes)
+
+        # Check if migration needed
+        all_legacy_props = file_level_props + collection_props + ['bytes']
+        has_file_props = any(k in data for k in all_legacy_props)
+        has_collections = 'file_collections' in data and data['file_collections']
+
+        if has_file_props and not has_collections:
+            # Create default file collection
+            file_collection = {
+                'id': f"{data.get('id', 'dataset')}-files",
+                'name': "Dataset Files",
+                'description': "Migrated from legacy dataset file properties"
+            }
+
+            # Create a File object for file-level properties
+            file_obj = {
+                'id': f"{data.get('id', 'dataset')}-file",
+                'file_type': 'data_file'
+            }
+
+            # Track migrated properties for warning
+            migrated_props = []
+
+            # Move file-level properties to File object
+            for prop in file_level_props:
+                if prop in data:
+                    file_obj[prop] = data.pop(prop)
+                    migrated_props.append(prop)
+
+            # Move collection-level properties to FileCollection
+            for prop in collection_props:
+                if prop in data:
+                    file_collection[prop] = data.pop(prop)
+                    migrated_props.append(prop)
+
+            # Handle bytes → total_bytes conversion
+            if 'bytes' in data:
+                # Put bytes on File object
+                file_obj['bytes'] = data.pop('bytes')
+                # Set total_bytes on FileCollection (same value for single file)
+                file_collection['total_bytes'] = file_obj['bytes']
+                migrated_props.append('bytes')
+
+            # Add File to collection resources if it has any properties
+            if any(k in file_obj for k in file_level_props + ['bytes']):
+                file_collection['resources'] = [file_obj]
+                file_collection['file_count'] = 1
+
+            # Add collection
+            data['file_collections'] = [file_collection]
+
+            # Create warning message
+            warning_msg = (
+                f"DEPRECATION: File properties ({', '.join(migrated_props)}) at Dataset level are deprecated. "
+                f"Use file_collections with File objects instead. Automatically migrated to FileCollection with File resources. "
+                f"This automatic migration will be removed in schema version 2.0."
+            )
+            warnings.append(warning_msg)
+
+            # Update schema version if present
+            if 'schema_version' in data:
+                data['schema_version'] = '1.1'
+
+        return data, warnings
+
+    # =========================================================================
     # Level 1: Syntax Validation
     # =========================================================================
 
@@ -289,11 +380,40 @@ class UnifiedValidator:
             return report
 
         try:
+            # Load and potentially migrate data
+            with open(input_path, 'r') as f:
+                data = yaml.safe_load(f)
+
+            # Apply migration if needed
+            migrated_data, migration_warnings = self.migrate_legacy_file_properties(data)
+
+            # Add migration warnings to report
+            report.warnings.extend(migration_warnings)
+
+            # If migrated, write to temp file for validation
+            if migration_warnings:
+                import tempfile
+                temp_file = tempfile.NamedTemporaryFile(
+                    mode='w',
+                    suffix='.yaml',
+                    delete=False
+                )
+                try:
+                    yaml.dump(migrated_data, temp_file, default_flow_style=False, sort_keys=False)
+                    temp_file.close()
+                    validation_path = Path(temp_file.name)
+                    report.info.append("Validating migrated data (legacy file properties → FileCollection)")
+                except Exception as e:
+                    report.errors.append(f"Failed to write migrated data: {e}")
+                    return report
+            else:
+                validation_path = input_path
+
             # Use linkml-validate command
             cmd = [
                 "linkml-validate",
                 "-s", str(self.schema_path),
-                str(input_path)
+                str(validation_path)
             ]
 
             if target_class:
@@ -305,6 +425,13 @@ class UnifiedValidator:
                 text=True,
                 timeout=30
             )
+
+            # Clean up temp file if created
+            if migration_warnings and validation_path != input_path:
+                try:
+                    validation_path.unlink()
+                except Exception:
+                    pass  # Best effort cleanup
 
             if result.returncode == 0:
                 report.info.append("D4D schema validation passed")
@@ -324,6 +451,12 @@ class UnifiedValidator:
         except subprocess.TimeoutExpired:
             report.passed = False
             report.errors.append("Validation timeout (>30 seconds)")
+            # Clean up temp file if created
+            if migration_warnings and validation_path != input_path:
+                try:
+                    validation_path.unlink()
+                except Exception:
+                    pass
         except FileNotFoundError:
             report.warnings.append("linkml-validate command not found")
             report.info.append("Install with: pip install linkml")

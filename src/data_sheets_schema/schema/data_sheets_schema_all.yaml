@@ -1128,6 +1128,92 @@ enums:
         description: Complex structured objects or nested data structures.
         broad_mappings:
         - schema:StructuredValue
+  FileTypeEnum:
+    name: FileTypeEnum
+    description: Types of individual files within datasets.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    permissible_values:
+      data_file:
+        text: data_file
+        description: A data file containing dataset content
+        meaning: schema:DataDownload
+      code_file:
+        text: code_file
+        description: A source code or script file
+        meaning: schema:SoftwareSourceCode
+      documentation_file:
+        text: documentation_file
+        description: A documentation file (README, guide, etc.)
+        meaning: schema:Documentation
+      metadata_file:
+        text: metadata_file
+        description: A metadata or annotation file
+        meaning: dcat:CatalogRecord
+      configuration_file:
+        text: configuration_file
+        description: A configuration or settings file
+        meaning: d4d:ConfigurationFile
+      notebook_file:
+        text: notebook_file
+        description: A computational notebook file (Jupyter, R Markdown, etc.)
+        meaning: d4d:NotebookFile
+      image_file:
+        text: image_file
+        description: An image or visualization file
+        meaning: schema:ImageObject
+      archive_file:
+        text: archive_file
+        description: An archive or compressed file
+        meaning: d4d:ArchiveFile
+      other:
+        text: other
+        description: Other file type
+        meaning: d4d:OtherFile
+  FileCollectionTypeEnum:
+    name: FileCollectionTypeEnum
+    description: Types of file collections within datasets.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    permissible_values:
+      raw_data:
+        text: raw_data
+        description: Raw, unprocessed data files
+        meaning: d4d:RawData
+      processed_data:
+        text: processed_data
+        description: Cleaned, processed, or transformed data files
+        meaning: d4d:ProcessedData
+      training_split:
+        text: training_split
+        description: Files designated for model training
+        meaning: d4d:TrainingSplit
+      test_split:
+        text: test_split
+        description: Files designated for model testing
+        meaning: d4d:TestSplit
+      validation_split:
+        text: validation_split
+        description: Files designated for model validation
+        meaning: d4d:ValidationSplit
+      documentation:
+        text: documentation
+        description: Documentation files (README, codebook, etc.)
+        meaning: schema:Documentation
+      metadata:
+        text: metadata
+        description: Metadata or annotation files
+        meaning: dcat:CatalogRecord
+      code:
+        text: code
+        description: Code or script files
+        meaning: schema:SoftwareSourceCode
+      supplementary:
+        text: supplementary
+        description: Supplementary materials
+        meaning: schema:SupplementalMaterial
+      other:
+        text: other
+        description: Other file collection type
+        meaning: d4d:OtherFileCollection
 slots:
   same_as:
     name: same_as
@@ -1160,6 +1246,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   language:
     name: language
     description: language in which the information is expressed
@@ -1172,6 +1259,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   publisher:
     name: publisher
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1181,6 +1269,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
     range: uriorcurie
   issued:
     name: issued
@@ -1191,6 +1280,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
     range: datetime
   page:
     name: page
@@ -1201,6 +1291,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   dialect:
     name: dialect
     description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
@@ -1208,21 +1299,22 @@ slots:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: schema:encodingFormat
     domain_of:
-    - Dataset
+    - File
   bytes:
     name: bytes
     description: Size of the data in bytes.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcat:byteSize
     domain_of:
-    - Dataset
+    - File
     range: integer
   path:
     name: path
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: schema:contentUrl
     domain_of:
-    - Dataset
+    - File
+    - FileCollection
   download_url:
     name: download_url
     description: URL from which the data can be downloaded. This is not the same as
@@ -1237,6 +1329,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
     range: uri
   format:
     name: format
@@ -1245,7 +1338,7 @@ slots:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:format
     domain_of:
-    - Dataset
+    - File
     range: FormatEnum
   encoding:
     name: encoding
@@ -1253,7 +1346,7 @@ slots:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcat:mediaType
     domain_of:
-    - Dataset
+    - File
     range: EncodingEnum
   compression:
     name: compression
@@ -1262,6 +1355,8 @@ slots:
     slot_uri: dcat:compressFormat
     domain_of:
     - Information
+    - File
+    - FileCollection
     - DatasetCollection
     - Dataset
     - DataSubset
@@ -1274,7 +1369,7 @@ slots:
     - schema:encodingFormat
     slot_uri: dcat:mediaType
     domain_of:
-    - Dataset
+    - File
     range: MediaTypeEnum
   hash:
     name: hash
@@ -1282,21 +1377,21 @@ slots:
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:identifier
     domain_of:
-    - Dataset
+    - File
   md5:
     name: md5
     description: md5 hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:identifier
     domain_of:
-    - Dataset
+    - File
   sha256:
     name: sha256
     description: sha256 hash of the data
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:identifier
     domain_of:
-    - Dataset
+    - File
   conforms_to:
     name: conforms_to
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1306,6 +1401,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   conforms_to_schema:
     name: conforms_to_schema
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1315,6 +1411,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   conforms_to_class:
     name: conforms_to_class
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1324,6 +1421,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   license:
     name: license
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1334,6 +1432,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   keywords:
     name: keywords
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1343,6 +1442,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
     multivalued: true
   version:
     name: version
@@ -1354,6 +1454,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   created_by:
     name: created_by
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1363,6 +1464,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   created_on:
     name: created_on
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1372,6 +1474,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
     range: datetime
   last_updated_on:
     name: last_updated_on
@@ -1382,6 +1485,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
     range: datetime
   modified_by:
     name: modified_by
@@ -1392,6 +1496,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   status:
     name: status
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1401,6 +1506,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   was_derived_from:
     name: was_derived_from
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1412,6 +1518,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
   doi:
     name: doi
     description: digital object identifier
@@ -1422,6 +1529,7 @@ slots:
     - DatasetCollection
     - Dataset
     - DataSubset
+    - File
     pattern: 10\.\d{4,}\/.+
   external_resources:
     name: external_resources
@@ -1433,17 +1541,22 @@ slots:
     domain_of:
     - Dataset
     - ExternalResource
+    - FileCollection
     - DataSubset
     multivalued: true
   resources:
     name: resources
-    description: Sub-resources or component datasets. Used in DatasetCollection to
-      contain Dataset objects, and in Dataset to allow nested resource structures.
+    description: Sub-resources or component items. In DatasetCollection, contains
+      Dataset objects. In Dataset, contains nested Dataset objects. In FileCollection,
+      contains nested FileCollection objects. The specific range is defined via slot_usage
+      in each class.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: schema:hasPart
     domain_of:
     - DatasetCollection
     - Dataset
+    - FileCollection
+    - DataSubset
     range: Dataset
     multivalued: true
 classes:
@@ -1470,8 +1583,10 @@ classes:
     attributes:
       resources:
         name: resources
-        description: Sub-resources or component datasets. Used in DatasetCollection
-          to contain Dataset objects, and in Dataset to allow nested resource structures.
+        description: Sub-resources or component items. In DatasetCollection, contains
+          Dataset objects. In Dataset, contains nested Dataset objects. In FileCollection,
+          contains nested FileCollection objects. The specific range is defined via
+          slot_usage in each class.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:hasPart
         alias: resources
@@ -1479,6 +1594,8 @@ classes:
         domain_of:
         - DatasetCollection
         - Dataset
+        - FileCollection
+        - DataSubset
         range: Dataset
         multivalued: true
         inlined_as_list: true
@@ -1491,6 +1608,8 @@ classes:
         owner: DatasetCollection
         domain_of:
         - Information
+        - File
+        - FileCollection
         - DatasetCollection
         - Dataset
         - DataSubset
@@ -1506,6 +1625,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       conforms_to_class:
         name: conforms_to_class
@@ -1518,6 +1638,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       conforms_to_schema:
         name: conforms_to_schema
@@ -1530,6 +1651,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       created_by:
         name: created_by
@@ -1542,6 +1664,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       created_on:
         name: created_on
@@ -1554,6 +1677,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       doi:
         name: doi
@@ -1567,6 +1691,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
         pattern: 10\.\d{4,}\/.+
       download_url:
@@ -1585,6 +1710,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: uri
       issued:
         name: issued
@@ -1597,6 +1723,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       keywords:
         name: keywords
@@ -1609,6 +1736,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
         multivalued: true
       language:
@@ -1625,6 +1753,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       last_updated_on:
         name: last_updated_on
@@ -1637,6 +1766,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       license:
         name: license
@@ -1650,6 +1780,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       modified_by:
         name: modified_by
@@ -1662,6 +1793,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       page:
         name: page
@@ -1674,6 +1806,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       publisher:
         name: publisher
@@ -1686,6 +1819,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: uriorcurie
       status:
         name: status
@@ -1698,6 +1832,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       title:
         name: title
@@ -1711,6 +1846,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       version:
         name: version
@@ -1724,6 +1860,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       was_derived_from:
         name: was_derived_from
@@ -1738,6 +1875,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       id:
         name: id
@@ -1763,6 +1901,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
       name:
         name: name
@@ -1787,6 +1986,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -1812,6 +2072,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
     tree_root: true
   Dataset:
@@ -1827,28 +2147,65 @@ classes:
     - schema:DataDownload
     is_a: Information
     slots:
-    - bytes
-    - dialect
-    - encoding
-    - format
-    - hash
-    - md5
-    - media_type
-    - path
-    - sha256
     - external_resources
     - resources
     slot_usage:
       external_resources:
         name: external_resources
+        description: External resources referenced at the dataset level (e.g., related
+          publications, repositories, documentation). For file-level external resources,
+          use FileCollection.external_resources.
         range: ExternalResource
+        multivalued: true
         inlined_as_list: true
       resources:
         name: resources
-        description: Sub-resources or component datasets that are part of this dataset.
-          Allows datasets to contain nested resource structures.
+        description: 'Sub-resources or component datasets that are part of this dataset.
+          Note: For file collections, use the file_collections attribute instead.'
+        range: Dataset
+        multivalued: true
         inlined_as_list: true
     attributes:
+      file_collections:
+        name: file_collections
+        description: Collections of files within this dataset. Each collection represents
+          a logical grouping of files with shared characteristics (e.g., all training
+          data, all image files, all raw data files). Maps to nested RO-Crate Dataset
+          entities via schema:hasPart.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - dcat:distribution
+        slot_uri: schema:hasPart
+        alias: file_collections
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: FileCollection
+        multivalued: true
+        inlined: true
+        inlined_as_list: true
+      total_file_count:
+        name: total_file_count
+        description: Total number of files across all file collections in this dataset.
+          Can be aggregated from file_collections[].file_count.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:totalFileCount
+        alias: total_file_count
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: integer
+      total_size_bytes:
+        name: total_size_bytes
+        description: Total size of all files in bytes across all file collections.
+          Can be aggregated from file_collections[].total_bytes.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:byteSize
+        alias: total_size_bytes
+        owner: Dataset
+        domain_of:
+        - Dataset
+        range: integer
       purposes:
         name: purposes
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2574,104 +2931,11 @@ classes:
         multivalued: true
         inlined: true
         inlined_as_list: true
-      bytes:
-        name: bytes
-        description: Size of the data in bytes.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcat:byteSize
-        alias: bytes
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: integer
-      dialect:
-        name: dialect
-        description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
-          profile).
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: schema:encodingFormat
-        alias: dialect
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: string
-      encoding:
-        name: encoding
-        description: the character encoding of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcat:mediaType
-        alias: encoding
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: EncodingEnum
-      format:
-        name: format
-        description: The file format, physical medium, or dimensions of a resource.
-          This should be a file extension or MIME type.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:format
-        alias: format
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: FormatEnum
-      hash:
-        name: hash
-        description: hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: hash
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: string
-      md5:
-        name: md5
-        description: md5 hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: md5
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: string
-      media_type:
-        name: media_type
-        description: The media type of the data. This should be a MIME type.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        exact_mappings:
-        - schema:encodingFormat
-        slot_uri: dcat:mediaType
-        alias: media_type
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: MediaTypeEnum
-      path:
-        name: path
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: schema:contentUrl
-        alias: path
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: string
-      sha256:
-        name: sha256
-        description: sha256 hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: sha256
-        owner: Dataset
-        domain_of:
-        - Dataset
-        range: string
       external_resources:
         name: external_resources
-        description: Links or identifiers for external resources. Can be used either
-          as a list of ExternalResource objects (in Dataset) or as a list of URL strings
-          (within ExternalResource class).
+        description: External resources referenced at the dataset level (e.g., related
+          publications, repositories, documentation). For file-level external resources,
+          use FileCollection.external_resources.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:references
         alias: external_resources
@@ -2679,6 +2943,7 @@ classes:
         domain_of:
         - Dataset
         - ExternalResource
+        - FileCollection
         - DataSubset
         range: ExternalResource
         multivalued: true
@@ -2686,8 +2951,8 @@ classes:
         inlined_as_list: true
       resources:
         name: resources
-        description: Sub-resources or component datasets that are part of this dataset.
-          Allows datasets to contain nested resource structures.
+        description: 'Sub-resources or component datasets that are part of this dataset.
+          Note: For file collections, use the file_collections attribute instead.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:hasPart
         alias: resources
@@ -2695,6 +2960,8 @@ classes:
         domain_of:
         - DatasetCollection
         - Dataset
+        - FileCollection
+        - DataSubset
         range: Dataset
         multivalued: true
         inlined: true
@@ -2708,6 +2975,8 @@ classes:
         owner: Dataset
         domain_of:
         - Information
+        - File
+        - FileCollection
         - DatasetCollection
         - Dataset
         - DataSubset
@@ -2723,6 +2992,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       conforms_to_class:
         name: conforms_to_class
@@ -2735,6 +3005,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       conforms_to_schema:
         name: conforms_to_schema
@@ -2747,6 +3018,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       created_by:
         name: created_by
@@ -2759,6 +3031,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       created_on:
         name: created_on
@@ -2771,6 +3044,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       doi:
         name: doi
@@ -2784,6 +3058,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
         pattern: 10\.\d{4,}\/.+
       download_url:
@@ -2802,6 +3077,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: uri
       issued:
         name: issued
@@ -2814,6 +3090,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       keywords:
         name: keywords
@@ -2826,6 +3103,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
         multivalued: true
       language:
@@ -2842,6 +3120,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       last_updated_on:
         name: last_updated_on
@@ -2854,6 +3133,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       license:
         name: license
@@ -2867,6 +3147,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       modified_by:
         name: modified_by
@@ -2879,6 +3160,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       page:
         name: page
@@ -2891,6 +3173,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       publisher:
         name: publisher
@@ -2903,6 +3186,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: uriorcurie
       status:
         name: status
@@ -2915,6 +3199,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       title:
         name: title
@@ -2928,6 +3213,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       version:
         name: version
@@ -2941,6 +3227,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       was_derived_from:
         name: was_derived_from
@@ -2955,6 +3242,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       id:
         name: id
@@ -2980,6 +3268,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -3005,6 +3354,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -3030,6 +3440,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
     class_uri: dcat:Distribution
   DataSubset:
@@ -3059,104 +3529,11 @@ classes:
         domain_of:
         - DataSubset
         range: boolean
-      bytes:
-        name: bytes
-        description: Size of the data in bytes.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcat:byteSize
-        alias: bytes
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: integer
-      dialect:
-        name: dialect
-        description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
-          profile).
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: schema:encodingFormat
-        alias: dialect
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: string
-      encoding:
-        name: encoding
-        description: the character encoding of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcat:mediaType
-        alias: encoding
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: EncodingEnum
-      format:
-        name: format
-        description: The file format, physical medium, or dimensions of a resource.
-          This should be a file extension or MIME type.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:format
-        alias: format
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: FormatEnum
-      hash:
-        name: hash
-        description: hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: hash
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: string
-      md5:
-        name: md5
-        description: md5 hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: md5
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: string
-      media_type:
-        name: media_type
-        description: The media type of the data. This should be a MIME type.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        exact_mappings:
-        - schema:encodingFormat
-        slot_uri: dcat:mediaType
-        alias: media_type
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: MediaTypeEnum
-      path:
-        name: path
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: schema:contentUrl
-        alias: path
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: string
-      sha256:
-        name: sha256
-        description: sha256 hash of the data
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-        slot_uri: dcterms:identifier
-        alias: sha256
-        owner: DataSubset
-        domain_of:
-        - Dataset
-        range: string
       external_resources:
         name: external_resources
-        description: Links or identifiers for external resources. Can be used either
-          as a list of ExternalResource objects (in Dataset) or as a list of URL strings
-          (within ExternalResource class).
+        description: External resources referenced at the dataset level (e.g., related
+          publications, repositories, documentation). For file-level external resources,
+          use FileCollection.external_resources.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:references
         alias: external_resources
@@ -3164,14 +3541,15 @@ classes:
         domain_of:
         - Dataset
         - ExternalResource
+        - FileCollection
         - DataSubset
         range: ExternalResource
         multivalued: true
         inlined_as_list: true
       resources:
         name: resources
-        description: Sub-resources or component datasets that are part of this dataset.
-          Allows datasets to contain nested resource structures.
+        description: 'Sub-resources or component datasets that are part of this dataset.
+          Note: For file collections, use the file_collections attribute instead.'
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: schema:hasPart
         alias: resources
@@ -3179,9 +3557,50 @@ classes:
         domain_of:
         - DatasetCollection
         - Dataset
+        - FileCollection
+        - DataSubset
         range: Dataset
         multivalued: true
         inlined_as_list: true
+      file_collections:
+        name: file_collections
+        description: Collections of files within this dataset. Each collection represents
+          a logical grouping of files with shared characteristics (e.g., all training
+          data, all image files, all raw data files). Maps to nested RO-Crate Dataset
+          entities via schema:hasPart.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - dcat:distribution
+        slot_uri: schema:hasPart
+        alias: file_collections
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: FileCollection
+        multivalued: true
+        inlined_as_list: true
+      total_file_count:
+        name: total_file_count
+        description: Total number of files across all file collections in this dataset.
+          Can be aggregated from file_collections[].file_count.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: d4d:totalFileCount
+        alias: total_file_count
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: integer
+      total_size_bytes:
+        name: total_size_bytes
+        description: Total size of all files in bytes across all file collections.
+          Can be aggregated from file_collections[].total_bytes.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:byteSize
+        alias: total_size_bytes
+        owner: DataSubset
+        domain_of:
+        - Dataset
+        range: integer
       purposes:
         name: purposes
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3869,6 +4288,8 @@ classes:
         owner: DataSubset
         domain_of:
         - Information
+        - File
+        - FileCollection
         - DatasetCollection
         - Dataset
         - DataSubset
@@ -3884,6 +4305,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       conforms_to_class:
         name: conforms_to_class
@@ -3896,6 +4318,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       conforms_to_schema:
         name: conforms_to_schema
@@ -3908,6 +4331,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       created_by:
         name: created_by
@@ -3920,6 +4344,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       created_on:
         name: created_on
@@ -3932,6 +4357,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       doi:
         name: doi
@@ -3945,6 +4371,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
         pattern: 10\.\d{4,}\/.+
       download_url:
@@ -3963,6 +4390,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: uri
       issued:
         name: issued
@@ -3975,6 +4403,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       keywords:
         name: keywords
@@ -3987,6 +4416,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
         multivalued: true
       language:
@@ -4003,6 +4433,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       last_updated_on:
         name: last_updated_on
@@ -4015,6 +4446,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       license:
         name: license
@@ -4028,6 +4460,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       modified_by:
         name: modified_by
@@ -4040,6 +4473,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       page:
         name: page
@@ -4052,6 +4486,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       publisher:
         name: publisher
@@ -4064,6 +4499,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: uriorcurie
       status:
         name: status
@@ -4076,6 +4512,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       title:
         name: title
@@ -4089,6 +4526,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       version:
         name: version
@@ -4102,6 +4540,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       was_derived_from:
         name: was_derived_from
@@ -4116,6 +4555,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       id:
         name: id
@@ -4141,6 +4581,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -4166,6 +4667,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -4191,6 +4753,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
   NamedThing:
     name: NamedThing
@@ -4221,6 +4843,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -4246,6 +4929,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -4271,6 +5015,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
     class_uri: schema:Thing
   Organization:
@@ -4303,6 +5107,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -4328,6 +5193,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -4353,6 +5279,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
     class_uri: schema:Organization
   DatasetProperty:
@@ -4752,6 +5738,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -4777,6 +5824,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -4802,6 +5910,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
     class_uri: schema:SoftwareApplication
   Person:
@@ -4878,6 +6046,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -4903,6 +6132,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -4928,6 +6218,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
     class_uri: schema:Person
   Information:
@@ -4968,6 +6318,8 @@ classes:
         owner: Information
         domain_of:
         - Information
+        - File
+        - FileCollection
         - DatasetCollection
         - Dataset
         - DataSubset
@@ -4983,6 +6335,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       conforms_to_class:
         name: conforms_to_class
@@ -4995,6 +6348,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       conforms_to_schema:
         name: conforms_to_schema
@@ -5007,6 +6361,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       created_by:
         name: created_by
@@ -5019,6 +6374,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       created_on:
         name: created_on
@@ -5031,6 +6387,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       doi:
         name: doi
@@ -5044,6 +6401,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
         pattern: 10\.\d{4,}\/.+
       download_url:
@@ -5062,6 +6420,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: uri
       issued:
         name: issued
@@ -5074,6 +6433,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       keywords:
         name: keywords
@@ -5086,6 +6446,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
         multivalued: true
       language:
@@ -5102,6 +6463,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       last_updated_on:
         name: last_updated_on
@@ -5114,6 +6476,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: datetime
       license:
         name: license
@@ -5127,6 +6490,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       modified_by:
         name: modified_by
@@ -5139,6 +6503,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       page:
         name: page
@@ -5151,6 +6516,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       publisher:
         name: publisher
@@ -5163,6 +6529,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: uriorcurie
       status:
         name: status
@@ -5175,6 +6542,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       title:
         name: title
@@ -5188,6 +6556,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       version:
         name: version
@@ -5201,6 +6570,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       was_derived_from:
         name: was_derived_from
@@ -5215,6 +6585,7 @@ classes:
         - DatasetCollection
         - Dataset
         - DataSubset
+        - File
         range: string
       id:
         name: id
@@ -5240,6 +6611,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -5265,6 +6697,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -5290,6 +6783,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
   FormatDialect:
     name: FormatDialect
@@ -7134,6 +8687,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -7159,6 +8773,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -7184,6 +8859,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
   Grant:
     name: Grant
@@ -7228,6 +8963,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: uriorcurie
         required: true
       name:
@@ -7253,6 +9049,67 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
       description:
         name: description
@@ -7278,6 +9135,66 @@ classes:
         - Creator
         - FundingMechanism
         - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
         range: string
   Instance:
     name: Instance
@@ -10389,6 +12306,7 @@ classes:
         domain_of:
         - Dataset
         - ExternalResource
+        - FileCollection
         - DataSubset
         range: string
         multivalued: true
@@ -29116,4 +31034,1336 @@ classes:
         inlined: true
         inlined_as_list: true
     class_uri: schema:PropertyValue
+  File:
+    name: File
+    description: A single file within a dataset or file collection. Represents an
+      individual data file, code file, documentation file, etc. Maps to RO-Crate File
+      entities.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    aliases:
+    - data file
+    - file
+    - file object
+    exact_mappings:
+    - schema:DigitalDocument
+    is_a: Information
+    slots:
+    - bytes
+    - path
+    - format
+    - encoding
+    - compression
+    - media_type
+    - hash
+    - md5
+    - sha256
+    - dialect
+    attributes:
+      file_type:
+        name: file_type
+        description: Semantic type or purpose of this file (e.g., data_file, code_file,
+          documentation_file, metadata_file).
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
+        slot_uri: d4d:fileType
+        alias: file_type
+        owner: File
+        domain_of:
+        - File
+        range: FileTypeEnum
+      bytes:
+        name: bytes
+        description: Size of the data in bytes.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:byteSize
+        alias: bytes
+        owner: File
+        domain_of:
+        - File
+        range: integer
+      path:
+        name: path
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:contentUrl
+        alias: path
+        owner: File
+        domain_of:
+        - File
+        - FileCollection
+        range: string
+      format:
+        name: format
+        description: The file format, physical medium, or dimensions of a resource.
+          This should be a file extension or MIME type.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:format
+        alias: format
+        owner: File
+        domain_of:
+        - File
+        range: FormatEnum
+      encoding:
+        name: encoding
+        description: the character encoding of the data
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:mediaType
+        alias: encoding
+        owner: File
+        domain_of:
+        - File
+        range: EncodingEnum
+      compression:
+        name: compression
+        description: compression format used, if any. e.g., gzip, bzip2, zip
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:compressFormat
+        alias: compression
+        owner: File
+        domain_of:
+        - Information
+        - File
+        - FileCollection
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        range: CompressionEnum
+      media_type:
+        name: media_type
+        description: The media type of the data. This should be a MIME type.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - schema:encodingFormat
+        slot_uri: dcat:mediaType
+        alias: media_type
+        owner: File
+        domain_of:
+        - File
+        range: MediaTypeEnum
+      hash:
+        name: hash
+        description: hash of the data
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:identifier
+        alias: hash
+        owner: File
+        domain_of:
+        - File
+        range: string
+      md5:
+        name: md5
+        description: md5 hash of the data
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:identifier
+        alias: md5
+        owner: File
+        domain_of:
+        - File
+        range: string
+      sha256:
+        name: sha256
+        description: sha256 hash of the data
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:identifier
+        alias: sha256
+        owner: File
+        domain_of:
+        - File
+        range: string
+      dialect:
+        name: dialect
+        description: Specific format dialect or variation (e.g., CSV dialect, JSON-LD
+          profile).
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:encodingFormat
+        alias: dialect
+        owner: File
+        domain_of:
+        - File
+        range: string
+      conforms_to:
+        name: conforms_to
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      conforms_to_class:
+        name: conforms_to_class
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to_class
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      conforms_to_schema:
+        name: conforms_to_schema
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to_schema
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      created_by:
+        name: created_by
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:creator
+        alias: created_by
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      created_on:
+        name: created_on
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:created
+        alias: created_on
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: datetime
+      doi:
+        name: doi
+        description: digital object identifier
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:identifier
+        alias: doi
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+        pattern: 10\.\d{4,}\/.+
+      download_url:
+        name: download_url
+        description: URL from which the data can be downloaded. This is not the same
+          as the landing page, which is a page that describes the dataset. Rather,
+          this URL points directly to the data itself.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - schema:url
+        slot_uri: dcat:downloadURL
+        alias: download_url
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: uri
+      issued:
+        name: issued
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:issued
+        alias: issued
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: datetime
+      keywords:
+        name: keywords
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:keyword
+        alias: keywords
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+        multivalued: true
+      language:
+        name: language
+        description: language in which the information is expressed
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - schema:inLanguage
+        slot_uri: dcterms:language
+        alias: language
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      last_updated_on:
+        name: last_updated_on
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:modified
+        alias: last_updated_on
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: datetime
+      license:
+        name: license
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:license
+        alias: license
+        owner: File
+        domain_of:
+        - Software
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      modified_by:
+        name: modified_by
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:contributor
+        alias: modified_by
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      page:
+        name: page
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:landingPage
+        alias: page
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      publisher:
+        name: publisher
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:publisher
+        alias: publisher
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: uriorcurie
+      status:
+        name: status
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:type
+        alias: status
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      title:
+        name: title
+        description: the official title of the element
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:title
+        alias: title
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      version:
+        name: version
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:hasVersion
+        alias: version
+        owner: File
+        domain_of:
+        - Software
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      was_derived_from:
+        name: was_derived_from
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - dcterms:source
+        slot_uri: prov:wasDerivedFrom
+        alias: was_derived_from
+        owner: File
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      id:
+        name: id
+        description: A unique identifier for a thing.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        identifier: true
+        alias: id
+        owner: File
+        domain_of:
+        - NamedThing
+        - DatasetProperty
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - Organization
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
+        range: uriorcurie
+        required: true
+      name:
+        name: name
+        description: A human-readable name for a thing.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: File
+        domain_of:
+        - NamedThing
+        - DatasetProperty
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - Organization
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
+        range: string
+      description:
+        name: description
+        description: A human-readable description for a thing.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: File
+        domain_of:
+        - NamedThing
+        - DatasetProperty
+        - DatasetRelationship
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - Organization
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
+        range: string
+    class_uri: schema:MediaObject
+  FileCollection:
+    name: FileCollection
+    description: A collection of files with shared characteristics (format, purpose,
+      structure). Represents a logical grouping of related files within a dataset,
+      such as all training data files, all image files, or all raw data files. Maps
+      to RO-Crate Dataset entities via schema:hasPart relationships.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    aliases:
+    - file collection
+    - data files
+    - file group
+    exact_mappings:
+    - schema:Dataset
+    close_mappings:
+    - dcat:Distribution
+    is_a: Information
+    slots:
+    - path
+    - compression
+    - external_resources
+    - resources
+    slot_usage:
+      path:
+        name: path
+        description: Path or URL to the FileCollection. May be a directory path, archive
+          file path, or download URL depending on how the collection is distributed.
+      compression:
+        name: compression
+        description: Compression format if the collection is packaged as a compressed
+          archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections
+          or purely logical groupings.
+      external_resources:
+        name: external_resources
+        description: External files or URLs referenced by this file collection.
+        range: ExternalResource
+        multivalued: true
+        inlined_as_list: true
+      resources:
+        name: resources
+        description: Individual files or nested file collections within this collection.
+          Allows hierarchical file organization with both File objects and nested
+          FileCollection objects.
+        multivalued: true
+        inlined_as_list: true
+        any_of:
+        - range: File
+        - range: FileCollection
+    attributes:
+      collection_type:
+        name: collection_type
+        description: Type(s) of content in this file collection. A collection may
+          have multiple types, for example a collection containing both raw_data and
+          documentation files would have both types listed.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
+        slot_uri: d4d:collectionType
+        alias: collection_type
+        owner: FileCollection
+        domain_of:
+        - FileCollection
+        range: FileCollectionTypeEnum
+        multivalued: true
+      file_count:
+        name: file_count
+        description: Number of files in this collection.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
+        slot_uri: d4d:fileCount
+        alias: file_count
+        owner: FileCollection
+        domain_of:
+        - FileCollection
+        range: integer
+      total_bytes:
+        name: total_bytes
+        description: Total size of all files in bytes.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
+        slot_uri: dcat:byteSize
+        alias: total_bytes
+        owner: FileCollection
+        domain_of:
+        - FileCollection
+        range: integer
+      path:
+        name: path
+        description: Path or URL to the FileCollection. May be a directory path, archive
+          file path, or download URL depending on how the collection is distributed.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:contentUrl
+        alias: path
+        owner: FileCollection
+        domain_of:
+        - File
+        - FileCollection
+        range: string
+      compression:
+        name: compression
+        description: Compression format if the collection is packaged as a compressed
+          archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections
+          or purely logical groupings.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:compressFormat
+        alias: compression
+        owner: FileCollection
+        domain_of:
+        - Information
+        - File
+        - FileCollection
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        range: CompressionEnum
+      external_resources:
+        name: external_resources
+        description: External files or URLs referenced by this file collection.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:references
+        alias: external_resources
+        owner: FileCollection
+        domain_of:
+        - Dataset
+        - ExternalResource
+        - FileCollection
+        - DataSubset
+        range: ExternalResource
+        multivalued: true
+        inlined_as_list: true
+      resources:
+        name: resources
+        description: Individual files or nested file collections within this collection.
+          Allows hierarchical file organization with both File objects and nested
+          FileCollection objects.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: schema:hasPart
+        alias: resources
+        owner: FileCollection
+        domain_of:
+        - DatasetCollection
+        - Dataset
+        - FileCollection
+        - DataSubset
+        range: Dataset
+        multivalued: true
+        inlined_as_list: true
+        any_of:
+        - range: File
+        - range: FileCollection
+      conforms_to:
+        name: conforms_to
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      conforms_to_class:
+        name: conforms_to_class
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to_class
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      conforms_to_schema:
+        name: conforms_to_schema
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:conformsTo
+        alias: conforms_to_schema
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      created_by:
+        name: created_by
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:creator
+        alias: created_by
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      created_on:
+        name: created_on
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:created
+        alias: created_on
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: datetime
+      doi:
+        name: doi
+        description: digital object identifier
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:identifier
+        alias: doi
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+        pattern: 10\.\d{4,}\/.+
+      download_url:
+        name: download_url
+        description: URL from which the data can be downloaded. This is not the same
+          as the landing page, which is a page that describes the dataset. Rather,
+          this URL points directly to the data itself.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - schema:url
+        slot_uri: dcat:downloadURL
+        alias: download_url
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: uri
+      issued:
+        name: issued
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:issued
+        alias: issued
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: datetime
+      keywords:
+        name: keywords
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:keyword
+        alias: keywords
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+        multivalued: true
+      language:
+        name: language
+        description: language in which the information is expressed
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - schema:inLanguage
+        slot_uri: dcterms:language
+        alias: language
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      last_updated_on:
+        name: last_updated_on
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:modified
+        alias: last_updated_on
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: datetime
+      license:
+        name: license
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:license
+        alias: license
+        owner: FileCollection
+        domain_of:
+        - Software
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      modified_by:
+        name: modified_by
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:contributor
+        alias: modified_by
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      page:
+        name: page
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcat:landingPage
+        alias: page
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      publisher:
+        name: publisher
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:publisher
+        alias: publisher
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: uriorcurie
+      status:
+        name: status
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:type
+        alias: status
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      title:
+        name: title
+        description: the official title of the element
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:title
+        alias: title
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      version:
+        name: version
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        slot_uri: dcterms:hasVersion
+        alias: version
+        owner: FileCollection
+        domain_of:
+        - Software
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      was_derived_from:
+        name: was_derived_from
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+        exact_mappings:
+        - dcterms:source
+        slot_uri: prov:wasDerivedFrom
+        alias: was_derived_from
+        owner: FileCollection
+        domain_of:
+        - Information
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - File
+        range: string
+      id:
+        name: id
+        description: A unique identifier for a thing.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:identifier
+        identifier: true
+        alias: id
+        owner: FileCollection
+        domain_of:
+        - NamedThing
+        - DatasetProperty
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - Organization
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
+        range: uriorcurie
+        required: true
+      name:
+        name: name
+        description: A human-readable name for a thing.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:name
+        alias: name
+        owner: FileCollection
+        domain_of:
+        - NamedThing
+        - DatasetProperty
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - Organization
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - DatasetRelationship
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
+        range: string
+      description:
+        name: description
+        description: A human-readable description for a thing.
+        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
+        slot_uri: schema:description
+        alias: description
+        owner: FileCollection
+        domain_of:
+        - NamedThing
+        - DatasetProperty
+        - DatasetRelationship
+        - DatasetCollection
+        - Dataset
+        - DataSubset
+        - Organization
+        - Software
+        - Person
+        - Information
+        - Purpose
+        - Task
+        - AddressingGap
+        - Creator
+        - FundingMechanism
+        - Grantor
+        - Grant
+        - Instance
+        - SamplingStrategy
+        - MissingInfo
+        - Relationships
+        - Splits
+        - DataAnomaly
+        - DatasetBias
+        - DatasetLimitation
+        - ExternalResource
+        - Confidentiality
+        - ContentWarning
+        - Subpopulation
+        - Deidentification
+        - SensitiveElement
+        - InstanceAcquisition
+        - CollectionMechanism
+        - DataCollector
+        - CollectionTimeframe
+        - DirectCollection
+        - MissingDataDocumentation
+        - RawDataSource
+        - PreprocessingStrategy
+        - CleaningStrategy
+        - LabelingStrategy
+        - RawData
+        - ImputationProtocol
+        - AnnotationAnalysis
+        - MachineAnnotationTools
+        - ExistingUse
+        - UseRepository
+        - OtherTask
+        - FutureUseImpact
+        - DiscouragedUse
+        - IntendedUse
+        - ProhibitedUse
+        - ThirdPartySharing
+        - DistributionFormat
+        - DistributionDate
+        - Maintainer
+        - Erratum
+        - UpdatePlan
+        - RetentionLimits
+        - VersionAccess
+        - ExtensionMechanism
+        - EthicalReview
+        - DataProtectionImpact
+        - CollectionNotification
+        - CollectionConsent
+        - ConsentRevocation
+        - HumanSubjectResearch
+        - InformedConsent
+        - ParticipantPrivacy
+        - HumanSubjectCompensation
+        - AtRiskPopulations
+        - LicenseAndUseTerms
+        - IPRestrictions
+        - ExportControlRegulatoryRestrictions
+        - VariableMetadata
+        - File
+        range: string
+    class_uri: dcat:Dataset
 source_file: src/data_sheets_schema/schema/data_sheets_schema.yaml
