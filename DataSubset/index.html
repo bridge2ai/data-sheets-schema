@@ -1660,12 +1660,12 @@ attributes:
     description: Collections of files within this dataset. Each collection represents
       a logical grouping of files with shared characteristics (e.g., all training
       data, all image files, all raw data files). Maps to nested RO-Crate Dataset
-      entities via schema:hasPart.
+      entities via schema:hasPart in RO-Crate converters.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - dcat:distribution
     rank: 1000
-    slot_uri: schema:hasPart
+    slot_uri: d4d:fileCollections
     alias: file_collections
     owner: DataSubset
     domain_of:
