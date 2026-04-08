@@ -30,9 +30,10 @@ def has_example(text: str) -> bool:
     """Check if description contains an example."""
     if not text:
         return False
-    indicators = ['e.g.', 'for example', '(e.g.,', 'such as']
+    # Only consider explicit example markers, not any parenthesis
+    indicators = ['e.g.', 'for example', 'such as', 'for instance']
     text_lower = text.lower()
-    return any(indicator in text_lower for indicator in indicators) or '(' in text
+    return any(indicator in text_lower for indicator in indicators)
 
 def is_complete_sentence(text: str) -> bool:
     """Check if text appears to be a complete sentence."""
@@ -61,12 +62,10 @@ def check_description_quality(description: str, element_type: str, element_name:
     if word_count < BREVITY_THRESHOLD:
         issues.append('TOO_BRIEF')
 
-    # Check complete sentence for attributes and slots
+    # Attributes and slots should always end with a period
     if element_type in ['attribute', 'slot']:
-        if not is_complete_sentence(description):
-            # Check if it ends with period
-            if not description.rstrip().endswith('.'):
-                issues.append('MISSING_PERIOD')
+        if not description.rstrip().endswith('.'):
+            issues.append('MISSING_PERIOD')
 
     # Check for examples in attributes
     if element_type == 'attribute':

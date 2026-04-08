@@ -3565,7 +3565,7 @@
     },
     {
       "name": "formatDialect__double_quote",
-      "description": "Whether quotes within quoted fields are escaped by doubling them.",
+      "description": "String indicator of whether quotes within quoted fields are escaped by doubling them.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/double_quote",
       "alias": "double_quote",
@@ -3578,7 +3578,7 @@
     },
     {
       "name": "formatDialect__header",
-      "description": "Whether the first row contains column headers (true/false).",
+      "description": "String indicator of whether the first row contains column headers.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/header",
       "alias": "header",
@@ -7883,12 +7883,12 @@
         },
         {
           "name": "double_quote",
-          "description": "Whether quotes within quoted fields are escaped by doubling them.",
+          "description": "String indicator of whether quotes within quoted fields are escaped by doubling them.",
           "@type": "SlotDefinition"
         },
         {
           "name": "header",
-          "description": "Whether the first row contains column headers (true/false).",
+          "description": "String indicator of whether the first row contains column headers.",
           "@type": "SlotDefinition"
         },
         {
@@ -10848,7 +10848,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-04-07T18:14:37",
   "source_file_size": 18558,
-  "generation_date": "2026-04-08T15:53:25",
+  "generation_date": "2026-04-08T16:17:07",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

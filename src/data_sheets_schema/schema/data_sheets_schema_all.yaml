@@ -7102,7 +7102,8 @@ classes:
         range: string
       double_quote:
         name: double_quote
-        description: Whether quotes within quoted fields are escaped by doubling them.
+        description: String indicator of whether quotes within quoted fields are escaped
+          by doubling them.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         alias: double_quote
         owner: FormatDialect
@@ -7111,7 +7112,7 @@ classes:
         range: string
       header:
         name: header
-        description: Whether the first row contains column headers (true/false).
+        description: String indicator of whether the first row contains column headers.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
         alias: header
         owner: FormatDialect

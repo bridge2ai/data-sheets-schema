@@ -228,9 +228,9 @@ classes:
       delimiter:
         description: Field delimiter character (e.g., "," for CSV, "\t" for TSV).
       double_quote:
-        description: Whether quotes within quoted fields are escaped by doubling them.
+        description: String indicator of whether quotes within quoted fields are escaped by doubling them.
       header:
-        description: Whether the first row contains column headers (true/false).
+        description: String indicator of whether the first row contains column headers.
       quote_char:
         description: Character used for quoting fields (e.g., '"' for CSV).
 

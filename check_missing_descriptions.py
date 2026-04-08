@@ -5,7 +5,6 @@ Check for missing descriptions in D4D schema module files.
 
 import yaml
 from pathlib import Path
-from collections import defaultdict
 
 def check_module(module_path):
     """Check a single module for missing descriptions."""

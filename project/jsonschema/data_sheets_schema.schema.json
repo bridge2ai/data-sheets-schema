@@ -4171,14 +4171,14 @@
                     ]
                 },
                 "double_quote": {
-                    "description": "Whether quotes within quoted fields are escaped by doubling them.",
+                    "description": "String indicator of whether quotes within quoted fields are escaped by doubling them.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "header": {
-                    "description": "Whether the first row contains column headers (true/false).",
+                    "description": "String indicator of whether the first row contains column headers.",
                     "type": [
                         "string",
                         "null"

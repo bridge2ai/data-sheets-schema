@@ -126,7 +126,7 @@ issued:
   description: Date of formal issuance or publication of the resource.
   
 doi:
-  description: digital object identifier
+  description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.
   pattern: "10\\.\\d{4,}\\/.+"
 ```
 
