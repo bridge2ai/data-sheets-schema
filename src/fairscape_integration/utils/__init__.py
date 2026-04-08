@@ -10,6 +10,7 @@ from .validator import D4DValidator
 from .mapping_loader import MappingLoader
 from .rocrate_parser import ROCrateParser
 from .informativeness_scorer import InformativenessScorer
+from .d4d_builder import D4DBuilder
 
 __all__ = [
     'FieldPrioritizer',
@@ -17,4 +18,5 @@ __all__ = [
     'MappingLoader',
     'ROCrateParser',
     'InformativenessScorer',
+    'D4DBuilder',
 ]
