@@ -23,6 +23,7 @@ click = "^8.1.0"
 
 [tool.poetry.scripts]
 d4d = "data_sheets_schema.cli:cli"
+fairscape-cli = "fairscape_integration.cli:main"
 
 [tool.poetry-dynamic-versioning]
 enable = true
