@@ -63,12 +63,20 @@ class SSSOMIntegration:
         if self.verbose:
             print(f"Loading SSSOM with standard sssom-py package: {self.sssom_path}")
 
-        # Parse SSSOM file
-        self.msdf = parse_sssom_table(str(self.sssom_path))
+        try:
+            # Parse SSSOM file
+            self.msdf = parse_sssom_table(str(self.sssom_path))
 
-        if self.verbose:
-            print(f"Loaded {len(self.msdf.df)} mappings")
-            print(f"Mapping set ID: {self.msdf.mapping_set_id}")
+            if self.verbose:
+                print(f"Loaded {len(self.msdf.df)} mappings")
+                print(f"Mapping set ID: {self.msdf.mapping_set_id}")
+        except Exception as e:
+            # Fall back to custom reader if sssom-py parsing fails
+            if self.verbose:
+                print(f"sssom-py parsing failed: {e}")
+                print("Falling back to custom reader")
+            self.use_standard = False
+            self._load_with_custom_reader()
 
     def _load_with_custom_reader(self):
         """Load SSSOM file using custom SSSOMReader."""
