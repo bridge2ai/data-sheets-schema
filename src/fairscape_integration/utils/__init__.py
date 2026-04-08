@@ -8,9 +8,11 @@ informativeness scoring, validation, and mapping management.
 from .field_prioritizer import FieldPrioritizer
 from .validator import D4DValidator
 from .mapping_loader import MappingLoader
+from .rocrate_parser import ROCrateParser
 
 __all__ = [
     'FieldPrioritizer',
     'D4DValidator',
     'MappingLoader',
+    'ROCrateParser',
 ]
