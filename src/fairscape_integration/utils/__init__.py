@@ -11,6 +11,7 @@ from .mapping_loader import MappingLoader
 from .rocrate_parser import ROCrateParser
 from .informativeness_scorer import InformativenessScorer
 from .d4d_builder import D4DBuilder
+from .rocrate_merger import ROCrateMerger
 
 __all__ = [
     'FieldPrioritizer',
@@ -19,4 +20,5 @@ __all__ = [
     'ROCrateParser',
     'InformativenessScorer',
     'D4DBuilder',
+    'ROCrateMerger',
 ]
