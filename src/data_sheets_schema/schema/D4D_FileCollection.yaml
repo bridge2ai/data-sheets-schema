@@ -103,6 +103,10 @@ classes:
           - range: FileCollection
         multivalued: true
         inlined_as_list: true
+        # NOTE: LinkML generator limitation - Generated artifacts (Python datamodel,
+        # JSON Schema) do not fully reflect this union type constraint. The generated
+        # code still types resources as Dataset rather than (File | FileCollection).
+        # This is a known limitation of LinkML's union type handling.
     attributes:
       collection_type:
         description: >-

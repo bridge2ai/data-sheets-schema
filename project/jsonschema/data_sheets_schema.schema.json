@@ -1207,7 +1207,7 @@
                     ]
                 },
                 "file_collections": {
-                    "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart.",
+                    "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
                     "items": {
                         "$ref": "#/$defs/FileCollection"
                     },
@@ -2005,7 +2005,7 @@
                     ]
                 },
                 "file_collections": {
-                    "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart.",
+                    "description": "Collections of files within this dataset. Each collection represents a logical grouping of files with shared characteristics (e.g., all training data, all image files, all raw data files). Maps to nested RO-Crate Dataset entities via schema:hasPart in RO-Crate converters.",
                     "items": {
                         "$ref": "#/$defs/FileCollection"
                     },

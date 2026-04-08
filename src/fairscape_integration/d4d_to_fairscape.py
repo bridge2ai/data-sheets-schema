@@ -121,6 +121,15 @@ class D4DToFairscapeConverter:
                 author_str = str(authors)
 
         # Build dataset params using JSON-LD field names (aliases)
+        # Collect all hasPart references: file collections + other resources
+        all_hasPart_ids = list(hasPart_ids or [])
+
+        # Include Dataset.resources (non-file-collection nested datasets) in hasPart
+        if "resources" in d4d_dict and d4d_dict["resources"]:
+            for resource in d4d_dict["resources"]:
+                if isinstance(resource, dict) and "id" in resource:
+                    all_hasPart_ids.append(resource["id"])
+
         dataset_params = {
             "@id": "./",
             "@type": ["Dataset", "https://w3id.org/EVI#ROCrate"],
@@ -130,7 +139,7 @@ class D4DToFairscapeConverter:
             "version": d4d_dict.get("version", "1.0"),
             "author": author_str,
             "license": d4d_dict.get("license", "No license specified"),  # Required field
-            "hasPart": [{"@id": id} for id in (hasPart_ids or [])]  # Add file collection references
+            "hasPart": [{"@id": id} for id in all_hasPart_ids]
         }
 
         # Add optional Schema.org fields
@@ -279,6 +288,11 @@ class D4DToFairscapeConverter:
 
             if "file_count" in fc:
                 collection_params["d4d:fileCount"] = fc["file_count"]
+
+            # TODO: Convert FileCollection.resources (File objects) to RO-Crate File entities
+            # Currently, file-level metadata in resources is not converted to RO-Crate.
+            # Future work: iterate fc.get('resources', []), create RO-Crate File entities,
+            # and add their @ids to hasPart.
 
             # Create nested Dataset element
             collection_elem = ROCrateMetadataElem(**collection_params)
