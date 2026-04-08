@@ -12,17 +12,18 @@ import warnings
 import yaml
 
 # Try to import linkml-map
+LINKML_MAP_AVAILABLE = False
+_linkml_map_import_error = None
+
 try:
     from linkml_map.transformer.transformer import Transformer
     from linkml_map.transformer.session import Session
     LINKML_MAP_AVAILABLE = True
-except ImportError:
-    LINKML_MAP_AVAILABLE = False
-    warnings.warn(
-        "linkml-map package not available. Install with: poetry install --with dev\n"
-        "Schema transformations will use fallback implementations.",
-        ImportWarning
-    )
+except ImportError as e:
+    _linkml_map_import_error = str(e)
+except Exception as e:
+    # Catch other errors like KeyError during linkml-map initialization
+    _linkml_map_import_error = f"linkml-map import error: {type(e).__name__}: {e}"
 
 
 class LinkMLMapIntegration:
