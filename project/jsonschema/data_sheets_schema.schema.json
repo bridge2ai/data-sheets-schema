@@ -219,7 +219,7 @@
             "type": "string"
         },
         "Boolean": {
-            "description": "",
+            "description": "Three-valued boolean logic supporting true, false, and unknown states.",
             "enum": [
                 "true",
                 "false",
@@ -523,7 +523,7 @@
             "type": "string"
         },
         "CompressionEnum": {
-            "description": "",
+            "description": "Compression algorithms and formats for file compression.",
             "enum": [
                 "gzip",
                 "bzip2",
@@ -694,6 +694,7 @@
                     ]
                 },
                 "warnings": {
+                    "description": "Specific content warnings describing potentially offensive, insulting, threatening, or anxiety-provoking content (e.g., violence, profanity, explicit imagery).",
                     "items": {
                         "type": "string"
                     },
@@ -1044,18 +1045,21 @@
                     ]
                 },
                 "conforms_to": {
+                    "description": "An established standard, specification, or schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
+                    "description": "The specific class or type within a schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
+                    "description": "The schema or data model to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
@@ -1071,12 +1075,14 @@
                     ]
                 },
                 "created_by": {
+                    "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_on": {
+                    "description": "The date and time when the resource was created.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1329,6 +1335,7 @@
                     ]
                 },
                 "issued": {
+                    "description": "Date of formal issuance or publication of the resource.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1336,6 +1343,7 @@
                     ]
                 },
                 "keywords": {
+                    "description": "Keywords or tags describing the resource for discovery and classification.",
                     "items": {
                         "type": "string"
                     },
@@ -1381,6 +1389,7 @@
                     ]
                 },
                 "last_updated_on": {
+                    "description": "The date and time when the resource was most recently modified or updated.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -1388,6 +1397,7 @@
                     ]
                 },
                 "license": {
+                    "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
                     "type": [
                         "string",
                         "null"
@@ -1433,6 +1443,7 @@
                     ]
                 },
                 "modified_by": {
+                    "description": "A person or organization that contributed to modifying or updating the resource.",
                     "type": [
                         "string",
                         "null"
@@ -1455,6 +1466,7 @@
                     ]
                 },
                 "page": {
+                    "description": "A landing page or web page providing access to or information about the resource.",
                     "type": [
                         "string",
                         "null"
@@ -1510,6 +1522,7 @@
                     ]
                 },
                 "publisher": {
+                    "description": "The organization or entity responsible for making the resource available.",
                     "type": [
                         "string",
                         "null"
@@ -1602,6 +1615,7 @@
                     ]
                 },
                 "status": {
+                    "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
                         "string",
                         "null"
@@ -1685,6 +1699,7 @@
                     ]
                 },
                 "version": {
+                    "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
                     "type": [
                         "string",
                         "null"
@@ -1701,6 +1716,7 @@
                     ]
                 },
                 "was_derived_from": {
+                    "description": "A resource from which this resource was derived, in whole or in part.",
                     "type": [
                         "string",
                         "null"
@@ -1842,18 +1858,21 @@
                     ]
                 },
                 "conforms_to": {
+                    "description": "An established standard, specification, or schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
+                    "description": "The specific class or type within a schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
+                    "description": "The schema or data model to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
@@ -1869,12 +1888,14 @@
                     ]
                 },
                 "created_by": {
+                    "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_on": {
+                    "description": "The date and time when the resource was created.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2113,6 +2134,7 @@
                     ]
                 },
                 "issued": {
+                    "description": "Date of formal issuance or publication of the resource.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2120,6 +2142,7 @@
                     ]
                 },
                 "keywords": {
+                    "description": "Keywords or tags describing the resource for discovery and classification.",
                     "items": {
                         "type": "string"
                     },
@@ -2165,6 +2188,7 @@
                     ]
                 },
                 "last_updated_on": {
+                    "description": "The date and time when the resource was most recently modified or updated.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2172,6 +2196,7 @@
                     ]
                 },
                 "license": {
+                    "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
                     "type": [
                         "string",
                         "null"
@@ -2217,6 +2242,7 @@
                     ]
                 },
                 "modified_by": {
+                    "description": "A person or organization that contributed to modifying or updating the resource.",
                     "type": [
                         "string",
                         "null"
@@ -2239,6 +2265,7 @@
                     ]
                 },
                 "page": {
+                    "description": "A landing page or web page providing access to or information about the resource.",
                     "type": [
                         "string",
                         "null"
@@ -2294,6 +2321,7 @@
                     ]
                 },
                 "publisher": {
+                    "description": "The organization or entity responsible for making the resource available.",
                     "type": [
                         "string",
                         "null"
@@ -2386,6 +2414,7 @@
                     ]
                 },
                 "status": {
+                    "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
                         "string",
                         "null"
@@ -2469,6 +2498,7 @@
                     ]
                 },
                 "version": {
+                    "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
                     "type": [
                         "string",
                         "null"
@@ -2485,6 +2515,7 @@
                     ]
                 },
                 "was_derived_from": {
+                    "description": "A resource from which this resource was derived, in whole or in part.",
                     "type": [
                         "string",
                         "null"
@@ -2573,30 +2604,35 @@
                     "description": "compression format used, if any. e.g., gzip, bzip2, zip"
                 },
                 "conforms_to": {
+                    "description": "An established standard, specification, or schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
+                    "description": "The specific class or type within a schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
+                    "description": "The schema or data model to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_by": {
+                    "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_on": {
+                    "description": "The date and time when the resource was created.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2630,6 +2666,7 @@
                     "type": "string"
                 },
                 "issued": {
+                    "description": "Date of formal issuance or publication of the resource.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2637,6 +2674,7 @@
                     ]
                 },
                 "keywords": {
+                    "description": "Keywords or tags describing the resource for discovery and classification.",
                     "items": {
                         "type": "string"
                     },
@@ -2653,6 +2691,7 @@
                     ]
                 },
                 "last_updated_on": {
+                    "description": "The date and time when the resource was most recently modified or updated.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -2660,12 +2699,14 @@
                     ]
                 },
                 "license": {
+                    "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "modified_by": {
+                    "description": "A person or organization that contributed to modifying or updating the resource.",
                     "type": [
                         "string",
                         "null"
@@ -2679,12 +2720,14 @@
                     ]
                 },
                 "page": {
+                    "description": "A landing page or web page providing access to or information about the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "publisher": {
+                    "description": "The organization or entity responsible for making the resource available.",
                     "type": [
                         "string",
                         "null"
@@ -2701,6 +2744,7 @@
                     ]
                 },
                 "status": {
+                    "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
                         "string",
                         "null"
@@ -2714,12 +2758,14 @@
                     ]
                 },
                 "version": {
+                    "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "was_derived_from": {
+                    "description": "A resource from which this resource was derived, in whole or in part.",
                     "type": [
                         "string",
                         "null"
@@ -3184,7 +3230,7 @@
             "type": "object"
         },
         "EncodingEnum": {
-            "description": "",
+            "description": "Character encoding schemes for text representation in different languages and scripts.",
             "enum": [
                 "ASCII",
                 "Big5",
@@ -3219,7 +3265,16 @@
                 "UTF-16",
                 "UTF-32",
                 "UTF-7",
-                "UTF-8"
+                "UTF-8",
+                "Windows-1250",
+                "Windows-1251",
+                "Windows-1252",
+                "Windows-1253",
+                "Windows-1254",
+                "Windows-1255",
+                "Windows-1256",
+                "Windows-1257",
+                "Windows-1258"
             ],
             "title": "EncodingEnum",
             "type": "string"
@@ -3617,30 +3672,35 @@
                     "description": "compression format used, if any. e.g., gzip, bzip2, zip"
                 },
                 "conforms_to": {
+                    "description": "An established standard, specification, or schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
+                    "description": "The specific class or type within a schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
+                    "description": "The schema or data model to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_by": {
+                    "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_on": {
+                    "description": "The date and time when the resource was created.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3700,6 +3760,7 @@
                     "type": "string"
                 },
                 "issued": {
+                    "description": "Date of formal issuance or publication of the resource.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3707,6 +3768,7 @@
                     ]
                 },
                 "keywords": {
+                    "description": "Keywords or tags describing the resource for discovery and classification.",
                     "items": {
                         "type": "string"
                     },
@@ -3723,6 +3785,7 @@
                     ]
                 },
                 "last_updated_on": {
+                    "description": "The date and time when the resource was most recently modified or updated.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3730,6 +3793,7 @@
                     ]
                 },
                 "license": {
+                    "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
                     "type": [
                         "string",
                         "null"
@@ -3747,6 +3811,7 @@
                     "description": "The media type of the data. This should be a MIME type."
                 },
                 "modified_by": {
+                    "description": "A person or organization that contributed to modifying or updating the resource.",
                     "type": [
                         "string",
                         "null"
@@ -3760,18 +3825,21 @@
                     ]
                 },
                 "page": {
+                    "description": "A landing page or web page providing access to or information about the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "path": {
+                    "description": "The file path or URL where the content is located.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "publisher": {
+                    "description": "The organization or entity responsible for making the resource available.",
                     "type": [
                         "string",
                         "null"
@@ -3785,6 +3853,7 @@
                     ]
                 },
                 "status": {
+                    "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
                         "string",
                         "null"
@@ -3798,12 +3867,14 @@
                     ]
                 },
                 "version": {
+                    "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "was_derived_from": {
+                    "description": "A resource from which this resource was derived, in whole or in part.",
                     "type": [
                         "string",
                         "null"
@@ -3835,30 +3906,35 @@
                     "description": "Compression format if the collection is packaged as a compressed archive (e.g., gzip, zip, bzip2). Omit this field for uncompressed collections or purely logical groupings."
                 },
                 "conforms_to": {
+                    "description": "An established standard, specification, or schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
+                    "description": "The specific class or type within a schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
+                    "description": "The schema or data model to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_by": {
+                    "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_on": {
+                    "description": "The date and time when the resource was created.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3909,6 +3985,7 @@
                     "type": "string"
                 },
                 "issued": {
+                    "description": "Date of formal issuance or publication of the resource.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3916,6 +3993,7 @@
                     ]
                 },
                 "keywords": {
+                    "description": "Keywords or tags describing the resource for discovery and classification.",
                     "items": {
                         "type": "string"
                     },
@@ -3932,6 +4010,7 @@
                     ]
                 },
                 "last_updated_on": {
+                    "description": "The date and time when the resource was most recently modified or updated.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -3939,12 +4018,14 @@
                     ]
                 },
                 "license": {
+                    "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "modified_by": {
+                    "description": "A person or organization that contributed to modifying or updating the resource.",
                     "type": [
                         "string",
                         "null"
@@ -3958,6 +4039,7 @@
                     ]
                 },
                 "page": {
+                    "description": "A landing page or web page providing access to or information about the resource.",
                     "type": [
                         "string",
                         "null"
@@ -3971,6 +4053,7 @@
                     ]
                 },
                 "publisher": {
+                    "description": "The organization or entity responsible for making the resource available.",
                     "type": [
                         "string",
                         "null"
@@ -3995,6 +4078,7 @@
                     ]
                 },
                 "status": {
+                    "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
                         "string",
                         "null"
@@ -4015,12 +4099,14 @@
                     ]
                 },
                 "version": {
+                    "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "was_derived_from": {
+                    "description": "A resource from which this resource was derived, in whole or in part.",
                     "type": [
                         "string",
                         "null"
@@ -4071,30 +4157,35 @@
             "description": "Additional format information for a file",
             "properties": {
                 "comment_prefix": {
+                    "description": "Character(s) used to indicate comment lines (e.g., \"#\" for CSV comments).",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "delimiter": {
+                    "description": "Field delimiter character (e.g., \",\" for CSV, \"\\t\" for TSV).",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "double_quote": {
+                    "description": "Whether quotes within quoted fields are escaped by doubling them.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "header": {
+                    "description": "Whether the first row contains column headers (true/false).",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "quote_char": {
+                    "description": "Character used for quoting fields (e.g., '\"' for CSV).",
                     "type": [
                         "string",
                         "null"
@@ -4105,7 +4196,7 @@
             "type": "object"
         },
         "FormatEnum": {
-            "description": "",
+            "description": "Common file format extensions for data files and documents.",
             "enum": [
                 "CSV",
                 "TSV",
@@ -4595,30 +4686,35 @@
                     "description": "compression format used, if any. e.g., gzip, bzip2, zip"
                 },
                 "conforms_to": {
+                    "description": "An established standard, specification, or schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_class": {
+                    "description": "The specific class or type within a schema to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "conforms_to_schema": {
+                    "description": "The schema or data model to which the resource conforms.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_by": {
+                    "description": "The person or organization primarily responsible for creating the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "created_on": {
+                    "description": "The date and time when the resource was created.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4652,6 +4748,7 @@
                     "type": "string"
                 },
                 "issued": {
+                    "description": "Date of formal issuance or publication of the resource.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4659,6 +4756,7 @@
                     ]
                 },
                 "keywords": {
+                    "description": "Keywords or tags describing the resource for discovery and classification.",
                     "items": {
                         "type": "string"
                     },
@@ -4675,6 +4773,7 @@
                     ]
                 },
                 "last_updated_on": {
+                    "description": "The date and time when the resource was most recently modified or updated.",
                     "format": "date-time",
                     "type": [
                         "string",
@@ -4682,12 +4781,14 @@
                     ]
                 },
                 "license": {
+                    "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "modified_by": {
+                    "description": "A person or organization that contributed to modifying or updating the resource.",
                     "type": [
                         "string",
                         "null"
@@ -4701,18 +4802,21 @@
                     ]
                 },
                 "page": {
+                    "description": "A landing page or web page providing access to or information about the resource.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "publisher": {
+                    "description": "The organization or entity responsible for making the resource available.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "status": {
+                    "description": "The status of the resource (e.g., draft, published, deprecated).",
                     "type": [
                         "string",
                         "null"
@@ -4726,12 +4830,14 @@
                     ]
                 },
                 "version": {
+                    "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "was_derived_from": {
+                    "description": "A resource from which this resource was derived, in whole or in part.",
                     "type": [
                         "string",
                         "null"
@@ -5367,7 +5473,7 @@
             "type": "object"
         },
         "MediaTypeEnum": {
-            "description": "",
+            "description": "MIME media types (Internet Media Types) for file content identification.",
             "enum": [
                 "text/csv",
                 "text/tab-separated-values",
@@ -6319,6 +6425,7 @@
                     "type": "string"
                 },
                 "license": {
+                    "description": "The license under which the software is distributed (e.g., \"MIT\", \"Apache-2.0\", \"GPL-3.0\").",
                     "type": [
                         "string",
                         "null"
@@ -6332,12 +6439,14 @@
                     ]
                 },
                 "url": {
+                    "description": "URL where the software can be found (e.g., homepage, repository, or documentation).",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "version": {
+                    "description": "The version identifier of the software (e.g., \"1.0.0\", \"2.3.1-beta\").",
                     "type": [
                         "string",
                         "null"
@@ -6411,6 +6520,7 @@
                     ]
                 },
                 "distribution": {
+                    "description": "The distribution of instances across identified subpopulations, including counts, percentages, or proportions for each subgroup.",
                     "items": {
                         "type": "string"
                     },
@@ -6427,6 +6537,7 @@
                     ]
                 },
                 "identification": {
+                    "description": "How subpopulations are identified and defined (e.g., by age groups, gender, geographic region, disease status, or other demographic/clinical characteristics).",
                     "items": {
                         "type": "string"
                     },
@@ -6904,16 +7015,7 @@
             "enum": [
                 "MAJOR",
                 "MINOR",
-                "PATCH",
-                "Windows-1250",
-                "Windows-1251",
-                "Windows-1252",
-                "Windows-1253",
-                "Windows-1254",
-                "Windows-1255",
-                "Windows-1256",
-                "Windows-1257",
-                "Windows-1258"
+                "PATCH"
             ],
             "title": "VersionTypeEnum",
             "type": "string"
@@ -6930,30 +7032,35 @@
             "description": "compression format used, if any. e.g., gzip, bzip2, zip"
         },
         "conforms_to": {
+            "description": "An established standard, specification, or schema to which the resource conforms.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "conforms_to_class": {
+            "description": "The specific class or type within a schema to which the resource conforms.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "conforms_to_schema": {
+            "description": "The schema or data model to which the resource conforms.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "created_by": {
+            "description": "The person or organization primarily responsible for creating the resource.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "created_on": {
+            "description": "The date and time when the resource was created.",
             "format": "date-time",
             "type": [
                 "string",
@@ -6987,6 +7094,7 @@
             "type": "string"
         },
         "issued": {
+            "description": "Date of formal issuance or publication of the resource.",
             "format": "date-time",
             "type": [
                 "string",
@@ -6994,6 +7102,7 @@
             ]
         },
         "keywords": {
+            "description": "Keywords or tags describing the resource for discovery and classification.",
             "items": {
                 "type": "string"
             },
@@ -7010,6 +7119,7 @@
             ]
         },
         "last_updated_on": {
+            "description": "The date and time when the resource was most recently modified or updated.",
             "format": "date-time",
             "type": [
                 "string",
@@ -7017,12 +7127,14 @@
             ]
         },
         "license": {
+            "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
             "type": [
                 "string",
                 "null"
             ]
         },
         "modified_by": {
+            "description": "A person or organization that contributed to modifying or updating the resource.",
             "type": [
                 "string",
                 "null"
@@ -7036,12 +7148,14 @@
             ]
         },
         "page": {
+            "description": "A landing page or web page providing access to or information about the resource.",
             "type": [
                 "string",
                 "null"
             ]
         },
         "publisher": {
+            "description": "The organization or entity responsible for making the resource available.",
             "type": [
                 "string",
                 "null"
@@ -7058,6 +7172,7 @@
             ]
         },
         "status": {
+            "description": "The status of the resource (e.g., draft, published, deprecated).",
             "type": [
                 "string",
                 "null"
@@ -7071,12 +7186,14 @@
             ]
         },
         "version": {
+            "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
             "type": [
                 "string",
                 "null"
             ]
         },
         "was_derived_from": {
+            "description": "A resource from which this resource was derived, in whole or in part.",
             "type": [
                 "string",
                 "null"

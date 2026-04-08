@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-07T13:03:28
+# Generation date: 2026-04-08T15:23:19
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -2948,164 +2948,368 @@ class FileCollection(Information):
 
 # Enumerations
 class FormatEnum(EnumDefinitionImpl):
-
-    CSV = PermissibleValue(text="CSV")
-    TSV = PermissibleValue(text="TSV")
-    XML = PermissibleValue(text="XML")
-    JSON = PermissibleValue(text="JSON")
-    JSONL = PermissibleValue(text="JSONL")
-    YAML = PermissibleValue(text="YAML")
-    HTML = PermissibleValue(text="HTML")
-    PDF = PermissibleValue(text="PDF")
-    DOCX = PermissibleValue(text="DOCX")
-    XLSX = PermissibleValue(text="XLSX")
-    PPTX = PermissibleValue(text="PPTX")
-    TXT = PermissibleValue(text="TXT")
-    MD = PermissibleValue(text="MD")
-    ZIP = PermissibleValue(text="ZIP")
-    TAR = PermissibleValue(text="TAR")
-    GZ = PermissibleValue(text="GZ")
-    BZ2 = PermissibleValue(text="BZ2")
-    XZ = PermissibleValue(text="XZ")
+    """
+    Common file format extensions for data files and documents.
+    """
+    CSV = PermissibleValue(
+        text="CSV",
+        description="Comma-Separated Values - tabular data format")
+    TSV = PermissibleValue(
+        text="TSV",
+        description="Tab-Separated Values - tabular data format with tab delimiters")
+    XML = PermissibleValue(
+        text="XML",
+        description="Extensible Markup Language - structured markup format")
+    JSON = PermissibleValue(
+        text="JSON",
+        description="JavaScript Object Notation - structured data interchange format")
+    JSONL = PermissibleValue(
+        text="JSONL",
+        description="JSON Lines - newline-delimited JSON format")
+    YAML = PermissibleValue(
+        text="YAML",
+        description="YAML Ain't Markup Language - human-readable data serialization format")
+    HTML = PermissibleValue(
+        text="HTML",
+        description="HyperText Markup Language - web page markup format")
+    PDF = PermissibleValue(
+        text="PDF",
+        description="Portable Document Format - fixed-layout document format")
+    DOCX = PermissibleValue(
+        text="DOCX",
+        description="Microsoft Word Open XML Document - word processing document")
+    XLSX = PermissibleValue(
+        text="XLSX",
+        description="Microsoft Excel Open XML Spreadsheet - spreadsheet format")
+    PPTX = PermissibleValue(
+        text="PPTX",
+        description="Microsoft PowerPoint Open XML Presentation - presentation format")
+    TXT = PermissibleValue(
+        text="TXT",
+        description="Plain text file")
+    MD = PermissibleValue(
+        text="MD",
+        description="Markdown - lightweight markup language")
+    ZIP = PermissibleValue(
+        text="ZIP",
+        description="ZIP archive - compressed file container")
+    TAR = PermissibleValue(
+        text="TAR",
+        description="Tape Archive - file archive format")
+    GZ = PermissibleValue(
+        text="GZ",
+        description="Gzip compressed file")
+    BZ2 = PermissibleValue(
+        text="BZ2",
+        description="Bzip2 compressed file")
+    XZ = PermissibleValue(
+        text="XZ",
+        description="XZ compressed file")
 
     _defn = EnumDefinition(
         name="FormatEnum",
+        description="Common file format extensions for data files and documents.",
     )
 
 class MediaTypeEnum(EnumDefinitionImpl):
-
+    """
+    MIME media types (Internet Media Types) for file content identification.
+    """
     _defn = EnumDefinition(
         name="MediaTypeEnum",
+        description="MIME media types (Internet Media Types) for file content identification.",
     )
 
     @classmethod
     def _addvals(cls):
         setattr(cls, "text/csv",
-            PermissibleValue(text="text/csv"))
+            PermissibleValue(
+                text="text/csv",
+                description="MIME type for CSV (Comma-Separated Values) files"))
         setattr(cls, "text/tab-separated-values",
-            PermissibleValue(text="text/tab-separated-values"))
+            PermissibleValue(
+                text="text/tab-separated-values",
+                description="MIME type for TSV (Tab-Separated Values) files"))
         setattr(cls, "application/json",
-            PermissibleValue(text="application/json"))
+            PermissibleValue(
+                text="application/json",
+                description="MIME type for JSON (JavaScript Object Notation) files"))
         setattr(cls, "application/xml",
-            PermissibleValue(text="application/xml"))
+            PermissibleValue(
+                text="application/xml",
+                description="MIME type for XML (Extensible Markup Language) files"))
         setattr(cls, "text/xml",
-            PermissibleValue(text="text/xml"))
+            PermissibleValue(
+                text="text/xml",
+                description="Alternative MIME type for XML files (text variant)"))
         setattr(cls, "application/yaml",
-            PermissibleValue(text="application/yaml"))
+            PermissibleValue(
+                text="application/yaml",
+                description="MIME type for YAML files"))
         setattr(cls, "text/yaml",
-            PermissibleValue(text="text/yaml"))
+            PermissibleValue(
+                text="text/yaml",
+                description="Alternative MIME type for YAML files (text variant)"))
         setattr(cls, "text/html",
-            PermissibleValue(text="text/html"))
+            PermissibleValue(
+                text="text/html",
+                description="MIME type for HTML (HyperText Markup Language) files"))
         setattr(cls, "application/pdf",
-            PermissibleValue(text="application/pdf"))
+            PermissibleValue(
+                text="application/pdf",
+                description="MIME type for PDF (Portable Document Format) files"))
         setattr(cls, "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            PermissibleValue(text="application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+            PermissibleValue(
+                text="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                description="MIME type for Microsoft Word DOCX files"))
         setattr(cls, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            PermissibleValue(text="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+            PermissibleValue(
+                text="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                description="MIME type for Microsoft Excel XLSX files"))
         setattr(cls, "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            PermissibleValue(text="application/vnd.openxmlformats-officedocument.presentationml.presentation"))
+            PermissibleValue(
+                text="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                description="MIME type for Microsoft PowerPoint PPTX files"))
         setattr(cls, "text/plain",
-            PermissibleValue(text="text/plain"))
+            PermissibleValue(
+                text="text/plain",
+                description="MIME type for plain text files"))
         setattr(cls, "text/markdown",
-            PermissibleValue(text="text/markdown"))
+            PermissibleValue(
+                text="text/markdown",
+                description="MIME type for Markdown files"))
         setattr(cls, "application/zip",
-            PermissibleValue(text="application/zip"))
+            PermissibleValue(
+                text="application/zip",
+                description="MIME type for ZIP archive files"))
         setattr(cls, "application/x-tar",
-            PermissibleValue(text="application/x-tar"))
+            PermissibleValue(
+                text="application/x-tar",
+                description="MIME type for TAR archive files"))
         setattr(cls, "application/gzip",
-            PermissibleValue(text="application/gzip"))
+            PermissibleValue(
+                text="application/gzip",
+                description="MIME type for Gzip compressed files"))
         setattr(cls, "application/x-bzip2",
-            PermissibleValue(text="application/x-bzip2"))
+            PermissibleValue(
+                text="application/x-bzip2",
+                description="MIME type for Bzip2 compressed files"))
         setattr(cls, "application/x-xz",
-            PermissibleValue(text="application/x-xz"))
+            PermissibleValue(
+                text="application/x-xz",
+                description="MIME type for XZ compressed files"))
 
 class CompressionEnum(EnumDefinitionImpl):
-
-    gzip = PermissibleValue(text="gzip")
-    bzip2 = PermissibleValue(text="bzip2")
-    zip = PermissibleValue(text="zip")
-    tar = PermissibleValue(text="tar")
-    xz = PermissibleValue(text="xz")
-    lzma = PermissibleValue(text="lzma")
-    compress = PermissibleValue(text="compress")
+    """
+    Compression algorithms and formats for file compression.
+    """
+    gzip = PermissibleValue(
+        text="gzip",
+        description="GNU zip compression (commonly used with .gz extension)")
+    bzip2 = PermissibleValue(
+        text="bzip2",
+        description="Burrows-Wheeler block-sorting compression (commonly used with .bz2 extension)")
+    zip = PermissibleValue(
+        text="zip",
+        description="ZIP archive compression format")
+    tar = PermissibleValue(
+        text="tar",
+        description="Tape Archive format (typically combined with gzip or bzip2)")
+    xz = PermissibleValue(
+        text="xz",
+        description="XZ Utils compression using LZMA2 algorithm")
+    lzma = PermissibleValue(
+        text="lzma",
+        description="Lempel-Ziv-Markov chain algorithm compression")
+    compress = PermissibleValue(
+        text="compress",
+        description="Unix compress utility (LZW compression)")
 
     _defn = EnumDefinition(
         name="CompressionEnum",
+        description="Compression algorithms and formats for file compression.",
     )
 
 class EncodingEnum(EnumDefinitionImpl):
-
-    ASCII = PermissibleValue(text="ASCII")
-    Big5 = PermissibleValue(text="Big5")
-    GB2312 = PermissibleValue(text="GB2312")
-    Shift_JIS = PermissibleValue(text="Shift_JIS")
+    """
+    Character encoding schemes for text representation in different languages and scripts.
+    """
+    ASCII = PermissibleValue(
+        text="ASCII",
+        description="American Standard Code for Information Interchange (7-bit, English characters only)")
+    Big5 = PermissibleValue(
+        text="Big5",
+        description="Traditional Chinese character encoding (primarily Taiwan and Hong Kong)")
+    GB2312 = PermissibleValue(
+        text="GB2312",
+        description="Simplified Chinese character encoding standard")
+    Shift_JIS = PermissibleValue(
+        text="Shift_JIS",
+        description="Japanese character encoding (Microsoft and other systems)")
 
     _defn = EnumDefinition(
         name="EncodingEnum",
+        description="Character encoding schemes for text representation in different languages and scripts.",
     )
 
     @classmethod
     def _addvals(cls):
         setattr(cls, "EUC-JP",
-            PermissibleValue(text="EUC-JP"))
+            PermissibleValue(
+                text="EUC-JP",
+                description="Extended Unix Code for Japanese"))
         setattr(cls, "EUC-KR",
-            PermissibleValue(text="EUC-KR"))
+            PermissibleValue(
+                text="EUC-KR",
+                description="Extended Unix Code for Korean"))
         setattr(cls, "EUC-TW",
-            PermissibleValue(text="EUC-TW"))
+            PermissibleValue(
+                text="EUC-TW",
+                description="Extended Unix Code for Traditional Chinese"))
         setattr(cls, "HZ-GB-2312",
-            PermissibleValue(text="HZ-GB-2312"))
+            PermissibleValue(
+                text="HZ-GB-2312",
+                description="7-bit encoding for Simplified Chinese (GB2312)"))
         setattr(cls, "ISO-2022-CN-EXT",
-            PermissibleValue(text="ISO-2022-CN-EXT"))
+            PermissibleValue(
+                text="ISO-2022-CN-EXT",
+                description="Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional)"))
         setattr(cls, "ISO-2022-CN",
-            PermissibleValue(text="ISO-2022-CN"))
+            PermissibleValue(
+                text="ISO-2022-CN",
+                description="ISO-2022 encoding for Chinese"))
         setattr(cls, "ISO-2022-JP-2",
-            PermissibleValue(text="ISO-2022-JP-2"))
+            PermissibleValue(
+                text="ISO-2022-JP-2",
+                description="Extended ISO-2022 encoding for Japanese (includes additional character sets)"))
         setattr(cls, "ISO-2022-JP",
-            PermissibleValue(text="ISO-2022-JP"))
+            PermissibleValue(
+                text="ISO-2022-JP",
+                description="ISO-2022 encoding for Japanese"))
         setattr(cls, "ISO-2022-KR",
-            PermissibleValue(text="ISO-2022-KR"))
+            PermissibleValue(
+                text="ISO-2022-KR",
+                description="ISO-2022 encoding for Korean"))
         setattr(cls, "ISO-8859-10",
-            PermissibleValue(text="ISO-8859-10"))
+            PermissibleValue(
+                text="ISO-8859-10",
+                description="Latin-6 (Nordic languages - Danish, Norwegian, Swedish, Icelandic)"))
         setattr(cls, "ISO-8859-11",
-            PermissibleValue(text="ISO-8859-11"))
+            PermissibleValue(
+                text="ISO-8859-11",
+                description="Latin/Thai encoding"))
         setattr(cls, "ISO-8859-13",
-            PermissibleValue(text="ISO-8859-13"))
+            PermissibleValue(
+                text="ISO-8859-13",
+                description="Latin-7 (Baltic Rim languages)"))
         setattr(cls, "ISO-8859-14",
-            PermissibleValue(text="ISO-8859-14"))
+            PermissibleValue(
+                text="ISO-8859-14",
+                description="Latin-8 (Celtic languages)"))
         setattr(cls, "ISO-8859-15",
-            PermissibleValue(text="ISO-8859-15"))
+            PermissibleValue(
+                text="ISO-8859-15",
+                description="Latin-9 (Western European with Euro sign)"))
         setattr(cls, "ISO-8859-16",
-            PermissibleValue(text="ISO-8859-16"))
+            PermissibleValue(
+                text="ISO-8859-16",
+                description="Latin-10 (South-Eastern European languages)"))
         setattr(cls, "ISO-8859-1",
-            PermissibleValue(text="ISO-8859-1"))
+            PermissibleValue(
+                text="ISO-8859-1",
+                description="Latin-1 (Western European languages)"))
         setattr(cls, "ISO-8859-2",
-            PermissibleValue(text="ISO-8859-2"))
+            PermissibleValue(
+                text="ISO-8859-2",
+                description="Latin-2 (Central European languages)"))
         setattr(cls, "ISO-8859-3",
-            PermissibleValue(text="ISO-8859-3"))
+            PermissibleValue(
+                text="ISO-8859-3",
+                description="Latin-3 (South European languages - Turkish, Maltese, Esperanto)"))
         setattr(cls, "ISO-8859-4",
-            PermissibleValue(text="ISO-8859-4"))
+            PermissibleValue(
+                text="ISO-8859-4",
+                description="Latin-4 (North European languages)"))
         setattr(cls, "ISO-8859-5",
-            PermissibleValue(text="ISO-8859-5"))
+            PermissibleValue(
+                text="ISO-8859-5",
+                description="Latin/Cyrillic encoding"))
         setattr(cls, "ISO-8859-6",
-            PermissibleValue(text="ISO-8859-6"))
+            PermissibleValue(
+                text="ISO-8859-6",
+                description="Latin/Arabic encoding"))
         setattr(cls, "ISO-8859-7",
-            PermissibleValue(text="ISO-8859-7"))
+            PermissibleValue(
+                text="ISO-8859-7",
+                description="Latin/Greek encoding"))
         setattr(cls, "ISO-8859-8",
-            PermissibleValue(text="ISO-8859-8"))
+            PermissibleValue(
+                text="ISO-8859-8",
+                description="Latin/Hebrew encoding"))
         setattr(cls, "ISO-8859-9",
-            PermissibleValue(text="ISO-8859-9"))
+            PermissibleValue(
+                text="ISO-8859-9",
+                description="Latin-5 (Turkish)"))
         setattr(cls, "KOI8-R",
-            PermissibleValue(text="KOI8-R"))
+            PermissibleValue(
+                text="KOI8-R",
+                description="Russian character encoding (Kod Obmena Informatsiey)"))
         setattr(cls, "KOI8-U",
-            PermissibleValue(text="KOI8-U"))
+            PermissibleValue(
+                text="KOI8-U",
+                description="Ukrainian character encoding"))
         setattr(cls, "UTF-16",
-            PermissibleValue(text="UTF-16"))
+            PermissibleValue(
+                text="UTF-16",
+                description="Unicode Transformation Format 16-bit (variable-width encoding)"))
         setattr(cls, "UTF-32",
-            PermissibleValue(text="UTF-32"))
+            PermissibleValue(
+                text="UTF-32",
+                description="Unicode Transformation Format 32-bit (fixed-width encoding)"))
         setattr(cls, "UTF-7",
-            PermissibleValue(text="UTF-7"))
+            PermissibleValue(
+                text="UTF-7",
+                description="Unicode Transformation Format 7-bit (for 7-bit channels)"))
         setattr(cls, "UTF-8",
-            PermissibleValue(text="UTF-8"))
+            PermissibleValue(
+                text="UTF-8",
+                description="Unicode Transformation Format 8-bit (variable-width, most common Unicode encoding)"))
+        setattr(cls, "Windows-1250",
+            PermissibleValue(
+                text="Windows-1250",
+                description="Windows code page for Central European languages"))
+        setattr(cls, "Windows-1251",
+            PermissibleValue(
+                text="Windows-1251",
+                description="Windows code page for Cyrillic script"))
+        setattr(cls, "Windows-1252",
+            PermissibleValue(
+                text="Windows-1252",
+                description="Windows code page for Western European languages"))
+        setattr(cls, "Windows-1253",
+            PermissibleValue(
+                text="Windows-1253",
+                description="Windows code page for Greek"))
+        setattr(cls, "Windows-1254",
+            PermissibleValue(
+                text="Windows-1254",
+                description="Windows code page for Turkish"))
+        setattr(cls, "Windows-1255",
+            PermissibleValue(
+                text="Windows-1255",
+                description="Windows code page for Hebrew"))
+        setattr(cls, "Windows-1256",
+            PermissibleValue(
+                text="Windows-1256",
+                description="Windows code page for Arabic"))
+        setattr(cls, "Windows-1257",
+            PermissibleValue(
+                text="Windows-1257",
+                description="Windows code page for Baltic languages"))
+        setattr(cls, "Windows-1258",
+            PermissibleValue(
+                text="Windows-1258",
+                description="Windows code page for Vietnamese"))
 
 class CRediTRoleEnum(EnumDefinitionImpl):
     """
@@ -3252,27 +3456,6 @@ class VersionTypeEnum(EnumDefinitionImpl):
         description="Type of version change using semantic versioning principles. See https://semver.org/",
     )
 
-    @classmethod
-    def _addvals(cls):
-        setattr(cls, "Windows-1250",
-            PermissibleValue(text="Windows-1250"))
-        setattr(cls, "Windows-1251",
-            PermissibleValue(text="Windows-1251"))
-        setattr(cls, "Windows-1252",
-            PermissibleValue(text="Windows-1252"))
-        setattr(cls, "Windows-1253",
-            PermissibleValue(text="Windows-1253"))
-        setattr(cls, "Windows-1254",
-            PermissibleValue(text="Windows-1254"))
-        setattr(cls, "Windows-1255",
-            PermissibleValue(text="Windows-1255"))
-        setattr(cls, "Windows-1256",
-            PermissibleValue(text="Windows-1256"))
-        setattr(cls, "Windows-1257",
-            PermissibleValue(text="Windows-1257"))
-        setattr(cls, "Windows-1258",
-            PermissibleValue(text="Windows-1258"))
-
 class CreatorOrMaintainerEnum(EnumDefinitionImpl):
     """
     Types of agents (persons or organizations) involved in dataset creation or maintenance. Mapped to schema.org
@@ -3318,19 +3501,25 @@ class CreatorOrMaintainerEnum(EnumDefinitionImpl):
     )
 
 class Boolean(EnumDefinitionImpl):
-
+    """
+    Three-valued boolean logic supporting true, false, and unknown states.
+    """
     true = PermissibleValue(
         text="true",
-        title="True")
+        title="True",
+        description="Affirmative or positive value")
     false = PermissibleValue(
         text="false",
-        title="False")
+        title="False",
+        description="Negative or false value")
     unknown = PermissibleValue(
         text="unknown",
-        title="Unknown")
+        title="Unknown",
+        description="Unknown, uncertain, or not applicable value")
 
     _defn = EnumDefinition(
         name="Boolean",
+        description="Three-valued boolean logic supporting true, false, and unknown states.",
     )
 
 class DatasetRelationshipTypeEnum(EnumDefinitionImpl):

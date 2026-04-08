@@ -334,6 +334,9 @@ classes:
         description: "Indicates whether any content warnings are needed."
         slot_uri: d4d:content_warnings_present
       warnings:
+        description: >-
+          Specific content warnings describing potentially offensive, insulting, threatening,
+          or anxiety-provoking content (e.g., violence, profanity, explicit imagery).
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -350,10 +353,16 @@ classes:
         range: boolean
         description: "Indicates whether any subpopulations are explicitly identified."
       identification:
+        description: >-
+          How subpopulations are identified and defined (e.g., by age groups, gender,
+          geographic region, disease status, or other demographic/clinical characteristics).
         range: string
         multivalued: true
         slot_uri: dcterms:description
       distribution:
+        description: >-
+          The distribution of instances across identified subpopulations, including counts,
+          percentages, or proportions for each subgroup.
         range: string
         multivalued: true
         slot_uri: dcterms:description
