@@ -39,6 +39,8 @@ class ROCrateMerger:
             'total_unique_fields': 0
         }
         self.verbose = verbose
+        self.primary_index: int = 0
+        self.primary_name: str = ""
 
     def merge_rocrates(
         self,
@@ -72,8 +74,19 @@ class ROCrateMerger:
                 for parser in rocrate_parsers
             ]
 
+        # Validate source_names length
+        if len(source_names) != len(rocrate_parsers):
+            raise ValueError(
+                f"source_names length ({len(source_names)}) must match "
+                f"rocrate_parsers length ({len(rocrate_parsers)})"
+            )
+
+        # Store primary index and name for reporting
+        self.primary_index = primary_index
+        self.primary_name = source_names[primary_index]
+
         primary_parser = rocrate_parsers[primary_index]
-        primary_name = source_names[primary_index]
+        primary_name = self.primary_name
 
         secondary_parsers = [
             (parser, name) for i, (parser, name) in enumerate(zip(rocrate_parsers, source_names))
@@ -239,10 +252,10 @@ class ROCrateMerger:
             # Count fields this source contributed
             contributed_fields = sum(
                 1 for field, sources in self.provenance.items()
-                if name in sources or (i == 0 and "primary" in sources)
+                if name in sources or (i == self.primary_index and self.primary_name in sources)
             )
 
-            marker = "(PRIMARY)" if i == 0 else ""
+            marker = "(PRIMARY)" if i == self.primary_index else ""
             report.append(f"{i+1}. {name} {marker}")
             report.append(f"   - Size: {file_size_kb:.1f} KB")
             report.append(f"   - D4D fields contributed: {contributed_fields}")

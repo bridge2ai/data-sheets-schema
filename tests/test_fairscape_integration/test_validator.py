@@ -7,7 +7,6 @@ Tests D4D YAML validation wrapper functionality.
 
 import unittest
 import sys
-import tempfile
 from pathlib import Path
 
 # Add src to path for imports

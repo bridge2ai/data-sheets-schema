@@ -6,24 +6,18 @@ This module provides a unified command-line interface for all FAIRSCAPE/RO-Crate
 integration tasks: parsing, converting, validating, and merging.
 """
 
-import sys
 import click
 from pathlib import Path
 from typing import Optional
 
-# Add src to path for imports
-repo_root = Path(__file__).parent.parent.parent
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
-
-from src.fairscape_integration.d4d_to_fairscape import D4DToFairscapeConverter
-from src.fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
-from src.fairscape_integration.utils.validator import D4DValidator
-from src.fairscape_integration.utils.rocrate_parser import ROCrateParser
-from src.fairscape_integration.utils.mapping_loader import MappingLoader
-from src.fairscape_integration.utils.d4d_builder import D4DBuilder
-from src.fairscape_integration.utils.rocrate_merger import ROCrateMerger
-from src.fairscape_integration.utils.informativeness_scorer import InformativenessScorer
+from fairscape_integration.d4d_to_fairscape import D4DToFairscapeConverter
+from fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
+from fairscape_integration.utils.validator import D4DValidator
+from fairscape_integration.utils.rocrate_parser import ROCrateParser
+from fairscape_integration.utils.mapping_loader import MappingLoader
+from fairscape_integration.utils.d4d_builder import D4DBuilder
+from fairscape_integration.utils.rocrate_merger import ROCrateMerger
+from fairscape_integration.utils.informativeness_scorer import InformativenessScorer
 
 
 @click.group()

@@ -42,32 +42,44 @@ class D4DValidator:
         if not yaml_path.exists():
             return False, f"File not found: {yaml_file}"
 
-        try:
-            # Run linkml-validate
-            result = subprocess.run(
-                [
-                    "poetry", "run", "linkml-validate",
-                    "-s", str(self.schema_path),
-                    "-C", target_class,
-                    str(yaml_path)
-                ],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
+        # Try linkml-validate directly first, fall back to poetry run if not found
+        commands_to_try = [
+            ["linkml-validate", "-s", str(self.schema_path), "-C", target_class, str(yaml_path)],
+            ["poetry", "run", "linkml-validate", "-s", str(self.schema_path), "-C", target_class, str(yaml_path)]
+        ]
 
-            # Check if validation passed
-            is_valid = result.returncode == 0
+        for cmd in commands_to_try:
+            try:
+                # Run linkml-validate
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    timeout=30
+                )
 
-            # Combine stdout and stderr
-            output = result.stdout + result.stderr
+                # Check if validation passed
+                is_valid = result.returncode == 0
 
-            return is_valid, output
+                # Combine stdout and stderr
+                output = result.stdout + result.stderr
 
-        except subprocess.TimeoutExpired:
-            return False, "Validation timeout (30s)"
-        except Exception as e:
-            return False, f"Validation error: {str(e)}"
+                return is_valid, output
+
+            except FileNotFoundError:
+                # Command not found, try next approach
+                continue
+            except subprocess.TimeoutExpired:
+                return False, "Validation timeout (30s)"
+            except Exception as e:
+                # Other error, try next command
+                if cmd is commands_to_try[-1]:
+                    # Last command failed
+                    return False, f"Validation error: {str(e)}"
+                continue
+
+        # None of the commands worked
+        return False, "linkml-validate not found (install linkml or run from poetry environment)"
 
     def parse_validation_errors(self, error_output: str) -> List[Dict[str, str]]:
         """

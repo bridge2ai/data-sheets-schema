@@ -236,7 +236,7 @@ def create_sssom_from_tsv_mapping(
     """
     import csv
 
-    with open(tsv_mapping_path, 'r') as f_in:
+    with open(tsv_mapping_path, 'r', encoding='utf-8') as f_in:
         reader = csv.DictReader(f_in, delimiter='\t')
 
         mappings = []
@@ -270,7 +270,7 @@ def create_sssom_from_tsv_mapping(
     if mappings:
         fieldnames = list(mappings[0].keys())
 
-        with open(output_sssom_path, 'w', newline='') as f_out:
+        with open(output_sssom_path, 'w', newline='', encoding='utf-8') as f_out:
             # Write SSSOM header comments
             f_out.write(f"# SSSOM Mapping: {subject_prefix} -> {object_prefix}\n")
             f_out.write(f"# Generated from: {tsv_mapping_path}\n")

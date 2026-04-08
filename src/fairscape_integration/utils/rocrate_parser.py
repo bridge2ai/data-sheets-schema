@@ -8,7 +8,7 @@ properties for transformation to D4D YAML format.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 
 class ROCrateParser:
@@ -24,7 +24,7 @@ class ROCrateParser:
         """
         self.rocrate_path = Path(rocrate_path)
         self.rocrate_data: Dict[str, Any] = {}
-        self.context: Dict[str, Any] = {}
+        self.context: Union[str, Dict[str, Any]] = {}
         self.graph: List[Dict[str, Any]] = []
         self.root_dataset: Optional[Dict[str, Any]] = None
         self.all_properties: Dict[str, Any] = {}
