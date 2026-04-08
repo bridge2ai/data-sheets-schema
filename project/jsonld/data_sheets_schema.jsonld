@@ -1660,7 +1660,7 @@
     {
       "name": "title",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/title",
-      "description": "the official title of the element",
+      "description": "The official title of the element.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/title"
@@ -1676,7 +1676,7 @@
     {
       "name": "language",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/language",
-      "description": "language in which the information is expressed",
+      "description": "Language in which the information is expressed.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/language"
@@ -1827,7 +1827,7 @@
     {
       "name": "encoding",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/encoding",
-      "description": "the character encoding of the data",
+      "description": "The character encoding of the data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://www.w3.org/ns/dcat#mediaType"
@@ -1843,7 +1843,7 @@
     {
       "name": "compression",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/compression",
-      "description": "compression format used, if any. e.g., gzip, bzip2, zip",
+      "description": "Compression format used, if any (e.g., gzip, bzip2, zip).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://www.w3.org/ns/dcat#compressFormat"
@@ -1880,7 +1880,7 @@
     {
       "name": "hash",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/hash",
-      "description": "hash of the data",
+      "description": "Cryptographic hash value of the data for integrity verification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/identifier"
@@ -1896,7 +1896,7 @@
     {
       "name": "md5",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/md5",
-      "description": "md5 hash of the data",
+      "description": "MD5 hash value of the data (128-bit cryptographic hash).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/identifier"
@@ -1912,7 +1912,7 @@
     {
       "name": "sha256",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sha256",
-      "description": "sha256 hash of the data",
+      "description": "SHA-256 hash value of the data (256-bit cryptographic hash, recommended).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/identifier"
@@ -2124,7 +2124,7 @@
     {
       "name": "doi",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/doi",
-      "description": "digital object identifier",
+      "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
         "http://purl.org/dc/terms/identifier"
@@ -10848,7 +10848,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-04-07T18:14:37",
   "source_file_size": 18558,
-  "generation_date": "2026-04-08T15:23:18",
+  "generation_date": "2026-04-08T15:53:25",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

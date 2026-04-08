@@ -1033,7 +1033,7 @@
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+                    "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "confidential_elements": {
                     "items": {
@@ -1151,7 +1151,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "digital object identifier",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -1382,7 +1382,7 @@
                     ]
                 },
                 "language": {
-                    "description": "language in which the information is expressed",
+                    "description": "Language in which the information is expressed.",
                     "type": [
                         "string",
                         "null"
@@ -1649,7 +1649,7 @@
                     ]
                 },
                 "title": {
-                    "description": "the official title of the element",
+                    "description": "The official title of the element.",
                     "type": [
                         "string",
                         "null"
@@ -1846,7 +1846,7 @@
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+                    "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "confidential_elements": {
                     "items": {
@@ -1964,7 +1964,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "digital object identifier",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -2181,7 +2181,7 @@
                     ]
                 },
                 "language": {
-                    "description": "language in which the information is expressed",
+                    "description": "Language in which the information is expressed.",
                     "type": [
                         "string",
                         "null"
@@ -2448,7 +2448,7 @@
                     ]
                 },
                 "title": {
-                    "description": "the official title of the element",
+                    "description": "The official title of the element.",
                     "type": [
                         "string",
                         "null"
@@ -2601,7 +2601,7 @@
             "properties": {
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+                    "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "conforms_to": {
                     "description": "An established standard, specification, or schema to which the resource conforms.",
@@ -2647,7 +2647,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "digital object identifier",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -2684,7 +2684,7 @@
                     ]
                 },
                 "language": {
-                    "description": "language in which the information is expressed",
+                    "description": "Language in which the information is expressed.",
                     "type": [
                         "string",
                         "null"
@@ -2751,7 +2751,7 @@
                     ]
                 },
                 "title": {
-                    "description": "the official title of the element",
+                    "description": "The official title of the element.",
                     "type": [
                         "string",
                         "null"
@@ -3669,7 +3669,7 @@
                 },
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+                    "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "conforms_to": {
                     "description": "An established standard, specification, or schema to which the resource conforms.",
@@ -3722,7 +3722,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "digital object identifier",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -3738,7 +3738,7 @@
                 },
                 "encoding": {
                     "$ref": "#/$defs/EncodingEnum",
-                    "description": "the character encoding of the data"
+                    "description": "The character encoding of the data."
                 },
                 "file_type": {
                     "$ref": "#/$defs/FileTypeEnum",
@@ -3749,7 +3749,7 @@
                     "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
                 },
                 "hash": {
-                    "description": "hash of the data",
+                    "description": "Cryptographic hash value of the data for integrity verification.",
                     "type": [
                         "string",
                         "null"
@@ -3778,7 +3778,7 @@
                     ]
                 },
                 "language": {
-                    "description": "language in which the information is expressed",
+                    "description": "Language in which the information is expressed.",
                     "type": [
                         "string",
                         "null"
@@ -3800,7 +3800,7 @@
                     ]
                 },
                 "md5": {
-                    "description": "md5 hash of the data",
+                    "description": "MD5 hash value of the data (128-bit cryptographic hash).",
                     "type": [
                         "string",
                         "null"
@@ -3846,7 +3846,7 @@
                     ]
                 },
                 "sha256": {
-                    "description": "sha256 hash of the data",
+                    "description": "SHA-256 hash value of the data (256-bit cryptographic hash, recommended).",
                     "type": [
                         "string",
                         "null"
@@ -3860,7 +3860,7 @@
                     ]
                 },
                 "title": {
-                    "description": "the official title of the element",
+                    "description": "The official title of the element.",
                     "type": [
                         "string",
                         "null"
@@ -3949,7 +3949,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "digital object identifier",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -4003,7 +4003,7 @@
                     ]
                 },
                 "language": {
-                    "description": "language in which the information is expressed",
+                    "description": "Language in which the information is expressed.",
                     "type": [
                         "string",
                         "null"
@@ -4085,7 +4085,7 @@
                     ]
                 },
                 "title": {
-                    "description": "the official title of the element",
+                    "description": "The official title of the element.",
                     "type": [
                         "string",
                         "null"
@@ -4683,7 +4683,7 @@
             "properties": {
                 "compression": {
                     "$ref": "#/$defs/CompressionEnum",
-                    "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+                    "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "conforms_to": {
                     "description": "An established standard, specification, or schema to which the resource conforms.",
@@ -4729,7 +4729,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "digital object identifier",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -4766,7 +4766,7 @@
                     ]
                 },
                 "language": {
-                    "description": "language in which the information is expressed",
+                    "description": "Language in which the information is expressed.",
                     "type": [
                         "string",
                         "null"
@@ -4823,7 +4823,7 @@
                     ]
                 },
                 "title": {
-                    "description": "the official title of the element",
+                    "description": "The official title of the element.",
                     "type": [
                         "string",
                         "null"
@@ -7029,7 +7029,7 @@
     "properties": {
         "compression": {
             "$ref": "#/$defs/CompressionEnum",
-            "description": "compression format used, if any. e.g., gzip, bzip2, zip"
+            "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
         },
         "conforms_to": {
             "description": "An established standard, specification, or schema to which the resource conforms.",
@@ -7075,7 +7075,7 @@
             ]
         },
         "doi": {
-            "description": "digital object identifier",
+            "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
             "pattern": "10\\.\\d{4,}\\/.+",
             "type": [
                 "string",
@@ -7112,7 +7112,7 @@
             ]
         },
         "language": {
-            "description": "language in which the information is expressed",
+            "description": "Language in which the information is expressed.",
             "type": [
                 "string",
                 "null"
@@ -7179,7 +7179,7 @@
             ]
         },
         "title": {
-            "description": "the official title of the element",
+            "description": "The official title of the element.",
             "type": [
                 "string",
                 "null"

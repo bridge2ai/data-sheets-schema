@@ -1341,7 +1341,7 @@ slots:
     multivalued: true
   title:
     name: title
-    description: the official title of the element
+    description: The official title of the element.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:title
     domain_of:
@@ -1352,7 +1352,7 @@ slots:
     - File
   language:
     name: language
-    description: language in which the information is expressed
+    description: Language in which the information is expressed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:inLanguage
@@ -1450,7 +1450,7 @@ slots:
     range: FormatEnum
   encoding:
     name: encoding
-    description: the character encoding of the data
+    description: The character encoding of the data.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcat:mediaType
     domain_of:
@@ -1458,7 +1458,7 @@ slots:
     range: EncodingEnum
   compression:
     name: compression
-    description: compression format used, if any. e.g., gzip, bzip2, zip
+    description: Compression format used, if any (e.g., gzip, bzip2, zip).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcat:compressFormat
     domain_of:
@@ -1481,21 +1481,21 @@ slots:
     range: MediaTypeEnum
   hash:
     name: hash
-    description: hash of the data
+    description: Cryptographic hash value of the data for integrity verification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:identifier
     domain_of:
     - File
   md5:
     name: md5
-    description: md5 hash of the data
+    description: MD5 hash value of the data (128-bit cryptographic hash).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:identifier
     domain_of:
     - File
   sha256:
     name: sha256
-    description: sha256 hash of the data
+    description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:identifier
     domain_of:
@@ -1647,7 +1647,8 @@ slots:
     - File
   doi:
     name: doi
-    description: digital object identifier
+    description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+      persistent identification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     slot_uri: dcterms:identifier
     domain_of:
@@ -1727,7 +1728,7 @@ classes:
         inlined_as_list: true
       compression:
         name: compression
-        description: compression format used, if any. e.g., gzip, bzip2, zip
+        description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
         alias: compression
@@ -1815,7 +1816,8 @@ classes:
         range: datetime
       doi:
         name: doi
-        description: digital object identifier
+        description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+          persistent identification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: doi
@@ -1877,7 +1879,7 @@ classes:
         multivalued: true
       language:
         name: language
-        description: language in which the information is expressed
+        description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:inLanguage
@@ -1983,7 +1985,7 @@ classes:
         range: string
       title:
         name: title
-        description: the official title of the element
+        description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
         alias: title
@@ -3118,7 +3120,7 @@ classes:
         inlined_as_list: true
       compression:
         name: compression
-        description: compression format used, if any. e.g., gzip, bzip2, zip
+        description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
         alias: compression
@@ -3206,7 +3208,8 @@ classes:
         range: datetime
       doi:
         name: doi
-        description: digital object identifier
+        description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+          persistent identification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: doi
@@ -3268,7 +3271,7 @@ classes:
         multivalued: true
       language:
         name: language
-        description: language in which the information is expressed
+        description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:inLanguage
@@ -3374,7 +3377,7 @@ classes:
         range: string
       title:
         name: title
-        description: the official title of the element
+        description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
         alias: title
@@ -4455,7 +4458,7 @@ classes:
         inlined_as_list: true
       compression:
         name: compression
-        description: compression format used, if any. e.g., gzip, bzip2, zip
+        description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
         alias: compression
@@ -4543,7 +4546,8 @@ classes:
         range: datetime
       doi:
         name: doi
-        description: digital object identifier
+        description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+          persistent identification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: doi
@@ -4605,7 +4609,7 @@ classes:
         multivalued: true
       language:
         name: language
-        description: language in which the information is expressed
+        description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:inLanguage
@@ -4711,7 +4715,7 @@ classes:
         range: string
       title:
         name: title
-        description: the official title of the element
+        description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
         alias: title
@@ -6514,7 +6518,7 @@ classes:
     attributes:
       compression:
         name: compression
-        description: compression format used, if any. e.g., gzip, bzip2, zip
+        description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
         alias: compression
@@ -6602,7 +6606,8 @@ classes:
         range: datetime
       doi:
         name: doi
-        description: digital object identifier
+        description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+          persistent identification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: doi
@@ -6664,7 +6669,7 @@ classes:
         multivalued: true
       language:
         name: language
-        description: language in which the information is expressed
+        description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:inLanguage
@@ -6770,7 +6775,7 @@ classes:
         range: string
       title:
         name: title
-        description: the official title of the element
+        description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
         alias: title
@@ -31345,7 +31350,7 @@ classes:
         range: FormatEnum
       encoding:
         name: encoding
-        description: the character encoding of the data
+        description: The character encoding of the data.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:mediaType
         alias: encoding
@@ -31355,7 +31360,7 @@ classes:
         range: EncodingEnum
       compression:
         name: compression
-        description: compression format used, if any. e.g., gzip, bzip2, zip
+        description: Compression format used, if any (e.g., gzip, bzip2, zip).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcat:compressFormat
         alias: compression
@@ -31382,7 +31387,7 @@ classes:
         range: MediaTypeEnum
       hash:
         name: hash
-        description: hash of the data
+        description: Cryptographic hash value of the data for integrity verification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: hash
@@ -31392,7 +31397,7 @@ classes:
         range: string
       md5:
         name: md5
-        description: md5 hash of the data
+        description: MD5 hash value of the data (128-bit cryptographic hash).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: md5
@@ -31402,7 +31407,7 @@ classes:
         range: string
       sha256:
         name: sha256
-        description: sha256 hash of the data
+        description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: sha256
@@ -31496,7 +31501,8 @@ classes:
         range: datetime
       doi:
         name: doi
-        description: digital object identifier
+        description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+          persistent identification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: doi
@@ -31558,7 +31564,7 @@ classes:
         multivalued: true
       language:
         name: language
-        description: language in which the information is expressed
+        description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:inLanguage
@@ -31664,7 +31670,7 @@ classes:
         range: string
       title:
         name: title
-        description: the official title of the element
+        description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
         alias: title
@@ -32186,7 +32192,8 @@ classes:
         range: datetime
       doi:
         name: doi
-        description: digital object identifier
+        description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+          persistent identification.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:identifier
         alias: doi
@@ -32248,7 +32255,7 @@ classes:
         multivalued: true
       language:
         name: language
-        description: language in which the information is expressed
+        description: Language in which the information is expressed.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         exact_mappings:
         - schema:inLanguage
@@ -32354,7 +32361,7 @@ classes:
         range: string
       title:
         name: title
-        description: the official title of the element
+        description: The official title of the element.
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema
         slot_uri: dcterms:title
         alias: title

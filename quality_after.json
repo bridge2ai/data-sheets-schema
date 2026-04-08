@@ -1,0 +1,444 @@
+================================================================================
+D4D SCHEMA DESCRIPTION QUALITY REPORT
+================================================================================
+
+SUMMARY
+--------------------------------------------------------------------------------
+Total issues found: 239
+
+By Issue Type:
+  CONSIDER_EXAMPLE: 204
+  MISSING_PERIOD: 17
+  TOO_BRIEF: 18
+
+By Priority:
+  HIGH: 0
+  MEDIUM: 8
+  LOW: 231
+
+QUALITY METRICS BY MODULE
+--------------------------------------------------------------------------------
+
+D4D_Base_import:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 7
+    Complete sentences: 5 (71.4%)
+    With examples: 1 (14.3%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 18
+    Complete sentences: 18 (100.0%)
+    With examples: 9 (50.0%)
+    Too brief: 0 (0.0%)
+  slot:
+    Total: 31
+    Complete sentences: 31 (100.0%)
+    With examples: 9 (29.0%)
+    Too brief: 0 (0.0%)
+  enum:
+    Total: 10
+    Complete sentences: 7 (70.0%)
+    With examples: 5 (50.0%)
+    Too brief: 0 (0.0%)
+  enum_value:
+    Total: 134
+    Complete sentences: 66 (49.3%)
+    With examples: 33 (24.6%)
+    Too brief: 24 (17.9%)
+
+D4D_Collection:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 1 (100.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 7
+    Complete sentences: 7 (100.0%)
+    With examples: 3 (42.9%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 20
+    Complete sentences: 14 (70.0%)
+    With examples: 6 (30.0%)
+    Too brief: 0 (0.0%)
+
+D4D_Composition:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 15
+    Complete sentences: 14 (93.3%)
+    With examples: 13 (86.7%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 47
+    Complete sentences: 47 (100.0%)
+    With examples: 12 (25.5%)
+    Too brief: 0 (0.0%)
+  enum:
+    Total: 1
+    Complete sentences: 0 (0.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  enum_value:
+    Total: 14
+    Complete sentences: 14 (100.0%)
+    With examples: 3 (21.4%)
+    Too brief: 0 (0.0%)
+
+D4D_Data_Governance:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 3
+    Complete sentences: 3 (100.0%)
+    With examples: 1 (33.3%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 9
+    Complete sentences: 8 (88.9%)
+    With examples: 4 (44.4%)
+    Too brief: 0 (0.0%)
+  enum:
+    Total: 3
+    Complete sentences: 2 (66.7%)
+    With examples: 3 (100.0%)
+    Too brief: 0 (0.0%)
+  enum_value:
+    Total: 30
+    Complete sentences: 10 (33.3%)
+    With examples: 21 (70.0%)
+    Too brief: 1 (3.3%)
+
+D4D_Distribution:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 3
+    Complete sentences: 3 (100.0%)
+    With examples: 2 (66.7%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 3
+    Complete sentences: 3 (100.0%)
+    With examples: 1 (33.3%)
+    Too brief: 0 (0.0%)
+
+D4D_Ethics:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 5
+    Complete sentences: 5 (100.0%)
+    With examples: 3 (60.0%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 7
+    Complete sentences: 7 (100.0%)
+    With examples: 1 (14.3%)
+    Too brief: 0 (0.0%)
+
+D4D_Evaluation_Summary:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 13
+    Complete sentences: 4 (30.8%)
+    With examples: 2 (15.4%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 91
+    Complete sentences: 81 (89.0%)
+    With examples: 23 (25.3%)
+    Too brief: 0 (0.0%)
+  enum:
+    Total: 10
+    Complete sentences: 9 (90.0%)
+    With examples: 0 (0.0%)
+    Too brief: 8 (80.0%)
+  enum_value:
+    Total: 38
+    Complete sentences: 26 (68.4%)
+    With examples: 3 (7.9%)
+    Too brief: 18 (47.4%)
+
+D4D_FileCollection:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 2
+    Complete sentences: 2 (100.0%)
+    With examples: 1 (50.0%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 4
+    Complete sentences: 4 (100.0%)
+    With examples: 2 (50.0%)
+    Too brief: 0 (0.0%)
+  enum:
+    Total: 2
+    Complete sentences: 2 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  enum_value:
+    Total: 19
+    Complete sentences: 14 (73.7%)
+    With examples: 3 (15.8%)
+    Too brief: 6 (31.6%)
+
+D4D_Human:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 5
+    Complete sentences: 5 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 22
+    Complete sentences: 22 (100.0%)
+    With examples: 8 (36.4%)
+    Too brief: 0 (0.0%)
+
+D4D_Maintenance:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 6
+    Complete sentences: 6 (100.0%)
+    With examples: 2 (33.3%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 13
+    Complete sentences: 13 (100.0%)
+    With examples: 2 (15.4%)
+    Too brief: 0 (0.0%)
+
+D4D_Metadata:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+
+D4D_Minimal:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 2
+    Complete sentences: 2 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+
+D4D_Motivation:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 7
+    Complete sentences: 7 (100.0%)
+    With examples: 1 (14.3%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 9
+    Complete sentences: 9 (100.0%)
+    With examples: 2 (22.2%)
+    Too brief: 0 (0.0%)
+
+D4D_Preprocessing:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 7
+    Complete sentences: 7 (100.0%)
+    With examples: 3 (42.9%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 22
+    Complete sentences: 22 (100.0%)
+    With examples: 10 (45.5%)
+    Too brief: 0 (0.0%)
+
+D4D_Uses:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 1 (100.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 7
+    Complete sentences: 7 (100.0%)
+    With examples: 1 (14.3%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 10
+    Complete sentences: 10 (100.0%)
+    With examples: 2 (20.0%)
+    Too brief: 0 (0.0%)
+
+D4D_Variables:
+  module:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  class:
+    Total: 1
+    Complete sentences: 1 (100.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  attribute:
+    Total: 14
+    Complete sentences: 14 (100.0%)
+    With examples: 4 (28.6%)
+    Too brief: 0 (0.0%)
+  enum:
+    Total: 1
+    Complete sentences: 0 (0.0%)
+    With examples: 0 (0.0%)
+    Too brief: 0 (0.0%)
+  enum_value:
+    Total: 13
+    Complete sentences: 13 (100.0%)
+    With examples: 4 (30.8%)
+    Too brief: 8 (61.5%)
+
+DETAILED ISSUES
+--------------------------------------------------------------------------------
+
+MEDIUM PRIORITY (8 issues):
+--------------------------------------------------------------------------------
+
+  TOO_BRIEF (8 occurrences):
+    • D4D_Evaluation_Summary::enums::RubricTypeEnum
+      Current: "Types of evaluation rubrics"
+    • D4D_Evaluation_Summary::enums::GenerationMethodEnum
+      Current: "D4D generation methods"
+    • D4D_Evaluation_Summary::enums::Bridge2AIProjectEnum
+      Current: "Bridge2AI Grand Challenge projects"
+    • D4D_Evaluation_Summary::enums::StrengthLevelEnum
+      Current: "Assessment of element/category strength"
+    • D4D_Evaluation_Summary::enums::WeaknessTypeEnum
+      Current: "Types of common weaknesses"
+    • D4D_Evaluation_Summary::enums::StrengthTypeEnum
+      Current: "Types of common strengths"
+    • D4D_Evaluation_Summary::enums::FrequencyEnum
+      Current: "Frequency of occurrence"
+    • D4D_Evaluation_Summary::enums::InsightTypeEnum
+      Current: "Types of analytical insights"
+
+LOW PRIORITY (231 issues):
+--------------------------------------------------------------------------------
+
+  CONSIDER_EXAMPLE (204 occurrences):
+    • D4D_Base_import::classes::NamedThing::attributes::id
+      Current: "A unique identifier for a thing."
+    • D4D_Base_import::classes::NamedThing::attributes::name
+      Current: "A human-readable name for a thing."
+    • D4D_Base_import::classes::NamedThing::attributes::description
+      Current: "A human-readable description for a thing."
+    • D4D_Base_import::classes::DatasetProperty::attributes::id
+      Current: "An optional identifier for this property."
+    • D4D_Base_import::classes::DatasetProperty::attributes::name
+      Current: "A human-readable name for this property."
+    • D4D_Base_import::classes::DatasetProperty::attributes::description
+      Current: "A human-readable description for this property."
+    • D4D_Base_import::classes::DatasetProperty::attributes::used_software
+      Current: "What software was used as part of this dataset property?"
+    • D4D_Base_import::classes::Person::attributes::email
+      Current: "The email address of the person. Represents current/preferre..."
+    • D4D_Base_import::classes::FormatDialect::attributes::double_quote
+      Current: "Whether quotes within quoted fields are escaped by doubling ..."
+    • D4D_Collection::classes::InstanceAcquisition::attributes::was_directly_observed
+      Current: "Whether the data was directly observed"
+    ... and 194 more
+
+  MISSING_PERIOD (17 occurrences):
+    • D4D_Collection::classes::InstanceAcquisition::attributes::was_directly_observed
+      Current: "Whether the data was directly observed"
+    • D4D_Collection::classes::InstanceAcquisition::attributes::was_reported_by_subjects
+      Current: "Whether the data was reported directly by the subjects thems..."
+    • D4D_Collection::classes::InstanceAcquisition::attributes::was_inferred_derived
+      Current: "Whether the data was inferred or derived from other data"
+    • D4D_Collection::classes::InstanceAcquisition::attributes::was_validated_verified
+      Current: "Whether the data was validated or verified in any way"
+    • D4D_Collection::classes::DataCollector::attributes::role
+      Current: "Role of the data collector (e.g., researcher, crowdworker)"
+    • D4D_Collection::classes::DirectCollection::attributes::is_direct
+      Current: "Whether collection was direct from individuals"
+    • D4D_Data_Governance::classes::LicenseAndUseTerms::attributes::data_use_permission
+      Current: "Structured data use permissions using the Data Use Ontology ..."
+    • D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::rubric_type
+      Current: "Type of rubric used (rubric10 or rubric20)"
+    • D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::rubric_description
+      Current: "Description of rubric structure and scoring"
+    • D4D_Evaluation_Summary::classes::EvaluationSummary::attributes::total_files_evaluated
+      Current: "Total number of D4D files evaluated"
+    ... and 7 more
+
+  TOO_BRIEF (10 occurrences):
+    • D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-11
+      Current: "Latin/Thai encoding"
+    • D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-5
+      Current: "Latin/Cyrillic encoding"
+    • D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-6
+      Current: "Latin/Arabic encoding"
+    • D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-7
+      Current: "Latin/Greek encoding"
+    • D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-8
+      Current: "Latin/Hebrew encoding"
+    • D4D_Base_import::enums::EncodingEnum::permissible_values::ISO-8859-9
+      Current: "Latin-5 (Turkish)"
+    • D4D_FileCollection::enums::FileCollectionTypeEnum::permissible_values::supplementary
+      Current: "Supplementary materials"
+    • D4D_Variables::enums::VariableTypeEnum::permissible_values::integer
+      Current: "Whole numbers."
+    • D4D_Variables::enums::VariableTypeEnum::permissible_values::string
+      Current: "Text strings."
+    • D4D_Variables::enums::VariableTypeEnum::permissible_values::boolean
+      Current: "True/false values."
+
+================================================================================

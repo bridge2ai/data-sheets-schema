@@ -242,11 +242,11 @@ slots:
   # https://github.com/linkml/linkml-model/blob/main/linkml_model/model/schema/datasets.yaml
 
   title:
-    description: the official title of the element
+    description: The official title of the element.
     slot_uri: dcterms:title
 
   language:
-    description: language in which the information is expressed
+    description: Language in which the information is expressed.
     slot_uri: dcterms:language
     exact_mappings:
       - schema:inLanguage
@@ -296,13 +296,12 @@ slots:
     slot_uri: dcterms:format
 
   encoding:
-    description: the character encoding of the data
+    description: The character encoding of the data.
     range: EncodingEnum
     slot_uri: dcat:mediaType
 
   compression:
-    description: >-
-      compression format used, if any. e.g., gzip, bzip2, zip
+    description: Compression format used, if any (e.g., gzip, bzip2, zip).
     range: CompressionEnum
     slot_uri: dcat:compressFormat
 
@@ -315,15 +314,15 @@ slots:
       - schema:encodingFormat
 
   hash:
-    description: hash of the data
+    description: Cryptographic hash value of the data for integrity verification.
     slot_uri: dcterms:identifier
 
   md5:
-    description: md5 hash of the data
+    description: MD5 hash value of the data (128-bit cryptographic hash).
     slot_uri: dcterms:identifier
 
   sha256:
-    description: sha256 hash of the data
+    description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
     slot_uri: dcterms:identifier
 
   conforms_to:
@@ -380,7 +379,7 @@ slots:
       - dcterms:source
 
   doi:
-    description: digital object identifier
+    description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.
     slot_uri: dcterms:identifier
     pattern: "10\\.\\d{4,}\\/.+"
 
