@@ -2,7 +2,7 @@
 Utility modules for FAIRSCAPE/RO-Crate integration.
 
 This package contains helper modules for field prioritization,
-informativeness scoring, validation, and mapping management.
+informativeness scoring, validation, mapping management, and SSSOM.
 """
 
 from .field_prioritizer import FieldPrioritizer
@@ -12,6 +12,7 @@ from .rocrate_parser import ROCrateParser
 from .informativeness_scorer import InformativenessScorer
 from .d4d_builder import D4DBuilder
 from .rocrate_merger import ROCrateMerger
+from .sssom_reader import SSSOMReader, SSSOMMapping
 
 __all__ = [
     'FieldPrioritizer',
@@ -21,4 +22,6 @@ __all__ = [
     'InformativenessScorer',
     'D4DBuilder',
     'ROCrateMerger',
+    'SSSOMReader',
+    'SSSOMMapping',
 ]
