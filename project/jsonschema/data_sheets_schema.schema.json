@@ -722,7 +722,7 @@
                     ]
                 },
                 "credit_roles": {
-                    "description": "One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
+                    "description": "One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team (e.g., Conceptualization, Data Curation, Methodology).",
                     "items": {
                         "$ref": "#/$defs/CRediTRoleEnum"
                     },
@@ -4373,7 +4373,7 @@
         },
         "FormatDialect": {
             "additionalProperties": false,
-            "description": "Additional format information for a file",
+            "description": "Additional format information for a file.",
             "properties": {
                 "comment_prefix": {
                     "description": "Character(s) used to indicate comment lines (e.g., \"#\" for CSV comments).",
@@ -4390,14 +4390,14 @@
                     ]
                 },
                 "double_quote": {
-                    "description": "Whether quotes within quoted fields are escaped by doubling them. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification).",
+                    "description": "Whether quotes within quoted fields are escaped by doubling them. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification). Follows the W3C CSV-on-the-Web dialect specification.",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "header": {
-                    "description": "Whether the first row of the file contains column headers. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification).",
+                    "description": "Whether the first row of the file contains column headers. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification). Follows the W3C CSV-on-the-Web dialect specification.",
                     "type": [
                         "string",
                         "null"
@@ -5369,7 +5369,7 @@
                     ]
                 },
                 "usage_notes": {
-                    "description": "Notes or caveats about using the dataset for intended purposes.",
+                    "description": "A note or caveat about using the dataset for its intended purposes.",
                     "type": [
                         "string",
                         "null"
@@ -5732,7 +5732,7 @@
                     ]
                 },
                 "handling_strategy": {
-                    "description": "Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).\n",
+                    "description": "The primary strategy used to handle missing data (e.g., listwise deletion, mean imputation, multiple imputation, flagging with sentinel values).\n",
                     "type": [
                         "string",
                         "null"

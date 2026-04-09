@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-09T00:03:47
+# Generation date: 2026-04-09T10:17:09
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -827,7 +827,7 @@ class DataSubset(Dataset):
 @dataclass(repr=False)
 class FormatDialect(YAMLRoot):
     """
-    Additional format information for a file
+    Additional format information for a file.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -2985,58 +2985,58 @@ class FormatEnum(EnumDefinitionImpl):
     """
     CSV = PermissibleValue(
         text="CSV",
-        description="Comma-Separated Values - tabular data format")
+        description="Comma-Separated Values - tabular data format.")
     TSV = PermissibleValue(
         text="TSV",
-        description="Tab-Separated Values - tabular data format with tab delimiters")
+        description="Tab-Separated Values - tabular data format with tab delimiters.")
     XML = PermissibleValue(
         text="XML",
-        description="Extensible Markup Language - structured markup format")
+        description="Extensible Markup Language - structured markup format.")
     JSON = PermissibleValue(
         text="JSON",
-        description="JavaScript Object Notation - structured data interchange format")
+        description="JavaScript Object Notation - structured data interchange format.")
     JSONL = PermissibleValue(
         text="JSONL",
-        description="JSON Lines - newline-delimited JSON format")
+        description="JSON Lines - newline-delimited JSON format.")
     YAML = PermissibleValue(
         text="YAML",
-        description="YAML Ain't Markup Language - human-readable data serialization format")
+        description="YAML Ain't Markup Language - human-readable data serialization format.")
     HTML = PermissibleValue(
         text="HTML",
-        description="HyperText Markup Language - web page markup format")
+        description="HyperText Markup Language - web page markup format.")
     PDF = PermissibleValue(
         text="PDF",
-        description="Portable Document Format - fixed-layout document format")
+        description="Portable Document Format - fixed-layout document format.")
     DOCX = PermissibleValue(
         text="DOCX",
-        description="Microsoft Word Open XML Document - word processing document")
+        description="Microsoft Word Open XML Document - word processing document.")
     XLSX = PermissibleValue(
         text="XLSX",
-        description="Microsoft Excel Open XML Spreadsheet - spreadsheet format")
+        description="Microsoft Excel Open XML Spreadsheet - spreadsheet format.")
     PPTX = PermissibleValue(
         text="PPTX",
-        description="Microsoft PowerPoint Open XML Presentation - presentation format")
+        description="Microsoft PowerPoint Open XML Presentation - presentation format.")
     TXT = PermissibleValue(
         text="TXT",
-        description="Plain text file")
+        description="Plain text file.")
     MD = PermissibleValue(
         text="MD",
-        description="Markdown - lightweight markup language")
+        description="Markdown - lightweight markup language.")
     ZIP = PermissibleValue(
         text="ZIP",
-        description="ZIP archive - compressed file container")
+        description="ZIP archive - compressed file container.")
     TAR = PermissibleValue(
         text="TAR",
-        description="Tape Archive - file archive format")
+        description="Tape Archive - file archive format.")
     GZ = PermissibleValue(
         text="GZ",
-        description="Gzip compressed file")
+        description="Gzip compressed file.")
     BZ2 = PermissibleValue(
         text="BZ2",
-        description="Bzip2 compressed file")
+        description="Bzip2 compressed file.")
     XZ = PermissibleValue(
         text="XZ",
-        description="XZ compressed file")
+        description="XZ compressed file.")
 
     _defn = EnumDefinition(
         name="FormatEnum",
@@ -3057,79 +3057,79 @@ class MediaTypeEnum(EnumDefinitionImpl):
         setattr(cls, "text/csv",
             PermissibleValue(
                 text="text/csv",
-                description="MIME type for CSV (Comma-Separated Values) files"))
+                description="MIME type for CSV (Comma-Separated Values) files."))
         setattr(cls, "text/tab-separated-values",
             PermissibleValue(
                 text="text/tab-separated-values",
-                description="MIME type for TSV (Tab-Separated Values) files"))
+                description="MIME type for TSV (Tab-Separated Values) files."))
         setattr(cls, "application/json",
             PermissibleValue(
                 text="application/json",
-                description="MIME type for JSON (JavaScript Object Notation) files"))
+                description="MIME type for JSON (JavaScript Object Notation) files."))
         setattr(cls, "application/xml",
             PermissibleValue(
                 text="application/xml",
-                description="MIME type for XML (Extensible Markup Language) files"))
+                description="MIME type for XML (Extensible Markup Language) files."))
         setattr(cls, "text/xml",
             PermissibleValue(
                 text="text/xml",
-                description="Alternative MIME type for XML files (text variant)"))
+                description="Alternative MIME type for XML files (text variant)."))
         setattr(cls, "application/yaml",
             PermissibleValue(
                 text="application/yaml",
-                description="MIME type for YAML files"))
+                description="MIME type for YAML files."))
         setattr(cls, "text/yaml",
             PermissibleValue(
                 text="text/yaml",
-                description="Alternative MIME type for YAML files (text variant)"))
+                description="Alternative MIME type for YAML files (text variant)."))
         setattr(cls, "text/html",
             PermissibleValue(
                 text="text/html",
-                description="MIME type for HTML (HyperText Markup Language) files"))
+                description="MIME type for HTML (HyperText Markup Language) files."))
         setattr(cls, "application/pdf",
             PermissibleValue(
                 text="application/pdf",
-                description="MIME type for PDF (Portable Document Format) files"))
+                description="MIME type for PDF (Portable Document Format) files."))
         setattr(cls, "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             PermissibleValue(
                 text="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                description="MIME type for Microsoft Word DOCX files"))
+                description="MIME type for Microsoft Word DOCX files."))
         setattr(cls, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             PermissibleValue(
                 text="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                description="MIME type for Microsoft Excel XLSX files"))
+                description="MIME type for Microsoft Excel XLSX files."))
         setattr(cls, "application/vnd.openxmlformats-officedocument.presentationml.presentation",
             PermissibleValue(
                 text="application/vnd.openxmlformats-officedocument.presentationml.presentation",
-                description="MIME type for Microsoft PowerPoint PPTX files"))
+                description="MIME type for Microsoft PowerPoint PPTX files."))
         setattr(cls, "text/plain",
             PermissibleValue(
                 text="text/plain",
-                description="MIME type for plain text files"))
+                description="MIME type for plain text files."))
         setattr(cls, "text/markdown",
             PermissibleValue(
                 text="text/markdown",
-                description="MIME type for Markdown files"))
+                description="MIME type for Markdown files."))
         setattr(cls, "application/zip",
             PermissibleValue(
                 text="application/zip",
-                description="MIME type for ZIP archive files"))
+                description="MIME type for ZIP archive files."))
         setattr(cls, "application/x-tar",
             PermissibleValue(
                 text="application/x-tar",
-                description="MIME type for TAR archive files"))
+                description="MIME type for TAR archive files."))
         setattr(cls, "application/gzip",
             PermissibleValue(
                 text="application/gzip",
-                description="MIME type for Gzip compressed files"))
+                description="MIME type for Gzip compressed files."))
         setattr(cls, "application/x-bzip2",
             PermissibleValue(
                 text="application/x-bzip2",
-                description="MIME type for Bzip2 compressed files"))
+                description="MIME type for Bzip2 compressed files."))
         setattr(cls, "application/x-xz",
             PermissibleValue(
                 text="application/x-xz",
-                description="MIME type for XZ compressed files"))
+                description="MIME type for XZ compressed files."))
 
 class CompressionEnum(EnumDefinitionImpl):
     """
@@ -3137,25 +3137,25 @@ class CompressionEnum(EnumDefinitionImpl):
     """
     gzip = PermissibleValue(
         text="gzip",
-        description="GNU zip compression (commonly used with .gz extension)")
+        description="GNU zip compression (commonly used with .gz extension).")
     bzip2 = PermissibleValue(
         text="bzip2",
-        description="Burrows-Wheeler block-sorting compression (commonly used with .bz2 extension)")
+        description="Burrows-Wheeler block-sorting compression (commonly used with .bz2 extension).")
     zip = PermissibleValue(
         text="zip",
-        description="ZIP archive compression format")
+        description="ZIP archive compression format.")
     tar = PermissibleValue(
         text="tar",
-        description="Tape Archive format (typically combined with gzip or bzip2)")
+        description="Tape Archive format (typically combined with gzip or bzip2).")
     xz = PermissibleValue(
         text="xz",
-        description="XZ Utils compression using LZMA2 algorithm")
+        description="XZ Utils compression using LZMA2 algorithm.")
     lzma = PermissibleValue(
         text="lzma",
-        description="Lempel-Ziv-Markov chain algorithm compression")
+        description="Lempel-Ziv-Markov chain algorithm compression.")
     compress = PermissibleValue(
         text="compress",
-        description="Unix compress utility (LZW compression)")
+        description="Unix compress utility (LZW compression).")
 
     _defn = EnumDefinition(
         name="CompressionEnum",
@@ -3168,16 +3168,16 @@ class EncodingEnum(EnumDefinitionImpl):
     """
     ASCII = PermissibleValue(
         text="ASCII",
-        description="American Standard Code for Information Interchange (7-bit, English characters only)")
+        description="American Standard Code for Information Interchange (7-bit, English characters only).")
     Big5 = PermissibleValue(
         text="Big5",
-        description="Traditional Chinese character encoding (primarily Taiwan and Hong Kong)")
+        description="Traditional Chinese character encoding (primarily Taiwan and Hong Kong).")
     GB2312 = PermissibleValue(
         text="GB2312",
-        description="Simplified Chinese character encoding standard")
+        description="Simplified Chinese character encoding standard.")
     Shift_JIS = PermissibleValue(
         text="Shift_JIS",
-        description="Japanese character encoding (Microsoft and other systems)")
+        description="Japanese character encoding (Microsoft and other systems).")
 
     _defn = EnumDefinition(
         name="EncodingEnum",
@@ -3189,159 +3189,159 @@ class EncodingEnum(EnumDefinitionImpl):
         setattr(cls, "EUC-JP",
             PermissibleValue(
                 text="EUC-JP",
-                description="Extended Unix Code for Japanese"))
+                description="Extended Unix Code for Japanese."))
         setattr(cls, "EUC-KR",
             PermissibleValue(
                 text="EUC-KR",
-                description="Extended Unix Code for Korean"))
+                description="Extended Unix Code for Korean."))
         setattr(cls, "EUC-TW",
             PermissibleValue(
                 text="EUC-TW",
-                description="Extended Unix Code for Traditional Chinese"))
+                description="Extended Unix Code for Traditional Chinese."))
         setattr(cls, "HZ-GB-2312",
             PermissibleValue(
                 text="HZ-GB-2312",
-                description="7-bit encoding for Simplified Chinese (GB2312)"))
+                description="7-bit encoding for Simplified Chinese (GB2312)."))
         setattr(cls, "ISO-2022-CN-EXT",
             PermissibleValue(
                 text="ISO-2022-CN-EXT",
-                description="Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional)"))
+                description="Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional)."))
         setattr(cls, "ISO-2022-CN",
             PermissibleValue(
                 text="ISO-2022-CN",
-                description="ISO-2022 encoding for Chinese"))
+                description="ISO-2022 encoding for Chinese."))
         setattr(cls, "ISO-2022-JP-2",
             PermissibleValue(
                 text="ISO-2022-JP-2",
-                description="Extended ISO-2022 encoding for Japanese (includes additional character sets)"))
+                description="Extended ISO-2022 encoding for Japanese (includes additional character sets)."))
         setattr(cls, "ISO-2022-JP",
             PermissibleValue(
                 text="ISO-2022-JP",
-                description="ISO-2022 encoding for Japanese"))
+                description="ISO-2022 encoding for Japanese."))
         setattr(cls, "ISO-2022-KR",
             PermissibleValue(
                 text="ISO-2022-KR",
-                description="ISO-2022 encoding for Korean"))
+                description="ISO-2022 encoding for Korean."))
         setattr(cls, "ISO-8859-10",
             PermissibleValue(
                 text="ISO-8859-10",
-                description="Latin-6 (Nordic languages - Danish, Norwegian, Swedish, Icelandic)"))
+                description="Latin-6 (Nordic languages - Danish, Norwegian, Swedish, Icelandic)."))
         setattr(cls, "ISO-8859-11",
             PermissibleValue(
                 text="ISO-8859-11",
-                description="Latin/Thai encoding"))
+                description="Latin/Thai encoding."))
         setattr(cls, "ISO-8859-13",
             PermissibleValue(
                 text="ISO-8859-13",
-                description="Latin-7 (Baltic Rim languages)"))
+                description="Latin-7 (Baltic Rim languages)."))
         setattr(cls, "ISO-8859-14",
             PermissibleValue(
                 text="ISO-8859-14",
-                description="Latin-8 (Celtic languages)"))
+                description="Latin-8 (Celtic languages)."))
         setattr(cls, "ISO-8859-15",
             PermissibleValue(
                 text="ISO-8859-15",
-                description="Latin-9 (Western European with Euro sign)"))
+                description="Latin-9 (Western European with Euro sign)."))
         setattr(cls, "ISO-8859-16",
             PermissibleValue(
                 text="ISO-8859-16",
-                description="Latin-10 (South-Eastern European languages)"))
+                description="Latin-10 (South-Eastern European languages)."))
         setattr(cls, "ISO-8859-1",
             PermissibleValue(
                 text="ISO-8859-1",
-                description="Latin-1 (Western European languages)"))
+                description="Latin-1 (Western European languages)."))
         setattr(cls, "ISO-8859-2",
             PermissibleValue(
                 text="ISO-8859-2",
-                description="Latin-2 (Central European languages)"))
+                description="Latin-2 (Central European languages)."))
         setattr(cls, "ISO-8859-3",
             PermissibleValue(
                 text="ISO-8859-3",
-                description="Latin-3 (South European languages - Turkish, Maltese, Esperanto)"))
+                description="Latin-3 (South European languages - Turkish, Maltese, Esperanto)."))
         setattr(cls, "ISO-8859-4",
             PermissibleValue(
                 text="ISO-8859-4",
-                description="Latin-4 (North European languages)"))
+                description="Latin-4 (North European languages)."))
         setattr(cls, "ISO-8859-5",
             PermissibleValue(
                 text="ISO-8859-5",
-                description="Latin/Cyrillic encoding"))
+                description="Latin/Cyrillic encoding."))
         setattr(cls, "ISO-8859-6",
             PermissibleValue(
                 text="ISO-8859-6",
-                description="Latin/Arabic encoding"))
+                description="Latin/Arabic encoding."))
         setattr(cls, "ISO-8859-7",
             PermissibleValue(
                 text="ISO-8859-7",
-                description="Latin/Greek encoding"))
+                description="Latin/Greek encoding."))
         setattr(cls, "ISO-8859-8",
             PermissibleValue(
                 text="ISO-8859-8",
-                description="Latin/Hebrew encoding"))
+                description="Latin/Hebrew encoding."))
         setattr(cls, "ISO-8859-9",
             PermissibleValue(
                 text="ISO-8859-9",
-                description="Latin-5 (Turkish)"))
+                description="Latin-5 (Turkish)."))
         setattr(cls, "KOI8-R",
             PermissibleValue(
                 text="KOI8-R",
-                description="Russian character encoding (Kod Obmena Informatsiey)"))
+                description="Russian character encoding (Kod Obmena Informatsiey)."))
         setattr(cls, "KOI8-U",
             PermissibleValue(
                 text="KOI8-U",
-                description="Ukrainian character encoding"))
+                description="Ukrainian character encoding."))
         setattr(cls, "UTF-16",
             PermissibleValue(
                 text="UTF-16",
-                description="Unicode Transformation Format 16-bit (variable-width encoding)"))
+                description="Unicode Transformation Format 16-bit (variable-width encoding)."))
         setattr(cls, "UTF-32",
             PermissibleValue(
                 text="UTF-32",
-                description="Unicode Transformation Format 32-bit (fixed-width encoding)"))
+                description="Unicode Transformation Format 32-bit (fixed-width encoding)."))
         setattr(cls, "UTF-7",
             PermissibleValue(
                 text="UTF-7",
-                description="Unicode Transformation Format 7-bit (for 7-bit channels)"))
+                description="Unicode Transformation Format 7-bit (for 7-bit channels)."))
         setattr(cls, "UTF-8",
             PermissibleValue(
                 text="UTF-8",
-                description="Unicode Transformation Format 8-bit (variable-width, most common Unicode encoding)"))
+                description="Unicode Transformation Format 8-bit (variable-width, most common Unicode encoding)."))
         setattr(cls, "Windows-1250",
             PermissibleValue(
                 text="Windows-1250",
-                description="Windows code page for Central European languages"))
+                description="Windows code page for Central European languages."))
         setattr(cls, "Windows-1251",
             PermissibleValue(
                 text="Windows-1251",
-                description="Windows code page for Cyrillic script"))
+                description="Windows code page for Cyrillic script."))
         setattr(cls, "Windows-1252",
             PermissibleValue(
                 text="Windows-1252",
-                description="Windows code page for Western European languages"))
+                description="Windows code page for Western European languages."))
         setattr(cls, "Windows-1253",
             PermissibleValue(
                 text="Windows-1253",
-                description="Windows code page for Greek"))
+                description="Windows code page for Greek."))
         setattr(cls, "Windows-1254",
             PermissibleValue(
                 text="Windows-1254",
-                description="Windows code page for Turkish"))
+                description="Windows code page for Turkish."))
         setattr(cls, "Windows-1255",
             PermissibleValue(
                 text="Windows-1255",
-                description="Windows code page for Hebrew"))
+                description="Windows code page for Hebrew."))
         setattr(cls, "Windows-1256",
             PermissibleValue(
                 text="Windows-1256",
-                description="Windows code page for Arabic"))
+                description="Windows code page for Arabic."))
         setattr(cls, "Windows-1257",
             PermissibleValue(
                 text="Windows-1257",
-                description="Windows code page for Baltic languages"))
+                description="Windows code page for Baltic languages."))
         setattr(cls, "Windows-1258",
             PermissibleValue(
                 text="Windows-1258",
-                description="Windows code page for Vietnamese"))
+                description="Windows code page for Vietnamese."))
 
 class CRediTRoleEnum(EnumDefinitionImpl):
     """
@@ -3349,46 +3349,46 @@ class CRediTRoleEnum(EnumDefinitionImpl):
     """
     conceptualization = PermissibleValue(
         text="conceptualization",
-        description="Ideas; formulation or evolution of overarching research goals and aims")
+        description="Ideas; formulation or evolution of overarching research goals and aims.")
     methodology = PermissibleValue(
         text="methodology",
-        description="Development or design of methodology; creation of models")
+        description="Development or design of methodology; creation of models.")
     software = PermissibleValue(
         text="software",
-        description="Programming, software development; designing computer programs")
+        description="Programming, software development; designing computer programs.")
     validation = PermissibleValue(
         text="validation",
-        description="Verification of the overall replication/reproducibility of results")
+        description="Verification of the overall replication/reproducibility of results.")
     formal_analysis = PermissibleValue(
         text="formal_analysis",
-        description="Application of statistical, mathematical, or other formal techniques")
+        description="Application of statistical, mathematical, or other formal techniques.")
     investigation = PermissibleValue(
         text="investigation",
-        description="Conducting the research and investigation process")
+        description="Conducting the research and investigation process.")
     resources = PermissibleValue(
         text="resources",
         description="Provision of study materials, reagents, patients, laboratory samples, etc.")
     data_curation = PermissibleValue(
         text="data_curation",
-        description="Management activities to annotate, scrub data and maintain research data")
+        description="Management activities to annotate, scrub data and maintain research data.")
     writing_original_draft = PermissibleValue(
         text="writing_original_draft",
-        description="Preparation, creation and/or presentation of the published work")
+        description="Preparation, creation and/or presentation of the published work.")
     writing_review_editing = PermissibleValue(
         text="writing_review_editing",
-        description="Critical review, commentary or revision of the work")
+        description="Critical review, commentary or revision of the work.")
     visualization = PermissibleValue(
         text="visualization",
-        description="Preparation, creation and/or presentation of visualizations/data presentation")
+        description="Preparation, creation and/or presentation of visualizations/data presentation.")
     supervision = PermissibleValue(
         text="supervision",
-        description="Oversight and leadership responsibility for the research activity")
+        description="Oversight and leadership responsibility for the research activity.")
     project_administration = PermissibleValue(
         text="project_administration",
-        description="Management and coordination responsibility for the research activity")
+        description="Management and coordination responsibility for the research activity.")
     funding_acquisition = PermissibleValue(
         text="funding_acquisition",
-        description="Acquisition of the financial support for the project")
+        description="Acquisition of the financial support for the project.")
 
     _defn = EnumDefinition(
         name="CRediTRoleEnum",
@@ -3475,13 +3475,13 @@ class VersionTypeEnum(EnumDefinitionImpl):
     """
     MAJOR = PermissibleValue(
         text="MAJOR",
-        description="Incompatible changes, breaking backward compatibility")
+        description="Incompatible changes, breaking backward compatibility.")
     MINOR = PermissibleValue(
         text="MINOR",
-        description="Backward-compatible new functionality or enhancements")
+        description="Backward-compatible new functionality or enhancements.")
     PATCH = PermissibleValue(
         text="PATCH",
-        description="Backward-compatible bug fixes or minor corrections")
+        description="Backward-compatible bug fixes or minor corrections.")
 
     _defn = EnumDefinition(
         name="VersionTypeEnum",
@@ -3539,15 +3539,15 @@ class Boolean(EnumDefinitionImpl):
     true = PermissibleValue(
         text="true",
         title="True",
-        description="Affirmative or positive value")
+        description="Affirmative or positive value.")
     false = PermissibleValue(
         text="false",
         title="False",
-        description="Negative or false value")
+        description="Negative or false value.")
     unknown = PermissibleValue(
         text="unknown",
         title="Unknown",
-        description="Unknown, uncertain, or not applicable value")
+        description="Unknown, uncertain, or not applicable value.")
 
     _defn = EnumDefinition(
         name="Boolean",
@@ -3667,91 +3667,91 @@ class DataUsePermissionEnum(EnumDefinitionImpl):
     """
     no_restriction = PermissibleValue(
         text="no_restriction",
-        description="No restriction on data use",
+        description="No restriction on data use.",
         meaning=DUO["0000004"])
     general_research_use = PermissibleValue(
         text="general_research_use",
-        description="Data available for any research purpose (GRU)",
+        description="Data available for any research purpose (GRU).",
         meaning=DUO["0000042"])
     health_medical_biomedical_research = PermissibleValue(
         text="health_medical_biomedical_research",
-        description="Data limited to health, medical, or biomedical research (HMB)",
+        description="Data limited to health, medical, or biomedical research (HMB).",
         meaning=DUO["0000006"])
     disease_specific_research = PermissibleValue(
         text="disease_specific_research",
-        description="Data limited to research on specified disease(s) (DS)",
+        description="Data limited to research on specified disease(s) (DS).",
         meaning=DUO["0000007"])
     population_origins_ancestry_research = PermissibleValue(
         text="population_origins_ancestry_research",
-        description="Data limited to population origins or ancestry research (POA)",
+        description="Data limited to population origins or ancestry research (POA).",
         meaning=DUO["0000011"])
     clinical_care_use = PermissibleValue(
         text="clinical_care_use",
-        description="Data available for clinical care and applications (CC)",
+        description="Data available for clinical care and applications (CC).",
         meaning=DUO["0000043"])
     no_commercial_use = PermissibleValue(
         text="no_commercial_use",
-        description="Data use limited to non-commercial purposes (NCU)",
+        description="Data use limited to non-commercial purposes (NCU).",
         meaning=DUO["0000046"])
     non_profit_use_only = PermissibleValue(
         text="non_profit_use_only",
-        description="Data use limited to not-for-profit organizations (NPU)",
+        description="Data use limited to not-for-profit organizations (NPU).",
         meaning=DUO["0000045"])
     non_profit_use_and_non_commercial_use = PermissibleValue(
         text="non_profit_use_and_non_commercial_use",
-        description="Data limited to not-for-profit organizations and non-commercial use (NPUNCU)",
+        description="Data limited to not-for-profit organizations and non-commercial use (NPUNCU).",
         meaning=DUO["0000018"])
     no_methods_development = PermissibleValue(
         text="no_methods_development",
-        description="Data cannot be used for methods or software development (NMDS)",
+        description="Data cannot be used for methods or software development (NMDS).",
         meaning=DUO["0000015"])
     genetic_studies_only = PermissibleValue(
         text="genetic_studies_only",
-        description="Data limited to genetic studies only (GSO)",
+        description="Data limited to genetic studies only (GSO).",
         meaning=DUO["0000016"])
     ethics_approval_required = PermissibleValue(
         text="ethics_approval_required",
-        description="Ethics approval (e.g., IRB/ERB) required for data use (IRB)",
+        description="Ethics approval (e.g., IRB/ERB) required for data use (IRB).",
         meaning=DUO["0000021"])
     collaboration_required = PermissibleValue(
         text="collaboration_required",
-        description="Collaboration with primary investigator required (COL)",
+        description="Collaboration with primary investigator required (COL).",
         meaning=DUO["0000020"])
     publication_required = PermissibleValue(
         text="publication_required",
-        description="Results must be published/shared with research community (PUB)",
+        description="Results must be published/shared with research community (PUB).",
         meaning=DUO["0000019"])
     geographic_restriction = PermissibleValue(
         text="geographic_restriction",
-        description="Data use limited to specific geographic region (GS)",
+        description="Data use limited to specific geographic region (GS).",
         meaning=DUO["0000022"])
     institution_specific = PermissibleValue(
         text="institution_specific",
-        description="Data use limited to approved institutions (IS)",
+        description="Data use limited to approved institutions (IS).",
         meaning=DUO["0000028"])
     project_specific = PermissibleValue(
         text="project_specific",
-        description="Data use limited to approved project(s) (PS)",
+        description="Data use limited to approved project(s) (PS).",
         meaning=DUO["0000027"])
     user_specific = PermissibleValue(
         text="user_specific",
-        description="Data use limited to approved users (US)",
+        description="Data use limited to approved users (US).",
         meaning=DUO["0000026"])
     time_limit = PermissibleValue(
         text="time_limit",
-        description="Data use approved for limited time period (TS)",
+        description="Data use approved for limited time period (TS).",
         meaning=DUO["0000025"])
     return_to_database = PermissibleValue(
         text="return_to_database",
-        description="Derived data must be returned to database/resource (RTN)",
+        description="Derived data must be returned to database/resource (RTN).",
         meaning=DUO["0000029"])
     publication_moratorium = PermissibleValue(
         text="publication_moratorium",
-        description="Publication restricted until specified date (MOR)",
+        description="Publication restricted until specified date (MOR).",
         meaning=DUO["0000024"])
     no_population_ancestry_research = PermissibleValue(
         text="no_population_ancestry_research",
-        description="Population/ancestry research prohibited (NPOA)",
+        description="Population/ancestry research prohibited (NPOA).",
         meaning=DUO["0000044"])
 
     _defn = EnumDefinition(
@@ -3815,39 +3815,39 @@ class FileTypeEnum(EnumDefinitionImpl):
     """
     data_file = PermissibleValue(
         text="data_file",
-        description="A data file containing dataset content",
+        description="A data file containing dataset content.",
         meaning=SCHEMA["DataDownload"])
     code_file = PermissibleValue(
         text="code_file",
-        description="A source code or script file",
+        description="A source code or script file.",
         meaning=SCHEMA["SoftwareSourceCode"])
     documentation_file = PermissibleValue(
         text="documentation_file",
-        description="A documentation file (README, guide, etc.)",
+        description="A documentation file (README, guide, etc.).",
         meaning=SCHEMA["Documentation"])
     metadata_file = PermissibleValue(
         text="metadata_file",
-        description="A metadata or annotation file",
+        description="A metadata or annotation file.",
         meaning=DCAT["CatalogRecord"])
     configuration_file = PermissibleValue(
         text="configuration_file",
-        description="A configuration or settings file",
+        description="A configuration or settings file.",
         meaning=D4D["ConfigurationFile"])
     notebook_file = PermissibleValue(
         text="notebook_file",
-        description="A computational notebook file (Jupyter, R Markdown, etc.)",
+        description="A computational notebook file (Jupyter, R Markdown, etc.).",
         meaning=D4D["NotebookFile"])
     image_file = PermissibleValue(
         text="image_file",
-        description="An image or visualization file",
+        description="An image or visualization file.",
         meaning=SCHEMA["ImageObject"])
     archive_file = PermissibleValue(
         text="archive_file",
-        description="An archive or compressed file",
+        description="An archive or compressed file.",
         meaning=D4D["ArchiveFile"])
     other = PermissibleValue(
         text="other",
-        description="Other file type",
+        description="Other file type.",
         meaning=D4D["OtherFile"])
 
     _defn = EnumDefinition(
@@ -3861,43 +3861,43 @@ class FileCollectionTypeEnum(EnumDefinitionImpl):
     """
     raw_data = PermissibleValue(
         text="raw_data",
-        description="Raw, unprocessed data files",
+        description="Raw, unprocessed data files.",
         meaning=D4D["RawData"])
     processed_data = PermissibleValue(
         text="processed_data",
-        description="Cleaned, processed, or transformed data files",
+        description="Cleaned, processed, or transformed data files.",
         meaning=D4D["ProcessedData"])
     training_split = PermissibleValue(
         text="training_split",
-        description="Files designated for model training",
+        description="Files designated for model training.",
         meaning=D4D["TrainingSplit"])
     test_split = PermissibleValue(
         text="test_split",
-        description="Files designated for model testing",
+        description="Files designated for model testing.",
         meaning=D4D["TestSplit"])
     validation_split = PermissibleValue(
         text="validation_split",
-        description="Files designated for model validation",
+        description="Files designated for model validation.",
         meaning=D4D["ValidationSplit"])
     documentation = PermissibleValue(
         text="documentation",
-        description="Documentation files (README, codebook, etc.)",
+        description="Documentation files (README, codebook, etc.).",
         meaning=SCHEMA["Documentation"])
     metadata = PermissibleValue(
         text="metadata",
-        description="Metadata or annotation files",
+        description="Metadata or annotation files.",
         meaning=DCAT["CatalogRecord"])
     code = PermissibleValue(
         text="code",
-        description="Code or script files",
+        description="Code or script files.",
         meaning=SCHEMA["SoftwareSourceCode"])
     supplementary = PermissibleValue(
         text="supplementary",
-        description="Supplementary materials",
+        description="Supplementary materials.",
         meaning=SCHEMA["SupplementalMaterial"])
     other = PermissibleValue(
         text="other",
-        description="Other file collection type",
+        description="Other file collection type.",
         meaning=D4D["OtherFileCollection"])
 
     _defn = EnumDefinition(

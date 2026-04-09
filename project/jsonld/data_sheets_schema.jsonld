@@ -483,75 +483,75 @@
       "permissible_values": [
         {
           "text": "CSV",
-          "description": "Comma-Separated Values - tabular data format"
+          "description": "Comma-Separated Values - tabular data format."
         },
         {
           "text": "TSV",
-          "description": "Tab-Separated Values - tabular data format with tab delimiters"
+          "description": "Tab-Separated Values - tabular data format with tab delimiters."
         },
         {
           "text": "XML",
-          "description": "Extensible Markup Language - structured markup format"
+          "description": "Extensible Markup Language - structured markup format."
         },
         {
           "text": "JSON",
-          "description": "JavaScript Object Notation - structured data interchange format"
+          "description": "JavaScript Object Notation - structured data interchange format."
         },
         {
           "text": "JSONL",
-          "description": "JSON Lines - newline-delimited JSON format"
+          "description": "JSON Lines - newline-delimited JSON format."
         },
         {
           "text": "YAML",
-          "description": "YAML Ain't Markup Language - human-readable data serialization format"
+          "description": "YAML Ain't Markup Language - human-readable data serialization format."
         },
         {
           "text": "HTML",
-          "description": "HyperText Markup Language - web page markup format"
+          "description": "HyperText Markup Language - web page markup format."
         },
         {
           "text": "PDF",
-          "description": "Portable Document Format - fixed-layout document format"
+          "description": "Portable Document Format - fixed-layout document format."
         },
         {
           "text": "DOCX",
-          "description": "Microsoft Word Open XML Document - word processing document"
+          "description": "Microsoft Word Open XML Document - word processing document."
         },
         {
           "text": "XLSX",
-          "description": "Microsoft Excel Open XML Spreadsheet - spreadsheet format"
+          "description": "Microsoft Excel Open XML Spreadsheet - spreadsheet format."
         },
         {
           "text": "PPTX",
-          "description": "Microsoft PowerPoint Open XML Presentation - presentation format"
+          "description": "Microsoft PowerPoint Open XML Presentation - presentation format."
         },
         {
           "text": "TXT",
-          "description": "Plain text file"
+          "description": "Plain text file."
         },
         {
           "text": "MD",
-          "description": "Markdown - lightweight markup language"
+          "description": "Markdown - lightweight markup language."
         },
         {
           "text": "ZIP",
-          "description": "ZIP archive - compressed file container"
+          "description": "ZIP archive - compressed file container."
         },
         {
           "text": "TAR",
-          "description": "Tape Archive - file archive format"
+          "description": "Tape Archive - file archive format."
         },
         {
           "text": "GZ",
-          "description": "Gzip compressed file"
+          "description": "Gzip compressed file."
         },
         {
           "text": "BZ2",
-          "description": "Bzip2 compressed file"
+          "description": "Bzip2 compressed file."
         },
         {
           "text": "XZ",
-          "description": "XZ compressed file"
+          "description": "XZ compressed file."
         }
       ]
     },
@@ -563,79 +563,79 @@
       "permissible_values": [
         {
           "text": "text/csv",
-          "description": "MIME type for CSV (Comma-Separated Values) files"
+          "description": "MIME type for CSV (Comma-Separated Values) files."
         },
         {
           "text": "text/tab-separated-values",
-          "description": "MIME type for TSV (Tab-Separated Values) files"
+          "description": "MIME type for TSV (Tab-Separated Values) files."
         },
         {
           "text": "application/json",
-          "description": "MIME type for JSON (JavaScript Object Notation) files"
+          "description": "MIME type for JSON (JavaScript Object Notation) files."
         },
         {
           "text": "application/xml",
-          "description": "MIME type for XML (Extensible Markup Language) files"
+          "description": "MIME type for XML (Extensible Markup Language) files."
         },
         {
           "text": "text/xml",
-          "description": "Alternative MIME type for XML files (text variant)"
+          "description": "Alternative MIME type for XML files (text variant)."
         },
         {
           "text": "application/yaml",
-          "description": "MIME type for YAML files"
+          "description": "MIME type for YAML files."
         },
         {
           "text": "text/yaml",
-          "description": "Alternative MIME type for YAML files (text variant)"
+          "description": "Alternative MIME type for YAML files (text variant)."
         },
         {
           "text": "text/html",
-          "description": "MIME type for HTML (HyperText Markup Language) files"
+          "description": "MIME type for HTML (HyperText Markup Language) files."
         },
         {
           "text": "application/pdf",
-          "description": "MIME type for PDF (Portable Document Format) files"
+          "description": "MIME type for PDF (Portable Document Format) files."
         },
         {
           "text": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          "description": "MIME type for Microsoft Word DOCX files"
+          "description": "MIME type for Microsoft Word DOCX files."
         },
         {
           "text": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-          "description": "MIME type for Microsoft Excel XLSX files"
+          "description": "MIME type for Microsoft Excel XLSX files."
         },
         {
           "text": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-          "description": "MIME type for Microsoft PowerPoint PPTX files"
+          "description": "MIME type for Microsoft PowerPoint PPTX files."
         },
         {
           "text": "text/plain",
-          "description": "MIME type for plain text files"
+          "description": "MIME type for plain text files."
         },
         {
           "text": "text/markdown",
-          "description": "MIME type for Markdown files"
+          "description": "MIME type for Markdown files."
         },
         {
           "text": "application/zip",
-          "description": "MIME type for ZIP archive files"
+          "description": "MIME type for ZIP archive files."
         },
         {
           "text": "application/x-tar",
-          "description": "MIME type for TAR archive files"
+          "description": "MIME type for TAR archive files."
         },
         {
           "text": "application/gzip",
-          "description": "MIME type for Gzip compressed files"
+          "description": "MIME type for Gzip compressed files."
         },
         {
           "text": "application/x-bzip2",
-          "description": "MIME type for Bzip2 compressed files"
+          "description": "MIME type for Bzip2 compressed files."
         },
         {
           "text": "application/x-xz",
-          "description": "MIME type for XZ compressed files"
+          "description": "MIME type for XZ compressed files."
         }
       ]
     },
@@ -647,31 +647,31 @@
       "permissible_values": [
         {
           "text": "gzip",
-          "description": "GNU zip compression (commonly used with .gz extension)"
+          "description": "GNU zip compression (commonly used with .gz extension)."
         },
         {
           "text": "bzip2",
-          "description": "Burrows-Wheeler block-sorting compression (commonly used with .bz2 extension)"
+          "description": "Burrows-Wheeler block-sorting compression (commonly used with .bz2 extension)."
         },
         {
           "text": "zip",
-          "description": "ZIP archive compression format"
+          "description": "ZIP archive compression format."
         },
         {
           "text": "tar",
-          "description": "Tape Archive format (typically combined with gzip or bzip2)"
+          "description": "Tape Archive format (typically combined with gzip or bzip2)."
         },
         {
           "text": "xz",
-          "description": "XZ Utils compression using LZMA2 algorithm"
+          "description": "XZ Utils compression using LZMA2 algorithm."
         },
         {
           "text": "lzma",
-          "description": "Lempel-Ziv-Markov chain algorithm compression"
+          "description": "Lempel-Ziv-Markov chain algorithm compression."
         },
         {
           "text": "compress",
-          "description": "Unix compress utility (LZW compression)"
+          "description": "Unix compress utility (LZW compression)."
         }
       ]
     },
@@ -683,175 +683,175 @@
       "permissible_values": [
         {
           "text": "ASCII",
-          "description": "American Standard Code for Information Interchange (7-bit, English characters only)"
+          "description": "American Standard Code for Information Interchange (7-bit, English characters only)."
         },
         {
           "text": "Big5",
-          "description": "Traditional Chinese character encoding (primarily Taiwan and Hong Kong)"
+          "description": "Traditional Chinese character encoding (primarily Taiwan and Hong Kong)."
         },
         {
           "text": "EUC-JP",
-          "description": "Extended Unix Code for Japanese"
+          "description": "Extended Unix Code for Japanese."
         },
         {
           "text": "EUC-KR",
-          "description": "Extended Unix Code for Korean"
+          "description": "Extended Unix Code for Korean."
         },
         {
           "text": "EUC-TW",
-          "description": "Extended Unix Code for Traditional Chinese"
+          "description": "Extended Unix Code for Traditional Chinese."
         },
         {
           "text": "GB2312",
-          "description": "Simplified Chinese character encoding standard"
+          "description": "Simplified Chinese character encoding standard."
         },
         {
           "text": "HZ-GB-2312",
-          "description": "7-bit encoding for Simplified Chinese (GB2312)"
+          "description": "7-bit encoding for Simplified Chinese (GB2312)."
         },
         {
           "text": "ISO-2022-CN-EXT",
-          "description": "Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional)"
+          "description": "Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional)."
         },
         {
           "text": "ISO-2022-CN",
-          "description": "ISO-2022 encoding for Chinese"
+          "description": "ISO-2022 encoding for Chinese."
         },
         {
           "text": "ISO-2022-JP-2",
-          "description": "Extended ISO-2022 encoding for Japanese (includes additional character sets)"
+          "description": "Extended ISO-2022 encoding for Japanese (includes additional character sets)."
         },
         {
           "text": "ISO-2022-JP",
-          "description": "ISO-2022 encoding for Japanese"
+          "description": "ISO-2022 encoding for Japanese."
         },
         {
           "text": "ISO-2022-KR",
-          "description": "ISO-2022 encoding for Korean"
+          "description": "ISO-2022 encoding for Korean."
         },
         {
           "text": "ISO-8859-10",
-          "description": "Latin-6 (Nordic languages - Danish, Norwegian, Swedish, Icelandic)"
+          "description": "Latin-6 (Nordic languages - Danish, Norwegian, Swedish, Icelandic)."
         },
         {
           "text": "ISO-8859-11",
-          "description": "Latin/Thai encoding"
+          "description": "Latin/Thai encoding."
         },
         {
           "text": "ISO-8859-13",
-          "description": "Latin-7 (Baltic Rim languages)"
+          "description": "Latin-7 (Baltic Rim languages)."
         },
         {
           "text": "ISO-8859-14",
-          "description": "Latin-8 (Celtic languages)"
+          "description": "Latin-8 (Celtic languages)."
         },
         {
           "text": "ISO-8859-15",
-          "description": "Latin-9 (Western European with Euro sign)"
+          "description": "Latin-9 (Western European with Euro sign)."
         },
         {
           "text": "ISO-8859-16",
-          "description": "Latin-10 (South-Eastern European languages)"
+          "description": "Latin-10 (South-Eastern European languages)."
         },
         {
           "text": "ISO-8859-1",
-          "description": "Latin-1 (Western European languages)"
+          "description": "Latin-1 (Western European languages)."
         },
         {
           "text": "ISO-8859-2",
-          "description": "Latin-2 (Central European languages)"
+          "description": "Latin-2 (Central European languages)."
         },
         {
           "text": "ISO-8859-3",
-          "description": "Latin-3 (South European languages - Turkish, Maltese, Esperanto)"
+          "description": "Latin-3 (South European languages - Turkish, Maltese, Esperanto)."
         },
         {
           "text": "ISO-8859-4",
-          "description": "Latin-4 (North European languages)"
+          "description": "Latin-4 (North European languages)."
         },
         {
           "text": "ISO-8859-5",
-          "description": "Latin/Cyrillic encoding"
+          "description": "Latin/Cyrillic encoding."
         },
         {
           "text": "ISO-8859-6",
-          "description": "Latin/Arabic encoding"
+          "description": "Latin/Arabic encoding."
         },
         {
           "text": "ISO-8859-7",
-          "description": "Latin/Greek encoding"
+          "description": "Latin/Greek encoding."
         },
         {
           "text": "ISO-8859-8",
-          "description": "Latin/Hebrew encoding"
+          "description": "Latin/Hebrew encoding."
         },
         {
           "text": "ISO-8859-9",
-          "description": "Latin-5 (Turkish)"
+          "description": "Latin-5 (Turkish)."
         },
         {
           "text": "KOI8-R",
-          "description": "Russian character encoding (Kod Obmena Informatsiey)"
+          "description": "Russian character encoding (Kod Obmena Informatsiey)."
         },
         {
           "text": "KOI8-U",
-          "description": "Ukrainian character encoding"
+          "description": "Ukrainian character encoding."
         },
         {
           "text": "Shift_JIS",
-          "description": "Japanese character encoding (Microsoft and other systems)"
+          "description": "Japanese character encoding (Microsoft and other systems)."
         },
         {
           "text": "UTF-16",
-          "description": "Unicode Transformation Format 16-bit (variable-width encoding)"
+          "description": "Unicode Transformation Format 16-bit (variable-width encoding)."
         },
         {
           "text": "UTF-32",
-          "description": "Unicode Transformation Format 32-bit (fixed-width encoding)"
+          "description": "Unicode Transformation Format 32-bit (fixed-width encoding)."
         },
         {
           "text": "UTF-7",
-          "description": "Unicode Transformation Format 7-bit (for 7-bit channels)"
+          "description": "Unicode Transformation Format 7-bit (for 7-bit channels)."
         },
         {
           "text": "UTF-8",
-          "description": "Unicode Transformation Format 8-bit (variable-width, most common Unicode encoding)"
+          "description": "Unicode Transformation Format 8-bit (variable-width, most common Unicode encoding)."
         },
         {
           "text": "Windows-1250",
-          "description": "Windows code page for Central European languages"
+          "description": "Windows code page for Central European languages."
         },
         {
           "text": "Windows-1251",
-          "description": "Windows code page for Cyrillic script"
+          "description": "Windows code page for Cyrillic script."
         },
         {
           "text": "Windows-1252",
-          "description": "Windows code page for Western European languages"
+          "description": "Windows code page for Western European languages."
         },
         {
           "text": "Windows-1253",
-          "description": "Windows code page for Greek"
+          "description": "Windows code page for Greek."
         },
         {
           "text": "Windows-1254",
-          "description": "Windows code page for Turkish"
+          "description": "Windows code page for Turkish."
         },
         {
           "text": "Windows-1255",
-          "description": "Windows code page for Hebrew"
+          "description": "Windows code page for Hebrew."
         },
         {
           "text": "Windows-1256",
-          "description": "Windows code page for Arabic"
+          "description": "Windows code page for Arabic."
         },
         {
           "text": "Windows-1257",
-          "description": "Windows code page for Baltic languages"
+          "description": "Windows code page for Baltic languages."
         },
         {
           "text": "Windows-1258",
-          "description": "Windows code page for Vietnamese"
+          "description": "Windows code page for Vietnamese."
         }
       ]
     },
@@ -863,27 +863,27 @@
       "permissible_values": [
         {
           "text": "conceptualization",
-          "description": "Ideas; formulation or evolution of overarching research goals and aims"
+          "description": "Ideas; formulation or evolution of overarching research goals and aims."
         },
         {
           "text": "methodology",
-          "description": "Development or design of methodology; creation of models"
+          "description": "Development or design of methodology; creation of models."
         },
         {
           "text": "software",
-          "description": "Programming, software development; designing computer programs"
+          "description": "Programming, software development; designing computer programs."
         },
         {
           "text": "validation",
-          "description": "Verification of the overall replication/reproducibility of results"
+          "description": "Verification of the overall replication/reproducibility of results."
         },
         {
           "text": "formal_analysis",
-          "description": "Application of statistical, mathematical, or other formal techniques"
+          "description": "Application of statistical, mathematical, or other formal techniques."
         },
         {
           "text": "investigation",
-          "description": "Conducting the research and investigation process"
+          "description": "Conducting the research and investigation process."
         },
         {
           "text": "resources",
@@ -891,31 +891,31 @@
         },
         {
           "text": "data_curation",
-          "description": "Management activities to annotate, scrub data and maintain research data"
+          "description": "Management activities to annotate, scrub data and maintain research data."
         },
         {
           "text": "writing_original_draft",
-          "description": "Preparation, creation and/or presentation of the published work"
+          "description": "Preparation, creation and/or presentation of the published work."
         },
         {
           "text": "writing_review_editing",
-          "description": "Critical review, commentary or revision of the work"
+          "description": "Critical review, commentary or revision of the work."
         },
         {
           "text": "visualization",
-          "description": "Preparation, creation and/or presentation of visualizations/data presentation"
+          "description": "Preparation, creation and/or presentation of visualizations/data presentation."
         },
         {
           "text": "supervision",
-          "description": "Oversight and leadership responsibility for the research activity"
+          "description": "Oversight and leadership responsibility for the research activity."
         },
         {
           "text": "project_administration",
-          "description": "Management and coordination responsibility for the research activity"
+          "description": "Management and coordination responsibility for the research activity."
         },
         {
           "text": "funding_acquisition",
-          "description": "Acquisition of the financial support for the project"
+          "description": "Acquisition of the financial support for the project."
         }
       ]
     },
@@ -1027,15 +1027,15 @@
       "permissible_values": [
         {
           "text": "MAJOR",
-          "description": "Incompatible changes, breaking backward compatibility"
+          "description": "Incompatible changes, breaking backward compatibility."
         },
         {
           "text": "MINOR",
-          "description": "Backward-compatible new functionality or enhancements"
+          "description": "Backward-compatible new functionality or enhancements."
         },
         {
           "text": "PATCH",
-          "description": "Backward-compatible bug fixes or minor corrections"
+          "description": "Backward-compatible bug fixes or minor corrections."
         }
       ]
     },
@@ -1117,17 +1117,17 @@
       "permissible_values": [
         {
           "text": "true",
-          "description": "Affirmative or positive value",
+          "description": "Affirmative or positive value.",
           "title": "True"
         },
         {
           "text": "false",
-          "description": "Negative or false value",
+          "description": "Negative or false value.",
           "title": "False"
         },
         {
           "text": "unknown",
-          "description": "Unknown, uncertain, or not applicable value",
+          "description": "Unknown, uncertain, or not applicable value.",
           "title": "Unknown"
         }
       ]
@@ -1303,112 +1303,112 @@
       "permissible_values": [
         {
           "text": "no_restriction",
-          "description": "No restriction on data use",
+          "description": "No restriction on data use.",
           "meaning": "DUO:0000004"
         },
         {
           "text": "general_research_use",
-          "description": "Data available for any research purpose (GRU)",
+          "description": "Data available for any research purpose (GRU).",
           "meaning": "DUO:0000042"
         },
         {
           "text": "health_medical_biomedical_research",
-          "description": "Data limited to health, medical, or biomedical research (HMB)",
+          "description": "Data limited to health, medical, or biomedical research (HMB).",
           "meaning": "DUO:0000006"
         },
         {
           "text": "disease_specific_research",
-          "description": "Data limited to research on specified disease(s) (DS)",
+          "description": "Data limited to research on specified disease(s) (DS).",
           "meaning": "DUO:0000007"
         },
         {
           "text": "population_origins_ancestry_research",
-          "description": "Data limited to population origins or ancestry research (POA)",
+          "description": "Data limited to population origins or ancestry research (POA).",
           "meaning": "DUO:0000011"
         },
         {
           "text": "clinical_care_use",
-          "description": "Data available for clinical care and applications (CC)",
+          "description": "Data available for clinical care and applications (CC).",
           "meaning": "DUO:0000043"
         },
         {
           "text": "no_commercial_use",
-          "description": "Data use limited to non-commercial purposes (NCU)",
+          "description": "Data use limited to non-commercial purposes (NCU).",
           "meaning": "DUO:0000046"
         },
         {
           "text": "non_profit_use_only",
-          "description": "Data use limited to not-for-profit organizations (NPU)",
+          "description": "Data use limited to not-for-profit organizations (NPU).",
           "meaning": "DUO:0000045"
         },
         {
           "text": "non_profit_use_and_non_commercial_use",
-          "description": "Data limited to not-for-profit organizations and non-commercial use (NPUNCU)",
+          "description": "Data limited to not-for-profit organizations and non-commercial use (NPUNCU).",
           "meaning": "DUO:0000018"
         },
         {
           "text": "no_methods_development",
-          "description": "Data cannot be used for methods or software development (NMDS)",
+          "description": "Data cannot be used for methods or software development (NMDS).",
           "meaning": "DUO:0000015"
         },
         {
           "text": "genetic_studies_only",
-          "description": "Data limited to genetic studies only (GSO)",
+          "description": "Data limited to genetic studies only (GSO).",
           "meaning": "DUO:0000016"
         },
         {
           "text": "ethics_approval_required",
-          "description": "Ethics approval (e.g., IRB/ERB) required for data use (IRB)",
+          "description": "Ethics approval (e.g., IRB/ERB) required for data use (IRB).",
           "meaning": "DUO:0000021"
         },
         {
           "text": "collaboration_required",
-          "description": "Collaboration with primary investigator required (COL)",
+          "description": "Collaboration with primary investigator required (COL).",
           "meaning": "DUO:0000020"
         },
         {
           "text": "publication_required",
-          "description": "Results must be published/shared with research community (PUB)",
+          "description": "Results must be published/shared with research community (PUB).",
           "meaning": "DUO:0000019"
         },
         {
           "text": "geographic_restriction",
-          "description": "Data use limited to specific geographic region (GS)",
+          "description": "Data use limited to specific geographic region (GS).",
           "meaning": "DUO:0000022"
         },
         {
           "text": "institution_specific",
-          "description": "Data use limited to approved institutions (IS)",
+          "description": "Data use limited to approved institutions (IS).",
           "meaning": "DUO:0000028"
         },
         {
           "text": "project_specific",
-          "description": "Data use limited to approved project(s) (PS)",
+          "description": "Data use limited to approved project(s) (PS).",
           "meaning": "DUO:0000027"
         },
         {
           "text": "user_specific",
-          "description": "Data use limited to approved users (US)",
+          "description": "Data use limited to approved users (US).",
           "meaning": "DUO:0000026"
         },
         {
           "text": "time_limit",
-          "description": "Data use approved for limited time period (TS)",
+          "description": "Data use approved for limited time period (TS).",
           "meaning": "DUO:0000025"
         },
         {
           "text": "return_to_database",
-          "description": "Derived data must be returned to database/resource (RTN)",
+          "description": "Derived data must be returned to database/resource (RTN).",
           "meaning": "DUO:0000029"
         },
         {
           "text": "publication_moratorium",
-          "description": "Publication restricted until specified date (MOR)",
+          "description": "Publication restricted until specified date (MOR).",
           "meaning": "DUO:0000024"
         },
         {
           "text": "no_population_ancestry_research",
-          "description": "Population/ancestry research prohibited (NPOA)",
+          "description": "Population/ancestry research prohibited (NPOA).",
           "meaning": "DUO:0000044"
         }
       ]
@@ -1521,47 +1521,47 @@
       "permissible_values": [
         {
           "text": "data_file",
-          "description": "A data file containing dataset content",
+          "description": "A data file containing dataset content.",
           "meaning": "schema:DataDownload"
         },
         {
           "text": "code_file",
-          "description": "A source code or script file",
+          "description": "A source code or script file.",
           "meaning": "schema:SoftwareSourceCode"
         },
         {
           "text": "documentation_file",
-          "description": "A documentation file (README, guide, etc.)",
+          "description": "A documentation file (README, guide, etc.).",
           "meaning": "schema:Documentation"
         },
         {
           "text": "metadata_file",
-          "description": "A metadata or annotation file",
+          "description": "A metadata or annotation file.",
           "meaning": "dcat:CatalogRecord"
         },
         {
           "text": "configuration_file",
-          "description": "A configuration or settings file",
+          "description": "A configuration or settings file.",
           "meaning": "d4d:ConfigurationFile"
         },
         {
           "text": "notebook_file",
-          "description": "A computational notebook file (Jupyter, R Markdown, etc.)",
+          "description": "A computational notebook file (Jupyter, R Markdown, etc.).",
           "meaning": "d4d:NotebookFile"
         },
         {
           "text": "image_file",
-          "description": "An image or visualization file",
+          "description": "An image or visualization file.",
           "meaning": "schema:ImageObject"
         },
         {
           "text": "archive_file",
-          "description": "An archive or compressed file",
+          "description": "An archive or compressed file.",
           "meaning": "d4d:ArchiveFile"
         },
         {
           "text": "other",
-          "description": "Other file type",
+          "description": "Other file type.",
           "meaning": "d4d:OtherFile"
         }
       ]
@@ -1574,52 +1574,52 @@
       "permissible_values": [
         {
           "text": "raw_data",
-          "description": "Raw, unprocessed data files",
+          "description": "Raw, unprocessed data files.",
           "meaning": "d4d:RawData"
         },
         {
           "text": "processed_data",
-          "description": "Cleaned, processed, or transformed data files",
+          "description": "Cleaned, processed, or transformed data files.",
           "meaning": "d4d:ProcessedData"
         },
         {
           "text": "training_split",
-          "description": "Files designated for model training",
+          "description": "Files designated for model training.",
           "meaning": "d4d:TrainingSplit"
         },
         {
           "text": "test_split",
-          "description": "Files designated for model testing",
+          "description": "Files designated for model testing.",
           "meaning": "d4d:TestSplit"
         },
         {
           "text": "validation_split",
-          "description": "Files designated for model validation",
+          "description": "Files designated for model validation.",
           "meaning": "d4d:ValidationSplit"
         },
         {
           "text": "documentation",
-          "description": "Documentation files (README, codebook, etc.)",
+          "description": "Documentation files (README, codebook, etc.).",
           "meaning": "schema:Documentation"
         },
         {
           "text": "metadata",
-          "description": "Metadata or annotation files",
+          "description": "Metadata or annotation files.",
           "meaning": "dcat:CatalogRecord"
         },
         {
           "text": "code",
-          "description": "Code or script files",
+          "description": "Code or script files.",
           "meaning": "schema:SoftwareSourceCode"
         },
         {
           "text": "supplementary",
-          "description": "Supplementary materials",
+          "description": "Supplementary materials.",
           "meaning": "schema:SupplementalMaterial"
         },
         {
           "text": "other",
-          "description": "Other file collection type",
+          "description": "Other file collection type.",
           "meaning": "d4d:OtherFileCollection"
         }
       ]
@@ -1629,6 +1629,13 @@
     {
       "name": "same_as",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/same_as",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "doi:10.XXXXX/example-dataset",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more URLs or URIs identifying equivalent or related representations of this dataset. Used to link to canonical or alternative representations of the same dataset on different platforms (e.g., DOI resolver, institutional repository, data catalog).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
@@ -1695,6 +1702,13 @@
     {
       "name": "publisher",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/publisher",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "ror:04t3en479  # use a ROR ID, DOI, or URL \u2014 not a plain name",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The organization or entity responsible for making the resource available.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -2218,6 +2232,13 @@
     },
     {
       "name": "dataset__total_file_count",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "156",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Total number of files across all file collections in this dataset. Can be aggregated from file_collections[].file_count.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
@@ -2234,6 +2255,13 @@
     },
     {
       "name": "dataset__total_size_bytes",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "10737418240 (10 GiB = 10 \u00d7 1024\u00b3 bytes)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Total size of all files in bytes across all file collections. Can be aggregated from file_collections[].total_bytes.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema",
       "mappings": [
@@ -3510,6 +3538,13 @@
     },
     {
       "name": "namedThing__id",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://example.org/dataset/my-dataset-001",
+          "@type": "Annotation"
+        }
+      ],
       "description": "A unique identifier for a thing.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3560,6 +3595,13 @@
     },
     {
       "name": "datasetProperty__id",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://example.org/dataset/property-001",
+          "@type": "Annotation"
+        }
+      ],
       "description": "An optional identifier for this property.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3708,6 +3750,13 @@
     },
     {
       "name": "person__orcid",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "0000-0001-2345-6789",
+          "@type": "Annotation"
+        }
+      ],
       "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
@@ -3754,7 +3803,7 @@
     },
     {
       "name": "formatDialect__double_quote",
-      "description": "Whether quotes within quoted fields are escaped by doubling them. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification).",
+      "description": "Whether quotes within quoted fields are escaped by doubling them. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification). Follows the W3C CSV-on-the-Web dialect specification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/double_quote",
       "alias": "double_quote",
@@ -3767,7 +3816,7 @@
     },
     {
       "name": "formatDialect__header",
-      "description": "Whether the first row of the file contains column headers. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification).",
+      "description": "Whether the first row of the file contains column headers. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification). Follows the W3C CSV-on-the-Web dialect specification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/header",
       "alias": "header",
@@ -3892,7 +3941,7 @@
     },
     {
       "name": "creator__credit_roles",
-      "description": "One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
+      "description": "One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team (e.g., Conceptualization, Data Curation, Methodology).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/creditRoles"
@@ -4020,6 +4069,13 @@
     },
     {
       "name": "instance__counts",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "42000 (42,000 patient records)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "How many instances are there in total (of each type, if appropriate)?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
@@ -4473,9 +4529,6 @@
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/hasArchivalVersion"
-      ],
-      "broad_mappings": [
-        "http://schema.org/archivedAt"
       ],
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/hasArchivalVersion",
       "alias": "archival",
@@ -5020,7 +5073,7 @@
     },
     {
       "name": "missingDataDocumentation__handling_strategy",
-      "description": "Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).\n",
+      "description": "The primary strategy used to handle missing data (e.g., listwise deletion, mean imputation, multiple imputation, flagging with sentinel values).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/handlingStrategy"
@@ -5177,6 +5230,13 @@
     },
     {
       "name": "labelingStrategy__annotations_per_item",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "3 (three independent annotators per item)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5249,6 +5309,13 @@
     },
     {
       "name": "rawData__access_url",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://example.org/dataset/raw/raw-data.zip",
+          "@type": "Annotation"
+        }
+      ],
       "description": "URL or access point for the raw data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
@@ -5502,6 +5569,13 @@
     },
     {
       "name": "useRepository__repository_url",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://example.org/dataset/known-uses",
+          "@type": "Annotation"
+        }
+      ],
       "description": "URL to a repository of known dataset uses.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#repository_url",
@@ -5597,7 +5671,7 @@
     },
     {
       "name": "intendedUse__usage_notes",
-      "description": "Notes or caveats about using the dataset for intended purposes.",
+      "description": "A note or caveat about using the dataset for its intended purposes.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/uses",
       "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/uses#usage_notes",
       "alias": "usage_notes",
@@ -5660,6 +5734,13 @@
     },
     {
       "name": "distributionFormat__access_urls",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://example.org/dataset/download",
+          "@type": "Annotation"
+        }
+      ],
       "description": "One or more URLs providing access to the distribution channel(s) or format(s).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
       "mappings": [
@@ -5727,6 +5808,13 @@
     },
     {
       "name": "erratum__erratum_url",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://example.org/dataset/errata/2024-01-15",
+          "@type": "Annotation"
+        }
+      ],
       "description": "URL or access point for the erratum.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -5876,6 +5964,13 @@
     },
     {
       "name": "extensionMechanism__contribution_url",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "https://example.org/dataset/contributing",
+          "@type": "Annotation"
+        }
+      ],
       "description": "URL for contribution guidelines or process.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
@@ -6650,6 +6745,13 @@
     },
     {
       "name": "variableMetadata__minimum_value",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "0.0",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The minimum value that the variable can take. Applicable to numeric variables.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6666,6 +6768,13 @@
     },
     {
       "name": "variableMetadata__maximum_value",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "100.0",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The maximum value that the variable can take. Applicable to numeric variables.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6748,6 +6857,13 @@
     },
     {
       "name": "variableMetadata__precision",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "2 (two decimal places, e.g., 3.14)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "The precision or number of decimal places for numeric variables.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
@@ -6849,6 +6965,13 @@
     },
     {
       "name": "fileCollection__file_count",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "47",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Number of files in this collection.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "mappings": [
@@ -6865,6 +6988,13 @@
     },
     {
       "name": "fileCollection__total_bytes",
+      "annotations": [
+        {
+          "tag": "d4d:docExample",
+          "value": "1073741824 (1 GiB = 1024\u00b3 bytes)",
+          "@type": "Annotation"
+        }
+      ],
       "description": "Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/file-collection",
       "mappings": [
@@ -7252,6 +7382,13 @@
         },
         {
           "name": "total_file_count",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "156",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Total number of files across all file collections in this dataset. Can be aggregated from file_collections[].file_count.",
           "slot_uri": "d4d:totalFileCount",
           "range": "integer",
@@ -7259,6 +7396,13 @@
         },
         {
           "name": "total_size_bytes",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "10737418240 (10 GiB = 10 \u00d7 1024\u00b3 bytes)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Total size of all files in bytes across all file collections. Can be aggregated from file_collections[].total_bytes.",
           "slot_uri": "dcat:byteSize",
           "range": "integer",
@@ -7995,6 +8139,13 @@
       "attributes": [
         {
           "name": "id",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://example.org/dataset/my-dataset-001",
+              "@type": "Annotation"
+            }
+          ],
           "description": "A unique identifier for a thing.",
           "slot_uri": "schema:identifier",
           "identifier": true,
@@ -8052,6 +8203,13 @@
       "attributes": [
         {
           "name": "id",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://example.org/dataset/property-001",
+              "@type": "Annotation"
+            }
+          ],
           "description": "An optional identifier for this property.",
           "slot_uri": "schema:identifier",
           "range": "uriorcurie",
@@ -8167,6 +8325,13 @@
         },
         {
           "name": "orcid",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "0000-0001-2345-6789",
+              "@type": "Annotation"
+            }
+          ],
           "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
           "broad_mappings": [
             "schema:identifier"
@@ -8221,7 +8386,7 @@
     {
       "name": "FormatDialect",
       "definition_uri": "https://w3id.org/bridge2ai/data-sheets-schema/FormatDialect",
-      "description": "Additional format information for a file",
+      "description": "Additional format information for a file.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "slots": [
         "formatDialect__comment_prefix",
@@ -8244,12 +8409,12 @@
         },
         {
           "name": "double_quote",
-          "description": "Whether quotes within quoted fields are escaped by doubling them. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification).",
+          "description": "Whether quotes within quoted fields are escaped by doubling them. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification). Follows the W3C CSV-on-the-Web dialect specification.",
           "@type": "SlotDefinition"
         },
         {
           "name": "header",
-          "description": "Whether the first row of the file contains column headers. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification).",
+          "description": "Whether the first row of the file contains column headers. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification). Follows the W3C CSV-on-the-Web dialect specification.",
           "@type": "SlotDefinition"
         },
         {
@@ -8390,7 +8555,7 @@
         },
         {
           "name": "credit_roles",
-          "description": "One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
+          "description": "One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team (e.g., Conceptualization, Data Curation, Methodology).",
           "slot_uri": "d4d:creditRoles",
           "range": "CRediTRoleEnum",
           "multivalued": true,
@@ -8533,6 +8698,13 @@
         },
         {
           "name": "counts",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "42000 (42,000 patient records)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "How many instances are there in total (of each type, if appropriate)?\n",
           "slot_uri": "schema:numberOfItems",
           "range": "integer",
@@ -8921,9 +9093,6 @@
         {
           "name": "archival",
           "description": "Indicates whether official archival versions of external resources are included in the dataset.\n",
-          "broad_mappings": [
-            "schema:archivedAt"
-          ],
           "slot_uri": "d4d:hasArchivalVersion",
           "range": "boolean",
           "@type": "SlotDefinition"
@@ -9437,7 +9606,7 @@
         },
         {
           "name": "handling_strategy",
-          "description": "Strategy used to handle missing data (e.g., deletion, imputation, flagging, multiple imputation).\n",
+          "description": "The primary strategy used to handle missing data (e.g., listwise deletion, mean imputation, multiple imputation, flagging with sentinel values).\n",
           "slot_uri": "d4d:handlingStrategy",
           "range": "string",
           "@type": "SlotDefinition"
@@ -9606,6 +9775,13 @@
         },
         {
           "name": "annotations_per_item",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "3 (three independent annotators per item)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Number of annotations collected per data item. Multiple annotations per item enable calculation of inter-annotator agreement.",
           "exact_mappings": [
             "rai:annotationsPerItem"
@@ -9662,6 +9838,13 @@
       "attributes": [
         {
           "name": "access_url",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://example.org/dataset/raw/raw-data.zip",
+              "@type": "Annotation"
+            }
+          ],
           "description": "URL or access point for the raw data.",
           "slot_uri": "d4d:rawDataAccessURL",
           "range": "uri",
@@ -9894,6 +10077,13 @@
       "attributes": [
         {
           "name": "repository_url",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://example.org/dataset/known-uses",
+              "@type": "Annotation"
+            }
+          ],
           "description": "URL to a repository of known dataset uses.",
           "range": "uri",
           "@type": "SlotDefinition"
@@ -10023,7 +10213,7 @@
         },
         {
           "name": "usage_notes",
-          "description": "Notes or caveats about using the dataset for intended purposes.",
+          "description": "A note or caveat about using the dataset for its intended purposes.",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -10109,6 +10299,13 @@
       "attributes": [
         {
           "name": "access_urls",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://example.org/dataset/download",
+              "@type": "Annotation"
+            }
+          ],
           "description": "One or more URLs providing access to the distribution channel(s) or format(s).",
           "slot_uri": "dcat:accessURL",
           "range": "uri",
@@ -10199,6 +10396,13 @@
       "attributes": [
         {
           "name": "erratum_url",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://example.org/dataset/errata/2024-01-15",
+              "@type": "Annotation"
+            }
+          ],
           "description": "URL or access point for the erratum.",
           "slot_uri": "d4d:erratumURL",
           "range": "uri",
@@ -10351,6 +10555,13 @@
       "attributes": [
         {
           "name": "contribution_url",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "https://example.org/dataset/contributing",
+              "@type": "Annotation"
+            }
+          ],
           "description": "URL for contribution guidelines or process.",
           "slot_uri": "d4d:contributionURL",
           "range": "uri",
@@ -11039,6 +11250,13 @@
         },
         {
           "name": "minimum_value",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "0.0",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The minimum value that the variable can take. Applicable to numeric variables.",
           "slot_uri": "schema:minValue",
           "range": "float",
@@ -11046,6 +11264,13 @@
         },
         {
           "name": "maximum_value",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "100.0",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The maximum value that the variable can take. Applicable to numeric variables.",
           "slot_uri": "schema:maxValue",
           "range": "float",
@@ -11083,6 +11308,13 @@
         },
         {
           "name": "precision",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "2 (two decimal places, e.g., 3.14)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "The precision or number of decimal places for numeric variables.",
           "slot_uri": "schema:valuePrecision",
           "range": "integer",
@@ -11245,6 +11477,13 @@
         },
         {
           "name": "file_count",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "47",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Number of files in this collection.",
           "slot_uri": "d4d:fileCount",
           "range": "integer",
@@ -11252,6 +11491,13 @@
         },
         {
           "name": "total_bytes",
+          "annotations": [
+            {
+              "tag": "d4d:docExample",
+              "value": "1073741824 (1 GiB = 1024\u00b3 bytes)",
+              "@type": "Annotation"
+            }
+          ],
           "description": "Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize.",
           "slot_uri": "dcat:byteSize",
           "range": "integer",
@@ -11264,9 +11510,9 @@
   ],
   "metamodel_version": "1.7.0",
   "source_file": "data_sheets_schema.yaml",
-  "source_file_date": "2026-04-08T23:58:16",
-  "source_file_size": 31653,
-  "generation_date": "2026-04-09T00:03:46",
+  "source_file_date": "2026-04-09T00:48:57",
+  "source_file_size": 31873,
+  "generation_date": "2026-04-09T10:17:07",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
