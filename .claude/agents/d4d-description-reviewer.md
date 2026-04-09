@@ -145,6 +145,11 @@ Is the description useful to someone filling out a D4D datasheet?
 - HTML or markdown artifacts in YAML descriptions
 - Duplicate sentences within a single description
 
+#### Check H: Style Consistency
+- **Terminal punctuation**: Every description — including short enum value phrases — must end with `.`, `?`, or `!`. Add a period to any that do not.
+- **Capitalization**: All descriptions must begin with an uppercase letter.
+- **Inline implementation notes**: Rationale for design decisions (e.g., "Note: roles are specified here rather than on Person…") belongs in a YAML comment (`#`), not in the user-facing description field.
+
 ### Step 3: Classify Issues by Severity
 
 **CRITICAL** — Semantically wrong; description contradicts the field's actual behavior:
@@ -167,6 +172,8 @@ Is the description useful to someone filling out a D4D datasheet?
 - Could benefit from a concrete example
 - Minor phrasing inconsistency
 - Brief but not wrong
+- Missing terminal period on a description (Check H)
+- Implementation rationale in description instead of YAML comment (Check H)
 
 ### Step 4: Generate Report
 

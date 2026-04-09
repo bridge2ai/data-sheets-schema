@@ -51,7 +51,9 @@ classes:
     attributes:
       preprocessing_details:
         description: >
-          Details on preprocessing steps applied to the data.
+          Free-text description of preprocessing steps applied to the data,
+          including tools used, parameters, order of operations, and rationale
+          for each step.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -67,7 +69,9 @@ classes:
     attributes:
       cleaning_details:
         description: >
-          Details on data cleaning procedures applied.
+          Free-text description of data cleaning procedures applied, including
+          criteria for removing or correcting instances, tools used, and how
+          removed instances are accounted for.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -81,12 +85,11 @@ classes:
     attributes:
       data_annotation_platform:
         description: >-
-          Platform or tool used for annotation (e.g., Label Studio, Prodigy,
+          One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy,
           Amazon Mechanical Turk, custom annotation tool).
         range: string
-        slot_uri: schema:instrument
-        exact_mappings:
-          - rai:dataAnnotationPlatform
+        multivalued: true
+        slot_uri: rai:dataAnnotationPlatform
       data_annotation_protocol:
         description: >-
           Annotation methodology, tasks, and protocols followed during labeling.
@@ -104,6 +107,8 @@ classes:
         range: integer
         exact_mappings:
           - rai:annotationsPerItem
+        annotations:
+          "d4d:docExample": "3 (three independent annotators per item)"
       inter_annotator_agreement:
         description: >-
           Measure of agreement between annotators (e.g., Cohen's kappa, Fleiss' kappa,
@@ -112,8 +117,8 @@ classes:
         slot_uri: schema:measurementMethod
       annotator_demographics:
         description: >-
-          Demographic information about annotators, if available and relevant
-          (e.g., geographic location, language background, expertise level).
+          One or more demographic characteristics of the annotators, if available and relevant
+          (e.g., geographic location, language background, expertise level, native language).
         slot_uri: d4d:annotatorDemographics
         range: string
         multivalued: true
@@ -121,7 +126,8 @@ classes:
           - rai:annotatorDemographics
       labeling_details:
         description: >
-          Details on labeling/annotation procedures and quality metrics.
+          Free-text description of the labeling or annotation procedures, including
+          annotation guidelines, task definitions, and quality control metrics.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -137,9 +143,12 @@ classes:
         description: "URL or access point for the raw data."
         slot_uri: d4d:rawDataAccessURL
         range: uri
+        annotations:
+          "d4d:docExample": "https://example.org/dataset/raw/raw-data.zip"
       raw_data_details:
         description: >
-          Details on raw data availability and access procedures.
+          Free-text description of raw data availability, access procedures,
+          and any conditions or restrictions on accessing the raw data.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -247,7 +256,7 @@ classes:
         multivalued: true
       tool_accuracy:
         description: >
-          Known accuracy or performance metrics for the automated tools (if available).
+          One or more known accuracy or performance metrics for the automated tools (if available).
           Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy: 92%").
         slot_uri: d4d:toolAccuracy
         range: string

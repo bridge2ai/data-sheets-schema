@@ -96,13 +96,13 @@ classes:
         slot_uri: d4d:teamAffiliation
         broad_mappings:
           - schema:affiliation
+      # Roles are placed on Creator rather than Person because the same person
+      # may contribute in different capacities across different datasets.
       credit_roles:
         description: >-
-          Contributor roles using the CRediT (Contributor Roles Taxonomy) for
-          the principal investigator or creator team. Specifies the specific
-          contributions made to this dataset (e.g., Conceptualization, Data Curation,
-          Methodology). Note: roles are specified here rather than on Person directly,
-          since the same person may have different roles across different datasets.
+          One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for
+          the principal investigator or creator team (e.g., Conceptualization, Data Curation,
+          Methodology).
         slot_uri: d4d:creditRoles
         range: CRediTRoleEnum
         multivalued: true

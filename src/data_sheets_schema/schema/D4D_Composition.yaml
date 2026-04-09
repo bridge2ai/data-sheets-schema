@@ -56,7 +56,9 @@ classes:
         slot_uri: dcat:theme
       instance_type:
         description: >
-          Multiple types of instances? (e.g., movies, users, and ratings).
+          The type or types of instances in the dataset (e.g., "movie", "user",
+          "rating", "clinical record"). Use when the dataset contains multiple
+          instance types with different structures.
         range: string
         slot_uri: d4d:instanceType
         broad_mappings:
@@ -73,6 +75,8 @@ classes:
           How many instances are there in total (of each type, if appropriate)?
         range: integer
         slot_uri: schema:numberOfItems
+        annotations:
+          "d4d:docExample": "42000 (42,000 patient records)"
       label:
         description: >
           Is there a label or target associated with each instance?
@@ -110,15 +114,13 @@ classes:
         description: "Indicates whether it is a sample of a larger set."
         slot_uri: d4d:isSample
         range: boolean
-        multivalued: true
       is_random:
         description: "Indicates whether the sample is random."
         slot_uri: d4d:isRandom
         range: boolean
-        multivalued: true
       source_data:
         description: >
-          Description of the larger set from which the sample was drawn, if any.
+          One or more descriptions of the larger sets from which the sample was drawn, if applicable.
         slot_uri: d4d:sourceData
         range: string
         multivalued: true
@@ -127,10 +129,9 @@ classes:
           Indicates whether the sample is representative of the larger set.
         slot_uri: d4d:isRepresentative
         range: boolean
-        multivalued: true
       representative_verification:
         description: >
-          Explanation of how representativeness was validated or verified.
+          One or more explanations of how representativeness was validated or verified (e.g., statistical tests, domain expert review).
         slot_uri: d4d:verificationDescription
         range: string
         multivalued: true
@@ -138,13 +139,14 @@ classes:
           - schema:description
       why_not_representative:
         description: >
-          Explanation of why the sample is not representative, if applicable.
+          One or more explanations of why the sample is not representative of the larger set, if applicable.
         slot_uri: d4d:whyNotRepresentative
         range: string
         multivalued: true
       strategies:
         description: >
-          Description of the sampling strategy (deterministic, probabilistic, etc.).
+          One or more sampling strategies used (e.g., deterministic, simple random,
+          stratified, cluster, systematic).
         slot_uri: d4d:strategies
         range: string
         multivalued: true
@@ -161,13 +163,17 @@ classes:
           Description of the missing data fields or elements.
         range: string
         multivalued: true
-        slot_uri: dcterms:description
+        slot_uri: d4d:missingDataDescription
+        broad_mappings:
+          - dcterms:description
       why_missing:
         description: >
           Explanation of why each piece of data is missing.
         range: string
         multivalued: true
-        slot_uri: dcterms:description
+        slot_uri: d4d:missingDataCause
+        broad_mappings:
+          - dcterms:description
 
 
   Relationships:
@@ -178,7 +184,9 @@ classes:
     attributes:
       relationship_details:
         description: >
-          Details on relationships between instances (e.g., graph edges, ratings).
+          Free-text description of how relationships between instances are represented
+          (e.g., graph edges, ratings matrices, foreign keys), including relationship types
+          and any associated metadata.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -192,7 +200,8 @@ classes:
     attributes:
       split_details:
         description: >
-          Details on recommended data splits and their rationale.
+          Free-text description of the recommended data splits (e.g., 80/10/10 train/
+          validation/test), how they are defined, and the rationale for the split strategy.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -205,7 +214,8 @@ classes:
     attributes:
       anomaly_details:
         description: >
-          Details on errors, noise sources, or redundancies in the dataset.
+          Free-text description of errors, noise sources, or redundancies in the dataset,
+          including their known causes and estimated prevalence.
         range: string
         multivalued: true
         slot_uri: d4d:anomalyDetails
@@ -241,7 +251,8 @@ classes:
         range: string
       affected_subsets:
         description: >
-          Specific subsets or features of the dataset affected by this bias.
+          One or more specific subsets or features of the dataset affected by this bias
+          (e.g., "female participants", "non-English text", "images taken at night").
         slot_uri: d4d:affectedSubsets
         range: string
         multivalued: true
@@ -302,14 +313,16 @@ classes:
           - dcterms:description
       archival:
         description: >
-          Indication whether official archival versions of external resources
-          are included.
-        slot_uri: schema:archivedAt
+          Indicates whether official archival versions of external resources
+          are included in the dataset.
+        slot_uri: d4d:hasArchivalVersion
         range: boolean
-        multivalued: true
+        broad_mappings:
+          - schema:archivedAt
       restrictions:
         description: >
-          Description of any restrictions or fees associated with external resources.
+          One or more descriptions of restrictions or fees associated with accessing
+          these external resources (e.g., paywalls, registration requirements, API limits).
         range: string
         multivalued: true
         slot_uri: d4d:externalResourceRestrictions
@@ -329,7 +342,9 @@ classes:
         slot_uri: d4d:confidential_elements_present
       confidentiality_details:
         description: >
-          Details on confidential data elements and handling procedures.
+          Free-text description of which data elements are confidential, the basis for
+          confidentiality (e.g., legal privilege, patient data), and how they are handled
+          or restricted.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -347,8 +362,9 @@ classes:
         slot_uri: d4d:content_warnings_present
       warnings:
         description: >-
-          Specific content warnings describing potentially offensive, insulting, threatening,
-          or anxiety-provoking content (e.g., violence, profanity, explicit imagery).
+          One or more specific content warnings describing potentially offensive, insulting,
+          threatening, or anxiety-provoking content present in the dataset
+          (e.g., violence, profanity, explicit imagery, hate speech).
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -370,14 +386,18 @@ classes:
           geographic region, disease status, or other demographic/clinical characteristics).
         range: string
         multivalued: true
-        slot_uri: dcterms:description
+        slot_uri: d4d:subpopulationIdentification
+        broad_mappings:
+          - dcterms:description
       distribution:
         description: >-
           The distribution of instances across identified subpopulations, including counts,
           percentages, or proportions for each subgroup.
         range: string
         multivalued: true
-        slot_uri: dcterms:description
+        slot_uri: d4d:subpopulationDistribution
+        broad_mappings:
+          - dcterms:description
 
 
   Deidentification:

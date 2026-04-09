@@ -62,10 +62,12 @@ classes:
     is_a: DatasetProperty
     attributes:
       access_urls:
-        description: "Details of the distribution channel(s) or format(s)."
-        range: string
+        description: "One or more URLs providing access to the distribution channel(s) or format(s)."
+        range: uri
         multivalued: true
         slot_uri: dcat:accessURL
+        annotations:
+          "d4d:docExample": "https://example.org/dataset/download"
 
 
   DistributionDate:
@@ -75,8 +77,9 @@ classes:
     attributes:
       release_dates:
         description: >
-          Dates or timeframe for dataset release. Could be a one-time release date
-          or multiple scheduled releases.
+          One or more dates or timeframes for dataset release, in ISO 8601 format
+          (e.g., "2024-03-15") or as a descriptive string (e.g., "Q2 2024").
+          Use multiple values for staged or scheduled releases.
         range: string
         multivalued: true
         slot_uri: dcterms:available

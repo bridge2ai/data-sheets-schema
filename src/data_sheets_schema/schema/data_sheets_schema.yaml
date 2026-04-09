@@ -133,12 +133,16 @@ classes:
           Can be aggregated from file_collections[].file_count.
         range: integer
         slot_uri: d4d:totalFileCount
+        annotations:
+          "d4d:docExample": "156"
       total_size_bytes:
         description: >-
           Total size of all files in bytes across all file collections.
           Can be aggregated from file_collections[].total_bytes.
         range: integer
         slot_uri: dcat:byteSize
+        annotations:
+          "d4d:docExample": "10737418240 (10 GiB = 10 × 1024³ bytes)"
       # Motivation module classes
       purposes:
         description: >-
@@ -194,9 +198,7 @@ classes:
         range: DataSubset
         multivalued: true
         inlined_as_list: true
-        slot_uri: dcat:distribution
-        exact_mappings:
-          - schema:distribution
+        slot_uri: d4d:dataSubset
       instances:
         description: >-
           Individual data instances or records in the dataset. List of
@@ -269,6 +271,24 @@ classes:
         range: SensitiveElement
         multivalued: true
         inlined_as_list: true
+      relationships:
+        description: >-
+          Explicit relationships between individual instances in the dataset.
+          List of Relationships objects from the Composition module describing
+          how instances relate (e.g., graph edges, ratings, social network links).
+        slot_uri: d4d:relationships
+        range: Relationships
+        multivalued: true
+        inlined_as_list: true
+      splits:
+        description: >-
+          Recommended data splits for this dataset. List of Splits objects
+          from the Composition module describing train/validation/test partitions
+          and the rationale for each split strategy.
+        slot_uri: d4d:splits
+        range: Splits
+        multivalued: true
+        inlined_as_list: true
       # Collection module classes
       acquisition_methods:
         description: >-
@@ -315,6 +335,42 @@ classes:
         range: CollectionTimeframe
         multivalued: true
         inlined_as_list: true
+      direct_collection:
+        description: >-
+          Whether data was collected directly from individuals or via third parties.
+          List of DirectCollection objects from the Collection module describing
+          direct vs. indirect collection methods and sources.
+        slot_uri: d4d:directCollection
+        range: DirectCollection
+        multivalued: true
+        inlined_as_list: true
+      collection_notifications:
+        description: >-
+          Notifications provided to individuals about data collection.
+          List of CollectionNotification objects from the Ethics module describing
+          how and when individuals were informed about the data collection.
+        slot_uri: d4d:collectionNotifications
+        range: CollectionNotification
+        multivalued: true
+        inlined_as_list: true
+      collection_consents:
+        description: >-
+          Consent obtained from individuals for data collection and use.
+          List of CollectionConsent objects from the Ethics module describing
+          how consent was requested, provided, and documented.
+        slot_uri: d4d:collectionConsents
+        range: CollectionConsent
+        multivalued: true
+        inlined_as_list: true
+      consent_revocations:
+        description: >-
+          Mechanisms for individuals to revoke previously given consent.
+          List of ConsentRevocation objects from the Ethics module describing
+          how revocation works and what happens to data after revocation.
+        slot_uri: d4d:consentRevocations
+        range: ConsentRevocation
+        multivalued: true
+        inlined_as_list: true
       missing_data_documentation:
         description: >-
           Documentation of missing data patterns and handling strategies.
@@ -324,7 +380,8 @@ classes:
         inlined_as_list: true
       raw_data_sources:
         description: >-
-          Description of raw data sources before preprocessing.
+          List of raw data sources before preprocessing. Each RawDataSource object
+          describes where the original data came from and how it can be accessed.
         slot_uri: d4d:rawDataSources
         range: RawDataSource
         multivalued: true
@@ -425,7 +482,9 @@ classes:
         inlined_as_list: true
       imputation_protocols:
         description: >-
-          Data imputation methodology and techniques.
+          Data imputation protocols applied to handle missing values.
+          List of ImputationProtocol objects from the Preprocessing module
+          describing the imputation technique, affected variables, and rationale.
         slot_uri: d4d:imputation_protocols
         range: ImputationProtocol
         multivalued: true
@@ -525,6 +584,16 @@ classes:
         range: DistributionDate
         multivalued: true
         inlined_as_list: true
+      third_party_sharing:
+        description: >-
+          Third-party distribution policies for the dataset.
+          List of ThirdPartySharing objects from the Distribution module describing
+          whether and how the dataset is shared with entities outside the
+          creating organization.
+        slot_uri: d4d:thirdPartySharing
+        range: ThirdPartySharing
+        multivalued: true
+        inlined_as_list: true
       # Data Governance module classes
       license_and_use_terms:
         description: >-
@@ -590,7 +659,7 @@ classes:
           Information about access to different versions of the dataset.
           VersionAccess object from the Maintenance module describing
           where older versions can be found and how version history is maintained.
-        slot_uri: dcat:accessURL
+        slot_uri: d4d:versionAccess
         range: VersionAccess
         inlined: true
       extension_mechanism:
@@ -626,7 +695,7 @@ classes:
           Whether the dataset is in tabular format (rows and columns).
           True if the data is structured as a table (e.g., CSV, TSV, relational
           database); false for unstructured formats such as images or free text.
-        slot_uri: schema:encodingFormat
+        slot_uri: d4d:isTabular
         range: boolean
       # Dataset citation and relationships
       citation:
@@ -693,13 +762,15 @@ slots:
   # Additional main schema specific slots
   same_as:
     description: >-
-      URL of a reference web resource that is the same as this dataset.
+      One or more URLs or URIs identifying equivalent or related representations of this dataset.
       Used to link to canonical or alternative representations of the same dataset
       on different platforms (e.g., DOI resolver, institutional repository, data catalog).
     singular_name: same_as
     multivalued: true
     range: uriorcurie
     slot_uri: schema:sameAs
+    annotations:
+      "d4d:docExample": "doi:10.XXXXX/example-dataset"
     exact_mappings:
       - schema:sameAs
 

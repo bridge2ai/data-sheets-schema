@@ -227,6 +227,8 @@ make full-schema
 
 **Problem**: Agents often invent semantic field names that "make sense" but aren't in the schema.
 
+> **Note on schema `d4d:docExample`**: The schema YAML contains `annotations: {"d4d:docExample": "..."}` on some fields. These are documentation only — do NOT copy them into D4D records. All values must come from the source documents.
+
 ```yaml
 # ❌ WRONG - Invented semantic field names (validation will FAIL)
 purposes:

@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-08T19:59:47
+# Generation date: 2026-04-09T00:03:47
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -247,7 +247,7 @@ class Software(NamedThing):
     id: Union[str, SoftwareId] = None
     version: Optional[str] = None
     license: Optional[str] = None
-    url: Optional[str] = None
+    url: Optional[Union[str, URI]] = None
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if self._is_empty(self.id):
@@ -261,8 +261,8 @@ class Software(NamedThing):
         if self.license is not None and not isinstance(self.license, str):
             self.license = str(self.license)
 
-        if self.url is not None and not isinstance(self.url, str):
-            self.url = str(self.url)
+        if self.url is not None and not isinstance(self.url, URI):
+            self.url = URI(self.url)
 
         super().__post_init__(**kwargs)
 
@@ -469,11 +469,17 @@ class Dataset(Information):
     content_warnings: Optional[Union[Union[dict, "ContentWarning"], list[Union[dict, "ContentWarning"]]]] = empty_list()
     subpopulations: Optional[Union[Union[dict, "Subpopulation"], list[Union[dict, "Subpopulation"]]]] = empty_list()
     sensitive_elements: Optional[Union[Union[dict, "SensitiveElement"], list[Union[dict, "SensitiveElement"]]]] = empty_list()
+    relationships: Optional[Union[Union[dict, "Relationships"], list[Union[dict, "Relationships"]]]] = empty_list()
+    splits: Optional[Union[Union[dict, "Splits"], list[Union[dict, "Splits"]]]] = empty_list()
     acquisition_methods: Optional[Union[Union[dict, "InstanceAcquisition"], list[Union[dict, "InstanceAcquisition"]]]] = empty_list()
     collection_mechanisms: Optional[Union[Union[dict, "CollectionMechanism"], list[Union[dict, "CollectionMechanism"]]]] = empty_list()
     sampling_strategies: Optional[Union[Union[dict, "SamplingStrategy"], list[Union[dict, "SamplingStrategy"]]]] = empty_list()
     data_collectors: Optional[Union[Union[dict, "DataCollector"], list[Union[dict, "DataCollector"]]]] = empty_list()
     collection_timeframes: Optional[Union[Union[dict, "CollectionTimeframe"], list[Union[dict, "CollectionTimeframe"]]]] = empty_list()
+    direct_collection: Optional[Union[Union[dict, "DirectCollection"], list[Union[dict, "DirectCollection"]]]] = empty_list()
+    collection_notifications: Optional[Union[Union[dict, "CollectionNotification"], list[Union[dict, "CollectionNotification"]]]] = empty_list()
+    collection_consents: Optional[Union[Union[dict, "CollectionConsent"], list[Union[dict, "CollectionConsent"]]]] = empty_list()
+    consent_revocations: Optional[Union[Union[dict, "ConsentRevocation"], list[Union[dict, "ConsentRevocation"]]]] = empty_list()
     missing_data_documentation: Optional[Union[Union[dict, "MissingDataDocumentation"], list[Union[dict, "MissingDataDocumentation"]]]] = empty_list()
     raw_data_sources: Optional[Union[Union[dict, "RawDataSource"], list[Union[dict, "RawDataSource"]]]] = empty_list()
     ethical_reviews: Optional[Union[Union[dict, "EthicalReview"], list[Union[dict, "EthicalReview"]]]] = empty_list()
@@ -499,6 +505,7 @@ class Dataset(Information):
     prohibited_uses: Optional[Union[Union[dict, "ProhibitedUse"], list[Union[dict, "ProhibitedUse"]]]] = empty_list()
     distribution_formats: Optional[Union[Union[dict, "DistributionFormat"], list[Union[dict, "DistributionFormat"]]]] = empty_list()
     distribution_dates: Optional[Union[Union[dict, "DistributionDate"], list[Union[dict, "DistributionDate"]]]] = empty_list()
+    third_party_sharing: Optional[Union[Union[dict, "ThirdPartySharing"], list[Union[dict, "ThirdPartySharing"]]]] = empty_list()
     license_and_use_terms: Optional[Union[dict, "LicenseAndUseTerms"]] = None
     ip_restrictions: Optional[Union[dict, "IPRestrictions"]] = None
     regulatory_restrictions: Optional[Union[dict, "ExportControlRegulatoryRestrictions"]] = None
@@ -589,6 +596,14 @@ class Dataset(Information):
             self.sensitive_elements = [self.sensitive_elements] if self.sensitive_elements is not None else []
         self.sensitive_elements = [v if isinstance(v, SensitiveElement) else SensitiveElement(**as_dict(v)) for v in self.sensitive_elements]
 
+        if not isinstance(self.relationships, list):
+            self.relationships = [self.relationships] if self.relationships is not None else []
+        self.relationships = [v if isinstance(v, Relationships) else Relationships(**as_dict(v)) for v in self.relationships]
+
+        if not isinstance(self.splits, list):
+            self.splits = [self.splits] if self.splits is not None else []
+        self.splits = [v if isinstance(v, Splits) else Splits(**as_dict(v)) for v in self.splits]
+
         if not isinstance(self.acquisition_methods, list):
             self.acquisition_methods = [self.acquisition_methods] if self.acquisition_methods is not None else []
         self.acquisition_methods = [v if isinstance(v, InstanceAcquisition) else InstanceAcquisition(**as_dict(v)) for v in self.acquisition_methods]
@@ -608,6 +623,22 @@ class Dataset(Information):
         if not isinstance(self.collection_timeframes, list):
             self.collection_timeframes = [self.collection_timeframes] if self.collection_timeframes is not None else []
         self.collection_timeframes = [v if isinstance(v, CollectionTimeframe) else CollectionTimeframe(**as_dict(v)) for v in self.collection_timeframes]
+
+        if not isinstance(self.direct_collection, list):
+            self.direct_collection = [self.direct_collection] if self.direct_collection is not None else []
+        self.direct_collection = [v if isinstance(v, DirectCollection) else DirectCollection(**as_dict(v)) for v in self.direct_collection]
+
+        if not isinstance(self.collection_notifications, list):
+            self.collection_notifications = [self.collection_notifications] if self.collection_notifications is not None else []
+        self.collection_notifications = [v if isinstance(v, CollectionNotification) else CollectionNotification(**as_dict(v)) for v in self.collection_notifications]
+
+        if not isinstance(self.collection_consents, list):
+            self.collection_consents = [self.collection_consents] if self.collection_consents is not None else []
+        self.collection_consents = [v if isinstance(v, CollectionConsent) else CollectionConsent(**as_dict(v)) for v in self.collection_consents]
+
+        if not isinstance(self.consent_revocations, list):
+            self.consent_revocations = [self.consent_revocations] if self.consent_revocations is not None else []
+        self.consent_revocations = [v if isinstance(v, ConsentRevocation) else ConsentRevocation(**as_dict(v)) for v in self.consent_revocations]
 
         if not isinstance(self.missing_data_documentation, list):
             self.missing_data_documentation = [self.missing_data_documentation] if self.missing_data_documentation is not None else []
@@ -706,6 +737,10 @@ class Dataset(Information):
         if not isinstance(self.distribution_dates, list):
             self.distribution_dates = [self.distribution_dates] if self.distribution_dates is not None else []
         self.distribution_dates = [v if isinstance(v, DistributionDate) else DistributionDate(**as_dict(v)) for v in self.distribution_dates]
+
+        if not isinstance(self.third_party_sharing, list):
+            self.third_party_sharing = [self.third_party_sharing] if self.third_party_sharing is not None else []
+        self.third_party_sharing = [v if isinstance(v, ThirdPartySharing) else ThirdPartySharing(**as_dict(v)) for v in self.third_party_sharing]
 
         if self.license_and_use_terms is not None and not isinstance(self.license_and_use_terms, LicenseAndUseTerms):
             self.license_and_use_terms = LicenseAndUseTerms(**as_dict(self.license_and_use_terms))
@@ -1060,30 +1095,27 @@ class SamplingStrategy(DatasetProperty):
     class_name: ClassVar[str] = "SamplingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.SamplingStrategy
 
-    is_sample: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
-    is_random: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
+    is_sample: Optional[Union[bool, Bool]] = None
+    is_random: Optional[Union[bool, Bool]] = None
     source_data: Optional[Union[str, list[str]]] = empty_list()
-    is_representative: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
+    is_representative: Optional[Union[bool, Bool]] = None
     representative_verification: Optional[Union[str, list[str]]] = empty_list()
     why_not_representative: Optional[Union[str, list[str]]] = empty_list()
     strategies: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if not isinstance(self.is_sample, list):
-            self.is_sample = [self.is_sample] if self.is_sample is not None else []
-        self.is_sample = [v if isinstance(v, Bool) else Bool(v) for v in self.is_sample]
+        if self.is_sample is not None and not isinstance(self.is_sample, Bool):
+            self.is_sample = Bool(self.is_sample)
 
-        if not isinstance(self.is_random, list):
-            self.is_random = [self.is_random] if self.is_random is not None else []
-        self.is_random = [v if isinstance(v, Bool) else Bool(v) for v in self.is_random]
+        if self.is_random is not None and not isinstance(self.is_random, Bool):
+            self.is_random = Bool(self.is_random)
 
         if not isinstance(self.source_data, list):
             self.source_data = [self.source_data] if self.source_data is not None else []
         self.source_data = [v if isinstance(v, str) else str(v) for v in self.source_data]
 
-        if not isinstance(self.is_representative, list):
-            self.is_representative = [self.is_representative] if self.is_representative is not None else []
-        self.is_representative = [v if isinstance(v, Bool) else Bool(v) for v in self.is_representative]
+        if self.is_representative is not None and not isinstance(self.is_representative, Bool):
+            self.is_representative = Bool(self.is_representative)
 
         if not isinstance(self.representative_verification, list):
             self.representative_verification = [self.representative_verification] if self.representative_verification is not None else []
@@ -1278,7 +1310,7 @@ class ExternalResource(DatasetProperty):
 
     external_resources: Optional[Union[str, list[str]]] = empty_list()
     future_guarantees: Optional[Union[str, list[str]]] = empty_list()
-    archival: Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]] = empty_list()
+    archival: Optional[Union[bool, Bool]] = None
     restrictions: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
@@ -1290,9 +1322,8 @@ class ExternalResource(DatasetProperty):
             self.future_guarantees = [self.future_guarantees] if self.future_guarantees is not None else []
         self.future_guarantees = [v if isinstance(v, str) else str(v) for v in self.future_guarantees]
 
-        if not isinstance(self.archival, list):
-            self.archival = [self.archival] if self.archival is not None else []
-        self.archival = [v if isinstance(v, Bool) else Bool(v) for v in self.archival]
+        if self.archival is not None and not isinstance(self.archival, Bool):
+            self.archival = Bool(self.archival)
 
         if not isinstance(self.restrictions, list):
             self.restrictions = [self.restrictions] if self.restrictions is not None else []
@@ -1757,7 +1788,7 @@ class LabelingStrategy(DatasetProperty):
     class_name: ClassVar[str] = "LabelingStrategy"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.LabelingStrategy
 
-    data_annotation_platform: Optional[str] = None
+    data_annotation_platform: Optional[Union[str, list[str]]] = empty_list()
     data_annotation_protocol: Optional[Union[str, list[str]]] = empty_list()
     annotations_per_item: Optional[int] = None
     inter_annotator_agreement: Optional[str] = None
@@ -1765,8 +1796,9 @@ class LabelingStrategy(DatasetProperty):
     labeling_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self.data_annotation_platform is not None and not isinstance(self.data_annotation_platform, str):
-            self.data_annotation_platform = str(self.data_annotation_platform)
+        if not isinstance(self.data_annotation_platform, list):
+            self.data_annotation_platform = [self.data_annotation_platform] if self.data_annotation_platform is not None else []
+        self.data_annotation_platform = [v if isinstance(v, str) else str(v) for v in self.data_annotation_platform]
 
         if not isinstance(self.data_annotation_protocol, list):
             self.data_annotation_protocol = [self.data_annotation_protocol] if self.data_annotation_protocol is not None else []
@@ -1951,8 +1983,8 @@ class ExistingUse(DatasetProperty):
 @dataclass(repr=False)
 class UseRepository(DatasetProperty):
     """
-    Is there a repository that links to any or all papers or systems that use the dataset? If so, provide a link or
-    other access point.
+    A repository or registry of known uses of this dataset by third parties. Documents where the dataset has been
+    applied, enabling discoverability of downstream use cases and impact tracking.
     """
     _inherited_slots: ClassVar[list[str]] = []
 
@@ -2131,12 +2163,12 @@ class DistributionFormat(DatasetProperty):
     class_name: ClassVar[str] = "DistributionFormat"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.DistributionFormat
 
-    access_urls: Optional[Union[str, list[str]]] = empty_list()
+    access_urls: Optional[Union[Union[str, URI], list[Union[str, URI]]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
         if not isinstance(self.access_urls, list):
             self.access_urls = [self.access_urls] if self.access_urls is not None else []
-        self.access_urls = [v if isinstance(v, str) else str(v) for v in self.access_urls]
+        self.access_urls = [v if isinstance(v, URI) else URI(v) for v in self.access_urls]
 
         super().__post_init__(**kwargs)
 
@@ -2283,13 +2315,13 @@ class VersionAccess(DatasetProperty):
     class_name: ClassVar[str] = "VersionAccess"
     class_model_uri: ClassVar[URIRef] = DATA_SHEETS_SCHEMA.VersionAccess
 
-    latest_version_doi: Optional[str] = None
+    latest_version_doi: Optional[Union[str, URIorCURIE]] = None
     versions_available: Optional[Union[str, list[str]]] = empty_list()
     version_details: Optional[Union[str, list[str]]] = empty_list()
 
     def __post_init__(self, *_: str, **kwargs: Any):
-        if self.latest_version_doi is not None and not isinstance(self.latest_version_doi, str):
-            self.latest_version_doi = str(self.latest_version_doi)
+        if self.latest_version_doi is not None and not isinstance(self.latest_version_doi, URIorCURIE):
+            self.latest_version_doi = URIorCURIE(self.latest_version_doi)
 
         if not isinstance(self.versions_available, list):
             self.versions_available = [self.versions_available] if self.versions_available is not None else []
@@ -3922,13 +3954,13 @@ slots.compression = Slot(uri=DCAT.compressFormat, name="compression", curie=DCAT
 slots.media_type = Slot(uri=DCAT.mediaType, name="media_type", curie=DCAT.curie('mediaType'),
                    model_uri=DATA_SHEETS_SCHEMA.media_type, domain=None, range=Optional[Union[str, "MediaTypeEnum"]])
 
-slots.hash = Slot(uri=DCTERMS.identifier, name="hash", curie=DCTERMS.curie('identifier'),
+slots.hash = Slot(uri=D4D.hashValue, name="hash", curie=D4D.curie('hashValue'),
                    model_uri=DATA_SHEETS_SCHEMA.hash, domain=None, range=Optional[str])
 
-slots.md5 = Slot(uri=DCTERMS.identifier, name="md5", curie=DCTERMS.curie('identifier'),
+slots.md5 = Slot(uri=D4D.md5Checksum, name="md5", curie=D4D.curie('md5Checksum'),
                    model_uri=DATA_SHEETS_SCHEMA.md5, domain=None, range=Optional[str])
 
-slots.sha256 = Slot(uri=DCTERMS.identifier, name="sha256", curie=DCTERMS.curie('identifier'),
+slots.sha256 = Slot(uri=SCHEMA.sha256, name="sha256", curie=SCHEMA.curie('sha256'),
                    model_uri=DATA_SHEETS_SCHEMA.sha256, domain=None, range=Optional[str])
 
 slots.conforms_to = Slot(uri=DCTERMS.conformsTo, name="conforms_to", curie=DCTERMS.curie('conformsTo'),
@@ -4001,7 +4033,7 @@ slots.dataset__creators = Slot(uri=SCHEMA.creator, name="dataset__creators", cur
 slots.dataset__funders = Slot(uri=SCHEMA.funder, name="dataset__funders", curie=SCHEMA.curie('funder'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__funders, domain=None, range=Optional[Union[Union[dict, FundingMechanism], list[Union[dict, FundingMechanism]]]])
 
-slots.dataset__subsets = Slot(uri=DCAT.distribution, name="dataset__subsets", curie=DCAT.curie('distribution'),
+slots.dataset__subsets = Slot(uri=D4D.dataSubset, name="dataset__subsets", curie=D4D.curie('dataSubset'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__subsets, domain=None, range=Optional[Union[dict[Union[str, DataSubsetId], Union[dict, DataSubset]], list[Union[dict, DataSubset]]]])
 
 slots.dataset__instances = Slot(uri=D4D.instances, name="dataset__instances", curie=D4D.curie('instances'),
@@ -4028,6 +4060,12 @@ slots.dataset__subpopulations = Slot(uri=D4D.subpopulations, name="dataset__subp
 slots.dataset__sensitive_elements = Slot(uri=D4D.sensitiveElements, name="dataset__sensitive_elements", curie=D4D.curie('sensitiveElements'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__sensitive_elements, domain=None, range=Optional[Union[Union[dict, SensitiveElement], list[Union[dict, SensitiveElement]]]])
 
+slots.dataset__relationships = Slot(uri=D4D.relationships, name="dataset__relationships", curie=D4D.curie('relationships'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__relationships, domain=None, range=Optional[Union[Union[dict, Relationships], list[Union[dict, Relationships]]]])
+
+slots.dataset__splits = Slot(uri=D4D.splits, name="dataset__splits", curie=D4D.curie('splits'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__splits, domain=None, range=Optional[Union[Union[dict, Splits], list[Union[dict, Splits]]]])
+
 slots.dataset__acquisition_methods = Slot(uri=D4D.acquisitionMethods, name="dataset__acquisition_methods", curie=D4D.curie('acquisitionMethods'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__acquisition_methods, domain=None, range=Optional[Union[Union[dict, InstanceAcquisition], list[Union[dict, InstanceAcquisition]]]])
 
@@ -4042,6 +4080,18 @@ slots.dataset__data_collectors = Slot(uri=D4D.dataCollectors, name="dataset__dat
 
 slots.dataset__collection_timeframes = Slot(uri=D4D.collectionTimeframes, name="dataset__collection_timeframes", curie=D4D.curie('collectionTimeframes'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__collection_timeframes, domain=None, range=Optional[Union[Union[dict, CollectionTimeframe], list[Union[dict, CollectionTimeframe]]]])
+
+slots.dataset__direct_collection = Slot(uri=D4D.directCollection, name="dataset__direct_collection", curie=D4D.curie('directCollection'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__direct_collection, domain=None, range=Optional[Union[Union[dict, DirectCollection], list[Union[dict, DirectCollection]]]])
+
+slots.dataset__collection_notifications = Slot(uri=D4D.collectionNotifications, name="dataset__collection_notifications", curie=D4D.curie('collectionNotifications'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__collection_notifications, domain=None, range=Optional[Union[Union[dict, CollectionNotification], list[Union[dict, CollectionNotification]]]])
+
+slots.dataset__collection_consents = Slot(uri=D4D.collectionConsents, name="dataset__collection_consents", curie=D4D.curie('collectionConsents'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__collection_consents, domain=None, range=Optional[Union[Union[dict, CollectionConsent], list[Union[dict, CollectionConsent]]]])
+
+slots.dataset__consent_revocations = Slot(uri=D4D.consentRevocations, name="dataset__consent_revocations", curie=D4D.curie('consentRevocations'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__consent_revocations, domain=None, range=Optional[Union[Union[dict, ConsentRevocation], list[Union[dict, ConsentRevocation]]]])
 
 slots.dataset__missing_data_documentation = Slot(uri=D4D.missingDataDocumentation, name="dataset__missing_data_documentation", curie=D4D.curie('missingDataDocumentation'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__missing_data_documentation, domain=None, range=Optional[Union[Union[dict, MissingDataDocumentation], list[Union[dict, MissingDataDocumentation]]]])
@@ -4118,6 +4168,9 @@ slots.dataset__distribution_formats = Slot(uri=D4D.distributionFormats, name="da
 slots.dataset__distribution_dates = Slot(uri=D4D.distributionDates, name="dataset__distribution_dates", curie=D4D.curie('distributionDates'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__distribution_dates, domain=None, range=Optional[Union[Union[dict, DistributionDate], list[Union[dict, DistributionDate]]]])
 
+slots.dataset__third_party_sharing = Slot(uri=D4D.thirdPartySharing, name="dataset__third_party_sharing", curie=D4D.curie('thirdPartySharing'),
+                   model_uri=DATA_SHEETS_SCHEMA.dataset__third_party_sharing, domain=None, range=Optional[Union[Union[dict, ThirdPartySharing], list[Union[dict, ThirdPartySharing]]]])
+
 slots.dataset__license_and_use_terms = Slot(uri=SCHEMA.license, name="dataset__license_and_use_terms", curie=SCHEMA.curie('license'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__license_and_use_terms, domain=None, range=Optional[Union[dict, LicenseAndUseTerms]])
 
@@ -4139,7 +4192,7 @@ slots.dataset__updates = Slot(uri=D4D.updates, name="dataset__updates", curie=D4
 slots.dataset__retention_limit = Slot(uri=D4D.retentionLimit, name="dataset__retention_limit", curie=D4D.curie('retentionLimit'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__retention_limit, domain=None, range=Optional[Union[dict, RetentionLimits]])
 
-slots.dataset__version_access = Slot(uri=DCAT.accessURL, name="dataset__version_access", curie=DCAT.curie('accessURL'),
+slots.dataset__version_access = Slot(uri=D4D.versionAccess, name="dataset__version_access", curie=D4D.curie('versionAccess'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__version_access, domain=None, range=Optional[Union[dict, VersionAccess]])
 
 slots.dataset__extension_mechanism = Slot(uri=D4D.extensionMechanism, name="dataset__extension_mechanism", curie=D4D.curie('extensionMechanism'),
@@ -4151,7 +4204,7 @@ slots.dataset__variables = Slot(uri=SCHEMA.variableMeasured, name="dataset__vari
 slots.dataset__is_deidentified = Slot(uri=D4D.isDeidentified, name="dataset__is_deidentified", curie=D4D.curie('isDeidentified'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__is_deidentified, domain=None, range=Optional[Union[dict, Deidentification]])
 
-slots.dataset__is_tabular = Slot(uri=SCHEMA.encodingFormat, name="dataset__is_tabular", curie=SCHEMA.curie('encodingFormat'),
+slots.dataset__is_tabular = Slot(uri=D4D.isTabular, name="dataset__is_tabular", curie=D4D.curie('isTabular'),
                    model_uri=DATA_SHEETS_SCHEMA.dataset__is_tabular, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.dataset__citation = Slot(uri=SCHEMA.citation, name="dataset__citation", curie=SCHEMA.curie('citation'),
@@ -4197,7 +4250,7 @@ slots.software__license = Slot(uri=SCHEMA.license, name="software__license", cur
                    model_uri=DATA_SHEETS_SCHEMA.software__license, domain=None, range=Optional[str])
 
 slots.software__url = Slot(uri=SCHEMA.url, name="software__url", curie=SCHEMA.curie('url'),
-                   model_uri=DATA_SHEETS_SCHEMA.software__url, domain=None, range=Optional[str])
+                   model_uri=DATA_SHEETS_SCHEMA.software__url, domain=None, range=Optional[Union[str, URI]])
 
 slots.person__affiliation = Slot(uri=SCHEMA.affiliation, name="person__affiliation", curie=SCHEMA.curie('affiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.person__affiliation, domain=None, range=Optional[Union[Union[str, OrganizationId], list[Union[str, OrganizationId]]]])
@@ -4276,16 +4329,16 @@ slots.instance__missing_information = Slot(uri=D4D.missingInformation, name="ins
                    model_uri=DATA_SHEETS_SCHEMA.instance__missing_information, domain=None, range=Optional[Union[Union[dict, MissingInfo], list[Union[dict, MissingInfo]]]])
 
 slots.samplingStrategy__is_sample = Slot(uri=D4D.isSample, name="samplingStrategy__is_sample", curie=D4D.curie('isSample'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_sample, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_sample, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.samplingStrategy__is_random = Slot(uri=D4D.isRandom, name="samplingStrategy__is_random", curie=D4D.curie('isRandom'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_random, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_random, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.samplingStrategy__source_data = Slot(uri=D4D.sourceData, name="samplingStrategy__source_data", curie=D4D.curie('sourceData'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__source_data, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.samplingStrategy__is_representative = Slot(uri=D4D.isRepresentative, name="samplingStrategy__is_representative", curie=D4D.curie('isRepresentative'),
-                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_representative, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
+                   model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_representative, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.samplingStrategy__representative_verification = Slot(uri=D4D.verificationDescription, name="samplingStrategy__representative_verification", curie=D4D.curie('verificationDescription'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__representative_verification, domain=None, range=Optional[Union[str, list[str]]])
@@ -4296,10 +4349,10 @@ slots.samplingStrategy__why_not_representative = Slot(uri=D4D.whyNotRepresentati
 slots.samplingStrategy__strategies = Slot(uri=D4D.strategies, name="samplingStrategy__strategies", curie=D4D.curie('strategies'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__strategies, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.missingInfo__missing = Slot(uri=DCTERMS.description, name="missingInfo__missing", curie=DCTERMS.curie('description'),
+slots.missingInfo__missing = Slot(uri=D4D.missingDataDescription, name="missingInfo__missing", curie=D4D.curie('missingDataDescription'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__missing, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.missingInfo__why_missing = Slot(uri=DCTERMS.description, name="missingInfo__why_missing", curie=DCTERMS.curie('description'),
+slots.missingInfo__why_missing = Slot(uri=D4D.missingDataCause, name="missingInfo__why_missing", curie=D4D.curie('missingDataCause'),
                    model_uri=DATA_SHEETS_SCHEMA.missingInfo__why_missing, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.relationships__relationship_details = Slot(uri=DCTERMS.description, name="relationships__relationship_details", curie=DCTERMS.curie('description'),
@@ -4338,8 +4391,8 @@ slots.datasetLimitation__recommended_mitigation = Slot(uri=D4D.recommendedMitiga
 slots.externalResource__future_guarantees = Slot(uri=D4D.availabilityGuarantee, name="externalResource__future_guarantees", curie=D4D.curie('availabilityGuarantee'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__future_guarantees, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.externalResource__archival = Slot(uri=SCHEMA.archivedAt, name="externalResource__archival", curie=SCHEMA.curie('archivedAt'),
-                   model_uri=DATA_SHEETS_SCHEMA.externalResource__archival, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
+slots.externalResource__archival = Slot(uri=D4D.hasArchivalVersion, name="externalResource__archival", curie=D4D.curie('hasArchivalVersion'),
+                   model_uri=DATA_SHEETS_SCHEMA.externalResource__archival, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.externalResource__restrictions = Slot(uri=D4D.externalResourceRestrictions, name="externalResource__restrictions", curie=D4D.curie('externalResourceRestrictions'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__restrictions, domain=None, range=Optional[Union[str, list[str]]])
@@ -4359,10 +4412,10 @@ slots.contentWarning__warnings = Slot(uri=DCTERMS.description, name="contentWarn
 slots.subpopulation__subpopulation_elements_present = Slot(uri=D4D.subpopulationElementsPresent, name="subpopulation__subpopulation_elements_present", curie=D4D.curie('subpopulationElementsPresent'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__subpopulation_elements_present, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.subpopulation__identification = Slot(uri=DCTERMS.description, name="subpopulation__identification", curie=DCTERMS.curie('description'),
+slots.subpopulation__identification = Slot(uri=D4D.subpopulationIdentification, name="subpopulation__identification", curie=D4D.curie('subpopulationIdentification'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__identification, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.subpopulation__distribution = Slot(uri=DCTERMS.description, name="subpopulation__distribution", curie=DCTERMS.curie('description'),
+slots.subpopulation__distribution = Slot(uri=D4D.subpopulationDistribution, name="subpopulation__distribution", curie=D4D.curie('subpopulationDistribution'),
                    model_uri=DATA_SHEETS_SCHEMA.subpopulation__distribution, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.deidentification__identifiable_elements_present = Slot(uri=D4D.identifiableElementsPresent, name="deidentification__identifiable_elements_present", curie=D4D.curie('identifiableElementsPresent'),
@@ -4458,8 +4511,8 @@ slots.preprocessingStrategy__preprocessing_details = Slot(uri=DCTERMS.descriptio
 slots.cleaningStrategy__cleaning_details = Slot(uri=DCTERMS.description, name="cleaningStrategy__cleaning_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.cleaningStrategy__cleaning_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.labelingStrategy__data_annotation_platform = Slot(uri=SCHEMA.instrument, name="labelingStrategy__data_annotation_platform", curie=SCHEMA.curie('instrument'),
-                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__data_annotation_platform, domain=None, range=Optional[str])
+slots.labelingStrategy__data_annotation_platform = Slot(uri=RAI.dataAnnotationPlatform, name="labelingStrategy__data_annotation_platform", curie=RAI.curie('dataAnnotationPlatform'),
+                   model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__data_annotation_platform, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.labelingStrategy__data_annotation_protocol = Slot(uri=D4D.dataAnnotationProtocol, name="labelingStrategy__data_annotation_protocol", curie=D4D.curie('dataAnnotationProtocol'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__data_annotation_protocol, domain=None, range=Optional[Union[str, list[str]]])
@@ -4552,7 +4605,7 @@ slots.thirdPartySharing__is_shared = Slot(uri=D4D.isExternallyShared, name="thir
                    model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__is_shared, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.distributionFormat__access_urls = Slot(uri=DCAT.accessURL, name="distributionFormat__access_urls", curie=DCAT.curie('accessURL'),
-                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__access_urls, domain=None, range=Optional[Union[str, list[str]]])
+                   model_uri=DATA_SHEETS_SCHEMA.distributionFormat__access_urls, domain=None, range=Optional[Union[Union[str, URI], list[Union[str, URI]]]])
 
 slots.distributionDate__release_dates = Slot(uri=DCTERMS.available, name="distributionDate__release_dates", curie=DCTERMS.curie('available'),
                    model_uri=DATA_SHEETS_SCHEMA.distributionDate__release_dates, domain=None, range=Optional[Union[str, list[str]]])
@@ -4582,7 +4635,7 @@ slots.retentionLimits__retention_details = Slot(uri=DCTERMS.description, name="r
                    model_uri=DATA_SHEETS_SCHEMA.retentionLimits__retention_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.versionAccess__latest_version_doi = Slot(uri=DCTERMS.hasVersion, name="versionAccess__latest_version_doi", curie=DCTERMS.curie('hasVersion'),
-                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__latest_version_doi, domain=None, range=Optional[str])
+                   model_uri=DATA_SHEETS_SCHEMA.versionAccess__latest_version_doi, domain=None, range=Optional[Union[str, URIorCURIE]])
 
 slots.versionAccess__versions_available = Slot(uri=D4D.versionsAvailable, name="versionAccess__versions_available", curie=D4D.curie('versionsAvailable'),
                    model_uri=DATA_SHEETS_SCHEMA.versionAccess__versions_available, domain=None, range=Optional[Union[str, list[str]]])

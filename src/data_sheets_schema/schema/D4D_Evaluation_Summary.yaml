@@ -18,7 +18,7 @@ imports:
 
 classes:
   EvaluationSummary:
-    description: Complete evaluation summary for a rubric system
+    description: Complete evaluation summary for a rubric system.
     attributes:
       rubric_type:
         description: Type of rubric used (rubric10 or rubric20).
@@ -26,7 +26,8 @@ classes:
         required: true
 
       rubric_description:
-        description: Description of rubric structure and scoring.
+        description: "Free-text description of the rubric structure, scoring criteria, and scale used in this evaluation (e.g., 'Rubric10: 10 elements × 5 sub-elements, binary scoring, max 50 points')."
+        range: string
         required: true
 
       total_files_evaluated:
@@ -99,7 +100,7 @@ classes:
         multivalued: true
 
   OverallPerformance:
-    description: Overall performance statistics across all files
+    description: Overall performance statistics across all files.
     attributes:
       average_score:
         description: Average score across all files.
@@ -144,7 +145,7 @@ classes:
         description: Identifier of the project, method, or file type that achieved the worst score.
 
   MethodPerformance:
-    description: Performance metrics for a specific generation method
+    description: Performance metrics for a specific generation method.
     attributes:
       method:
         description: The D4D generation method used to create the datasheets (e.g., claudecode_agent, gpt5).
@@ -187,7 +188,7 @@ classes:
         range: integer
 
   ProjectPerformance:
-    description: Performance metrics for a Bridge2AI Grand Challenge project
+    description: Performance metrics for a Bridge2AI Grand Challenge project.
     attributes:
       project:
         description: The Bridge2AI Grand Challenge project for which D4D datasheets were evaluated (e.g., AI_READI, VOICE).
@@ -218,7 +219,7 @@ classes:
         range: integer
 
   TopPerformer:
-    description: Information about a top-performing D4D file
+    description: Information about a top-performing D4D file.
     attributes:
       rank:
         description: Position in the top performers list (1 = highest score).
@@ -263,7 +264,7 @@ classes:
         description: Filename of the top-performing D4D datasheet.
 
   ElementPerformance:
-    description: Performance for a specific rubric element (rubric10)
+    description: Performance for a specific rubric element (rubric10).
     attributes:
       element_id:
         description: Numeric identifier of the rubric element being evaluated (1-10 for rubric10).
@@ -296,7 +297,7 @@ classes:
         description: Description of what this element measures.
 
   CategoryPerformance:
-    description: Performance for a rubric category (rubric20)
+    description: Performance for a rubric category (rubric20).
     attributes:
       category_id:
         description: Numeric identifier of the rubric category being evaluated (1-4 for rubric20).
@@ -330,7 +331,7 @@ classes:
         range: integer
 
   CommonWeakness:
-    description: Common weakness identified across evaluations
+    description: Common weakness identified across evaluations.
     attributes:
       weakness_type:
         description: Classification of the weakness observed across multiple D4D files.
@@ -350,10 +351,11 @@ classes:
         description: Specific rubric element or question where this weakness commonly occurs.
 
       typical_score:
-        description: Representative score typically achieved in areas affected by this weakness.
+        description: Representative numeric score (float) typically achieved in areas affected by this weakness.
+        range: float
 
   CommonStrength:
-    description: Common strength identified across evaluations
+    description: Common strength identified across evaluations.
     attributes:
       strength_type:
         description: Classification of the strength pattern observed across multiple D4D files.
@@ -373,10 +375,11 @@ classes:
         description: Specific rubric element or question where this strength commonly occurs.
 
       typical_score:
-        description: Representative score typically achieved in areas demonstrating this strength.
+        description: Representative numeric score (float) typically achieved in areas demonstrating this strength.
+        range: float
 
   KeyInsight:
-    description: Key analytical insight from evaluation
+    description: Key analytical insight from evaluation.
     attributes:
       insight_type:
         description: Classification of the analytical insight (e.g., trend, comparison, finding).
@@ -399,7 +402,7 @@ classes:
         description: Numerical comparison metric quantifying the insight (e.g., "2.4× better", "30% improvement").
 
   InputTypeComparison:
-    description: Comparison between concatenated and individual file performance
+    description: Comparison between concatenated and individual file performance.
     attributes:
       concatenated_performance:
         description: Performance metrics for D4D files generated from concatenated source documents.
@@ -412,10 +415,11 @@ classes:
         required: true
 
       synthesis_advantage:
-        description: Explanation of the multi-document synthesis advantage demonstrated by concatenated files.
+        description: "Free-text explanation of the performance difference observed between multi-document synthesis (concatenated files) and individual source documents for this comparison, including any advantage or disadvantage."
+        range: string
 
   InputTypePerformance:
-    description: Performance metrics for an input type
+    description: Performance metrics for an input type.
     attributes:
       input_type:
         description: Type of input (concatenated or individual).
@@ -442,7 +446,7 @@ classes:
         range: GenerationMethodEnum
 
   GeneratedFile:
-    description: Information about generated output file
+    description: Information about generated output file.
     attributes:
       file_path:
         description: Filesystem path to the generated evaluation output file.
@@ -450,7 +454,7 @@ classes:
 
       file_type:
         description: File format type of the generated output (CSV, JSON, or Markdown).
-        range: FileTypeEnum
+        range: EvaluationOutputFormatEnum
         required: true
 
       description:
@@ -463,7 +467,7 @@ classes:
 
 enums:
   RubricTypeEnum:
-    description: Types of evaluation rubrics
+    description: Types of evaluation rubrics.
     permissible_values:
       rubric10:
         description: 10-element hierarchical rubric (50 sub-elements, max 50 points)
@@ -471,109 +475,109 @@ enums:
         description: 20-question detailed rubric (4 categories, max 84 points)
 
   GenerationMethodEnum:
-    description: D4D generation methods
+    description: D4D generation methods.
     permissible_values:
       curated:
-        description: Manually curated comprehensive datasheets
+        description: Manually curated comprehensive datasheets.
       gpt5:
-        description: Generated using GPT-5 API
+        description: Generated using GPT-5 API.
       claudecode:
-        description: Direct synthesis at temperature=0.0 (concatenated only)
+        description: Direct synthesis at temperature=0.0 (concatenated only).
       claudecode_agent:
-        description: Claude Code agent-based generation
+        description: Claude Code agent-based generation.
       claudecode_assistant:
-        description: Claude Code assistant-based generation
+        description: Claude Code assistant-based generation.
 
   Bridge2AIProjectEnum:
-    description: Bridge2AI Grand Challenge projects
+    description: Bridge2AI Grand Challenge projects.
     permissible_values:
       AI_READI:
-        description: AI-READI - AI-Ready and Equitable Atlas for Diabetes Insights
+        description: AI-READI - AI-Ready and Equitable Atlas for Diabetes Insights.
       CHORUS:
-        description: CHoRUS - Collaborative Hospital Repository Uniting Standards
+        description: CHoRUS - Collaborative Hospital Repository Uniting Standards.
       CM4AI:
-        description: CM4AI - Cell Maps for AI
+        description: CM4AI - Cell Maps for AI.
       VOICE:
-        description: VOICE - Voice as a Biomarker of Health
+        description: VOICE - Voice as a Biomarker of Health.
 
   InputTypeEnum:
-    description: Types of input files for D4D generation
+    description: Types of input files for D4D generation.
     permissible_values:
       concatenated:
-        description: Multiple source documents concatenated, requires synthesis
+        description: Multiple source documents concatenated, requires synthesis.
       individual:
-        description: Single source document, single-source extraction
+        description: Single source document, single-source extraction.
 
   StrengthLevelEnum:
-    description: Assessment of element/category strength
+    description: Assessment of element/category strength.
     permissible_values:
       strongest:
-        description: Highest performing element/category
+        description: Highest performing element/category.
       strong:
-        description: Above average performance
+        description: Above average performance.
       weak:
-        description: Below average performance
+        description: Below average performance.
       weakest:
-        description: Lowest performing element/category
+        description: Lowest performing element/category.
 
   WeaknessTypeEnum:
-    description: Types of common weaknesses
+    description: Types of common weaknesses.
     permissible_values:
       missing_field:
-        description: Required or important field is missing
+        description: Required or important field is missing.
       incomplete_content:
-        description: Field present but content is incomplete
+        description: Field present but content is incomplete.
       low_quality:
-        description: Content quality is below standard
+        description: Content quality is below standard.
       inconsistent:
-        description: Information is inconsistent across fields
+        description: Information is inconsistent across fields.
       generic:
-        description: Content is too generic/boilerplate
+        description: Content is too generic/boilerplate.
 
   StrengthTypeEnum:
-    description: Types of common strengths
+    description: Types of common strengths.
     permissible_values:
       comprehensive:
-        description: Comprehensive coverage of topic
+        description: Comprehensive coverage of topic.
       high_quality:
-        description: High quality detailed content
+        description: High quality detailed content.
       consistent:
-        description: Consistent information across fields
+        description: Consistent information across fields.
       well_structured:
-        description: Well-structured and organized
+        description: Well-structured and organized.
 
   FrequencyEnum:
-    description: Frequency of occurrence
+    description: Frequency of occurrence.
     permissible_values:
       always:
-        description: Appears in all or nearly all files
+        description: Appears in all or nearly all files.
       frequently:
-        description: Appears in majority of files
+        description: Appears in majority of files.
       sometimes:
-        description: Appears in some files
+        description: Appears in some files.
       rarely:
-        description: Appears in few files
+        description: Appears in few files.
 
   InsightTypeEnum:
-    description: Types of analytical insights
+    description: Types of analytical insights.
     permissible_values:
       method_comparison:
-        description: Comparison between generation methods
+        description: Comparison between generation methods.
       synthesis_advantage:
-        description: Advantage of synthesis vs single-source
+        description: Advantage of synthesis vs single-source.
       performance_gap:
-        description: Gap between best and worst performers
+        description: Gap between best and worst performers.
       common_pattern:
-        description: Pattern observed across evaluations
+        description: Pattern observed across evaluations.
       improvement_opportunity:
-        description: Opportunity for improvement
+        description: Opportunity for improvement.
 
-  FileTypeEnum:
-    description: Types of generated output files
+  EvaluationOutputFormatEnum:
+    description: Types of generated output files.
     permissible_values:
       csv:
-        description: CSV file with tabular data
+        description: CSV file with tabular data.
       json:
-        description: JSON file with structured data
+        description: JSON file with structured data.
       markdown:
-        description: Markdown file with formatted text
+        description: Markdown file with formatted text.

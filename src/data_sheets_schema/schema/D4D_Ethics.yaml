@@ -64,7 +64,8 @@ classes:
           - schema:provider
       review_details:
         description: >
-          Details on ethical review processes, outcomes, and supporting documentation.
+          Free-text description of the ethical review process, board decisions, outcomes,
+          and any supporting documentation (e.g., IRB approval number, ethics committee name).
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -79,12 +80,16 @@ classes:
     attributes:
       impact_details:
         description: >
-          Details on data protection impact analysis, outcomes, and documentation.
+          Free-text description of the data protection impact analysis, including methodology,
+          privacy risks identified, mitigation measures taken, and any regulatory findings.
         range: string
         multivalued: true
         slot_uri: dcterms:description
 
 
+  # CollectionNotification, CollectionConsent, and ConsentRevocation cover general data
+  # collection ethics (notification, consent, revocation) applicable to any dataset
+  # touching individuals — broader than formal human subjects research (D4D_Human.yaml scope).
   CollectionNotification:
     description: >
       Were the individuals in question notified about the data collection? If so, please
@@ -94,7 +99,9 @@ classes:
     attributes:
       notification_details:
         description: >
-          Details on how individuals were notified about data collection.
+          Free-text description of how individuals were notified about data collection,
+          including the notification method (e.g., email, poster, in-person), timing,
+          and the language or text of the notification itself if available.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -109,7 +116,8 @@ classes:
     attributes:
       consent_details:
         description: >
-          Details on how consent was requested, provided, and documented.
+          Free-text description of how consent was requested (e.g., opt-in form, verbal
+          agreement), provided, and documented, including the language individuals consented to.
         range: string
         multivalued: true
         slot_uri: dcterms:description
@@ -123,7 +131,9 @@ classes:
     attributes:
       revocation_details:
         description: >
-          Details on consent revocation mechanisms and procedures.
+          Free-text description of the mechanism provided for individuals to revoke
+          consent (e.g., opt-out portal, written request), the scope of revocation
+          (full withdrawal or specific uses), and what happens to their data after revocation.
         range: string
         multivalued: true
         slot_uri: dcterms:description

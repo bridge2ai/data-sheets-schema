@@ -254,7 +254,7 @@
             "description": "Was any cleaning of the data done (e.g., removal of instances, processing of missing values)?",
             "properties": {
                 "cleaning_details": {
-                    "description": "Details on data cleaning procedures applied.\n",
+                    "description": "Free-text description of data cleaning procedures applied, including criteria for removing or correcting instances, tools used, and how removed instances are accounted for.\n",
                     "items": {
                         "type": "string"
                     },
@@ -303,7 +303,7 @@
             "description": "Did the individuals in question consent to the collection and use of their data? If so, how was consent requested and provided, and what language did individuals consent to?",
             "properties": {
                 "consent_details": {
-                    "description": "Details on how consent was requested, provided, and documented.\n",
+                    "description": "Free-text description of how consent was requested (e.g., opt-in form, verbal agreement), provided, and documented, including the language individuals consented to.\n",
                     "items": {
                         "type": "string"
                     },
@@ -366,7 +366,7 @@
                     ]
                 },
                 "mechanism_details": {
-                    "description": "Details on mechanisms or procedures used to collect the data.\n",
+                    "description": "Free-text description of the specific mechanisms or procedures used to collect the data (e.g., hardware model, software API, manual curation process), including how those mechanisms were validated.\n",
                     "items": {
                         "type": "string"
                     },
@@ -422,7 +422,7 @@
                     ]
                 },
                 "notification_details": {
-                    "description": "Details on how individuals were notified about data collection.\n",
+                    "description": "Free-text description of how individuals were notified about data collection, including the notification method (e.g., email, poster, in-person), timing, and the language or text of the notification itself if available.\n",
                     "items": {
                         "type": "string"
                     },
@@ -487,7 +487,7 @@
                     ]
                 },
                 "timeframe_details": {
-                    "description": "Details on the collection timeframe and relationship to data creation dates.\n",
+                    "description": "Free-text description of the data collection period and whether this timeframe matches the creation timeframe of the underlying data (e.g., historical records, prospective collection).\n",
                     "items": {
                         "type": "string"
                     },
@@ -548,7 +548,7 @@
                     ]
                 },
                 "confidentiality_details": {
-                    "description": "Details on confidential data elements and handling procedures.\n",
+                    "description": "Free-text description of which data elements are confidential, the basis for confidentiality (e.g., legal privilege, patient data), and how they are handled or restricted.\n",
                     "items": {
                         "type": "string"
                     },
@@ -628,7 +628,7 @@
                     ]
                 },
                 "revocation_details": {
-                    "description": "Details on consent revocation mechanisms and procedures.\n",
+                    "description": "Free-text description of the mechanism provided for individuals to revoke consent (e.g., opt-out portal, written request), the scope of revocation (full withdrawal or specific uses), and what happens to their data after revocation.\n",
                     "items": {
                         "type": "string"
                     },
@@ -694,7 +694,7 @@
                     ]
                 },
                 "warnings": {
-                    "description": "Specific content warnings describing potentially offensive, insulting, threatening, or anxiety-provoking content (e.g., violence, profanity, explicit imagery).",
+                    "description": "One or more specific content warnings describing potentially offensive, insulting, threatening, or anxiety-provoking content present in the dataset (e.g., violence, profanity, explicit imagery, hate speech).",
                     "items": {
                         "type": "string"
                     },
@@ -722,7 +722,7 @@
                     ]
                 },
                 "credit_roles": {
-                    "description": "Contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
+                    "description": "One or more contributor roles using the CRediT (Contributor Roles Taxonomy) for the principal investigator or creator team. Specifies the specific contributions made to this dataset (e.g., Conceptualization, Data Curation, Methodology). Note: roles are specified here rather than on Person directly, since the same person may have different roles across different datasets.",
                     "items": {
                         "$ref": "#/$defs/CRediTRoleEnum"
                     },
@@ -796,7 +796,7 @@
             "description": "Are there any errors, sources of noise, or redundancies in the dataset?",
             "properties": {
                 "anomaly_details": {
-                    "description": "Details on errors, noise sources, or redundancies in the dataset.\n",
+                    "description": "Free-text description of errors, noise sources, or redundancies in the dataset, including their known causes and estimated prevalence.\n",
                     "items": {
                         "type": "string"
                     },
@@ -845,7 +845,7 @@
             "description": "Who was involved in the data collection (e.g., students, crowdworkers, contractors), and how they were compensated.",
             "properties": {
                 "collector_details": {
-                    "description": "Details on who collected the data and their compensation.\n",
+                    "description": "Free-text description of who was involved in data collection (e.g., students, crowdworkers, contractors), their training or qualifications, and how they were compensated.\n",
                     "items": {
                         "type": "string"
                     },
@@ -915,7 +915,7 @@
                     ]
                 },
                 "impact_details": {
-                    "description": "Details on data protection impact analysis, outcomes, and documentation.\n",
+                    "description": "Free-text description of the data protection impact analysis, including methodology, privacy risks identified, mitigation measures taken, and any regulatory findings.\n",
                     "items": {
                         "type": "string"
                     },
@@ -950,6 +950,7 @@
             "description": "A subset of a dataset, likely containing multiple files of multiple potential purposes and properties.",
             "properties": {
                 "acquisition_methods": {
+                    "description": "Methods used to acquire or obtain dataset instances. List of InstanceAcquisition objects from the Collection module describing how data was sourced, whether directly observed or derived.",
                     "items": {
                         "$ref": "#/$defs/InstanceAcquisition"
                     },
@@ -959,6 +960,7 @@
                     ]
                 },
                 "addressing_gaps": {
+                    "description": "Research or practical gaps this dataset addresses. List of AddressingGap objects from the Motivation module, each describing a gap in existing datasets or knowledge that this dataset fills.",
                     "items": {
                         "$ref": "#/$defs/AddressingGap"
                     },
@@ -978,6 +980,7 @@
                     ]
                 },
                 "anomalies": {
+                    "description": "Known data quality issues, errors, or irregularities in the dataset. List of DataAnomaly objects from the Composition module, each documenting a specific anomaly and its potential impact.",
                     "items": {
                         "$ref": "#/$defs/DataAnomaly"
                     },
@@ -1005,6 +1008,7 @@
                     ]
                 },
                 "cleaning_strategies": {
+                    "description": "Data cleaning and quality control procedures applied to the dataset. List of CleaningStrategy objects from the Preprocessing module describing outlier removal, deduplication, and error correction steps.",
                     "items": {
                         "$ref": "#/$defs/CleaningStrategy"
                     },
@@ -1013,7 +1017,18 @@
                         "null"
                     ]
                 },
+                "collection_consents": {
+                    "description": "Consent obtained from individuals for data collection and use. List of CollectionConsent objects from the Ethics module describing how consent was requested, provided, and documented.",
+                    "items": {
+                        "$ref": "#/$defs/CollectionConsent"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "collection_mechanisms": {
+                    "description": "Mechanisms, instruments, or tools used for data collection. List of CollectionMechanism objects from the Collection module describing sensors, surveys, APIs, or other collection instruments.",
                     "items": {
                         "$ref": "#/$defs/CollectionMechanism"
                     },
@@ -1022,7 +1037,18 @@
                         "null"
                     ]
                 },
+                "collection_notifications": {
+                    "description": "Notifications provided to individuals about data collection. List of CollectionNotification objects from the Ethics module describing how and when individuals were informed about the data collection.",
+                    "items": {
+                        "$ref": "#/$defs/CollectionNotification"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "collection_timeframes": {
+                    "description": "Time periods during which data was collected. List of CollectionTimeframe objects from the Collection module describing collection start and end dates, and any gaps in the collection period.",
                     "items": {
                         "$ref": "#/$defs/CollectionTimeframe"
                     },
@@ -1036,6 +1062,7 @@
                     "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "confidential_elements": {
+                    "description": "Confidential or restricted information within the dataset that requires access controls. List of Confidentiality objects describing what is confidential and why it cannot be released.",
                     "items": {
                         "$ref": "#/$defs/Confidentiality"
                     },
@@ -1065,7 +1092,18 @@
                         "null"
                     ]
                 },
+                "consent_revocations": {
+                    "description": "Mechanisms for individuals to revoke previously given consent. List of ConsentRevocation objects from the Ethics module describing how revocation works and what happens to data after revocation.",
+                    "items": {
+                        "$ref": "#/$defs/ConsentRevocation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "content_warnings": {
+                    "description": "Content warnings for potentially harmful, offensive, or disturbing material in the dataset. List of ContentWarning objects alerting users to sensitive content categories.",
                     "items": {
                         "$ref": "#/$defs/ContentWarning"
                     },
@@ -1090,6 +1128,7 @@
                     ]
                 },
                 "creators": {
+                    "description": "Individuals or organizations who created the dataset. List of Creator objects describing authorship, roles, and affiliations of dataset creators.",
                     "items": {
                         "$ref": "#/$defs/Creator"
                     },
@@ -1099,6 +1138,7 @@
                     ]
                 },
                 "data_collectors": {
+                    "description": "Individuals or organizations responsible for collecting the data. List of DataCollector objects from the Collection module describing who performed data collection and their roles.",
                     "items": {
                         "$ref": "#/$defs/DataCollector"
                     },
@@ -1108,6 +1148,7 @@
                     ]
                 },
                 "data_protection_impacts": {
+                    "description": "Data protection impact assessments (DPIAs) conducted for the dataset. List of DataProtectionImpact objects from the Ethics module documenting privacy risk assessments and mitigation measures.",
                     "items": {
                         "$ref": "#/$defs/DataProtectionImpact"
                     },
@@ -1123,7 +1164,18 @@
                         "null"
                     ]
                 },
+                "direct_collection": {
+                    "description": "Whether data was collected directly from individuals or via third parties. List of DirectCollection objects from the Collection module describing direct vs. indirect collection methods and sources.",
+                    "items": {
+                        "$ref": "#/$defs/DirectCollection"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "discouraged_uses": {
+                    "description": "Uses that are not recommended for this dataset due to limitations, risks, or ethical concerns. List of DiscouragedUse objects from the Uses module explaining why certain applications should be avoided.",
                     "items": {
                         "$ref": "#/$defs/DiscouragedUse"
                     },
@@ -1133,6 +1185,7 @@
                     ]
                 },
                 "distribution_dates": {
+                    "description": "Dates when the dataset was or will be distributed or released. List of DistributionDate objects from the Distribution module describing initial release dates, version release dates, and planned future releases.",
                     "items": {
                         "$ref": "#/$defs/DistributionDate"
                     },
@@ -1142,6 +1195,7 @@
                     ]
                 },
                 "distribution_formats": {
+                    "description": "Formats in which the dataset is distributed or made available. List of DistributionFormat objects from the Distribution module describing file formats, compression, and access methods.",
                     "items": {
                         "$ref": "#/$defs/DistributionFormat"
                     },
@@ -1151,7 +1205,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -1166,6 +1220,7 @@
                     ]
                 },
                 "errata": {
+                    "description": "Known errors or corrections to the dataset since publication. List of Erratum objects from the Maintenance module describing discovered errors, affected records, and correction procedures.",
                     "items": {
                         "$ref": "#/$defs/Erratum"
                     },
@@ -1175,6 +1230,7 @@
                     ]
                 },
                 "ethical_reviews": {
+                    "description": "Ethical reviews and institutional oversight for the dataset. List of EthicalReview objects from the Ethics module describing IRB approvals, ethics committee reviews, and compliance certifications.",
                     "items": {
                         "$ref": "#/$defs/EthicalReview"
                     },
@@ -1184,6 +1240,7 @@
                     ]
                 },
                 "existing_uses": {
+                    "description": "Known existing uses of the dataset at the time of publication. List of ExistingUse objects from the Uses module describing research, commercial, or other applications of the dataset.",
                     "items": {
                         "$ref": "#/$defs/ExistingUse"
                     },
@@ -1200,7 +1257,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Mechanisms for extending or contributing to the dataset. ExtensionMechanism object from the Maintenance module describing how others can propose additions, corrections, or expansions."
                 },
                 "external_resources": {
                     "description": "External resources referenced at the dataset level (e.g., related publications, repositories, documentation). For file-level external resources, use FileCollection.external_resources.",
@@ -1223,6 +1281,7 @@
                     ]
                 },
                 "funders": {
+                    "description": "Funding mechanisms that supported dataset creation. List of FundingMechanism objects describing grants, contracts, or other funding sources including grantors and grant identifiers.",
                     "items": {
                         "$ref": "#/$defs/FundingMechanism"
                     },
@@ -1232,6 +1291,7 @@
                     ]
                 },
                 "future_use_impacts": {
+                    "description": "Anticipated impacts of future uses, including risks and benefits. List of FutureUseImpact objects from the Uses module describing foreseeable consequences of using this dataset in new applications.",
                     "items": {
                         "$ref": "#/$defs/FutureUseImpact"
                     },
@@ -1256,7 +1316,7 @@
                     "type": "string"
                 },
                 "imputation_protocols": {
-                    "description": "Data imputation methodology and techniques.",
+                    "description": "Data imputation protocols applied to handle missing values. List of ImputationProtocol objects from the Preprocessing module describing the imputation technique, affected variables, and rationale.",
                     "items": {
                         "$ref": "#/$defs/ImputationProtocol"
                     },
@@ -1276,6 +1336,7 @@
                     ]
                 },
                 "instances": {
+                    "description": "Individual data instances or records in the dataset. List of Instance objects from the Composition module describing what each data point represents, its type, and associated label information.",
                     "items": {
                         "$ref": "#/$defs/Instance"
                     },
@@ -1302,7 +1363,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Intellectual property restrictions on dataset use or redistribution. IPRestrictions object from the Data Governance module describing copyright, trademark, or other IP considerations."
                 },
                 "is_data_split": {
                     "description": "Is this subset a split of the larger dataset, e.g., is it a set for model training, testing, or validation?",
@@ -1319,7 +1381,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "De-identification status and procedures applied to the dataset. Deidentification object describing whether the dataset contains personal data, what de-identification methods were applied, and any residual re-identification risks."
                 },
                 "is_subpopulation": {
                     "description": "Is this subset a subpopulation of the larger dataset, e.g., is it a set of data for a specific demographic?",
@@ -1329,6 +1392,7 @@
                     ]
                 },
                 "is_tabular": {
+                    "description": "Whether the dataset is in tabular format (rows and columns). True if the data is structured as a table (e.g., CSV, TSV, relational database); false for unstructured formats such as images or free text.",
                     "type": [
                         "boolean",
                         "null"
@@ -1373,6 +1437,7 @@
                     ]
                 },
                 "labeling_strategies": {
+                    "description": "Labeling or annotation methodologies applied to the data. List of LabelingStrategy objects from the Preprocessing module describing annotation procedures, annotator qualifications, and quality controls.",
                     "items": {
                         "$ref": "#/$defs/LabelingStrategy"
                     },
@@ -1411,7 +1476,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "License and usage terms governing dataset access and use. LicenseAndUseTerms object from the Data Governance module describing the applicable license, permitted uses, and any restrictions."
                 },
                 "machine_annotation_tools": {
                     "description": "Automated annotation tools used in dataset creation.",
@@ -1424,6 +1490,7 @@
                     ]
                 },
                 "maintainers": {
+                    "description": "Individuals or organizations responsible for maintaining the dataset. List of Maintainer objects from the Maintenance module describing maintenance contacts, roles, and support channels.",
                     "items": {
                         "$ref": "#/$defs/Maintainer"
                     },
@@ -1457,6 +1524,7 @@
                     ]
                 },
                 "other_tasks": {
+                    "description": "Additional tasks the dataset may support beyond its original intent. List of OtherTask objects from the Uses module describing potential applications not originally planned by the dataset creators.",
                     "items": {
                         "$ref": "#/$defs/OtherTask"
                     },
@@ -1503,6 +1571,7 @@
                     ]
                 },
                 "preprocessing_strategies": {
+                    "description": "Preprocessing steps applied to the raw data. List of PreprocessingStrategy objects from the Preprocessing module describing normalization, transformation, and other preparation steps.",
                     "items": {
                         "$ref": "#/$defs/PreprocessingStrategy"
                     },
@@ -1529,6 +1598,7 @@
                     ]
                 },
                 "purposes": {
+                    "description": "Purposes for which the dataset was created. List of Purpose objects from the Motivation module, each describing a specific creation goal or intended application.",
                     "items": {
                         "$ref": "#/$defs/Purpose"
                     },
@@ -1538,7 +1608,7 @@
                     ]
                 },
                 "raw_data_sources": {
-                    "description": "Description of raw data sources before preprocessing.",
+                    "description": "List of raw data sources before preprocessing. Each RawDataSource object describes where the original data came from and how it can be accessed.",
                     "items": {
                         "$ref": "#/$defs/RawDataSource"
                     },
@@ -1548,6 +1618,7 @@
                     ]
                 },
                 "raw_sources": {
+                    "description": "Raw, unprocessed source data before any preprocessing was applied. List of RawData objects from the Preprocessing module describing original data sources and their formats.",
                     "items": {
                         "$ref": "#/$defs/RawData"
                     },
@@ -1564,12 +1635,23 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Regulatory and export control restrictions applicable to the dataset. ExportControlRegulatoryRestrictions object from the Data Governance module describing compliance requirements such as ITAR, EAR, or GDPR."
                 },
                 "related_datasets": {
                     "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
                     "items": {
                         "$ref": "#/$defs/DatasetRelationship"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "relationships": {
+                    "description": "Explicit relationships between individual instances in the dataset. List of Relationships objects from the Composition module describing how instances relate (e.g., graph edges, ratings, social network links).",
+                    "items": {
+                        "$ref": "#/$defs/Relationships"
                     },
                     "type": [
                         "array",
@@ -1594,9 +1676,11 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Data retention policies and limits for the dataset. RetentionLimits object from the Maintenance module describing how long the dataset will be available and any deletion schedules."
                 },
                 "sampling_strategies": {
+                    "description": "Strategies used to select data instances from a larger population. List of SamplingStrategy objects from the Collection module describing sampling methodology, inclusion criteria, and limitations.",
                     "items": {
                         "$ref": "#/$defs/SamplingStrategy"
                     },
@@ -1606,8 +1690,19 @@
                     ]
                 },
                 "sensitive_elements": {
+                    "description": "Sensitive data elements requiring special handling or access controls. List of SensitiveElement objects identifying sensitive attributes such as personal identifiers, protected health information, or legally sensitive content.",
                     "items": {
                         "$ref": "#/$defs/SensitiveElement"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "splits": {
+                    "description": "Recommended data splits for this dataset. List of Splits objects from the Composition module describing train/validation/test partitions and the rationale for each split strategy.",
+                    "items": {
+                        "$ref": "#/$defs/Splits"
                     },
                     "type": [
                         "array",
@@ -1622,6 +1717,7 @@
                     ]
                 },
                 "subpopulations": {
+                    "description": "Subpopulations represented within the dataset. List of Subpopulation objects from the Composition module describing demographic or other groups, their representation, and any imbalances.",
                     "items": {
                         "$ref": "#/$defs/Subpopulation"
                     },
@@ -1631,6 +1727,7 @@
                     ]
                 },
                 "subsets": {
+                    "description": "Subsets or splits of this dataset. List of DataSubset objects from the Composition module, each representing a logical partition such as training, validation, or test splits, or demographic subgroups.",
                     "items": {
                         "$ref": "#/$defs/DataSubset"
                     },
@@ -1640,8 +1737,19 @@
                     ]
                 },
                 "tasks": {
+                    "description": "Tasks the dataset is intended to support. List of Task objects from the Motivation module describing specific machine learning, research, or analytical tasks.",
                     "items": {
                         "$ref": "#/$defs/Task"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "third_party_sharing": {
+                    "description": "Third-party distribution policies for the dataset. List of ThirdPartySharing objects from the Distribution module describing whether and how the dataset is shared with entities outside the creating organization.",
+                    "items": {
+                        "$ref": "#/$defs/ThirdPartySharing"
                     },
                     "type": [
                         "array",
@@ -1677,9 +1785,11 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Plans for future updates or versioning of the dataset. UpdatePlan object from the Maintenance module describing update frequency, versioning policy, and planned enhancements."
                 },
                 "use_repository": {
+                    "description": "Repositories or registries tracking how the dataset has been used. List of UseRepository objects from the Uses module pointing to papers with code, citation indices, or other use-tracking resources.",
                     "items": {
                         "$ref": "#/$defs/UseRepository"
                     },
@@ -1713,7 +1823,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Information about access to different versions of the dataset. VersionAccess object from the Maintenance module describing where older versions can be found and how version history is maintained."
                 },
                 "was_derived_from": {
                     "description": "A resource from which this resource was derived, in whole or in part.",
@@ -1763,6 +1874,7 @@
             "description": "A single component of related observations and/or information that can be read, manipulated, transformed, and otherwise interpreted.",
             "properties": {
                 "acquisition_methods": {
+                    "description": "Methods used to acquire or obtain dataset instances. List of InstanceAcquisition objects from the Collection module describing how data was sourced, whether directly observed or derived.",
                     "items": {
                         "$ref": "#/$defs/InstanceAcquisition"
                     },
@@ -1772,6 +1884,7 @@
                     ]
                 },
                 "addressing_gaps": {
+                    "description": "Research or practical gaps this dataset addresses. List of AddressingGap objects from the Motivation module, each describing a gap in existing datasets or knowledge that this dataset fills.",
                     "items": {
                         "$ref": "#/$defs/AddressingGap"
                     },
@@ -1791,6 +1904,7 @@
                     ]
                 },
                 "anomalies": {
+                    "description": "Known data quality issues, errors, or irregularities in the dataset. List of DataAnomaly objects from the Composition module, each documenting a specific anomaly and its potential impact.",
                     "items": {
                         "$ref": "#/$defs/DataAnomaly"
                     },
@@ -1818,6 +1932,7 @@
                     ]
                 },
                 "cleaning_strategies": {
+                    "description": "Data cleaning and quality control procedures applied to the dataset. List of CleaningStrategy objects from the Preprocessing module describing outlier removal, deduplication, and error correction steps.",
                     "items": {
                         "$ref": "#/$defs/CleaningStrategy"
                     },
@@ -1826,7 +1941,18 @@
                         "null"
                     ]
                 },
+                "collection_consents": {
+                    "description": "Consent obtained from individuals for data collection and use. List of CollectionConsent objects from the Ethics module describing how consent was requested, provided, and documented.",
+                    "items": {
+                        "$ref": "#/$defs/CollectionConsent"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "collection_mechanisms": {
+                    "description": "Mechanisms, instruments, or tools used for data collection. List of CollectionMechanism objects from the Collection module describing sensors, surveys, APIs, or other collection instruments.",
                     "items": {
                         "$ref": "#/$defs/CollectionMechanism"
                     },
@@ -1835,7 +1961,18 @@
                         "null"
                     ]
                 },
+                "collection_notifications": {
+                    "description": "Notifications provided to individuals about data collection. List of CollectionNotification objects from the Ethics module describing how and when individuals were informed about the data collection.",
+                    "items": {
+                        "$ref": "#/$defs/CollectionNotification"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "collection_timeframes": {
+                    "description": "Time periods during which data was collected. List of CollectionTimeframe objects from the Collection module describing collection start and end dates, and any gaps in the collection period.",
                     "items": {
                         "$ref": "#/$defs/CollectionTimeframe"
                     },
@@ -1849,6 +1986,7 @@
                     "description": "Compression format used, if any (e.g., gzip, bzip2, zip)."
                 },
                 "confidential_elements": {
+                    "description": "Confidential or restricted information within the dataset that requires access controls. List of Confidentiality objects describing what is confidential and why it cannot be released.",
                     "items": {
                         "$ref": "#/$defs/Confidentiality"
                     },
@@ -1878,7 +2016,18 @@
                         "null"
                     ]
                 },
+                "consent_revocations": {
+                    "description": "Mechanisms for individuals to revoke previously given consent. List of ConsentRevocation objects from the Ethics module describing how revocation works and what happens to data after revocation.",
+                    "items": {
+                        "$ref": "#/$defs/ConsentRevocation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "content_warnings": {
+                    "description": "Content warnings for potentially harmful, offensive, or disturbing material in the dataset. List of ContentWarning objects alerting users to sensitive content categories.",
                     "items": {
                         "$ref": "#/$defs/ContentWarning"
                     },
@@ -1903,6 +2052,7 @@
                     ]
                 },
                 "creators": {
+                    "description": "Individuals or organizations who created the dataset. List of Creator objects describing authorship, roles, and affiliations of dataset creators.",
                     "items": {
                         "$ref": "#/$defs/Creator"
                     },
@@ -1912,6 +2062,7 @@
                     ]
                 },
                 "data_collectors": {
+                    "description": "Individuals or organizations responsible for collecting the data. List of DataCollector objects from the Collection module describing who performed data collection and their roles.",
                     "items": {
                         "$ref": "#/$defs/DataCollector"
                     },
@@ -1921,6 +2072,7 @@
                     ]
                 },
                 "data_protection_impacts": {
+                    "description": "Data protection impact assessments (DPIAs) conducted for the dataset. List of DataProtectionImpact objects from the Ethics module documenting privacy risk assessments and mitigation measures.",
                     "items": {
                         "$ref": "#/$defs/DataProtectionImpact"
                     },
@@ -1936,7 +2088,18 @@
                         "null"
                     ]
                 },
+                "direct_collection": {
+                    "description": "Whether data was collected directly from individuals or via third parties. List of DirectCollection objects from the Collection module describing direct vs. indirect collection methods and sources.",
+                    "items": {
+                        "$ref": "#/$defs/DirectCollection"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "discouraged_uses": {
+                    "description": "Uses that are not recommended for this dataset due to limitations, risks, or ethical concerns. List of DiscouragedUse objects from the Uses module explaining why certain applications should be avoided.",
                     "items": {
                         "$ref": "#/$defs/DiscouragedUse"
                     },
@@ -1946,6 +2109,7 @@
                     ]
                 },
                 "distribution_dates": {
+                    "description": "Dates when the dataset was or will be distributed or released. List of DistributionDate objects from the Distribution module describing initial release dates, version release dates, and planned future releases.",
                     "items": {
                         "$ref": "#/$defs/DistributionDate"
                     },
@@ -1955,6 +2119,7 @@
                     ]
                 },
                 "distribution_formats": {
+                    "description": "Formats in which the dataset is distributed or made available. List of DistributionFormat objects from the Distribution module describing file formats, compression, and access methods.",
                     "items": {
                         "$ref": "#/$defs/DistributionFormat"
                     },
@@ -1964,7 +2129,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -1979,6 +2144,7 @@
                     ]
                 },
                 "errata": {
+                    "description": "Known errors or corrections to the dataset since publication. List of Erratum objects from the Maintenance module describing discovered errors, affected records, and correction procedures.",
                     "items": {
                         "$ref": "#/$defs/Erratum"
                     },
@@ -1988,6 +2154,7 @@
                     ]
                 },
                 "ethical_reviews": {
+                    "description": "Ethical reviews and institutional oversight for the dataset. List of EthicalReview objects from the Ethics module describing IRB approvals, ethics committee reviews, and compliance certifications.",
                     "items": {
                         "$ref": "#/$defs/EthicalReview"
                     },
@@ -1997,6 +2164,7 @@
                     ]
                 },
                 "existing_uses": {
+                    "description": "Known existing uses of the dataset at the time of publication. List of ExistingUse objects from the Uses module describing research, commercial, or other applications of the dataset.",
                     "items": {
                         "$ref": "#/$defs/ExistingUse"
                     },
@@ -2013,7 +2181,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Mechanisms for extending or contributing to the dataset. ExtensionMechanism object from the Maintenance module describing how others can propose additions, corrections, or expansions."
                 },
                 "external_resources": {
                     "description": "External resources referenced at the dataset level (e.g., related publications, repositories, documentation). For file-level external resources, use FileCollection.external_resources.",
@@ -2036,6 +2205,7 @@
                     ]
                 },
                 "funders": {
+                    "description": "Funding mechanisms that supported dataset creation. List of FundingMechanism objects describing grants, contracts, or other funding sources including grantors and grant identifiers.",
                     "items": {
                         "$ref": "#/$defs/FundingMechanism"
                     },
@@ -2045,6 +2215,7 @@
                     ]
                 },
                 "future_use_impacts": {
+                    "description": "Anticipated impacts of future uses, including risks and benefits. List of FutureUseImpact objects from the Uses module describing foreseeable consequences of using this dataset in new applications.",
                     "items": {
                         "$ref": "#/$defs/FutureUseImpact"
                     },
@@ -2069,7 +2240,7 @@
                     "type": "string"
                 },
                 "imputation_protocols": {
-                    "description": "Data imputation methodology and techniques.",
+                    "description": "Data imputation protocols applied to handle missing values. List of ImputationProtocol objects from the Preprocessing module describing the imputation technique, affected variables, and rationale.",
                     "items": {
                         "$ref": "#/$defs/ImputationProtocol"
                     },
@@ -2089,6 +2260,7 @@
                     ]
                 },
                 "instances": {
+                    "description": "Individual data instances or records in the dataset. List of Instance objects from the Composition module describing what each data point represents, its type, and associated label information.",
                     "items": {
                         "$ref": "#/$defs/Instance"
                     },
@@ -2115,7 +2287,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Intellectual property restrictions on dataset use or redistribution. IPRestrictions object from the Data Governance module describing copyright, trademark, or other IP considerations."
                 },
                 "is_deidentified": {
                     "anyOf": [
@@ -2125,9 +2298,11 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "De-identification status and procedures applied to the dataset. Deidentification object describing whether the dataset contains personal data, what de-identification methods were applied, and any residual re-identification risks."
                 },
                 "is_tabular": {
+                    "description": "Whether the dataset is in tabular format (rows and columns). True if the data is structured as a table (e.g., CSV, TSV, relational database); false for unstructured formats such as images or free text.",
                     "type": [
                         "boolean",
                         "null"
@@ -2172,6 +2347,7 @@
                     ]
                 },
                 "labeling_strategies": {
+                    "description": "Labeling or annotation methodologies applied to the data. List of LabelingStrategy objects from the Preprocessing module describing annotation procedures, annotator qualifications, and quality controls.",
                     "items": {
                         "$ref": "#/$defs/LabelingStrategy"
                     },
@@ -2210,7 +2386,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "License and usage terms governing dataset access and use. LicenseAndUseTerms object from the Data Governance module describing the applicable license, permitted uses, and any restrictions."
                 },
                 "machine_annotation_tools": {
                     "description": "Automated annotation tools used in dataset creation.",
@@ -2223,6 +2400,7 @@
                     ]
                 },
                 "maintainers": {
+                    "description": "Individuals or organizations responsible for maintaining the dataset. List of Maintainer objects from the Maintenance module describing maintenance contacts, roles, and support channels.",
                     "items": {
                         "$ref": "#/$defs/Maintainer"
                     },
@@ -2256,6 +2434,7 @@
                     ]
                 },
                 "other_tasks": {
+                    "description": "Additional tasks the dataset may support beyond its original intent. List of OtherTask objects from the Uses module describing potential applications not originally planned by the dataset creators.",
                     "items": {
                         "$ref": "#/$defs/OtherTask"
                     },
@@ -2302,6 +2481,7 @@
                     ]
                 },
                 "preprocessing_strategies": {
+                    "description": "Preprocessing steps applied to the raw data. List of PreprocessingStrategy objects from the Preprocessing module describing normalization, transformation, and other preparation steps.",
                     "items": {
                         "$ref": "#/$defs/PreprocessingStrategy"
                     },
@@ -2328,6 +2508,7 @@
                     ]
                 },
                 "purposes": {
+                    "description": "Purposes for which the dataset was created. List of Purpose objects from the Motivation module, each describing a specific creation goal or intended application.",
                     "items": {
                         "$ref": "#/$defs/Purpose"
                     },
@@ -2337,7 +2518,7 @@
                     ]
                 },
                 "raw_data_sources": {
-                    "description": "Description of raw data sources before preprocessing.",
+                    "description": "List of raw data sources before preprocessing. Each RawDataSource object describes where the original data came from and how it can be accessed.",
                     "items": {
                         "$ref": "#/$defs/RawDataSource"
                     },
@@ -2347,6 +2528,7 @@
                     ]
                 },
                 "raw_sources": {
+                    "description": "Raw, unprocessed source data before any preprocessing was applied. List of RawData objects from the Preprocessing module describing original data sources and their formats.",
                     "items": {
                         "$ref": "#/$defs/RawData"
                     },
@@ -2363,12 +2545,23 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Regulatory and export control restrictions applicable to the dataset. ExportControlRegulatoryRestrictions object from the Data Governance module describing compliance requirements such as ITAR, EAR, or GDPR."
                 },
                 "related_datasets": {
                     "description": "Related datasets with typed relationships (e.g., supplements, derives from, is version of). Use DatasetRelationship class to specify relationship types.",
                     "items": {
                         "$ref": "#/$defs/DatasetRelationship"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "relationships": {
+                    "description": "Explicit relationships between individual instances in the dataset. List of Relationships objects from the Composition module describing how instances relate (e.g., graph edges, ratings, social network links).",
+                    "items": {
+                        "$ref": "#/$defs/Relationships"
                     },
                     "type": [
                         "array",
@@ -2393,9 +2586,11 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Data retention policies and limits for the dataset. RetentionLimits object from the Maintenance module describing how long the dataset will be available and any deletion schedules."
                 },
                 "sampling_strategies": {
+                    "description": "Strategies used to select data instances from a larger population. List of SamplingStrategy objects from the Collection module describing sampling methodology, inclusion criteria, and limitations.",
                     "items": {
                         "$ref": "#/$defs/SamplingStrategy"
                     },
@@ -2405,8 +2600,19 @@
                     ]
                 },
                 "sensitive_elements": {
+                    "description": "Sensitive data elements requiring special handling or access controls. List of SensitiveElement objects identifying sensitive attributes such as personal identifiers, protected health information, or legally sensitive content.",
                     "items": {
                         "$ref": "#/$defs/SensitiveElement"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "splits": {
+                    "description": "Recommended data splits for this dataset. List of Splits objects from the Composition module describing train/validation/test partitions and the rationale for each split strategy.",
+                    "items": {
+                        "$ref": "#/$defs/Splits"
                     },
                     "type": [
                         "array",
@@ -2421,6 +2627,7 @@
                     ]
                 },
                 "subpopulations": {
+                    "description": "Subpopulations represented within the dataset. List of Subpopulation objects from the Composition module describing demographic or other groups, their representation, and any imbalances.",
                     "items": {
                         "$ref": "#/$defs/Subpopulation"
                     },
@@ -2430,6 +2637,7 @@
                     ]
                 },
                 "subsets": {
+                    "description": "Subsets or splits of this dataset. List of DataSubset objects from the Composition module, each representing a logical partition such as training, validation, or test splits, or demographic subgroups.",
                     "items": {
                         "$ref": "#/$defs/DataSubset"
                     },
@@ -2439,8 +2647,19 @@
                     ]
                 },
                 "tasks": {
+                    "description": "Tasks the dataset is intended to support. List of Task objects from the Motivation module describing specific machine learning, research, or analytical tasks.",
                     "items": {
                         "$ref": "#/$defs/Task"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "third_party_sharing": {
+                    "description": "Third-party distribution policies for the dataset. List of ThirdPartySharing objects from the Distribution module describing whether and how the dataset is shared with entities outside the creating organization.",
+                    "items": {
+                        "$ref": "#/$defs/ThirdPartySharing"
                     },
                     "type": [
                         "array",
@@ -2476,9 +2695,11 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Plans for future updates or versioning of the dataset. UpdatePlan object from the Maintenance module describing update frequency, versioning policy, and planned enhancements."
                 },
                 "use_repository": {
+                    "description": "Repositories or registries tracking how the dataset has been used. List of UseRepository objects from the Uses module pointing to papers with code, citation indices, or other use-tracking resources.",
                     "items": {
                         "$ref": "#/$defs/UseRepository"
                     },
@@ -2512,7 +2733,8 @@
                         {
                             "type": "null"
                         }
-                    ]
+                    ],
+                    "description": "Information about access to different versions of the dataset. VersionAccess object from the Maintenance module describing where older versions can be found and how version history is maintained."
                 },
                 "was_derived_from": {
                     "description": "A resource from which this resource was derived, in whole or in part.",
@@ -2533,7 +2755,7 @@
             "description": "Documents known biases present in the dataset. Biases are systematic errors or prejudices that may affect the representativeness or fairness of the data. Distinct from anomalies (data quality issues) and limitations (scope constraints).",
             "properties": {
                 "affected_subsets": {
-                    "description": "Specific subsets or features of the dataset affected by this bias.\n",
+                    "description": "One or more specific subsets or features of the dataset affected by this bias (e.g., \"female participants\", \"non-English text\", \"images taken at night\").\n",
                     "items": {
                         "type": "string"
                     },
@@ -2647,7 +2869,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -2989,7 +3211,7 @@
                     ]
                 },
                 "identifiers_removed": {
-                    "description": "List of identifier types removed during de-identification.",
+                    "description": "List of identifier types removed during de-identification (e.g., 'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').",
                     "items": {
                         "type": "string"
                     },
@@ -3031,7 +3253,7 @@
             "description": "Indicates whether the data was collected directly from the individuals in question or obtained via third parties/other sources.",
             "properties": {
                 "collection_details": {
-                    "description": "Details on direct vs. indirect collection methods and sources.\n",
+                    "description": "Free-text description of whether data was collected directly from individuals or obtained via third parties or other indirect sources, and what those sources are.\n",
                     "items": {
                         "type": "string"
                     },
@@ -3094,7 +3316,7 @@
                     ]
                 },
                 "discouragement_details": {
-                    "description": "Details on tasks for which the dataset should not be used.\n",
+                    "description": "Free-text description of tasks or applications for which the dataset is not recommended, with explanation of why (e.g., out-of-scope, risk of harm, poor coverage).\n",
                     "items": {
                         "type": "string"
                     },
@@ -3157,7 +3379,7 @@
                     ]
                 },
                 "release_dates": {
-                    "description": "Dates or timeframe for dataset release. Could be a one-time release date or multiple scheduled releases.\n",
+                    "description": "One or more dates or timeframes for dataset release, in ISO 8601 format (e.g., \"2024-03-15\") or as a descriptive string (e.g., \"Q2 2024\"). Use multiple values for staged or scheduled releases.\n",
                     "items": {
                         "type": "string"
                     },
@@ -3185,7 +3407,7 @@
             "description": "How will the dataset be distributed (e.g., tarball on a website, API, GitHub)?",
             "properties": {
                 "access_urls": {
-                    "description": "Details of the distribution channel(s) or format(s).",
+                    "description": "One or more URLs providing access to the distribution channel(s) or format(s).",
                     "items": {
                         "type": "string"
                     },
@@ -3291,7 +3513,7 @@
                     ]
                 },
                 "erratum_details": {
-                    "description": "Details on any errata or corrections to the dataset.\n",
+                    "description": "Free-text description of the error, its scope, the affected data or records, and the correction applied.\n",
                     "items": {
                         "type": "string"
                     },
@@ -3368,7 +3590,7 @@
                     ]
                 },
                 "review_details": {
-                    "description": "Details on ethical review processes, outcomes, and supporting documentation.\n",
+                    "description": "Free-text description of the ethical review process, board decisions, outcomes, and any supporting documentation (e.g., IRB approval number, ethics committee name).\n",
                     "items": {
                         "type": "string"
                     },
@@ -3498,7 +3720,7 @@
                     ]
                 },
                 "regulatory_restrictions": {
-                    "description": "Export or regulatory restrictions on the dataset.",
+                    "description": "One or more export controls or regulatory restrictions applicable to the dataset (e.g., HIPAA, ITAR, GDPR).",
                     "items": {
                         "type": "string"
                     },
@@ -3540,7 +3762,7 @@
                     ]
                 },
                 "extension_details": {
-                    "description": "Details on extension mechanisms, contribution validation, and communication.\n",
+                    "description": "Free-text description of how third parties can contribute to the dataset, how contributions are validated (e.g., peer review, automated tests), and how accepted contributions will be communicated to the community.\n",
                     "items": {
                         "type": "string"
                     },
@@ -3582,12 +3804,9 @@
             "description": "Is the dataset self-contained or does it rely on external resources (e.g., websites, other datasets)? If external, are there guarantees that those resources will remain available and unchanged?",
             "properties": {
                 "archival": {
-                    "description": "Indication whether official archival versions of external resources are included.\n",
-                    "items": {
-                        "type": "boolean"
-                    },
+                    "description": "Indicates whether official archival versions of external resources are included in the dataset.\n",
                     "type": [
-                        "array",
+                        "boolean",
                         "null"
                     ]
                 },
@@ -3633,7 +3852,7 @@
                     ]
                 },
                 "restrictions": {
-                    "description": "Description of any restrictions or fees associated with external resources.\n",
+                    "description": "One or more descriptions of restrictions or fees associated with accessing these external resources (e.g., paywalls, registration requirements, API limits).\n",
                     "items": {
                         "type": "string"
                     },
@@ -3722,7 +3941,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -3749,7 +3968,7 @@
                     "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type."
                 },
                 "hash": {
-                    "description": "Cryptographic hash value of the data for integrity verification.",
+                    "description": "Cryptographic hash value of the data for integrity verification (e.g., SHA-256: 'e3b0c44298fc1c149afb...', MD5: 'd41d8cd98f00b204e9800998ecf8427e').",
                     "type": [
                         "string",
                         "null"
@@ -3949,7 +4168,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -4092,7 +4311,7 @@
                     ]
                 },
                 "total_bytes": {
-                    "description": "Total size of all files in bytes.",
+                    "description": "Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize.",
                     "type": [
                         "integer",
                         "null"
@@ -4171,14 +4390,14 @@
                     ]
                 },
                 "double_quote": {
-                    "description": "String indicator of whether quotes within quoted fields are escaped by doubling them.",
+                    "description": "Whether quotes within quoted fields are escaped by doubling them. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification).",
                     "type": [
                         "string",
                         "null"
                     ]
                 },
                 "header": {
-                    "description": "String indicator of whether the first row contains column headers.",
+                    "description": "Whether the first row of the file contains column headers. Expected values: \"true\" or \"false\" (as strings per CSV dialect specification).",
                     "type": [
                         "string",
                         "null"
@@ -4295,7 +4514,7 @@
                     ]
                 },
                 "impact_details": {
-                    "description": "Details on potential impacts, risks, and mitigation strategies.\n",
+                    "description": "Free-text description of potential future impacts or risks arising from the dataset's composition or collection (e.g., unfair treatment, privacy violations, legal or financial risks), and any recommended mitigation strategies.\n",
                     "items": {
                         "type": "string"
                     },
@@ -4578,7 +4797,7 @@
                     ]
                 },
                 "restrictions": {
-                    "description": "Explanation of third-party IP restrictions.",
+                    "description": "One or more explanations of third-party IP restrictions or associated fees.",
                     "items": {
                         "type": "string"
                     },
@@ -4729,7 +4948,7 @@
                     ]
                 },
                 "doi": {
-                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+                    "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
                     "pattern": "10\\.\\d{4,}\\/.+",
                     "type": [
                         "string",
@@ -4976,7 +5195,7 @@
                     ]
                 },
                 "instance_type": {
-                    "description": "Multiple types of instances? (e.g., movies, users, and ratings).\n",
+                    "description": "The type or types of instances in the dataset (e.g., \"movie\", \"user\", \"rating\", \"clinical record\"). Use when the dataset contains multiple instance types with different structures.\n",
                     "type": [
                         "string",
                         "null"
@@ -5042,7 +5261,7 @@
             "description": "Describes how data associated with each instance was acquired (e.g., directly observed, reported by subjects, inferred).",
             "properties": {
                 "acquisition_details": {
-                    "description": "Details on how data was acquired for each instance.\n",
+                    "description": "Free-text description of how data was acquired for each instance, including instruments, protocols, and any manual steps involved.\n",
                     "items": {
                         "type": "string"
                     },
@@ -5083,28 +5302,28 @@
                     ]
                 },
                 "was_directly_observed": {
-                    "description": "Whether the data was directly observed.",
+                    "description": "True if the data was directly observed by a researcher or instrument; false if it was obtained through other means (e.g., reported, inferred).",
                     "type": [
                         "boolean",
                         "null"
                     ]
                 },
                 "was_inferred_derived": {
-                    "description": "Whether the data was inferred or derived from other data.",
+                    "description": "True if the data was computationally inferred or derived from other data (e.g., model outputs, imputed values); false otherwise.",
                     "type": [
                         "boolean",
                         "null"
                     ]
                 },
                 "was_reported_by_subjects": {
-                    "description": "Whether the data was reported directly by the subjects themselves.",
+                    "description": "True if the data was self-reported directly by the subjects themselves (e.g., survey responses, questionnaires); false otherwise.",
                     "type": [
                         "boolean",
                         "null"
                     ]
                 },
                 "was_validated_verified": {
-                    "description": "Whether the data was validated or verified in any way.",
+                    "description": "True if the data underwent a validation or verification process (e.g., expert review, cross-checking with ground truth); false otherwise.",
                     "type": [
                         "boolean",
                         "null"
@@ -5157,7 +5376,7 @@
                     ]
                 },
                 "use_category": {
-                    "description": "Category of intended use (e.g., research, clinical, educational, commercial, policy).",
+                    "description": "One or more categories of intended use (e.g., research, clinical, educational, commercial, policy).",
                     "items": {
                         "type": "string"
                     },
@@ -5192,7 +5411,7 @@
                     ]
                 },
                 "annotator_demographics": {
-                    "description": "Demographic information about annotators, if available and relevant (e.g., geographic location, language background, expertise level).",
+                    "description": "One or more demographic characteristics of the annotators, if available and relevant (e.g., geographic location, language background, expertise level, native language).",
                     "items": {
                         "type": "string"
                     },
@@ -5202,9 +5421,12 @@
                     ]
                 },
                 "data_annotation_platform": {
-                    "description": "Platform or tool used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
+                    "description": "One or more platforms or tools used for annotation (e.g., Label Studio, Prodigy, Amazon Mechanical Turk, custom annotation tool).",
+                    "items": {
+                        "type": "string"
+                    },
                     "type": [
-                        "string",
+                        "array",
                         "null"
                     ]
                 },
@@ -5240,7 +5462,7 @@
                     ]
                 },
                 "labeling_details": {
-                    "description": "Details on labeling/annotation procedures and quality metrics.\n",
+                    "description": "Free-text description of the labeling or annotation procedures, including annotation guidelines, task definitions, and quality control metrics.\n",
                     "items": {
                         "type": "string"
                     },
@@ -5306,7 +5528,7 @@
                     ]
                 },
                 "license_terms": {
-                    "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
+                    "description": "Description of the dataset's license and terms of use, including links, costs, or usage constraints (e.g., 'CC BY 4.0', 'Apache 2.0', 'MIT', 'CC BY-NC-SA 4.0', 'proprietary - contact data@example.org for access').",
                     "items": {
                         "type": "string"
                     },
@@ -5376,7 +5598,7 @@
                     ]
                 },
                 "tool_accuracy": {
-                    "description": "Known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., \"spaCy F1: 0.95\", \"GPT-4 Accuracy: 92%\").\n",
+                    "description": "One or more known accuracy or performance metrics for the automated tools (if available). Include metric name and value (e.g., \"spaCy F1: 0.95\", \"GPT-4 Accuracy: 92%\").\n",
                     "items": {
                         "type": "string"
                     },
@@ -5438,7 +5660,7 @@
                     ]
                 },
                 "maintainer_details": {
-                    "description": "Details on who will support, host, or maintain the dataset.\n",
+                    "description": "Free-text description of the organization, team, or individual responsible for maintaining the dataset, including contact information and hosting arrangements.\n",
                     "items": {
                         "type": "string"
                     },
@@ -5710,7 +5932,7 @@
                     ]
                 },
                 "task_details": {
-                    "description": "Details on other potential tasks the dataset could be used for.\n",
+                    "description": "Free-text description of other potential tasks the dataset could support, including any prerequisites or limitations for those uses.\n",
                     "items": {
                         "type": "string"
                     },
@@ -5892,7 +6114,7 @@
                     ]
                 },
                 "preprocessing_details": {
-                    "description": "Details on preprocessing steps applied to the data.\n",
+                    "description": "Free-text description of preprocessing steps applied to the data, including tools used, parameters, order of operations, and rationale for each step.\n",
                     "items": {
                         "type": "string"
                     },
@@ -5941,7 +6163,7 @@
                     ]
                 },
                 "prohibition_reason": {
-                    "description": "Reason why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
+                    "description": "One or more reasons why this use is prohibited (e.g., license restriction, ethical concern, privacy risk, legal constraint).",
                     "items": {
                         "type": "string"
                     },
@@ -6043,7 +6265,7 @@
                     ]
                 },
                 "raw_data_details": {
-                    "description": "Details on raw data availability and access procedures.\n",
+                    "description": "Free-text description of raw data availability, access procedures, and any conditions or restrictions on accessing the raw data.\n",
                     "items": {
                         "type": "string"
                     },
@@ -6099,7 +6321,7 @@
                     ]
                 },
                 "raw_data_format": {
-                    "description": "Format of the raw data before any preprocessing.\n",
+                    "description": "One or more formats of the raw data before any preprocessing (e.g., CSV, DICOM, JSON).\n",
                     "items": {
                         "type": "string"
                     },
@@ -6113,7 +6335,7 @@
                     "type": "string"
                 },
                 "source_type": {
-                    "description": "Type of raw source (sensor, database, user input, web scraping, etc.).\n",
+                    "description": "One or more types of raw source (e.g., sensor, database, user input, web scraping).\n",
                     "items": {
                         "type": "string"
                     },
@@ -6165,7 +6387,7 @@
                     ]
                 },
                 "relationship_details": {
-                    "description": "Details on relationships between instances (e.g., graph edges, ratings).\n",
+                    "description": "Free-text description of how relationships between instances are represented (e.g., graph edges, ratings matrices, foreign keys), including relationship types and any associated metadata.\n",
                     "items": {
                         "type": "string"
                     },
@@ -6214,7 +6436,7 @@
                     ]
                 },
                 "retention_details": {
-                    "description": "Details on data retention limits and enforcement procedures.\n",
+                    "description": "Free-text description of applicable retention limits, legal or ethical basis for those limits, and how they will be enforced (e.g., automated deletion, anonymization after the retention period).\n",
                     "items": {
                         "type": "string"
                     },
@@ -6264,31 +6486,22 @@
                 },
                 "is_random": {
                     "description": "Indicates whether the sample is random.",
-                    "items": {
-                        "type": "boolean"
-                    },
                     "type": [
-                        "array",
+                        "boolean",
                         "null"
                     ]
                 },
                 "is_representative": {
                     "description": "Indicates whether the sample is representative of the larger set.\n",
-                    "items": {
-                        "type": "boolean"
-                    },
                     "type": [
-                        "array",
+                        "boolean",
                         "null"
                     ]
                 },
                 "is_sample": {
                     "description": "Indicates whether it is a sample of a larger set.",
-                    "items": {
-                        "type": "boolean"
-                    },
                     "type": [
-                        "array",
+                        "boolean",
                         "null"
                     ]
                 },
@@ -6300,7 +6513,7 @@
                     ]
                 },
                 "representative_verification": {
-                    "description": "Explanation of how representativeness was validated or verified.\n",
+                    "description": "One or more explanations of how representativeness was validated or verified (e.g., statistical tests, domain expert review).\n",
                     "items": {
                         "type": "string"
                     },
@@ -6310,7 +6523,7 @@
                     ]
                 },
                 "source_data": {
-                    "description": "Description of the larger set from which the sample was drawn, if any.\n",
+                    "description": "One or more descriptions of the larger sets from which the sample was drawn, if applicable.\n",
                     "items": {
                         "type": "string"
                     },
@@ -6320,7 +6533,7 @@
                     ]
                 },
                 "strategies": {
-                    "description": "Description of the sampling strategy (deterministic, probabilistic, etc.).\n",
+                    "description": "One or more sampling strategies used (e.g., deterministic, simple random, stratified, cluster, systematic).\n",
                     "items": {
                         "type": "string"
                     },
@@ -6340,7 +6553,7 @@
                     ]
                 },
                 "why_not_representative": {
-                    "description": "Explanation of why the sample is not representative, if applicable.\n",
+                    "description": "One or more explanations of why the sample is not representative of the larger set, if applicable.\n",
                     "items": {
                         "type": "string"
                     },
@@ -6485,7 +6698,7 @@
                     ]
                 },
                 "split_details": {
-                    "description": "Details on recommended data splits and their rationale.\n",
+                    "description": "Free-text description of the recommended data splits (e.g., 80/10/10 train/ validation/test), how they are defined, and the rationale for the split strategy.\n",
                     "items": {
                         "type": "string"
                     },
@@ -6699,7 +6912,7 @@
                     ]
                 },
                 "update_details": {
-                    "description": "Details on update plans, responsible parties, and communication methods.\n",
+                    "description": "Free-text description of planned update types (e.g., corrections, additions, deletions), responsible parties, and how updates will be communicated to users.\n",
                     "items": {
                         "type": "string"
                     },
@@ -6724,7 +6937,7 @@
         },
         "UseRepository": {
             "additionalProperties": false,
-            "description": "Is there a repository that links to any or all papers or systems that use the dataset? If so, provide a link or other access point.",
+            "description": "A repository or registry of known uses of this dataset by third parties. Documents where the dataset has been applied, enabling discoverability of downstream use cases and impact tracking.",
             "properties": {
                 "description": {
                     "description": "A human-readable description for this property.",
@@ -6748,7 +6961,7 @@
                     ]
                 },
                 "repository_details": {
-                    "description": "Details on the repository of known dataset uses.\n",
+                    "description": "Free-text description of the repository of known dataset uses, including how it is maintained and how to contribute new use cases.\n",
                     "items": {
                         "type": "string"
                     },
@@ -6783,7 +6996,7 @@
             "description": "Metadata describing an individual variable, field, or column in a dataset. Variables may represent measurements, observations, derived values, or categorical attributes.",
             "properties": {
                 "categories": {
-                    "description": "The permitted categories or values for a categorical variable. Each entry should describe a possible value and its meaning.",
+                    "description": "One or more permitted categories or values for a categorical variable. Each entry should describe a possible value and its meaning.",
                     "items": {
                         "type": "string"
                     },
@@ -6963,7 +7176,7 @@
                     ]
                 },
                 "latest_version_doi": {
-                    "description": "DOI or URL of the latest dataset version.",
+                    "description": "DOI or URL identifying the latest version of this dataset (e.g., '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567' for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').",
                     "type": [
                         "string",
                         "null"
@@ -6987,7 +7200,7 @@
                     ]
                 },
                 "version_details": {
-                    "description": "Details on version support policies and obsolescence communication.\n",
+                    "description": "Free-text description of version support policies, how long older versions will be hosted, and how dataset consumers will be notified when versions become obsolete.\n",
                     "items": {
                         "type": "string"
                     },
@@ -7075,7 +7288,7 @@
             ]
         },
         "doi": {
-            "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+            "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').",
             "pattern": "10\\.\\d{4,}\\/.+",
             "type": [
                 "string",

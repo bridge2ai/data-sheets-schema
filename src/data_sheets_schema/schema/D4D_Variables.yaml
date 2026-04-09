@@ -82,16 +82,20 @@ classes:
           The minimum value that the variable can take. Applicable to numeric variables.
         range: float
         slot_uri: schema:minValue
+        annotations:
+          "d4d:docExample": "0.0"
 
       maximum_value:
         description: >-
           The maximum value that the variable can take. Applicable to numeric variables.
         range: float
         slot_uri: schema:maxValue
+        annotations:
+          "d4d:docExample": "100.0"
 
       categories:
         description: >-
-          The permitted categories or values for a categorical variable.
+          One or more permitted categories or values for a categorical variable.
           Each entry should describe a possible value and its meaning.
         range: string
         multivalued: true
@@ -123,6 +127,8 @@ classes:
           The precision or number of decimal places for numeric variables.
         slot_uri: schema:valuePrecision
         range: integer
+        annotations:
+          "d4d:docExample": "2 (two decimal places, e.g., 3.14)"
 
       measurement_technique:
         description: >-
