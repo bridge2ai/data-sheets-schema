@@ -385,7 +385,7 @@ classes:
         range: string
         multivalued: true
         description: "List of identifier types removed during de-identification."
-        slot_uri: schema:identifier
+        slot_uri: d4d:removedIdentifierTypes
       deidentification_details:
         description: >
           Details on de-identification procedures and residual risks.

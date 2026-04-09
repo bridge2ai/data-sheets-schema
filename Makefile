@@ -447,6 +447,40 @@ fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
 		--sssom $(SSSOM_FULL)
 
 ## ------------------------------------------------------------------
+## Semantic Review Tools
+## ------------------------------------------------------------------
+
+.PHONY: semantic-review semantic-review-conflicts semantic-review-ranges semantic-review-data semantic-review-report
+
+semantic-review: semantic-review-conflicts semantic-review-ranges semantic-review-data semantic-review-report ## Run full semantic review
+
+semantic-review-conflicts: ## Detect slot_uri conflicts
+	@echo "Detecting slot_uri conflicts..."
+	$(RUN) python scripts/slot_uri_conflict_detector.py --output reports/slot_uri_conflicts.json
+	@echo "✓ Conflicts report: reports/slot_uri_conflicts.json"
+
+semantic-review-ranges: ## Check range-description alignment
+	@echo "Checking range-description alignment..."
+	$(RUN) python scripts/range_description_checker.py --output reports/range_mismatches.json
+	@echo "✓ Range mismatches report: reports/range_mismatches.json"
+
+semantic-review-data: ## Analyze actual data values
+	@echo "Analyzing actual D4D data values..."
+	$(RUN) python scripts/data_value_analyzer.py --output reports/data_value_analysis.json
+	@echo "✓ Data analysis report: reports/data_value_analysis.json"
+
+semantic-review-report: reports/slot_uri_conflicts.json reports/range_mismatches.json reports/data_value_analysis.json ## Generate consolidated report
+	@echo "Generating comprehensive semantic review report..."
+	$(RUN) python scripts/generate_semantic_review_report.py \
+		reports/slot_uri_conflicts.json \
+		reports/range_mismatches.json \
+		reports/data_value_analysis.json
+	@echo "✓ Semantic review report: reports/semantic_review_report.md"
+	@echo ""
+	@echo "Summary:"
+	@grep -A 5 "Executive Summary" reports/semantic_review_report.md || true
+
+## ------------------------------------------------------------------
 
 clean:
 	rm -rf $(DEST)

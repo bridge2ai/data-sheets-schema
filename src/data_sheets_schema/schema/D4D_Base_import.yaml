@@ -298,7 +298,7 @@ slots:
   encoding:
     description: The character encoding of the data.
     range: EncodingEnum
-    slot_uri: dcat:mediaType
+    slot_uri: d4d:characterEncoding
 
   compression:
     description: Compression format used, if any (e.g., gzip, bzip2, zip).

@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-08T17:21:06
+# Generation date: 2026-04-08T18:10:07
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3913,7 +3913,7 @@ slots.download_url = Slot(uri=DCAT.downloadURL, name="download_url", curie=DCAT.
 slots.format = Slot(uri=DCTERMS.format, name="format", curie=DCTERMS.curie('format'),
                    model_uri=DATA_SHEETS_SCHEMA.format, domain=None, range=Optional[Union[str, "FormatEnum"]])
 
-slots.encoding = Slot(uri=DCAT.mediaType, name="encoding", curie=DCAT.curie('mediaType'),
+slots.encoding = Slot(uri=D4D.characterEncoding, name="encoding", curie=D4D.curie('characterEncoding'),
                    model_uri=DATA_SHEETS_SCHEMA.encoding, domain=None, range=Optional[Union[str, "EncodingEnum"]])
 
 slots.compression = Slot(uri=DCAT.compressFormat, name="compression", curie=DCAT.curie('compressFormat'),
@@ -4371,7 +4371,7 @@ slots.deidentification__identifiable_elements_present = Slot(uri=D4D.identifiabl
 slots.deidentification__method = Slot(uri=D4DCOMPOSITION.method, name="deidentification__method", curie=D4DCOMPOSITION.curie('method'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__method, domain=None, range=Optional[str])
 
-slots.deidentification__identifiers_removed = Slot(uri=SCHEMA.identifier, name="deidentification__identifiers_removed", curie=SCHEMA.curie('identifier'),
+slots.deidentification__identifiers_removed = Slot(uri=D4D.removedIdentifierTypes, name="deidentification__identifiers_removed", curie=D4D.curie('removedIdentifierTypes'),
                    model_uri=DATA_SHEETS_SCHEMA.deidentification__identifiers_removed, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.deidentification__deidentification_details = Slot(uri=DCTERMS.description, name="deidentification__deidentification_details", curie=DCTERMS.curie('description'),
@@ -4563,7 +4563,7 @@ slots.maintainer__role = Slot(uri=SCHEMA.maintainer, name="maintainer__role", cu
 slots.maintainer__maintainer_details = Slot(uri=DCTERMS.description, name="maintainer__maintainer_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.maintainer__maintainer_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.erratum__erratum_url = Slot(uri=DCAT.accessURL, name="erratum__erratum_url", curie=DCAT.curie('accessURL'),
+slots.erratum__erratum_url = Slot(uri=D4D.erratumURL, name="erratum__erratum_url", curie=D4D.curie('erratumURL'),
                    model_uri=DATA_SHEETS_SCHEMA.erratum__erratum_url, domain=None, range=Optional[Union[str, URI]])
 
 slots.erratum__erratum_details = Slot(uri=DCTERMS.description, name="erratum__erratum_details", curie=DCTERMS.curie('description'),
@@ -4590,7 +4590,7 @@ slots.versionAccess__versions_available = Slot(uri=D4D.versionsAvailable, name="
 slots.versionAccess__version_details = Slot(uri=DCTERMS.description, name="versionAccess__version_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.versionAccess__version_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.extensionMechanism__contribution_url = Slot(uri=DCAT.landingPage, name="extensionMechanism__contribution_url", curie=DCAT.curie('landingPage'),
+slots.extensionMechanism__contribution_url = Slot(uri=D4D.contributionURL, name="extensionMechanism__contribution_url", curie=D4D.curie('contributionURL'),
                    model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__contribution_url, domain=None, range=Optional[Union[str, URI]])
 
 slots.extensionMechanism__extension_details = Slot(uri=DCTERMS.description, name="extensionMechanism__extension_details", curie=DCTERMS.curie('description'),

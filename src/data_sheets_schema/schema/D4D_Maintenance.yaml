@@ -63,7 +63,7 @@ classes:
     attributes:
       erratum_url:
         description: "URL or access point for the erratum."
-        slot_uri: dcat:accessURL
+        slot_uri: d4d:erratumURL
         range: uri
       erratum_details:
         description: >
@@ -146,7 +146,7 @@ classes:
     attributes:
       contribution_url:
         description: "URL for contribution guidelines or process."
-        slot_uri: dcat:landingPage
+        slot_uri: d4d:contributionURL
         range: uri
       extension_details:
         description: >

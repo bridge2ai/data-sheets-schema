@@ -1830,9 +1830,9 @@
       "description": "The character encoding of the data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://www.w3.org/ns/dcat#mediaType"
+        "https://w3id.org/bridge2ai/data-sheets-schema/characterEncoding"
       ],
-      "slot_uri": "http://www.w3.org/ns/dcat#mediaType",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/characterEncoding",
       "owner": "File",
       "domain_of": [
         "File"
@@ -4428,9 +4428,9 @@
       "description": "List of identifier types removed during de-identification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
-        "http://schema.org/identifier"
+        "https://w3id.org/bridge2ai/data-sheets-schema/removedIdentifierTypes"
       ],
-      "slot_uri": "http://schema.org/identifier",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/removedIdentifierTypes",
       "alias": "identifiers_removed",
       "owner": "Deidentification",
       "domain_of": [
@@ -5492,9 +5492,9 @@
       "description": "URL or access point for the erratum.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
-        "http://www.w3.org/ns/dcat#accessURL"
+        "https://w3id.org/bridge2ai/data-sheets-schema/erratumURL"
       ],
-      "slot_uri": "http://www.w3.org/ns/dcat#accessURL",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/erratumURL",
       "alias": "erratum_url",
       "owner": "Erratum",
       "domain_of": [
@@ -5641,9 +5641,9 @@
       "description": "URL for contribution guidelines or process.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
-        "http://www.w3.org/ns/dcat#landingPage"
+        "https://w3id.org/bridge2ai/data-sheets-schema/contributionURL"
       ],
-      "slot_uri": "http://www.w3.org/ns/dcat#landingPage",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/contributionURL",
       "alias": "contribution_url",
       "owner": "ExtensionMechanism",
       "domain_of": [
@@ -8691,7 +8691,7 @@
         {
           "name": "identifiers_removed",
           "description": "List of identifier types removed during de-identification.",
-          "slot_uri": "schema:identifier",
+          "slot_uri": "d4d:removedIdentifierTypes",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -9790,7 +9790,7 @@
         {
           "name": "erratum_url",
           "description": "URL or access point for the erratum.",
-          "slot_uri": "dcat:accessURL",
+          "slot_uri": "d4d:erratumURL",
           "range": "uri",
           "@type": "SlotDefinition"
         },
@@ -9942,7 +9942,7 @@
         {
           "name": "contribution_url",
           "description": "URL for contribution guidelines or process.",
-          "slot_uri": "dcat:landingPage",
+          "slot_uri": "d4d:contributionURL",
           "range": "uri",
           "@type": "SlotDefinition"
         },
@@ -10848,7 +10848,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-04-07T18:14:37",
   "source_file_size": 18558,
-  "generation_date": "2026-04-08T17:21:05",
+  "generation_date": "2026-04-08T18:10:05",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",
