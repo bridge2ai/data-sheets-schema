@@ -457,7 +457,7 @@
                     ]
                 },
                 "end_date": {
-                    "description": "End date of data collection",
+                    "description": "End date of data collection.",
                     "format": "date",
                     "type": [
                         "string",
@@ -479,7 +479,7 @@
                     ]
                 },
                 "start_date": {
-                    "description": "Start date of data collection",
+                    "description": "Start date of data collection.",
                     "format": "date",
                     "type": [
                         "string",
@@ -876,7 +876,7 @@
                     ]
                 },
                 "role": {
-                    "description": "Role of the data collector (e.g., researcher, crowdworker)",
+                    "description": "Role of the data collector (e.g., researcher, crowdworker).",
                     "type": [
                         "string",
                         "null"
@@ -3055,7 +3055,7 @@
                     ]
                 },
                 "is_direct": {
-                    "description": "Whether collection was direct from individuals",
+                    "description": "Whether collection was direct from individuals.",
                     "type": [
                         "boolean",
                         "null"
@@ -5083,28 +5083,28 @@
                     ]
                 },
                 "was_directly_observed": {
-                    "description": "Whether the data was directly observed",
+                    "description": "Whether the data was directly observed.",
                     "type": [
                         "boolean",
                         "null"
                     ]
                 },
                 "was_inferred_derived": {
-                    "description": "Whether the data was inferred or derived from other data",
+                    "description": "Whether the data was inferred or derived from other data.",
                     "type": [
                         "boolean",
                         "null"
                     ]
                 },
                 "was_reported_by_subjects": {
-                    "description": "Whether the data was reported directly by the subjects themselves",
+                    "description": "Whether the data was reported directly by the subjects themselves.",
                     "type": [
                         "boolean",
                         "null"
                     ]
                 },
                 "was_validated_verified": {
-                    "description": "Whether the data was validated or verified in any way",
+                    "description": "Whether the data was validated or verified in any way.",
                     "type": [
                         "boolean",
                         "null"
@@ -5282,7 +5282,7 @@
                     ]
                 },
                 "data_use_permission": {
-                    "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO",
+                    "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.",
                     "items": {
                         "$ref": "#/$defs/DataUsePermissionEnum"
                     },

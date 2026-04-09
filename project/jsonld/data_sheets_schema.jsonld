@@ -4539,7 +4539,7 @@
     },
     {
       "name": "instanceAcquisition__was_directly_observed",
-      "description": "Whether the data was directly observed",
+      "description": "Whether the data was directly observed.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/wasDirectlyObserved"
@@ -4555,7 +4555,7 @@
     },
     {
       "name": "instanceAcquisition__was_reported_by_subjects",
-      "description": "Whether the data was reported directly by the subjects themselves",
+      "description": "Whether the data was reported directly by the subjects themselves.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/wasReportedBySubjects"
@@ -4571,7 +4571,7 @@
     },
     {
       "name": "instanceAcquisition__was_inferred_derived",
-      "description": "Whether the data was inferred or derived from other data",
+      "description": "Whether the data was inferred or derived from other data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/wasInferred"
@@ -4587,7 +4587,7 @@
     },
     {
       "name": "instanceAcquisition__was_validated_verified",
-      "description": "Whether the data was validated or verified in any way",
+      "description": "Whether the data was validated or verified in any way.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/wasValidated"
@@ -4637,7 +4637,7 @@
     },
     {
       "name": "dataCollector__role",
-      "description": "Role of the data collector (e.g., researcher, crowdworker)",
+      "description": "Role of the data collector (e.g., researcher, crowdworker).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "http://schema.org/roleName"
@@ -4670,7 +4670,7 @@
     },
     {
       "name": "collectionTimeframe__start_date",
-      "description": "Start date of data collection",
+      "description": "Start date of data collection.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "http://schema.org/startDate"
@@ -4686,7 +4686,7 @@
     },
     {
       "name": "collectionTimeframe__end_date",
-      "description": "End date of data collection",
+      "description": "End date of data collection.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "http://schema.org/endDate"
@@ -4719,7 +4719,7 @@
     },
     {
       "name": "directCollection__is_direct",
-      "description": "Whether collection was direct from individuals",
+      "description": "Whether collection was direct from individuals.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
         "https://w3id.org/bridge2ai/data-sheets-schema/isDirect"
@@ -6181,7 +6181,7 @@
     },
     {
       "name": "licenseAndUseTerms__data_use_permission",
-      "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO",
+      "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
         "http://purl.obolibrary.org/obo/DUO_0000001"
@@ -8809,28 +8809,28 @@
       "attributes": [
         {
           "name": "was_directly_observed",
-          "description": "Whether the data was directly observed",
+          "description": "Whether the data was directly observed.",
           "slot_uri": "d4d:wasDirectlyObserved",
           "range": "boolean",
           "@type": "SlotDefinition"
         },
         {
           "name": "was_reported_by_subjects",
-          "description": "Whether the data was reported directly by the subjects themselves",
+          "description": "Whether the data was reported directly by the subjects themselves.",
           "slot_uri": "d4d:wasReportedBySubjects",
           "range": "boolean",
           "@type": "SlotDefinition"
         },
         {
           "name": "was_inferred_derived",
-          "description": "Whether the data was inferred or derived from other data",
+          "description": "Whether the data was inferred or derived from other data.",
           "slot_uri": "d4d:wasInferred",
           "range": "boolean",
           "@type": "SlotDefinition"
         },
         {
           "name": "was_validated_verified",
-          "description": "Whether the data was validated or verified in any way",
+          "description": "Whether the data was validated or verified in any way.",
           "slot_uri": "d4d:wasValidated",
           "range": "boolean",
           "@type": "SlotDefinition"
@@ -8895,7 +8895,7 @@
       "attributes": [
         {
           "name": "role",
-          "description": "Role of the data collector (e.g., researcher, crowdworker)",
+          "description": "Role of the data collector (e.g., researcher, crowdworker).",
           "slot_uri": "schema:roleName",
           "range": "string",
           "@type": "SlotDefinition"
@@ -8934,14 +8934,14 @@
       "attributes": [
         {
           "name": "start_date",
-          "description": "Start date of data collection",
+          "description": "Start date of data collection.",
           "slot_uri": "schema:startDate",
           "range": "date",
           "@type": "SlotDefinition"
         },
         {
           "name": "end_date",
-          "description": "End date of data collection",
+          "description": "End date of data collection.",
           "slot_uri": "schema:endDate",
           "range": "date",
           "@type": "SlotDefinition"
@@ -8976,7 +8976,7 @@
       "attributes": [
         {
           "name": "is_direct",
-          "description": "Whether collection was direct from individuals",
+          "description": "Whether collection was direct from individuals.",
           "slot_uri": "d4d:isDirect",
           "range": "boolean",
           "@type": "SlotDefinition"
@@ -10426,7 +10426,7 @@
         },
         {
           "name": "data_use_permission",
-          "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO",
+          "description": "Structured data use permissions using the Data Use Ontology (DUO). Specifies permitted uses (e.g., general research, health/medical research, disease-specific research) and restrictions (e.g., non-commercial use, ethics approval required, collaboration required). See https://github.com/EBISPOT/DUO.",
           "exact_mappings": [
             "DUO:0000001"
           ],
@@ -10848,7 +10848,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-04-07T18:14:37",
   "source_file_size": 18558,
-  "generation_date": "2026-04-08T16:17:07",
+  "generation_date": "2026-04-08T17:21:05",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

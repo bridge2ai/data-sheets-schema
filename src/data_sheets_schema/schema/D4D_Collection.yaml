@@ -38,19 +38,19 @@ classes:
       (e.g., directly observed, reported by subjects, inferred).
     attributes:
       was_directly_observed:
-        description: Whether the data was directly observed
+        description: Whether the data was directly observed.
         slot_uri: d4d:wasDirectlyObserved
         range: boolean
       was_reported_by_subjects:
-        description: Whether the data was reported directly by the subjects themselves
+        description: Whether the data was reported directly by the subjects themselves.
         slot_uri: d4d:wasReportedBySubjects
         range: boolean
       was_inferred_derived:
-        description: Whether the data was inferred or derived from other data
+        description: Whether the data was inferred or derived from other data.
         slot_uri: d4d:wasInferred
         range: boolean
       was_validated_verified:
-        description: Whether the data was validated or verified in any way
+        description: Whether the data was validated or verified in any way.
         slot_uri: d4d:wasValidated
         range: boolean
       acquisition_details:
@@ -84,7 +84,7 @@ classes:
       and how they were compensated.
     attributes:
       role:
-        description: Role of the data collector (e.g., researcher, crowdworker)
+        description: Role of the data collector (e.g., researcher, crowdworker).
         slot_uri: schema:roleName
         range: string
       collector_details:
@@ -104,11 +104,11 @@ classes:
       - rai:dataCollectionTimeframe
     attributes:
       start_date:
-        description: Start date of data collection
+        description: Start date of data collection.
         slot_uri: schema:startDate
         range: date
       end_date:
-        description: End date of data collection
+        description: End date of data collection.
         slot_uri: schema:endDate
         range: date
       timeframe_details:
@@ -126,7 +126,7 @@ classes:
       or obtained via third parties/other sources.
     attributes:
       is_direct:
-        description: Whether collection was direct from individuals
+        description: Whether collection was direct from individuals.
         slot_uri: d4d:isDirect
         range: boolean
       collection_details:
