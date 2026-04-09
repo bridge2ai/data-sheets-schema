@@ -8,7 +8,7 @@ Ontology Mappings) TSV files and querying mappings programmatically.
 
 import csv
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 from dataclasses import dataclass
 
 
@@ -228,7 +228,7 @@ class SSSOMReader:
         """
         return set(self.predicate_index.keys())
 
-    def get_statistics(self) -> Dict[str, any]:
+    def get_statistics(self) -> Dict[str, Any]:
         """
         Get mapping statistics.
 

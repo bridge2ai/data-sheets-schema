@@ -6,9 +6,14 @@ This module provides a unified command-line interface for all FAIRSCAPE/RO-Crate
 integration tasks: parsing, converting, validating, and merging.
 """
 
+import sys
 import click
 from pathlib import Path
 from typing import Optional
+
+# Resolve repository root for bundled schema lookup.
+# Works both from a repo checkout and when installed as a package.
+repo_root = Path(__file__).parent.parent.parent
 
 from fairscape_integration.d4d_to_fairscape import D4DToFairscapeConverter
 from fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter

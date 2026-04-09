@@ -88,10 +88,15 @@ class FieldPrioritizer:
             return self._combine_descriptive(field_name, primary_value, secondary_values)
 
         elif strategy == MergeStrategy.AGGREGATE:
-            # For aggregates, always prefer primary
+            # For aggregates, prefer primary but do not sum/combine values.
             if primary_value is not None:
                 sources.append("primary")
                 return primary_value, sources
+            # Fallback to the first available secondary value.
+            for value, source in secondary_values:
+                if value is not None:
+                    sources.append(source)
+                    return value, sources
             return None, []
 
         # Default fallback

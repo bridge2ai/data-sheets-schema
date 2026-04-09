@@ -65,7 +65,17 @@ class ROCrateMerger:
         if primary_index >= len(rocrate_parsers):
             raise ValueError(f"Primary index {primary_index} out of range")
 
-        self.merge_stats['total_sources'] = len(rocrate_parsers)
+        # Reset state so the same instance can be reused for multiple merges
+        self.merged_data = {}
+        self.provenance = {}
+        self.merge_stats = {
+            'total_sources': len(rocrate_parsers),
+            'fields_from_primary': 0,
+            'fields_from_secondary': 0,
+            'fields_combined': 0,
+            'fields_merged_as_arrays': 0,
+            'total_unique_fields': 0
+        }
 
         # Get source names
         if source_names is None:
@@ -142,7 +152,10 @@ class ROCrateMerger:
                 strategy = self.prioritizer.get_merge_strategy(field_name)
                 if strategy == MergeStrategy.PRIMARY_WINS and primary_name in sources:
                     self.merge_stats['fields_from_primary'] += 1
-                elif strategy == MergeStrategy.SECONDARY_WINS:
+                elif (
+                    strategy == MergeStrategy.SECONDARY_WINS
+                    and any(s != primary_name for s in sources)
+                ):
                     self.merge_stats['fields_from_secondary'] += 1
                 elif strategy == MergeStrategy.COMBINE:
                     self.merge_stats['fields_combined'] += 1
