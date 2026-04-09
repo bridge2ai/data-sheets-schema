@@ -141,32 +141,56 @@ classes:
         slot_uri: dcat:byteSize
       # Motivation module classes
       purposes:
+        description: >-
+          Purposes for which the dataset was created. List of Purpose objects
+          from the Motivation module, each describing a specific creation goal
+          or intended application.
         slot_uri: d4d:purposes
         range: Purpose
         multivalued: true
         inlined_as_list: true
       tasks:
+        description: >-
+          Tasks the dataset is intended to support. List of Task objects
+          from the Motivation module describing specific machine learning,
+          research, or analytical tasks.
         slot_uri: d4d:tasks
         range: Task
         multivalued: true
         inlined_as_list: true
       addressing_gaps:
+        description: >-
+          Research or practical gaps this dataset addresses. List of
+          AddressingGap objects from the Motivation module, each describing
+          a gap in existing datasets or knowledge that this dataset fills.
         slot_uri: d4d:addressingGaps
         range: AddressingGap
         multivalued: true
         inlined_as_list: true
       creators:
+        description: >-
+          Individuals or organizations who created the dataset. List of
+          Creator objects describing authorship, roles, and affiliations
+          of dataset creators.
         slot_uri: schema:creator
         range: Creator
         multivalued: true
         inlined_as_list: true
       funders:
+        description: >-
+          Funding mechanisms that supported dataset creation. List of
+          FundingMechanism objects describing grants, contracts, or other
+          funding sources including grantors and grant identifiers.
         slot_uri: schema:funder
         range: FundingMechanism
         multivalued: true
         inlined_as_list: true
       # Composition module classes
       subsets:
+        description: >-
+          Subsets or splits of this dataset. List of DataSubset objects
+          from the Composition module, each representing a logical partition
+          such as training, validation, or test splits, or demographic subgroups.
         range: DataSubset
         multivalued: true
         inlined_as_list: true
@@ -174,11 +198,19 @@ classes:
         exact_mappings:
           - schema:distribution
       instances:
+        description: >-
+          Individual data instances or records in the dataset. List of
+          Instance objects from the Composition module describing what
+          each data point represents, its type, and associated label information.
         slot_uri: d4d:instances
         range: Instance
         multivalued: true
         inlined_as_list: true
       anomalies:
+        description: >-
+          Known data quality issues, errors, or irregularities in the dataset.
+          List of DataAnomaly objects from the Composition module, each
+          documenting a specific anomaly and its potential impact.
         slot_uri: d4d:anomalies
         range: DataAnomaly
         multivalued: true
@@ -201,47 +233,84 @@ classes:
         multivalued: true
         inlined_as_list: true
       confidential_elements:
+        description: >-
+          Confidential or restricted information within the dataset that
+          requires access controls. List of Confidentiality objects describing
+          what is confidential and why it cannot be released.
         slot_uri: d4d:confidentialElements
         range: Confidentiality
         multivalued: true
         inlined_as_list: true
       content_warnings:
+        description: >-
+          Content warnings for potentially harmful, offensive, or disturbing
+          material in the dataset. List of ContentWarning objects alerting
+          users to sensitive content categories.
         slot_uri: d4d:contentWarnings
         range: ContentWarning
         multivalued: true
         inlined_as_list: true
       subpopulations:
+        description: >-
+          Subpopulations represented within the dataset. List of Subpopulation
+          objects from the Composition module describing demographic or other
+          groups, their representation, and any imbalances.
         slot_uri: d4d:subpopulations
         range: Subpopulation
         multivalued: true
         inlined_as_list: true
       sensitive_elements:
+        description: >-
+          Sensitive data elements requiring special handling or access controls.
+          List of SensitiveElement objects identifying sensitive attributes
+          such as personal identifiers, protected health information, or
+          legally sensitive content.
         slot_uri: d4d:sensitiveElements
         range: SensitiveElement
         multivalued: true
         inlined_as_list: true
       # Collection module classes
       acquisition_methods:
+        description: >-
+          Methods used to acquire or obtain dataset instances. List of
+          InstanceAcquisition objects from the Collection module describing
+          how data was sourced, whether directly observed or derived.
         slot_uri: d4d:acquisitionMethods
         range: InstanceAcquisition
         multivalued: true
         inlined_as_list: true
       collection_mechanisms:
+        description: >-
+          Mechanisms, instruments, or tools used for data collection.
+          List of CollectionMechanism objects from the Collection module
+          describing sensors, surveys, APIs, or other collection instruments.
         slot_uri: d4d:collectionMechanisms
         range: CollectionMechanism
         multivalued: true
         inlined_as_list: true
       sampling_strategies:
+        description: >-
+          Strategies used to select data instances from a larger population.
+          List of SamplingStrategy objects from the Collection module
+          describing sampling methodology, inclusion criteria, and limitations.
         slot_uri: d4d:samplingStrategies
         range: SamplingStrategy
         multivalued: true
         inlined_as_list: true
       data_collectors:
+        description: >-
+          Individuals or organizations responsible for collecting the data.
+          List of DataCollector objects from the Collection module describing
+          who performed data collection and their roles.
         slot_uri: d4d:dataCollectors
         range: DataCollector
         multivalued: true
         inlined_as_list: true
       collection_timeframes:
+        description: >-
+          Time periods during which data was collected. List of
+          CollectionTimeframe objects from the Collection module describing
+          collection start and end dates, and any gaps in the collection period.
         slot_uri: d4d:collectionTimeframes
         range: CollectionTimeframe
         multivalued: true
@@ -262,11 +331,19 @@ classes:
         inlined_as_list: true
       # Ethics module classes
       ethical_reviews:
+        description: >-
+          Ethical reviews and institutional oversight for the dataset.
+          List of EthicalReview objects from the Ethics module describing
+          IRB approvals, ethics committee reviews, and compliance certifications.
         slot_uri: d4d:ethicalReviews
         range: EthicalReview
         multivalued: true
         inlined_as_list: true
       data_protection_impacts:
+        description: >-
+          Data protection impact assessments (DPIAs) conducted for the dataset.
+          List of DataProtectionImpact objects from the Ethics module
+          documenting privacy risk assessments and mitigation measures.
         slot_uri: d4d:dataProtectionImpacts
         range: DataProtectionImpact
         multivalued: true
@@ -311,21 +388,37 @@ classes:
           Information about compensation or incentives provided to human research participants.
       # Preprocessing module classes
       preprocessing_strategies:
+        description: >-
+          Preprocessing steps applied to the raw data. List of
+          PreprocessingStrategy objects from the Preprocessing module
+          describing normalization, transformation, and other preparation steps.
         slot_uri: d4d:preprocessingStrategies
         range: PreprocessingStrategy
         multivalued: true
         inlined_as_list: true
       cleaning_strategies:
+        description: >-
+          Data cleaning and quality control procedures applied to the dataset.
+          List of CleaningStrategy objects from the Preprocessing module
+          describing outlier removal, deduplication, and error correction steps.
         slot_uri: d4d:cleaningStrategies
         range: CleaningStrategy
         multivalued: true
         inlined_as_list: true
       labeling_strategies:
+        description: >-
+          Labeling or annotation methodologies applied to the data. List of
+          LabelingStrategy objects from the Preprocessing module describing
+          annotation procedures, annotator qualifications, and quality controls.
         slot_uri: d4d:labelingStrategies
         range: LabelingStrategy
         multivalued: true
         inlined_as_list: true
       raw_sources:
+        description: >-
+          Raw, unprocessed source data before any preprocessing was applied.
+          List of RawData objects from the Preprocessing module describing
+          original data sources and their formats.
         slot_uri: d4d:rawSources
         range: RawData
         multivalued: true
@@ -352,26 +445,46 @@ classes:
         inlined_as_list: true
       # Uses module classes
       existing_uses:
+        description: >-
+          Known existing uses of the dataset at the time of publication.
+          List of ExistingUse objects from the Uses module describing
+          research, commercial, or other applications of the dataset.
         slot_uri: d4d:existingUses
         range: ExistingUse
         multivalued: true
         inlined_as_list: true
       use_repository:
+        description: >-
+          Repositories or registries tracking how the dataset has been used.
+          List of UseRepository objects from the Uses module pointing to
+          papers with code, citation indices, or other use-tracking resources.
         slot_uri: d4d:useRepository
         range: UseRepository
         multivalued: true
         inlined_as_list: true
       other_tasks:
+        description: >-
+          Additional tasks the dataset may support beyond its original intent.
+          List of OtherTask objects from the Uses module describing potential
+          applications not originally planned by the dataset creators.
         slot_uri: d4d:otherTasks
         range: OtherTask
         multivalued: true
         inlined_as_list: true
       future_use_impacts:
+        description: >-
+          Anticipated impacts of future uses, including risks and benefits.
+          List of FutureUseImpact objects from the Uses module describing
+          foreseeable consequences of using this dataset in new applications.
         slot_uri: d4d:futureUseImpacts
         range: FutureUseImpact
         multivalued: true
         inlined_as_list: true
       discouraged_uses:
+        description: >-
+          Uses that are not recommended for this dataset due to limitations,
+          risks, or ethical concerns. List of DiscouragedUse objects from
+          the Uses module explaining why certain applications should be avoided.
         slot_uri: d4d:discouragedUses
         range: DiscouragedUse
         multivalued: true
@@ -394,52 +507,97 @@ classes:
           Stronger than discouraged_uses - these are not permitted.
       # Distribution module classes
       distribution_formats:
+        description: >-
+          Formats in which the dataset is distributed or made available.
+          List of DistributionFormat objects from the Distribution module
+          describing file formats, compression, and access methods.
         slot_uri: d4d:distributionFormats
         range: DistributionFormat
         multivalued: true
         inlined_as_list: true
       distribution_dates:
+        description: >-
+          Dates when the dataset was or will be distributed or released.
+          List of DistributionDate objects from the Distribution module
+          describing initial release dates, version release dates, and
+          planned future releases.
         slot_uri: d4d:distributionDates
         range: DistributionDate
         multivalued: true
         inlined_as_list: true
       # Data Governance module classes
       license_and_use_terms:
+        description: >-
+          License and usage terms governing dataset access and use.
+          LicenseAndUseTerms object from the Data Governance module describing
+          the applicable license, permitted uses, and any restrictions.
         slot_uri: schema:license
         range: LicenseAndUseTerms
         inlined: true
       ip_restrictions:
+        description: >-
+          Intellectual property restrictions on dataset use or redistribution.
+          IPRestrictions object from the Data Governance module describing
+          copyright, trademark, or other IP considerations.
         slot_uri: d4d:ipRestrictions
         range: IPRestrictions
         inlined: true
       regulatory_restrictions:
+        description: >-
+          Regulatory and export control restrictions applicable to the dataset.
+          ExportControlRegulatoryRestrictions object from the Data Governance
+          module describing compliance requirements such as ITAR, EAR, or GDPR.
         slot_uri: d4d:regulatoryRestrictions
         range: ExportControlRegulatoryRestrictions
         inlined: true
       # Maintenance module classes
       maintainers:
+        description: >-
+          Individuals or organizations responsible for maintaining the dataset.
+          List of Maintainer objects from the Maintenance module describing
+          maintenance contacts, roles, and support channels.
         slot_uri: d4d:maintainers
         range: Maintainer
         multivalued: true
         inlined_as_list: true
       errata:
+        description: >-
+          Known errors or corrections to the dataset since publication.
+          List of Erratum objects from the Maintenance module describing
+          discovered errors, affected records, and correction procedures.
         slot_uri: d4d:errata
         range: Erratum
         multivalued: true
         inlined_as_list: true
       updates:
+        description: >-
+          Plans for future updates or versioning of the dataset.
+          UpdatePlan object from the Maintenance module describing update
+          frequency, versioning policy, and planned enhancements.
         slot_uri: d4d:updates
         range: UpdatePlan
         inlined: true
       retention_limit:
+        description: >-
+          Data retention policies and limits for the dataset.
+          RetentionLimits object from the Maintenance module describing
+          how long the dataset will be available and any deletion schedules.
         slot_uri: d4d:retentionLimit
         range: RetentionLimits
         inlined: true
       version_access:
+        description: >-
+          Information about access to different versions of the dataset.
+          VersionAccess object from the Maintenance module describing
+          where older versions can be found and how version history is maintained.
         slot_uri: dcat:accessURL
         range: VersionAccess
         inlined: true
       extension_mechanism:
+        description: >-
+          Mechanisms for extending or contributing to the dataset.
+          ExtensionMechanism object from the Maintenance module describing
+          how others can propose additions, corrections, or expansions.
         slot_uri: d4d:extensionMechanism
         range: ExtensionMechanism
         inlined: true
@@ -455,10 +613,19 @@ classes:
           - schema:variableMeasured
       # Other attributes
       is_deidentified:
+        description: >-
+          De-identification status and procedures applied to the dataset.
+          Deidentification object describing whether the dataset contains
+          personal data, what de-identification methods were applied, and
+          any residual re-identification risks.
         slot_uri: d4d:isDeidentified
         range: Deidentification
         inlined: true
       is_tabular:
+        description: >-
+          Whether the dataset is in tabular format (rows and columns).
+          True if the data is structured as a table (e.g., CSV, TSV, relational
+          database); false for unstructured formats such as images or free text.
         slot_uri: schema:encodingFormat
         range: boolean
       # Dataset citation and relationships

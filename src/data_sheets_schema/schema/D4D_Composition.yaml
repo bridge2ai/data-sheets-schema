@@ -396,7 +396,9 @@ classes:
       identifiers_removed:
         range: string
         multivalued: true
-        description: "List of identifier types removed during de-identification."
+        description: >-
+          List of identifier types removed during de-identification
+          (e.g., 'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').
         slot_uri: d4d:removedIdentifierTypes
       deidentification_details:
         description: >

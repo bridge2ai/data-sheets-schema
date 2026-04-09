@@ -314,7 +314,9 @@ slots:
       - schema:encodingFormat
 
   hash:
-    description: Cryptographic hash value of the data for integrity verification.
+    description: >-
+      Cryptographic hash value of the data for integrity verification
+      (e.g., SHA-256: 'e3b0c44298fc1c149afb...', MD5: 'd41d8cd98f00b204e9800998ecf8427e').
     slot_uri: dcterms:identifier
 
   md5:
@@ -383,7 +385,9 @@ slots:
       - dcterms:source
 
   doi:
-    description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.
+    description: >-
+      Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification
+      (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
     slot_uri: d4d:doiIdentifier
     pattern: "10\\.\\d{4,}\\/.+"
     broad_mappings:
