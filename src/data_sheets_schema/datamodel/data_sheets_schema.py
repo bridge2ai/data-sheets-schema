@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-08T18:54:33
+# Generation date: 2026-04-08T19:59:47
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3934,10 +3934,10 @@ slots.sha256 = Slot(uri=DCTERMS.identifier, name="sha256", curie=DCTERMS.curie('
 slots.conforms_to = Slot(uri=DCTERMS.conformsTo, name="conforms_to", curie=DCTERMS.curie('conformsTo'),
                    model_uri=DATA_SHEETS_SCHEMA.conforms_to, domain=None, range=Optional[str])
 
-slots.conforms_to_schema = Slot(uri=DCTERMS.conformsTo, name="conforms_to_schema", curie=DCTERMS.curie('conformsTo'),
+slots.conforms_to_schema = Slot(uri=D4D.conformsToSchema, name="conforms_to_schema", curie=D4D.curie('conformsToSchema'),
                    model_uri=DATA_SHEETS_SCHEMA.conforms_to_schema, domain=None, range=Optional[str])
 
-slots.conforms_to_class = Slot(uri=DCTERMS.conformsTo, name="conforms_to_class", curie=DCTERMS.curie('conformsTo'),
+slots.conforms_to_class = Slot(uri=D4D.conformsToClass, name="conforms_to_class", curie=D4D.curie('conformsToClass'),
                    model_uri=DATA_SHEETS_SCHEMA.conforms_to_class, domain=None, range=Optional[str])
 
 slots.license = Slot(uri=DCTERMS.license, name="license", curie=DCTERMS.curie('license'),
@@ -3967,7 +3967,7 @@ slots.status = Slot(uri=D4D.publicationStatus, name="status", curie=D4D.curie('p
 slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", curie=PROV.curie('wasDerivedFrom'),
                    model_uri=DATA_SHEETS_SCHEMA.was_derived_from, domain=None, range=Optional[str])
 
-slots.doi = Slot(uri=DCTERMS.identifier, name="doi", curie=DCTERMS.curie('identifier'),
+slots.doi = Slot(uri=D4D.doiIdentifier, name="doi", curie=D4D.curie('doiIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.doi, domain=None, range=Optional[str],
                    pattern=re.compile(r'10\.\d{4,}\/.+'))
 
@@ -4224,13 +4224,13 @@ slots.formatDialect__header = Slot(uri=DATA_SHEETS_SCHEMA.header, name="formatDi
 slots.formatDialect__quote_char = Slot(uri=DATA_SHEETS_SCHEMA.quote_char, name="formatDialect__quote_char", curie=DATA_SHEETS_SCHEMA.curie('quote_char'),
                    model_uri=DATA_SHEETS_SCHEMA.formatDialect__quote_char, domain=None, range=Optional[str])
 
-slots.purpose__response = Slot(uri=DCTERMS.description, name="purpose__response", curie=DCTERMS.curie('description'),
+slots.purpose__response = Slot(uri=D4D.questionResponse, name="purpose__response", curie=D4D.curie('questionResponse'),
                    model_uri=DATA_SHEETS_SCHEMA.purpose__response, domain=None, range=Optional[str])
 
-slots.task__response = Slot(uri=DCTERMS.description, name="task__response", curie=DCTERMS.curie('description'),
+slots.task__response = Slot(uri=D4D.questionResponse, name="task__response", curie=D4D.curie('questionResponse'),
                    model_uri=DATA_SHEETS_SCHEMA.task__response, domain=None, range=Optional[str])
 
-slots.addressingGap__response = Slot(uri=DCTERMS.description, name="addressingGap__response", curie=DCTERMS.curie('description'),
+slots.addressingGap__response = Slot(uri=D4D.questionResponse, name="addressingGap__response", curie=D4D.curie('questionResponse'),
                    model_uri=DATA_SHEETS_SCHEMA.addressingGap__response, domain=None, range=Optional[str])
 
 slots.creator__principal_investigator = Slot(uri=D4D.principalInvestigator, name="creator__principal_investigator", curie=D4D.curie('principalInvestigator'),
@@ -4254,7 +4254,7 @@ slots.grant__grant_number = Slot(uri=D4D.grantIdentifier, name="grant__grant_num
 slots.instance__data_topic = Slot(uri=DCAT.theme, name="instance__data_topic", curie=DCAT.curie('theme'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__data_topic, domain=None, range=Optional[Union[str, URIorCURIE]])
 
-slots.instance__instance_type = Slot(uri=DCTERMS.type, name="instance__instance_type", curie=DCTERMS.curie('type'),
+slots.instance__instance_type = Slot(uri=D4D.instanceType, name="instance__instance_type", curie=D4D.curie('instanceType'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__instance_type, domain=None, range=Optional[str])
 
 slots.instance__data_substrate = Slot(uri=DCTERMS.type, name="instance__data_substrate", curie=DCTERMS.curie('type'),
@@ -4266,7 +4266,7 @@ slots.instance__counts = Slot(uri=SCHEMA.numberOfItems, name="instance__counts",
 slots.instance__label = Slot(uri=D4D.hasLabel, name="instance__label", curie=D4D.curie('hasLabel'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label, domain=None, range=Optional[Union[bool, Bool]])
 
-slots.instance__label_description = Slot(uri=SCHEMA.description, name="instance__label_description", curie=SCHEMA.curie('description'),
+slots.instance__label_description = Slot(uri=D4D.labelPattern, name="instance__label_description", curie=D4D.curie('labelPattern'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__label_description, domain=None, range=Optional[str])
 
 slots.instance__sampling_strategies = Slot(uri=D4D.samplingStrategies, name="instance__sampling_strategies", curie=D4D.curie('samplingStrategies'),
@@ -4287,7 +4287,7 @@ slots.samplingStrategy__source_data = Slot(uri=D4D.sourceData, name="samplingStr
 slots.samplingStrategy__is_representative = Slot(uri=D4D.isRepresentative, name="samplingStrategy__is_representative", curie=D4D.curie('isRepresentative'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__is_representative, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.samplingStrategy__representative_verification = Slot(uri=SCHEMA.description, name="samplingStrategy__representative_verification", curie=SCHEMA.curie('description'),
+slots.samplingStrategy__representative_verification = Slot(uri=D4D.verificationDescription, name="samplingStrategy__representative_verification", curie=D4D.curie('verificationDescription'),
                    model_uri=DATA_SHEETS_SCHEMA.samplingStrategy__representative_verification, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.samplingStrategy__why_not_representative = Slot(uri=D4D.whyNotRepresentative, name="samplingStrategy__why_not_representative", curie=D4D.curie('whyNotRepresentative'),
@@ -4308,7 +4308,7 @@ slots.relationships__relationship_details = Slot(uri=DCTERMS.description, name="
 slots.splits__split_details = Slot(uri=DCTERMS.description, name="splits__split_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.splits__split_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.dataAnomaly__anomaly_details = Slot(uri=DCTERMS.description, name="dataAnomaly__anomaly_details", curie=DCTERMS.curie('description'),
+slots.dataAnomaly__anomaly_details = Slot(uri=D4D.anomalyDetails, name="dataAnomaly__anomaly_details", curie=D4D.curie('anomalyDetails'),
                    model_uri=DATA_SHEETS_SCHEMA.dataAnomaly__anomaly_details, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.datasetBias__bias_type = Slot(uri=D4D.biasType, name="datasetBias__bias_type", curie=D4D.curie('biasType'),
@@ -4335,7 +4335,7 @@ slots.datasetLimitation__scope_impact = Slot(uri=D4D.scopeImpact, name="datasetL
 slots.datasetLimitation__recommended_mitigation = Slot(uri=D4D.recommendedMitigation, name="datasetLimitation__recommended_mitigation", curie=D4D.curie('recommendedMitigation'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetLimitation__recommended_mitigation, domain=None, range=Optional[str])
 
-slots.externalResource__future_guarantees = Slot(uri=DCTERMS.description, name="externalResource__future_guarantees", curie=DCTERMS.curie('description'),
+slots.externalResource__future_guarantees = Slot(uri=D4D.availabilityGuarantee, name="externalResource__future_guarantees", curie=D4D.curie('availabilityGuarantee'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__future_guarantees, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.externalResource__archival = Slot(uri=SCHEMA.archivedAt, name="externalResource__archival", curie=SCHEMA.curie('archivedAt'),
@@ -4443,7 +4443,7 @@ slots.missingDataDocumentation__handling_strategy = Slot(uri=D4D.handlingStrateg
 slots.rawDataSource__source_description = Slot(uri=DCTERMS.description, name="rawDataSource__source_description", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.rawDataSource__source_description, domain=None, range=str)
 
-slots.rawDataSource__source_type = Slot(uri=DCTERMS.type, name="rawDataSource__source_type", curie=DCTERMS.curie('type'),
+slots.rawDataSource__source_type = Slot(uri=D4D.sourceType, name="rawDataSource__source_type", curie=D4D.curie('sourceType'),
                    model_uri=DATA_SHEETS_SCHEMA.rawDataSource__source_type, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.rawDataSource__access_details = Slot(uri=D4D.accessDetails, name="rawDataSource__access_details", curie=D4D.curie('accessDetails'),
@@ -4509,7 +4509,7 @@ slots.annotationAnalysis__disagreement_patterns = Slot(uri=D4D.disagreementPatte
 slots.annotationAnalysis__annotation_quality_details = Slot(uri=D4D.annotationQualityDetails, name="annotationAnalysis__annotation_quality_details", curie=D4D.curie('annotationQualityDetails'),
                    model_uri=DATA_SHEETS_SCHEMA.annotationAnalysis__annotation_quality_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.machineAnnotationTools__tools = Slot(uri=SCHEMA.name, name="machineAnnotationTools__tools", curie=SCHEMA.curie('name'),
+slots.machineAnnotationTools__tools = Slot(uri=D4D.toolNames, name="machineAnnotationTools__tools", curie=D4D.curie('toolNames'),
                    model_uri=DATA_SHEETS_SCHEMA.machineAnnotationTools__tools, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.machineAnnotationTools__tool_descriptions = Slot(uri=D4D.toolDescriptions, name="machineAnnotationTools__tool_descriptions", curie=D4D.curie('toolDescriptions'),
@@ -4596,7 +4596,7 @@ slots.extensionMechanism__contribution_url = Slot(uri=D4D.contributionURL, name=
 slots.extensionMechanism__extension_details = Slot(uri=DCTERMS.description, name="extensionMechanism__extension_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.extensionMechanism__extension_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.ethicalReview__contact_person = Slot(uri=SCHEMA.contactPoint, name="ethicalReview__contact_person", curie=SCHEMA.curie('contactPoint'),
+slots.ethicalReview__contact_person = Slot(uri=D4D.ethicsContactPoint, name="ethicalReview__contact_person", curie=D4D.curie('ethicsContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.ethicalReview__contact_person, domain=None, range=Optional[Union[str, PersonId]])
 
 slots.ethicalReview__reviewing_organization = Slot(uri=SCHEMA.provider, name="ethicalReview__reviewing_organization", curie=SCHEMA.curie('provider'),
@@ -4689,7 +4689,7 @@ slots.licenseAndUseTerms__license_terms = Slot(uri=D4D.licenseDescription, name=
 slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="licenseAndUseTerms__data_use_permission", curie=DUO.curie('0000001'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__data_use_permission, domain=None, range=Optional[Union[Union[str, "DataUsePermissionEnum"], list[Union[str, "DataUsePermissionEnum"]]]])
 
-slots.licenseAndUseTerms__contact_person = Slot(uri=SCHEMA.contactPoint, name="licenseAndUseTerms__contact_person", curie=SCHEMA.curie('contactPoint'),
+slots.licenseAndUseTerms__contact_person = Slot(uri=D4D.licenseContactPoint, name="licenseAndUseTerms__contact_person", curie=D4D.curie('licenseContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__contact_person, domain=None, range=Optional[Union[str, PersonId]])
 
 slots.iPRestrictions__restrictions = Slot(uri=DCTERMS.rights, name="iPRestrictions__restrictions", curie=DCTERMS.curie('rights'),
@@ -4707,10 +4707,10 @@ slots.exportControlRegulatoryRestrictions__other_compliance = Slot(uri=D4D.other
 slots.exportControlRegulatoryRestrictions__confidentiality_level = Slot(uri=D4D.confidentialityLevel, name="exportControlRegulatoryRestrictions__confidentiality_level", curie=D4D.curie('confidentialityLevel'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__confidentiality_level, domain=None, range=Optional[Union[str, "ConfidentialityLevelEnum"]])
 
-slots.exportControlRegulatoryRestrictions__governance_committee_contact = Slot(uri=SCHEMA.contactPoint, name="exportControlRegulatoryRestrictions__governance_committee_contact", curie=SCHEMA.curie('contactPoint'),
+slots.exportControlRegulatoryRestrictions__governance_committee_contact = Slot(uri=D4D.governanceContactPoint, name="exportControlRegulatoryRestrictions__governance_committee_contact", curie=D4D.curie('governanceContactPoint'),
                    model_uri=DATA_SHEETS_SCHEMA.exportControlRegulatoryRestrictions__governance_committee_contact, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.variableMetadata__variable_name = Slot(uri=SCHEMA.name, name="variableMetadata__variable_name", curie=SCHEMA.curie('name'),
+slots.variableMetadata__variable_name = Slot(uri=D4D.variableName, name="variableMetadata__variable_name", curie=D4D.curie('variableName'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__variable_name, domain=None, range=str)
 
 slots.variableMetadata__data_type = Slot(uri=SCHEMA.DataType, name="variableMetadata__data_type", curie=SCHEMA.curie('DataType'),
@@ -4749,7 +4749,7 @@ slots.variableMetadata__measurement_technique = Slot(uri=SCHEMA.measurementTechn
 slots.variableMetadata__derivation = Slot(uri=DCTERMS.provenance, name="variableMetadata__derivation", curie=DCTERMS.curie('provenance'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__derivation, domain=None, range=Optional[str])
 
-slots.variableMetadata__quality_notes = Slot(uri=DCTERMS.description, name="variableMetadata__quality_notes", curie=DCTERMS.curie('description'),
+slots.variableMetadata__quality_notes = Slot(uri=D4D.qualityNotes, name="variableMetadata__quality_notes", curie=D4D.curie('qualityNotes'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__quality_notes, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.file__file_type = Slot(uri=D4D.fileType, name="file__file_type", curie=D4D.curie('fileType'),

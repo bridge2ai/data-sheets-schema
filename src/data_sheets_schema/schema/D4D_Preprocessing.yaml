@@ -233,9 +233,11 @@ classes:
           List of automated annotation tools with their versions. Format each entry as
           "ToolName version" (e.g., "spaCy 3.5.0", "NLTK 3.8", "GPT-4 turbo").
           Use "unknown" for version if not available (e.g., "Custom NER Model unknown").
-        slot_uri: schema:name
+        slot_uri: d4d:toolNames
         range: string
         multivalued: true
+        broad_mappings:
+          - schema:name
       tool_descriptions:
         description: >
           Descriptions of what each tool does in the annotation process and

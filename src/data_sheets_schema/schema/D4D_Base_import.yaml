@@ -331,11 +331,15 @@ slots:
 
   conforms_to_schema:
     description: The schema or data model to which the resource conforms.
-    slot_uri: dcterms:conformsTo
+    slot_uri: d4d:conformsToSchema
+    broad_mappings:
+      - dcterms:conformsTo
 
   conforms_to_class:
     description: The specific class or type within a schema to which the resource conforms.
-    slot_uri: dcterms:conformsTo
+    slot_uri: d4d:conformsToClass
+    broad_mappings:
+      - dcterms:conformsTo
 
   license:
     description: The legal license under which the resource is made available (e.g., "MIT", "CC-BY-4.0").
@@ -380,8 +384,12 @@ slots:
 
   doi:
     description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.
-    slot_uri: dcterms:identifier
+    slot_uri: d4d:doiIdentifier
     pattern: "10\\.\\d{4,}\\/.+"
+    broad_mappings:
+      - dcterms:identifier
+    exact_mappings:
+      - schema:identifier
 
   external_resources:
     description: >-

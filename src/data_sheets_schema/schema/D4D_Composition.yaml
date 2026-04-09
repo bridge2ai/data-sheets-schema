@@ -58,7 +58,9 @@ classes:
         description: >
           Multiple types of instances? (e.g., movies, users, and ratings).
         range: string
-        slot_uri: dcterms:type
+        slot_uri: d4d:instanceType
+        broad_mappings:
+          - dcterms:type
       data_substrate:
         description: >
           Type of data (e.g., raw text, images) from Bridge2AI standards.
@@ -80,7 +82,9 @@ classes:
         description: >
           If labeled, what pattern or format do labels follow?
         range: string
-        slot_uri: schema:description
+        slot_uri: d4d:labelPattern
+        broad_mappings:
+          - schema:description
       sampling_strategies:
         description: >
           References to one or more SamplingStrategy objects.
@@ -127,9 +131,11 @@ classes:
       representative_verification:
         description: >
           Explanation of how representativeness was validated or verified.
-        slot_uri: schema:description
+        slot_uri: d4d:verificationDescription
         range: string
         multivalued: true
+        broad_mappings:
+          - schema:description
       why_not_representative:
         description: >
           Explanation of why the sample is not representative, if applicable.
@@ -202,7 +208,9 @@ classes:
           Details on errors, noise sources, or redundancies in the dataset.
         range: string
         multivalued: true
-        slot_uri: dcterms:description
+        slot_uri: d4d:anomalyDetails
+        broad_mappings:
+          - dcterms:description
 
 
   DatasetBias:
@@ -289,7 +297,9 @@ classes:
           available and stable over time.
         range: string
         multivalued: true
-        slot_uri: dcterms:description
+        slot_uri: d4d:availabilityGuarantee
+        broad_mappings:
+          - dcterms:description
       archival:
         description: >
           Indication whether official archival versions of external resources

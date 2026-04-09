@@ -74,8 +74,8 @@ classes:
           This person can answer questions about licensing terms, usage restrictions,
           fees, and permissions.
         range: Person
-        slot_uri: schema:contactPoint
-        exact_mappings:
+        slot_uri: d4d:licenseContactPoint
+        broad_mappings:
           - schema:contactPoint
 
 
@@ -140,8 +140,8 @@ classes:
           questions about data governance policies, access procedures, and
           oversight mechanisms.
         range: Person
-        slot_uri: schema:contactPoint
-        exact_mappings:
+        slot_uri: d4d:governanceContactPoint
+        broad_mappings:
           - schema:contactPoint
 
 

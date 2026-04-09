@@ -185,9 +185,11 @@ classes:
       source_type:
         description: >
           Type of raw source (sensor, database, user input, web scraping, etc.).
-        slot_uri: dcterms:type
+        slot_uri: d4d:sourceType
         range: string
         multivalued: true
+        broad_mappings:
+          - dcterms:type
       access_details:
         description: >
           Information on how to access or retrieve the raw source data.

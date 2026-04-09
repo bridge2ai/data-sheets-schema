@@ -1947,9 +1947,12 @@
       "description": "The schema or data model to which the resource conforms.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/conformsToSchema"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/conformsTo"
       ],
-      "slot_uri": "http://purl.org/dc/terms/conformsTo",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conformsToSchema",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -1963,9 +1966,12 @@
       "description": "The specific class or type within a schema to which the resource conforms.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/conformsToClass"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/conformsTo"
       ],
-      "slot_uri": "http://purl.org/dc/terms/conformsTo",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/conformsToClass",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -2127,9 +2133,15 @@
       "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/doiIdentifier"
+      ],
+      "exact_mappings": [
+        "http://schema.org/identifier"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/identifier"
       ],
-      "slot_uri": "http://purl.org/dc/terms/identifier",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/doiIdentifier",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -3607,9 +3619,12 @@
       "description": "Short explanation describing the primary purpose of creating the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/questionResponse"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/description"
       ],
-      "slot_uri": "http://purl.org/dc/terms/description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/questionResponse",
       "alias": "response",
       "owner": "Purpose",
       "domain_of": [
@@ -3623,9 +3638,12 @@
       "description": "Short explanation describing the specific task or tasks for which this dataset was created.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/questionResponse"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/description"
       ],
-      "slot_uri": "http://purl.org/dc/terms/description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/questionResponse",
       "alias": "response",
       "owner": "Task",
       "domain_of": [
@@ -3639,9 +3657,12 @@
       "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/questionResponse"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/description"
       ],
-      "slot_uri": "http://purl.org/dc/terms/description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/questionResponse",
       "alias": "response",
       "owner": "AddressingGap",
       "domain_of": [
@@ -3787,9 +3808,12 @@
       "description": "Multiple types of instances? (e.g., movies, users, and ratings).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/instanceType"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/type"
       ],
-      "slot_uri": "http://purl.org/dc/terms/type",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/instanceType",
       "alias": "instance_type",
       "owner": "Instance",
       "domain_of": [
@@ -3854,9 +3878,12 @@
       "description": "If labeled, what pattern or format do labels follow?\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/labelPattern"
+      ],
+      "broad_mappings": [
         "http://schema.org/description"
       ],
-      "slot_uri": "http://schema.org/description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/labelPattern",
       "alias": "label_description",
       "owner": "Instance",
       "domain_of": [
@@ -3974,9 +4001,12 @@
       "description": "Explanation of how representativeness was validated or verified.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/verificationDescription"
+      ],
+      "broad_mappings": [
         "http://schema.org/description"
       ],
-      "slot_uri": "http://schema.org/description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/verificationDescription",
       "alias": "representative_verification",
       "owner": "SamplingStrategy",
       "domain_of": [
@@ -4093,9 +4123,12 @@
       "description": "Details on errors, noise sources, or redundancies in the dataset.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/anomalyDetails"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/description"
       ],
-      "slot_uri": "http://purl.org/dc/terms/description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/anomalyDetails",
       "alias": "anomaly_details",
       "owner": "DataAnomaly",
       "domain_of": [
@@ -4239,9 +4272,12 @@
       "description": "Explanation of any commitments that external resources will remain available and stable over time.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/availabilityGuarantee"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/description"
       ],
-      "slot_uri": "http://purl.org/dc/terms/description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/availabilityGuarantee",
       "alias": "future_guarantees",
       "owner": "ExternalResource",
       "domain_of": [
@@ -4832,9 +4868,12 @@
       "description": "Type of raw source (sensor, database, user input, web scraping, etc.).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/collection",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/sourceType"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/type"
       ],
-      "slot_uri": "http://purl.org/dc/terms/type",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/sourceType",
       "alias": "source_type",
       "owner": "RawDataSource",
       "domain_of": [
@@ -5209,9 +5248,12 @@
       "description": "List of automated annotation tools with their versions. Format each entry as \"ToolName version\" (e.g., \"spaCy 3.5.0\", \"NLTK 3.8\", \"GPT-4 turbo\"). Use \"unknown\" for version if not available (e.g., \"Custom NER Model unknown\").\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/toolNames"
+      ],
+      "broad_mappings": [
         "http://schema.org/name"
       ],
-      "slot_uri": "http://schema.org/name",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/toolNames",
       "alias": "tools",
       "owner": "MachineAnnotationTools",
       "domain_of": [
@@ -5684,12 +5726,12 @@
       "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/ethics",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/ethicsContactPoint"
+      ],
+      "broad_mappings": [
         "http://schema.org/contactPoint"
       ],
-      "exact_mappings": [
-        "http://schema.org/contactPoint"
-      ],
-      "slot_uri": "http://schema.org/contactPoint",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/ethicsContactPoint",
       "alias": "contact_person",
       "owner": "EthicalReview",
       "domain_of": [
@@ -6218,12 +6260,12 @@
       "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/licenseContactPoint"
+      ],
+      "broad_mappings": [
         "http://schema.org/contactPoint"
       ],
-      "exact_mappings": [
-        "http://schema.org/contactPoint"
-      ],
-      "slot_uri": "http://schema.org/contactPoint",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/licenseContactPoint",
       "alias": "contact_person",
       "owner": "LicenseAndUseTerms",
       "domain_of": [
@@ -6329,12 +6371,12 @@
       "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint"
+      ],
+      "broad_mappings": [
         "http://schema.org/contactPoint"
       ],
-      "exact_mappings": [
-        "http://schema.org/contactPoint"
-      ],
-      "slot_uri": "http://schema.org/contactPoint",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/governanceContactPoint",
       "alias": "governance_committee_contact",
       "owner": "ExportControlRegulatoryRestrictions",
       "domain_of": [
@@ -6348,12 +6390,13 @@
       "description": "The name or identifier of the variable as it appears in the data files.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
-        "http://schema.org/name"
+        "https://w3id.org/bridge2ai/data-sheets-schema/variableName"
       ],
-      "exact_mappings": [
-        "http://schema.org/name"
+      "broad_mappings": [
+        "http://schema.org/name",
+        "http://schema.org/identifier"
       ],
-      "slot_uri": "http://schema.org/name",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/variableName",
       "alias": "variable_name",
       "owner": "VariableMetadata",
       "domain_of": [
@@ -6570,9 +6613,12 @@
       "description": "Notes about data quality, reliability, or known issues specific to this variable.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/qualityNotes"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/description"
       ],
-      "slot_uri": "http://purl.org/dc/terms/description",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/qualityNotes",
       "alias": "quality_notes",
       "owner": "VariableMetadata",
       "domain_of": [
@@ -7932,7 +7978,10 @@
         {
           "name": "response",
           "description": "Short explanation describing the primary purpose of creating the dataset.",
-          "slot_uri": "dcterms:description",
+          "broad_mappings": [
+            "dcterms:description"
+          ],
+          "slot_uri": "d4d:questionResponse",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -7958,7 +8007,10 @@
         {
           "name": "response",
           "description": "Short explanation describing the specific task or tasks for which this dataset was created.",
-          "slot_uri": "dcterms:description",
+          "broad_mappings": [
+            "dcterms:description"
+          ],
+          "slot_uri": "d4d:questionResponse",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -7984,7 +8036,10 @@
         {
           "name": "response",
           "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
-          "slot_uri": "dcterms:description",
+          "broad_mappings": [
+            "dcterms:description"
+          ],
+          "slot_uri": "d4d:questionResponse",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -8158,7 +8213,10 @@
         {
           "name": "instance_type",
           "description": "Multiple types of instances? (e.g., movies, users, and ratings).\n",
-          "slot_uri": "dcterms:type",
+          "broad_mappings": [
+            "dcterms:type"
+          ],
+          "slot_uri": "d4d:instanceType",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -8189,7 +8247,10 @@
         {
           "name": "label_description",
           "description": "If labeled, what pattern or format do labels follow?\n",
-          "slot_uri": "schema:description",
+          "broad_mappings": [
+            "schema:description"
+          ],
+          "slot_uri": "d4d:labelPattern",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -8269,7 +8330,10 @@
         {
           "name": "representative_verification",
           "description": "Explanation of how representativeness was validated or verified.\n",
-          "slot_uri": "schema:description",
+          "broad_mappings": [
+            "schema:description"
+          ],
+          "slot_uri": "d4d:verificationDescription",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -8402,7 +8466,10 @@
         {
           "name": "anomaly_details",
           "description": "Details on errors, noise sources, or redundancies in the dataset.\n",
-          "slot_uri": "dcterms:description",
+          "broad_mappings": [
+            "dcterms:description"
+          ],
+          "slot_uri": "d4d:anomalyDetails",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -8539,7 +8606,10 @@
         {
           "name": "future_guarantees",
           "description": "Explanation of any commitments that external resources will remain available and stable over time.\n",
-          "slot_uri": "dcterms:description",
+          "broad_mappings": [
+            "dcterms:description"
+          ],
+          "slot_uri": "d4d:availabilityGuarantee",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -9096,7 +9166,10 @@
         {
           "name": "source_type",
           "description": "Type of raw source (sensor, database, user input, web scraping, etc.).\n",
-          "slot_uri": "dcterms:type",
+          "broad_mappings": [
+            "dcterms:type"
+          ],
+          "slot_uri": "d4d:sourceType",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -9438,7 +9511,10 @@
         {
           "name": "tools",
           "description": "List of automated annotation tools with their versions. Format each entry as \"ToolName version\" (e.g., \"spaCy 3.5.0\", \"NLTK 3.8\", \"GPT-4 turbo\"). Use \"unknown\" for version if not available (e.g., \"Custom NER Model unknown\").\n",
-          "slot_uri": "schema:name",
+          "broad_mappings": [
+            "schema:name"
+          ],
+          "slot_uri": "d4d:toolNames",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -10002,10 +10078,10 @@
         {
           "name": "contact_person",
           "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
-          "exact_mappings": [
+          "broad_mappings": [
             "schema:contactPoint"
           ],
-          "slot_uri": "schema:contactPoint",
+          "slot_uri": "d4d:ethicsContactPoint",
           "range": "Person",
           "@type": "SlotDefinition"
         },
@@ -10466,10 +10542,10 @@
         {
           "name": "contact_person",
           "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
-          "exact_mappings": [
+          "broad_mappings": [
             "schema:contactPoint"
           ],
-          "slot_uri": "schema:contactPoint",
+          "slot_uri": "d4d:licenseContactPoint",
           "range": "Person",
           "@type": "SlotDefinition"
         }
@@ -10565,10 +10641,10 @@
         {
           "name": "governance_committee_contact",
           "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
-          "exact_mappings": [
+          "broad_mappings": [
             "schema:contactPoint"
           ],
-          "slot_uri": "schema:contactPoint",
+          "slot_uri": "d4d:governanceContactPoint",
           "range": "Person",
           "@type": "SlotDefinition"
         }
@@ -10613,10 +10689,11 @@
         {
           "name": "variable_name",
           "description": "The name or identifier of the variable as it appears in the data files.",
-          "exact_mappings": [
-            "schema:name"
+          "broad_mappings": [
+            "schema:name",
+            "schema:identifier"
           ],
-          "slot_uri": "schema:name",
+          "slot_uri": "d4d:variableName",
           "range": "string",
           "required": true,
           "@type": "SlotDefinition"
@@ -10718,7 +10795,10 @@
         {
           "name": "quality_notes",
           "description": "Notes about data quality, reliability, or known issues specific to this variable.",
-          "slot_uri": "dcterms:description",
+          "broad_mappings": [
+            "dcterms:description"
+          ],
+          "slot_uri": "d4d:qualityNotes",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -10876,7 +10956,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-04-07T18:14:37",
   "source_file_size": 18558,
-  "generation_date": "2026-04-08T18:54:30",
+  "generation_date": "2026-04-08T19:59:45",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

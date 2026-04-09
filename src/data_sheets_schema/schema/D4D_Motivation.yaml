@@ -46,7 +46,9 @@ classes:
       response:
         description: "Short explanation describing the primary purpose of creating the dataset."
         range: string
-        slot_uri: dcterms:description
+        slot_uri: d4d:questionResponse
+        broad_mappings:
+          - dcterms:description
 
 
   Task:
@@ -56,7 +58,9 @@ classes:
       response:
         description: "Short explanation describing the specific task or tasks for which this dataset was created."
         range: string
-        slot_uri: dcterms:description
+        slot_uri: d4d:questionResponse
+        broad_mappings:
+          - dcterms:description
 
 
   AddressingGap:
@@ -66,7 +70,9 @@ classes:
       response:
         description: "Short explanation of the knowledge or resource gap that this dataset was intended to address."
         range: string
-        slot_uri: dcterms:description
+        slot_uri: d4d:questionResponse
+        broad_mappings:
+          - dcterms:description
 
 
   Creator:

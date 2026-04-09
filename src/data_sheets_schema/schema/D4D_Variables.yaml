@@ -44,9 +44,10 @@ classes:
           The name or identifier of the variable as it appears in the data files.
         range: string
         required: true
-        slot_uri: schema:name
-        exact_mappings:
+        slot_uri: d4d:variableName
+        broad_mappings:
           - schema:name
+          - schema:identifier
 
       data_type:
         description: >-
@@ -141,9 +142,11 @@ classes:
         description: >-
           Notes about data quality, reliability, or known issues specific
           to this variable.
-        slot_uri: dcterms:description
+        slot_uri: d4d:qualityNotes
         range: string
         multivalued: true
+        broad_mappings:
+          - dcterms:description
 
 enums:
 

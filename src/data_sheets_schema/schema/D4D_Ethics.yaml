@@ -50,8 +50,8 @@ classes:
           Contact person for questions about ethical review. Provides structured
           contact information including name, email, affiliation, and optional ORCID.
         range: Person
-        slot_uri: schema:contactPoint
-        exact_mappings:
+        slot_uri: d4d:ethicsContactPoint
+        broad_mappings:
           - schema:contactPoint
       reviewing_organization:
         description: >-
