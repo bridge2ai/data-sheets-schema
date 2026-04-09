@@ -281,10 +281,10 @@ sufficiently precise predicate. All resolve under `https://w3id.org/bridge2ai/da
 ### Approximate (broad_mappings) mappings
 The following slots use `broad_mappings` because no ontology provides an exact match:
 
-- **`d4d:hash`** → `broad_mappings: dcterms:identifier` — a hash value is a form of identifier
+- **`d4d:hashValue`** → `broad_mappings: dcterms:identifier` — a hash value is a form of identifier
   but `dcterms:identifier` is not specific to cryptographic hashes.
-- **`d4d:md5`** → same rationale; `schema:sha256` exists but MD5 has no Schema.org term.
-- **`d4d:doi`** → `broad_mappings: dcterms:identifier`; DOI is a specific identifier scheme
+- **`d4d:md5Checksum`** → same rationale; `schema:sha256` exists but MD5 has no Schema.org term.
+- **`d4d:doiIdentifier`** → `broad_mappings: dcterms:identifier`; DOI is a specific identifier scheme
   but no dedicated ontology predicate for DOI is widely used in DCAT/DC contexts.
 - **`d4d:conforms_to_schema` / `d4d:conforms_to_class`** → `broad_mappings: dcterms:conformsTo`;
   these are refinements of conformance but LinkML has no standard sub-property for schema/class

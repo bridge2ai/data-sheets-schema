@@ -549,7 +549,7 @@ enums:
       GB2312:
         description: Simplified Chinese character encoding standard.
       HZ-GB-2312:
-        description: 7-bit encoding for Simplified Chinese (GB2312)
+        description: 7-bit encoding for Simplified Chinese (GB2312).
       ISO-2022-CN-EXT:
         description: Extended ISO-2022 encoding for Chinese (includes both Simplified and Traditional).
       ISO-2022-CN:

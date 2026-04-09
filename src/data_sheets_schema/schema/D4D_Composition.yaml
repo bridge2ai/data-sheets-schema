@@ -317,8 +317,6 @@ classes:
           are included in the dataset.
         slot_uri: d4d:hasArchivalVersion
         range: boolean
-        broad_mappings:
-          - schema:archivedAt
       restrictions:
         description: >
           One or more descriptions of restrictions or fees associated with accessing

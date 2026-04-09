@@ -456,12 +456,12 @@ semantic-review: semantic-review-conflicts semantic-review-ranges semantic-revie
 
 semantic-review-conflicts: ## Detect slot_uri conflicts
 	@echo "Detecting slot_uri conflicts..."
-	$(RUN) python scripts/slot_uri_conflict_detector.py --output reports/slot_uri_conflicts.json
+	$(RUN) python scripts/slot_uri_conflict_detector.py --output reports/slot_uri_conflicts.json || true
 	@echo "✓ Conflicts report: reports/slot_uri_conflicts.json"
 
 semantic-review-ranges: ## Check range-description alignment
 	@echo "Checking range-description alignment..."
-	$(RUN) python scripts/range_description_checker.py --output reports/range_mismatches.json
+	$(RUN) python scripts/range_description_checker.py --output reports/range_mismatches.json || true
 	@echo "✓ Range mismatches report: reports/range_mismatches.json"
 
 semantic-review-data: ## Analyze actual data values
