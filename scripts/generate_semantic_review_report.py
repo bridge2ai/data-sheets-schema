@@ -54,8 +54,14 @@ def generate_executive_summary(reports: dict) -> str:
 
     lines.append("### Key Findings\n")
     lines.append(f"1. **slot_uri Conflicts:** {slot_uri.get('metadata', {}).get('total_conflicts', 0)} conflicts detected")
-    lines.append(f"   - Most severe: `dcterms:description` used by 40 different slots (semantic flattening)")
-    lines.append(f"   - Critical: Multiple core mappings (dcat:mediaType, dcterms:license, etc.)\n")
+    conflicts_list = slot_uri.get('conflicts', [])
+    if conflicts_list:
+        most_severe = max(conflicts_list, key=lambda c: c.get('conflict_count', 0))
+        lines.append(f"   - Most severe: `{most_severe.get('slot_uri', 'N/A')}` used by {most_severe.get('conflict_count', '?')} slots")
+        critical_uris = [c.get('slot_uri') for c in conflicts_list if c.get('severity') == 'CRITICAL']
+        if critical_uris:
+            lines.append(f"   - Critical URIs: {', '.join(f'`{u}`' for u in critical_uris[:5])}")
+    lines.append("")
 
     lines.append(f"2. **Range-Description Mismatches:** {ranges.get('metadata', {}).get('total_issues', 0)} issues")
     lines.append(f"   - HIGH priority: {ranges.get('summary', {}).get('HIGH', 0)} (boolean oversimplification, missing multivalued)")

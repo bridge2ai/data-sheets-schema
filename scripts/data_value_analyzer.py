@@ -157,7 +157,8 @@ def identify_issues(field_analyses: Dict[str, dict]) -> List[dict]:
 
         # Issue: Boolean field but multiple distinct string values
         if analysis['inferred_type'] == 'str' and not analysis['is_boolean']:
-            if field_path.endswith(('is_', 'has_', 'was_', 'are_')) or 'boolean' in field_path.lower():
+            last_segment = field_path.split('.')[-1]
+            if last_segment.startswith(('is_', 'has_', 'was_', 'are_')) or 'boolean' in last_segment.lower():
                 issues.append({
                     'field': field_path,
                     'issue_type': 'boolean_field_has_non_boolean_values',
