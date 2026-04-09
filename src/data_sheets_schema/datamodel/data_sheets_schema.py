@@ -1,5 +1,5 @@
 # Auto generated from data_sheets_schema.yaml by pythongen.py version: 0.0.1
-# Generation date: 2026-04-08T18:10:07
+# Generation date: 2026-04-08T18:54:33
 # Schema: data-sheets-schema
 #
 # id: https://w3id.org/bridge2ai/data-sheets-schema
@@ -3946,7 +3946,7 @@ slots.license = Slot(uri=DCTERMS.license, name="license", curie=DCTERMS.curie('l
 slots.keywords = Slot(uri=DCAT.keyword, name="keywords", curie=DCAT.curie('keyword'),
                    model_uri=DATA_SHEETS_SCHEMA.keywords, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.version = Slot(uri=DCTERMS.hasVersion, name="version", curie=DCTERMS.curie('hasVersion'),
+slots.version = Slot(uri=SCHEMA.version, name="version", curie=SCHEMA.curie('version'),
                    model_uri=DATA_SHEETS_SCHEMA.version, domain=None, range=Optional[str])
 
 slots.created_by = Slot(uri=DCTERMS.creator, name="created_by", curie=DCTERMS.curie('creator'),
@@ -3961,7 +3961,7 @@ slots.last_updated_on = Slot(uri=DCTERMS.modified, name="last_updated_on", curie
 slots.modified_by = Slot(uri=DCTERMS.contributor, name="modified_by", curie=DCTERMS.curie('contributor'),
                    model_uri=DATA_SHEETS_SCHEMA.modified_by, domain=None, range=Optional[str])
 
-slots.status = Slot(uri=DCTERMS.type, name="status", curie=DCTERMS.curie('type'),
+slots.status = Slot(uri=D4D.publicationStatus, name="status", curie=D4D.curie('publicationStatus'),
                    model_uri=DATA_SHEETS_SCHEMA.status, domain=None, range=Optional[str])
 
 slots.was_derived_from = Slot(uri=PROV.wasDerivedFrom, name="was_derived_from", curie=PROV.curie('wasDerivedFrom'),
@@ -4205,7 +4205,7 @@ slots.person__affiliation = Slot(uri=SCHEMA.affiliation, name="person__affiliati
 slots.person__email = Slot(uri=SCHEMA.email, name="person__email", curie=SCHEMA.curie('email'),
                    model_uri=DATA_SHEETS_SCHEMA.person__email, domain=None, range=Optional[str])
 
-slots.person__orcid = Slot(uri=SCHEMA.identifier, name="person__orcid", curie=SCHEMA.curie('identifier'),
+slots.person__orcid = Slot(uri=D4D.orcidIdentifier, name="person__orcid", curie=D4D.curie('orcidIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.person__orcid, domain=None, range=Optional[str],
                    pattern=re.compile(r'^\d{4}-\d{4}-\d{4}-\d{3}[0-9X]$'))
 
@@ -4233,10 +4233,10 @@ slots.task__response = Slot(uri=DCTERMS.description, name="task__response", curi
 slots.addressingGap__response = Slot(uri=DCTERMS.description, name="addressingGap__response", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.addressingGap__response, domain=None, range=Optional[str])
 
-slots.creator__principal_investigator = Slot(uri=DCTERMS.creator, name="creator__principal_investigator", curie=DCTERMS.curie('creator'),
+slots.creator__principal_investigator = Slot(uri=D4D.principalInvestigator, name="creator__principal_investigator", curie=D4D.curie('principalInvestigator'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__principal_investigator, domain=None, range=Optional[Union[str, PersonId]])
 
-slots.creator__affiliations = Slot(uri=SCHEMA.affiliation, name="creator__affiliations", curie=SCHEMA.curie('affiliation'),
+slots.creator__affiliations = Slot(uri=D4D.teamAffiliation, name="creator__affiliations", curie=D4D.curie('teamAffiliation'),
                    model_uri=DATA_SHEETS_SCHEMA.creator__affiliations, domain=None, range=Optional[Union[dict[Union[str, OrganizationId], Union[dict, Organization]], list[Union[dict, Organization]]]])
 
 slots.creator__credit_roles = Slot(uri=D4D.creditRoles, name="creator__credit_roles", curie=D4D.curie('creditRoles'),
@@ -4248,7 +4248,7 @@ slots.fundingMechanism__grantor = Slot(uri=SCHEMA.funder, name="fundingMechanism
 slots.fundingMechanism__grants = Slot(uri=SCHEMA.funding, name="fundingMechanism__grants", curie=SCHEMA.curie('funding'),
                    model_uri=DATA_SHEETS_SCHEMA.fundingMechanism__grants, domain=None, range=Optional[Union[dict[Union[str, GrantId], Union[dict, Grant]], list[Union[dict, Grant]]]])
 
-slots.grant__grant_number = Slot(uri=SCHEMA.identifier, name="grant__grant_number", curie=SCHEMA.curie('identifier'),
+slots.grant__grant_number = Slot(uri=D4D.grantIdentifier, name="grant__grant_number", curie=D4D.curie('grantIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.grant__grant_number, domain=None, range=Optional[str])
 
 slots.instance__data_topic = Slot(uri=DCAT.theme, name="instance__data_topic", curie=DCAT.curie('theme'),
@@ -4257,7 +4257,7 @@ slots.instance__data_topic = Slot(uri=DCAT.theme, name="instance__data_topic", c
 slots.instance__instance_type = Slot(uri=DCTERMS.type, name="instance__instance_type", curie=DCTERMS.curie('type'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__instance_type, domain=None, range=Optional[str])
 
-slots.instance__data_substrate = Slot(uri=DCTERMS.format, name="instance__data_substrate", curie=DCTERMS.curie('format'),
+slots.instance__data_substrate = Slot(uri=DCTERMS.type, name="instance__data_substrate", curie=DCTERMS.curie('type'),
                    model_uri=DATA_SHEETS_SCHEMA.instance__data_substrate, domain=None, range=Optional[Union[str, URIorCURIE]])
 
 slots.instance__counts = Slot(uri=SCHEMA.numberOfItems, name="instance__counts", curie=SCHEMA.curie('numberOfItems'),
@@ -4341,7 +4341,7 @@ slots.externalResource__future_guarantees = Slot(uri=DCTERMS.description, name="
 slots.externalResource__archival = Slot(uri=SCHEMA.archivedAt, name="externalResource__archival", curie=SCHEMA.curie('archivedAt'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__archival, domain=None, range=Optional[Union[Union[bool, Bool], list[Union[bool, Bool]]]])
 
-slots.externalResource__restrictions = Slot(uri=DCTERMS.accessRights, name="externalResource__restrictions", curie=DCTERMS.curie('accessRights'),
+slots.externalResource__restrictions = Slot(uri=D4D.externalResourceRestrictions, name="externalResource__restrictions", curie=D4D.curie('externalResourceRestrictions'),
                    model_uri=DATA_SHEETS_SCHEMA.externalResource__restrictions, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.confidentiality__confidential_elements_present = Slot(uri=D4D.confidential_elements_present, name="confidentiality__confidential_elements_present", curie=D4D.curie('confidential_elements_present'),
@@ -4383,7 +4383,7 @@ slots.sensitiveElement__sensitive_elements_present = Slot(uri=D4D.sensitive_elem
 slots.sensitiveElement__sensitivity_details = Slot(uri=DCTERMS.description, name="sensitiveElement__sensitivity_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.sensitiveElement__sensitivity_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.datasetRelationship__target_dataset = Slot(uri=SCHEMA.identifier, name="datasetRelationship__target_dataset", curie=SCHEMA.curie('identifier'),
+slots.datasetRelationship__target_dataset = Slot(uri=DCTERMS.relation, name="datasetRelationship__target_dataset", curie=DCTERMS.curie('relation'),
                    model_uri=DATA_SHEETS_SCHEMA.datasetRelationship__target_dataset, domain=None, range=str)
 
 slots.datasetRelationship__relationship_type = Slot(uri=SCHEMA.additionalType, name="datasetRelationship__relationship_type", curie=SCHEMA.curie('additionalType'),
@@ -4476,7 +4476,7 @@ slots.labelingStrategy__annotator_demographics = Slot(uri=D4D.annotatorDemograph
 slots.labelingStrategy__labeling_details = Slot(uri=DCTERMS.description, name="labelingStrategy__labeling_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.labelingStrategy__labeling_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.rawData__access_url = Slot(uri=DCAT.accessURL, name="rawData__access_url", curie=DCAT.curie('accessURL'),
+slots.rawData__access_url = Slot(uri=D4D.rawDataAccessURL, name="rawData__access_url", curie=D4D.curie('rawDataAccessURL'),
                    model_uri=DATA_SHEETS_SCHEMA.rawData__access_url, domain=None, range=Optional[Union[str, URI]])
 
 slots.rawData__raw_data_details = Slot(uri=DCTERMS.description, name="rawData__raw_data_details", curie=DCTERMS.curie('description'),
@@ -4548,7 +4548,7 @@ slots.intendedUse__use_category = Slot(uri=D4D.useCategory, name="intendedUse__u
 slots.prohibitedUse__prohibition_reason = Slot(uri=D4D.prohibitionReason, name="prohibitedUse__prohibition_reason", curie=D4D.curie('prohibitionReason'),
                    model_uri=DATA_SHEETS_SCHEMA.prohibitedUse__prohibition_reason, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.thirdPartySharing__is_shared = Slot(uri=DCTERMS.accessRights, name="thirdPartySharing__is_shared", curie=DCTERMS.curie('accessRights'),
+slots.thirdPartySharing__is_shared = Slot(uri=D4D.isExternallyShared, name="thirdPartySharing__is_shared", curie=D4D.curie('isExternallyShared'),
                    model_uri=DATA_SHEETS_SCHEMA.thirdPartySharing__is_shared, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.distributionFormat__access_urls = Slot(uri=DCAT.accessURL, name="distributionFormat__access_urls", curie=DCAT.curie('accessURL'),
@@ -4581,7 +4581,7 @@ slots.retentionLimits__retention_period = Slot(uri=D4D.retentionPeriod, name="re
 slots.retentionLimits__retention_details = Slot(uri=DCTERMS.description, name="retentionLimits__retention_details", curie=DCTERMS.curie('description'),
                    model_uri=DATA_SHEETS_SCHEMA.retentionLimits__retention_details, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.versionAccess__latest_version_doi = Slot(uri=SCHEMA.identifier, name="versionAccess__latest_version_doi", curie=SCHEMA.curie('identifier'),
+slots.versionAccess__latest_version_doi = Slot(uri=DCTERMS.hasVersion, name="versionAccess__latest_version_doi", curie=DCTERMS.curie('hasVersion'),
                    model_uri=DATA_SHEETS_SCHEMA.versionAccess__latest_version_doi, domain=None, range=Optional[str])
 
 slots.versionAccess__versions_available = Slot(uri=D4D.versionsAvailable, name="versionAccess__versions_available", curie=D4D.curie('versionsAvailable'),
@@ -4683,7 +4683,7 @@ slots.atRiskPopulations__assent_procedures = Slot(uri=D4D.assentProcedures, name
 slots.atRiskPopulations__guardian_consent = Slot(uri=D4D.guardianConsent, name="atRiskPopulations__guardian_consent", curie=D4D.curie('guardianConsent'),
                    model_uri=DATA_SHEETS_SCHEMA.atRiskPopulations__guardian_consent, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.licenseAndUseTerms__license_terms = Slot(uri=DCTERMS.license, name="licenseAndUseTerms__license_terms", curie=DCTERMS.curie('license'),
+slots.licenseAndUseTerms__license_terms = Slot(uri=D4D.licenseDescription, name="licenseAndUseTerms__license_terms", curie=D4D.curie('licenseDescription'),
                    model_uri=DATA_SHEETS_SCHEMA.licenseAndUseTerms__license_terms, domain=None, range=Optional[Union[str, list[str]]])
 
 slots.licenseAndUseTerms__data_use_permission = Slot(uri=DUO['0000001'], name="licenseAndUseTerms__data_use_permission", curie=DUO.curie('0000001'),
@@ -4734,7 +4734,7 @@ slots.variableMetadata__categories = Slot(uri=SCHEMA.valueReference, name="varia
 slots.variableMetadata__examples = Slot(uri=SKOS.example, name="variableMetadata__examples", curie=SKOS.curie('example'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__examples, domain=None, range=Optional[Union[str, list[str]]])
 
-slots.variableMetadata__is_identifier = Slot(uri=SCHEMA.identifier, name="variableMetadata__is_identifier", curie=SCHEMA.curie('identifier'),
+slots.variableMetadata__is_identifier = Slot(uri=D4D.isIdentifier, name="variableMetadata__is_identifier", curie=D4D.curie('isIdentifier'),
                    model_uri=DATA_SHEETS_SCHEMA.variableMetadata__is_identifier, domain=None, range=Optional[Union[bool, Bool]])
 
 slots.variableMetadata__is_sensitive = Slot(uri=D4D.isSensitive, name="variableMetadata__is_sensitive", curie=D4D.curie('isSensitive'),

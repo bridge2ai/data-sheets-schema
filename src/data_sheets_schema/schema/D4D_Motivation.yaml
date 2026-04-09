@@ -78,15 +78,18 @@ classes:
       principal_investigator:
         description: "A key individual (Principal Investigator) responsible for or overseeing dataset creation."
         range: Person
-        slot_uri: dcterms:creator
-        exact_mappings:
+        slot_uri: d4d:principalInvestigator
+        broad_mappings:
+          - dcterms:creator
           - schema:creator
       affiliations:
         description: "Organizations with which the creator or team is affiliated."
         range: Organization
         multivalued: true
         inlined_as_list: true
-        slot_uri: schema:affiliation
+        slot_uri: d4d:teamAffiliation
+        broad_mappings:
+          - schema:affiliation
       credit_roles:
         description: >-
           Contributor roles using the CRediT (Contributor Roles Taxonomy) for
@@ -135,4 +138,6 @@ classes:
       grant_number:
         description: "The alphanumeric identifier for the grant."
         range: string
-        slot_uri: schema:identifier
+        slot_uri: d4d:grantIdentifier
+        broad_mappings:
+          - schema:identifier

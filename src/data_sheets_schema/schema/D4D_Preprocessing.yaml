@@ -135,7 +135,7 @@ classes:
     attributes:
       access_url:
         description: "URL or access point for the raw data."
-        slot_uri: dcat:accessURL
+        slot_uri: d4d:rawDataAccessURL
         range: uri
       raw_data_details:
         description: >

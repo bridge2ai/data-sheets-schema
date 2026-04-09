@@ -108,7 +108,7 @@ classes:
           Indicates whether this variable serves as a unique identifier or key
           for records in the dataset.
         range: boolean
-        slot_uri: schema:identifier
+        slot_uri: d4d:isIdentifier
 
       is_sensitive:
         description: >-

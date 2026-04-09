@@ -52,7 +52,10 @@ classes:
           links, costs, or usage constraints).
         range: string
         multivalued: true
-        slot_uri: dcterms:license
+        slot_uri: d4d:licenseDescription
+        broad_mappings:
+          - dcterms:license
+          - dcterms:rights
       data_use_permission:
         description: >-
           Structured data use permissions using the Data Use Ontology (DUO).

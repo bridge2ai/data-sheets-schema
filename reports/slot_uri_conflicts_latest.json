@@ -1,0 +1,1142 @@
+{
+  "metadata": {
+    "tool": "slot_uri_conflict_detector",
+    "total_conflicts": 11
+  },
+  "conflicts": [
+    {
+      "slot_uri": "dcat:byteSize",
+      "severity": "MEDIUM",
+      "conflict_count": 2,
+      "usages": [
+        {
+          "slot_name": "bytes",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "Size of the data in bytes.",
+          "line": 0
+        },
+        {
+          "slot_name": "total_bytes",
+          "module": "D4D_FileCollection",
+          "file": "D4D_FileCollection.yaml",
+          "description": "Total size of all files in bytes.",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "bytes",
+            "action": "keep",
+            "new_slot_uri": "dcat:byteSize",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "total_bytes",
+            "action": "change",
+            "new_slot_uri": "d4d:total_bytes",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "dcterms:conformsTo",
+      "severity": "MEDIUM",
+      "conflict_count": 3,
+      "usages": [
+        {
+          "slot_name": "conforms_to",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "An established standard, specification, or schema to which the resource conforms.",
+          "line": 0
+        },
+        {
+          "slot_name": "conforms_to_schema",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "The schema or data model to which the resource conforms.",
+          "line": 0
+        },
+        {
+          "slot_name": "conforms_to_class",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "The specific class or type within a schema to which the resource conforms.",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "conforms_to",
+            "action": "keep",
+            "new_slot_uri": "dcterms:conformsTo",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "conforms_to_schema",
+            "action": "change",
+            "new_slot_uri": "d4d:conforms_to_schema",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "conforms_to_class",
+            "action": "change",
+            "new_slot_uri": "d4d:conforms_to_class",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "dcterms:description",
+      "severity": "CRITICAL",
+      "conflict_count": 40,
+      "usages": [
+        {
+          "slot_name": "acquisition_details",
+          "module": "D4D_Collection",
+          "file": "D4D_Collection.yaml",
+          "description": "Details on how data was acquired for each instance.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "mechanism_details",
+          "module": "D4D_Collection",
+          "file": "D4D_Collection.yaml",
+          "description": "Details on mechanisms or procedures used to collect the data.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "collector_details",
+          "module": "D4D_Collection",
+          "file": "D4D_Collection.yaml",
+          "description": "Details on who collected the data and their compensation.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "timeframe_details",
+          "module": "D4D_Collection",
+          "file": "D4D_Collection.yaml",
+          "description": "Details on the collection timeframe and relationship to data creation dates.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "collection_details",
+          "module": "D4D_Collection",
+          "file": "D4D_Collection.yaml",
+          "description": "Details on direct vs. indirect collection methods and sources.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "source_description",
+          "module": "D4D_Collection",
+          "file": "D4D_Collection.yaml",
+          "description": "Detailed description of where raw data comes from (e.g., sensors, databases, web APIs, manual collection).\n",
+          "line": 0
+        },
+        {
+          "slot_name": "missing",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Description of the missing data fields or elements.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "why_missing",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Explanation of why each piece of data is missing.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "relationship_details",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Details on relationships between instances (e.g., graph edges, ratings).\n",
+          "line": 0
+        },
+        {
+          "slot_name": "split_details",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Details on recommended data splits and their rationale.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "anomaly_details",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Details on errors, noise sources, or redundancies in the dataset.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "bias_description",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Detailed description of how this bias manifests in the dataset, including affected populations, features, or outcomes.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "limitation_description",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Detailed description of the limitation and its implications.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "future_guarantees",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Explanation of any commitments that external resources will remain available and stable over time.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "confidentiality_details",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Details on confidential data elements and handling procedures.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "warnings",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Specific content warnings describing potentially offensive, insulting, threatening, or anxiety-provoking content (e.g., violence, profanity, explicit imagery).",
+          "line": 0
+        },
+        {
+          "slot_name": "identification",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "How subpopulations are identified and defined (e.g., by age groups, gender, geographic region, disease status, or other demographic/clinical characteristics).",
+          "line": 0
+        },
+        {
+          "slot_name": "distribution",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "The distribution of instances across identified subpopulations, including counts, percentages, or proportions for each subgroup.",
+          "line": 0
+        },
+        {
+          "slot_name": "deidentification_details",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Details on de-identification procedures and residual risks.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "sensitivity_details",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Details on sensitive data elements present and handling procedures.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "review_details",
+          "module": "D4D_Ethics",
+          "file": "D4D_Ethics.yaml",
+          "description": "Details on ethical review processes, outcomes, and supporting documentation.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "impact_details",
+          "module": "D4D_Ethics",
+          "file": "D4D_Ethics.yaml",
+          "description": "Details on data protection impact analysis, outcomes, and documentation.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "notification_details",
+          "module": "D4D_Ethics",
+          "file": "D4D_Ethics.yaml",
+          "description": "Details on how individuals were notified about data collection.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "consent_details",
+          "module": "D4D_Ethics",
+          "file": "D4D_Ethics.yaml",
+          "description": "Details on how consent was requested, provided, and documented.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "revocation_details",
+          "module": "D4D_Ethics",
+          "file": "D4D_Ethics.yaml",
+          "description": "Details on consent revocation mechanisms and procedures.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "maintainer_details",
+          "module": "D4D_Maintenance",
+          "file": "D4D_Maintenance.yaml",
+          "description": "Details on who will support, host, or maintain the dataset.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "erratum_details",
+          "module": "D4D_Maintenance",
+          "file": "D4D_Maintenance.yaml",
+          "description": "Details on any errata or corrections to the dataset.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "update_details",
+          "module": "D4D_Maintenance",
+          "file": "D4D_Maintenance.yaml",
+          "description": "Details on update plans, responsible parties, and communication methods.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "retention_details",
+          "module": "D4D_Maintenance",
+          "file": "D4D_Maintenance.yaml",
+          "description": "Details on data retention limits and enforcement procedures.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "version_details",
+          "module": "D4D_Maintenance",
+          "file": "D4D_Maintenance.yaml",
+          "description": "Details on version support policies and obsolescence communication.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "extension_details",
+          "module": "D4D_Maintenance",
+          "file": "D4D_Maintenance.yaml",
+          "description": "Details on extension mechanisms, contribution validation, and communication.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "response",
+          "module": "D4D_Motivation",
+          "file": "D4D_Motivation.yaml",
+          "description": "Short explanation describing the primary purpose of creating the dataset.",
+          "line": 0
+        },
+        {
+          "slot_name": "response",
+          "module": "D4D_Motivation",
+          "file": "D4D_Motivation.yaml",
+          "description": "Short explanation describing the specific task or tasks for which this dataset was created.",
+          "line": 0
+        },
+        {
+          "slot_name": "response",
+          "module": "D4D_Motivation",
+          "file": "D4D_Motivation.yaml",
+          "description": "Short explanation of the knowledge or resource gap that this dataset was intended to address.",
+          "line": 0
+        },
+        {
+          "slot_name": "preprocessing_details",
+          "module": "D4D_Preprocessing",
+          "file": "D4D_Preprocessing.yaml",
+          "description": "Details on preprocessing steps applied to the data.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "cleaning_details",
+          "module": "D4D_Preprocessing",
+          "file": "D4D_Preprocessing.yaml",
+          "description": "Details on data cleaning procedures applied.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "labeling_details",
+          "module": "D4D_Preprocessing",
+          "file": "D4D_Preprocessing.yaml",
+          "description": "Details on labeling/annotation procedures and quality metrics.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "raw_data_details",
+          "module": "D4D_Preprocessing",
+          "file": "D4D_Preprocessing.yaml",
+          "description": "Details on raw data availability and access procedures.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "repository_details",
+          "module": "D4D_Uses",
+          "file": "D4D_Uses.yaml",
+          "description": "Details on the repository of known dataset uses.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "task_details",
+          "module": "D4D_Uses",
+          "file": "D4D_Uses.yaml",
+          "description": "Details on other potential tasks the dataset could be used for.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "impact_details",
+          "module": "D4D_Uses",
+          "file": "D4D_Uses.yaml",
+          "description": "Details on potential impacts, risks, and mitigation strategies.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "discouragement_details",
+          "module": "D4D_Uses",
+          "file": "D4D_Uses.yaml",
+          "description": "Details on tasks for which the dataset should not be used.\n",
+          "line": 0
+        },
+        {
+          "slot_name": "quality_notes",
+          "module": "D4D_Variables",
+          "file": "D4D_Variables.yaml",
+          "description": "Notes about data quality, reliability, or known issues specific to this variable.",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "acquisition_details",
+            "action": "keep",
+            "new_slot_uri": "dcterms:description",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "mechanism_details",
+            "action": "change",
+            "new_slot_uri": "d4d:mechanism_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "collector_details",
+            "action": "change",
+            "new_slot_uri": "d4d:collector_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "timeframe_details",
+            "action": "change",
+            "new_slot_uri": "d4d:timeframe_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "collection_details",
+            "action": "change",
+            "new_slot_uri": "d4d:collection_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "source_description",
+            "action": "change",
+            "new_slot_uri": "d4d:source_description",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "missing",
+            "action": "change",
+            "new_slot_uri": "d4d:missing",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "why_missing",
+            "action": "change",
+            "new_slot_uri": "d4d:why_missing",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "relationship_details",
+            "action": "change",
+            "new_slot_uri": "d4d:relationship_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "split_details",
+            "action": "change",
+            "new_slot_uri": "d4d:split_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "anomaly_details",
+            "action": "change",
+            "new_slot_uri": "d4d:anomaly_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "bias_description",
+            "action": "change",
+            "new_slot_uri": "d4d:bias_description",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "limitation_description",
+            "action": "change",
+            "new_slot_uri": "d4d:limitation_description",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "future_guarantees",
+            "action": "change",
+            "new_slot_uri": "d4d:future_guarantees",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "confidentiality_details",
+            "action": "change",
+            "new_slot_uri": "d4d:confidentiality_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "warnings",
+            "action": "change",
+            "new_slot_uri": "d4d:warnings",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "identification",
+            "action": "change",
+            "new_slot_uri": "d4d:identification",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "distribution",
+            "action": "change",
+            "new_slot_uri": "d4d:distribution",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "deidentification_details",
+            "action": "change",
+            "new_slot_uri": "d4d:deidentification_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "sensitivity_details",
+            "action": "change",
+            "new_slot_uri": "d4d:sensitivity_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "review_details",
+            "action": "change",
+            "new_slot_uri": "d4d:review_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "impact_details",
+            "action": "change",
+            "new_slot_uri": "d4d:impact_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "notification_details",
+            "action": "change",
+            "new_slot_uri": "d4d:notification_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "consent_details",
+            "action": "change",
+            "new_slot_uri": "d4d:consent_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "revocation_details",
+            "action": "change",
+            "new_slot_uri": "d4d:revocation_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "maintainer_details",
+            "action": "change",
+            "new_slot_uri": "d4d:maintainer_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "erratum_details",
+            "action": "change",
+            "new_slot_uri": "d4d:erratum_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "update_details",
+            "action": "change",
+            "new_slot_uri": "d4d:update_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "retention_details",
+            "action": "change",
+            "new_slot_uri": "d4d:retention_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "version_details",
+            "action": "change",
+            "new_slot_uri": "d4d:version_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "extension_details",
+            "action": "change",
+            "new_slot_uri": "d4d:extension_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "response",
+            "action": "change",
+            "new_slot_uri": "d4d:response",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "response",
+            "action": "change",
+            "new_slot_uri": "d4d:response",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "response",
+            "action": "change",
+            "new_slot_uri": "d4d:response",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "preprocessing_details",
+            "action": "change",
+            "new_slot_uri": "d4d:preprocessing_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "cleaning_details",
+            "action": "change",
+            "new_slot_uri": "d4d:cleaning_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "labeling_details",
+            "action": "change",
+            "new_slot_uri": "d4d:labeling_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "raw_data_details",
+            "action": "change",
+            "new_slot_uri": "d4d:raw_data_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "repository_details",
+            "action": "change",
+            "new_slot_uri": "d4d:repository_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "task_details",
+            "action": "change",
+            "new_slot_uri": "d4d:task_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "impact_details",
+            "action": "change",
+            "new_slot_uri": "d4d:impact_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "discouragement_details",
+            "action": "change",
+            "new_slot_uri": "d4d:discouragement_details",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "quality_notes",
+            "action": "change",
+            "new_slot_uri": "d4d:quality_notes",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "dcterms:format",
+      "severity": "CRITICAL",
+      "conflict_count": 2,
+      "usages": [
+        {
+          "slot_name": "format",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "The file format, physical medium, or dimensions of a resource. This should be a file extension or MIME type.",
+          "line": 0
+        },
+        {
+          "slot_name": "data_substrate",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Type of data (e.g., raw text, images) from Bridge2AI standards.\n",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "format",
+            "action": "keep",
+            "new_slot_uri": "dcterms:format",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "data_substrate",
+            "action": "change",
+            "new_slot_uri": "d4d:data_substrate",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "dcterms:hasVersion",
+      "severity": "CRITICAL",
+      "conflict_count": 2,
+      "usages": [
+        {
+          "slot_name": "version",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
+          "line": 0
+        },
+        {
+          "slot_name": "latest_version_doi",
+          "module": "D4D_Maintenance",
+          "file": "D4D_Maintenance.yaml",
+          "description": "DOI or URL of the latest dataset version.",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "version",
+            "action": "keep",
+            "new_slot_uri": "dcterms:hasVersion",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "latest_version_doi",
+            "action": "change",
+            "new_slot_uri": "d4d:latest_version_doi",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "dcterms:identifier",
+      "severity": "MEDIUM",
+      "conflict_count": 4,
+      "usages": [
+        {
+          "slot_name": "hash",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "Cryptographic hash value of the data for integrity verification.",
+          "line": 0
+        },
+        {
+          "slot_name": "md5",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "MD5 hash value of the data (128-bit cryptographic hash).",
+          "line": 0
+        },
+        {
+          "slot_name": "sha256",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "SHA-256 hash value of the data (256-bit cryptographic hash, recommended).",
+          "line": 0
+        },
+        {
+          "slot_name": "doi",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing persistent identification.",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "hash",
+            "action": "keep",
+            "new_slot_uri": "dcterms:identifier",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "md5",
+            "action": "change",
+            "new_slot_uri": "d4d:md5",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "sha256",
+            "action": "change",
+            "new_slot_uri": "d4d:sha256",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "doi",
+            "action": "change",
+            "new_slot_uri": "d4d:doi",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "dcterms:license",
+      "severity": "CRITICAL",
+      "conflict_count": 2,
+      "usages": [
+        {
+          "slot_name": "license",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "The legal license under which the resource is made available (e.g., \"MIT\", \"CC-BY-4.0\").",
+          "line": 0
+        },
+        {
+          "slot_name": "license_terms",
+          "module": "D4D_Data_Governance",
+          "file": "D4D_Data_Governance.yaml",
+          "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "license",
+            "action": "keep",
+            "new_slot_uri": "dcterms:license",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "license_terms",
+            "action": "change",
+            "new_slot_uri": "d4d:license_terms",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "dcterms:type",
+      "severity": "CRITICAL",
+      "conflict_count": 3,
+      "usages": [
+        {
+          "slot_name": "status",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "The status of the resource (e.g., draft, published, deprecated).",
+          "line": 0
+        },
+        {
+          "slot_name": "source_type",
+          "module": "D4D_Collection",
+          "file": "D4D_Collection.yaml",
+          "description": "Type of raw source (sensor, database, user input, web scraping, etc.).\n",
+          "line": 0
+        },
+        {
+          "slot_name": "instance_type",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Multiple types of instances? (e.g., movies, users, and ratings).\n",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "status",
+            "action": "keep",
+            "new_slot_uri": "dcterms:type",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "source_type",
+            "action": "change",
+            "new_slot_uri": "d4d:source_type",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "instance_type",
+            "action": "change",
+            "new_slot_uri": "d4d:instance_type",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "schema:contactPoint",
+      "severity": "HIGH",
+      "conflict_count": 2,
+      "usages": [
+        {
+          "slot_name": "contact_person",
+          "module": "D4D_Data_Governance",
+          "file": "D4D_Data_Governance.yaml",
+          "description": "Contact person for licensing questions. Provides structured contact information including name, email, affiliation, and optional ORCID. This person can answer questions about licensing terms, usage restrictions, fees, and permissions.",
+          "line": 0
+        },
+        {
+          "slot_name": "governance_committee_contact",
+          "module": "D4D_Data_Governance",
+          "file": "D4D_Data_Governance.yaml",
+          "description": "Contact person for data governance committee. This person can answer questions about data governance policies, access procedures, and oversight mechanisms.",
+          "line": 0
+        },
+        {
+          "slot_name": "contact_person",
+          "module": "D4D_Ethics",
+          "file": "D4D_Ethics.yaml",
+          "description": "Contact person for questions about ethical review. Provides structured contact information including name, email, affiliation, and optional ORCID.",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "contact_person",
+            "action": "keep",
+            "new_slot_uri": "schema:contactPoint",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "governance_committee_contact",
+            "action": "change",
+            "new_slot_uri": "d4d:governance_committee_contact",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "contact_person",
+            "action": "change",
+            "new_slot_uri": "d4d:contact_person",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "schema:description",
+      "severity": "MEDIUM",
+      "conflict_count": 3,
+      "usages": [
+        {
+          "slot_name": "description",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "A human-readable description for a thing.",
+          "line": 0
+        },
+        {
+          "slot_name": "description",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "A human-readable description for this property.",
+          "line": 0
+        },
+        {
+          "slot_name": "label_description",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "If labeled, what pattern or format do labels follow?\n",
+          "line": 0
+        },
+        {
+          "slot_name": "representative_verification",
+          "module": "D4D_Composition",
+          "file": "D4D_Composition.yaml",
+          "description": "Explanation of how representativeness was validated or verified.\n",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "description",
+            "action": "keep",
+            "new_slot_uri": "schema:description",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "description",
+            "action": "change",
+            "new_slot_uri": "d4d:description",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "label_description",
+            "action": "change",
+            "new_slot_uri": "d4d:label_description",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "representative_verification",
+            "action": "change",
+            "new_slot_uri": "d4d:representative_verification",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    },
+    {
+      "slot_uri": "schema:name",
+      "severity": "MEDIUM",
+      "conflict_count": 3,
+      "usages": [
+        {
+          "slot_name": "name",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "A human-readable name for a thing.",
+          "line": 0
+        },
+        {
+          "slot_name": "name",
+          "module": "D4D_Base_import",
+          "file": "D4D_Base_import.yaml",
+          "description": "A human-readable name for this property.",
+          "line": 0
+        },
+        {
+          "slot_name": "tools",
+          "module": "D4D_Preprocessing",
+          "file": "D4D_Preprocessing.yaml",
+          "description": "List of automated annotation tools with their versions. Format each entry as \"ToolName version\" (e.g., \"spaCy 3.5.0\", \"NLTK 3.8\", \"GPT-4 turbo\"). Use \"unknown\" for version if not available (e.g., \"Custom NER Model unknown\").\n",
+          "line": 0
+        },
+        {
+          "slot_name": "variable_name",
+          "module": "D4D_Variables",
+          "file": "D4D_Variables.yaml",
+          "description": "The name or identifier of the variable as it appears in the data files.",
+          "line": 0
+        }
+      ],
+      "impact": {
+        "data_corruption_risk": "low",
+        "tool_breakage_risk": "high",
+        "semantic_integrity": "critical",
+        "migration_complexity": "low"
+      },
+      "recommended_fix": {
+        "approach": "differentiate_mappings",
+        "recommendations": [
+          {
+            "slot": "name",
+            "action": "keep",
+            "new_slot_uri": "schema:name",
+            "rationale": "Appears to match ontology term semantics"
+          },
+          {
+            "slot": "name",
+            "action": "change",
+            "new_slot_uri": "d4d:name",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "tools",
+            "action": "change",
+            "new_slot_uri": "d4d:tools",
+            "rationale": "Create custom D4D term to avoid conflict"
+          },
+          {
+            "slot": "variable_name",
+            "action": "change",
+            "new_slot_uri": "d4d:variable_name",
+            "rationale": "Create custom D4D term to avoid conflict"
+          }
+        ]
+      }
+    }
+  ]
+}

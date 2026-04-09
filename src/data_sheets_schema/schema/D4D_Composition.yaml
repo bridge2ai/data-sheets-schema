@@ -65,7 +65,7 @@ classes:
         range: uriorcurie
         values_from:
           - B2AI_SUBSTRATE
-        slot_uri: dcterms:format
+        slot_uri: dcterms:type
       counts:
         description: >
           How many instances are there in total (of each type, if appropriate)?
@@ -302,7 +302,9 @@ classes:
           Description of any restrictions or fees associated with external resources.
         range: string
         multivalued: true
-        slot_uri: dcterms:accessRights
+        slot_uri: d4d:externalResourceRestrictions
+        broad_mappings:
+          - dcterms:accessRights
 
 
   Confidentiality:
@@ -425,7 +427,7 @@ classes:
         description: >-
           The dataset that this relationship points to. Can be specified by
           identifier, URL, or Dataset object.
-        slot_uri: schema:identifier
+        slot_uri: dcterms:relation
         range: string
         required: true
       relationship_type:

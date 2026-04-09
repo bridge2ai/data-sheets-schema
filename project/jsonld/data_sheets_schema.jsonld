@@ -2012,9 +2012,9 @@
       "description": "The version identifier of the resource (e.g., \"1.0\", \"2.3.1\").",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/dc/terms/hasVersion"
+        "http://schema.org/version"
       ],
-      "slot_uri": "http://purl.org/dc/terms/hasVersion",
+      "slot_uri": "http://schema.org/version",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -2092,9 +2092,9 @@
       "description": "The status of the resource (e.g., draft, published, deprecated).",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
-        "http://purl.org/dc/terms/type"
+        "https://w3id.org/bridge2ai/data-sheets-schema/publicationStatus"
       ],
-      "slot_uri": "http://purl.org/dc/terms/type",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/publicationStatus",
       "owner": "Information",
       "domain_of": [
         "Information"
@@ -3522,12 +3522,12 @@
       "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/base",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/orcidIdentifier"
+      ],
+      "broad_mappings": [
         "http://schema.org/identifier"
       ],
-      "exact_mappings": [
-        "http://schema.org/identifier"
-      ],
-      "slot_uri": "http://schema.org/identifier",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/orcidIdentifier",
       "alias": "orcid",
       "owner": "Person",
       "domain_of": [
@@ -3655,12 +3655,13 @@
       "description": "A key individual (Principal Investigator) responsible for or overseeing dataset creation.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
-        "http://purl.org/dc/terms/creator"
+        "https://w3id.org/bridge2ai/data-sheets-schema/principalInvestigator"
       ],
-      "exact_mappings": [
+      "broad_mappings": [
+        "http://purl.org/dc/terms/creator",
         "http://schema.org/creator"
       ],
-      "slot_uri": "http://purl.org/dc/terms/creator",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/principalInvestigator",
       "alias": "principal_investigator",
       "owner": "Creator",
       "domain_of": [
@@ -3674,9 +3675,12 @@
       "description": "Organizations with which the creator or team is affiliated.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/teamAffiliation"
+      ],
+      "broad_mappings": [
         "http://schema.org/affiliation"
       ],
-      "slot_uri": "http://schema.org/affiliation",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/teamAffiliation",
       "alias": "affiliations",
       "owner": "Creator",
       "domain_of": [
@@ -3745,9 +3749,12 @@
       "description": "The alphanumeric identifier for the grant.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/motivation",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/grantIdentifier"
+      ],
+      "broad_mappings": [
         "http://schema.org/identifier"
       ],
-      "slot_uri": "http://schema.org/identifier",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/grantIdentifier",
       "alias": "grant_number",
       "owner": "Grant",
       "domain_of": [
@@ -3796,12 +3803,12 @@
       "description": "Type of data (e.g., raw text, images) from Bridge2AI standards.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
-        "http://purl.org/dc/terms/format"
+        "http://purl.org/dc/terms/type"
       ],
       "values_from": [
         "B2AI_SUBSTRATE"
       ],
-      "slot_uri": "http://purl.org/dc/terms/format",
+      "slot_uri": "http://purl.org/dc/terms/type",
       "alias": "data_substrate",
       "owner": "Instance",
       "domain_of": [
@@ -4266,9 +4273,12 @@
       "description": "Description of any restrictions or fees associated with external resources.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
+        "https://w3id.org/bridge2ai/data-sheets-schema/externalResourceRestrictions"
+      ],
+      "broad_mappings": [
         "http://purl.org/dc/terms/accessRights"
       ],
-      "slot_uri": "http://purl.org/dc/terms/accessRights",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/externalResourceRestrictions",
       "alias": "restrictions",
       "owner": "ExternalResource",
       "domain_of": [
@@ -4495,9 +4505,9 @@
       "description": "The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/composition",
       "mappings": [
-        "http://schema.org/identifier"
+        "http://purl.org/dc/terms/relation"
       ],
-      "slot_uri": "http://schema.org/identifier",
+      "slot_uri": "http://purl.org/dc/terms/relation",
       "alias": "target_dataset",
       "owner": "DatasetRelationship",
       "domain_of": [
@@ -5017,9 +5027,9 @@
       "description": "URL or access point for the raw data.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling",
       "mappings": [
-        "http://www.w3.org/ns/dcat#accessURL"
+        "https://w3id.org/bridge2ai/data-sheets-schema/rawDataAccessURL"
       ],
-      "slot_uri": "http://www.w3.org/ns/dcat#accessURL",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/rawDataAccessURL",
       "alias": "access_url",
       "owner": "RawData",
       "domain_of": [
@@ -5409,9 +5419,9 @@
       "description": "Boolean indicating whether the dataset is distributed to parties external to the dataset-creating entity.\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/distribution",
       "mappings": [
-        "http://purl.org/dc/terms/accessRights"
+        "https://w3id.org/bridge2ai/data-sheets-schema/isExternallyShared"
       ],
-      "slot_uri": "http://purl.org/dc/terms/accessRights",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/isExternallyShared",
       "alias": "is_shared",
       "owner": "ThirdPartySharing",
       "domain_of": [
@@ -5591,9 +5601,9 @@
       "description": "DOI or URL of the latest dataset version.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/maintenance",
       "mappings": [
-        "http://schema.org/identifier"
+        "http://purl.org/dc/terms/hasVersion"
       ],
-      "slot_uri": "http://schema.org/identifier",
+      "slot_uri": "http://purl.org/dc/terms/hasVersion",
       "alias": "latest_version_doi",
       "owner": "VersionAccess",
       "domain_of": [
@@ -6167,9 +6177,13 @@
       "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/data-governance",
       "mappings": [
-        "http://purl.org/dc/terms/license"
+        "https://w3id.org/bridge2ai/data-sheets-schema/licenseDescription"
       ],
-      "slot_uri": "http://purl.org/dc/terms/license",
+      "broad_mappings": [
+        "http://purl.org/dc/terms/license",
+        "http://purl.org/dc/terms/rights"
+      ],
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/licenseDescription",
       "alias": "license_terms",
       "owner": "LicenseAndUseTerms",
       "domain_of": [
@@ -6476,9 +6490,9 @@
       "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
       "from_schema": "https://w3id.org/bridge2ai/data-sheets-schema/variables",
       "mappings": [
-        "http://schema.org/identifier"
+        "https://w3id.org/bridge2ai/data-sheets-schema/isIdentifier"
       ],
-      "slot_uri": "http://schema.org/identifier",
+      "slot_uri": "https://w3id.org/bridge2ai/data-sheets-schema/isIdentifier",
       "alias": "is_identifier",
       "owner": "VariableMetadata",
       "domain_of": [
@@ -7807,10 +7821,10 @@
         {
           "name": "orcid",
           "description": "ORCID (Open Researcher and Contributor ID) - a persistent digital identifier for researchers. Format: 0000-0000-0000-0000 (16 digits in groups of 4). Use this for stable cross-dataset identification.",
-          "exact_mappings": [
+          "broad_mappings": [
             "schema:identifier"
           ],
-          "slot_uri": "schema:identifier",
+          "slot_uri": "d4d:orcidIdentifier",
           "range": "string",
           "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$",
           "@type": "SlotDefinition"
@@ -7998,17 +8012,21 @@
         {
           "name": "principal_investigator",
           "description": "A key individual (Principal Investigator) responsible for or overseeing dataset creation.",
-          "exact_mappings": [
+          "broad_mappings": [
+            "dcterms:creator",
             "schema:creator"
           ],
-          "slot_uri": "dcterms:creator",
+          "slot_uri": "d4d:principalInvestigator",
           "range": "Person",
           "@type": "SlotDefinition"
         },
         {
           "name": "affiliations",
           "description": "Organizations with which the creator or team is affiliated.",
-          "slot_uri": "schema:affiliation",
+          "broad_mappings": [
+            "schema:affiliation"
+          ],
+          "slot_uri": "d4d:teamAffiliation",
           "range": "Organization",
           "multivalued": true,
           "inlined_as_list": true,
@@ -8094,7 +8112,10 @@
         {
           "name": "grant_number",
           "description": "The alphanumeric identifier for the grant.",
-          "slot_uri": "schema:identifier",
+          "broad_mappings": [
+            "schema:identifier"
+          ],
+          "slot_uri": "d4d:grantIdentifier",
           "range": "string",
           "@type": "SlotDefinition"
         }
@@ -8147,7 +8168,7 @@
           "values_from": [
             "B2AI_SUBSTRATE"
           ],
-          "slot_uri": "dcterms:format",
+          "slot_uri": "dcterms:type",
           "range": "uriorcurie",
           "@type": "SlotDefinition"
         },
@@ -8534,7 +8555,10 @@
         {
           "name": "restrictions",
           "description": "Description of any restrictions or fees associated with external resources.\n",
-          "slot_uri": "dcterms:accessRights",
+          "broad_mappings": [
+            "dcterms:accessRights"
+          ],
+          "slot_uri": "d4d:externalResourceRestrictions",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -8765,7 +8789,7 @@
         {
           "name": "target_dataset",
           "description": "The dataset that this relationship points to. Can be specified by identifier, URL, or Dataset object.",
-          "slot_uri": "schema:identifier",
+          "slot_uri": "dcterms:relation",
           "range": "string",
           "required": true,
           "@type": "SlotDefinition"
@@ -9256,7 +9280,7 @@
         {
           "name": "access_url",
           "description": "URL or access point for the raw data.",
-          "slot_uri": "dcat:accessURL",
+          "slot_uri": "d4d:rawDataAccessURL",
           "range": "uri",
           "@type": "SlotDefinition"
         },
@@ -9674,7 +9698,7 @@
         {
           "name": "is_shared",
           "description": "Boolean indicating whether the dataset is distributed to parties external to the dataset-creating entity.\n",
-          "slot_uri": "dcterms:accessRights",
+          "slot_uri": "d4d:isExternallyShared",
           "range": "boolean",
           "@type": "SlotDefinition"
         }
@@ -9899,7 +9923,7 @@
         {
           "name": "latest_version_doi",
           "description": "DOI or URL of the latest dataset version.",
-          "slot_uri": "schema:identifier",
+          "slot_uri": "dcterms:hasVersion",
           "range": "string",
           "@type": "SlotDefinition"
         },
@@ -10419,7 +10443,11 @@
         {
           "name": "license_terms",
           "description": "Description of the dataset's license and terms of use (including links, costs, or usage constraints).\n",
-          "slot_uri": "dcterms:license",
+          "broad_mappings": [
+            "dcterms:license",
+            "dcterms:rights"
+          ],
+          "slot_uri": "d4d:licenseDescription",
           "range": "string",
           "multivalued": true,
           "@type": "SlotDefinition"
@@ -10655,7 +10683,7 @@
         {
           "name": "is_identifier",
           "description": "Indicates whether this variable serves as a unique identifier or key for records in the dataset.",
-          "slot_uri": "schema:identifier",
+          "slot_uri": "d4d:isIdentifier",
           "range": "boolean",
           "@type": "SlotDefinition"
         },
@@ -10848,7 +10876,7 @@
   "source_file": "data_sheets_schema.yaml",
   "source_file_date": "2026-04-07T18:14:37",
   "source_file_size": 18558,
-  "generation_date": "2026-04-08T18:10:05",
+  "generation_date": "2026-04-08T18:54:30",
   "@type": "SchemaDefinition",
   "@context": [
     "project/jsonld/data_sheets_schema.context.jsonld",

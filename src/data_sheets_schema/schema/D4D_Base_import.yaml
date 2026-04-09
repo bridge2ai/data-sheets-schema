@@ -188,8 +188,8 @@ classes:
           Use this for stable cross-dataset identification.
         range: string
         pattern: "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$"
-        slot_uri: schema:identifier
-        exact_mappings:
+        slot_uri: d4d:orcidIdentifier
+        broad_mappings:
           - schema:identifier
 
   Information:
@@ -348,7 +348,7 @@ slots:
 
   version:
     description: The version identifier of the resource (e.g., "1.0", "2.3.1").
-    slot_uri: dcterms:hasVersion
+    slot_uri: schema:version
 
   created_by:
     description: The person or organization primarily responsible for creating the resource.
@@ -370,7 +370,7 @@ slots:
 
   status:
     description: The status of the resource (e.g., draft, published, deprecated).
-    slot_uri: dcterms:type
+    slot_uri: d4d:publicationStatus
 
   was_derived_from:
     description: A resource from which this resource was derived, in whole or in part.

@@ -52,7 +52,7 @@ classes:
           Boolean indicating whether the dataset is distributed to
           parties external to the dataset-creating entity.
         range: boolean
-        slot_uri: dcterms:accessRights
+        slot_uri: d4d:isExternallyShared
 
 
   DistributionFormat:
