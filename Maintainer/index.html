@@ -283,7 +283,7 @@
 <tr>
 <td><a href="../maintainer_details/">maintainer_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on who will support, host, or maintain the dataset</td>
+<td>Free-text description of the organization, team, or individual responsible fo...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -385,7 +385,8 @@ attributes:
     range: CreatorOrMaintainerEnum
   maintainer_details:
     name: maintainer_details
-    description: 'Details on who will support, host, or maintain the dataset.
+    description: 'Free-text description of the organization, team, or individual responsible
+      for maintaining the dataset, including contact information and hosting arrangements.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -422,7 +423,8 @@ attributes:
     range: CreatorOrMaintainerEnum
   maintainer_details:
     name: maintainer_details
-    description: 'Details on who will support, host, or maintain the dataset.
+    description: 'Free-text description of the organization, team, or individual responsible
+      for maintaining the dataset, including contact information and hosting arrangements.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -436,6 +438,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

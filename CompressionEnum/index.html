@@ -347,6 +347,7 @@
 
 
 <h1 id="enum-compressionenum">Enum: CompressionEnum</h1>
+<p><em>Compression algorithms and formats for file compression.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/CompressionEnum">data_sheets_schema:CompressionEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
@@ -361,37 +362,37 @@
 <tr>
 <td>gzip</td>
 <td>None</td>
-<td></td>
+<td>GNU zip compression (commonly used with</td>
 </tr>
 <tr>
 <td>bzip2</td>
 <td>None</td>
-<td></td>
+<td>Burrows-Wheeler block-sorting compression (commonly used with</td>
 </tr>
 <tr>
 <td>zip</td>
 <td>None</td>
-<td></td>
+<td>ZIP archive compression format</td>
 </tr>
 <tr>
 <td>tar</td>
 <td>None</td>
-<td></td>
+<td>Tape Archive format (typically combined with gzip or bzip2)</td>
 </tr>
 <tr>
 <td>xz</td>
 <td>None</td>
-<td></td>
+<td>XZ Utils compression using LZMA2 algorithm</td>
 </tr>
 <tr>
 <td>lzma</td>
 <td>None</td>
-<td></td>
+<td>Lempel-Ziv-Markov chain algorithm compression</td>
 </tr>
 <tr>
 <td>compress</td>
 <td>None</td>
-<td></td>
+<td>Unix compress utility (LZW compression)</td>
 </tr>
 </tbody>
 </table>
@@ -406,7 +407,7 @@
 <tbody>
 <tr>
 <td><a href="../compression/">compression</a></td>
-<td>compression format used, if any</td>
+<td>Compression format used, if any (e</td>
 </tr>
 </tbody>
 </table>
@@ -419,23 +420,32 @@
 <details>
 
 <pre><code class="language-yaml">name: CompressionEnum
+description: Compression algorithms and formats for file compression.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 permissible_values:
   gzip:
     text: gzip
+    description: GNU zip compression (commonly used with .gz extension).
   bzip2:
     text: bzip2
+    description: Burrows-Wheeler block-sorting compression (commonly used with .bz2
+      extension).
   zip:
     text: zip
+    description: ZIP archive compression format.
   tar:
     text: tar
+    description: Tape Archive format (typically combined with gzip or bzip2).
   xz:
     text: xz
+    description: XZ Utils compression using LZMA2 algorithm.
   lzma:
     text: lzma
+    description: Lempel-Ziv-Markov chain algorithm compression.
   compress:
     text: compress
+    description: Unix compress utility (LZW compression).
 
 </code></pre>
 

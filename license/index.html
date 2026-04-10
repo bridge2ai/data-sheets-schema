@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-license">Slot: license</h1>
+<p><em>The legal license under which the resource is made available (e.g., "MIT", "CC-BY-4.0").</em></p>
 <p>URI: <a href="http://purl.org/dc/terms/license">dcterms:license</a>
 Alias: license</p>
 <!-- no inheritance hierarchy -->
@@ -374,16 +375,6 @@ Alias: license</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Software/">Software</a></td>
-<td>A software program or library</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
@@ -394,13 +385,23 @@ Alias: license</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
 <td><a href="../FileCollection/">FileCollection</a></td>
 <td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Software/">Software</a></td>
+<td>A software program or library</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -437,6 +438,8 @@ Alias: license</p>
 <details>
 
 <pre><code class="language-yaml">name: license
+description: The legal license under which the resource is made available (e.g., &quot;MIT&quot;,
+  &quot;CC-BY-4.0&quot;).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcterms:license

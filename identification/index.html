@@ -354,7 +354,8 @@
 
 
 <h1 id="slot-identification">Slot: identification</h1>
-<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
+<p><em>How subpopulations are identified and defined (e.g., by age groups, gender, geographic region, disease status, or other demographic/clinical characteristics).</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/subpopulationIdentification">d4d:subpopulationIdentification</a>
 Alias: identification</p>
 <!-- no inheritance hierarchy -->
 
@@ -400,11 +401,15 @@ Alias: identification</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:description</td>
+<td>d4d:subpopulationIdentification</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:identification</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:description</td>
 </tr>
 </tbody>
 </table>
@@ -412,9 +417,13 @@ Alias: identification</p>
 <details>
 
 <pre><code class="language-yaml">name: identification
+description: How subpopulations are identified and defined (e.g., by age groups, gender,
+  geographic region, disease status, or other demographic/clinical characteristics).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:description
 rank: 1000
-slot_uri: dcterms:description
+slot_uri: d4d:subpopulationIdentification
 alias: identification
 owner: Subpopulation
 domain_of:

@@ -278,7 +278,7 @@
 <tr>
 <td><a href="../source_type/">source_type</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Type of raw source (sensor, database, user input, web scraping, etc</td>
+<td>One or more types of raw source (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -290,7 +290,7 @@
 <tr>
 <td><a href="../raw_data_format/">raw_data_format</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Format of the raw data before any preprocessing</td>
+<td>One or more formats of the raw data before any preprocessing (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -401,13 +401,15 @@ attributes:
     required: true
   source_type:
     name: source_type
-    description: 'Type of raw source (sensor, database, user input, web scraping,
-      etc.).
+    description: 'One or more types of raw source (e.g., sensor, database, user input,
+      web scraping).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    broad_mappings:
+    - dcterms:type
     rank: 1000
-    slot_uri: dcterms:type
+    slot_uri: d4d:sourceType
     domain_of:
     - RawDataSource
     range: string
@@ -425,7 +427,8 @@ attributes:
     range: string
   raw_data_format:
     name: raw_data_format
-    description: 'Format of the raw data before any preprocessing.
+    description: 'One or more formats of the raw data before any preprocessing (e.g.,
+      CSV, DICOM, JSON).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -467,13 +470,15 @@ attributes:
     required: true
   source_type:
     name: source_type
-    description: 'Type of raw source (sensor, database, user input, web scraping,
-      etc.).
+    description: 'One or more types of raw source (e.g., sensor, database, user input,
+      web scraping).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
+    broad_mappings:
+    - dcterms:type
     rank: 1000
-    slot_uri: dcterms:type
+    slot_uri: d4d:sourceType
     alias: source_type
     owner: RawDataSource
     domain_of:
@@ -495,7 +500,8 @@ attributes:
     range: string
   raw_data_format:
     name: raw_data_format
-    description: 'Format of the raw data before any preprocessing.
+    description: 'One or more formats of the raw data before any preprocessing (e.g.,
+      CSV, DICOM, JSON).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -509,6 +515,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

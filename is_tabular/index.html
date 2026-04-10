@@ -354,7 +354,8 @@
 
 
 <h1 id="slot-is_tabular">Slot: is_tabular</h1>
-<p>URI: <a href="http://schema.org/encodingFormat">schema:encodingFormat</a>
+<p><em>Whether the dataset is in tabular format (rows and columns). True if the data is structured as a table (e.g., CSV, TSV, relational database); false for unstructured formats such as images or free text.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/isTabular">d4d:isTabular</a>
 Alias: is_tabular</p>
 <!-- no inheritance hierarchy -->
 
@@ -369,13 +370,13 @@ Alias: is_tabular</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -400,7 +401,7 @@ Alias: is_tabular</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:encodingFormat</td>
+<td>d4d:isTabular</td>
 </tr>
 <tr>
 <td>native</td>
@@ -412,9 +413,12 @@ Alias: is_tabular</p>
 <details>
 
 <pre><code class="language-yaml">name: is_tabular
+description: Whether the dataset is in tabular format (rows and columns). True if
+  the data is structured as a table (e.g., CSV, TSV, relational database); false for
+  unstructured formats such as images or free text.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: schema:encodingFormat
+slot_uri: d4d:isTabular
 alias: is_tabular
 owner: Dataset
 domain_of:

@@ -291,6 +291,17 @@
 
 
 
+      DataSubset : collection_consents
+
+
+
+
+
+        DataSubset --&gt; "*" CollectionConsent : collection_consents
+        click CollectionConsent href "../CollectionConsent/"
+
+
+
       DataSubset : collection_mechanisms
 
 
@@ -299,6 +310,17 @@
 
         DataSubset --&gt; "*" CollectionMechanism : collection_mechanisms
         click CollectionMechanism href "../CollectionMechanism/"
+
+
+
+      DataSubset : collection_notifications
+
+
+
+
+
+        DataSubset --&gt; "*" CollectionNotification : collection_notifications
+        click CollectionNotification href "../CollectionNotification/"
 
 
 
@@ -340,6 +362,17 @@
       DataSubset : conforms_to_class
 
       DataSubset : conforms_to_schema
+
+      DataSubset : consent_revocations
+
+
+
+
+
+        DataSubset --&gt; "*" ConsentRevocation : consent_revocations
+        click ConsentRevocation href "../ConsentRevocation/"
+
+
 
       DataSubset : content_warnings
 
@@ -390,6 +423,17 @@
 
 
       DataSubset : description
+
+      DataSubset : direct_collection
+
+
+
+
+
+        DataSubset --&gt; "*" DirectCollection : direct_collection
+        click DirectCollection href "../DirectCollection/"
+
+
 
       DataSubset : discouraged_uses
 
@@ -817,6 +861,17 @@
 
 
 
+      DataSubset : relationships
+
+
+
+
+
+        DataSubset --&gt; "*" Relationships : relationships
+        click Relationships href "../Relationships/"
+
+
+
       DataSubset : resources
 
 
@@ -861,6 +916,17 @@
 
 
 
+      DataSubset : splits
+
+
+
+
+
+        DataSubset --&gt; "*" Splits : splits
+        click Splits href "../Splits/"
+
+
+
       DataSubset : status
 
       DataSubset : subpopulations
@@ -893,6 +959,17 @@
 
         DataSubset --&gt; "*" Task : tasks
         click Task href "../Task/"
+
+
+
+      DataSubset : third_party_sharing
+
+
+
+
+
+        DataSubset --&gt; "*" ThirdPartySharing : third_party_sharing
+        click ThirdPartySharing href "../ThirdPartySharing/"
 
 
 
@@ -1021,49 +1098,49 @@
 <tr>
 <td><a href="../purposes/">purposes</a></td>
 <td>* <br/> <a href="../Purpose/">Purpose</a></td>
-<td></td>
+<td>Purposes for which the dataset was created</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../tasks/">tasks</a></td>
 <td>* <br/> <a href="../Task/">Task</a></td>
-<td></td>
+<td>Tasks the dataset is intended to support</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../addressing_gaps/">addressing_gaps</a></td>
 <td>* <br/> <a href="../AddressingGap/">AddressingGap</a></td>
-<td></td>
+<td>Research or practical gaps this dataset addresses</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../creators/">creators</a></td>
 <td>* <br/> <a href="../Creator/">Creator</a></td>
-<td></td>
+<td>Individuals or organizations who created the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../funders/">funders</a></td>
 <td>* <br/> <a href="../FundingMechanism/">FundingMechanism</a></td>
-<td></td>
+<td>Funding mechanisms that supported dataset creation</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../subsets/">subsets</a></td>
 <td>* <br/> <a href="./">DataSubset</a></td>
-<td></td>
+<td>Subsets or splits of this dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../instances/">instances</a></td>
 <td>* <br/> <a href="../Instance/">Instance</a></td>
-<td></td>
+<td>Individual data instances or records in the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../anomalies/">anomalies</a></td>
 <td>* <br/> <a href="../DataAnomaly/">DataAnomaly</a></td>
-<td></td>
+<td>Known data quality issues, errors, or irregularities in the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1081,55 +1158,91 @@
 <tr>
 <td><a href="../confidential_elements/">confidential_elements</a></td>
 <td>* <br/> <a href="../Confidentiality/">Confidentiality</a></td>
-<td></td>
+<td>Confidential or restricted information within the dataset that requires acces...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../content_warnings/">content_warnings</a></td>
 <td>* <br/> <a href="../ContentWarning/">ContentWarning</a></td>
-<td></td>
+<td>Content warnings for potentially harmful, offensive, or disturbing material i...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../subpopulations/">subpopulations</a></td>
 <td>* <br/> <a href="../Subpopulation/">Subpopulation</a></td>
-<td></td>
+<td>Subpopulations represented within the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../sensitive_elements/">sensitive_elements</a></td>
 <td>* <br/> <a href="../SensitiveElement/">SensitiveElement</a></td>
-<td></td>
+<td>Sensitive data elements requiring special handling or access controls</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../relationships/">relationships</a></td>
+<td>* <br/> <a href="../Relationships/">Relationships</a></td>
+<td>Explicit relationships between individual instances in the dataset</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../splits/">splits</a></td>
+<td>* <br/> <a href="../Splits/">Splits</a></td>
+<td>Recommended data splits for this dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../acquisition_methods/">acquisition_methods</a></td>
 <td>* <br/> <a href="../InstanceAcquisition/">InstanceAcquisition</a></td>
-<td></td>
+<td>Methods used to acquire or obtain dataset instances</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../collection_mechanisms/">collection_mechanisms</a></td>
 <td>* <br/> <a href="../CollectionMechanism/">CollectionMechanism</a></td>
-<td></td>
+<td>Mechanisms, instruments, or tools used for data collection</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../sampling_strategies/">sampling_strategies</a></td>
 <td>* <br/> <a href="../SamplingStrategy/">SamplingStrategy</a></td>
-<td></td>
+<td>Strategies used to select data instances from a larger population</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../data_collectors/">data_collectors</a></td>
 <td>* <br/> <a href="../DataCollector/">DataCollector</a></td>
-<td></td>
+<td>Individuals or organizations responsible for collecting the data</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../collection_timeframes/">collection_timeframes</a></td>
 <td>* <br/> <a href="../CollectionTimeframe/">CollectionTimeframe</a></td>
-<td></td>
+<td>Time periods during which data was collected</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../direct_collection/">direct_collection</a></td>
+<td>* <br/> <a href="../DirectCollection/">DirectCollection</a></td>
+<td>Whether data was collected directly from individuals or via third parties</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../collection_notifications/">collection_notifications</a></td>
+<td>* <br/> <a href="../CollectionNotification/">CollectionNotification</a></td>
+<td>Notifications provided to individuals about data collection</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../collection_consents/">collection_consents</a></td>
+<td>* <br/> <a href="../CollectionConsent/">CollectionConsent</a></td>
+<td>Consent obtained from individuals for data collection and use</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../consent_revocations/">consent_revocations</a></td>
+<td>* <br/> <a href="../ConsentRevocation/">ConsentRevocation</a></td>
+<td>Mechanisms for individuals to revoke previously given consent</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1141,19 +1254,19 @@
 <tr>
 <td><a href="../raw_data_sources/">raw_data_sources</a></td>
 <td>* <br/> <a href="../RawDataSource/">RawDataSource</a></td>
-<td>Description of raw data sources before preprocessing</td>
+<td>List of raw data sources before preprocessing</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../ethical_reviews/">ethical_reviews</a></td>
 <td>* <br/> <a href="../EthicalReview/">EthicalReview</a></td>
-<td></td>
+<td>Ethical reviews and institutional oversight for the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../data_protection_impacts/">data_protection_impacts</a></td>
 <td>* <br/> <a href="../DataProtectionImpact/">DataProtectionImpact</a></td>
-<td></td>
+<td>Data protection impact assessments (DPIAs) conducted for the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1189,31 +1302,31 @@
 <tr>
 <td><a href="../preprocessing_strategies/">preprocessing_strategies</a></td>
 <td>* <br/> <a href="../PreprocessingStrategy/">PreprocessingStrategy</a></td>
-<td></td>
+<td>Preprocessing steps applied to the raw data</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../cleaning_strategies/">cleaning_strategies</a></td>
 <td>* <br/> <a href="../CleaningStrategy/">CleaningStrategy</a></td>
-<td></td>
+<td>Data cleaning and quality control procedures applied to the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../labeling_strategies/">labeling_strategies</a></td>
 <td>* <br/> <a href="../LabelingStrategy/">LabelingStrategy</a></td>
-<td></td>
+<td>Labeling or annotation methodologies applied to the data</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../raw_sources/">raw_sources</a></td>
 <td>* <br/> <a href="../RawData/">RawData</a></td>
-<td></td>
+<td>Raw, unprocessed source data before any preprocessing was applied</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../imputation_protocols/">imputation_protocols</a></td>
 <td>* <br/> <a href="../ImputationProtocol/">ImputationProtocol</a></td>
-<td>Data imputation methodology and techniques</td>
+<td>Data imputation protocols applied to handle missing values</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1231,31 +1344,31 @@
 <tr>
 <td><a href="../existing_uses/">existing_uses</a></td>
 <td>* <br/> <a href="../ExistingUse/">ExistingUse</a></td>
-<td></td>
+<td>Known existing uses of the dataset at the time of publication</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../use_repository/">use_repository</a></td>
 <td>* <br/> <a href="../UseRepository/">UseRepository</a></td>
-<td></td>
+<td>Repositories or registries tracking how the dataset has been used</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../other_tasks/">other_tasks</a></td>
 <td>* <br/> <a href="../OtherTask/">OtherTask</a></td>
-<td></td>
+<td>Additional tasks the dataset may support beyond its original intent</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../future_use_impacts/">future_use_impacts</a></td>
 <td>* <br/> <a href="../FutureUseImpact/">FutureUseImpact</a></td>
-<td></td>
+<td>Anticipated impacts of future uses, including risks and benefits</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../discouraged_uses/">discouraged_uses</a></td>
 <td>* <br/> <a href="../DiscouragedUse/">DiscouragedUse</a></td>
-<td></td>
+<td>Uses that are not recommended for this dataset due to limitations, risks, or ...</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1273,67 +1386,73 @@
 <tr>
 <td><a href="../distribution_formats/">distribution_formats</a></td>
 <td>* <br/> <a href="../DistributionFormat/">DistributionFormat</a></td>
-<td></td>
+<td>Formats in which the dataset is distributed or made available</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../distribution_dates/">distribution_dates</a></td>
 <td>* <br/> <a href="../DistributionDate/">DistributionDate</a></td>
-<td></td>
+<td>Dates when the dataset was or will be distributed or released</td>
+<td><a href="../Dataset/">Dataset</a></td>
+</tr>
+<tr>
+<td><a href="../third_party_sharing/">third_party_sharing</a></td>
+<td>* <br/> <a href="../ThirdPartySharing/">ThirdPartySharing</a></td>
+<td>Third-party distribution policies for the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../license_and_use_terms/">license_and_use_terms</a></td>
 <td>0..1 <br/> <a href="../LicenseAndUseTerms/">LicenseAndUseTerms</a></td>
-<td></td>
+<td>License and usage terms governing dataset access and use</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../ip_restrictions/">ip_restrictions</a></td>
 <td>0..1 <br/> <a href="../IPRestrictions/">IPRestrictions</a></td>
-<td></td>
+<td>Intellectual property restrictions on dataset use or redistribution</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../regulatory_restrictions/">regulatory_restrictions</a></td>
 <td>0..1 <br/> <a href="../ExportControlRegulatoryRestrictions/">ExportControlRegulatoryRestrictions</a></td>
-<td></td>
+<td>Regulatory and export control restrictions applicable to the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../maintainers/">maintainers</a></td>
 <td>* <br/> <a href="../Maintainer/">Maintainer</a></td>
-<td></td>
+<td>Individuals or organizations responsible for maintaining the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../errata/">errata</a></td>
 <td>* <br/> <a href="../Erratum/">Erratum</a></td>
-<td></td>
+<td>Known errors or corrections to the dataset since publication</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../updates/">updates</a></td>
 <td>0..1 <br/> <a href="../UpdatePlan/">UpdatePlan</a></td>
-<td></td>
+<td>Plans for future updates or versioning of the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../retention_limit/">retention_limit</a></td>
 <td>0..1 <br/> <a href="../RetentionLimits/">RetentionLimits</a></td>
-<td></td>
+<td>Data retention policies and limits for the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../version_access/">version_access</a></td>
 <td>0..1 <br/> <a href="../VersionAccess/">VersionAccess</a></td>
-<td></td>
+<td>Information about access to different versions of the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../extension_mechanism/">extension_mechanism</a></td>
 <td>0..1 <br/> <a href="../ExtensionMechanism/">ExtensionMechanism</a></td>
-<td></td>
+<td>Mechanisms for extending or contributing to the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1345,13 +1464,13 @@
 <tr>
 <td><a href="../is_deidentified/">is_deidentified</a></td>
 <td>0..1 <br/> <a href="../Deidentification/">Deidentification</a></td>
-<td></td>
+<td>De-identification status and procedures applied to the dataset</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
 <td><a href="../is_tabular/">is_tabular</a></td>
 <td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
-<td></td>
+<td>Whether the dataset is in tabular format (rows and columns)</td>
 <td><a href="../Dataset/">Dataset</a></td>
 </tr>
 <tr>
@@ -1375,43 +1494,43 @@
 <tr>
 <td><a href="../compression/">compression</a></td>
 <td>0..1 <br/> <a href="../CompressionEnum/">CompressionEnum</a></td>
-<td>compression format used, if any</td>
+<td>Compression format used, if any (e</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to/">conforms_to</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>An established standard, specification, or schema to which the resource confo...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to_class/">conforms_to_class</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The specific class or type within a schema to which the resource conforms</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to_schema/">conforms_to_schema</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The schema or data model to which the resource conforms</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../created_by/">created_by</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The person or organization primarily responsible for creating the resource</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../created_on/">created_on</a></td>
 <td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
-<td></td>
+<td>The date and time when the resource was created</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../doi/">doi</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>digital object identifier</td>
+<td>Digital Object Identifier (DOI) in format 10</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -1423,73 +1542,73 @@
 <tr>
 <td><a href="../issued/">issued</a></td>
 <td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
-<td></td>
+<td>Date of formal issuance or publication of the resource</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../keywords/">keywords</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>Keywords or tags describing the resource for discovery and classification</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../language/">language</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>language in which the information is expressed</td>
+<td>Language in which the information is expressed</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../last_updated_on/">last_updated_on</a></td>
 <td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
-<td></td>
+<td>The date and time when the resource was most recently modified or updated</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../license/">license</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The legal license under which the resource is made available (e</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../modified_by/">modified_by</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>A person or organization that contributed to modifying or updating the resour...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../page/">page</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>A landing page or web page providing access to or information about the resou...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../publisher/">publisher</a></td>
 <td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td></td>
+<td>The organization or entity responsible for making the resource available</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../status/">status</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The status of the resource (e</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../title/">title</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>the official title of the element</td>
+<td>The official title of the element</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../version/">version</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The version identifier of the resource (e</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../was_derived_from/">was_derived_from</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>A resource from which this resource was derived, in whole or in part</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -1676,6 +1795,10 @@ attributes:
     inlined_as_list: true
   total_file_count:
     name: total_file_count
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '156'
     description: Total number of files across all file collections in this dataset.
       Can be aggregated from file_collections[].file_count.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1688,6 +1811,10 @@ attributes:
     range: integer
   total_size_bytes:
     name: total_size_bytes
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 10737418240 (10 GiB = 10 × 1024³ bytes)
     description: Total size of all files in bytes across all file collections. Can
       be aggregated from file_collections[].total_bytes.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
@@ -1700,6 +1827,9 @@ attributes:
     range: integer
   purposes:
     name: purposes
+    description: Purposes for which the dataset was created. List of Purpose objects
+      from the Motivation module, each describing a specific creation goal or intended
+      application.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:purposes
@@ -1713,6 +1843,9 @@ attributes:
     inlined_as_list: true
   tasks:
     name: tasks
+    description: Tasks the dataset is intended to support. List of Task objects from
+      the Motivation module describing specific machine learning, research, or analytical
+      tasks.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:tasks
@@ -1726,6 +1859,9 @@ attributes:
     inlined_as_list: true
   addressing_gaps:
     name: addressing_gaps
+    description: Research or practical gaps this dataset addresses. List of AddressingGap
+      objects from the Motivation module, each describing a gap in existing datasets
+      or knowledge that this dataset fills.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:addressingGaps
@@ -1739,6 +1875,8 @@ attributes:
     inlined_as_list: true
   creators:
     name: creators
+    description: Individuals or organizations who created the dataset. List of Creator
+      objects describing authorship, roles, and affiliations of dataset creators.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: schema:creator
@@ -1752,6 +1890,9 @@ attributes:
     inlined_as_list: true
   funders:
     name: funders
+    description: Funding mechanisms that supported dataset creation. List of FundingMechanism
+      objects describing grants, contracts, or other funding sources including grantors
+      and grant identifiers.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: schema:funder
@@ -1765,11 +1906,12 @@ attributes:
     inlined_as_list: true
   subsets:
     name: subsets
+    description: Subsets or splits of this dataset. List of DataSubset objects from
+      the Composition module, each representing a logical partition such as training,
+      validation, or test splits, or demographic subgroups.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-    exact_mappings:
-    - schema:distribution
     rank: 1000
-    slot_uri: dcat:distribution
+    slot_uri: d4d:dataSubset
     alias: subsets
     owner: DataSubset
     domain_of:
@@ -1780,6 +1922,9 @@ attributes:
     inlined_as_list: true
   instances:
     name: instances
+    description: Individual data instances or records in the dataset. List of Instance
+      objects from the Composition module describing what each data point represents,
+      its type, and associated label information.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:instances
@@ -1793,6 +1938,9 @@ attributes:
     inlined_as_list: true
   anomalies:
     name: anomalies
+    description: Known data quality issues, errors, or irregularities in the dataset.
+      List of DataAnomaly objects from the Composition module, each documenting a
+      specific anomaly and its potential impact.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:anomalies
@@ -1837,6 +1985,9 @@ attributes:
     inlined_as_list: true
   confidential_elements:
     name: confidential_elements
+    description: Confidential or restricted information within the dataset that requires
+      access controls. List of Confidentiality objects describing what is confidential
+      and why it cannot be released.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:confidentialElements
@@ -1850,6 +2001,9 @@ attributes:
     inlined_as_list: true
   content_warnings:
     name: content_warnings
+    description: Content warnings for potentially harmful, offensive, or disturbing
+      material in the dataset. List of ContentWarning objects alerting users to sensitive
+      content categories.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:contentWarnings
@@ -1863,6 +2017,9 @@ attributes:
     inlined_as_list: true
   subpopulations:
     name: subpopulations
+    description: Subpopulations represented within the dataset. List of Subpopulation
+      objects from the Composition module describing demographic or other groups,
+      their representation, and any imbalances.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:subpopulations
@@ -1876,6 +2033,9 @@ attributes:
     inlined_as_list: true
   sensitive_elements:
     name: sensitive_elements
+    description: Sensitive data elements requiring special handling or access controls.
+      List of SensitiveElement objects identifying sensitive attributes such as personal
+      identifiers, protected health information, or legally sensitive content.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:sensitiveElements
@@ -1887,8 +2047,43 @@ attributes:
     multivalued: true
     inlined: true
     inlined_as_list: true
+  relationships:
+    name: relationships
+    description: Explicit relationships between individual instances in the dataset.
+      List of Relationships objects from the Composition module describing how instances
+      relate (e.g., graph edges, ratings, social network links).
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:relationships
+    alias: relationships
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Relationships
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  splits:
+    name: splits
+    description: Recommended data splits for this dataset. List of Splits objects
+      from the Composition module describing train/validation/test partitions and
+      the rationale for each split strategy.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:splits
+    alias: splits
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: Splits
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   acquisition_methods:
     name: acquisition_methods
+    description: Methods used to acquire or obtain dataset instances. List of InstanceAcquisition
+      objects from the Collection module describing how data was sourced, whether
+      directly observed or derived.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:acquisitionMethods
@@ -1902,6 +2097,9 @@ attributes:
     inlined_as_list: true
   collection_mechanisms:
     name: collection_mechanisms
+    description: Mechanisms, instruments, or tools used for data collection. List
+      of CollectionMechanism objects from the Collection module describing sensors,
+      surveys, APIs, or other collection instruments.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:collectionMechanisms
@@ -1915,6 +2113,9 @@ attributes:
     inlined_as_list: true
   sampling_strategies:
     name: sampling_strategies
+    description: Strategies used to select data instances from a larger population.
+      List of SamplingStrategy objects from the Collection module describing sampling
+      methodology, inclusion criteria, and limitations.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:samplingStrategies
@@ -1929,6 +2130,9 @@ attributes:
     inlined_as_list: true
   data_collectors:
     name: data_collectors
+    description: Individuals or organizations responsible for collecting the data.
+      List of DataCollector objects from the Collection module describing who performed
+      data collection and their roles.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:dataCollectors
@@ -1942,6 +2146,9 @@ attributes:
     inlined_as_list: true
   collection_timeframes:
     name: collection_timeframes
+    description: Time periods during which data was collected. List of CollectionTimeframe
+      objects from the Collection module describing collection start and end dates,
+      and any gaps in the collection period.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:collectionTimeframes
@@ -1950,6 +2157,70 @@ attributes:
     domain_of:
     - Dataset
     range: CollectionTimeframe
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  direct_collection:
+    name: direct_collection
+    description: Whether data was collected directly from individuals or via third
+      parties. List of DirectCollection objects from the Collection module describing
+      direct vs. indirect collection methods and sources.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:directCollection
+    alias: direct_collection
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: DirectCollection
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  collection_notifications:
+    name: collection_notifications
+    description: Notifications provided to individuals about data collection. List
+      of CollectionNotification objects from the Ethics module describing how and
+      when individuals were informed about the data collection.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:collectionNotifications
+    alias: collection_notifications
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: CollectionNotification
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  collection_consents:
+    name: collection_consents
+    description: Consent obtained from individuals for data collection and use. List
+      of CollectionConsent objects from the Ethics module describing how consent was
+      requested, provided, and documented.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:collectionConsents
+    alias: collection_consents
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: CollectionConsent
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
+  consent_revocations:
+    name: consent_revocations
+    description: Mechanisms for individuals to revoke previously given consent. List
+      of ConsentRevocation objects from the Ethics module describing how revocation
+      works and what happens to data after revocation.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:consentRevocations
+    alias: consent_revocations
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ConsentRevocation
     multivalued: true
     inlined: true
     inlined_as_list: true
@@ -1969,7 +2240,8 @@ attributes:
     inlined_as_list: true
   raw_data_sources:
     name: raw_data_sources
-    description: Description of raw data sources before preprocessing.
+    description: List of raw data sources before preprocessing. Each RawDataSource
+      object describes where the original data came from and how it can be accessed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:rawDataSources
@@ -1983,6 +2255,9 @@ attributes:
     inlined_as_list: true
   ethical_reviews:
     name: ethical_reviews
+    description: Ethical reviews and institutional oversight for the dataset. List
+      of EthicalReview objects from the Ethics module describing IRB approvals, ethics
+      committee reviews, and compliance certifications.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:ethicalReviews
@@ -1996,6 +2271,9 @@ attributes:
     inlined_as_list: true
   data_protection_impacts:
     name: data_protection_impacts
+    description: Data protection impact assessments (DPIAs) conducted for the dataset.
+      List of DataProtectionImpact objects from the Ethics module documenting privacy
+      risk assessments and mitigation measures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:dataProtectionImpacts
@@ -2080,6 +2358,9 @@ attributes:
     inlined_as_list: true
   preprocessing_strategies:
     name: preprocessing_strategies
+    description: Preprocessing steps applied to the raw data. List of PreprocessingStrategy
+      objects from the Preprocessing module describing normalization, transformation,
+      and other preparation steps.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:preprocessingStrategies
@@ -2093,6 +2374,9 @@ attributes:
     inlined_as_list: true
   cleaning_strategies:
     name: cleaning_strategies
+    description: Data cleaning and quality control procedures applied to the dataset.
+      List of CleaningStrategy objects from the Preprocessing module describing outlier
+      removal, deduplication, and error correction steps.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:cleaningStrategies
@@ -2106,6 +2390,9 @@ attributes:
     inlined_as_list: true
   labeling_strategies:
     name: labeling_strategies
+    description: Labeling or annotation methodologies applied to the data. List of
+      LabelingStrategy objects from the Preprocessing module describing annotation
+      procedures, annotator qualifications, and quality controls.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:labelingStrategies
@@ -2119,6 +2406,9 @@ attributes:
     inlined_as_list: true
   raw_sources:
     name: raw_sources
+    description: Raw, unprocessed source data before any preprocessing was applied.
+      List of RawData objects from the Preprocessing module describing original data
+      sources and their formats.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:rawSources
@@ -2132,7 +2422,9 @@ attributes:
     inlined_as_list: true
   imputation_protocols:
     name: imputation_protocols
-    description: Data imputation methodology and techniques.
+    description: Data imputation protocols applied to handle missing values. List
+      of ImputationProtocol objects from the Preprocessing module describing the imputation
+      technique, affected variables, and rationale.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:imputation_protocols
@@ -2173,6 +2465,9 @@ attributes:
     inlined_as_list: true
   existing_uses:
     name: existing_uses
+    description: Known existing uses of the dataset at the time of publication. List
+      of ExistingUse objects from the Uses module describing research, commercial,
+      or other applications of the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:existingUses
@@ -2186,6 +2481,9 @@ attributes:
     inlined_as_list: true
   use_repository:
     name: use_repository
+    description: Repositories or registries tracking how the dataset has been used.
+      List of UseRepository objects from the Uses module pointing to papers with code,
+      citation indices, or other use-tracking resources.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:useRepository
@@ -2199,6 +2497,9 @@ attributes:
     inlined_as_list: true
   other_tasks:
     name: other_tasks
+    description: Additional tasks the dataset may support beyond its original intent.
+      List of OtherTask objects from the Uses module describing potential applications
+      not originally planned by the dataset creators.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:otherTasks
@@ -2212,6 +2513,9 @@ attributes:
     inlined_as_list: true
   future_use_impacts:
     name: future_use_impacts
+    description: Anticipated impacts of future uses, including risks and benefits.
+      List of FutureUseImpact objects from the Uses module describing foreseeable
+      consequences of using this dataset in new applications.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:futureUseImpacts
@@ -2225,6 +2529,9 @@ attributes:
     inlined_as_list: true
   discouraged_uses:
     name: discouraged_uses
+    description: Uses that are not recommended for this dataset due to limitations,
+      risks, or ethical concerns. List of DiscouragedUse objects from the Uses module
+      explaining why certain applications should be avoided.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:discouragedUses
@@ -2268,6 +2575,9 @@ attributes:
     inlined_as_list: true
   distribution_formats:
     name: distribution_formats
+    description: Formats in which the dataset is distributed or made available. List
+      of DistributionFormat objects from the Distribution module describing file formats,
+      compression, and access methods.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:distributionFormats
@@ -2281,6 +2591,9 @@ attributes:
     inlined_as_list: true
   distribution_dates:
     name: distribution_dates
+    description: Dates when the dataset was or will be distributed or released. List
+      of DistributionDate objects from the Distribution module describing initial
+      release dates, version release dates, and planned future releases.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:distributionDates
@@ -2292,8 +2605,27 @@ attributes:
     multivalued: true
     inlined: true
     inlined_as_list: true
+  third_party_sharing:
+    name: third_party_sharing
+    description: Third-party distribution policies for the dataset. List of ThirdPartySharing
+      objects from the Distribution module describing whether and how the dataset
+      is shared with entities outside the creating organization.
+    from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    rank: 1000
+    slot_uri: d4d:thirdPartySharing
+    alias: third_party_sharing
+    owner: DataSubset
+    domain_of:
+    - Dataset
+    range: ThirdPartySharing
+    multivalued: true
+    inlined: true
+    inlined_as_list: true
   license_and_use_terms:
     name: license_and_use_terms
+    description: License and usage terms governing dataset access and use. LicenseAndUseTerms
+      object from the Data Governance module describing the applicable license, permitted
+      uses, and any restrictions.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: schema:license
@@ -2305,6 +2637,9 @@ attributes:
     inlined: true
   ip_restrictions:
     name: ip_restrictions
+    description: Intellectual property restrictions on dataset use or redistribution.
+      IPRestrictions object from the Data Governance module describing copyright,
+      trademark, or other IP considerations.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:ipRestrictions
@@ -2316,6 +2651,9 @@ attributes:
     inlined: true
   regulatory_restrictions:
     name: regulatory_restrictions
+    description: Regulatory and export control restrictions applicable to the dataset.
+      ExportControlRegulatoryRestrictions object from the Data Governance module describing
+      compliance requirements such as ITAR, EAR, or GDPR.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:regulatoryRestrictions
@@ -2328,6 +2666,9 @@ attributes:
     inlined: true
   maintainers:
     name: maintainers
+    description: Individuals or organizations responsible for maintaining the dataset.
+      List of Maintainer objects from the Maintenance module describing maintenance
+      contacts, roles, and support channels.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:maintainers
@@ -2341,6 +2682,9 @@ attributes:
     inlined_as_list: true
   errata:
     name: errata
+    description: Known errors or corrections to the dataset since publication. List
+      of Erratum objects from the Maintenance module describing discovered errors,
+      affected records, and correction procedures.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:errata
@@ -2354,6 +2698,9 @@ attributes:
     inlined_as_list: true
   updates:
     name: updates
+    description: Plans for future updates or versioning of the dataset. UpdatePlan
+      object from the Maintenance module describing update frequency, versioning policy,
+      and planned enhancements.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:updates
@@ -2365,6 +2712,9 @@ attributes:
     inlined: true
   retention_limit:
     name: retention_limit
+    description: Data retention policies and limits for the dataset. RetentionLimits
+      object from the Maintenance module describing how long the dataset will be available
+      and any deletion schedules.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:retentionLimit
@@ -2376,9 +2726,12 @@ attributes:
     inlined: true
   version_access:
     name: version_access
+    description: Information about access to different versions of the dataset. VersionAccess
+      object from the Maintenance module describing where older versions can be found
+      and how version history is maintained.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: dcat:accessURL
+    slot_uri: d4d:versionAccess
     alias: version_access
     owner: DataSubset
     domain_of:
@@ -2387,6 +2740,9 @@ attributes:
     inlined: true
   extension_mechanism:
     name: extension_mechanism
+    description: Mechanisms for extending or contributing to the dataset. ExtensionMechanism
+      object from the Maintenance module describing how others can propose additions,
+      corrections, or expansions.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:extensionMechanism
@@ -2415,6 +2771,9 @@ attributes:
     inlined_as_list: true
   is_deidentified:
     name: is_deidentified
+    description: De-identification status and procedures applied to the dataset. Deidentification
+      object describing whether the dataset contains personal data, what de-identification
+      methods were applied, and any residual re-identification risks.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: d4d:isDeidentified
@@ -2426,9 +2785,12 @@ attributes:
     inlined: true
   is_tabular:
     name: is_tabular
+    description: Whether the dataset is in tabular format (rows and columns). True
+      if the data is structured as a table (e.g., CSV, TSV, relational database);
+      false for unstructured formats such as images or free text.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: schema:encodingFormat
+    slot_uri: d4d:isTabular
     alias: is_tabular
     owner: DataSubset
     domain_of:
@@ -2483,7 +2845,7 @@ attributes:
     inlined_as_list: true
   compression:
     name: compression
-    description: compression format used, if any. e.g., gzip, bzip2, zip
+    description: Compression format used, if any (e.g., gzip, bzip2, zip).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcat:compressFormat
@@ -2496,6 +2858,8 @@ attributes:
     range: CompressionEnum
   conforms_to:
     name: conforms_to
+    description: An established standard, specification, or schema to which the resource
+      conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:conformsTo
@@ -2506,9 +2870,13 @@ attributes:
     range: string
   conforms_to_class:
     name: conforms_to_class
+    description: The specific class or type within a schema to which the resource
+      conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    broad_mappings:
+    - dcterms:conformsTo
     rank: 1000
-    slot_uri: dcterms:conformsTo
+    slot_uri: d4d:conformsToClass
     alias: conforms_to_class
     owner: DataSubset
     domain_of:
@@ -2516,9 +2884,12 @@ attributes:
     range: string
   conforms_to_schema:
     name: conforms_to_schema
+    description: The schema or data model to which the resource conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    broad_mappings:
+    - dcterms:conformsTo
     rank: 1000
-    slot_uri: dcterms:conformsTo
+    slot_uri: d4d:conformsToSchema
     alias: conforms_to_schema
     owner: DataSubset
     domain_of:
@@ -2526,6 +2897,8 @@ attributes:
     range: string
   created_by:
     name: created_by
+    description: The person or organization primarily responsible for creating the
+      resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:creator
@@ -2536,6 +2909,7 @@ attributes:
     range: string
   created_on:
     name: created_on
+    description: The date and time when the resource was created.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:created
@@ -2546,10 +2920,15 @@ attributes:
     range: datetime
   doi:
     name: doi
-    description: digital object identifier
+    description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+      persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:identifier
+    broad_mappings:
+    - dcterms:identifier
     rank: 1000
-    slot_uri: dcterms:identifier
+    slot_uri: d4d:doiIdentifier
     alias: doi
     owner: DataSubset
     domain_of:
@@ -2573,6 +2952,7 @@ attributes:
     range: uri
   issued:
     name: issued
+    description: Date of formal issuance or publication of the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:issued
@@ -2583,6 +2963,7 @@ attributes:
     range: datetime
   keywords:
     name: keywords
+    description: Keywords or tags describing the resource for discovery and classification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcat:keyword
@@ -2594,7 +2975,7 @@ attributes:
     multivalued: true
   language:
     name: language
-    description: language in which the information is expressed
+    description: Language in which the information is expressed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:inLanguage
@@ -2607,6 +2988,8 @@ attributes:
     range: string
   last_updated_on:
     name: last_updated_on
+    description: The date and time when the resource was most recently modified or
+      updated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:modified
@@ -2617,6 +3000,8 @@ attributes:
     range: datetime
   license:
     name: license
+    description: The legal license under which the resource is made available (e.g.,
+      "MIT", "CC-BY-4.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:license
@@ -2628,6 +3013,8 @@ attributes:
     range: string
   modified_by:
     name: modified_by
+    description: A person or organization that contributed to modifying or updating
+      the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:contributor
@@ -2638,6 +3025,8 @@ attributes:
     range: string
   page:
     name: page
+    description: A landing page or web page providing access to or information about
+      the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcat:landingPage
@@ -2648,6 +3037,11 @@ attributes:
     range: string
   publisher:
     name: publisher
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
+    description: The organization or entity responsible for making the resource available.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:publisher
@@ -2658,9 +3052,10 @@ attributes:
     range: uriorcurie
   status:
     name: status
+    description: The status of the resource (e.g., draft, published, deprecated).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: dcterms:type
+    slot_uri: d4d:publicationStatus
     alias: status
     owner: DataSubset
     domain_of:
@@ -2668,7 +3063,7 @@ attributes:
     range: string
   title:
     name: title
-    description: the official title of the element
+    description: The official title of the element.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:title
@@ -2679,9 +3074,10 @@ attributes:
     range: string
   version:
     name: version
+    description: The version identifier of the resource (e.g., "1.0", "2.3.1").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: dcterms:hasVersion
+    slot_uri: schema:version
     alias: version
     owner: DataSubset
     domain_of:
@@ -2690,6 +3086,7 @@ attributes:
     range: string
   was_derived_from:
     name: was_derived_from
+    description: A resource from which this resource was derived, in whole or in part.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - dcterms:source
@@ -2702,6 +3099,10 @@ attributes:
     range: string
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/my-dataset-001
     description: A unique identifier for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-data_protection_impacts">Slot: data_protection_impacts</h1>
+<p><em>Data protection impact assessments (DPIAs) conducted for the dataset. List of DataProtectionImpact objects from the Ethics module documenting privacy risk assessments and mitigation measures.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/dataProtectionImpacts">d4d:dataProtectionImpacts</a>
 Alias: data_protection_impacts</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: data_protection_impacts</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: data_protection_impacts</p>
 <details>
 
 <pre><code class="language-yaml">name: data_protection_impacts
+description: Data protection impact assessments (DPIAs) conducted for the dataset.
+  List of DataProtectionImpact objects from the Ethics module documenting privacy
+  risk assessments and mitigation measures.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:dataProtectionImpacts

@@ -364,8 +364,10 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - dcterms:description
     rank: 1000
-    slot_uri: dcterms:description
+    slot_uri: d4d:missingDataDescription
     domain_of:
     - MissingInfo
     range: string
@@ -376,8 +378,10 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - dcterms:description
     rank: 1000
-    slot_uri: dcterms:description
+    slot_uri: d4d:missingDataCause
     domain_of:
     - MissingInfo
     range: string
@@ -401,8 +405,10 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - dcterms:description
     rank: 1000
-    slot_uri: dcterms:description
+    slot_uri: d4d:missingDataDescription
     alias: missing
     owner: MissingInfo
     domain_of:
@@ -415,8 +421,10 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - dcterms:description
     rank: 1000
-    slot_uri: dcterms:description
+    slot_uri: d4d:missingDataCause
     alias: why_missing
     owner: MissingInfo
     domain_of:
@@ -425,6 +433,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

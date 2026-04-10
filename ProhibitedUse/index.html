@@ -266,7 +266,7 @@
 <tr>
 <td><a href="../prohibition_reason/">prohibition_reason</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Reason why this use is prohibited (e</td>
+<td>One or more reasons why this use is prohibited (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -359,8 +359,8 @@ is_a: DatasetProperty
 attributes:
   prohibition_reason:
     name: prohibition_reason
-    description: Reason why this use is prohibited (e.g., license restriction, ethical
-      concern, privacy risk, legal constraint).
+    description: One or more reasons why this use is prohibited (e.g., license restriction,
+      ethical concern, privacy risk, legal constraint).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
     slot_uri: d4d:prohibitionReason
@@ -384,8 +384,8 @@ is_a: DatasetProperty
 attributes:
   prohibition_reason:
     name: prohibition_reason
-    description: Reason why this use is prohibited (e.g., license restriction, ethical
-      concern, privacy risk, legal constraint).
+    description: One or more reasons why this use is prohibited (e.g., license restriction,
+      ethical concern, privacy risk, legal constraint).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
     slot_uri: d4d:prohibitionReason
@@ -397,6 +397,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

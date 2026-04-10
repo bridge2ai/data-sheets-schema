@@ -354,7 +354,8 @@
 
 
 <h1 id="slot-subsets">Slot: subsets</h1>
-<p>URI: <a href="http://www.w3.org/ns/dcat#distribution">dcat:distribution</a>
+<p><em>Subsets or splits of this dataset. List of DataSubset objects from the Composition module, each representing a logical partition such as training, validation, or test splits, or demographic subgroups.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/dataSubset">d4d:dataSubset</a>
 Alias: subsets</p>
 <!-- no inheritance hierarchy -->
 
@@ -369,13 +370,13 @@ Alias: subsets</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -405,15 +406,11 @@ Alias: subsets</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcat:distribution</td>
+<td>d4d:dataSubset</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:subsets</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>schema:distribution</td>
 </tr>
 </tbody>
 </table>
@@ -421,11 +418,12 @@ Alias: subsets</p>
 <details>
 
 <pre><code class="language-yaml">name: subsets
+description: Subsets or splits of this dataset. List of DataSubset objects from the
+  Composition module, each representing a logical partition such as training, validation,
+  or test splits, or demographic subgroups.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- schema:distribution
 rank: 1000
-slot_uri: dcat:distribution
+slot_uri: d4d:dataSubset
 alias: subsets
 owner: Dataset
 domain_of:

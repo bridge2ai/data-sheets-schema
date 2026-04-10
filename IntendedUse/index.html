@@ -276,13 +276,13 @@
 <tr>
 <td><a href="../usage_notes/">usage_notes</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Notes or caveats about using the dataset for intended purposes</td>
+<td>A note or caveat about using the dataset for its intended purposes</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../use_category/">use_category</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Category of intended use (e</td>
+<td>One or more categories of intended use (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -391,7 +391,7 @@ attributes:
     multivalued: true
   usage_notes:
     name: usage_notes
-    description: Notes or caveats about using the dataset for intended purposes.
+    description: A note or caveat about using the dataset for its intended purposes.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
     domain_of:
@@ -399,8 +399,8 @@ attributes:
     range: string
   use_category:
     name: use_category
-    description: Category of intended use (e.g., research, clinical, educational,
-      commercial, policy).
+    description: One or more categories of intended use (e.g., research, clinical,
+      educational, commercial, policy).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
     slot_uri: d4d:useCategory
@@ -438,7 +438,7 @@ attributes:
     multivalued: true
   usage_notes:
     name: usage_notes
-    description: Notes or caveats about using the dataset for intended purposes.
+    description: A note or caveat about using the dataset for its intended purposes.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
     alias: usage_notes
@@ -448,8 +448,8 @@ attributes:
     range: string
   use_category:
     name: use_category
-    description: Category of intended use (e.g., research, clinical, educational,
-      commercial, policy).
+    description: One or more categories of intended use (e.g., research, clinical,
+      educational, commercial, policy).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
     rank: 1000
     slot_uri: d4d:useCategory
@@ -461,6 +461,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

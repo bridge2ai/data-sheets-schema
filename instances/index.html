@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-instances">Slot: instances</h1>
+<p><em>Individual data instances or records in the dataset. List of Instance objects from the Composition module describing what each data point represents, its type, and associated label information.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/instances">d4d:instances</a>
 Alias: instances</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: instances</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: instances</p>
 <details>
 
 <pre><code class="language-yaml">name: instances
+description: Individual data instances or records in the dataset. List of Instance
+  objects from the Composition module describing what each data point represents,
+  its type, and associated label information.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:instances

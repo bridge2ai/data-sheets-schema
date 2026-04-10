@@ -304,7 +304,7 @@
 <tr>
 <td><a href="../instance_type/">instance_type</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Multiple types of instances? (e</td>
+<td>The type or types of instances in the dataset (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -445,12 +445,16 @@ attributes:
     range: uriorcurie
   instance_type:
     name: instance_type
-    description: 'Multiple types of instances? (e.g., movies, users, and ratings).
+    description: 'The type or types of instances in the dataset (e.g., "movie", "user",
+      "rating", "clinical record"). Use when the dataset contains multiple instance
+      types with different structures.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - dcterms:type
     rank: 1000
-    slot_uri: dcterms:type
+    slot_uri: d4d:instanceType
     domain_of:
     - Instance
     range: string
@@ -463,12 +467,16 @@ attributes:
     rank: 1000
     values_from:
     - B2AI_SUBSTRATE
-    slot_uri: dcterms:format
+    slot_uri: dcterms:type
     domain_of:
     - Instance
     range: uriorcurie
   counts:
     name: counts
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 42000 (42,000 patient records)
     description: 'How many instances are there in total (of each type, if appropriate)?
 
       '
@@ -495,8 +503,10 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - schema:description
     rank: 1000
-    slot_uri: schema:description
+    slot_uri: d4d:labelPattern
     domain_of:
     - Instance
     range: string
@@ -555,12 +565,16 @@ attributes:
     range: uriorcurie
   instance_type:
     name: instance_type
-    description: 'Multiple types of instances? (e.g., movies, users, and ratings).
+    description: 'The type or types of instances in the dataset (e.g., "movie", "user",
+      "rating", "clinical record"). Use when the dataset contains multiple instance
+      types with different structures.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - dcterms:type
     rank: 1000
-    slot_uri: dcterms:type
+    slot_uri: d4d:instanceType
     alias: instance_type
     owner: Instance
     domain_of:
@@ -575,7 +589,7 @@ attributes:
     rank: 1000
     values_from:
     - B2AI_SUBSTRATE
-    slot_uri: dcterms:format
+    slot_uri: dcterms:type
     alias: data_substrate
     owner: Instance
     domain_of:
@@ -583,6 +597,10 @@ attributes:
     range: uriorcurie
   counts:
     name: counts
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 42000 (42,000 patient records)
     description: 'How many instances are there in total (of each type, if appropriate)?
 
       '
@@ -613,8 +631,10 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - schema:description
     rank: 1000
-    slot_uri: schema:description
+    slot_uri: d4d:labelPattern
     alias: label_description
     owner: Instance
     domain_of:
@@ -651,6 +671,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

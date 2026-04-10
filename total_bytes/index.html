@@ -308,6 +308,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -354,7 +361,7 @@
 
 
 <h1 id="slot-total_bytes">Slot: total_bytes</h1>
-<p><em>Total size of all files in bytes.</em></p>
+<p><em>Total size of all files in this collection, in bytes (integer). Maps to dcat:byteSize.</em></p>
 <p>URI: <a href="http://www.w3.org/ns/dcat#byteSize">dcat:byteSize</a>
 Alias: total_bytes</p>
 <!-- no inheritance hierarchy -->
@@ -381,6 +388,21 @@ Alias: total_bytes</p>
 <li>Range: <a href="../Integer/">Integer</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>1073741824 (1 GiB = 1024³ bytes)</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -408,7 +430,12 @@ Alias: total_bytes</p>
 <details>
 
 <pre><code class="language-yaml">name: total_bytes
-description: Total size of all files in bytes.
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: 1073741824 (1 GiB = 1024³ bytes)
+description: Total size of all files in this collection, in bytes (integer). Maps
+  to dcat:byteSize.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcat:byteSize

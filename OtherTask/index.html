@@ -266,7 +266,7 @@
 <tr>
 <td><a href="../task_details/">task_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on other potential tasks the dataset could be used for</td>
+<td>Free-text description of other potential tasks the dataset could support, inc...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -357,7 +357,8 @@ is_a: DatasetProperty
 attributes:
   task_details:
     name: task_details
-    description: 'Details on other potential tasks the dataset could be used for.
+    description: 'Free-text description of other potential tasks the dataset could
+      support, including any prerequisites or limitations for those uses.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -381,7 +382,8 @@ is_a: DatasetProperty
 attributes:
   task_details:
     name: task_details
-    description: 'Details on other potential tasks the dataset could be used for.
+    description: 'Free-text description of other potential tasks the dataset could
+      support, including any prerequisites or limitations for those uses.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/uses
@@ -395,6 +397,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

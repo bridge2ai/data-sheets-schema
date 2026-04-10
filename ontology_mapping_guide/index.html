@@ -1,0 +1,1489 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/ontology_mapping_guide/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>D4D Ontology Mapping Guide - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#d4d-ontology-mapping-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              D4D Ontology Mapping Guide
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home/" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Schema Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        CLI Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#namespace-prefixes" class="md-nav__link">
+    Namespace Prefixes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mapping-strategy" class="md-nav__link">
+    Mapping Strategy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-slot-mappings-d4d_base_importyaml" class="md-nav__link">
+    Core Slot Mappings (D4D_Base_import.yaml)
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Slot Mappings (D4D_Base_import.yaml)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#base-class-uris" class="md-nav__link">
+    Base Class URIs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-specific-mapping-decisions" class="md-nav__link">
+    Module-Specific Mapping Decisions
+  </a>
+  
+    <nav class="md-nav" aria-label="Module-Specific Mapping Decisions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#d4d_distributionyaml-dcat-alignment" class="md-nav__link">
+    D4D_Distribution.yaml — DCAT alignment
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d4d_data_governanceyaml-duo-for-data-use-permissions" class="md-nav__link">
+    D4D_Data_Governance.yaml — DUO for data use permissions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d4d_collectionyaml-and-d4d_preprocessingyaml-raicroissant" class="md-nav__link">
+    D4D_Collection.yaml and D4D_Preprocessing.yaml — RAI/Croissant
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d4d_variablesyaml-qudt-for-units" class="md-nav__link">
+    D4D_Variables.yaml — QUDT for units
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d4d_motivationyaml-schemaorg-for-funding-and-contributors" class="md-nav__link">
+    D4D_Motivation.yaml — Schema.org for funding and contributors
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d4d_compositionyaml-aio-for-bias-types" class="md-nav__link">
+    D4D_Composition.yaml — AIO for bias types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d4d_maintenanceyaml-and-d4d_distributionyaml-dcterms-for-versions" class="md-nav__link">
+    D4D_Maintenance.yaml and D4D_Distribution.yaml — DCTERMS for versions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custom-d4d-terms" class="md-nav__link">
+    Custom d4d: Terms
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom d4d: Terms">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#identity-and-provenance" class="md-nav__link">
+    Identity and Provenance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#collection-and-annotation" class="md-nav__link">
+    Collection and Annotation
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consent-and-ethics" class="md-nav__link">
+    Consent and Ethics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sensitive-and-confidential-data" class="md-nav__link">
+    Sensitive and Confidential Data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing-and-cleaning" class="md-nav__link">
+    Preprocessing and Cleaning
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#uses-and-distribution" class="md-nav__link">
+    Uses and Distribution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance-and-versioning" class="md-nav__link">
+    Maintenance and Versioning
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#human-subjects-and-at-risk-populations" class="md-nav__link">
+    Human Subjects and At-Risk Populations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#composition-and-subpopulations" class="md-nav__link">
+    Composition and Subpopulations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous" class="md-nav__link">
+    Miscellaneous
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#known-limitations" class="md-nav__link">
+    Known Limitations
+  </a>
+  
+    <nav class="md-nav" aria-label="Known Limitations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#approximate-broad_mappings-mappings" class="md-nav__link">
+    Approximate (broad_mappings) mappings
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#duo-as-value-vocabulary-not-predicate-vocabulary" class="md-nav__link">
+    DUO as value vocabulary, not predicate vocabulary
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#raicroissant-coverage" class="md-nav__link">
+    RAI/Croissant coverage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aio-ontology-gaps" class="md-nav__link">
+    AIO ontology gaps
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/ontology_mapping_guide.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="d4d-ontology-mapping-guide">D4D Ontology Mapping Guide</h1>
+<h2 id="overview">Overview</h2>
+<p>Ontology mappings in the D4D schema serve two purposes: <strong>RDF serialization</strong> and <strong>semantic
+interoperability</strong>. Every <code>slot_uri</code> becomes the RDF predicate when D4D YAML is serialized to
+Turtle, JSON-LD, or other RDF formats. <code>exact_mappings</code>, <code>broad_mappings</code>, and <code>close_mappings</code>
+declare alignment with terms in external vocabularies, enabling federated queries and FAIR
+data discovery without requiring consumers to adopt the D4D namespace.</p>
+<p>Where a well-established ontology term exists and is semantically accurate, it is used directly
+as the <code>slot_uri</code>. Where no suitable standard term exists, a custom <code>d4d:</code> term is minted.</p>
+<hr />
+<h2 id="namespace-prefixes">Namespace Prefixes</h2>
+<table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Full URI</th>
+<th>Ontology / Standard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d</code></td>
+<td><code>https://w3id.org/bridge2ai/data-sheets-schema/</code></td>
+<td>D4D custom terms (this project)</td>
+</tr>
+<tr>
+<td><code>data_sheets_schema</code></td>
+<td><code>https://w3id.org/bridge2ai/data-sheets-schema/</code></td>
+<td>Alias for <code>d4d</code> used as default prefix</td>
+</tr>
+<tr>
+<td><code>dcterms</code></td>
+<td><code>http://purl.org/dc/terms/</code></td>
+<td>Dublin Core Terms — general metadata</td>
+</tr>
+<tr>
+<td><code>dcat</code></td>
+<td><code>http://www.w3.org/ns/dcat#</code></td>
+<td>Data Catalog Vocabulary — dataset/distribution metadata</td>
+</tr>
+<tr>
+<td><code>schema</code></td>
+<td><code>http://schema.org/</code></td>
+<td>Schema.org — broad structured data vocabulary</td>
+</tr>
+<tr>
+<td><code>prov</code></td>
+<td><code>http://www.w3.org/ns/prov#</code></td>
+<td>PROV-O — provenance ontology</td>
+</tr>
+<tr>
+<td><code>qudt</code></td>
+<td><code>http://qudt.org/schema/qudt/</code></td>
+<td>QUDT — quantities, units, dimensions, types</td>
+</tr>
+<tr>
+<td><code>skos</code></td>
+<td><code>http://www.w3.org/2004/02/skos/core#</code></td>
+<td>SKOS — knowledge organization / concept schemes</td>
+</tr>
+<tr>
+<td><code>AIO</code></td>
+<td><code>https://w3id.org/aio/</code></td>
+<td>Artificial Intelligence Ontology — AI/ML concepts</td>
+</tr>
+<tr>
+<td><code>DUO</code></td>
+<td><code>http://purl.obolibrary.org/obo/DUO_</code></td>
+<td>Data Use Ontology — data access and use conditions</td>
+</tr>
+<tr>
+<td><code>biolink</code></td>
+<td><code>https://w3id.org/biolink/vocab/</code></td>
+<td>Biolink Model — biomedical knowledge graph vocabulary</td>
+</tr>
+<tr>
+<td><code>sh</code></td>
+<td><code>https://w3id.org/shacl/</code></td>
+<td>SHACL — shapes constraint language</td>
+</tr>
+<tr>
+<td><code>linkml</code></td>
+<td><code>https://w3id.org/linkml/</code></td>
+<td>LinkML framework built-ins</td>
+</tr>
+<tr>
+<td><code>mediatypes</code></td>
+<td><code>https://www.iana.org/assignments/media-types/</code></td>
+<td>IANA media type registry</td>
+</tr>
+<tr>
+<td><code>B2AI_TOPIC</code></td>
+<td><code>https://w3id.org/bridge2ai/b2ai-standards-registry/</code></td>
+<td>Bridge2AI standards registry</td>
+</tr>
+<tr>
+<td><code>rai</code></td>
+<td><code>http://mlcommons.org/croissant/RAI/</code></td>
+<td>Responsible AI (Croissant/MLCommons)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mapping-strategy">Mapping Strategy</h2>
+<p>LinkML supports four mapping mechanisms:</p>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Meaning</th>
+<th>Use in D4D</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>slot_uri</code></td>
+<td>The primary RDF predicate; the slot's canonical identity in RDF</td>
+<td>Used for every slot; chosen to be the best single match</td>
+</tr>
+<tr>
+<td><code>exact_mappings</code></td>
+<td>Semantically equivalent term in another ontology</td>
+<td>Used when a second vocabulary has an identical concept</td>
+</tr>
+<tr>
+<td><code>broad_mappings</code></td>
+<td>A related but broader or less precise term</td>
+<td>Used when no exact match exists; indicates approximate alignment</td>
+</tr>
+<tr>
+<td><code>close_mappings</code></td>
+<td>Similar but not identical — overlapping semantics</td>
+<td>Used at the class level or when meaning is analogous but scope differs</td>
+</tr>
+</tbody>
+</table>
+<p>The guiding rule: prefer <code>dcterms</code>, <code>dcat</code>, or <code>schema:</code> terms for <code>slot_uri</code> when an accurate
+match exists. Fall back to <code>d4d:</code> for D4D-specific concepts (consent details, bias types,
+annotation protocols, etc.).</p>
+<hr />
+<h2 id="core-slot-mappings-d4d_base_importyaml">Core Slot Mappings (D4D_Base_import.yaml)</h2>
+<table>
+<thead>
+<tr>
+<th>Slot</th>
+<th><code>slot_uri</code></th>
+<th>Ontology</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>title</code></td>
+<td><code>dcterms:title</code></td>
+<td>Dublin Core</td>
+<td>Standard bibliographic title term</td>
+</tr>
+<tr>
+<td><code>language</code></td>
+<td><code>dcterms:language</code></td>
+<td>Dublin Core</td>
+<td>Standard language declaration; <code>schema:inLanguage</code> as exact mapping</td>
+</tr>
+<tr>
+<td><code>publisher</code></td>
+<td><code>dcterms:publisher</code></td>
+<td>Dublin Core</td>
+<td>Entity responsible for making resource available</td>
+</tr>
+<tr>
+<td><code>issued</code></td>
+<td><code>dcterms:issued</code></td>
+<td>Dublin Core</td>
+<td>Formal publication/issuance date</td>
+</tr>
+<tr>
+<td><code>page</code></td>
+<td><code>dcat:landingPage</code></td>
+<td>DCAT</td>
+<td>Web page describing (not delivering) the resource</td>
+</tr>
+<tr>
+<td><code>download_url</code></td>
+<td><code>dcat:downloadURL</code></td>
+<td>DCAT</td>
+<td>Direct data download link; <code>schema:url</code> as exact mapping</td>
+</tr>
+<tr>
+<td><code>bytes</code></td>
+<td><code>dcat:byteSize</code></td>
+<td>DCAT</td>
+<td>File size in bytes — DCAT distribution property</td>
+</tr>
+<tr>
+<td><code>format</code></td>
+<td><code>dcterms:format</code></td>
+<td>Dublin Core</td>
+<td>File format/extension</td>
+</tr>
+<tr>
+<td><code>media_type</code></td>
+<td><code>dcat:mediaType</code></td>
+<td>DCAT</td>
+<td>MIME type; <code>schema:encodingFormat</code> as exact mapping</td>
+</tr>
+<tr>
+<td><code>compression</code></td>
+<td><code>dcat:compressFormat</code></td>
+<td>DCAT</td>
+<td>Compression algorithm used</td>
+</tr>
+<tr>
+<td><code>keywords</code></td>
+<td><code>dcat:keyword</code></td>
+<td>DCAT</td>
+<td>Discovery keywords for the resource</td>
+</tr>
+<tr>
+<td><code>license</code></td>
+<td><code>dcterms:license</code></td>
+<td>Dublin Core</td>
+<td>Legal license term</td>
+</tr>
+<tr>
+<td><code>version</code></td>
+<td><code>schema:version</code></td>
+<td>Schema.org</td>
+<td>Version string</td>
+</tr>
+<tr>
+<td><code>created_by</code></td>
+<td><code>dcterms:creator</code></td>
+<td>Dublin Core</td>
+<td>Primary creator</td>
+</tr>
+<tr>
+<td><code>created_on</code></td>
+<td><code>dcterms:created</code></td>
+<td>Dublin Core</td>
+<td>Creation datetime</td>
+</tr>
+<tr>
+<td><code>last_updated_on</code></td>
+<td><code>dcterms:modified</code></td>
+<td>Dublin Core</td>
+<td>Last modification datetime</td>
+</tr>
+<tr>
+<td><code>modified_by</code></td>
+<td><code>dcterms:contributor</code></td>
+<td>Dublin Core</td>
+<td>Contributor to update</td>
+</tr>
+<tr>
+<td><code>conforms_to</code></td>
+<td><code>dcterms:conformsTo</code></td>
+<td>Dublin Core</td>
+<td>Standard or schema conformed to</td>
+</tr>
+<tr>
+<td><code>was_derived_from</code></td>
+<td><code>prov:wasDerivedFrom</code></td>
+<td>PROV-O</td>
+<td>Derivation provenance; <code>dcterms:source</code> as exact mapping</td>
+</tr>
+<tr>
+<td><code>external_resources</code></td>
+<td><code>dcterms:references</code></td>
+<td>Dublin Core</td>
+<td>Links to related resources</td>
+</tr>
+<tr>
+<td><code>resources</code></td>
+<td><code>schema:hasPart</code></td>
+<td>Schema.org</td>
+<td>Sub-datasets or component files</td>
+</tr>
+<tr>
+<td><code>sha256</code></td>
+<td><code>schema:sha256</code></td>
+<td>Schema.org</td>
+<td>Schema.org has a dedicated sha256 property</td>
+</tr>
+<tr>
+<td><code>hash</code></td>
+<td><code>d4d:hashValue</code></td>
+<td>D4D custom</td>
+<td>Generic hash; no standard single-algorithm-neutral term</td>
+</tr>
+<tr>
+<td><code>md5</code></td>
+<td><code>d4d:md5Checksum</code></td>
+<td>D4D custom</td>
+<td>MD5-specific; schema.org only defines sha256</td>
+</tr>
+<tr>
+<td><code>encoding</code></td>
+<td><code>d4d:characterEncoding</code></td>
+<td>D4D custom</td>
+<td>Character encoding; no precise DCAT/DC term at enum level</td>
+</tr>
+<tr>
+<td><code>doi</code></td>
+<td><code>d4d:doiIdentifier</code></td>
+<td>D4D custom</td>
+<td>DOI-specific; <code>dcterms:identifier</code> is broad mapping</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td><code>d4d:publicationStatus</code></td>
+<td>D4D custom</td>
+<td>Publication lifecycle status; no standard enum-backed term</td>
+</tr>
+<tr>
+<td><code>conforms_to_schema</code></td>
+<td><code>d4d:conformsToSchema</code></td>
+<td>D4D custom</td>
+<td>Schema-specific refinement of <code>dcterms:conformsTo</code></td>
+</tr>
+<tr>
+<td><code>conforms_to_class</code></td>
+<td><code>d4d:conformsToClass</code></td>
+<td>D4D custom</td>
+<td>Class-specific refinement of <code>dcterms:conformsTo</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="base-class-uris">Base Class URIs</h3>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th><code>class_uri</code></th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NamedThing</code></td>
+<td><code>schema:Thing</code></td>
+<td>Root Schema.org class for any identifiable entity</td>
+</tr>
+<tr>
+<td><code>Organization</code></td>
+<td><code>schema:Organization</code></td>
+<td>Direct Schema.org match</td>
+</tr>
+<tr>
+<td><code>Person</code></td>
+<td><code>schema:Person</code></td>
+<td>Direct Schema.org match</td>
+</tr>
+<tr>
+<td><code>Software</code></td>
+<td><code>schema:SoftwareApplication</code></td>
+<td>Direct Schema.org match</td>
+</tr>
+<tr>
+<td><code>Information</code></td>
+<td>— (inherits <code>NamedThing</code>)</td>
+<td>Abstract grouping; close mapping to <code>schema:CreativeWork</code></td>
+</tr>
+<tr>
+<td><code>DatasetCollection</code></td>
+<td>—</td>
+<td>Exact mapping: <code>dcat:Dataset</code>; close mapping: <code>dcat:Catalog</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="module-specific-mapping-decisions">Module-Specific Mapping Decisions</h2>
+<h3 id="d4d_distributionyaml-dcat-alignment">D4D_Distribution.yaml — DCAT alignment</h3>
+<p>Distribution metadata (access URLs, release dates, formats, access rights) maps heavily to
+DCAT. <code>dcat:accessURL</code> is used for access points, <code>dcterms:accessRights</code> for access conditions,
+<code>dcterms:rights</code> for rights statements, and <code>dcat:theme</code> for thematic classification.</p>
+<h3 id="d4d_data_governanceyaml-duo-for-data-use-permissions">D4D_Data_Governance.yaml — DUO for data use permissions</h3>
+<p>Data Use Ontology (DUO) terms are used as <code>meaning:</code> values on <code>DataUsePermissionEnum</code> permissible
+values (e.g., <code>DUO:0000004</code> for no restriction, <code>DUO:0000007</code> for disease-specific research).
+The enum itself uses <code>d4d:</code> for the slot_uri since DUO is an OBO ontology for values, not
+predicates. Regulatory compliance and license slots use <code>dcterms:</code> terms.</p>
+<h3 id="d4d_collectionyaml-and-d4d_preprocessingyaml-raicroissant">D4D_Collection.yaml and D4D_Preprocessing.yaml — RAI/Croissant</h3>
+<p>The Responsible AI (RAI) vocabulary from MLCommons/Croissant is used for <code>data_annotation_platform</code>
+(<code>rai:dataAnnotationPlatform</code>). Other collection-specific concepts (consent, collector demographics,
+acquisition methods) use <code>d4d:</code> terms, as no standard ontology covers these at the required
+specificity.</p>
+<h3 id="d4d_variablesyaml-qudt-for-units">D4D_Variables.yaml — QUDT for units</h3>
+<p>Variable unit declarations use <code>qudt:unit</code> as the <code>slot_uri</code>. This is the primary QUDT predicate
+for associating a unit of measurement with a quantity. Range is <code>uriorcurie</code> to allow QUDT unit
+URIs (e.g., <code>qudt:KilogramPerCubicMeter</code>) or custom values.</p>
+<h3 id="d4d_motivationyaml-schemaorg-for-funding-and-contributors">D4D_Motivation.yaml — Schema.org for funding and contributors</h3>
+<p>Funder and funding information use <code>schema:funder</code> and <code>schema:funding</code>. Creator credit roles
+use <code>d4d:creditRoles</code> (no standard slot for CRediT taxonomy associations).</p>
+<h3 id="d4d_compositionyaml-aio-for-bias-types">D4D_Composition.yaml — AIO for bias types</h3>
+<p><code>BiasTypeEnum</code> permissible values use <code>meaning:</code> to map to AIO ontology terms
+(e.g., <code>AIO:MeasurementBias</code>, <code>AIO:HistoricalBias</code>). For bias types without a 1:1 AIO match,
+<code>broad_mappings</code> to the closest AIO term is used instead.</p>
+<h3 id="d4d_maintenanceyaml-and-d4d_distributionyaml-dcterms-for-versions">D4D_Maintenance.yaml and D4D_Distribution.yaml — DCTERMS for versions</h3>
+<p><code>dcterms:hasVersion</code> covers version availability; <code>dcterms:available</code> is used for availability
+dates. Errata and update tracking use <code>d4d:</code> terms.</p>
+<hr />
+<h2 id="custom-d4d-terms">Custom d4d: Terms</h2>
+<p>The following <code>d4d:</code> slot URIs were minted because no standard ontology provided a
+sufficiently precise predicate. All resolve under <code>https://w3id.org/bridge2ai/data-sheets-schema/</code>.</p>
+<h3 id="identity-and-provenance">Identity and Provenance</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:doiIdentifier</code></td>
+<td>DOI-specific identifier (broader <code>dcterms:identifier</code> used as broad mapping)</td>
+</tr>
+<tr>
+<td><code>d4d:orcidIdentifier</code></td>
+<td>ORCID researcher identifier</td>
+</tr>
+<tr>
+<td><code>d4d:hashValue</code></td>
+<td>Generic cryptographic hash (algorithm-neutral)</td>
+</tr>
+<tr>
+<td><code>d4d:md5Checksum</code></td>
+<td>MD5-specific checksum</td>
+</tr>
+<tr>
+<td><code>d4d:conformsToSchema</code></td>
+<td>Schema-specific conformance (refinement of <code>dcterms:conformsTo</code>)</td>
+</tr>
+<tr>
+<td><code>d4d:conformsToClass</code></td>
+<td>Class-specific conformance (refinement of <code>dcterms:conformsTo</code>)</td>
+</tr>
+<tr>
+<td><code>d4d:publicationStatus</code></td>
+<td>Publication lifecycle status</td>
+</tr>
+<tr>
+<td><code>d4d:characterEncoding</code></td>
+<td>Character encoding scheme</td>
+</tr>
+</tbody>
+</table>
+<h3 id="collection-and-annotation">Collection and Annotation</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:collectionMechanisms</code></td>
+<td>Data collection mechanisms</td>
+</tr>
+<tr>
+<td><code>d4d:collectionType</code></td>
+<td>Type of collection (direct, inferred, etc.)</td>
+</tr>
+<tr>
+<td><code>d4d:collectionTimeframes</code></td>
+<td>Time period(s) of data collection</td>
+</tr>
+<tr>
+<td><code>d4d:dataCollectors</code></td>
+<td>Who collected the data</td>
+</tr>
+<tr>
+<td><code>d4d:dataAnnotationProtocol</code></td>
+<td>Annotation protocol description</td>
+</tr>
+<tr>
+<td><code>d4d:annotationsPerItem</code></td>
+<td>Number of annotations per data item</td>
+</tr>
+<tr>
+<td><code>d4d:annotatorDemographics</code></td>
+<td>Demographics of annotators</td>
+</tr>
+<tr>
+<td><code>d4d:agreementMetric</code></td>
+<td>Inter-annotator agreement metric</td>
+</tr>
+<tr>
+<td><code>d4d:disagreementPatterns</code></td>
+<td>Patterns in annotation disagreements</td>
+</tr>
+<tr>
+<td><code>d4d:wasDirectlyObserved</code></td>
+<td>Observation acquisition method flag</td>
+</tr>
+<tr>
+<td><code>d4d:wasReportedBySubjects</code></td>
+<td>Self-report acquisition flag</td>
+</tr>
+<tr>
+<td><code>d4d:wasInferred</code></td>
+<td>Inference/derivation acquisition flag</td>
+</tr>
+<tr>
+<td><code>d4d:wasValidated</code></td>
+<td>Validation acquisition flag</td>
+</tr>
+<tr>
+<td><code>d4d:directCollection</code></td>
+<td>Whether directly collected from subjects</td>
+</tr>
+</tbody>
+</table>
+<h3 id="consent-and-ethics">Consent and Ethics</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:consentObtained</code></td>
+<td>Whether consent was obtained</td>
+</tr>
+<tr>
+<td><code>d4d:consentType</code></td>
+<td>Type of consent obtained</td>
+</tr>
+<tr>
+<td><code>d4d:consentScope</code></td>
+<td>Scope/breadth of consent</td>
+</tr>
+<tr>
+<td><code>d4d:consentDocumentation</code></td>
+<td>Where consent documentation lives</td>
+</tr>
+<tr>
+<td><code>d4d:consentRevocations</code></td>
+<td>Revocation information</td>
+</tr>
+<tr>
+<td><code>d4d:collectionConsents</code></td>
+<td>Consent details for collection</td>
+</tr>
+<tr>
+<td><code>d4d:collectionNotifications</code></td>
+<td>Notifications given to data subjects</td>
+</tr>
+<tr>
+<td><code>d4d:assentProcedures</code></td>
+<td>Assent procedures for minors/vulnerable groups</td>
+</tr>
+<tr>
+<td><code>d4d:withdrawalMechanism</code></td>
+<td>How subjects can withdraw data</td>
+</tr>
+<tr>
+<td><code>d4d:ethicalReviews</code></td>
+<td>IRB/ethics review details</td>
+</tr>
+<tr>
+<td><code>d4d:ethicsReviewBoard</code></td>
+<td>Name of reviewing ethics board</td>
+</tr>
+<tr>
+<td><code>d4d:ethicsContactPoint</code></td>
+<td>Contact for ethics questions</td>
+</tr>
+<tr>
+<td><code>d4d:dataProtectionImpacts</code></td>
+<td>Data protection impact assessments</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sensitive-and-confidential-data">Sensitive and Confidential Data</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:sensitiveElements</code></td>
+<td>Description of sensitive data elements</td>
+</tr>
+<tr>
+<td><code>d4d:sensitive_elements_present</code></td>
+<td>Boolean flag for sensitivity</td>
+</tr>
+<tr>
+<td><code>d4d:confidentialElements</code></td>
+<td>Confidential element descriptions</td>
+</tr>
+<tr>
+<td><code>d4d:confidential_elements_present</code></td>
+<td>Boolean flag for confidentiality</td>
+</tr>
+<tr>
+<td><code>d4d:confidentialityLevel</code></td>
+<td>Level of confidentiality</td>
+</tr>
+<tr>
+<td><code>d4d:contentWarnings</code></td>
+<td>Content warning descriptions</td>
+</tr>
+<tr>
+<td><code>d4d:content_warnings_present</code></td>
+<td>Boolean flag for content warnings</td>
+</tr>
+<tr>
+<td><code>d4d:reidentificationRisk</code></td>
+<td>Re-identification risk description</td>
+</tr>
+<tr>
+<td><code>d4d:anonymizationMethod</code></td>
+<td>Method used for anonymization</td>
+</tr>
+<tr>
+<td><code>d4d:removedIdentifierTypes</code></td>
+<td>Types of identifiers removed</td>
+</tr>
+</tbody>
+</table>
+<h3 id="preprocessing-and-cleaning">Preprocessing and Cleaning</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:cleaningStrategies</code></td>
+<td>Data cleaning strategy objects</td>
+</tr>
+<tr>
+<td><code>d4d:strategies</code></td>
+<td>Generic preprocessing strategy list</td>
+</tr>
+</tbody>
+</table>
+<h3 id="uses-and-distribution">Uses and Distribution</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:useCategory</code></td>
+<td>Category of intended use</td>
+</tr>
+<tr>
+<td><code>d4d:discouragedUses</code></td>
+<td>Uses that are discouraged but not prohibited</td>
+</tr>
+<tr>
+<td><code>d4d:existingUses</code></td>
+<td>Known prior uses of the dataset</td>
+</tr>
+<tr>
+<td><code>d4d:useRepository</code></td>
+<td>Repository indexing dataset uses</td>
+</tr>
+<tr>
+<td><code>d4d:distributionFormats</code></td>
+<td>Formats in which dataset is distributed</td>
+</tr>
+<tr>
+<td><code>d4d:distributionDates</code></td>
+<td>Distribution date information</td>
+</tr>
+<tr>
+<td><code>d4d:thirdPartySharing</code></td>
+<td>Third-party sharing arrangements</td>
+</tr>
+<tr>
+<td><code>d4d:regulatoryRestrictions</code></td>
+<td>Legal/regulatory distribution restrictions</td>
+</tr>
+<tr>
+<td><code>d4d:externalResourceRestrictions</code></td>
+<td>Restrictions on external resource access</td>
+</tr>
+<tr>
+<td><code>d4d:availabilityGuarantee</code></td>
+<td>Long-term availability commitments</td>
+</tr>
+<tr>
+<td><code>d4d:retentionPeriod</code></td>
+<td>Data retention period</td>
+</tr>
+<tr>
+<td><code>d4d:retentionLimit</code></td>
+<td>Maximum retention limit</td>
+</tr>
+</tbody>
+</table>
+<h3 id="maintenance-and-versioning">Maintenance and Versioning</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:versionsAvailable</code></td>
+<td>Available dataset versions</td>
+</tr>
+<tr>
+<td><code>d4d:versionAccess</code></td>
+<td>How to access specific versions</td>
+</tr>
+<tr>
+<td><code>d4d:updates</code></td>
+<td>Planned or past update information</td>
+</tr>
+<tr>
+<td><code>d4d:errata</code></td>
+<td>Error corrections</td>
+</tr>
+<tr>
+<td><code>d4d:erratumURL</code></td>
+<td>URL for errata publication</td>
+</tr>
+<tr>
+<td><code>d4d:extensionMechanism</code></td>
+<td>How the dataset can be extended</td>
+</tr>
+<tr>
+<td><code>d4d:contributionURL</code></td>
+<td>How to contribute to the dataset</td>
+</tr>
+</tbody>
+</table>
+<h3 id="human-subjects-and-at-risk-populations">Human Subjects and At-Risk Populations</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:atRiskPopulations</code></td>
+<td>At-risk population documentation</td>
+</tr>
+<tr>
+<td><code>d4d:atRiskGroupsIncluded</code></td>
+<td>Specific at-risk groups present</td>
+</tr>
+<tr>
+<td><code>d4d:specialProtections</code></td>
+<td>Special protections in place</td>
+</tr>
+<tr>
+<td><code>d4d:specialPopulations</code></td>
+<td>Other special population designations</td>
+</tr>
+</tbody>
+</table>
+<h3 id="composition-and-subpopulations">Composition and Subpopulations</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:subpopulations</code></td>
+<td>Subpopulation objects</td>
+</tr>
+<tr>
+<td><code>d4d:subpopulationIdentification</code></td>
+<td>How subpopulations are identified</td>
+</tr>
+<tr>
+<td><code>d4d:subpopulationDistribution</code></td>
+<td>Distribution across subpopulations</td>
+</tr>
+<tr>
+<td><code>d4d:subpopulationElementsPresent</code></td>
+<td>Whether subpopulation info is present</td>
+</tr>
+<tr>
+<td><code>d4d:samplingStrategies</code></td>
+<td>Sampling strategy objects</td>
+</tr>
+<tr>
+<td><code>d4d:sourceData</code></td>
+<td>Source of sampled data</td>
+</tr>
+<tr>
+<td><code>d4d:whyNotRepresentative</code></td>
+<td>Explanation of non-representativeness</td>
+</tr>
+<tr>
+<td><code>d4d:relationships</code></td>
+<td>Relationships between dataset instances</td>
+</tr>
+<tr>
+<td><code>d4d:dataSubset</code></td>
+<td>Subset description</td>
+</tr>
+<tr>
+<td><code>d4d:splits</code></td>
+<td>Train/val/test split information</td>
+</tr>
+</tbody>
+</table>
+<h3 id="miscellaneous">Miscellaneous</h3>
+<table>
+<thead>
+<tr>
+<th>d4d term</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>d4d:usedSoftware</code></td>
+<td>Software used in this property/process</td>
+</tr>
+<tr>
+<td><code>d4d:tasks</code></td>
+<td>ML tasks the dataset supports</td>
+</tr>
+<tr>
+<td><code>d4d:biasType</code></td>
+<td>Type of bias (linked to AIO enum)</td>
+</tr>
+<tr>
+<td><code>d4d:anomalies</code></td>
+<td>Dataset anomaly objects</td>
+</tr>
+<tr>
+<td><code>d4d:fileCollections</code></td>
+<td>Nested file collection list</td>
+</tr>
+<tr>
+<td><code>d4d:fileCount</code></td>
+<td>Number of files</td>
+</tr>
+<tr>
+<td><code>d4d:totalFileCount</code></td>
+<td>Total file count across nested collections</td>
+</tr>
+<tr>
+<td><code>d4d:variableName</code></td>
+<td>Name of a variable/feature</td>
+</tr>
+<tr>
+<td><code>d4d:regulatoryCompliance</code></td>
+<td>Regulatory compliance declarations</td>
+</tr>
+<tr>
+<td><code>d4d:teamAffiliation</code></td>
+<td>Team or institutional affiliation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="known-limitations">Known Limitations</h2>
+<h3 id="approximate-broad_mappings-mappings">Approximate (broad_mappings) mappings</h3>
+<p>The following slots use <code>broad_mappings</code> because no ontology provides an exact match:</p>
+<ul>
+<li><strong><code>d4d:hashValue</code></strong> → <code>broad_mappings: dcterms:identifier</code> — a hash value is a form of identifier
+  but <code>dcterms:identifier</code> is not specific to cryptographic hashes.</li>
+<li><strong><code>d4d:md5Checksum</code></strong> → same rationale; <code>schema:sha256</code> exists but MD5 has no Schema.org term.</li>
+<li><strong><code>d4d:doiIdentifier</code></strong> → <code>broad_mappings: dcterms:identifier</code>; DOI is a specific identifier scheme
+  but no dedicated ontology predicate for DOI is widely used in DCAT/DC contexts.</li>
+<li><strong><code>d4d:conforms_to_schema</code> / <code>d4d:conforms_to_class</code></strong> → <code>broad_mappings: dcterms:conformsTo</code>;
+  these are refinements of conformance but LinkML has no standard sub-property for schema/class
+  specificity.</li>
+<li><strong><code>d4d:orcidIdentifier</code></strong> → <code>broad_mappings: schema:identifier</code>; ORCID has no dedicated
+  Schema.org property, though <code>schema:identifier</code> with a type qualifier is the recommended
+  approach.</li>
+</ul>
+<h3 id="duo-as-value-vocabulary-not-predicate-vocabulary">DUO as value vocabulary, not predicate vocabulary</h3>
+<p>DUO terms are used as <code>meaning:</code> values on enum members in <code>DataUsePermissionEnum</code> and
+<code>DataUseModifierEnum</code>. They are not used as <code>slot_uri</code> predicates because DUO defines controlled
+vocabulary <em>concepts</em>, not RDF predicates. The slot predicate remains <code>d4d:</code> while the enum value's
+semantic meaning points to the DUO term.</p>
+<h3 id="raicroissant-coverage">RAI/Croissant coverage</h3>
+<p>The RAI (Responsible AI) vocabulary from MLCommons/Croissant is only partially developed.
+Only <code>rai:dataAnnotationPlatform</code> is currently used. Many other collection and annotation
+concepts (demographics, protocols, agreement metrics) have no RAI equivalent and use <code>d4d:</code> terms.
+As RAI matures, these may be replaced with canonical RAI predicates.</p>
+<h3 id="aio-ontology-gaps">AIO ontology gaps</h3>
+<p>For <code>BiasTypeEnum</code>, some bias types have no 1:1 AIO mapping:
+- <code>selection_bias</code> → <code>broad_mappings: AIO:SelectionAndSamplingBias</code> (covers both selection and sampling)
+- <code>sampling_bias</code> → same broad mapping as selection_bias
+- <code>aggregation_bias</code> → <code>broad_mappings: AIO:EcologicalFallacyBias</code> (closest available)
+- <code>algorithmic_bias</code> → <code>broad_mappings: AIO:ProcessingBias, AIO:ComputationalBias</code> (split concept)
+- <code>annotation_bias</code> → <code>broad_mappings: AIO:AnnotatorReportingBias</code> (narrower than intended)</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>

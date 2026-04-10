@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-conforms_to">Slot: conforms_to</h1>
+<p><em>An established standard, specification, or schema to which the resource conforms.</em></p>
 <p>URI: <a href="http://purl.org/dc/terms/conformsTo">dcterms:conformsTo</a>
 Alias: conforms_to</p>
 <!-- no inheritance hierarchy -->
@@ -374,11 +375,6 @@ Alias: conforms_to</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
@@ -389,13 +385,18 @@ Alias: conforms_to</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
 <td><a href="../FileCollection/">FileCollection</a></td>
 <td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -432,6 +433,8 @@ Alias: conforms_to</p>
 <details>
 
 <pre><code class="language-yaml">name: conforms_to
+description: An established standard, specification, or schema to which the resource
+  conforms.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcterms:conformsTo

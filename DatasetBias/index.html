@@ -299,7 +299,7 @@
 <tr>
 <td><a href="../affected_subsets/">affected_subsets</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Specific subsets or features of the dataset affected by this bias</td>
+<td>One or more specific subsets or features of the dataset affected by this bias...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -433,7 +433,9 @@ attributes:
     range: string
   affected_subsets:
     name: affected_subsets
-    description: 'Specific subsets or features of the dataset affected by this bias.
+    description: 'One or more specific subsets or features of the dataset affected
+      by this bias (e.g., "female participants", "non-English text", "images taken
+      at night").
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -502,7 +504,9 @@ attributes:
     range: string
   affected_subsets:
     name: affected_subsets
-    description: 'Specific subsets or features of the dataset affected by this bias.
+    description: 'One or more specific subsets or features of the dataset affected
+      by this bias (e.g., "female participants", "non-English text", "images taken
+      at night").
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -516,6 +520,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

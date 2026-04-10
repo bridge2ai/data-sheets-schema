@@ -384,43 +384,43 @@
 <tr>
 <td><a href="../total_bytes/">total_bytes</a></td>
 <td>0..1 <br/> <a href="../Integer/">Integer</a></td>
-<td>Total size of all files in bytes</td>
+<td>Total size of all files in this collection, in bytes (integer)</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../conforms_to/">conforms_to</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>An established standard, specification, or schema to which the resource confo...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to_class/">conforms_to_class</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The specific class or type within a schema to which the resource conforms</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../conforms_to_schema/">conforms_to_schema</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The schema or data model to which the resource conforms</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../created_by/">created_by</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The person or organization primarily responsible for creating the resource</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../created_on/">created_on</a></td>
 <td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
-<td></td>
+<td>The date and time when the resource was created</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../doi/">doi</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>digital object identifier</td>
+<td>Digital Object Identifier (DOI) in format 10</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -432,73 +432,73 @@
 <tr>
 <td><a href="../issued/">issued</a></td>
 <td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
-<td></td>
+<td>Date of formal issuance or publication of the resource</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../keywords/">keywords</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>Keywords or tags describing the resource for discovery and classification</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../language/">language</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>language in which the information is expressed</td>
+<td>Language in which the information is expressed</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../last_updated_on/">last_updated_on</a></td>
 <td>0..1 <br/> <a href="../Datetime/">Datetime</a></td>
-<td></td>
+<td>The date and time when the resource was most recently modified or updated</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../license/">license</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The legal license under which the resource is made available (e</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../modified_by/">modified_by</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>A person or organization that contributed to modifying or updating the resour...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../page/">page</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>A landing page or web page providing access to or information about the resou...</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../publisher/">publisher</a></td>
 <td>0..1 <br/> <a href="../Uriorcurie/">Uriorcurie</a></td>
-<td></td>
+<td>The organization or entity responsible for making the resource available</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../status/">status</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The status of the resource (e</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../title/">title</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td>the official title of the element</td>
+<td>The official title of the element</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../version/">version</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The version identifier of the resource (e</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
 <td><a href="../was_derived_from/">was_derived_from</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>A resource from which this resource was derived, in whole or in part</td>
 <td><a href="../Information/">Information</a></td>
 </tr>
 <tr>
@@ -655,6 +655,10 @@ attributes:
     multivalued: true
   file_count:
     name: file_count
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '47'
     description: Number of files in this collection.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
     rank: 1000
@@ -664,7 +668,12 @@ attributes:
     range: integer
   total_bytes:
     name: total_bytes
-    description: Total size of all files in bytes.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 1073741824 (1 GiB = 1024³ bytes)
+    description: Total size of all files in this collection, in bytes (integer). Maps
+      to dcat:byteSize.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
     rank: 1000
     slot_uri: dcat:byteSize
@@ -735,6 +744,10 @@ attributes:
     multivalued: true
   file_count:
     name: file_count
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '47'
     description: Number of files in this collection.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
     rank: 1000
@@ -746,7 +759,12 @@ attributes:
     range: integer
   total_bytes:
     name: total_bytes
-    description: Total size of all files in bytes.
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 1073741824 (1 GiB = 1024³ bytes)
+    description: Total size of all files in this collection, in bytes (integer). Maps
+      to dcat:byteSize.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/file-collection
     rank: 1000
     slot_uri: dcat:byteSize
@@ -820,6 +838,8 @@ attributes:
     - range: FileCollection
   conforms_to:
     name: conforms_to
+    description: An established standard, specification, or schema to which the resource
+      conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:conformsTo
@@ -830,9 +850,13 @@ attributes:
     range: string
   conforms_to_class:
     name: conforms_to_class
+    description: The specific class or type within a schema to which the resource
+      conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    broad_mappings:
+    - dcterms:conformsTo
     rank: 1000
-    slot_uri: dcterms:conformsTo
+    slot_uri: d4d:conformsToClass
     alias: conforms_to_class
     owner: FileCollection
     domain_of:
@@ -840,9 +864,12 @@ attributes:
     range: string
   conforms_to_schema:
     name: conforms_to_schema
+    description: The schema or data model to which the resource conforms.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    broad_mappings:
+    - dcterms:conformsTo
     rank: 1000
-    slot_uri: dcterms:conformsTo
+    slot_uri: d4d:conformsToSchema
     alias: conforms_to_schema
     owner: FileCollection
     domain_of:
@@ -850,6 +877,8 @@ attributes:
     range: string
   created_by:
     name: created_by
+    description: The person or organization primarily responsible for creating the
+      resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:creator
@@ -860,6 +889,7 @@ attributes:
     range: string
   created_on:
     name: created_on
+    description: The date and time when the resource was created.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:created
@@ -870,10 +900,15 @@ attributes:
     range: datetime
   doi:
     name: doi
-    description: digital object identifier
+    description: Digital Object Identifier (DOI) in format 10.xxxx/xxxxx providing
+      persistent identification (e.g., '10.1038/s41586-020-2649-2', '10.5281/zenodo.1234567').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+    exact_mappings:
+    - schema:identifier
+    broad_mappings:
+    - dcterms:identifier
     rank: 1000
-    slot_uri: dcterms:identifier
+    slot_uri: d4d:doiIdentifier
     alias: doi
     owner: FileCollection
     domain_of:
@@ -897,6 +932,7 @@ attributes:
     range: uri
   issued:
     name: issued
+    description: Date of formal issuance or publication of the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:issued
@@ -907,6 +943,7 @@ attributes:
     range: datetime
   keywords:
     name: keywords
+    description: Keywords or tags describing the resource for discovery and classification.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcat:keyword
@@ -918,7 +955,7 @@ attributes:
     multivalued: true
   language:
     name: language
-    description: language in which the information is expressed
+    description: Language in which the information is expressed.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - schema:inLanguage
@@ -931,6 +968,8 @@ attributes:
     range: string
   last_updated_on:
     name: last_updated_on
+    description: The date and time when the resource was most recently modified or
+      updated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:modified
@@ -941,6 +980,8 @@ attributes:
     range: datetime
   license:
     name: license
+    description: The legal license under which the resource is made available (e.g.,
+      "MIT", "CC-BY-4.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:license
@@ -952,6 +993,8 @@ attributes:
     range: string
   modified_by:
     name: modified_by
+    description: A person or organization that contributed to modifying or updating
+      the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:contributor
@@ -962,6 +1005,8 @@ attributes:
     range: string
   page:
     name: page
+    description: A landing page or web page providing access to or information about
+      the resource.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcat:landingPage
@@ -972,6 +1017,11 @@ attributes:
     range: string
   publisher:
     name: publisher
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 'ror:04t3en479  # use a ROR ID, DOI, or URL — not a plain name'
+    description: The organization or entity responsible for making the resource available.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:publisher
@@ -982,9 +1032,10 @@ attributes:
     range: uriorcurie
   status:
     name: status
+    description: The status of the resource (e.g., draft, published, deprecated).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: dcterms:type
+    slot_uri: d4d:publicationStatus
     alias: status
     owner: FileCollection
     domain_of:
@@ -992,7 +1043,7 @@ attributes:
     range: string
   title:
     name: title
-    description: the official title of the element
+    description: The official title of the element.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
     slot_uri: dcterms:title
@@ -1003,9 +1054,10 @@ attributes:
     range: string
   version:
     name: version
+    description: The version identifier of the resource (e.g., "1.0", "2.3.1").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     rank: 1000
-    slot_uri: dcterms:hasVersion
+    slot_uri: schema:version
     alias: version
     owner: FileCollection
     domain_of:
@@ -1014,6 +1066,7 @@ attributes:
     range: string
   was_derived_from:
     name: was_derived_from
+    description: A resource from which this resource was derived, in whole or in part.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema
     exact_mappings:
     - dcterms:source
@@ -1026,6 +1079,10 @@ attributes:
     range: string
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/my-dataset-001
     description: A unique identifier for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

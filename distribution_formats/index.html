@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-distribution_formats">Slot: distribution_formats</h1>
+<p><em>Formats in which the dataset is distributed or made available. List of DistributionFormat objects from the Distribution module describing file formats, compression, and access methods.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/distributionFormats">d4d:distributionFormats</a>
 Alias: distribution_formats</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: distribution_formats</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: distribution_formats</p>
 <details>
 
 <pre><code class="language-yaml">name: distribution_formats
+description: Formats in which the dataset is distributed or made available. List of
+  DistributionFormat objects from the Distribution module describing file formats,
+  compression, and access methods.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:distributionFormats

@@ -354,7 +354,8 @@
 
 
 <h1 id="slot-conforms_to_schema">Slot: conforms_to_schema</h1>
-<p>URI: <a href="http://purl.org/dc/terms/conformsTo">dcterms:conformsTo</a>
+<p><em>The schema or data model to which the resource conforms.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/conformsToSchema">d4d:conformsToSchema</a>
 Alias: conforms_to_schema</p>
 <!-- no inheritance hierarchy -->
 
@@ -374,11 +375,6 @@ Alias: conforms_to_schema</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
@@ -389,13 +385,18 @@ Alias: conforms_to_schema</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
 <td><a href="../FileCollection/">FileCollection</a></td>
 <td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -420,11 +421,15 @@ Alias: conforms_to_schema</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:conformsTo</td>
+<td>d4d:conformsToSchema</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:conforms_to_schema</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:conformsTo</td>
 </tr>
 </tbody>
 </table>
@@ -432,9 +437,12 @@ Alias: conforms_to_schema</p>
 <details>
 
 <pre><code class="language-yaml">name: conforms_to_schema
+description: The schema or data model to which the resource conforms.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:conformsTo
 rank: 1000
-slot_uri: dcterms:conformsTo
+slot_uri: d4d:conformsToSchema
 alias: conforms_to_schema
 domain_of:
 - Information

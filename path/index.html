@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-path">Slot: path</h1>
+<p><em>The file path or URL where the content is located.</em></p>
 <p>URI: <a href="http://schema.org/contentUrl">schema:contentUrl</a>
 Alias: path</p>
 <!-- no inheritance hierarchy -->
@@ -369,14 +370,14 @@ Alias: path</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../FileCollection/">FileCollection</a></td>
 <td>A collection of files with shared characteristics (format, purpose, structure...</td>
 <td>yes</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
+<td>no</td>
 </tr>
 </tbody>
 </table>
@@ -412,6 +413,7 @@ Alias: path</p>
 <details>
 
 <pre><code class="language-yaml">name: path
+description: The file path or URL where the content is located.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: schema:contentUrl

@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-is_deidentified">Slot: is_deidentified</h1>
+<p><em>De-identification status and procedures applied to the dataset. Deidentification object describing whether the dataset contains personal data, what de-identification methods were applied, and any residual re-identification risks.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/isDeidentified">d4d:isDeidentified</a>
 Alias: is_deidentified</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: is_deidentified</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -412,6 +413,9 @@ Alias: is_deidentified</p>
 <details>
 
 <pre><code class="language-yaml">name: is_deidentified
+description: De-identification status and procedures applied to the dataset. Deidentification
+  object describing whether the dataset contains personal data, what de-identification
+  methods were applied, and any residual re-identification risks.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:isDeidentified

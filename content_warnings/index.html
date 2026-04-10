@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-content_warnings">Slot: content_warnings</h1>
+<p><em>Content warnings for potentially harmful, offensive, or disturbing material in the dataset. List of ContentWarning objects alerting users to sensitive content categories.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/contentWarnings">d4d:contentWarnings</a>
 Alias: content_warnings</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: content_warnings</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: content_warnings</p>
 <details>
 
 <pre><code class="language-yaml">name: content_warnings
+description: Content warnings for potentially harmful, offensive, or disturbing material
+  in the dataset. List of ContentWarning objects alerting users to sensitive content
+  categories.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:contentWarnings

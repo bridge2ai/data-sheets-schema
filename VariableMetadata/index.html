@@ -336,7 +336,7 @@
 <tr>
 <td><a href="../categories/">categories</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>The permitted categories or values for a categorical variable</td>
+<td>One or more permitted categories or values for a categorical variable</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -478,10 +478,11 @@ attributes:
     description: The name or identifier of the variable as it appears in the data
       files.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
-    exact_mappings:
+    broad_mappings:
     - schema:name
+    - schema:identifier
     rank: 1000
-    slot_uri: schema:name
+    slot_uri: d4d:variableName
     domain_of:
     - VariableMetadata
     range: string
@@ -524,6 +525,10 @@ attributes:
     multivalued: true
   minimum_value:
     name: minimum_value
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '0.0'
     description: The minimum value that the variable can take. Applicable to numeric
       variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -534,6 +539,10 @@ attributes:
     range: float
   maximum_value:
     name: maximum_value
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '100.0'
     description: The maximum value that the variable can take. Applicable to numeric
       variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -544,8 +553,8 @@ attributes:
     range: float
   categories:
     name: categories
-    description: The permitted categories or values for a categorical variable. Each
-      entry should describe a possible value and its meaning.
+    description: One or more permitted categories or values for a categorical variable.
+      Each entry should describe a possible value and its meaning.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
     slot_uri: schema:valueReference
@@ -570,7 +579,7 @@ attributes:
       key for records in the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: schema:identifier
+    slot_uri: d4d:isIdentifier
     domain_of:
     - VariableMetadata
     range: boolean
@@ -586,6 +595,10 @@ attributes:
     range: boolean
   precision:
     name: precision
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 2 (two decimal places, e.g., 3.14)
     description: The precision or number of decimal places for numeric variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
@@ -618,8 +631,10 @@ attributes:
     description: Notes about data quality, reliability, or known issues specific to
       this variable.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
+    broad_mappings:
+    - dcterms:description
     rank: 1000
-    slot_uri: dcterms:description
+    slot_uri: d4d:qualityNotes
     domain_of:
     - VariableMetadata
     range: string
@@ -644,10 +659,11 @@ attributes:
     description: The name or identifier of the variable as it appears in the data
       files.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
-    exact_mappings:
+    broad_mappings:
     - schema:name
+    - schema:identifier
     rank: 1000
-    slot_uri: schema:name
+    slot_uri: d4d:variableName
     alias: variable_name
     owner: VariableMetadata
     domain_of:
@@ -698,6 +714,10 @@ attributes:
     multivalued: true
   minimum_value:
     name: minimum_value
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '0.0'
     description: The minimum value that the variable can take. Applicable to numeric
       variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -710,6 +730,10 @@ attributes:
     range: float
   maximum_value:
     name: maximum_value
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: '100.0'
     description: The maximum value that the variable can take. Applicable to numeric
       variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
@@ -722,8 +746,8 @@ attributes:
     range: float
   categories:
     name: categories
-    description: The permitted categories or values for a categorical variable. Each
-      entry should describe a possible value and its meaning.
+    description: One or more permitted categories or values for a categorical variable.
+      Each entry should describe a possible value and its meaning.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
     slot_uri: schema:valueReference
@@ -752,7 +776,7 @@ attributes:
       key for records in the dataset.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
-    slot_uri: schema:identifier
+    slot_uri: d4d:isIdentifier
     alias: is_identifier
     owner: VariableMetadata
     domain_of:
@@ -772,6 +796,10 @@ attributes:
     range: boolean
   precision:
     name: precision
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 2 (two decimal places, e.g., 3.14)
     description: The precision or number of decimal places for numeric variables.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
     rank: 1000
@@ -810,8 +838,10 @@ attributes:
     description: Notes about data quality, reliability, or known issues specific to
       this variable.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/variables
+    broad_mappings:
+    - dcterms:description
     rank: 1000
-    slot_uri: dcterms:description
+    slot_uri: d4d:qualityNotes
     alias: quality_notes
     owner: VariableMetadata
     domain_of:
@@ -820,6 +850,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

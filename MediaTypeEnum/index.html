@@ -347,6 +347,7 @@
 
 
 <h1 id="enum-mediatypeenum">Enum: MediaTypeEnum</h1>
+<p><em>MIME media types (Internet Media Types) for file content identification.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/MediaTypeEnum">data_sheets_schema:MediaTypeEnum</a></p>
 <h2 id="permissible-values">Permissible Values</h2>
 <table>
@@ -361,97 +362,97 @@
 <tr>
 <td>text/csv</td>
 <td>None</td>
-<td></td>
+<td>MIME type for CSV (Comma-Separated Values) files</td>
 </tr>
 <tr>
 <td>text/tab-separated-values</td>
 <td>None</td>
-<td></td>
+<td>MIME type for TSV (Tab-Separated Values) files</td>
 </tr>
 <tr>
 <td>application/json</td>
 <td>None</td>
-<td></td>
+<td>MIME type for JSON (JavaScript Object Notation) files</td>
 </tr>
 <tr>
 <td>application/xml</td>
 <td>None</td>
-<td></td>
+<td>MIME type for XML (Extensible Markup Language) files</td>
 </tr>
 <tr>
 <td>text/xml</td>
 <td>None</td>
-<td></td>
+<td>Alternative MIME type for XML files (text variant)</td>
 </tr>
 <tr>
 <td>application/yaml</td>
 <td>None</td>
-<td></td>
+<td>MIME type for YAML files</td>
 </tr>
 <tr>
 <td>text/yaml</td>
 <td>None</td>
-<td></td>
+<td>Alternative MIME type for YAML files (text variant)</td>
 </tr>
 <tr>
 <td>text/html</td>
 <td>None</td>
-<td></td>
+<td>MIME type for HTML (HyperText Markup Language) files</td>
 </tr>
 <tr>
 <td>application/pdf</td>
 <td>None</td>
-<td></td>
+<td>MIME type for PDF (Portable Document Format) files</td>
 </tr>
 <tr>
 <td>application/vnd.openxmlformats-officedocument.wordprocessingml.document</td>
 <td>None</td>
-<td></td>
+<td>MIME type for Microsoft Word DOCX files</td>
 </tr>
 <tr>
 <td>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</td>
 <td>None</td>
-<td></td>
+<td>MIME type for Microsoft Excel XLSX files</td>
 </tr>
 <tr>
 <td>application/vnd.openxmlformats-officedocument.presentationml.presentation</td>
 <td>None</td>
-<td></td>
+<td>MIME type for Microsoft PowerPoint PPTX files</td>
 </tr>
 <tr>
 <td>text/plain</td>
 <td>None</td>
-<td></td>
+<td>MIME type for plain text files</td>
 </tr>
 <tr>
 <td>text/markdown</td>
 <td>None</td>
-<td></td>
+<td>MIME type for Markdown files</td>
 </tr>
 <tr>
 <td>application/zip</td>
 <td>None</td>
-<td></td>
+<td>MIME type for ZIP archive files</td>
 </tr>
 <tr>
 <td>application/x-tar</td>
 <td>None</td>
-<td></td>
+<td>MIME type for TAR archive files</td>
 </tr>
 <tr>
 <td>application/gzip</td>
 <td>None</td>
-<td></td>
+<td>MIME type for Gzip compressed files</td>
 </tr>
 <tr>
 <td>application/x-bzip2</td>
 <td>None</td>
-<td></td>
+<td>MIME type for Bzip2 compressed files</td>
 </tr>
 <tr>
 <td>application/x-xz</td>
 <td>None</td>
-<td></td>
+<td>MIME type for XZ compressed files</td>
 </tr>
 </tbody>
 </table>
@@ -479,47 +480,67 @@
 <details>
 
 <pre><code class="language-yaml">name: MediaTypeEnum
+description: MIME media types (Internet Media Types) for file content identification.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 permissible_values:
   text/csv:
     text: text/csv
+    description: MIME type for CSV (Comma-Separated Values) files.
   text/tab-separated-values:
     text: text/tab-separated-values
+    description: MIME type for TSV (Tab-Separated Values) files.
   application/json:
     text: application/json
+    description: MIME type for JSON (JavaScript Object Notation) files.
   application/xml:
     text: application/xml
+    description: MIME type for XML (Extensible Markup Language) files.
   text/xml:
     text: text/xml
+    description: Alternative MIME type for XML files (text variant).
   application/yaml:
     text: application/yaml
+    description: MIME type for YAML files.
   text/yaml:
     text: text/yaml
+    description: Alternative MIME type for YAML files (text variant).
   text/html:
     text: text/html
+    description: MIME type for HTML (HyperText Markup Language) files.
   application/pdf:
     text: application/pdf
+    description: MIME type for PDF (Portable Document Format) files.
   application/vnd.openxmlformats-officedocument.wordprocessingml.document:
     text: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+    description: MIME type for Microsoft Word DOCX files.
   application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
     text: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+    description: MIME type for Microsoft Excel XLSX files.
   application/vnd.openxmlformats-officedocument.presentationml.presentation:
     text: application/vnd.openxmlformats-officedocument.presentationml.presentation
+    description: MIME type for Microsoft PowerPoint PPTX files.
   text/plain:
     text: text/plain
+    description: MIME type for plain text files.
   text/markdown:
     text: text/markdown
+    description: MIME type for Markdown files.
   application/zip:
     text: application/zip
+    description: MIME type for ZIP archive files.
   application/x-tar:
     text: application/x-tar
+    description: MIME type for TAR archive files.
   application/gzip:
     text: application/gzip
+    description: MIME type for Gzip compressed files.
   application/x-bzip2:
     text: application/x-bzip2
+    description: MIME type for Bzip2 compressed files.
   application/x-xz:
     text: application/x-xz
+    description: MIME type for XZ compressed files.
 
 </code></pre>
 

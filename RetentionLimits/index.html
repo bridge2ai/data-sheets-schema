@@ -274,7 +274,7 @@
 <tr>
 <td><a href="../retention_details/">retention_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on data retention limits and enforcement procedures</td>
+<td>Free-text description of applicable retention limits, legal or ethical basis ...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -377,7 +377,9 @@ attributes:
     range: string
   retention_details:
     name: retention_details
-    description: 'Details on data retention limits and enforcement procedures.
+    description: 'Free-text description of applicable retention limits, legal or ethical
+      basis for those limits, and how they will be enforced (e.g., automated deletion,
+      anonymization after the retention period).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -415,7 +417,9 @@ attributes:
     range: string
   retention_details:
     name: retention_details
-    description: 'Details on data retention limits and enforcement procedures.
+    description: 'Free-text description of applicable retention limits, legal or ethical
+      basis for those limits, and how they will be enforced (e.g., automated deletion,
+      anonymization after the retention period).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -429,6 +433,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

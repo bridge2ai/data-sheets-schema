@@ -354,7 +354,8 @@
 
 
 <h1 id="slot-distribution">Slot: distribution</h1>
-<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
+<p><em>The distribution of instances across identified subpopulations, including counts, percentages, or proportions for each subgroup.</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/subpopulationDistribution">d4d:subpopulationDistribution</a>
 Alias: distribution</p>
 <!-- no inheritance hierarchy -->
 
@@ -400,11 +401,15 @@ Alias: distribution</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:description</td>
+<td>d4d:subpopulationDistribution</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:distribution</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:description</td>
 </tr>
 </tbody>
 </table>
@@ -412,9 +417,13 @@ Alias: distribution</p>
 <details>
 
 <pre><code class="language-yaml">name: distribution
+description: The distribution of instances across identified subpopulations, including
+  counts, percentages, or proportions for each subgroup.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:description
 rank: 1000
-slot_uri: dcterms:description
+slot_uri: d4d:subpopulationDistribution
 alias: distribution
 owner: Subpopulation
 domain_of:

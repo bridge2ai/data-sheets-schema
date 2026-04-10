@@ -258,19 +258,19 @@
 <tr>
 <td><a href="../version/">version</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The version identifier of the software (e</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../license/">license</a></td>
 <td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>The license under which the software is distributed (e</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../url/">url</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>0..1 <br/> <a href="../Uri/">Uri</a></td>
+<td>URL where the software can be found (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -737,6 +737,7 @@ is_a: NamedThing
 attributes:
   version:
     name: version
+    description: The version identifier of the software (e.g., "1.0.0", "2.3.1-beta").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:softwareVersion
     domain_of:
@@ -745,6 +746,8 @@ attributes:
     range: string
   license:
     name: license
+    description: The license under which the software is distributed (e.g., "MIT",
+      "Apache-2.0", "GPL-3.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:license
     domain_of:
@@ -753,12 +756,14 @@ attributes:
     range: string
   url:
     name: url
+    description: URL where the software can be found (e.g., homepage, repository,
+      or documentation).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:url
     domain_of:
     - Software
-    range: string
+    range: uri
 class_uri: schema:SoftwareApplication
 
 </code></pre>
@@ -774,6 +779,7 @@ is_a: NamedThing
 attributes:
   version:
     name: version
+    description: The version identifier of the software (e.g., "1.0.0", "2.3.1-beta").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:softwareVersion
     alias: version
@@ -784,6 +790,8 @@ attributes:
     range: string
   license:
     name: license
+    description: The license under which the software is distributed (e.g., "MIT",
+      "Apache-2.0", "GPL-3.0").
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:license
     alias: license
@@ -794,6 +802,8 @@ attributes:
     range: string
   url:
     name: url
+    description: URL where the software can be found (e.g., homepage, repository,
+      or documentation).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000
     slot_uri: schema:url
@@ -801,9 +811,13 @@ attributes:
     owner: Software
     domain_of:
     - Software
-    range: string
+    range: uri
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/my-dataset-001
     description: A unique identifier for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

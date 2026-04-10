@@ -274,7 +274,7 @@
 <tr>
 <td><a href="../extension_details/">extension_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on extension mechanisms, contribution validation, and communication</td>
+<td>Free-text description of how third parties can contribute to the dataset, how...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -367,16 +367,22 @@ is_a: DatasetProperty
 attributes:
   contribution_url:
     name: contribution_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/contributing
     description: URL for contribution guidelines or process.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
-    slot_uri: dcat:landingPage
+    slot_uri: d4d:contributionURL
     domain_of:
     - ExtensionMechanism
     range: uri
   extension_details:
     name: extension_details
-    description: 'Details on extension mechanisms, contribution validation, and communication.
+    description: 'Free-text description of how third parties can contribute to the
+      dataset, how contributions are validated (e.g., peer review, automated tests),
+      and how accepted contributions will be communicated to the community.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -402,10 +408,14 @@ is_a: DatasetProperty
 attributes:
   contribution_url:
     name: contribution_url
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/contributing
     description: URL for contribution guidelines or process.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
     rank: 1000
-    slot_uri: dcat:landingPage
+    slot_uri: d4d:contributionURL
     alias: contribution_url
     owner: ExtensionMechanism
     domain_of:
@@ -413,7 +423,9 @@ attributes:
     range: uri
   extension_details:
     name: extension_details
-    description: 'Details on extension mechanisms, contribution validation, and communication.
+    description: 'Free-text description of how third parties can contribute to the
+      dataset, how contributions are validated (e.g., peer review, automated tests),
+      and how accepted contributions will be communicated to the community.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -427,6 +439,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

@@ -277,44 +277,44 @@
 <tbody>
 <tr>
 <td><a href="../is_sample/">is_sample</a></td>
-<td>* <br/> <a href="../Boolean/">Boolean</a></td>
+<td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
 <td>Indicates whether it is a sample of a larger set</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../is_random/">is_random</a></td>
-<td>* <br/> <a href="../Boolean/">Boolean</a></td>
+<td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
 <td>Indicates whether the sample is random</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../source_data/">source_data</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Description of the larger set from which the sample was drawn, if any</td>
+<td>One or more descriptions of the larger sets from which the sample was drawn, ...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../is_representative/">is_representative</a></td>
-<td>* <br/> <a href="../Boolean/">Boolean</a></td>
+<td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
 <td>Indicates whether the sample is representative of the larger set</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../representative_verification/">representative_verification</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Explanation of how representativeness was validated or verified</td>
+<td>One or more explanations of how representativeness was validated or verified ...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../why_not_representative/">why_not_representative</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Explanation of why the sample is not representative, if applicable</td>
+<td>One or more explanations of why the sample is not representative of the large...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../strategies/">strategies</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Description of the sampling strategy (deterministic, probabilistic, etc</td>
+<td>One or more sampling strategies used (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -420,7 +420,6 @@ attributes:
     domain_of:
     - SamplingStrategy
     range: boolean
-    multivalued: true
   is_random:
     name: is_random
     description: Indicates whether the sample is random.
@@ -430,11 +429,10 @@ attributes:
     domain_of:
     - SamplingStrategy
     range: boolean
-    multivalued: true
   source_data:
     name: source_data
-    description: 'Description of the larger set from which the sample was drawn, if
-      any.
+    description: 'One or more descriptions of the larger sets from which the sample
+      was drawn, if applicable.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -455,22 +453,25 @@ attributes:
     domain_of:
     - SamplingStrategy
     range: boolean
-    multivalued: true
   representative_verification:
     name: representative_verification
-    description: 'Explanation of how representativeness was validated or verified.
+    description: 'One or more explanations of how representativeness was validated
+      or verified (e.g., statistical tests, domain expert review).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - schema:description
     rank: 1000
-    slot_uri: schema:description
+    slot_uri: d4d:verificationDescription
     domain_of:
     - SamplingStrategy
     range: string
     multivalued: true
   why_not_representative:
     name: why_not_representative
-    description: 'Explanation of why the sample is not representative, if applicable.
+    description: 'One or more explanations of why the sample is not representative
+      of the larger set, if applicable.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -482,8 +483,8 @@ attributes:
     multivalued: true
   strategies:
     name: strategies
-    description: 'Description of the sampling strategy (deterministic, probabilistic,
-      etc.).
+    description: 'One or more sampling strategies used (e.g., deterministic, simple
+      random, stratified, cluster, systematic).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -518,7 +519,6 @@ attributes:
     domain_of:
     - SamplingStrategy
     range: boolean
-    multivalued: true
   is_random:
     name: is_random
     description: Indicates whether the sample is random.
@@ -530,11 +530,10 @@ attributes:
     domain_of:
     - SamplingStrategy
     range: boolean
-    multivalued: true
   source_data:
     name: source_data
-    description: 'Description of the larger set from which the sample was drawn, if
-      any.
+    description: 'One or more descriptions of the larger sets from which the sample
+      was drawn, if applicable.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -559,15 +558,17 @@ attributes:
     domain_of:
     - SamplingStrategy
     range: boolean
-    multivalued: true
   representative_verification:
     name: representative_verification
-    description: 'Explanation of how representativeness was validated or verified.
+    description: 'One or more explanations of how representativeness was validated
+      or verified (e.g., statistical tests, domain expert review).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - schema:description
     rank: 1000
-    slot_uri: schema:description
+    slot_uri: d4d:verificationDescription
     alias: representative_verification
     owner: SamplingStrategy
     domain_of:
@@ -576,7 +577,8 @@ attributes:
     multivalued: true
   why_not_representative:
     name: why_not_representative
-    description: 'Explanation of why the sample is not representative, if applicable.
+    description: 'One or more explanations of why the sample is not representative
+      of the larger set, if applicable.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -590,8 +592,8 @@ attributes:
     multivalued: true
   strategies:
     name: strategies
-    description: 'Description of the sampling strategy (deterministic, probabilistic,
-      etc.).
+    description: 'One or more sampling strategies used (e.g., deterministic, simple
+      random, stratified, cluster, systematic).
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
@@ -605,6 +607,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

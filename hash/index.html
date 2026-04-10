@@ -354,8 +354,8 @@
 
 
 <h1 id="slot-hash">Slot: hash</h1>
-<p><em>hash of the data</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/identifier">dcterms:identifier</a>
+<p><em>Cryptographic hash value of the data for integrity verification (e.g., SHA-256: 'e3b0c44298fc1c149afb...', MD5: 'd41d8cd98f00b204e9800998ecf8427e').</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/hashValue">d4d:hashValue</a>
 Alias: hash</p>
 <!-- no inheritance hierarchy -->
 
@@ -396,11 +396,15 @@ Alias: hash</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:identifier</td>
+<td>d4d:hashValue</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:hash</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:identifier</td>
 </tr>
 </tbody>
 </table>
@@ -408,10 +412,13 @@ Alias: hash</p>
 <details>
 
 <pre><code class="language-yaml">name: hash
-description: hash of the data
+description: 'Cryptographic hash value of the data for integrity verification (e.g.,
+  SHA-256: ''e3b0c44298fc1c149afb...'', MD5: ''d41d8cd98f00b204e9800998ecf8427e'').'
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:identifier
 rank: 1000
-slot_uri: dcterms:identifier
+slot_uri: d4d:hashValue
 alias: hash
 domain_of:
 - File

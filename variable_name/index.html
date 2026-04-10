@@ -355,7 +355,7 @@
 
 <h1 id="slot-variable_name">Slot: variable_name</h1>
 <p><em>The name or identifier of the variable as it appears in the data files.</em></p>
-<p>URI: <a href="http://schema.org/name">schema:name</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/variableName">d4d:variableName</a>
 Alias: variable_name</p>
 <!-- no inheritance hierarchy -->
 
@@ -401,15 +401,15 @@ Alias: variable_name</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:name</td>
+<td>d4d:variableName</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:variable_name</td>
 </tr>
 <tr>
-<td>exact</td>
-<td>schema:name</td>
+<td>broad</td>
+<td>schema:name, schema:identifier</td>
 </tr>
 </tbody>
 </table>
@@ -419,10 +419,11 @@ Alias: variable_name</p>
 <pre><code class="language-yaml">name: variable_name
 description: The name or identifier of the variable as it appears in the data files.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
+broad_mappings:
 - schema:name
+- schema:identifier
 rank: 1000
-slot_uri: schema:name
+slot_uri: d4d:variableName
 alias: variable_name
 owner: VariableMetadata
 domain_of:

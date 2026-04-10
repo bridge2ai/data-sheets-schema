@@ -308,6 +308,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -354,7 +361,7 @@
 
 
 <h1 id="slot-access_urls">Slot: access_urls</h1>
-<p><em>Details of the distribution channel(s) or format(s).</em></p>
+<p><em>One or more URLs providing access to the distribution channel(s) or format(s).</em></p>
 <p>URI: <a href="http://www.w3.org/ns/dcat#accessURL">dcat:accessURL</a>
 Alias: access_urls</p>
 <!-- no inheritance hierarchy -->
@@ -379,13 +386,28 @@ Alias: access_urls</p>
 <h2 id="properties">Properties</h2>
 <ul>
 <li>
-<p>Range: <a href="../String/">String</a></p>
+<p>Range: <a href="../Uri/">Uri</a></p>
 </li>
 <li>
 <p>Multivalued: True</p>
 </li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>https://example.org/dataset/download</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -413,7 +435,11 @@ Alias: access_urls</p>
 <details>
 
 <pre><code class="language-yaml">name: access_urls
-description: Details of the distribution channel(s) or format(s).
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: https://example.org/dataset/download
+description: One or more URLs providing access to the distribution channel(s) or format(s).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: dcat:accessURL
@@ -421,7 +447,7 @@ alias: access_urls
 owner: DistributionFormat
 domain_of:
 - DistributionFormat
-range: string
+range: uri
 multivalued: true
 
 </code></pre>

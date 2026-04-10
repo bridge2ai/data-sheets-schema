@@ -354,9 +354,9 @@
 
 
 <h1 id="slot-anomaly_details">Slot: anomaly_details</h1>
-<p><em>Details on errors, noise sources, or redundancies in the dataset.</em></p>
+<p><em>Free-text description of errors, noise sources, or redundancies in the dataset, including their known causes and estimated prevalence.</em></p>
 <p>__</p>
-<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/anomalyDetails">d4d:anomalyDetails</a>
 Alias: anomaly_details</p>
 <!-- no inheritance hierarchy -->
 
@@ -402,11 +402,15 @@ Alias: anomaly_details</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:description</td>
+<td>d4d:anomalyDetails</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:anomaly_details</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:description</td>
 </tr>
 </tbody>
 </table>
@@ -414,12 +418,15 @@ Alias: anomaly_details</p>
 <details>
 
 <pre><code class="language-yaml">name: anomaly_details
-description: 'Details on errors, noise sources, or redundancies in the dataset.
+description: 'Free-text description of errors, noise sources, or redundancies in the
+  dataset, including their known causes and estimated prevalence.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:description
 rank: 1000
-slot_uri: dcterms:description
+slot_uri: d4d:anomalyDetails
 alias: anomaly_details
 owner: DataAnomaly
 domain_of:

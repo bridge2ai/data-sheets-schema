@@ -282,7 +282,7 @@
 <tr>
 <td><a href="../tool_accuracy/">tool_accuracy</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Known accuracy or performance metrics for the automated tools (if available)</td>
+<td>One or more known accuracy or performance metrics for the automated tools (if...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -387,8 +387,10 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    broad_mappings:
+    - schema:name
     rank: 1000
-    slot_uri: schema:name
+    slot_uri: d4d:toolNames
     domain_of:
     - MachineAnnotationTools
     range: string
@@ -408,9 +410,9 @@ attributes:
     multivalued: true
   tool_accuracy:
     name: tool_accuracy
-    description: 'Known accuracy or performance metrics for the automated tools (if
-      available). Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy:
-      92%").
+    description: 'One or more known accuracy or performance metrics for the automated
+      tools (if available). Include metric name and value (e.g., "spaCy F1: 0.95",
+      "GPT-4 Accuracy: 92%").
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -444,8 +446,10 @@ attributes:
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
+    broad_mappings:
+    - schema:name
     rank: 1000
-    slot_uri: schema:name
+    slot_uri: d4d:toolNames
     alias: tools
     owner: MachineAnnotationTools
     domain_of:
@@ -469,9 +473,9 @@ attributes:
     multivalued: true
   tool_accuracy:
     name: tool_accuracy
-    description: 'Known accuracy or performance metrics for the automated tools (if
-      available). Include metric name and value (e.g., "spaCy F1: 0.95", "GPT-4 Accuracy:
-      92%").
+    description: 'One or more known accuracy or performance metrics for the automated
+      tools (if available). Include metric name and value (e.g., "spaCy F1: 0.95",
+      "GPT-4 Accuracy: 92%").
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -485,6 +489,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

@@ -308,6 +308,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#annotations" class="md-nav__link">
+    Annotations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#schema-source" class="md-nav__link">
     Schema Source
   </a>
@@ -355,7 +362,7 @@
 
 <h1 id="slot-access_url">Slot: access_url</h1>
 <p><em>URL or access point for the raw data.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#accessURL">dcat:accessURL</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/rawDataAccessURL">d4d:rawDataAccessURL</a>
 Alias: access_url</p>
 <!-- no inheritance hierarchy -->
 
@@ -381,6 +388,21 @@ Alias: access_url</p>
 <li>Range: <a href="../Uri/">Uri</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
+<h3 id="annotations">Annotations</h3>
+<table>
+<thead>
+<tr>
+<th>property</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>d4d:docExample</td>
+<td>https://example.org/dataset/raw/raw-data.zip</td>
+</tr>
+</tbody>
+</table>
 <h3 id="schema-source">Schema Source</h3>
 <ul>
 <li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
@@ -396,7 +418,7 @@ Alias: access_url</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcat:accessURL</td>
+<td>d4d:rawDataAccessURL</td>
 </tr>
 <tr>
 <td>native</td>
@@ -408,10 +430,14 @@ Alias: access_url</p>
 <details>
 
 <pre><code class="language-yaml">name: access_url
+annotations:
+  d4d:docExample:
+    tag: d4d:docExample
+    value: https://example.org/dataset/raw/raw-data.zip
 description: URL or access point for the raw data.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: dcat:accessURL
+slot_uri: d4d:rawDataAccessURL
 alias: access_url
 owner: RawData
 domain_of:

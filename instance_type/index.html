@@ -354,9 +354,9 @@
 
 
 <h1 id="slot-instance_type">Slot: instance_type</h1>
-<p><em>Multiple types of instances? (e.g., movies, users, and ratings).</em></p>
+<p><em>The type or types of instances in the dataset (e.g., "movie", "user", "rating", "clinical record"). Use when the dataset contains multiple instance types with different structures.</em></p>
 <p>__</p>
-<p>URI: <a href="http://purl.org/dc/terms/type">dcterms:type</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/instanceType">d4d:instanceType</a>
 Alias: instance_type</p>
 <!-- no inheritance hierarchy -->
 
@@ -397,11 +397,15 @@ Alias: instance_type</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:type</td>
+<td>d4d:instanceType</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:instance_type</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:type</td>
 </tr>
 </tbody>
 </table>
@@ -409,12 +413,16 @@ Alias: instance_type</p>
 <details>
 
 <pre><code class="language-yaml">name: instance_type
-description: 'Multiple types of instances? (e.g., movies, users, and ratings).
+description: 'The type or types of instances in the dataset (e.g., &quot;movie&quot;, &quot;user&quot;,
+  &quot;rating&quot;, &quot;clinical record&quot;). Use when the dataset contains multiple instance types
+  with different structures.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:type
 rank: 1000
-slot_uri: dcterms:type
+slot_uri: d4d:instanceType
 alias: instance_type
 owner: Instance
 domain_of:

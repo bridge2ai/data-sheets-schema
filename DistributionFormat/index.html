@@ -265,8 +265,8 @@
 <tbody>
 <tr>
 <td><a href="../access_urls/">access_urls</a></td>
-<td>* <br/> <a href="../String/">String</a></td>
-<td>Details of the distribution channel(s) or format(s)</td>
+<td>* <br/> <a href="../Uri/">Uri</a></td>
+<td>One or more URLs providing access to the distribution channel(s) or format(s)</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -358,13 +358,18 @@ is_a: DatasetProperty
 attributes:
   access_urls:
     name: access_urls
-    description: Details of the distribution channel(s) or format(s).
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/download
+    description: One or more URLs providing access to the distribution channel(s)
+      or format(s).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
     rank: 1000
     slot_uri: dcat:accessURL
     domain_of:
     - DistributionFormat
-    range: string
+    range: uri
     multivalued: true
 
 </code></pre>
@@ -381,7 +386,12 @@ is_a: DatasetProperty
 attributes:
   access_urls:
     name: access_urls
-    description: Details of the distribution channel(s) or format(s).
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/download
+    description: One or more URLs providing access to the distribution channel(s)
+      or format(s).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
     rank: 1000
     slot_uri: dcat:accessURL
@@ -389,10 +399,14 @@ attributes:
     owner: DistributionFormat
     domain_of:
     - DistributionFormat
-    range: string
+    range: uri
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

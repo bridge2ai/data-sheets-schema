@@ -284,7 +284,7 @@
 <tr>
 <td><a href="../identifiers_removed/">identifiers_removed</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>List of identifier types removed during de-identification</td>
+<td>List of identifier types removed during de-identification (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -399,10 +399,11 @@ attributes:
     range: string
   identifiers_removed:
     name: identifiers_removed
-    description: List of identifier types removed during de-identification.
+    description: List of identifier types removed during de-identification (e.g.,
+      'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: schema:identifier
+    slot_uri: d4d:removedIdentifierTypes
     domain_of:
     - Deidentification
     range: string
@@ -455,10 +456,11 @@ attributes:
     range: string
   identifiers_removed:
     name: identifiers_removed
-    description: List of identifier types removed during de-identification.
+    description: List of identifier types removed during de-identification (e.g.,
+      'name', 'date of birth', 'SSN', 'email address', 'geographic subdivision').
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
-    slot_uri: schema:identifier
+    slot_uri: d4d:removedIdentifierTypes
     alias: identifiers_removed
     owner: Deidentification
     domain_of:
@@ -481,6 +483,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

@@ -354,8 +354,8 @@
 
 
 <h1 id="slot-sha256">Slot: sha256</h1>
-<p><em>sha256 hash of the data</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/identifier">dcterms:identifier</a>
+<p><em>SHA-256 hash value of the data (256-bit cryptographic hash, recommended).</em></p>
+<p>URI: <a href="http://schema.org/sha256">schema:sha256</a>
 Alias: sha256</p>
 <!-- no inheritance hierarchy -->
 
@@ -396,7 +396,7 @@ Alias: sha256</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:identifier</td>
+<td>schema:sha256</td>
 </tr>
 <tr>
 <td>native</td>
@@ -408,10 +408,10 @@ Alias: sha256</p>
 <details>
 
 <pre><code class="language-yaml">name: sha256
-description: sha256 hash of the data
+description: SHA-256 hash value of the data (256-bit cryptographic hash, recommended).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: dcterms:identifier
+slot_uri: schema:sha256
 alias: sha256
 domain_of:
 - File

@@ -274,31 +274,31 @@
 <tr>
 <td><a href="../was_directly_observed/">was_directly_observed</a></td>
 <td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
-<td>Whether the data was directly observed</td>
+<td>True if the data was directly observed by a researcher or instrument; false i...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../was_reported_by_subjects/">was_reported_by_subjects</a></td>
 <td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
-<td>Whether the data was reported directly by the subjects themselves</td>
+<td>True if the data was self-reported directly by the subjects themselves (e</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../was_inferred_derived/">was_inferred_derived</a></td>
 <td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
-<td>Whether the data was inferred or derived from other data</td>
+<td>True if the data was computationally inferred or derived from other data (e</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../was_validated_verified/">was_validated_verified</a></td>
 <td>0..1 <br/> <a href="../Boolean/">Boolean</a></td>
-<td>Whether the data was validated or verified in any way</td>
+<td>True if the data underwent a validation or verification process (e</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../acquisition_details/">acquisition_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on how data was acquired for each instance</td>
+<td>Free-text description of how data was acquired for each instance, including i...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -390,7 +390,8 @@ is_a: DatasetProperty
 attributes:
   was_directly_observed:
     name: was_directly_observed
-    description: Whether the data was directly observed
+    description: True if the data was directly observed by a researcher or instrument;
+      false if it was obtained through other means (e.g., reported, inferred).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
     slot_uri: d4d:wasDirectlyObserved
@@ -399,7 +400,8 @@ attributes:
     range: boolean
   was_reported_by_subjects:
     name: was_reported_by_subjects
-    description: Whether the data was reported directly by the subjects themselves
+    description: True if the data was self-reported directly by the subjects themselves
+      (e.g., survey responses, questionnaires); false otherwise.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
     slot_uri: d4d:wasReportedBySubjects
@@ -408,7 +410,8 @@ attributes:
     range: boolean
   was_inferred_derived:
     name: was_inferred_derived
-    description: Whether the data was inferred or derived from other data
+    description: True if the data was computationally inferred or derived from other
+      data (e.g., model outputs, imputed values); false otherwise.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
     slot_uri: d4d:wasInferred
@@ -417,7 +420,8 @@ attributes:
     range: boolean
   was_validated_verified:
     name: was_validated_verified
-    description: Whether the data was validated or verified in any way
+    description: True if the data underwent a validation or verification process (e.g.,
+      expert review, cross-checking with ground truth); false otherwise.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
     slot_uri: d4d:wasValidated
@@ -426,7 +430,8 @@ attributes:
     range: boolean
   acquisition_details:
     name: acquisition_details
-    description: 'Details on how data was acquired for each instance.
+    description: 'Free-text description of how data was acquired for each instance,
+      including instruments, protocols, and any manual steps involved.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -451,7 +456,8 @@ is_a: DatasetProperty
 attributes:
   was_directly_observed:
     name: was_directly_observed
-    description: Whether the data was directly observed
+    description: True if the data was directly observed by a researcher or instrument;
+      false if it was obtained through other means (e.g., reported, inferred).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
     slot_uri: d4d:wasDirectlyObserved
@@ -462,7 +468,8 @@ attributes:
     range: boolean
   was_reported_by_subjects:
     name: was_reported_by_subjects
-    description: Whether the data was reported directly by the subjects themselves
+    description: True if the data was self-reported directly by the subjects themselves
+      (e.g., survey responses, questionnaires); false otherwise.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
     slot_uri: d4d:wasReportedBySubjects
@@ -473,7 +480,8 @@ attributes:
     range: boolean
   was_inferred_derived:
     name: was_inferred_derived
-    description: Whether the data was inferred or derived from other data
+    description: True if the data was computationally inferred or derived from other
+      data (e.g., model outputs, imputed values); false otherwise.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
     slot_uri: d4d:wasInferred
@@ -484,7 +492,8 @@ attributes:
     range: boolean
   was_validated_verified:
     name: was_validated_verified
-    description: Whether the data was validated or verified in any way
+    description: True if the data underwent a validation or verification process (e.g.,
+      expert review, cross-checking with ground truth); false otherwise.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
     rank: 1000
     slot_uri: d4d:wasValidated
@@ -495,7 +504,8 @@ attributes:
     range: boolean
   acquisition_details:
     name: acquisition_details
-    description: 'Details on how data was acquired for each instance.
+    description: 'Free-text description of how data was acquired for each instance,
+      including instruments, protocols, and any manual steps involved.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -509,6 +519,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

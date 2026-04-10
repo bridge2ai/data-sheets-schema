@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-distribution_dates">Slot: distribution_dates</h1>
+<p><em>Dates when the dataset was or will be distributed or released. List of DistributionDate objects from the Distribution module describing initial release dates, version release dates, and planned future releases.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/distributionDates">d4d:distributionDates</a>
 Alias: distribution_dates</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: distribution_dates</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: distribution_dates</p>
 <details>
 
 <pre><code class="language-yaml">name: distribution_dates
+description: Dates when the dataset was or will be distributed or released. List of
+  DistributionDate objects from the Distribution module describing initial release
+  dates, version release dates, and planned future releases.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:distributionDates

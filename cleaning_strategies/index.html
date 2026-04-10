@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-cleaning_strategies">Slot: cleaning_strategies</h1>
+<p><em>Data cleaning and quality control procedures applied to the dataset. List of CleaningStrategy objects from the Preprocessing module describing outlier removal, deduplication, and error correction steps.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/cleaningStrategies">d4d:cleaningStrategies</a>
 Alias: cleaning_strategies</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: cleaning_strategies</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: cleaning_strategies</p>
 <details>
 
 <pre><code class="language-yaml">name: cleaning_strategies
+description: Data cleaning and quality control procedures applied to the dataset.
+  List of CleaningStrategy objects from the Preprocessing module describing outlier
+  removal, deduplication, and error correction steps.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:cleaningStrategies

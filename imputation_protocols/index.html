@@ -354,7 +354,7 @@
 
 
 <h1 id="slot-imputation_protocols">Slot: imputation_protocols</h1>
-<p><em>Data imputation methodology and techniques.</em></p>
+<p><em>Data imputation protocols applied to handle missing values. List of ImputationProtocol objects from the Preprocessing module describing the imputation technique, affected variables, and rationale.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/imputation_protocols">d4d:imputation_protocols</a>
 Alias: imputation_protocols</p>
 <!-- no inheritance hierarchy -->
@@ -370,13 +370,13 @@ Alias: imputation_protocols</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -418,7 +418,9 @@ Alias: imputation_protocols</p>
 <details>
 
 <pre><code class="language-yaml">name: imputation_protocols
-description: Data imputation methodology and techniques.
+description: Data imputation protocols applied to handle missing values. List of ImputationProtocol
+  objects from the Preprocessing module describing the imputation technique, affected
+  variables, and rationale.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:imputation_protocols

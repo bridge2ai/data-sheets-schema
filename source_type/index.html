@@ -354,9 +354,9 @@
 
 
 <h1 id="slot-source_type">Slot: source_type</h1>
-<p><em>Type of raw source (sensor, database, user input, web scraping, etc.).</em></p>
+<p><em>One or more types of raw source (e.g., sensor, database, user input, web scraping).</em></p>
 <p>__</p>
-<p>URI: <a href="http://purl.org/dc/terms/type">dcterms:type</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/sourceType">d4d:sourceType</a>
 Alias: source_type</p>
 <!-- no inheritance hierarchy -->
 
@@ -402,11 +402,15 @@ Alias: source_type</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:type</td>
+<td>d4d:sourceType</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:source_type</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:type</td>
 </tr>
 </tbody>
 </table>
@@ -414,12 +418,15 @@ Alias: source_type</p>
 <details>
 
 <pre><code class="language-yaml">name: source_type
-description: 'Type of raw source (sensor, database, user input, web scraping, etc.).
+description: 'One or more types of raw source (e.g., sensor, database, user input,
+  web scraping).
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:type
 rank: 1000
-slot_uri: dcterms:type
+slot_uri: d4d:sourceType
 alias: source_type
 owner: RawDataSource
 domain_of:

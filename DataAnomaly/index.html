@@ -266,7 +266,7 @@
 <tr>
 <td><a href="../anomaly_details/">anomaly_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on errors, noise sources, or redundancies in the dataset</td>
+<td>Free-text description of errors, noise sources, or redundancies in the datase...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -357,12 +357,15 @@ is_a: DatasetProperty
 attributes:
   anomaly_details:
     name: anomaly_details
-    description: 'Details on errors, noise sources, or redundancies in the dataset.
+    description: 'Free-text description of errors, noise sources, or redundancies
+      in the dataset, including their known causes and estimated prevalence.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - dcterms:description
     rank: 1000
-    slot_uri: dcterms:description
+    slot_uri: d4d:anomalyDetails
     domain_of:
     - DataAnomaly
     range: string
@@ -381,12 +384,15 @@ is_a: DatasetProperty
 attributes:
   anomaly_details:
     name: anomaly_details
-    description: 'Details on errors, noise sources, or redundancies in the dataset.
+    description: 'Free-text description of errors, noise sources, or redundancies
+      in the dataset, including their known causes and estimated prevalence.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
+    broad_mappings:
+    - dcterms:description
     rank: 1000
-    slot_uri: dcterms:description
+    slot_uri: d4d:anomalyDetails
     alias: anomaly_details
     owner: DataAnomaly
     domain_of:
@@ -395,6 +401,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

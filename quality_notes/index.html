@@ -355,7 +355,7 @@
 
 <h1 id="slot-quality_notes">Slot: quality_notes</h1>
 <p><em>Notes about data quality, reliability, or known issues specific to this variable.</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/qualityNotes">d4d:qualityNotes</a>
 Alias: quality_notes</p>
 <!-- no inheritance hierarchy -->
 
@@ -401,11 +401,15 @@ Alias: quality_notes</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:description</td>
+<td>d4d:qualityNotes</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:quality_notes</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:description</td>
 </tr>
 </tbody>
 </table>
@@ -416,8 +420,10 @@ Alias: quality_notes</p>
 description: Notes about data quality, reliability, or known issues specific to this
   variable.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:description
 rank: 1000
-slot_uri: dcterms:description
+slot_uri: d4d:qualityNotes
 alias: quality_notes
 owner: VariableMetadata
 domain_of:

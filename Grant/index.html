@@ -337,8 +337,10 @@ attributes:
     name: grant_number
     description: The alphanumeric identifier for the grant.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    broad_mappings:
+    - schema:identifier
     rank: 1000
-    slot_uri: schema:identifier
+    slot_uri: d4d:grantIdentifier
     domain_of:
     - Grant
     range: string
@@ -359,8 +361,10 @@ attributes:
     name: grant_number
     description: The alphanumeric identifier for the grant.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    broad_mappings:
+    - schema:identifier
     rank: 1000
-    slot_uri: schema:identifier
+    slot_uri: d4d:grantIdentifier
     alias: grant_number
     owner: Grant
     domain_of:
@@ -368,6 +372,10 @@ attributes:
     range: string
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/my-dataset-001
     description: A unique identifier for a thing.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     rank: 1000

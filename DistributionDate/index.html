@@ -266,7 +266,7 @@
 <tr>
 <td><a href="../release_dates/">release_dates</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Dates or timeframe for dataset release</td>
+<td>One or more dates or timeframes for dataset release, in ISO 8601 format (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -357,8 +357,9 @@ is_a: DatasetProperty
 attributes:
   release_dates:
     name: release_dates
-    description: 'Dates or timeframe for dataset release. Could be a one-time release
-      date or multiple scheduled releases.
+    description: 'One or more dates or timeframes for dataset release, in ISO 8601
+      format (e.g., "2024-03-15") or as a descriptive string (e.g., "Q2 2024"). Use
+      multiple values for staged or scheduled releases.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
@@ -382,8 +383,9 @@ is_a: DatasetProperty
 attributes:
   release_dates:
     name: release_dates
-    description: 'Dates or timeframe for dataset release. Could be a one-time release
-      date or multiple scheduled releases.
+    description: 'One or more dates or timeframes for dataset release, in ISO 8601
+      format (e.g., "2024-03-15") or as a descriptive string (e.g., "Q2 2024"). Use
+      multiple values for staged or scheduled releases.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/distribution
@@ -397,6 +399,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

@@ -356,7 +356,7 @@
 <h1 id="slot-why_missing">Slot: why_missing</h1>
 <p><em>Explanation of why each piece of data is missing.</em></p>
 <p>__</p>
-<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/missingDataCause">d4d:missingDataCause</a>
 Alias: why_missing</p>
 <!-- no inheritance hierarchy -->
 
@@ -402,11 +402,15 @@ Alias: why_missing</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:description</td>
+<td>d4d:missingDataCause</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:why_missing</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:description</td>
 </tr>
 </tbody>
 </table>
@@ -418,8 +422,10 @@ description: 'Explanation of why each piece of data is missing.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:description
 rank: 1000
-slot_uri: dcterms:description
+slot_uri: d4d:missingDataCause
 alias: why_missing
 owner: MissingInfo
 domain_of:

@@ -275,8 +275,8 @@
 <tbody>
 <tr>
 <td><a href="../data_annotation_platform/">data_annotation_platform</a></td>
-<td>0..1 <br/> <a href="../String/">String</a></td>
-<td>Platform or tool used for annotation (e</td>
+<td>* <br/> <a href="../String/">String</a></td>
+<td>One or more platforms or tools used for annotation (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -300,13 +300,13 @@
 <tr>
 <td><a href="../annotator_demographics/">annotator_demographics</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Demographic information about annotators, if available and relevant (e</td>
+<td>One or more demographic characteristics of the annotators, if available and r...</td>
 <td>direct</td>
 </tr>
 <tr>
 <td><a href="../labeling_details/">labeling_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on labeling/annotation procedures and quality metrics</td>
+<td>Free-text description of the labeling or annotation procedures, including ann...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -398,16 +398,15 @@ is_a: DatasetProperty
 attributes:
   data_annotation_platform:
     name: data_annotation_platform
-    description: Platform or tool used for annotation (e.g., Label Studio, Prodigy,
-      Amazon Mechanical Turk, custom annotation tool).
+    description: One or more platforms or tools used for annotation (e.g., Label Studio,
+      Prodigy, Amazon Mechanical Turk, custom annotation tool).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
-    exact_mappings:
-    - rai:dataAnnotationPlatform
     rank: 1000
-    slot_uri: schema:instrument
+    slot_uri: rai:dataAnnotationPlatform
     domain_of:
     - LabelingStrategy
     range: string
+    multivalued: true
   data_annotation_protocol:
     name: data_annotation_protocol
     description: Annotation methodology, tasks, and protocols followed during labeling.
@@ -423,6 +422,10 @@ attributes:
     multivalued: true
   annotations_per_item:
     name: annotations_per_item
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 3 (three independent annotators per item)
     description: Number of annotations collected per data item. Multiple annotations
       per item enable calculation of inter-annotator agreement.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -446,8 +449,9 @@ attributes:
     range: string
   annotator_demographics:
     name: annotator_demographics
-    description: Demographic information about annotators, if available and relevant
-      (e.g., geographic location, language background, expertise level).
+    description: One or more demographic characteristics of the annotators, if available
+      and relevant (e.g., geographic location, language background, expertise level,
+      native language).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     exact_mappings:
     - rai:annotatorDemographics
@@ -459,7 +463,8 @@ attributes:
     multivalued: true
   labeling_details:
     name: labeling_details
-    description: 'Details on labeling/annotation procedures and quality metrics.
+    description: 'Free-text description of the labeling or annotation procedures,
+      including annotation guidelines, task definitions, and quality control metrics.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -484,18 +489,17 @@ is_a: DatasetProperty
 attributes:
   data_annotation_platform:
     name: data_annotation_platform
-    description: Platform or tool used for annotation (e.g., Label Studio, Prodigy,
-      Amazon Mechanical Turk, custom annotation tool).
+    description: One or more platforms or tools used for annotation (e.g., Label Studio,
+      Prodigy, Amazon Mechanical Turk, custom annotation tool).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
-    exact_mappings:
-    - rai:dataAnnotationPlatform
     rank: 1000
-    slot_uri: schema:instrument
+    slot_uri: rai:dataAnnotationPlatform
     alias: data_annotation_platform
     owner: LabelingStrategy
     domain_of:
     - LabelingStrategy
     range: string
+    multivalued: true
   data_annotation_protocol:
     name: data_annotation_protocol
     description: Annotation methodology, tasks, and protocols followed during labeling.
@@ -513,6 +517,10 @@ attributes:
     multivalued: true
   annotations_per_item:
     name: annotations_per_item
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: 3 (three independent annotators per item)
     description: Number of annotations collected per data item. Multiple annotations
       per item enable calculation of inter-annotator agreement.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -540,8 +548,9 @@ attributes:
     range: string
   annotator_demographics:
     name: annotator_demographics
-    description: Demographic information about annotators, if available and relevant
-      (e.g., geographic location, language background, expertise level).
+    description: One or more demographic characteristics of the annotators, if available
+      and relevant (e.g., geographic location, language background, expertise level,
+      native language).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
     exact_mappings:
     - rai:annotatorDemographics
@@ -555,7 +564,8 @@ attributes:
     multivalued: true
   labeling_details:
     name: labeling_details
-    description: 'Details on labeling/annotation procedures and quality metrics.
+    description: 'Free-text description of the labeling or annotation procedures,
+      including annotation guidelines, task definitions, and quality control metrics.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/preprocessing-cleaning-labeling
@@ -569,6 +579,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

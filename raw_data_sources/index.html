@@ -354,7 +354,7 @@
 
 
 <h1 id="slot-raw_data_sources">Slot: raw_data_sources</h1>
-<p><em>Description of raw data sources before preprocessing.</em></p>
+<p><em>List of raw data sources before preprocessing. Each RawDataSource object describes where the original data came from and how it can be accessed.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/rawDataSources">d4d:rawDataSources</a>
 Alias: raw_data_sources</p>
 <!-- no inheritance hierarchy -->
@@ -370,13 +370,13 @@ Alias: raw_data_sources</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -418,7 +418,8 @@ Alias: raw_data_sources</p>
 <details>
 
 <pre><code class="language-yaml">name: raw_data_sources
-description: Description of raw data sources before preprocessing.
+description: List of raw data sources before preprocessing. Each RawDataSource object
+  describes where the original data came from and how it can be accessed.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:rawDataSources

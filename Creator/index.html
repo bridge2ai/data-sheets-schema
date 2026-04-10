@@ -309,7 +309,7 @@
 <tr>
 <td><a href="../credit_roles/">credit_roles</a></td>
 <td>* <br/> <a href="../CRediTRoleEnum/">CRediTRoleEnum</a></td>
-<td>Contributor roles using the CRediT (Contributor Roles Taxonomy) for the princ...</td>
+<td>One or more contributor roles using the CRediT (Contributor Roles Taxonomy) f...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -405,10 +405,11 @@ attributes:
     description: A key individual (Principal Investigator) responsible for or overseeing
       dataset creation.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    exact_mappings:
+    broad_mappings:
+    - dcterms:creator
     - schema:creator
     rank: 1000
-    slot_uri: dcterms:creator
+    slot_uri: d4d:principalInvestigator
     domain_of:
     - Creator
     range: Person
@@ -416,8 +417,10 @@ attributes:
     name: affiliations
     description: Organizations with which the creator or team is affiliated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    broad_mappings:
+    - schema:affiliation
     rank: 1000
-    slot_uri: schema:affiliation
+    slot_uri: d4d:teamAffiliation
     domain_of:
     - Creator
     range: Organization
@@ -426,11 +429,9 @@ attributes:
     inlined_as_list: true
   credit_roles:
     name: credit_roles
-    description: 'Contributor roles using the CRediT (Contributor Roles Taxonomy)
-      for the principal investigator or creator team. Specifies the specific contributions
-      made to this dataset (e.g., Conceptualization, Data Curation, Methodology).
-      Note: roles are specified here rather than on Person directly, since the same
-      person may have different roles across different datasets.'
+    description: One or more contributor roles using the CRediT (Contributor Roles
+      Taxonomy) for the principal investigator or creator team (e.g., Conceptualization,
+      Data Curation, Methodology).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     rank: 1000
     slot_uri: d4d:creditRoles
@@ -457,10 +458,11 @@ attributes:
     description: A key individual (Principal Investigator) responsible for or overseeing
       dataset creation.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
-    exact_mappings:
+    broad_mappings:
+    - dcterms:creator
     - schema:creator
     rank: 1000
-    slot_uri: dcterms:creator
+    slot_uri: d4d:principalInvestigator
     alias: principal_investigator
     owner: Creator
     domain_of:
@@ -470,8 +472,10 @@ attributes:
     name: affiliations
     description: Organizations with which the creator or team is affiliated.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
+    broad_mappings:
+    - schema:affiliation
     rank: 1000
-    slot_uri: schema:affiliation
+    slot_uri: d4d:teamAffiliation
     alias: affiliations
     owner: Creator
     domain_of:
@@ -482,11 +486,9 @@ attributes:
     inlined_as_list: true
   credit_roles:
     name: credit_roles
-    description: 'Contributor roles using the CRediT (Contributor Roles Taxonomy)
-      for the principal investigator or creator team. Specifies the specific contributions
-      made to this dataset (e.g., Conceptualization, Data Curation, Methodology).
-      Note: roles are specified here rather than on Person directly, since the same
-      person may have different roles across different datasets.'
+    description: One or more contributor roles using the CRediT (Contributor Roles
+      Taxonomy) for the principal investigator or creator team (e.g., Conceptualization,
+      Data Curation, Methodology).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/motivation
     rank: 1000
     slot_uri: d4d:creditRoles
@@ -498,6 +500,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

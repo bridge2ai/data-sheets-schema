@@ -356,7 +356,7 @@
 <h1 id="slot-missing">Slot: missing</h1>
 <p><em>Description of the missing data fields or elements.</em></p>
 <p>__</p>
-<p>URI: <a href="http://purl.org/dc/terms/description">dcterms:description</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/missingDataDescription">d4d:missingDataDescription</a>
 Alias: missing</p>
 <!-- no inheritance hierarchy -->
 
@@ -402,11 +402,15 @@ Alias: missing</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:description</td>
+<td>d4d:missingDataDescription</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:missing</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:description</td>
 </tr>
 </tbody>
 </table>
@@ -418,8 +422,10 @@ description: 'Description of the missing data fields or elements.
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:description
 rank: 1000
-slot_uri: dcterms:description
+slot_uri: d4d:missingDataDescription
 alias: missing
 owner: MissingInfo
 domain_of:

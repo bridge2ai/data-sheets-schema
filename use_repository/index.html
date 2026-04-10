@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-use_repository">Slot: use_repository</h1>
+<p><em>Repositories or registries tracking how the dataset has been used. List of UseRepository objects from the Uses module pointing to papers with code, citation indices, or other use-tracking resources.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/useRepository">d4d:useRepository</a>
 Alias: use_repository</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: use_repository</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: use_repository</p>
 <details>
 
 <pre><code class="language-yaml">name: use_repository
+description: Repositories or registries tracking how the dataset has been used. List
+  of UseRepository objects from the Uses module pointing to papers with code, citation
+  indices, or other use-tracking resources.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:useRepository

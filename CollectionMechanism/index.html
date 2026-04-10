@@ -266,7 +266,7 @@
 <tr>
 <td><a href="../mechanism_details/">mechanism_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on mechanisms or procedures used to collect the data</td>
+<td>Free-text description of the specific mechanisms or procedures used to collec...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -364,7 +364,9 @@ is_a: DatasetProperty
 attributes:
   mechanism_details:
     name: mechanism_details
-    description: 'Details on mechanisms or procedures used to collect the data.
+    description: 'Free-text description of the specific mechanisms or procedures used
+      to collect the data (e.g., hardware model, software API, manual curation process),
+      including how those mechanisms were validated.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -391,7 +393,9 @@ is_a: DatasetProperty
 attributes:
   mechanism_details:
     name: mechanism_details
-    description: 'Details on mechanisms or procedures used to collect the data.
+    description: 'Free-text description of the specific mechanisms or procedures used
+      to collect the data (e.g., hardware model, software API, manual curation process),
+      including how those mechanisms were validated.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/collection
@@ -405,6 +409,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

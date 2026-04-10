@@ -354,8 +354,8 @@
 
 
 <h1 id="slot-md5">Slot: md5</h1>
-<p><em>md5 hash of the data</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/identifier">dcterms:identifier</a>
+<p><em>MD5 hash value of the data (128-bit cryptographic hash).</em></p>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/md5Checksum">d4d:md5Checksum</a>
 Alias: md5</p>
 <!-- no inheritance hierarchy -->
 
@@ -396,11 +396,15 @@ Alias: md5</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:identifier</td>
+<td>d4d:md5Checksum</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:md5</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>dcterms:identifier</td>
 </tr>
 </tbody>
 </table>
@@ -408,10 +412,12 @@ Alias: md5</p>
 <details>
 
 <pre><code class="language-yaml">name: md5
-description: md5 hash of the data
+description: MD5 hash value of the data (128-bit cryptographic hash).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- dcterms:identifier
 rank: 1000
-slot_uri: dcterms:identifier
+slot_uri: d4d:md5Checksum
 alias: md5
 domain_of:
 - File

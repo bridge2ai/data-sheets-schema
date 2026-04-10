@@ -266,7 +266,7 @@
 <tr>
 <td><a href="../restrictions/">restrictions</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Explanation of third-party IP restrictions</td>
+<td>One or more explanations of third-party IP restrictions or associated fees</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -360,7 +360,8 @@ is_a: DatasetProperty
 attributes:
   restrictions:
     name: restrictions
-    description: Explanation of third-party IP restrictions.
+    description: One or more explanations of third-party IP restrictions or associated
+      fees.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - DUO:0000046
@@ -388,7 +389,8 @@ is_a: DatasetProperty
 attributes:
   restrictions:
     name: restrictions
-    description: Explanation of third-party IP restrictions.
+    description: One or more explanations of third-party IP restrictions or associated
+      fees.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/data-governance
     broad_mappings:
     - DUO:0000046
@@ -403,6 +405,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

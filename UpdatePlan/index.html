@@ -274,7 +274,7 @@
 <tr>
 <td><a href="../update_details/">update_details</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td>Details on update plans, responsible parties, and communication methods</td>
+<td>Free-text description of planned update types (e</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -382,8 +382,9 @@ attributes:
     range: string
   update_details:
     name: update_details
-    description: 'Details on update plans, responsible parties, and communication
-      methods.
+    description: 'Free-text description of planned update types (e.g., corrections,
+      additions, deletions), responsible parties, and how updates will be communicated
+      to users.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -422,8 +423,9 @@ attributes:
     range: string
   update_details:
     name: update_details
-    description: 'Details on update plans, responsible parties, and communication
-      methods.
+    description: 'Free-text description of planned update types (e.g., corrections,
+      additions, deletions), responsible parties, and how updates will be communicated
+      to users.
 
       '
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/maintenance
@@ -437,6 +439,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

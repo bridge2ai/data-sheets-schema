@@ -354,7 +354,8 @@
 
 
 <h1 id="slot-version">Slot: version</h1>
-<p>URI: <a href="http://purl.org/dc/terms/hasVersion">dcterms:hasVersion</a>
+<p><em>The version identifier of the resource (e.g., "1.0", "2.3.1").</em></p>
+<p>URI: <a href="http://schema.org/version">schema:version</a>
 Alias: version</p>
 <!-- no inheritance hierarchy -->
 
@@ -374,16 +375,6 @@ Alias: version</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../Software/">Software</a></td>
-<td>A software program or library</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
 <td><a href="../DatasetCollection/">DatasetCollection</a></td>
 <td>A collection of related datasets, likely containing multiple files of multipl...</td>
 <td>no</td>
@@ -394,13 +385,23 @@ Alias: version</p>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 <tr>
 <td><a href="../FileCollection/">FileCollection</a></td>
 <td>A collection of files with shared characteristics (format, purpose, structure...</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../File/">File</a></td>
+<td>A single file within a dataset or file collection</td>
+<td>no</td>
+</tr>
+<tr>
+<td><a href="../Software/">Software</a></td>
+<td>A software program or library</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -425,7 +426,7 @@ Alias: version</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>dcterms:hasVersion</td>
+<td>schema:version</td>
 </tr>
 <tr>
 <td>native</td>
@@ -437,9 +438,10 @@ Alias: version</p>
 <details>
 
 <pre><code class="language-yaml">name: version
+description: The version identifier of the resource (e.g., &quot;1.0&quot;, &quot;2.3.1&quot;).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: dcterms:hasVersion
+slot_uri: schema:version
 alias: version
 domain_of:
 - Software

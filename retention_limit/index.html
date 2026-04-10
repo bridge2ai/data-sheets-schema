@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-retention_limit">Slot: retention_limit</h1>
+<p><em>Data retention policies and limits for the dataset. RetentionLimits object from the Maintenance module describing how long the dataset will be available and any deletion schedules.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/retentionLimit">d4d:retentionLimit</a>
 Alias: retention_limit</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: retention_limit</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -412,6 +413,9 @@ Alias: retention_limit</p>
 <details>
 
 <pre><code class="language-yaml">name: retention_limit
+description: Data retention policies and limits for the dataset. RetentionLimits object
+  from the Maintenance module describing how long the dataset will be available and
+  any deletion schedules.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:retentionLimit

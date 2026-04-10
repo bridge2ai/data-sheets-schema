@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-errata">Slot: errata</h1>
+<p><em>Known errors or corrections to the dataset since publication. List of Erratum objects from the Maintenance module describing discovered errors, affected records, and correction procedures.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/errata">d4d:errata</a>
 Alias: errata</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: errata</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: errata</p>
 <details>
 
 <pre><code class="language-yaml">name: errata
+description: Known errors or corrections to the dataset since publication. List of
+  Erratum objects from the Maintenance module describing discovered errors, affected
+  records, and correction procedures.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:errata

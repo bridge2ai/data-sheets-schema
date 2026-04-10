@@ -356,7 +356,7 @@
 <h1 id="slot-label_description">Slot: label_description</h1>
 <p><em>If labeled, what pattern or format do labels follow?</em></p>
 <p>__</p>
-<p>URI: <a href="http://schema.org/description">schema:description</a>
+<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/labelPattern">d4d:labelPattern</a>
 Alias: label_description</p>
 <!-- no inheritance hierarchy -->
 
@@ -397,11 +397,15 @@ Alias: label_description</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:description</td>
+<td>d4d:labelPattern</td>
 </tr>
 <tr>
 <td>native</td>
 <td>data_sheets_schema:label_description</td>
+</tr>
+<tr>
+<td>broad</td>
+<td>schema:description</td>
 </tr>
 </tbody>
 </table>
@@ -413,8 +417,10 @@ description: 'If labeled, what pattern or format do labels follow?
 
   '
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
+broad_mappings:
+- schema:description
 rank: 1000
-slot_uri: schema:description
+slot_uri: d4d:labelPattern
 alias: label_description
 owner: Instance
 domain_of:

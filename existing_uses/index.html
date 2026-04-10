@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-existing_uses">Slot: existing_uses</h1>
+<p><em>Known existing uses of the dataset at the time of publication. List of ExistingUse objects from the Uses module describing research, commercial, or other applications of the dataset.</em></p>
 <p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/existingUses">d4d:existingUses</a>
 Alias: existing_uses</p>
 <!-- no inheritance hierarchy -->
@@ -369,13 +370,13 @@ Alias: existing_uses</p>
 </thead>
 <tbody>
 <tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
+<td><a href="../DataSubset/">DataSubset</a></td>
+<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
 <td>no</td>
 </tr>
 <tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
+<td><a href="../Dataset/">Dataset</a></td>
+<td>A single component of related observations and/or information that can be rea...</td>
 <td>no</td>
 </tr>
 </tbody>
@@ -417,6 +418,9 @@ Alias: existing_uses</p>
 <details>
 
 <pre><code class="language-yaml">name: existing_uses
+description: Known existing uses of the dataset at the time of publication. List of
+  ExistingUse objects from the Uses module describing research, commercial, or other
+  applications of the dataset.
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: d4d:existingUses

@@ -354,8 +354,8 @@
 
 
 <h1 id="slot-latest_version_doi">Slot: latest_version_doi</h1>
-<p><em>DOI or URL of the latest dataset version.</em></p>
-<p>URI: <a href="http://schema.org/identifier">schema:identifier</a>
+<p><em>DOI or URL identifying the latest version of this dataset (e.g., '10.5281/zenodo.1234567' for a DOI or 'https://doi.org/10.5281/zenodo.1234567' for a full URL). Use CURIE format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').</em></p>
+<p>URI: <a href="http://purl.org/dc/terms/hasVersion">dcterms:hasVersion</a>
 Alias: latest_version_doi</p>
 <!-- no inheritance hierarchy -->
 
@@ -378,7 +378,7 @@ Alias: latest_version_doi</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../String/">String</a></li>
+<li>Range: <a href="../Uriorcurie/">Uriorcurie</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
@@ -396,7 +396,7 @@ Alias: latest_version_doi</p>
 <tbody>
 <tr>
 <td>self</td>
-<td>schema:identifier</td>
+<td>dcterms:hasVersion</td>
 </tr>
 <tr>
 <td>native</td>
@@ -408,15 +408,17 @@ Alias: latest_version_doi</p>
 <details>
 
 <pre><code class="language-yaml">name: latest_version_doi
-description: DOI or URL of the latest dataset version.
+description: DOI or URL identifying the latest version of this dataset (e.g., '10.5281/zenodo.1234567'
+  for a DOI or 'https://doi.org/10.5281/zenodo.1234567' for a full URL). Use CURIE
+  format for DOIs (e.g., 'doi:10.5281/zenodo.1234567').
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
-slot_uri: schema:identifier
+slot_uri: dcterms:hasVersion
 alias: latest_version_doi
 owner: VersionAccess
 domain_of:
 - VersionAccess
-range: string
+range: uriorcurie
 
 </code></pre>
 

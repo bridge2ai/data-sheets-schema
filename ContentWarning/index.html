@@ -274,7 +274,7 @@
 <tr>
 <td><a href="../warnings/">warnings</a></td>
 <td>* <br/> <a href="../String/">String</a></td>
-<td></td>
+<td>One or more specific content warnings describing potentially offensive, insul...</td>
 <td>direct</td>
 </tr>
 <tr>
@@ -375,6 +375,9 @@ attributes:
     range: boolean
   warnings:
     name: warnings
+    description: One or more specific content warnings describing potentially offensive,
+      insulting, threatening, or anxiety-provoking content present in the dataset
+      (e.g., violence, profanity, explicit imagery, hate speech).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
     slot_uri: dcterms:description
@@ -408,6 +411,9 @@ attributes:
     range: boolean
   warnings:
     name: warnings
+    description: One or more specific content warnings describing potentially offensive,
+      insulting, threatening, or anxiety-provoking content present in the dataset
+      (e.g., violence, profanity, explicit imagery, hate speech).
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/composition
     rank: 1000
     slot_uri: dcterms:description
@@ -419,6 +425,10 @@ attributes:
     multivalued: true
   id:
     name: id
+    annotations:
+      d4d:docExample:
+        tag: d4d:docExample
+        value: https://example.org/dataset/property-001
     description: An optional identifier for this property.
     from_schema: https://w3id.org/bridge2ai/data-sheets-schema/base
     slot_uri: schema:identifier

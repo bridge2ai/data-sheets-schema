@@ -354,6 +354,7 @@
 
 
 <h1 id="slot-url">Slot: url</h1>
+<p><em>URL where the software can be found (e.g., homepage, repository, or documentation).</em></p>
 <p>URI: <a href="http://schema.org/url">schema:url</a>
 Alias: url</p>
 <!-- no inheritance hierarchy -->
@@ -377,7 +378,7 @@ Alias: url</p>
 </table>
 <h2 id="properties">Properties</h2>
 <ul>
-<li>Range: <a href="../String/">String</a></li>
+<li>Range: <a href="../Uri/">Uri</a></li>
 </ul>
 <h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
 <h3 id="schema-source">Schema Source</h3>
@@ -407,6 +408,7 @@ Alias: url</p>
 <details>
 
 <pre><code class="language-yaml">name: url
+description: URL where the software can be found (e.g., homepage, repository, or documentation).
 from_schema: https://w3id.org/bridge2ai/data-sheets-schema
 rank: 1000
 slot_uri: schema:url
@@ -414,7 +416,7 @@ alias: url
 owner: Software
 domain_of:
 - Software
-range: string
+range: uri
 
 </code></pre>
 
