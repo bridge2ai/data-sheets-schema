@@ -202,17 +202,6 @@ classes:
         slot_uri: schema:funder
 
       # Composition module
-      subsets:
-        description: >-
-          Subsets or splits of this dataset (e.g., train/test/validation splits
-          or demographic subgroups), each documented as a CoreDataset.
-        range: CoreDataset
-        multivalued: true
-        inlined_as_list: true
-        slot_uri: d4d:dataSubset
-        broad_mappings:
-          - schema:hasPart
-
       instances:
         description: >-
           Individual data instances or records in the dataset.
@@ -626,26 +615,6 @@ classes:
         broad_mappings:
           - d4d:atRiskPopulations
 
-      participant_privacy:
-        description: >-
-          Information about privacy protections for human research participants.
-        range: ParticipantPrivacy
-        multivalued: true
-        inlined_as_list: true
-        slot_uri: d4d:participantPrivacy
-        broad_mappings:
-          - rai:personalSensitiveInformation
-
-      participant_compensation:
-        description: >-
-          Information about compensation provided to human research participants.
-        range: HumanSubjectCompensation
-        multivalued: true
-        inlined_as_list: true
-        slot_uri: d4d:participantCompensation
-        broad_mappings:
-          - d4d:participantCompensation
-
       # Data Governance module
       license_and_use_terms:
         description: >-
@@ -672,17 +641,6 @@ classes:
         broad_mappings:
           - schema:conditionsOfAccess
 
-      # Variables module
-      variables:
-        description: >-
-          Metadata describing individual variables, fields, or columns.
-        range: VariableMetadata
-        multivalued: true
-        inlined_as_list: true
-        slot_uri: schema:variableMeasured
-        exact_mappings:
-          - schema:variableMeasured
-
       # -----------------------------------------------------------------------
       # Group 3 — simple flags and scalar fields on Dataset
       # -----------------------------------------------------------------------
@@ -704,35 +662,20 @@ classes:
         broad_mappings:
           - schema:encodingFormat
 
-      citation:
-        description: >-
-          Recommended citation for this dataset in DataCite or BibTeX format.
-        range: string
-        slot_uri: schema:citation
-        exact_mappings:
-          - schema:citation
-
       # -----------------------------------------------------------------------
-      # Dataset relationships (also in SKOS mapping)
+      # Distribution format detail
       # -----------------------------------------------------------------------
 
-      parent_datasets:
+      dialect:
         description: >-
-          Parent datasets that this dataset is part of or derived from.
-        range: CoreDataset
-        multivalued: true
-        inlined_as_list: true
-        slot_uri: schema:isPartOf
-        exact_mappings:
-          - schema:isPartOf
-
-      related_datasets:
-        description: >-
-          Related datasets with typed relationships.
-        range: DatasetRelationship
-        multivalued: true
-        inlined_as_list: true
-        slot_uri: schema:isRelatedTo
+          Format dialect or variation describing structural details such as
+          CSV delimiters, header presence, and quote characters.
+          Maps to the exchange layer as format + schema (headers T/F, separator).
+        range: FormatDialect
+        inlined: true
+        slot_uri: schema:encodingFormat
+        broad_mappings:
+          - schema:encodingFormat
 
       external_resources:
         description: >-

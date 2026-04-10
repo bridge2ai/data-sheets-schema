@@ -28886,21 +28886,6 @@ classes:
         range: FundingMechanism
         multivalued: true
         inlined_as_list: true
-      subsets:
-        name: subsets
-        description: Subsets or splits of this dataset (e.g., train/test/validation
-          splits or demographic subgroups), each documented as a CoreDataset.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core
-        broad_mappings:
-        - schema:hasPart
-        slot_uri: d4d:dataSubset
-        alias: subsets
-        owner: CoreDataset
-        domain_of:
-        - CoreDataset
-        range: CoreDataset
-        multivalued: true
-        inlined_as_list: true
       instances:
         name: instances
         description: Individual data instances or records in the dataset.
@@ -29480,34 +29465,6 @@ classes:
         - CoreDataset
         range: AtRiskPopulations
         inlined: true
-      participant_privacy:
-        name: participant_privacy
-        description: Information about privacy protections for human research participants.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core
-        broad_mappings:
-        - rai:personalSensitiveInformation
-        slot_uri: d4d:participantPrivacy
-        alias: participant_privacy
-        owner: CoreDataset
-        domain_of:
-        - CoreDataset
-        range: ParticipantPrivacy
-        multivalued: true
-        inlined_as_list: true
-      participant_compensation:
-        name: participant_compensation
-        description: Information about compensation provided to human research participants.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core
-        broad_mappings:
-        - d4d:participantCompensation
-        slot_uri: d4d:participantCompensation
-        alias: participant_compensation
-        owner: CoreDataset
-        domain_of:
-        - CoreDataset
-        range: HumanSubjectCompensation
-        multivalued: true
-        inlined_as_list: true
       license_and_use_terms:
         name: license_and_use_terms
         description: License and usage terms governing dataset access and use.
@@ -29547,20 +29504,6 @@ classes:
         - CoreDataset
         range: ExportControlRegulatoryRestrictions
         inlined: true
-      variables:
-        name: variables
-        description: Metadata describing individual variables, fields, or columns.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core
-        exact_mappings:
-        - schema:variableMeasured
-        slot_uri: schema:variableMeasured
-        alias: variables
-        owner: CoreDataset
-        domain_of:
-        - CoreDataset
-        range: VariableMetadata
-        multivalued: true
-        inlined_as_list: true
       is_deidentified:
         name: is_deidentified
         description: De-identification status and procedures applied to the dataset.
@@ -29586,44 +29529,21 @@ classes:
         domain_of:
         - CoreDataset
         range: boolean
-      citation:
-        name: citation
-        description: Recommended citation for this dataset in DataCite or BibTeX format.
+      dialect:
+        name: dialect
+        description: Format dialect or variation describing structural details such
+          as CSV delimiters, header presence, and quote characters. Maps to the exchange
+          layer as format + schema (headers T/F, separator).
         from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core
-        exact_mappings:
-        - schema:citation
-        slot_uri: schema:citation
-        alias: citation
+        broad_mappings:
+        - schema:encodingFormat
+        slot_uri: schema:encodingFormat
+        alias: dialect
         owner: CoreDataset
         domain_of:
         - CoreDataset
-        range: string
-      parent_datasets:
-        name: parent_datasets
-        description: Parent datasets that this dataset is part of or derived from.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core
-        exact_mappings:
-        - schema:isPartOf
-        slot_uri: schema:isPartOf
-        alias: parent_datasets
-        owner: CoreDataset
-        domain_of:
-        - CoreDataset
-        range: CoreDataset
-        multivalued: true
-        inlined_as_list: true
-      related_datasets:
-        name: related_datasets
-        description: Related datasets with typed relationships.
-        from_schema: https://w3id.org/bridge2ai/data-sheets-schema/core
-        slot_uri: schema:isRelatedTo
-        alias: related_datasets
-        owner: CoreDataset
-        domain_of:
-        - CoreDataset
-        range: DatasetRelationship
-        multivalued: true
-        inlined_as_list: true
+        range: FormatDialect
+        inlined: true
       external_resources:
         name: external_resources
         description: External resources referenced at the dataset level.
